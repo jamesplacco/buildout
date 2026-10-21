@@ -1,15 +1,16 @@
   /* =====================================================================================
-     boot.js (v0.5): six groups, their desks, the math toggle, deep links, live data, boot
+     boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {
-    today: { name: "Today", views: ["desk"] },
-    decide: { name: "Decide", views: ["decide", "journal", "swans"] },
+    today: { name: "Today", views: ["desk", "noteworthy"] },
+    decide: { name: "Decide", views: ["decide", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "securities", "insurers"] },
-    research: { name: "Research", views: ["fundamentals", "physics", "findings", "theses"] },
+    trading: { name: "Trading", views: ["prop", "making"] },
+    research: { name: "Research", views: ["fundamentals", "buyside", "physics", "findings", "theses"] },
     wisdom: { name: "Wisdom", views: ["legends", "lenses", "lab"] },
     reference: { name: "Reference", views: ["engine", "appendix"] },
   };
-  const GROUP_ORDER = ["today", "decide", "markets", "research", "wisdom", "reference"];
+  const GROUP_ORDER = ["today", "decide", "markets", "trading", "research", "wisdom", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
@@ -29,6 +30,10 @@
     journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
+    noteworthy: () => {}, buyside: drawBuyside,
+    brain: () => guard("The brain", updateBrain, $("#br-svg-box")),
+    prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
+    making: () => { guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },
   };
   let current = null;
   // any element id is a deep link: the view that contains it opens and the element scrolls into view
@@ -61,7 +66,18 @@
       nav.append(a);
     });
   }
+  // a view change cross-fades where the browser supports view transitions and the reader allows motion
+  const calm = () => !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function show(token, scroll) {
+    let t = token;
+    try { t = decodeURIComponent(token); } catch (e) { t = ""; }
+    const { view } = resolve(t);
+    if (scroll && current && view !== current && typeof document.startViewTransition === "function" && !calm() && !document.body.classList.contains("printing")) {
+      try { document.startViewTransition(() => showNow(token, scroll)); return; } catch (e) { /* fall through */ }
+    }
+    showNow(token, scroll);
+  }
+  function showNow(token, scroll) {
     let t = token;
     try { t = decodeURIComponent(token); } catch (e) { t = ""; }
     const { view, el } = resolve(t);
@@ -106,8 +122,11 @@
     OVERLOOKED.forEach((o) => add(o.n, o.t, "Overlooked", o.at));
     TOYS.forEach((t) => add(t.title, t.intro, "Tool", t.id));
     document.querySelectorAll("#fi-list .finding").forEach((f) => { const h3 = f.querySelector("h3"), c = f.querySelector(".claim"); if (h3) add(h3.textContent, c ? c.textContent : "", "Finding", f.id); });
+    NW.forEach((t) => add(t.n, t.bluf, "Trend", "nw-" + t.id, t.watch.map((w) => w.join(" ")).join(" ")));
+    BR_NODES.forEach((n) => add(`${n.n} in the brain`, n.why, "Node", "brain", n.s));
+    BR_PRESETS.forEach((p) => add(`Brain scenario: ${p.n}`, "Shock the system map and read the fourth-order effects", "Tool", "brain"));
     FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${r.stage || "n/a"} finance`, "Company", "fu-t-title", r.t));
-    Object.assign(KIND_RANK, { Decision: 8, Finding: 7, Chain: 5, Swan: 5, Company: 5, Legend: 4, Assumption: 4, Principle: 3, Overlooked: 3 });
+    Object.assign(KIND_RANK, { Decision: 8, Finding: 7, Trend: 6, Chain: 5, Swan: 5, Company: 5, Node: 4, Legend: 4, Assumption: 4, Principle: 3, Overlooked: 3 });
   }
 
   /* ---------- boot ---------- */
@@ -115,6 +134,7 @@
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
    ["Decide", buildDecide], ["Fundamentals", buildFundamentals], ["Physics", buildPhysics], ["Findings", buildFindings, "#fi-list"], ["Swans", buildSwans, "#sw-grid"], ["Legends", buildLegends, "#lg-grid"], ["Math lab", buildLab, "#lab-list"],
+   ["Noteworthy", buildNoteworthy, "#nw-grid"], ["Brain", buildBrain, "#br-svg-box"], ["Trading", buildTrading], ["Buyside", buildBuyside, "#bs-sel"], ["Brain links", renderBrainMeasured, "#br-meas"], ["Pulse", buildPulse, "#pulse"],
    ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
    ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
@@ -157,6 +177,16 @@
         && r.tails && Array.isArray(r.tails.rows) && r.tails.rows.length === 4 && r.roc && r.roc.rows.length === 4 && r.oil && r.oil.summary && r.vix && r.vix.s30 && r.spells && r.gold && r.cape && r.cape.rows.length === 10 && r.panel.end >= FINDINGS.panel.end);
     } catch (e) { return false; }
   }
+  // v0.6 files must look like their snapshots, or the snapshot stays
+  const brainOk = (b) => { try { return ["low_inflation", "inflation"].every((k) => b.regimes[k] && BR_MEASURED.every((e) => b.regimes[k].edges[e] && fin(b.regimes[k].edges[e].w) && Math.abs(b.regimes[k].edges[e].w) < 1.5 && fin(b.regimes[k].edges[e].se))); } catch (e) { return false; } };
+  const buyOk = (b) => { try { return !!(b.latest && fin(b.latest.cpi_3m_ann) && fin(b.latest.corr36) && fin(b.latest.brent_vs_5y) && b.selector && b.tail && fin(b.tail.student_t) && Array.isArray(b.replays)); } catch (e) { return false; } };
+  const feedsOk = (f) => !!(f && Array.isArray(f.themes) && Array.isArray(f.items) && typeof f.bluf === "string");
+  Promise.all(["brain", "buyside", "feeds", "sources"].map((n) => loadJSON(`data/${n}.json`))).then(([b, bs, fd, so]) => {
+    if (b && brainOk(b)) { LIVE.brain = b; guard("Brain links", renderBrainMeasured, $("#br-meas")); guard("The brain", updateBrain, $("#br-svg-box")); } else if (b) LIVE.problems.push("brain.json did not match the expected shape; the page keeps its snapshot");
+    if (bs && buyOk(bs)) { LIVE.buyside = bs; guard("Buyside", buildBuyside, $("#bs-sel")); if (current === "buyside") guard("Buyside", drawBuyside); } else if (bs) LIVE.problems.push("buyside.json did not match the expected shape");
+    if (fd && feedsOk(fd)) { LIVE.feeds = fd; guard("Noteworthy", buildNoteworthy, $("#nw-grid")); } else if (fd) LIVE.problems.push("feeds.json did not match the expected shape");
+    if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} data sources`; }
+  });
   Promise.all(["macro", "report", "capex", "status", "research"].map((n) => loadJSON(`data/${n}.json`))).then(([m, r, cx, st, rs]) => {
     if (cx) {
       guard("Capex panel", () => renderCapex(cx), $("#capex-live"));
@@ -193,6 +223,6 @@
     if (st) { LIVE.status = st; guard("System status", () => renderStatus(st), $("#status-body")); }
     guard("Signals", renderSignals, $("#signals-grid"));
     guard("Futures defaults", futuresDefaults);
-    if (LIVE.macro || LIVE.report || LIVE.research) { guard("Decide", buildDecide); guard("Legends", renderLegends, $("#lg-grid")); }
+    if (LIVE.macro || LIVE.report || LIVE.research) { guard("Decide", buildDecide); guard("Legends", renderLegends, $("#lg-grid")); guard("Pulse", buildPulse, $("#pulse")); guard("Buyside", buildBuyside, $("#bs-sel")); }
     if (current) guard(TAB_NAME[current], RENDER[current]);
   });

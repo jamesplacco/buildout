@@ -1,0 +1,211 @@
+# Noteworthy: what the feed scraper reads and what it looks for.  `python -m buildout feeds --out site/data`
+#
+# tier: official (primary data), niche (few readers, early), specialist (expert newsletters and analysts),
+#       mainstream (wires and large accounts). The asymmetry score is high when a theme lives in the first three
+#       before the fourth notices.
+# X is read only through the official API (set the X_BEARER_TOKEN secret); without it, X sources are skipped.
+# Telegram public channels are read from their web preview, t.me/s/<channel>, which needs no login.
+
+[[source]]
+platform = "rss"
+name = "Federal Reserve press releases"
+url = "https://www.federalreserve.gov/feeds/press_all.xml"
+tier = "official"
+
+[[source]]
+platform = "rss"
+name = "BLS latest releases"
+url = "https://www.bls.gov/feed/bls_latest.rss"
+tier = "official"
+
+[[source]]
+platform = "rss"
+name = "EIA Today in Energy"
+url = "https://www.eia.gov/rss/todayinenergy.xml"
+tier = "official"
+
+[[source]]
+platform = "rss"
+name = "SEC press releases"
+url = "https://www.sec.gov/news/pressreleases.rss"
+tier = "official"
+
+[[source]]
+platform = "rss"
+name = "Bouchaud (market microstructure)"
+url = "https://bouchaud.substack.com/feed"
+tier = "niche"
+
+[[source]]
+platform = "rss"
+name = "Farview (multi-manager hedge funds)"
+url = "https://farview.substack.com/feed"
+tier = "niche"
+
+[[source]]
+platform = "rss"
+name = "EventHorizonIQ (BDCs and private credit)"
+url = "https://eventhorizoniq.substack.com/feed"
+tier = "niche"
+
+[[source]]
+platform = "rss"
+name = "Data Gravity (GPU economics)"
+url = "https://www.datagravity.dev/feed"
+tier = "niche"
+
+[[source]]
+platform = "rss"
+name = "Doomberg (energy)"
+url = "https://doomberg.substack.com/feed"
+tier = "specialist"
+
+[[source]]
+platform = "rss"
+name = "Apricitas Economics"
+url = "https://www.apricitas.io/feed"
+tier = "specialist"
+
+[[source]]
+platform = "rss"
+name = "Net Interest (financials)"
+url = "https://www.netinterest.co/feed"
+tier = "specialist"
+
+[[source]]
+platform = "rss"
+name = "The Diff"
+url = "https://www.thediff.co/feed"
+tier = "specialist"
+
+[[source]]
+platform = "telegram"
+name = "Walter Bloomberg"
+channel = "WalterBloomberg"
+tier = "mainstream"
+
+[[source]]
+platform = "x"
+name = "The Kobeissi Letter"
+handle = "KobeissiLetter"
+tier = "mainstream"
+
+[[source]]
+platform = "x"
+name = "Six Sigma Capital"
+handle = "SixSigmaCapital"
+tier = "specialist"
+
+[[source]]
+platform = "x"
+name = "BowTiedBull"
+handle = "BowTiedBull"
+tier = "specialist"
+
+[[source]]
+platform = "x"
+name = "Nick Timiraos (WSJ, the Fed)"
+handle = "NickTimiraos"
+tier = "mainstream"
+
+[[source]]
+platform = "x"
+name = "Jim Bianco"
+handle = "biancoresearch"
+tier = "specialist"
+
+[[source]]
+platform = "x"
+name = "SemiAnalysis"
+handle = "SemiAnalysis_"
+tier = "specialist"
+
+[[source]]
+platform = "reddit"
+name = "r/investing"
+sub = "investing"
+tier = "mainstream"
+
+[[source]]
+platform = "reddit"
+name = "r/quant"
+sub = "quant"
+tier = "niche"
+
+[[source]]
+platform = "hn"
+name = "Hacker News"
+tier = "specialist"
+
+# Themes: each is matched against titles and text, case-insensitively, on whole words. `query` is what the
+# scraper sends to X recent search and Google News (the mainstream baseline) for that theme.
+
+[[theme]]
+id = "oil-physical"
+name = "Physical oil premium"
+terms = ["dated brent", "hormuz", "backwardation", "tanker", "physical premium", "crude draw"]
+query = "\"dated brent\" OR hormuz OR backwardation"
+desk = "nw-oil-physical"
+
+[[theme]]
+id = "fed-hike"
+name = "Fed second hike"
+terms = ["rate hike", "fomc", "hawkish", "waller", "williams", "fed funds"]
+query = "FOMC hike October"
+desk = "nw-fed-hike"
+
+[[theme]]
+id = "private-credit"
+name = "Private credit gates"
+terms = ["bdc", "redemption", "gated", "pik", "payment in kind", "non-accrual", "bcred", "private credit"]
+query = "BDC redemptions OR \"private credit\" gate"
+desk = "nw-private-credit"
+
+[[theme]]
+id = "memory"
+name = "Memory supercycle"
+terms = ["hbm", "dram", "ddr5", "memory prices", "sk hynix", "micron", "nand"]
+query = "HBM OR DRAM contract prices"
+desk = "nw-memory"
+
+[[theme]]
+id = "power"
+name = "Grid power ceiling"
+terms = ["pjm", "capacity auction", "interconnection", "data center power", "gas turbine", "megawatt"]
+query = "PJM capacity OR \"data center power\""
+desk = "nw-power"
+
+[[theme]]
+id = "depreciation"
+name = "GPU useful-life reset"
+terms = ["useful life", "depreciation", "impairment", "gpu life", "server life"]
+query = "GPU \"useful life\" depreciation"
+desk = "nw-depreciation"
+
+[[theme]]
+id = "market-structure"
+name = "Market structure shift"
+terms = ["0dte", "off-exchange", "payment for order flow", "internalization", "market maker", "dark pool"]
+query = "0DTE OR \"off-exchange\" OR \"market maker\""
+desk = "nw-market-structure"
+
+[[theme]]
+id = "pods"
+name = "Pod shop costs and crowding"
+terms = ["multi-manager", "multistrategy", "pass-through", "pod", "millennium", "citadel", "balyasny"]
+query = "multistrategy hedge fund pass-through"
+desk = "nw-pods"
+
+[[theme]]
+id = "consumer"
+name = "Consumer strain"
+terms = ["consumer sentiment", "umich", "delinquen*", "real spending", "pce", "layoffs"]
+query = "\"consumer sentiment\" OR delinquencies"
+desk = "nw-consumer"
+
+[[theme]]
+id = "saas"
+name = "Agents eat seat-based software"
+terms = ["saas", "seat-based", "agentic", "ai agents", "net revenue retention", "software selloff"]
+query = "SaaS AI agents selloff"
+desk = "nw-saas"

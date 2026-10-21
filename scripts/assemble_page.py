@@ -4,7 +4,8 @@ head.html and body.html are the markup. The scripts are concatenated in SCRIPTS 
 function scope, so nothing leaks into the global scope: math.js (pure functions), ui.js (DOM and charts),
 data.js and reference.js (v0.4 desk content and the appendix), research.js (v0.5 data: filings, findings,
 swans, legends, assumptions, chains), views.js (the v0.4 desks), decide.js, journal.js, desks.js, wisdom.js
-and lab.js (the v0.5 desks), and boot.js (navigation, live data and boot, last).
+and lab.js (the v0.5 desks), snap6.js (the generated v0.6 engine snapshot), brain.js, noteworthy.js, trading.js,
+buyside6.js and pulse.js (the v0.6 desks), and boot.js (navigation, live data and boot, last).
 
     python scripts/assemble_page.py           # write site/page.html
     python scripts/assemble_page.py --check   # exit 1 if site/page.html is out of date
@@ -17,7 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "site" / "src"
 OUT = ROOT / "site" / "page.html"
-SCRIPTS = ["math.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js", "boot.js"]
+SCRIPTS = ["math.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js",
+           "snap6.js", "brain.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "boot.js"]
 
 
 def assemble(src: Path = SRC) -> str:

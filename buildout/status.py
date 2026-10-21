@@ -140,6 +140,29 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
             days = (now.date() - date.fromisoformat(end[:7] + "-01")).days
             check("Research data ends within the last 120 days", days <= 120, f"ends {end}, {days} days ago")
 
+    brain = load("brain.json", None)
+    if brain is not None:
+        regs = brain.get("regimes") or {}
+        ws = [e.get("w") for r in regs.values() for e in (r.get("edges") or {}).values()]
+        check("Brain weights are finite and below 1.5 in size", bool(ws) and all(isinstance(w, (int, float)) and abs(w) < 1.5 for w in ws),
+              f"{len(ws)} edges in {len(regs)} regimes")
+        files["brain.json"]["cadence"] = "monthly"
+
+    buy = load("buyside.json", "latest.month")
+    if buy is not None:
+        files["buyside.json"]["cadence"] = "monthly"
+        t = buy.get("tail") or {}
+        check("Fat-tail shortfall: Student-t at least the normal", isinstance(t.get("student_t"), (int, float)) and isinstance(t.get("normal"), (int, float))
+              and t["student_t"] >= t["normal"], f"{t.get('student_t')} vs {t.get('normal')}")
+
+    feeds = load("feeds.json", "generated_utc")
+    if feeds is not None:
+        src = feeds.get("sources") or {}
+        n_ok, n_bad = len(src.get("ok") or []), len(src.get("failed") or [])
+        check("Feed scraper read at least half its sources", n_ok >= n_bad, f"{n_ok} read, {n_bad} failed or skipped")
+        check("Feed items are links, not markup", all(str(it.get("url", "")).startswith(("https://", "http://", "")) and "<" not in str(it.get("title", ""))
+                                                    for it in feeds.get("items") or []))
+
     return {
         "generated_utc": now.isoformat(timespec="seconds"),
         "commit": (os.environ.get("GITHUB_SHA") or "")[:7] or None,

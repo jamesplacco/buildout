@@ -32,6 +32,7 @@ FLOWS = {
     "net_income": ["NetIncomeLoss"],
     "interest": ["InterestExpense", "InterestExpenseNonoperating", "InterestExpenseDebt"],
     "buybacks": ["PaymentsForRepurchaseOfCommonStock"],
+    "sbc": ["ShareBasedCompensation", "AllocatedShareBasedCompensationExpense"],          # v0.6: the manual's red flags
 }
 INSTANTS = {
     "debt": ["LongTermDebt", "LongTermDebtNoncurrent"],
@@ -39,6 +40,7 @@ INSTANTS = {
     "cash": ["CashAndCashEquivalentsAtCarryingValue"],
     "securities": ["MarketableSecuritiesCurrent", "AvailableForSaleSecuritiesDebtSecuritiesCurrent", "ShortTermInvestments"],
     "rpo": ["RevenueRemainingPerformanceObligation"],
+    "receivables": ["AccountsReceivableNetCurrent"],
 }
 STAGES = {"hedge": "Hedge finance", "speculative": "Speculative finance", "ponzi": "Ponzi edge"}
 
@@ -153,6 +155,10 @@ def analyze_company(units: dict[str, list[dict]], supplements: dict | None = Non
     sec, _ = last("securities")
     m["cash"], m["cash_date"] = (total, total_date) if total is not None else ((cash + (sec or 0.0)), cash_date) if cash is not None else (None, None)
     m["rpo"], m["rpo_date"] = last("rpo")
+    m["receivables"], _ = last("receivables")
+    rc = inst["receivables"].dropna()
+    rprior = _at(rc, rc.index[-1] - pd.DateOffset(years=1), 40) if len(rc) else None
+    m["receivables_yoy"] = (m["receivables"] * 1e9 / rprior - 1) if m["receivables"] is not None and rprior else None
     d = inst["debt"].dropna()
     prior = _at(d, d.index[-1] - pd.DateOffset(years=1), 40) if len(d) else None
     m["debt_yoy"] = (m["debt"] * 1e9 / prior - 1) if m["debt"] is not None and prior else None
@@ -175,6 +181,14 @@ def derive(m: dict) -> dict:
     m["rpo_years"] = div(g("rpo"), g("revenue"))
     m["ocf_to_interest"] = div(g("ocf"), g("interest"))
     m["stage"] = minsky_stage(m)
+    # the field manual's red-flag tests (6c), where the filings carry the inputs
+    m["fcf_to_ni"] = div(g("fcf"), g("net_income")) if (g("net_income") or 0) > 0 else None
+    m["sbc_to_rev"] = div(g("sbc"), g("revenue"))
+    ry, gy = g("receivables_yoy"), g("revenue_growth")
+    m["recv_minus_rev"] = (ry - gy) if ry is not None and gy is not None else None
+    from .accounting import red_flags
+    m["red_flags"] = red_flags({"capex_to_dep": m.get("capex_to_da"), "fcf_to_ni": m.get("fcf_to_ni"), "sbc_to_rev": m.get("sbc_to_rev"),
+                                "recv_minus_rev": m.get("recv_minus_rev")})
     return m
 
 

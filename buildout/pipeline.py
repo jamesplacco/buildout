@@ -149,6 +149,14 @@ def analyze(cfg: Config, inp: Inputs) -> dict:
         v["dsr"] = metrics.deflated_sharpe(v["sr_per_period"], v["n"], v["skew"], v["kurtosis"],
                                            n_trials=len(bt), sr_var=float(np.var(srs, ddof=1)) if len(srs) > 1 else 0.0)
 
+    # 7b. The field manual's checks on the book itself: fat-tail shortfall, the hedge selector by regime, liquidity
+    from . import buyside, microstructure
+    tail = buyside.tail_risk(book)
+    hedge_pick = buyside.hedge_selector(book, {h: rets[h].reindex(book.index) for h in u.hedges}, reg.reindex(book.index),
+                                        weight=0.3, periods_per_year=252)
+    liquidity = {t: microstructure.roll_spread(prices[t].dropna().tail(252)) / float(prices[t].dropna().tail(252).mean()) * 1e4
+                 for t in names if t in prices and prices[t].dropna().size > 60}
+
     # 8. Can we forecast the book's next month? Walk-forward, purged, judged on calibration.
     feats = signals.features(eq_curve, hedge_r, corr)
     label = signals.forward_up(eq_curve, 21)
@@ -179,6 +187,7 @@ def analyze(cfg: Config, inp: Inputs) -> dict:
         "backtest": {"stats": bt, "curves": curves},
         "signal": {k: v for k, v in sig_eval.items()},
         "trims": sizing.trim_orders(base.iloc[-1] * 1.0, w_book, rp.trim_band),
+        "tail": tail, "hedge_selector": hedge_pick, "roll_spread_bps": liquidity,
     })
 
 

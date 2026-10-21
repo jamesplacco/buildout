@@ -1097,7 +1097,8 @@
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
-    decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab" };
+    decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
+    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
     "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {
@@ -1376,7 +1377,7 @@
       if (sg.unit === "text") { if (use) { level = use.lvl; val = use.text; } }
       else if (use && fin(use.v)) { level = sg.level(use.v); val = fmtSignal(sg, use.v); }
       if (lv) nLive++;
-      states.push({ sg, level, live: !!lv });
+      states.push({ sg, level, live: !!lv, v: use && fin(use.v) ? use.v : null });
       const card = h("article", "sig " + (level == null ? "lx" : "l" + level));
       card.id = "sig-" + sg.id;
       const top = h("div", "sig-top");
@@ -1957,7 +1958,7 @@
       if (typing || e.metaKey || e.ctrlKey || e.altKey || !$("#palette").hidden) return;
       if (e.key === "/") { e.preventDefault(); openPalette(); }
       else if (e.key === "?") { e.preventDefault(); palReturn = document.activeElement; $("#keys").hidden = false; $("#keys-close").focus(); }
-      else if (/^[1-6]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
+      else if (/^[1-7]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
       else if ((e.key === "m" || e.key === "M") && $("#keys").hidden) toggleMath();
     });
     $("#keys").addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); $("#keys-close").focus(); } });

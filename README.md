@@ -3,8 +3,11 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.5 adds the decision layer: every reading becomes a written rule, a sized action, a confidence and a
-distance to a flip, and every decision you make can be logged, locked and scored for luck against skill.
+Version 0.6 adds the brain (a signed network of the financial system that carries any shock or assumption to
+its fourth-order effects, with eleven links measured in two regimes), Noteworthy (an asymmetric-information feed
+scraper over Substack, Telegram, X, Reddit, Hacker News and the wires), prop trading and market making desks, and
+the 2026 buyside field manual as engine modules. Version 0.5 added the decision layer: every reading becomes a
+written rule, a sized action, a confidence and a distance to a flip, and every decision can be logged and scored.
 
 It answers three questions every day, with the data behind each answer:
 
@@ -26,6 +29,9 @@ session's close. It can also be started by hand from the Actions tab (Run workfl
 | Book run: exposures, regime, hedge, sizing, stress, backtest | secret `DATABENTO_API_KEY` | `site/data/report.json` |
 | Fundamentals: capex, cash flow, debt from SEC filings; last-twelve-month analysis and Minsky stages | variable `SEC_USER_AGENT` | `site/data/capex.json` |
 | Long-history research: 155 years of public data (Shiller, BLS, Treasury, EIA, CBOE, gold) | nothing | `site/data/research.json` |
+| Brain links by regime; the field manual's regime, hedge selector, fat tails and replays | nothing | `brain.json`, `buyside.json` |
+| Noteworthy feeds: RSS and Substack, Telegram previews, Reddit, Hacker News, Google News; X with a token | optional secret `X_BEARER_TOKEN` | `feeds.json`, `feeds_history.json` |
+| Source registry | nothing | `sources.json` |
 | Status: which files exist, how fresh each is, sanity checks (always runs, even after a failure) | nothing | `site/data/status.json` |
 
 Steps without their secret or variable skip themselves with a notice. Results are committed back to `main`
@@ -35,23 +41,30 @@ by `github-actions[bot]`. Only derived analytics are committed; raw market data 
 
 1. **Databento key.** Settings > Secrets and variables > Actions > New repository secret:
    name `DATABENTO_API_KEY`, value `db-...`. The next run prices the pull (`buildout cost`) and then runs the book.
-2. **SEC contact (optional).** Same page, Variables tab: `SEC_USER_AGENT` = `Your Name you@example.com`.
+2. **X (optional).** Secret `X_BEARER_TOKEN` (X API v2) adds the X accounts in `feeds.toml` to Noteworthy.
+   Without it they are skipped with a note; X is never scraped.
+3. **SEC contact (optional).** Same page, Variables tab: `SEC_USER_AGENT` = `Your Name you@example.com`.
    The SEC requires a real contact on every request.
-3. **Public page (optional).** Make the repository public, set Settings > Pages > Source to
+4. **Public page (optional).** Check the ICE BofA license before redistributing the credit spreads. Make the repository public, set Settings > Pages > Source to
    "GitHub Actions", and add the variable `PUBLISH_PAGES` = `true`. `pages.yml` then redeploys the page
    after every daily run.
 
 ## The page
 
-`site/page.html` is one self-contained page with eighteen desks in six sections (Today, Decide, Markets,
-Research, Wisdom, Reference). Market figures carry a source and a date;
+`site/page.html` is one self-contained page with twenty-three desks in seven sections (Today, Decide, Markets,
+Trading, Research, Wisdom, Reference). Market figures carry a source and a date;
 tiles marked Live are replaced by the daily run's numbers, and a Stale badge appears when a file is more
 than three weekdays old. The bond, curve, option, hedge and sizing tools run in the browser with the same
 formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked against it to 1e-9.
 
 | Desk | What it holds |
 |---|---|
-| Today | A three-line brief (do, risk, watch), twelve signals each with a rule and an action, the system map (nine parts of the financial system and the channels between them, red where stress is flowing), what moved, key levels, regime map, engine readout, calendar |
+| Today | Risk rings, what changed since your last visit, a morning check-in with a streak, early trends, a three-line brief (do, risk, watch), twelve signals each with a rule and an action, the system map (nine parts of the financial system and the channels between them, red where stress is flowing), what moved, key levels, regime map, engine readout, calendar |
+| Noteworthy | Ten trends placed on the curve from niche to consensus, each with a bottom line, sourced numbers, a watch list and live links to X, Substack and Telegram; the feed's latest items; heat, niche skew and lead time per theme |
+| The brain | Twenty-one parts of the system and forty-eight signed links (eleven measured by regime, the rest judged and editable): propagation by order, strongest channels, feedback loops, load-bearing links, Monte Carlo robustness, the spectral radius, the inverse problem, PM and quant modes |
+| Prop | Industry economics (Jane Street, Citadel Securities, Virtu, retail challenges), the edge calculator and Kelly hill, a funded-challenge simulator, pod-shop economics from gross to net |
+| Market making | Market structure in 2026, an Avellaneda-Stoikov simulator, Glosten-Milgrom adverse selection, square-root impact with Almgren-Chriss schedules and the execution frontier, the book's own liquidity |
+| Buyside 2026 | The field manual as tools: regime and gross, the hedge selector, Student-t shortfall, five replays, server-life depreciation, cash earnings, reverse DCF, red flags, private credit stress, position tiers and the moonbag rule, the manual's ten signals, and where the manual and the data disagree |
 | Decide | Seven decisions traced from data to rule to action, each with a confidence (the product of its assumptions) and the distance to a flip; rates of change (velocity, acceleration, time to each rule's line) for eleven signals; fifteen weighted assumptions with sliders; known knowns to unknown unknowns; five shocks run to the fourth order |
 | Journal | A private decision tracker: hypothesis, evidence, weighted assumptions, kill line, pre-mortem, Kelly sizing; the forecast locks when logged; after-action reviews; Brier score, calibration, alpha after beta, a luck test and a process-against-outcome grid |
 | Swans | Fat tails since 1871, twelve named swans with the hedge that pays and the one that fails, Taleb's toolkit as rules, Spitznagel's compound-growth test |
@@ -71,7 +84,7 @@ formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked
 | Appendix | Glossary (126 terms, linked from the text), methods and formulas, 48 hard questions, model risk register, data dictionary, episode atlas (15 stresses since 1987), reading list, checklists, changelog |
 
 Navigation: `/` or Ctrl/Cmd+K searches every desk, term, security, thesis, episode and question; `?` lists
-the shortcuts; digits 1 to 6 open the sections (each reopens the desk last read in it); M shows every formula;
+the shortcuts; digits 1 to 7 open the sections (each reopens the desk last read in it); M shows every formula;
 any element id is a deep link (`#g-dv01`, `#d-duration`, `#fi-hedge`, `#sw-credit`). Print all (Appendix)
 prints every desk with every question answered (outside the artifact viewer, which cannot print).
 
@@ -83,12 +96,13 @@ anywhere else, and exports JSON that `python -m buildout journal decisions.json`
 
 The page is assembled from `site/src/` (`head.html`, `body.html`, and `math.js`, `ui.js`, `data.js`,
 `reference.js`, `research.js`, `views.js`, `decide.js`, `journal.js`, `desks.js`, `wisdom.js`, `lab.js`,
-`boot.js` inside one strict-mode script). Edit the parts, then:
+`snap6.js`, `brain.js`, `noteworthy.js`, `trading.js`, `buyside6.js`, `pulse.js`, `boot.js` inside one strict-mode script). Edit the parts, then:
 
 ```bash
 python scripts/assemble_page.py           # writes site/page.html; --check fails CI if it is stale
 python site/tests/stress.py               # browser suite (needs: pip install playwright; playwright install chromium)
 python scripts/snapshot_fundamentals.py   # regenerate the Fundamentals snapshot from the SEC facts in tests/fixtures
+python scripts/snapshot_v06.py <dir>      # regenerate snap6.js from brain, buyside and sources output in <dir>
 ```
 
 The browser suite builds the site from engine-generated fixtures and feeds it hostile files (wrong shapes,
@@ -103,7 +117,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 114 tests, no data needed
+pytest                                    # 135 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -113,6 +127,10 @@ python -m buildout run  --config config.toml --out out
 python -m buildout capex GOOGL MSFT AMZN META ORCL TSLA --ua "Your Name you@example.com"
 python -m buildout research --out out     # 155 years of public data: the hedge line, fat tails, base rates
 python -m buildout journal decisions.json # score an exported journal: Brier, calibration, alpha, luck
+python -m buildout brain --out out        # measured links between oil, CPI, yields, stocks, VIX and gold, by regime
+python -m buildout buyside --out out      # regime and gross, hedge selector, Student-t shortfall, replays
+python -m buildout feeds --out out        # Noteworthy: reads feeds.toml (add any Substack, Telegram channel or RSS)
+python -m buildout sources --out out      # every source the engine reads
 python -m buildout kalshi KXFED           # prediction-market Fed path (series names change; check Kalshi)
 ```
 
@@ -128,6 +146,9 @@ and run with `--config config.private.toml`.
 | SEC EDGAR | Revenue, operating cash flow, capex, leases, depreciation, operating and non-operating income, interest, debt, cash and backlog from XBRL filings | Free (contact required) |
 | GitHub datasets | Shiller's S&P 500 since 1871, BLS CPI-U, the 10-year Treasury, EIA Brent, CBOE VIX, monthly gold | Free |
 | Kalshi | Prediction-market probabilities (Fed path, CPI, recession) | Free public endpoints |
+| Feeds | Substack and RSS, Telegram public previews, X API v2, Reddit, Hacker News, Google News (`feeds.toml`) | Free; X needs an API token |
+
+91 sources in all (`python -m buildout sources`).
 
 ## Modules
 
@@ -141,6 +162,10 @@ and run with `--config config.private.toml`.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.6 | `brain.py` | Recursive regressions on standardized monthly changes by regime; propagation, Leontief total, spectral radius |
+| | `buyside.py`, `accounting.py` | Regime label and gross scaler, hedge selector by shortfall per carry, Student-t shortfall, replays; depreciation, cash EPS, reverse DCF, credit stress, red flags |
+| | `microstructure.py` | Avellaneda-Stoikov quotes and simulation, Glosten-Milgrom, square-root impact, Almgren-Chriss, Roll, Amihud, Kyle |
+| | `feeds.py`, `sources.py` | Feed fetchers and parsers, theme tagging, heat, niche skew, novelty and lead time; the source registry |
 | Exposure | `analytics/exposures.py` | Recursive exponentially weighted betas to market, AI and rates factors; IPO shrinkage |
 | Regime | `analytics/regime.py` | Stock-bond correlation with hysteresis; worst-day shock table |
 | Hedge | `analytics/hedge.py` | Min-variance ratios, four policies judged out of sample, DV01 futures sizing |
@@ -150,7 +175,7 @@ and run with `--config config.private.toml`.
 | Sizing | `analytics/sizing.py` | Vol targeting, shrunk fractional Kelly, equal risk contribution, drawdown-capped leverage, trim bands |
 | Stress | `analytics/stress.py` | Historical episodes (2020, 2022, 2024, 2025, 2026) and hypothetical factor shocks |
 | Proof | `analytics/backtest.py`, `metrics.py`, `signals.py` | Dollar-exact backtester, deflated Sharpe, purged walk-forward model judged on calibration |
-| Page | `site/src/`, `scripts/assemble_page.py`, `scripts/build_site.py` | Eighteen-desk research site assembled into `site/page.html` (reads `site/data/*.json`); `build_site.py` wraps it for GitHub Pages |
+| Page | `site/src/`, `scripts/assemble_page.py`, `scripts/build_site.py` | Twenty-three-desk research site assembled into `site/page.html` (reads `site/data/*.json`); `build_site.py` wraps it for GitHub Pages |
 
 ## What the tests prove
 
@@ -171,6 +196,13 @@ and run with `--config config.private.toml`.
 - Kelly's closed form for a position matches a numerical maximization of log growth.
 - The page's rates of change, decision math, journal scorecard, depreciation model and ergodicity game
   match the engine; every link the decision layer draws lands on something.
+- The brain recovers planted links and a planted sign flip by regime; the page's propagation matches the engine
+  and converges to the Leontief inverse.
+- Market-making quotes, impact and Almgren-Chriss schedules match the engine exactly; inventory skew cuts
+  inventory risk in simulation; Roll's estimator recovers a planted bid-ask bounce.
+- The field manual's depreciation and private-credit tables are reproduced to the rounding shown.
+- The feed scraper survives dead sources and a missing X token, finds a planted lead time, and its text cannot
+  inject markup or script into the page.
 
 ## Principles
 

@@ -33,7 +33,7 @@ def test_no_banned_text():
     assert "intersection" not in PAGE.lower()
 
 
-JS_FILES = ["ui.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js", "boot.js"]
+JS_FILES = ["ui.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js", "brain.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "boot.js"]
 
 
 def test_every_referenced_id_exists():
@@ -56,8 +56,8 @@ def test_no_duplicate_ids_in_the_markup():
     assert not dup, f"ids defined twice: {dup}"
 
 
-GROUPS = {"today", "decide", "markets", "research", "wisdom", "reference"}
-RUNTIME_IDS = r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+|d-[\w-]+|as-[\w-]+|ch-[\w-]+|sw-[\w-]+|lg-[\w-]+|fi-[\w-]+|lab-[\w-]+)"
+GROUPS = {"today", "decide", "markets", "trading", "research", "wisdom", "reference"}
+RUNTIME_IDS = r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+|d-[\w-]+|as-[\w-]+|ch-[\w-]+|sw-[\w-]+|lg-[\w-]+|fi-[\w-]+|lab-[\w-]+|nw-[\w-]+)"
 
 
 def test_hash_targets_resolve():
@@ -376,3 +376,97 @@ def test_fundamentals_snapshot_matches_the_filings():
     assert m, "FUND block not found in research.js"
     got = json.loads(m.group(1))
     assert got == json.loads(json.dumps(want)), "research.js FUND is stale: rerun scripts/snapshot_fundamentals.py"
+
+
+# ---------------------------------------------------------------- v0.6: trading, buyside and the brain against the engine
+def _node6(cases):
+    r = subprocess.run([NODE, str(ROOT / "site" / "tests" / "harness6.js")], input=json.dumps(cases), capture_output=True, text=True, check=True)
+    return json.loads(r.stdout)
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_trading_math_matches_the_engine():
+    from buildout import decisions as dc
+    from buildout import microstructure as ms
+    cases = [{"fn": "as", "s": 100, "q": q, "g": 0.1, "sig": 2, "tau": 0.6, "k": 1.5} for q in (-5, 0, 3)]
+    cases += [{"fn": "gm", "mu": 0.12, "vh": 10, "vl": -10}, {"fn": "impact", "Q": 3e5, "adv": 1e7, "sig": 0.022, "Y": 0.7}]
+    cases += [{"fn": "ac", "X": 1e6, "T": 3, "N": 12, "sig": 0.02, "eta": 2e-6, "lam": lam} for lam in (0, 1e-3, 5e-2)]
+    cases += [{"fn": "edge", "p": 0.45, "b": 1.6, "c": 0.0, "r": 0.03}]
+    got = _node6(cases)
+    for c, g in zip(cases[:3], got[:3]):
+        w = ms.as_quotes(c["s"], c["q"], c["g"], c["sig"], c["tau"], c["k"])
+        assert [g[k] for k in ("reservation", "spread", "bid", "ask")] == pytest.approx([w[k] for k in ("reservation", "spread", "bid", "ask")], abs=1e-12)
+    assert got[3] == pytest.approx(ms.gm_spread(0.12, 10, -10)) and got[4] == pytest.approx(ms.sqrt_impact(3e5, 1e7, 0.022, 0.7), rel=1e-12)
+    for c, g in zip(cases[5:8], got[5:8]):
+        t = ms.ac_trajectory(c["X"], c["T"], c["N"], c["sig"], c["eta"], c["lam"])
+        assert g["traj"] == pytest.approx(t, rel=1e-9, abs=1e-6)
+        cc = ms.ac_cost(t, c["T"], c["sig"], c["eta"])
+        assert [g["cost"]["expected"], g["cost"]["sd"]] == pytest.approx([cc["expected"], cc["sd"]], rel=1e-9)
+    e = got[8]
+    assert e["st"]["kelly"] == pytest.approx(dc.kelly(0.45, 1.6), abs=1e-15)
+    assert e["g"] == pytest.approx(dc.log_growth(0.03, 0.45, 1.6), abs=1e-15)
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_buyside_math_matches_the_engine():
+    from buildout import accounting as ac
+    from buildout import buyside as bs
+    c = {"fn": "acct", "cohort": 425, "eps": [134, 42, 34, 12, 2, 5, 7.45], "dcf": [67, 0.12, 0.092, 0.03], "rev": [3800, 67, 0.092, 0.03],
+         "credit": [[0.039, 0.055, 0.02, 0.6], [0.039, 0.055, 0.06, 0.5], [0.039, 0.055, 0.14, 0.4]],
+         "grades": [[3.0, 1.5, 2.5, "lt"], [0.95, 0.9, 0.6, "gt"], [0.08, 0.05, 0.12, "lt"], [0.5, 0.9, 0.6, "gt"]],
+         "gross": [[1, 2.74], [1, 1.0], [0, 2.0], [-1, 0.5]], "regime": [[3.63, 2.74, 1, 1.5], [2.0, 0.5, -1, 0.9], [3.5, 2.0, 0, 1.0]]}
+    [g] = _node6([c])
+    want = ac.depreciation_table(425)
+    assert [(r["life"], r["annual"], r["gap"]) for r in g["dep"]] == pytest.approx([(r["life"], r["annual"], r["gap"]) for r in want])
+    assert g["ddb"] == pytest.approx(ac.ddb_first_year(425, 6))
+    assert g["eps"] == pytest.approx(ac.cash_eps(*c["eps"]))
+    assert g["dcf"] == pytest.approx(ac.dcf_value(*c["dcf"]), rel=1e-12)
+    assert g["rev"] == pytest.approx(ac.reverse_dcf(*c["rev"]), abs=1e-12)
+    for x, got in zip(c["credit"], g["credit"]):
+        w = ac.credit_stress(*x)
+        assert [got["gross"], got["loss"], got["net"], got["over"]] == pytest.approx([w["gross"], w["loss"], w["net"], w["over_treasury"]], abs=1e-15)
+    assert g["grades"] == [ac.grade(*x) for x in c["grades"]]
+    assert [list(x) for x in g["gross"]] == [list(bs.gross_scaler(*x)) for x in c["gross"]]
+    assert g["regime"] == [bs.regime_label(x[0], x[1], x[2], x[3], 0.0, 0.03)["label"] for x in c["regime"]]
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_brain_propagation_matches_the_engine():
+    import numpy as np
+    from buildout import brain
+    cases = [{"fn": "brain", "blend": b, "dataOnly": d, "shock": s, "K": k} for b, d, s, k in
+             ((1, False, {"hormuz": 1.5}, 6), (0, False, {"fed": -1.5}, 8), (0.5, True, {"oil": 1}, 4), (1, False, {"capex": -1.5}, 40))]
+    for c, g in zip(cases, _node6(cases)):
+        nodes, edges = g["nodes"], [tuple(e) for e in g["edges"]]
+        want = brain.propagate(nodes, edges, c["shock"], c["K"])
+        assert g["total"] == pytest.approx(list(want["total"]), abs=1e-12)
+        assert g["orders"][-1] == pytest.approx(list(want["orders"][-1]), abs=1e-12)
+        rho = brain.spectral_radius(nodes, edges)
+        assert rho < 1 and g["rho"] == pytest.approx(rho, rel=0.08)
+        if c["K"] == 40:          # forty orders: the series has converged to the Leontief inverse
+            assert g["total"] == pytest.approx(list(brain.leontief_total(nodes, edges, c["shock"])), abs=1e-6)
+    snap = _json_const((SRC / "snap6.js").read_text(), "BRAIN_SNAP")
+    flip = snap["corr"]
+    assert flip["low_inflation"] > 0 > flip["inflation"], "the brain's headline: yields and stocks flipped sign in 2022"
+
+
+def test_v06_links_and_desks():
+    body = (SRC / "body.html").read_text()
+    ids = set(re.findall(r'\bid="([\w-]+)"', body)) | set(re.findall(r'id="view-([\w-]+)"', body))
+    nw = (SRC / "noteworthy.js").read_text()
+    trends = re.findall(r'\{ id: "([\w-]+)", n: "', nw)
+    assert len(trends) == 10
+    for t in re.findall(r'link: "([\w-]+)"', nw):
+        assert t in ids or re.fullmatch(RUNTIME_IDS, t), f"a trend links to missing #{t}"
+    feeds_toml = (ROOT / "feeds.toml").read_text()
+    assert set(trends) == set(re.findall(r'^id = "([\w-]+)"', feeds_toml, flags=re.M)), "page trends and scraper themes must share ids"
+    for t in re.findall(r'"#([\w-]+)"\]', nw):
+        assert t in ids
+    br = (SRC / "brain.js").read_text()
+    nodes = set(re.findall(r'\{ id: "([\w]+)", n: "', br))
+    for f, t in re.findall(r'\["(\w+)", "(\w+)", -?\d', br):
+        assert f in nodes and t in nodes, f"brain link {f}>{t} names a missing node"
+    for d in re.findall(r' d: "([\w-]+)"', br):
+        assert d in ids or re.fullmatch(RUNTIME_IDS, d), f"brain node links to missing #{d}"
+    for v in ("noteworthy", "brain", "prop", "making", "buyside"):
+        assert f'id="view-{v}"' in body

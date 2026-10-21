@@ -86,12 +86,23 @@ def make_fixtures(out: Path) -> Path:
     ttm["MSFT"]["quarter_end"] = "2026-09-30"            # a newer filing than the page's snapshot
     write({"units": "USD billions", "companies": companies, "ttm": ttm, "skipped": []}, out, "capex.json")
     write(fake_research(), out, "research.json")
+    from buildout import brain, buyside, sources
+    raw = fake_raw()
+    write(brain.run(raw), out, "brain.json")
+    write(buyside.run(raw), out, "buyside.json")
+    write(fake_feeds(), out, "feeds.json")
+    write(sources.run(ROOT / "feeds.toml"), out, "sources.json")
     write(build_status(out, now=datetime(2026, 10, 20, 12, tzinfo=timezone.utc)), out, "status.json")
     return out
 
 
 def fake_research(seed: int = 3) -> dict:
     """The long-history research run on synthetic files in the shape of the public datasets, through 2026-09."""
+    return compact(run(fake_raw(seed)))
+
+
+def fake_raw(seed: int = 3) -> dict:
+    """Synthetic files in the shape of the public datasets, through 2026-09."""
     rng = np.random.default_rng(seed)
     m = pd.date_range("1871-01-01", "2026-09-01", freq="MS")
     n = len(m)
@@ -109,7 +120,30 @@ def fake_research(seed: int = 3) -> dict:
     dv = pd.bdate_range("1990-01-02", "2026-10-19")
     vix = pd.DataFrame({"DATE": dv.strftime("%Y-%m-%d"), "CLOSE": np.exp(np.log(18) + 0.3 * np.sin(np.arange(len(dv)) / 40) + 0.05 * rng.normal(size=len(dv)))})
     gold = pd.DataFrame({"Date": m.strftime("%Y-%m"), "Price": 20 * np.exp(np.cumsum(0.003 + 0.03 * rng.normal(size=n)))})
-    return compact(run({"shiller": sh, "cpi": bls, "y10": gs10, "brent": brent, "vix": vix, "gold": gold}))
+    return {"shiller": sh, "cpi": bls, "y10": gs10, "brent": brent, "vix": vix, "gold": gold}
+
+
+def fake_feeds() -> dict:
+    """A feeds run over canned items: one niche Substack post, one Telegram wire item, one mainstream headline."""
+    import datetime as dt
+    from buildout import feeds
+    now = dt.datetime(2026, 10, 21, 12, tzinfo=dt.timezone.utc)
+    rss = b"""<rss><channel><item><title>Dated Brent premium to futures hits $27 as Hormuz flows stall</title><link>https://example.com/a</link>
+<pubDate>Wed, 21 Oct 2026 08:00:00 GMT</pubDate></item><item><title>BDC redemption queue grows as PIK climbs</title><link>https://example.com/b</link>
+<pubDate>Wed, 21 Oct 2026 07:00:00 GMT</pubDate></item></channel></rss>"""
+    tg = b"""<div class="tgme_widget_message_wrap"><div data-post="WalterBloomberg/7"><div class="tgme_widget_message_text">FED'S WALLER: ANOTHER RATE HIKE MAY BE NEEDED</div>
+<span class="tgme_widget_message_views">9K</span><time datetime="2026-10-21T10:00:00+00:00"></time></div></div>"""
+
+    def getter(url, user_agent=""):
+        if "t.me/s/" in url:
+            return tg
+        if "eventhorizoniq" in url or "news.google" in url:
+            return rss
+        if "hn.algolia" in url:
+            return b'{"hits": []}'
+        raise RuntimeError("offline fixture")
+    doc, _ = feeds.run(feeds.load_config(ROOT / "feeds.toml"), {}, getter=getter, now=now)
+    return doc
 
 
 if __name__ == "__main__":

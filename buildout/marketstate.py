@@ -40,7 +40,8 @@ VOL_PAIRS = [("spx", "S&P 500", "SP500", "VIXCLS"), ("ndx", "Nasdaq-100", "NASDA
 TERM_IDS = ("VIXCLS", "VXVCLS")                      # VIX and 3-month VIX
 LIQ_IDS = ["WALCL", "WTREGEN", "RRPONTSYD", "WRESBAL", "SOFR", "IORB"]
 # v0.5 macro state: inflation (the hedge line), labor, the curve, financial conditions
-MACRO_IDS = ["CPIAUCSL", "SAHMREALTIME", "UNRATE", "T10Y3M", "NFCI", "ICSA"]
+MACRO_IDS = ["CPIAUCSL", "SAHMREALTIME", "UNRATE", "T10Y3M", "NFCI", "ICSA",
+             "UMCSENT", "PCEC96", "DHHNGSP", "DRTSCILM", "MORTGAGE30US"]   # v0.6: the field manual's monitors
 HEDGE_LINE = 0.0275   # average inflation over 36 months above which bonds rarely hedged stocks, 1871-2026
 MIN_Z_OBS = 100                                      # fewer seven-day changes than this: no z-score
 
@@ -248,15 +249,21 @@ def macro_state_block(fred: pd.DataFrame) -> dict:
         yoy_s = (m / m.shift(12) - 1).dropna()
         avg_s = ((m / m.shift(36)) ** (1 / 3) - 1).dropna()
         out["inflation"] = {"date": last.strftime("%Y-%m-%d"), "yoy": yoy, "avg36": infl36, "above_line": infl36 >= HEDGE_LINE,
+                            "ann3m": float((m.iloc[-1] / m.iloc[-4]) ** 4 - 1),
                             "months_to_line_at_2pct": months, "yoy_3m_ago": float(m.iloc[-4] / m.iloc[-16] - 1) if len(m) > 16 else None,
                             **monthly_roc(yoy_s, "yoy"), **monthly_roc(avg_s, "avg36")}
-    for key, sid, scale in (("sahm", "SAHMREALTIME", 1), ("unrate", "UNRATE", 1), ("t10y3m", "T10Y3M", 100), ("nfci", "NFCI", 1), ("claims", "ICSA", 1)):
+    for key, sid, scale in (("sahm", "SAHMREALTIME", 1), ("unrate", "UNRATE", 1), ("t10y3m", "T10Y3M", 100), ("nfci", "NFCI", 1), ("claims", "ICSA", 1),
+                            ("umich", "UMCSENT", 1), ("real_pce", "PCEC96", 1), ("henry_hub", "DHHNGSP", 1), ("sloos_ci", "DRTSCILM", 1),
+                            ("mortgage30", "MORTGAGE30US", 1)):
         s = _col(fred, sid)
         if s is None:
             continue
         row = {"date": s.index[-1].strftime("%Y-%m-%d"), "value": float(s.iloc[-1])}
         if sid == "ICSA":
             row["avg4w"] = float(s.iloc[-4:].mean())
+        if sid == "PCEC96" and len(s) > 3:          # the manual's trigger: real spending down two months running
+            ch = s.diff().dropna()
+            row["down_2m"] = bool(ch.iloc[-1] < 0 and ch.iloc[-2] < 0)
         row.update(roc.roc_row(s, scale=scale))
         out[key] = row
     return out

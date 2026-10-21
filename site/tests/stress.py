@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
-VIEWS = ["desk", "decide", "journal", "swans", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
+VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
@@ -139,6 +139,15 @@ async def extreme_inputs(page, label: str) -> None:
                 ("#lab-lev-mu", 0.02), ("#lab-lev-sig", 0.6), ("#lab-lev-r", 0.07), ("#lab-lev-sig", 0.05), ("#lab-conj-n", 15), ("#lab-conj-p", 0.5),
                 ("#lab-bayes-prior", 0.02), ("#lab-bayes-fpr", 0.5), ("#lab-bayes-sens", 0.99), ("#lab-luck-sr", 0.1), ("#lab-luck-z", 3), ("#lab-div-n", 1), ("#lab-div-rho", 0.95), ("#lab-div-n", 50)],
         "decide": [("#as-a-oil", 0.05), ("#as-a-line", 0.99), ("#as-a-capex", 0.05)],
+        "brain": [("#br-size", -3), ("#br-blend", 0), ("#br-K", 1), ("#br-shock", "corr"), ("#br-target", "corr"), ("#br-K", 8), ("#br-blend", 55),
+                  ("#br-edge", "y10>eq"), ("#br-w", 1), ("#br-w", -1), ("#br-shock", "pods"), ("#br-target", "hormuz"), ("#br-size", 3)],
+        "prop": [("#pe-p", 20), ("#pe-b", 0.3), ("#pe-c", 0.3), ("#pe-r", 20), ("#pe-n", 50), ("#pe-p", 80), ("#pe-b", 5), ("#pe-c", 0),
+                 ("#pc-p", 30), ("#pc-b", 0.5), ("#pc-r", 3), ("#pc-days", 10), ("#pc-t", 20), ("#pc-dl", 1), ("#pc-p", 70), ("#pc-b", 3),
+                 ("#pp-g", 0), ("#pp-pt", 12), ("#pp-mg", 3), ("#pp-pf", 40), ("#pp-vol", 1)],
+        "making": [("#as-sig", 5), ("#as-g", 0.01), ("#as-k", 0.5), ("#as-A", 300), ("#as-g", 1), ("#gm-mu", 0), ("#gm-info", 100), ("#gm-s", 0.5), ("#gm-mu", 50),
+                   ("#ex-q", 100), ("#ex-sig", 6), ("#ex-T", 1), ("#ex-l", 0), ("#ex-l", 20), ("#ex-Y", 1.5), ("#ex-q", 0.5), ("#ex-T", 10)],
+        "buyside": [("#bd-c", 50), ("#bd-l", 2), ("#bd-l", 7), ("#ce-sh", 0), ("#ce-ni", -500), ("#ce-sh", ""), ("#rd-f", -5), ("#rd-mv", 1e5), ("#rd-f", 1), ("#rd-erp", 1), ("#rd-rf", 2),
+                    ("#cs-d", 20), ("#cs-r", 0), ("#cs-m", 2.5), ("#cs-b", 0), ("#cs-d", 0), ("#mb-e", 1e6), ("#mb-p", 0.01), ("#mb-s", 1), ("#mb-atr", 10), ("#mb-e", 10), ("#mb-p", 1e6)],
     })
     for view, steps in cases.items():
         await page.evaluate(f"location.hash = '{view}'")
@@ -197,7 +206,8 @@ async def keyboard_and_links(page, label: str) -> None:
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
                         ("sig-vix", "desk"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"),
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
-                        ("fi-hedge", "findings"), ("lab-coin", "lab"), ("research", "findings"), ("wisdom", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans")]:
+                        ("fi-hedge", "findings"), ("lab-coin", "lab"), ("research", "findings"), ("wisdom", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
+                        ("nw-memory", "noteworthy"), ("trading", "making"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
         await page.wait_for_timeout(250)
         got = await page.evaluate("document.querySelector('.view:not([hidden])').id")
@@ -369,7 +379,8 @@ async def accessibility(page, label: str) -> None:
 async def main() -> int:
     from fixtures import make_fixtures
     base = make_fixtures(Path(tempfile.mkdtemp(prefix="buildout-fixtures-")))
-    good = {n: json.loads((base / n).read_text()) for n in ["macro.json", "report.json", "capex.json", "status.json", "research.json"]}
+    good = {n: json.loads((base / n).read_text()) for n in ["macro.json", "report.json", "capex.json", "status.json", "research.json",
+                                                             "brain.json", "buyside.json", "feeds.json", "sources.json"]}
     snapshot_only = {k: v for k, v in good.items() if k != "research.json"}
     stale = copy.deepcopy(good)
     stale["macro.json"]["latest"]["as_of"] = "2026-09-01"
@@ -387,6 +398,13 @@ async def main() -> int:
     hostile["capex.json"]["ttm"] = {"MSFT": {"quarter_end": "soon", "capex_to_ocf": "high"}, "GOOGL": None, "ZZZ": 5}
     hostile["research.json"] = {"panel": {"months": 12, "end": "2099-01"}, "hedge": {"rows": "many"}}
     hostile["macro.json"]["macro_state"] = {"inflation": {"avg36": "hot", "yoy": None, "date": 5}, "nfci": {"value": "loose"}, "sahm": None}
+    hostile["brain.json"]["regimes"]["inflation"]["edges"]["y10>eq"]["w"] = 50
+    hostile["buyside.json"]["tail"] = "fat"
+    evil = '<img src=x onerror="window.__pwned=1">'
+    hostile["feeds.json"]["items"] = [{"title": evil, "url": "javascript:window.__pwned=1", "source": evil, "platform": "<b>x</b>", "tier": "niche", "themes": ["memory"]}]
+    hostile["feeds.json"]["themes"][0]["top"] = [{"title": evil, "url": "javascript:window.__pwned=2", "source": evil, "tier": "x"}]
+    hostile["feeds.json"]["themes"][0]["series"] = ["a", None, 1e308]
+    hostile["feeds.json"]["bluf"] = evil
     huge = copy.deepcopy(good)
     for p in huge["macro.json"]["rates"]["curves"]["latest"]["points"]:
         p["yield"] = 1e6
@@ -401,7 +419,7 @@ async def main() -> int:
         await scenario(browser, "good data, print every desk", site_with(good), extra=print_all)
         await scenario(browser, "no data at all", site_with(None))
         await scenario(browser, "stale data", site_with(stale), extra=lambda p, l: stale_check(p, l))
-        await scenario(browser, "hostile shapes", site_with(hostile), expect_errors=2)
+        await scenario(browser, "hostile shapes", site_with(hostile), expect_errors=2, extra=no_injection)
         await scenario(browser, "huge yields", site_with(huge))
         await scenario(browser, "truncated files", site_with(None, raw={n: '{"latest": {"as_of": "2026-10' for n in good}))
         await scenario(browser, "incomplete market file", site_with({"macro.json": {"latest": {"as_of": "2026-10-16"}}}), expect_errors=1)
@@ -410,6 +428,16 @@ async def main() -> int:
         await browser.close()
     print(f"\n{len(FAILURES)} failures")
     return 1 if FAILURES else 0
+
+
+async def no_injection(page, label: str) -> None:
+    """Feed text is untrusted: nothing in it may run, and no javascript: link may reach the page."""
+    await page.evaluate("location.hash = 'noteworthy'")
+    await page.wait_for_timeout(400)
+    res = await page.evaluate("""() => ({ pwned: window.__pwned || 0, imgs: document.querySelectorAll('#view-noteworthy img').length,
+      js: [...document.querySelectorAll('a[href]')].filter((a) => a.getAttribute('href').trim().toLowerCase().startsWith('javascript')).length })""")
+    if res["pwned"] or res["imgs"] or res["js"]:
+        fail(f"{label}: feed content was not inert {res}")
 
 
 async def stale_check(page, label: str) -> None:

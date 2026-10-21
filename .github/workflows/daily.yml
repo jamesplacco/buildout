@@ -39,6 +39,21 @@ jobs:
         continue-on-error: true   # a dataset mirror being down must never block the market data
         run: python -m buildout research --out site/data
 
+      - name: Brain and field-manual engine (public datasets, free)
+        continue-on-error: true
+        run: |
+          python -m buildout brain --out site/data
+          python -m buildout buyside --out site/data
+
+      - name: Noteworthy feeds (RSS, Substack, Telegram, Reddit, HN, news; X with a token)
+        continue-on-error: true   # social sources come and go; they never block the market data
+        env:
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+        run: python -m buildout feeds --out site/data
+
+      - name: Source registry
+        run: python -m buildout sources --out site/data
+
       - name: Book run (Databento)
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}

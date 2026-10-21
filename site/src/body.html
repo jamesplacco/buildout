@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.5</span>
+      Buildout <span class="ver">v0.6</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -21,6 +21,7 @@
       <a href="#desk" data-group="today">Today</a>
       <a href="#decide" data-group="decide">Decide</a>
       <a href="#rates" data-group="markets">Markets</a>
+      <a href="#prop" data-group="trading">Trading</a>
       <a href="#fundamentals" data-group="research">Research</a>
       <a href="#legends" data-group="wisdom">Wisdom</a>
       <a href="#engine" data-group="reference">Reference</a>
@@ -39,14 +40,30 @@
       <h1 id="desk-title">Bonds stop hedging above 2.75% inflation. <em>We are at 3.1%.</em></h1>
       <p class="lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit, volatility, filings and the grid every day, turns each reading into a written rule and a sized action, and keeps score of its own calls. The headline is its own finding from 155 years of data.</p>
       <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 114 of 114 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 135 of 135 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
-        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 20, 2026</span>
+        <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
+        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 21, 2026</span>
       </div>
     </div>
     <div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout · 2026</span></div>
   </div>
+
+  <section class="section pulse" id="pulse" aria-labelledby="pulse-title">
+    <h2 class="sr-only" id="pulse-title">Your pulse</h2>
+    <div class="pulse-grid">
+      <div class="panel rings-panel"><div class="rings" id="rings" role="img" aria-label="Risk rings"></div><ul class="ring-key" id="ring-key"></ul></div>
+      <div class="panel since-panel"><span class="panel-title">Since your last visit</span><div id="since"></div></div>
+      <div class="panel checkin-panel"><div class="panel-head"><span class="panel-title">Morning check-in</span><span class="streak" id="streak"></span></div><ul class="checkin" id="checkin"></ul><p class="hint">Saved in this browser. Finish all five on consecutive weekdays to build a streak.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="nw-tease-sec" aria-labelledby="nwt-title">
+    <div class="section-head"><p class="eyebrow">Noteworthy</p><h2 id="nwt-title">Early, and worth a look</h2></div>
+    <div class="nw-teaser" id="nw-teaser"></div>
+    <a class="more-link" href="#noteworthy">All ten trends, with live feeds from X, Telegram and Substack →</a>
+  </section>
 
   <section class="section" id="brief-sec" aria-labelledby="brief-title">
     <h2 class="sr-only" id="brief-title">The brief</h2>
@@ -194,6 +211,37 @@
   </section>
 
   <footer class="foot"><p>Research desk, not investment advice. The model book is illustrative. Scenario sizes and tool inputs are assumptions; every market figure links to its source and date.</p></footer>
+</section>
+
+<!-- ======================= NOTEWORTHY ======================= -->
+<section class="view" id="view-noteworthy" hidden aria-labelledby="nw-title">
+  <div class="vhead">
+    <p class="eyebrow">Noteworthy · asymmetric information</p>
+    <h1 id="nw-title">What is moving before it is obvious.</h1>
+    <p class="lede">Ten stories the desk is tracking, each placed on the curve from niche to consensus, with a bottom line, the numbers, what to monitor and one-tap links to follow it live on X, Substack, Telegram and the wires. The engine's feed scraper reads every source below each morning and scores each theme for heat, niche skew and lead time.</p>
+  </div>
+  <section class="section" aria-labelledby="nwb-title">
+    <h2 class="sr-only" id="nwb-title">Bottom line</h2>
+    <p class="nw-bluf" id="nw-bluf"></p>
+    <p class="hint" id="nw-asof"></p>
+  </section>
+  <section class="section" aria-labelledby="nwm-title">
+    <div class="section-head"><p class="eyebrow">Diffusion</p><h2 id="nwm-title">Where each story sits on the curve</h2><p class="prose">The edge lives on the left. A story that only niche and specialist sources discuss is not yet in prices; by the time it is consensus, the trade is the sizing, not the call.</p></div>
+    <div class="nw-map" id="nw-map"></div>
+  </section>
+  <section class="section" aria-labelledby="nwc-title">
+    <div class="section-head"><p class="eyebrow">Trends</p><h2 id="nwc-title">Ten trends, each with a bottom line and a watch list</h2><p class="prose">Cards rise to the top when the scraper flags them. Each monitor line is a threshold the desk acts on, and each link opens a live search of the source.</p></div>
+    <div class="nw-grid" id="nw-grid"></div>
+  </section>
+  <section class="section" aria-labelledby="nwf-title">
+    <div class="section-head"><p class="eyebrow">Feed</p><h2 id="nwf-title">Latest from the sources</h2><p class="prose">The newest items that matched a theme, from the last feeds run. Headlines are shown as written by their sources; open the link before acting on any of them.</p></div>
+    <div class="panel nw-feed" id="nw-feed"></div>
+  </section>
+  <section class="section" aria-labelledby="nws-title">
+    <div class="section-head"><p class="eyebrow">Sources</p><h2 id="nws-title">Where the scraper looks</h2><p class="prose">Edit <code>feeds.toml</code> to add a Substack, a Telegram channel, an X account or any RSS feed. Telegram is read from each public channel's web preview; X only through its official API, with the <code>X_BEARER_TOKEN</code> secret. Each source carries a tier: official, niche, specialist or mainstream.</p></div>
+    <div class="src-chips" id="nw-sources"></div>
+    <div class="math"><span class="mlabel">How a theme is scored</span>Heat = (<var>n</var><sub>24h</sub> &minus; mean<sub>28d</sub>) &divide; max(sd<sub>28d</sub>, &radic;(mean<sub>28d</sub> + 1)): the Poisson floor stops one mention on a quiet theme from looking hot. Niche skew = share of the last 72 hours' mentions from niche and specialist sources &minus; that tier's share of everything read. Lead = the lag, 0 to 5 days, at which niche mentions best predict mainstream mentions (cross-correlation above 0.3, with 21 days of history). Novelty = share of today's distinctive words the theme has not used before. Noteworthy = heat &ge; 2, or skew above 20 points across two or more platforms.</div>
+  </section>
 </section>
 
 <!-- ======================= RATES ======================= -->
@@ -685,6 +733,198 @@
   <p class="callout">The link to the book: insurers are the marginal buyers of the long-dated debt that funds AI data centers. If their appetite slows, through rising defaults or capital rules, AI financing costs rise. That is the <a href="#hedges">financing-shock lane</a>, the one where long bonds fail as a hedge.</p>
 </section>
 
+<!-- ======================= PROP ======================= -->
+<section class="view" id="view-prop" hidden aria-labelledby="prop-title">
+  <div class="vhead">
+    <p class="eyebrow">Trading · prop</p>
+    <h1 id="prop-title">Edge is a number. Measure it before you size it.</h1>
+    <p class="lede">Prop trading is three numbers: how much each trade earns after costs, how many trades it takes to prove that, and how much to risk so a bad run cannot end the game. The tools below compute all three, simulate a funded-account challenge, and follow a pod shop's gross return down to what its investors keep.</p>
+  </div>
+  <section class="section" aria-labelledby="prd-title">
+    <div class="section-head"><p class="eyebrow">Industry</p><h2 id="prd-title">Who earns what</h2><p class="prose">The largest liquidity providers are posting records, while most retail challenge-takers never see a payout.</p></div>
+    <div class="tiles">
+      <article class="tile"><span class="label">Jane Street, 2025 net trading revenue</span><span class="value">$39.6B</span><span class="note">$16.1B in Q1 2026, a record, with profit of $10.3B. About 3,500 people: roughly $11M of revenue each.</span><span class="src"><a href="https://uk.marketscreener.com/news/jane-street-rakes-in-record-first-quarter-trading-haul-of-16-1-billion-sources-say-ce7f5bdbdf8af521">Reuters via MarketScreener, May 8, 2026</a></span></article>
+      <article class="tile"><span class="label">Citadel Securities, 2025 trading revenue</span><span class="value">$12.2B</span><span class="note">A record, up from $9.7B in 2024; EBITDA about $6.5B.</span><span class="src"><a href="https://news.bgov.com/international-trade/citadel-securities-nets-record-12-billion-trading-haul-1">Bloomberg, Mar 24, 2026</a></span></article>
+      <article class="tile"><span class="label">Virtu, Q2 2026 adjusted net trading income</span><span class="value">$717.9M</span><span class="note">+26% on a year; market making $579.9M. About $11.6M a trading day over 62 sessions (computed).</span><span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001592386/000159238626000023/exhibit991q226.htm">Virtu 8-K, Q2 2026</a></span></article>
+      <article class="tile"><span class="label">Retail prop challenges that pay out</span><span class="value">1 to 2%</span><span class="note">5 to 10% pass the evaluation; about 20% of those ever get paid (The Funded Trader). FPFX: 7% of 300,000 accounts.</span><span class="src"><a href="https://www.financemagnates.com/forex/only-1-in-20-traders-pass-prop-firm-challenges-reports-the-funded-trader/">Finance Magnates, Mar 18, 2025</a></span></article>
+    </div>
+  </section>
+  <section class="section" id="pr-edge" aria-labelledby="pe-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="pe-title">Edge calculator</h2><p class="prose">Win rate and payoff in R, where 1 R is the amount risked on a trade. Costs come off every trade. The chart is long-run growth by risk per trade: it rises to the Kelly fraction, then falls, and past twice Kelly it loses money even with an edge.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Edge inputs">
+        <div class="field"><div class="field-top"><label for="pe-p">Win rate</label><output id="pe-p-o" for="pe-p"></output></div><input type="range" id="pe-p" min="20" max="80" step="1" value="45"></div>
+        <div class="field"><div class="field-top"><label for="pe-b">Average win, in R</label><output id="pe-b-o" for="pe-b"></output></div><input type="range" id="pe-b" min="0.3" max="5" step="0.05" value="1.6"></div>
+        <div class="field"><div class="field-top"><label for="pe-c">Cost per trade, in R</label><output id="pe-c-o" for="pe-c"></output></div><input type="range" id="pe-c" min="0" max="0.3" step="0.01" value="0.05"></div>
+        <div class="field"><div class="field-top"><label for="pe-r">Risk per trade, % of account</label><output id="pe-r-o" for="pe-r"></output></div><input type="range" id="pe-r" min="0.1" max="20" step="0.1" value="1"></div>
+        <div class="field"><div class="field-top"><label for="pe-n">Trades a day</label><output id="pe-n-o" for="pe-n"></output></div><input type="range" id="pe-n" min="1" max="50" step="1" value="4"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Expectancy</span><span class="v num" id="pe-E"></span></div>
+          <div class="ro"><span class="k">Break-even win rate</span><span class="v num" id="pe-be"></span></div>
+          <div class="ro"><span class="k">Sharpe, a year</span><span class="v num" id="pe-sr"></span></div>
+          <div class="ro"><span class="k">Time to prove it (t = 2)</span><span class="v num" id="pe-days"></span></div>
+        </div>
+        <p class="sentence" id="pe-out"></p>
+        <figure class="chart"><div class="chart-head"><span class="chart-title">Long-run growth a year by risk per trade (log)</span></div><div class="svgbox" id="pe-chart"></div></figure>
+        <div class="math"><span class="mlabel">Edge arithmetic</span><var>E</var> = <var>p</var><var>b</var> &minus; (1 &minus; <var>p</var>) &minus; <var>c</var> R a trade. Break-even <var>p</var> = (1 + <var>c</var>) &divide; (1 + <var>b</var>). Trades to prove it: <var>n</var> = (2&middot;sd &divide; <var>E</var>)<sup>2</sup>. Kelly <var>f</var><sup>*</sup> = <var>p</var> &minus; (1 &minus; <var>p</var>) &divide; <var>b</var>. Growth a trade at risk <var>r</var>: <var>g</var> = <var>p</var> ln(1 + <var>r</var>(<var>b</var> &minus; <var>c</var>)) + (1 &minus; <var>p</var>) ln(1 &minus; <var>r</var>(1 + <var>c</var>)).</div>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="pr-chal" aria-labelledby="chal-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="chal-title">Prop challenge simulator</h2><p class="prose">A funded-account evaluation is a race between a profit target and two loss limits. Three thousand simulated attempts show the pass rate at your risk, and the risk that maximizes it.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Challenge inputs">
+        <div class="inline2">
+          <div class="field"><div class="field-top"><label for="pc-p">Win rate</label><output id="pc-p-o" for="pc-p"></output></div><input type="range" id="pc-p" min="30" max="70" step="1" value="48"></div>
+          <div class="field"><div class="field-top"><label for="pc-b">Average win</label><output id="pc-b-o" for="pc-b"></output></div><input type="range" id="pc-b" min="0.5" max="3" step="0.05" value="1.3"></div>
+        </div>
+        <div class="field"><div class="field-top"><label for="pc-r">Risk per trade</label><output id="pc-r-o" for="pc-r"></output></div><input type="range" id="pc-r" min="0.25" max="3" step="0.25" value="1"></div>
+        <div class="field"><div class="field-top"><label for="pc-n">Trades a day</label><output id="pc-n-o" for="pc-n"></output></div><input type="range" id="pc-n" min="1" max="12" step="1" value="3"></div>
+        <details class="more"><summary>Challenge rules</summary><div class="inner">
+          <div class="field"><div class="field-top"><label for="pc-t">Profit target</label><output id="pc-t-o" for="pc-t"></output></div><input type="range" id="pc-t" min="4" max="20" step="1" value="10"></div>
+          <div class="field"><div class="field-top"><label for="pc-ml">Maximum total loss</label><output id="pc-ml-o" for="pc-ml"></output></div><input type="range" id="pc-ml" min="4" max="20" step="1" value="10"></div>
+          <div class="field"><div class="field-top"><label for="pc-dl">Daily loss limit</label><output id="pc-dl-o" for="pc-dl"></output></div><input type="range" id="pc-dl" min="1" max="10" step="0.5" value="5"></div>
+          <div class="field"><div class="field-top"><label for="pc-days">Trading days allowed</label><output id="pc-days-o" for="pc-days"></output></div><input type="range" id="pc-days" min="10" max="90" step="5" value="30"></div>
+          <div class="field"><div class="field-top"><label for="pc-fee">Challenge fee</label><output id="pc-fee-o" for="pc-fee"></output></div><input type="range" id="pc-fee" min="50" max="1000" step="10" value="540"></div>
+        </div></details>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Pass</span><span class="v num" id="pc-pass"></span></div>
+          <div class="ro"><span class="k">Breach a limit</span><span class="v num" id="pc-breach"></span></div>
+          <div class="ro"><span class="k">Fees per funded account</span><span class="v num" id="pc-cost"></span></div>
+          <div class="ro"><span class="k">Risk that maximizes passing</span><span class="v num" id="pc-best"></span></div>
+        </div>
+        <p class="sentence" id="pc-out"></p>
+        <figure class="chart"><div class="chart-head"><span class="chart-title">Pass and breach probability by risk per trade</span><span class="legend"><span><i class="ln" style="background:var(--s3)"></i>Pass</span><span><i class="ln" style="background:var(--red)"></i>Breach</span></span></div><div class="svgbox" id="pc-chart"></div></figure>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="pr-pods" aria-labelledby="pr-pods-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="pr-pods-title">Pod shop economics: from gross to net</h2><p class="prose">Multi-manager funds pass their costs through to investors before the performance fee. The field manual's example: Balyasny's 2023 15.2% gross became 2.8% net after $768M of pass-throughs.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Pod economics inputs">
+        <div class="field"><div class="field-top"><label for="pp-g">Gross return</label><output id="pp-g-o" for="pp-g"></output></div><input type="range" id="pp-g" min="0" max="30" step="0.1" value="15.2"></div>
+        <div class="field"><div class="field-top"><label for="pp-pt">Pass-through costs, % of NAV</label><output id="pp-pt-o" for="pp-pt"></output></div><input type="range" id="pp-pt" min="0" max="12" step="0.1" value="8"></div>
+        <div class="field"><div class="field-top"><label for="pp-mg">Management fee</label><output id="pp-mg-o" for="pp-mg"></output></div><input type="range" id="pp-mg" min="0" max="3" step="0.1" value="0"></div>
+        <div class="field"><div class="field-top"><label for="pp-pf">Performance fee</label><output id="pp-pf-o" for="pp-pf"></output></div><input type="range" id="pp-pf" min="0" max="40" step="1" value="20"></div>
+        <div class="field"><div class="field-top"><label for="pp-vol">Fund volatility</label><output id="pp-vol-o" for="pp-vol"></output></div><input type="range" id="pp-vol" min="1" max="20" step="0.5" value="6"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Net to the LP</span><span class="v num" id="pp-net"></span></div>
+          <div class="ro"><span class="k">Share of gross kept</span><span class="v num" id="pp-keep"></span></div>
+          <div class="ro"><span class="k">Sharpe, gross → net</span><span class="v num" id="pp-sr"></span></div>
+        </div>
+        <p class="sentence" id="pp-out"></p>
+        <figure class="chart"><div class="chart-head"><span class="chart-title">From gross to net, % of NAV</span></div><div class="svgbox" id="pp-chart"></div></figure>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="prp-title">
+    <div class="section-head"><p class="eyebrow">Process</p><h2 id="prp-title">The trader's day</h2></div>
+    <ol class="steps">
+      <li><div><strong>Before the open: write the limits down.</strong><span>Daily loss limit, size per trade, the three names you will trade. A limit set mid-loss is not a limit.</span></div></li>
+      <li><div><strong>Every trade gets a reason and an exit.</strong><span>Log the hypothesis and the price that proves it wrong in the <a href="#journal">decision journal</a> before entry.</span></div></li>
+      <li><div><strong>Size from the edge, then shrink.</strong><span>Quarter Kelly at most, and never more than the challenge-optimal risk while proving the edge.</span></div></li>
+      <li><div><strong>Stop at the daily limit.</strong><span>The simulator shows most failures are a breach, not a missed target.</span></div></li>
+      <li><div><strong>Score process, not P&amp;L.</strong><span>Brier, hit rate and payoff over 30 trades; the journal's luck test says when a streak means anything.</span></div></li>
+    </ol>
+  </section>
+</section>
+
+<!-- ======================= MARKET MAKING ======================= -->
+<section class="view" id="view-making" hidden aria-labelledby="mm-title">
+  <div class="vhead">
+    <p class="eyebrow">Trading · market making</p>
+    <h1 id="mm-title">Market makers sell immediacy and refuse to warehouse risk.</h1>
+    <p class="lede">The spread pays for three things: being picked off by better-informed traders, holding inventory while prices move, and running the machine. The best market makers win on the first two. The tools below quote like Avellaneda and Stoikov, price adverse selection like Glosten and Milgrom, and execute like Almgren and Chriss.</p>
+  </div>
+  <section class="section" aria-labelledby="mms-title">
+    <div class="section-head"><p class="eyebrow">Market structure, 2026</p><h2 id="mms-title">Where liquidity lives now</h2></div>
+    <div class="tiles">
+      <article class="tile"><span class="label">Off-exchange share of US volume</span><span class="value">50.6%</span><span class="note">September; 50.4% over Q3. Internalized retail flow and dark pools.</span><span class="src"><a href="https://www.cboe.com/insights/posts/market-metrics-that-matter-u-s-cash-equities-september-volume-briefing">Cboe, Oct 12, 2026</a></span></article>
+      <article class="tile"><span class="label">On-exchange share, excluding auctions</span><span class="value">44%</span><span class="note">September; a historic low of 43.6% in August. Closing auction volume +20% on a year.</span><span class="src"><a href="https://www.cboe.com/insights/posts/market-metrics-that-matter-u-s-cash-equities-september-volume-briefing">Cboe</a></span></article>
+      <article class="tile"><span class="label">Same-day (0DTE) share of S&amp;P 500 options</span><span class="value">66.2%</span><span class="note">July 2026, a record. Index options volume +34% on a year.</span><span class="src"><a href="https://tradeinformer.com/institutional-trading/cboe-reports-july-options-and-fx-growth-as-0dte-reaches-66-2-of-spx-volume">TradeInformer, Aug 6, 2026</a></span></article>
+      <article class="tile"><span class="label">Record share volume</span><span class="value">23.3B</span><span class="note">Shares a day in June 2026; 16.9B in September.</span><span class="src"><a href="https://www.cboe.com/insights/posts/market-metrics-that-matter-u-s-cash-equities-september-volume-briefing">Cboe</a></span></article>
+    </div>
+  </section>
+  <section class="section" id="mm-as" aria-labelledby="mmas-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="mmas-title">Quote like Avellaneda and Stoikov</h2><p class="prose">Six hundred simulated trading days. The inventory-skewed quoter shades its prices against what it already holds; the symmetric one quotes the same spread around the mid. Same expected spread, very different risk.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Market maker inputs">
+        <div class="field"><div class="field-top"><label for="as-sig">Price volatility over the day</label><output id="as-sig-o" for="as-sig"></output></div><input type="range" id="as-sig" min="0.5" max="5" step="0.1" value="2"></div>
+        <div class="field"><div class="field-top"><label for="as-g">Risk aversion, γ</label><output id="as-g-o" for="as-g"></output></div><input type="range" id="as-g" min="0.01" max="1" step="0.01" value="0.1"></div>
+        <div class="field"><div class="field-top"><label for="as-k">Book depth, k</label><output id="as-k-o" for="as-k"></output></div><input type="range" id="as-k" min="0.5" max="5" step="0.1" value="1.5"></div>
+        <div class="field"><div class="field-top"><label for="as-A">Order arrival, A</label><output id="as-A-o" for="as-A"></output></div><input type="range" id="as-A" min="20" max="300" step="10" value="140"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Mean P&amp;L, skewed vs symmetric</span><span class="v num" id="as-mean"></span></div>
+          <div class="ro"><span class="k">P&amp;L spread</span><span class="v num" id="as-sd"></span></div>
+          <div class="ro key"><span class="k">Mean ÷ spread</span><span class="v num" id="as-ratio"></span></div>
+          <div class="ro"><span class="k">Inventory swings</span><span class="v num" id="as-inv"></span></div>
+        </div>
+        <p class="sentence" id="as-out"></p>
+        <div class="grid2">
+          <figure class="chart"><div class="chart-head"><span class="chart-title">End-of-day P&amp;L</span><span class="legend"><span><i class="ln" style="background:var(--s1)"></i>Skewed</span><span><i class="ln" style="background:var(--s2)"></i>Symmetric</span></span></div><div class="svgbox" id="as-chart"></div></figure>
+          <figure class="chart"><div class="chart-head"><span class="chart-title">Inventory through one day</span></div><div class="svgbox" id="as-inv-chart"></div></figure>
+        </div>
+        <div class="math"><span class="mlabel">Avellaneda and Stoikov (2008)</span>Reservation price <var>r</var> = <var>s</var> &minus; <var>q</var>&gamma;&sigma;<sup>2</sup>(<var>T</var> &minus; <var>t</var>). Total spread &delta; = &gamma;&sigma;<sup>2</sup>(<var>T</var> &minus; <var>t</var>) + (2/&gamma;) ln(1 + &gamma;/<var>k</var>). Fills arrive at rate <var>A</var>e<sup>&minus;<var>k</var>&delta;</sup> at distance &delta; from the mid.</div>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="mm-gm" aria-labelledby="gm-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="gm-title">Adverse selection: who is on the other side</h2><p class="prose">Glosten and Milgrom: if a share μ of orders comes from traders who know where the price is going, the spread must cover what they take. Retail flow is mostly uninformed, which is why it is worth paying for.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Adverse selection inputs">
+        <div class="field"><div class="field-top"><label for="gm-mu">Informed share of orders, μ</label><output id="gm-mu-o" for="gm-mu"></output></div><input type="range" id="gm-mu" min="0" max="50" step="1" value="8"></div>
+        <div class="field"><div class="field-top"><label for="gm-info">Size of what they know</label><output id="gm-info-o" for="gm-info"></output></div><input type="range" id="gm-info" min="1" max="100" step="1" value="20"></div>
+        <div class="field"><div class="field-top"><label for="gm-s">Your quoted spread</label><output id="gm-s-o" for="gm-s"></output></div><input type="range" id="gm-s" min="0.5" max="30" step="0.5" value="3"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts"><div class="ro"><span class="k">Break-even spread</span><span class="v num" id="gm-fair"></span></div><div class="ro key"><span class="k">Edge per trade</span><span class="v num" id="gm-edge"></span></div></div>
+        <p class="sentence" id="gm-out"></p>
+        <figure class="chart"><div class="chart-head"><span class="chart-title">Break-even spread by informed share</span></div><div class="svgbox" id="gm-chart"></div></figure>
+        <div class="math"><span class="mlabel">Glosten and Milgrom (1985), two values</span>Break-even spread = &mu;(<var>V</var><sub>high</sub> &minus; <var>V</var><sub>low</sub>). Edge per trade = spread/2 &minus; &mu;(<var>V</var><sub>high</sub> &minus; <var>V</var><sub>low</sub>)/2.</div>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="mm-ex" aria-labelledby="ex-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="ex-title">Execution: the square-root law and the optimal schedule</h2><p class="prose">Impact grows with the square root of size: four times the order costs twice the impact per share. Trading slowly saves impact and buys timing risk; the Almgren-Chriss schedule finds the best trade-off for your urgency.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Execution inputs">
+        <div class="field"><div class="field-top"><label for="ex-q">Order size</label><output id="ex-q-o" for="ex-q"></output></div><input type="range" id="ex-q" min="0.5" max="100" step="0.5" value="10"></div>
+        <div class="field"><div class="field-top"><label for="ex-sig">Daily volatility</label><output id="ex-sig-o" for="ex-sig"></output></div><input type="range" id="ex-sig" min="0.5" max="6" step="0.1" value="2.2"></div>
+        <div class="field"><div class="field-top"><label for="ex-sp">Bid-ask spread</label><output id="ex-sp-o" for="ex-sp"></output></div><input type="range" id="ex-sp" min="0.5" max="40" step="0.5" value="2"></div>
+        <div class="field"><div class="field-top"><label for="ex-T">Days to finish</label><output id="ex-T-o" for="ex-T"></output></div><input type="range" id="ex-T" min="1" max="10" step="1" value="3"></div>
+        <div class="field"><div class="field-top"><label for="ex-l">Urgency</label><output id="ex-l-o" for="ex-l"></output></div><input type="range" id="ex-l" min="0" max="20" step="0.5" value="2"></div>
+        <div class="field"><div class="field-top"><label for="ex-Y">Impact constant, Y</label><output id="ex-Y-o" for="ex-Y"></output></div><input type="range" id="ex-Y" min="0.2" max="1.5" step="0.05" value="0.7"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Square-root impact</span><span class="v num" id="ex-imp"></span></div>
+          <div class="ro"><span class="k">With half the spread</span><span class="v num" id="ex-tot"></span></div>
+          <div class="ro key"><span class="k">Your schedule: cost ± risk</span><span class="v num" id="ex-cost"></span></div>
+        </div>
+        <p class="sentence" id="ex-out"></p>
+        <div class="grid2">
+          <figure class="chart"><div class="chart-head"><span class="chart-title">Order still to trade</span><span class="legend"><span><i class="ln" style="background:var(--muted)"></i>Even</span><span><i class="ln" style="background:var(--s1)"></i>Yours</span><span><i class="ln" style="background:var(--s2)"></i>Urgent</span></span></div><div class="svgbox" id="ex-chart"></div></figure>
+          <figure class="chart"><div class="chart-head"><span class="chart-title">The efficient frontier of execution</span></div><div class="svgbox" id="ex-frontier"></div></figure>
+        </div>
+        <div class="math"><span class="mlabel">Impact and schedule</span>Impact = <var>Y</var>&sigma;<sub>daily</sub>&radic;(<var>Q</var>/ADV), <var>Y</var> of order 1 (T&oacute;th et al., 2011). Almgren-Chriss holdings <var>x</var><sub>j</sub> = <var>X</var> sinh(&kappa;(<var>T</var> &minus; <var>t</var><sub>j</sub>)) / sinh(&kappa;<var>T</var>), cosh(&kappa;&tau;) = 1 + &lambda;&sigma;<sup>2</sup>&tau;<sup>2</sup>/(2&eta;). Linear temporary impact &eta; is calibrated so the even pace costs exactly the square-root impact.</div>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="tape-title">
+    <div class="section-head"><p class="eyebrow">Reading the tape</p><h2 id="tape-title">The book's own liquidity</h2><p class="prose">Three estimators from daily bars: Roll's effective spread from the bounce in closing prices, Amihud's price move per dollar traded, and Kyle's lambda, the slope of price on signed volume.</p></div>
+    <div class="panel" id="mm-tape"></div>
+    <div class="math"><span class="mlabel">Estimators</span>Roll spread = 2&radic;(&minus;cov(&Delta;<var>p</var><sub>t</sub>, &Delta;<var>p</var><sub>t&minus;1</sub>)) when the covariance is negative. Amihud = mean(|<var>r</var>| &divide; dollar volume) per $1M. Kyle &lambda; = cov(<var>r</var>, signed $ volume) &divide; var(signed $ volume), sign from the tick rule.</div>
+  </section>
+</section>
+
 <!-- ======================= THESES ======================= -->
 <section class="view" id="view-theses" hidden aria-labelledby="th-title">
   <div class="vhead">
@@ -798,6 +1038,59 @@
     <div class="chains" id="chain-list"></div>
   </section>
   <footer class="foot"><p>Rules and probabilities are the desk's judgment, stated so they can be argued with. Research desk, not investment advice.</p></footer>
+</section>
+
+<!-- ======================= BRAIN ======================= -->
+<section class="view" id="view-brain" hidden aria-labelledby="br-title">
+  <div class="vhead">
+    <p class="eyebrow">The brain · higher-order thinking, computed</p>
+    <h1 id="br-title">Carry every assumption to its fourth-order conclusion.</h1>
+    <p class="lede">Twenty-one parts of the system, forty-eight signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and yours to change. Shock any node and watch it travel: what arrives first, second, third and fourth, which loops amplify it, which single assumption carries the answer, and the cheapest combination of shocks that would produce a given outcome.</p>
+  </div>
+  <section class="section" aria-labelledby="brm-title">
+    <h2 class="sr-only" id="brm-title">The map</h2>
+    <div class="brain-lab">
+      <form class="panel controls" id="br-form" aria-label="Brain inputs">
+        <div class="field"><span class="flabel" id="br-pre-l">Scenario</span><div class="seg" role="group" aria-labelledby="br-pre-l" id="br-presets"></div></div>
+        <div class="field"><label for="br-shock">Shock this node</label><select id="br-shock"></select></div>
+        <div class="field"><div class="field-top"><label for="br-size">Shock size</label><output id="br-size-o" for="br-size"></output></div><input type="range" id="br-size" min="-3" max="3" step="0.25" value="1.5"></div>
+        <div class="field"><label for="br-target">Read the effect on</label><select id="br-target"></select></div>
+        <div class="field"><div class="field-top"><label for="br-blend">Regime weights</label><output id="br-blend-o" for="br-blend"></output></div><input type="range" id="br-blend" min="0" max="100" step="5" value="100"><p class="hint">0 uses the 1990 to 2021 measured links, 100 the links since 2022.</p></div>
+        <div class="field"><div class="field-top"><label for="br-K">Orders of effect</label><output id="br-K-o" for="br-K"></output></div><input type="range" id="br-K" min="1" max="8" step="1" value="6"></div>
+        <div class="field"><span class="flabel" id="br-mode-l">Mode</span><div class="seg" role="group" aria-labelledby="br-mode-l" id="br-mode"><button type="button" data-v="all" aria-pressed="true">PM: data and judgment</button><button type="button" data-v="data" aria-pressed="false">Quant: measured links only</button></div></div>
+        <details class="more"><summary>Edit a link (your assumptions)</summary><div class="inner">
+          <div class="field"><label for="br-edge">Link</label><select id="br-edge"></select></div>
+          <div class="field"><div class="field-top"><label for="br-w">Weight, σ per σ</label><output id="br-w-o" for="br-w"></output></div><input type="range" id="br-w" min="-1" max="1" step="0.01" value="0"></div>
+          <p class="hint" id="br-edge-note"></p>
+          <div class="seg"><button type="button" id="br-w-reset">Reset this link</button><button type="button" id="br-reset-all">Reset all my edits</button></div>
+          <p class="hint">Edits stay in this browser only.</p>
+        </div></details>
+      </form>
+      <div class="panel brain-out" aria-live="polite">
+        <div class="brain-field" id="br-svg-box"></div>
+        <div class="readouts">
+          <div class="ro key"><span class="k" id="br-total-k">Effect</span><span class="v num" id="br-total"></span></div>
+          <div class="ro"><span class="k">Keeps its sign in</span><span class="v num" id="br-robust"></span></div>
+          <div class="ro"><span class="k">10th to 90th percentile</span><span class="v num" id="br-band"></span></div>
+          <div class="ro"><span class="k">Reflexivity (spectral radius)</span><span class="v num" id="br-rho"></span><span class="k" id="br-rho-note"></span></div>
+        </div>
+        <div class="read" id="br-conclusion"></div>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="brw-title">
+    <div class="section-head"><p class="eyebrow">Reasoning</p><h2 id="brw-title">How the answer is built</h2><p class="prose">Each order is one more link in the chain. Most people stop at the first; the graph does not.</p></div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Effect by order</span></div><div class="svgbox" id="br-orders"></div></figure>
+      <div class="panel"><span class="panel-title">Strongest channels</span><ol class="br-list" id="br-paths"></ol></div>
+      <div class="panel"><span class="panel-title">Feedback loops in the system</span><ol class="br-list" id="br-loops"></ol><p class="hint">A loop's gain is the product of its links. Reinforcing loops (positive gain) amplify a shock; balancing loops damp it.</p></div>
+      <div class="panel"><span class="panel-title">Load-bearing links</span><ol class="br-list" id="br-sens"></ol><p class="hint">How far the answer moves if each link sat two standard deviations from its value. "Can flip" means that doubt alone could reverse the sign.</p></div>
+      <div class="panel"><span class="panel-title">What it would take: the cheapest drivers of a 1σ fall in <span id="br-inverse-t">the target</span></span><ol class="br-list" id="br-inverse"></ol><p class="hint">The smallest combination of driver shocks, by size, that produces the move: the inverse problem a human cannot do in their head.</p></div>
+      <div class="panel"><span class="panel-title">Measured links in two regimes</span><div class="tablewrap"><table id="br-meas"></table></div><p class="hint" id="br-meas-note"></p></div>
+    </div>
+    <details class="tableview"><summary>Show every node's response as a table</summary><div class="tablewrap"><table id="br-table"></table></div></details>
+    <div class="math"><span class="mlabel">The arithmetic</span>Order <var>k</var>: <var>x</var><sub>k</sub> = <var>W</var>&#8868;<var>x</var><sub>k&minus;1</sub>, with <var>x</var><sub>0</sub> the shock. Total over <var>K</var> orders = &sum;<sub>k=1..K</sub> <var>x</var><sub>k</sub>, which tends to the Leontief inverse [(<var>I</var> &minus; <var>W</var>&#8868;)<sup>&minus;1</sup> &minus; <var>I</var>] <var>x</var><sub>0</sub> when the spectral radius &rho;(<var>W</var>) is below 1 (estimated by Gelfand's formula, &rho; = lim &#8214;<var>W</var><sup>n</sup>&#8214;<sup>1/n</sup>). Measured links: recursive regressions of standardized monthly changes in the order oil, CPI, 10-year, stocks, VIX, gold, per regime; the slider blends the two sets. Robustness: 400 draws with every weight ~ N(<var>w</var>, <var>sd</var>), sd = the regression's standard error or half a judged weight. Inverse: the minimum-norm driver shock <var>s</var> = <var>y</var> &middot; <var>m</var> &divide; &#8214;<var>m</var>&#8214;<sup>2</sup>, where <var>m</var><sub>i</sub> is the total effect of driver <var>i</var> on the target.</div>
+  </section>
 </section>
 
 <!-- ======================= JOURNAL ======================= -->
@@ -928,6 +1221,179 @@
   <footer class="foot"><p>Figures are from SEC XBRL facts as filed, with the few supplements named in the table note. Ratios, stages and the depreciation model are the desk's analysis, not the companies' statements.</p></footer>
 </section>
 
+<!-- ======================= BUYSIDE ======================= -->
+<section class="view" id="view-buyside" hidden aria-labelledby="buy-title">
+  <div class="vhead">
+    <p class="eyebrow">Buyside 2026 · from the field manual</p>
+    <h1 id="buy-title">Earn returns net of cost. Survive liquidity and fat tails.</h1>
+    <p class="lede">Your Oct 21 field manual, turned into engine modules and tools. Every figure it cites is checked against the desk's own data, and where they disagree, both are shown with the reason.</p>
+  </div>
+  <section class="section" aria-labelledby="bsb-title">
+    <div class="section-head"><p class="eyebrow">Bottom line</p><h2 id="bsb-title">What the engine changed because of the manual</h2></div>
+    <ol class="steps">
+      <li><div><strong>A regime module with a gross scaler.</strong><span>Rule 7a.1 now reads policy direction and real yields; today it caps gross at 0.90x to 1.13x, looser than the volatility rule's 0.71x, so volatility binds.</span></div></li>
+      <li><div><strong>A hedge selector by expected shortfall per dollar of carry.</strong><span>Since 1990, with inflation above the 2.75% line, the 10-year Treasury removed nothing from the worst-month loss; a put spread removed the most.</span></div></li>
+      <li><div><strong>Student-t shortfall and five scenario replays.</strong><span>The normal model understates the worst 2.5% of months by about a third.</span></div></li>
+      <li><div><strong>Red flags from the filings.</strong><span>Capex over depreciation, cash conversion, stock pay and receivables, for every builder, every day.</span></div></li>
+      <li><div><strong>A physical-versus-futures oil check.</strong><span>The manual's Brent range was the futures price; the physical barrel, the one consumer prices follow, traded about $27 higher.</span></div></li>
+    </ol>
+  </section>
+  <section class="section" aria-labelledby="bsr-title">
+    <div class="section-head"><p class="eyebrow">Regime</p><h2 id="bsr-title">Don't fight the Fed: the regime and the gross it allows</h2></div>
+    <div class="tiles" id="bs-reg-tiles"></div>
+  </section>
+  <section class="section" aria-labelledby="bs-sel-title">
+    <div class="section-head"><p class="eyebrow">Engine</p><h2 id="bs-sel-title">The hedge selector: what paid when the book lost most</h2><p class="prose">Each hedge held at 30% of the book, judged on the S&amp;P 500's worst 5% of months, separately when three-year inflation sat above and below the 2.75% line. Monthly data average prices within each month, which understates moves inside it; the daily run repeats this on daily data for the model book.</p></div>
+    <div class="grid2" id="bs-sel"></div>
+  </section>
+  <section class="section" aria-labelledby="bst-title">
+    <div class="section-head"><p class="eyebrow">Fat tails</p><h2 id="bst-title">How much the bell curve understates the worst months</h2><p class="prose" id="bs-tail-note"></p></div>
+    <figure class="chart panel"><div class="svgbox" id="bs-tail"></div></figure>
+  </section>
+  <section class="section" aria-labelledby="bsp-title">
+    <div class="section-head"><p class="eyebrow">Scenario replays</p><h2 id="bsp-title">Five episodes, two ways to hedge</h2><p class="prose">The book alone, with 30% in the 10-year Treasury, and with the manual's hedge stack: a monthly 95/85 put spread on the whole book plus 4% gold and 4% Brent. No hedge wins every episode: the stack wins oil and liquidity shocks, bonds win deflationary busts, and neither saved a slow inflation bear like 2022, where trend-following is the missing leg.</p></div>
+    <figure class="chart panel"><div class="chart-head"><span class="chart-title">Return over each episode</span><span class="legend"><span><i style="background:var(--muted)"></i>Book</span><span><i style="background:var(--s2)"></i>With bonds</span><span><i style="background:var(--s1)"></i>With the stack</span></span></div><div class="svgbox" id="bs-replay-chart"></div>
+      <details class="tableview"><summary>Show as table</summary><div class="tablewrap"><table id="bs-replay"></table></div></details></figure>
+  </section>
+  <section class="section" aria-labelledby="bs-depr-title">
+    <div class="section-head"><p class="eyebrow">Accounting stress test</p><h2 id="bs-depr-title">The single most important accounting number: server life</h2><p class="prose">Straight-line depreciation of a server cohort by assumed life. The manual's table is the default: a $425B 2026 cohort.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Depreciation inputs">
+        <div class="field"><div class="field-top"><label for="bd-c">Server cohort</label><output id="bd-c-o" for="bd-c"></output></div><input type="range" id="bd-c" min="50" max="800" step="5" value="425"></div>
+        <div class="field"><div class="field-top"><label for="bd-l">Assumed life</label><output id="bd-l-o" for="bd-l"></output></div><input type="range" id="bd-l" min="2" max="7" step="0.5" value="3"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts"><div class="ro key"><span class="k">Depreciation a year</span><span class="v num" id="bd-annual"></span></div><div class="ro"><span class="k">Against a 6-year life</span><span class="v num" id="bd-gap"></span></div><div class="ro"><span class="k">Front-loaded 6-year, year one</span><span class="v num" id="bd-ddb"></span></div></div>
+        <p class="sentence" id="bd-out"></p>
+        <figure class="chart"><div class="svgbox" id="bd-chart"></div></figure>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="bsc-title">
+    <div class="section-head"><p class="eyebrow">Tools</p><h2 id="bsc-title">Cash earnings and the price's implied growth</h2></div>
+    <div class="grid2">
+      <form class="panel" aria-label="Cash earnings bridge" id="ce-form">
+        <span class="panel-title">Cash earnings bridge, $ billions</span>
+        <div class="inline2">
+          <div class="field"><label for="ce-ni">Net income</label><input type="number" id="ce-ni" value="134" step="1"></div>
+          <div class="field"><label for="ce-sh">Diluted shares, billions</label><input type="number" id="ce-sh" value="7.45" step="0.01"></div>
+          <div class="field"><label for="ce-de">Depreciation at economic life</label><input type="number" id="ce-de" value="42" step="1"></div>
+          <div class="field"><label for="ce-db">Depreciation as booked</label><input type="number" id="ce-db" value="34" step="1"></div>
+          <div class="field"><label for="ce-sbc">Stock compensation</label><input type="number" id="ce-sbc" value="12" step="0.5"></div>
+          <div class="field"><label for="ce-sw">Increase in capitalized software</label><input type="number" id="ce-sw" value="2" step="0.5"></div>
+          <div class="field"><label for="ce-dr">Increase in deferred revenue</label><input type="number" id="ce-dr" value="5" step="0.5"></div>
+        </div>
+        <div class="readouts"><div class="ro"><span class="k">Reported EPS</span><span class="v num" id="ce-rep"></span></div><div class="ro key"><span class="k">Cash EPS</span><span class="v num" id="ce-cash"></span></div><div class="ro"><span class="k">Gap</span><span class="v num" id="ce-gap"></span></div></div>
+        <p class="sentence" id="ce-out"></p>
+        <p class="hint">Defaults: a Microsoft-like year from the Fundamentals desk (net income $133.7B, booked depreciation $34.3B) with a 4-year economic life and illustrative stock pay; replace them with any company's 10-K.</p>
+      </form>
+      <form class="panel" aria-label="Reverse DCF" id="rd-form">
+        <span class="panel-title">Reverse DCF: what growth the price assumes</span>
+        <div class="inline2">
+          <div class="field"><label for="rd-mv">Market value, $ billions</label><input type="number" id="rd-mv" value="3800" step="50"></div>
+          <div class="field"><label for="rd-f">Free cash flow, last year, $ billions</label><input type="number" id="rd-f" value="67" step="1"></div>
+        </div>
+        <div class="field"><div class="field-top"><label for="rd-rf">Risk-free rate</label><output id="rd-rf-o" for="rd-rf"></output></div><input type="range" id="rd-rf" min="2" max="7" step="0.05" value="5.2"></div>
+        <div class="field"><div class="field-top"><label for="rd-erp">Equity risk premium</label><output id="rd-erp-o" for="rd-erp"></output></div><input type="range" id="rd-erp" min="1" max="8" step="0.25" value="4"></div>
+        <div class="field"><div class="field-top"><label for="rd-g3">Free cash flow growth, last 3 years</label><output id="rd-g3-o" for="rd-g3"></output></div><input type="range" id="rd-g3" min="-20" max="60" step="1" value="10"></div>
+        <div class="readouts"><div class="ro key"><span class="k">Implied 10-year growth</span><span class="v num" id="rd-g"></span></div></div>
+        <p class="sentence" id="rd-out"></p>
+      </form>
+    </div>
+    <div class="math"><span class="mlabel">The bridge and the reverse DCF</span>Cash EPS = [NI &minus; (<var>D</var><sub>economic</sub> &minus; <var>D</var><sub>book</sub>) &minus; SBC &minus; &Delta;capitalized software + &Delta;deferred revenue] &divide; diluted shares (pre-tax adjustments: a conservative floor). Reverse DCF: solve <var>g</var> in &sum;<sub>t=1..10</sub> <var>F</var><sub>0</sub>(1+<var>g</var>)<sup>t</sup>/(1+<var>r</var>)<sup>t</sup> + <var>F</var><sub>10</sub>(1+<var>g</var><sub>T</sub>)/((<var>r</var>&minus;<var>g</var><sub>T</sub>)(1+<var>r</var>)<sup>10</sup>) = market value, <var>g</var><sub>T</sub> = 3%. Moonshot flag: <var>g</var> &gt; 2 &times; the last three years' cash growth.</div>
+  </section>
+  <section class="section" aria-labelledby="bsf-title">
+    <div class="section-head"><p class="eyebrow">Red flags</p><h2 id="bsf-title">The six tests, run on every builder</h2><p class="prose">Healthy, watch or red against the manual's thresholds: capex over depreciation above 2.5x, free cash flow below 60% of net income, stock pay above 12% of revenue, receivables outgrowing revenue by 10 points. Stock pay and receivables fill in from the daily SEC run.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="bs-flags"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="bs-credit-title">
+    <div class="section-head"><p class="eyebrow">Private credit</p><h2 id="bs-credit-title">Private credit stress test</h2><p class="prose">An unlevered direct-lending fund: base rate 3.9% plus a 5.5% unitranche spread, 1.25% management fee and 12.5% incentive fee. At today's default rate, the illiquidity premium over Treasuries is gone.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Private credit inputs">
+        <div class="field"><span class="flabel" id="cs-pre-l">Scenario</span><div class="seg" role="group" aria-labelledby="cs-pre-l" id="cs-presets"></div></div>
+        <div class="field"><div class="field-top"><label for="cs-d">Default rate</label><output id="cs-d-o" for="cs-d"></output></div><input type="range" id="cs-d" min="0" max="20" step="0.5" value="6"></div>
+        <div class="field"><div class="field-top"><label for="cs-r">Recovery</label><output id="cs-r-o" for="cs-r"></output></div><input type="range" id="cs-r" min="0" max="90" step="5" value="50"></div>
+        <details class="more"><summary>Rates and fees</summary><div class="inner">
+          <div class="field"><div class="field-top"><label for="cs-b">Base rate</label><output id="cs-b-o" for="cs-b"></output></div><input type="range" id="cs-b" min="0" max="8" step="0.05" value="3.9"></div>
+          <div class="field"><div class="field-top"><label for="cs-s">Spread</label><output id="cs-s-o" for="cs-s"></output></div><input type="range" id="cs-s" min="2" max="10" step="0.05" value="5.5"></div>
+          <div class="field"><div class="field-top"><label for="cs-m">Management fee</label><output id="cs-m-o" for="cs-m"></output></div><input type="range" id="cs-m" min="0" max="2.5" step="0.05" value="1.25"></div>
+        </div></details>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts"><div class="ro"><span class="k">Credit losses a year</span><span class="v num" id="cs-loss"></span></div><div class="ro key"><span class="k">Net to the investor</span><span class="v num" id="cs-net"></span></div><div class="ro"><span class="k">Over the 5.2% 10-year</span><span class="v num" id="cs-over"></span></div></div>
+        <p class="sentence" id="cs-out"></p>
+        <p class="hint">Fitch's 6% counts PIK amendments as defaults; Houlihan Lokey measures 0.8% of principal across the whole market. The truth for any fund depends on its mix of small borrowers and software.</p>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="bsz-title">
+    <div class="section-head"><p class="eyebrow">Sizing for the right tail</p><h2 id="bsz-title">Position tiers and the moonbag rule</h2><p class="prose">About 4% of US stocks produced all the net wealth creation from 1926 to 2016 (Bessembinder, 2018). Selling winners early is the most expensive error in that distribution, so the framework protects through size and hedges, not early exits.</p></div>
+    <div class="grid2">
+      <div class="panel"><div class="tablewrap"><table>
+        <thead><tr><th>Tier</th><th>Size</th><th>Stop</th><th>Trim</th></tr></thead>
+        <tbody>
+          <tr><td>Core compounder</td><td>5 to 10%</td><td>Thesis or cash-bridge failure only</td><td>Above 15% of the book</td></tr>
+          <tr><td>Growth or thematic</td><td>2 to 5%</td><td>Volatility-scaled trailing stop</td><td>Moonbag rule at 2x</td></tr>
+          <tr><td>Moonbag</td><td>Residual after cost is recovered</td><td>None</td><td>Only if the thesis breaks</td></tr>
+          <tr><td>Convex bets</td><td>Under 1% each, 5% in all</td><td>The premium is the maximum loss</td><td>Take half off at 5x</td></tr>
+          <tr><td>Hedge sleeve</td><td>1 to 2% of NAV a year</td><td>Rolled quarterly</td><td>Monetize after a 2σ move</td></tr>
+        </tbody></table></div></div>
+      <form class="panel" aria-label="Moonbag calculator">
+        <span class="panel-title">Moonbag calculator</span>
+        <div class="inline2">
+          <div class="field"><label for="mb-e">Entry price</label><input type="number" id="mb-e" value="100" step="1"></div>
+          <div class="field"><label for="mb-p">Price now</label><input type="number" id="mb-p" value="210" step="1"></div>
+          <div class="field"><label for="mb-s">Shares</label><input type="number" id="mb-s" value="100" step="1"></div>
+        </div>
+        <div class="field"><div class="field-top"><label for="mb-atr">Average daily range, 20 days</label><output id="mb-atr-o" for="mb-atr"></output></div><input type="range" id="mb-atr" min="0.5" max="10" step="0.1" value="3.2"></div>
+        <div class="readouts"><div class="ro"><span class="k">Multiple</span><span class="v num" id="mb-mult"></span></div><div class="ro key"><span class="k">Sell to recover cost</span><span class="v num" id="mb-sell"></span></div><div class="ro"><span class="k">Rides free</span><span class="v num" id="mb-keep"></span></div><div class="ro"><span class="k">Trailing stop</span><span class="v num" id="mb-stop"></span></div></div>
+        <p class="sentence" id="mb-out"></p>
+      </form>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="bsm-title">
+    <div class="section-head"><p class="eyebrow">Monitoring</p><h2 id="bsm-title">The manual's ten signals, read against the desk's data</h2><p class="prose">Review weekly; act only on a threshold breach.</p></div>
+    <div class="signals" id="bs-board"></div>
+  </section>
+  <section class="section" aria-labelledby="bsx-title">
+    <div class="section-head"><p class="eyebrow">Rigor</p><h2 id="bsx-title">Where the manual and the data disagree</h2><p class="prose">Most figures check out. Five need a second look, and each changes how the engine reads them.</p></div>
+    <div class="panel"><div class="tablewrap"><table class="recon">
+      <thead><tr><th>Claim</th><th>Manual</th><th>Data now</th><th>Why they differ, and what the engine uses</th></tr></thead>
+      <tbody>
+        <tr><td>Brent crude</td><td>$97 to $102 (Sept)</td><td>$126.55 EIA spot (Oct 14); about $107 futures and $134 Dated (IEA, Oct 14)</td><td>The manual quotes futures from early September; spot jumped to $131 by Sep 15. Physical barrels trade far above futures. The engine tracks both and shows the gap.</td></tr>
+        <tr><td>10-year real yield</td><td>About 1.6%</td><td>2.74% TIPS (Oct 16, FRED)</td><td>1.6% is the backward-looking real rate (5.2% minus CPI); 2.74% is what the market demands now. Equity discount rates follow the second, which is the one in decisions 1 to 3.</td></tr>
+        <tr><td>Stock-bond correlation</td><td>About +0.40</td><td>+0.15 (36 months, engine); +0.21 (one year, Federal Reserve)</td><td>Different windows, indexes and frequencies. All three are positive, which is what matters: bonds are not hedging. The engine uses its own.</td></tr>
+        <tr><td>CPI</td><td>3.4% (August)</td><td>3.7% (September, Oct 14)</td><td>A newer print, released the week the manual was written. It strengthens the manual's case.</td></tr>
+        <tr><td>Next Fed decision</td><td>Oct 28; about 80% hold</td><td>Oct 27 to 28; 82 to 84% hold (Oct 9)</td><td>Agree.</td></tr>
+        <tr><td>PJM 2027/28 capacity</td><td>$329.17/MW-day</td><td>$122,039/MW-year, about $334/MW-day</td><td>The same capped price, quoted per day and per year. Agree.</td></tr>
+        <tr><td>CAPE</td><td>About 41.6</td><td>40.9 (multpl, Oct 20)</td><td>Different dates. Agree.</td></tr>
+      </tbody></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="bsk-title">
+    <div class="section-head"><p class="eyebrow">Constants</p><h2 id="bsk-title">Six problems that never go away</h2><p class="prose">Every major buyside blowup traces to one of them; the fatal ones combine liquidity mismatch with leverage. What survivors had in common: term-matched capital, hard gross limits, pre-committed drawdown rules and cost discipline.</p></div>
+    <div class="panel"><div class="tablewrap"><table>
+      <thead><tr><th>Problem</th><th>Mechanism</th><th>History</th><th>The 2026 version</th><th>On this site</th></tr></thead>
+      <tbody>
+        <tr><td>Liquidity mismatch</td><td>Liquid promises funded by illiquid assets</td><td>Money funds 2008; BREIT gated Nov 2022</td><td>Non-traded BDC requests at 13.6% of NAV in Q2; BCRED gated three quarters</td><td><a href="#nw-private-credit">Noteworthy</a></td></tr>
+        <tr><td>Leverage plus fat tails</td><td>Normal models underprice 5σ moves</td><td>LTCM 1998; Archegos 2021</td><td>Back-leverage to private credit; tech bond supply pushing the 10-year up</td><td><a href="#bst-title">Fat tails</a></td></tr>
+        <tr><td>Alpha decay and crowding</td><td>Capital floods an edge; crowded books unwind together</td><td>Quant quake, Aug 2007</td><td>Multi-manager AUM +175% from 2017 to 2023</td><td><a href="#pr-pods-title">Pod economics</a></td></tr>
+        <tr><td>Agency and fee drag</td><td>Manager economics diverge from LP returns</td><td>Balyasny 2023: 15.2% gross, 2.8% net</td><td>Pass-throughs of 3 to 10% of NAV</td><td><a href="#pr-pods-title">Pod economics</a></td></tr>
+        <tr><td>Regime and correlation shifts</td><td>Hedges built for one regime fail in the next</td><td>2022: correlation +0.52, 60/40 −17.5% real</td><td>Bonds traded with oil from April to June 2026</td><td><a href="#brain">The brain</a></td></tr>
+        <tr><td>Marks and opacity</td><td>Level 3 marks lag reality</td><td>Subprime ABS 2007 to 2008</td><td>PIK booked as revenue; BDC discounts signal stale marks</td><td><a href="#bs-credit-title">Credit stress</a></td></tr>
+      </tbody></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="bsn-title">
+    <div class="section-head"><p class="eyebrow">Build plan</p><h2 id="bsn-title">The manual's 30, 60 and 90 days, and where v0.6 stands</h2></div>
+    <ol class="steps plan">
+      <li class="done"><div><strong>Regime module and hedge selector.</strong><span>Built: regime label, rule 7a.1 gross scaler, selector by shortfall per dollar of carry in each inflation regime; the book run repeats it on daily data. TLT tested against 2022 and the 2026 oil shock.</span></div></li>
+      <li class="done"><div><strong>Risk engine with fat tails and replays.</strong><span>Built: Student-t and historical shortfall at 97.5%, five episode replays. The book run adds daily shortfall for the model book.</span></div></li>
+      <li class="done"><div><strong>Accounting layer.</strong><span>Built for the nine builders: red flags, cash earnings bridge, reverse DCF, depreciation by life. Next: the top 20 S&amp;P 500 names.</span></div></li>
+      <li class="part"><div><strong>Credit and bottleneck layer.</strong><span>Built: private credit stress test, power and memory trackers on Noteworthy, BDC queue and PIK monitors. Next: BDC price to NAV and PIK share straight from 10-Q filings.</span></div></li>
+      <li class="part"><div><strong>Execution link.</strong><span>Your Robinhood agent project: paper trading first, human approval for every live order. The Trading desks' sizing and execution tools are the inputs it would read.</span></div></li>
+    </ol>
+  </section>
+</section>
+
 <!-- ======================= PHYSICS ======================= -->
 <section class="view" id="view-physics" hidden aria-labelledby="ph-title">
   <div class="vhead">
@@ -1017,11 +1483,11 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">The engine behind the desk.</h1>
-    <p class="lede">Python, about 5,000 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 6,500 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
-    <li><h3>Data</h3><p>FRED curve, credit, volatility, oil, inflation, jobs and financial conditions daily; SEC 10-K and 10-Q facts; 155 years of public data monthly; Databento bars with split and dividend factors; Kalshi odds.</p></li>
+    <li><h3>Data</h3><p>91 sources: FRED curve, credit, volatility, oil, inflation, jobs, sentiment and financial conditions daily; feeds from Substack, Telegram, X, Reddit and the wires; SEC 10-K and 10-Q facts; 155 years of public data monthly; Databento bars with split and dividend factors; Kalshi odds.</p></li>
     <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
     <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
     <li><h3>Hedge &amp; size</h3><p>Min-variance TLT ratio when the regime allows it. Vol target and drawdown cap set gross; Kelly checks the edge.</p></li>
@@ -1033,7 +1499,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">85 of 85 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">135 of 135 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1051,8 +1517,12 @@
           <tr><td>Research on a planted inflation threshold, and on none</td><td class="r">found; nothing invented</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
+          <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>
+          <tr><td>Market making and execution: quotes, impact, Almgren-Chriss; Roll spread on a planted bounce</td><td class="r">exact; spread within 10%</td></tr>
+          <tr><td>Field manual tables: depreciation by life, private credit stress</td><td class="r">reproduced to the rounding shown</td></tr>
+          <tr><td>Feed scraper: dead sources, missing X token, planted lead time, hostile markup</td><td class="r">skipped, found, inert</td></tr>
           <tr><td>Property tests: thousands of random bonds, curves and options</td><td class="r">2 bugs found, fixed</td></tr>
-          <tr><td>Browser suite: hostile files, extreme inputs, the journal end to end, live research, 320 to 1920px, print, accessibility</td><td class="r">16 scenarios, 0 failures</td></tr>
+          <tr><td>Browser suite: hostile files and feed injection, extreme inputs on every tool, the journal end to end, 320 to 1920px, 160 printed pages, accessibility in light and dark</td><td class="r">16 scenarios, 0 failures</td></tr>
         </tbody>
       </table></div>
       <p class="hint">Ten years of simulated daily data with two correlation regimes and known betas. Passing proves the machinery; it says nothing about markets until real data runs through it.</p>
@@ -1177,7 +1647,7 @@
     <h2 id="keys-title">Keyboard shortcuts</h2>
     <dl class="dlist">
       <dt>/ or Ctrl K</dt><dd>Search everything: tools, terms, securities, theses, episodes, questions</dd>
-      <dt>1 to 6</dt><dd>Jump to a section: Today, Decide, Markets, Research, Wisdom, Reference</dd><dt>M</dt><dd>Show or hide the math</dd>
+      <dt>1 to 7</dt><dd>Jump to a section: Today, Decide, Markets, Trading, Research, Wisdom, Reference</dd><dt>M</dt><dd>Show or hide the math</dd>
       <dt>← →</dt><dd>Step through a focused chart</dd>
       <dt>?</dt><dd>This list</dd>
       <dt>Esc</dt><dd>Close a dialog</dd>
