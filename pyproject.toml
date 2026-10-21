@@ -1,6 +1,6 @@
 [project]
 name = "buildout"
-version = "0.7.0"
+version = "0.8.0"
 description = "Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -19,6 +19,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["buildout*"]
+
+[tool.setuptools.package-data]
+buildout = ["assets/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -202,11 +202,64 @@
       : "The book has no exposure to these factors.";
     fixChartRoles($("#view-solve"));
   }
+  /* ---------- v0.8: the boundary of the decision, its robustness, and five kinds of uncertainty ---------- */
+  const BND_TILTS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3], BND_LOSSES = [0.05, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20, 0.25, 0.30, 0.35];
+  function renderBoundary() {
+    const box = $("#rz-bnd");
+    if (!box || !RZ_LAST) return;
+    const R = RZ_LAST, grid = rzBoundary(R.post.posterior, RZ_SCENARIOS, R.P, BND_TILTS, BND_LOSSES), opt = R.alts.optimal;
+    let agree = 0, tot = 0;
+    grid.forEach((row) => row.forEach((c) => { if (c) { tot += 1; if (opt && Math.abs(c.port[0] - opt.port[0]) <= 0.1 + 1e-9) agree += 1; } }));
+    const W = boxWidth(box), padL = 54, padB = 40, padT = 10, cw = (W - padL - 10) / BND_TILTS.length, chh = 26, Hh = padT + chh * BND_LOSSES.length + padB;
+    box.replaceChildren();
+    const sv = svg("svg", { viewBox: `0 0 ${W} ${Hh}`, width: W, height: Hh, role: "img", "aria-label": `Decision boundary: optimal equity by downside odds and loss limit. The current choice holds in ${tot ? Math.round((agree / tot) * 100) : 0}% of the grid.` }, box);
+    const col = (e) => `color-mix(in srgb, var(--q5) ${Math.round((e / 1.5) * 100)}%, var(--q1))`;
+    BND_LOSSES.forEach((L, i) => {
+      const y = padT + (BND_LOSSES.length - 1 - i) * chh;
+      text(sv, padL - 8, y + chh / 2 + 4, `${Math.round(L * 100)}%`, "ax", "end");
+      BND_TILTS.forEach((f, j) => {
+        const c = grid[i][j], x = padL + j * cw;
+        const r = svg("rect", { x: x + 1, y: y + 1, width: cw - 2, height: chh - 2, rx: 4, fill: c ? col(c.port[0]) : "var(--grid)" }, sv);
+        if (c) text(sv, x + cw / 2, y + chh / 2 + 4, `${fx(c.port[0], 2)}${c.port[2] > 0 ? "·p" : ""}`, c.port[0] > 0.8 ? "bnd-l dark" : "bnd-l", "middle");
+        const here = Math.abs(f - 1) < 1e-9 && Math.abs(L - R.P.max_loss) < 1e-9;
+        if (here) svg("rect", { x: x + 1, y: y + 1, width: cw - 2, height: chh - 2, rx: 4, fill: "none", stroke: "var(--ink)", "stroke-width": 2.2 }, sv);
+        bindTip(r, () => [[c ? `${xx(c.port[0])} equity` : "nothing feasible", `downside odds ×${f}, loss limit ${Math.round(L * 100)}%`], [c ? `TLT ${fx(c.port[1], 1)}x · puts ${fx(c.port[2] * 100, 2)}% · gold ${fx(c.port[3] * 100, 0)}%` : "", "rest of the portfolio"]]);
+      });
+    });
+    BND_TILTS.forEach((f, j) => text(sv, padL + j * cw + cw / 2, Hh - padB + 16, `×${f}`, "ax", "middle"));
+    text(sv, padL + (W - padL) / 2, Hh - 6, "Odds on the four downside scenarios, times today's posterior", "ax", "middle");
+    $("#rz-bnd-out").textContent = `The current choice (${opt ? xx(opt.port[0]) : "n/a"} equity, within 0.10x) is optimal in ${tot ? Math.round((agree / tot) * 100) : 0}% of the ${tot} assumption pairs tested. That is scenario robustness across stated assumptions, not a probability. "·p" marks cells that buy put spreads. Your current limit and today's odds are outlined.`;
+    RZ_LAST.robust_share = tot ? agree / tot : NaN;
+    renderUncertainty();
+  }
+  function renderUncertainty() {
+    const box = $("#rz-unc");
+    if (!box || !RZ_LAST) return;
+    const R = RZ_LAST, sig = observeSignals(), live = sig.filter((x) => x.live).length, known = sig.filter((x) => x.on != null).length;
+    const H = -R.post.posterior.reduce((a, p) => a + (p > 0 ? p * Math.log(p) : 0), 0) / Math.log(R.post.posterior.length);
+    const opt = R.alts.optimal, spread = opt ? Math.max(...opt.rets) - Math.min(...opt.rets) : NaN;
+    const mm = R.alts.minimax_regret, robustPick = R.robust.names[R.robust.mix.indexOf(Math.max(...R.robust.mix))];
+    const loo = rzLeaveOneOut(R.pri, RZ_SIGNALS, R.obs, RZ_SCENARIOS, R.P), flipsFam = loo.filter((x) => x.used && !x.same);
+    const flipSig = R.voi ? R.voi.signals.filter((x) => x.flip_changes_choice) : [];
+    const months = R.cov.regimes.inflation ? R.cov.regimes.inflation.months : null;
+    const grade = (bad, mid) => (bad ? ["High", "bad"] : mid ? ["Medium", "warn"] : ["Low", "good"]);
+    const rows = [
+      ["Data quality", grade(known < 5, live < known), `${known} of ${sig.length} signals observed, ${live} from the latest daily files; the rest from the dated snapshot.`],
+      ["Forecast uncertainty", grade(H > 0.85, H > 0.6), `Posterior entropy ${fx(H, 2)} of its maximum; the chosen portfolio's 3-month outcomes span ${fx(spread * 100, 1)} points across scenarios.`],
+      ["Model disagreement", grade(mm !== "optimal" && robustPick !== "optimal", mm !== "optimal" || robustPick !== "optimal"), `Growth-optimal picks "optimal"; minimax regret picks "${mm}"; the game against Nature leans to "${robustPick}".`],
+      ["Assumption sensitivity", grade(flipSig.length >= 3 || (fin(R.robust_share) && R.robust_share < 0.3), flipSig.length >= 1 || flipsFam.length >= 1), `${flipSig.length} signal${flipSig.length === 1 ? "" : "s"} would flip the choice; dropping ${flipsFam.length ? flipsFam.map((x) => `the ${x.family} family`).join(" or ") : "no single evidence family"} changes it${fin(R.robust_share) ? `; robust in ${pct0(R.robust_share)} of the boundary grid` : ""}.`],
+      ["Applicability", grade(months != null && months < 36, months != null && months < 120), `Covariances for the current regime rest on ${months || "n/a"} months; scenarios and likelihoods are assumptions, not fitted to these conditions.`],
+    ];
+    box.replaceChildren(tableBlock(["Dimension", "Level", "Why"], rows.map(([k, [lvl], why]) => [k, lvl, why])));
+    box.querySelectorAll("tbody tr").forEach((tr, i) => { const td = tr.children[1]; td.className = "lvl-" + rows[i][1][1]; });
+    const lt = $("#rz-loo");
+    if (lt) lt.replaceChildren(tableBlock(["Evidence family left out", "Used today", "Choice without it", "Same choice?"], loo.map((x) => [x.family, x.used ? "yes" : "no", x.port ? shortPort(x.port) : "nothing feasible", x.same ? "yes" : "no"])));
+  }
   let solveTimer = null;
   function scheduleSolve() {
     renderSolve(false);                                   // instant: posterior and choices
     clearTimeout(solveTimer);
-    solveTimer = setTimeout(() => guard("Value of information", () => renderSolve(true), $("#rz-voi")), 180);
+    solveTimer = setTimeout(() => { guard("Value of information", () => renderSolve(true), $("#rz-voi")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); }, 180);
   }
   function buildSolve() {
     if (!$("#rz-ledger")) return;
@@ -230,5 +283,20 @@
     const reset = $("#rz-reset");
     if (reset && !reset.dataset.wired) { reset.dataset.wired = "1"; reset.addEventListener("click", () => { RZS.over = {}; LS.set("bo-rz-over", {}); renderSolve(true); }); }
     wireCalc($("#calc-in"), $("#calc-out"), $("#calc-hist"));
+    const rec = $("#rz-record");
+    if (rec && !rec.dataset.wired) {
+      rec.dataset.wired = "1";
+      rec.addEventListener("click", async () => {
+        rec.disabled = true;
+        const msg = $("#rz-record-msg");
+        try {
+          const R = RZ_LAST || runReasoner(true), saved = await recordSolverDecision(R, observeSignals());
+          if (saved) { msg.replaceChildren(document.createTextNode(`Recorded with hash ${saved.hash}. `)); const a = h("a", null, "Open it in the journal →"); a.href = "#journal"; a.addEventListener("click", () => { JR.sel = saved.id; JR.draft = Object.assign({}, saved); JR.showEx = false; }); msg.append(a); if (typeof renderJournal === "function") renderJournal(); }
+          else msg.textContent = "Could not save here; export from the journal to keep it.";
+        } catch (e) { msg.textContent = "Could not record: " + (e && e.message ? e.message : e); }
+        rec.disabled = false;
+      });
+    }
     renderSolve(true);
+    guard("Decision boundary", renderBoundary, $("#rz-bnd"));
   }

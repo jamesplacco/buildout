@@ -275,6 +275,30 @@
     return { shock: Sb.map((x) => -loss * x / q), sigmas: d, p_normal: ncdf(-d), port_sd: Math.sqrt(q) };
   }
 
+  // v0.8: the decision boundary. Tilt the odds of the four downside scenarios by f (renormalized) and move the loss
+  // limit; at every pair, the grid's optimal equity. Where the colour changes is where the preferred action changes.
+  const RZ_DOWN = ["termprem", "digest", "stagfl", "crash"];
+  function rzTilt(post, f) {
+    const w = post.map((p, i) => p * (RZ_DOWN.includes(RZ_SCENARIOS[i].id) ? f : 1)), z = w.reduce((a, b) => a + b, 0);
+    return w.map((x) => x / z);
+  }
+  function rzBoundary(post, scen, P, tilts, losses) {
+    return losses.map((L) => tilts.map((f) => {
+      const b = rzSolve(rzTilt(post, f), scen, Object.assign({}, P, { max_loss: L }));
+      return b ? { port: b.port, elog: b.elog } : null;
+    }));
+  }
+  // leave one evidence family (driver) out at a time: does the choice survive without it?
+  function rzLeaveOneOut(priors, signals, observed, scen, P) {
+    const fams = [...new Set(signals.map((s) => s.cluster))], base = rzSolve(rzPosterior(priors, signals, observed).posterior, scen, P);
+    return fams.map((fam) => {
+      const obs = Object.assign({}, observed);
+      signals.filter((s) => s.cluster === fam).forEach((s) => { delete obs[s.id]; });
+      const b = rzSolve(rzPosterior(priors, signals, obs).posterior, scen, P);
+      return { family: fam, port: b ? b.port : null, same: !!(b && base && b.port.every((x, i) => x === base.port[i])), used: signals.some((s) => s.cluster === fam && observed[s.id] != null) };
+    });
+  }
+
   /* ---------- game theory ---------- */
   function solveLinear(M, v) {
     const n = v.length, A = M.map((r, i) => r.map(Number).concat([Number(v[i])]));
@@ -398,6 +422,25 @@
     for (let i = 0; i < r.length - 1; i++) bins.push({ lo: r[i].k, hi: r[i + 1].k, p: fit[i] - fit[i + 1] });
     bins.push({ lo: r[r.length - 1].k, hi: null, p: fit[fit.length - 1] });
     return { mids, coherent_fit: fit, violations: viol, arbitrage: arbs, pmf: bins };
+  }
+
+  /* ---------- v0.8: field research, comparing explanations (mirrors buildout/field.py) ---------- */
+  function fieldPosterior(prior, lik, seen) {
+    let p = prior.map(Number);
+    Object.entries(seen).forEach(([e, v]) => { if (v == null || !(e in lik)) return; p = p.map((pi, i) => pi * (v ? lik[e][i] : 1 - lik[e][i])); });
+    const z = p.reduce((a, b) => a + b, 0);
+    return z > 0 ? p.map((x) => x / z) : p.map(() => 1 / p.length);
+  }
+  const entropy2 = (p) => -p.reduce((a, x) => a + (x > 0 ? x * Math.log2(x) : 0), 0);
+  function fieldNext(prior, lik, seen) {
+    const post = fieldPosterior(prior, lik, seen), h0 = entropy2(post), out = [];
+    Object.entries(lik).forEach(([e, ls]) => {
+      if (seen[e] != null) return;
+      const pYes = post.reduce((a, p, i) => a + p * ls[i], 0);
+      const hy = pYes > 0 ? entropy2(fieldPosterior(post, { [e]: ls }, { [e]: true })) : 0, hn = pYes < 1 ? entropy2(fieldPosterior(post, { [e]: ls }, { [e]: false })) : 0;
+      out.push({ evidence: e, p_yes: pYes, info_bits: h0 - pYes * hy - (1 - pYes) * hn });
+    });
+    return out.sort((a, b) => b.info_bits - a.info_bits);
   }
 
   /* ---------- fill quality (review sections 20 and 21) ---------- */

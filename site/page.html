@@ -382,7 +382,7 @@ td.r { white-space: nowrap; }
 .tchip:hover { border-color: var(--accent); }
 
 /* lenses */
-.lens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.lens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
 .lens { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; }
 .lens h3 { font: 700 var(--t-xl)/1.05 var(--f-display); letter-spacing: 0.01em; }
 .lens .idea { font-size: var(--t-sm); color: var(--ink); }
@@ -761,7 +761,7 @@ table.assume input[type="range"] { width: 110px; }
 .jr-form legend { font: 600 0.6875rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); padding: 0 6px; }
 .jr-form label { font-size: var(--t-sm); font-weight: 500; color: var(--ink); display: grid; gap: 4px; min-width: 0; }
 .jr-form label small { font-weight: 400; color: var(--muted); font-size: var(--t-xs); }
-.jr-form input[type="text"], .jr-form input[type="date"], .jr-form textarea, .jr-form select { width: 100%; font: 400 var(--t-sm)/1.4 var(--f-body); padding: 8px 10px; border-radius: 7px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.jr-form input[type="text"], .jr-form input[type="date"], .jr-form textarea, .jr-form select { width: 100%; max-width: 100%; min-width: 0; font: 400 var(--t-sm)/1.4 var(--f-body); padding: 8px 10px; border-radius: 7px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
 .jr-form textarea { min-height: 64px; resize: vertical; }
 .jr-form .row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .jr-form .row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -1117,6 +1117,8 @@ table.recon td:first-child { font-weight: 600; white-space: nowrap; }
 .t7-what { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
 .t7-v { font-size: var(--t-sm); color: var(--ink); }
 .t7-why { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.45; }
+.t7-was { color: var(--muted); }
+.t7-quiet { font-size: var(--t-xs); color: var(--muted); margin: -4px 0 8px; }
 .t7-changes a, .t7-card .more-link { font-size: var(--t-xs); }
 .t7-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .t7-list li { display: grid; gap: 2px; font-size: var(--t-sm); line-height: 1.4; min-width: 0; }
@@ -1178,6 +1180,92 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   .tabs a { padding-inline: 5px; letter-spacing: 0.02em; font-size: 0.625rem; }
 }
 @media print { .t7-card { box-shadow: none; } .calc-in, .calc-ex, #rz-reset { display: none; } }
+/* ---------- v0.8: the thinking brain and the mark ---------- */
+.bnd-l { fill: var(--ink); font: 600 10px var(--f-mono); }
+.bnd-l.dark { fill: var(--surface); }
+td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var(--warn-ink); font-weight: 700; } td.lvl-good { color: var(--good-ink); font-weight: 700; }
+.rz-record { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 6px; }
+.jr-record { margin: 12px 0; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); }
+.jr-record summary { padding: 10px 12px; cursor: pointer; font: 600 var(--t-xs)/1.3 var(--f-mono); }
+.jr-record .inner { padding: 0 12px 12px; display: grid; gap: 10px; }
+.jr-revs { margin: 0; padding-left: 18px; font-size: var(--t-xs); color: var(--muted); }
+.brain-think { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+.br-steps { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; counter-reset: brs; }
+.br-step { position: relative; padding: 10px 12px 10px 40px; border-radius: 10px; border: 1px solid var(--rule); background: var(--paper); cursor: pointer; transition: border-color .2s, background .2s; }
+.br-step::before { counter-increment: brs; content: counter(brs); position: absolute; left: 10px; top: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-wash); color: var(--accent); font: 700 0.7rem/20px var(--f-mono); text-align: center; }
+.br-step.active { border-color: var(--accent); background: var(--accent-wash); }
+.br-step.active::before { background: var(--accent); color: var(--surface); }
+.br-step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.br-step-h { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.br-step p { margin: 4px 0 0; font-size: var(--t-sm); line-height: 1.45; color: var(--ink-2); }
+.obs-add { display: grid; gap: 10px; margin-top: 12px; }
+.br-ring { fill: #8f88c9; font: 600 9px var(--f-mono); letter-spacing: 0.18em; opacity: 0.7; }
+.br-node.dim { opacity: 0.22; }
+.br-node.focus .br-halo { opacity: 0.95 !important; }
+.br-root { animation: brspin 6s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes brspin { to { transform: rotate(360deg); } }
+.logo-mark .logo-curve { stroke-dasharray: 30; stroke-dashoffset: 0; }
+.brand-mark { display: inline-grid; place-items: center; }
+.hero-mark { width: 64px; height: 64px; flex: none; }
+.hero-mark svg, .vmark svg { width: 100%; height: 100%; display: block; }
+.t7-brand { display: flex; align-items: center; gap: 14px; }
+.vmark { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; margin-right: 8px; }
+.vhead .eyebrow, .t7-head .eyebrow { display: flex; align-items: center; }
+.mark-end { display: grid; justify-items: center; gap: 10px; padding-block: 34px 18px; color: var(--muted); }
+.mark-end svg { width: 72px; height: 72px; }
+.mark-end span { font: 600 0.7rem/1 var(--f-mono); letter-spacing: 0.24em; text-transform: uppercase; }
+.empty .vmark { width: 28px; height: 28px; margin: 0 0 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-mark .logo-curve, .brand svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 1.1s 0.15s ease-out forwards; }
+  .hero-mark circle.logo-dot, .brand svg circle { opacity: 0; animation: dot .3s 1.15s ease-out forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes dot { to { opacity: 1; } }
+}
+@media (prefers-reduced-motion: reduce) { .br-root { animation: none; } }
+@media (max-width: 960px) { .brain-think { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 400px) { .hero-mark { width: 48px; height: 48px; } }
+@media print { .br-step { break-inside: avoid; } }
+
+/* v0.8 field desk */
+.field select, .field input { max-width: 100%; min-width: 0; }
+.field, details.more .inner { min-width: 0; }
+.view svg[viewBox][width] { max-width: 100%; height: auto; }
+.nw > *, .stage { min-width: 0; }
+#fd-case { width: 100%; max-width: 100%; min-width: 0; font: 400 var(--t-sm)/1.4 var(--f-body); padding: 8px 10px; border-radius: 7px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.fd-clocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.fd-clock { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+.fd-clock b { font-weight: 600; color: var(--ink); }
+.fd-clock span { color: var(--ink-2); font-size: var(--t-sm); }
+.fd-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; margin-top: 14px; }
+.fd-grid > div { min-width: 0; }
+@media (max-width: 760px) { .fd-grid { grid-template-columns: 1fr; } }
+.fd-ev { display: grid; gap: 10px; }
+.fd-row { display: grid; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); font-size: var(--t-sm); color: var(--ink); }
+.fd-next { display: grid; gap: 6px; padding-left: 20px; margin: 0; font-size: var(--t-sm); }
+.fd-next li { display: flex; justify-content: space-between; gap: 10px; }
+.fd-next li b { white-space: nowrap; }
+.fd-post { display: grid; gap: 10px; margin-bottom: 16px; }
+.fd-p { display: grid; gap: 4px; font-size: var(--t-sm); color: var(--ink-2); }
+.fd-p-l { display: flex; justify-content: space-between; gap: 10px; }
+.fd-p-bar { height: 10px; border-radius: 5px; background: var(--paper); border: 1px solid var(--rule); overflow: hidden; }
+.fd-p-bar i { display: block; height: 100%; background: var(--s1); border-radius: 0 4px 4px 0; transition: width .4s ease; }
+.fd-p.lead { color: var(--ink); }
+.fd-p.lead .fd-p-bar i { background: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .fd-p-bar i { transition: none; } }
+.fd-row3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.fd-row4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.fd-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.fd-export { width: 100%; min-height: 140px; font: 400 var(--t-xs)/1.4 var(--f-mono); background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 7px; padding: 8px; }
+.ms-list { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 8px; }
+.ms { display: grid; gap: 4px; padding: 10px 14px; border: 1px solid var(--rule); border-left: 4px solid var(--rule); border-radius: 10px; background: var(--surface); font-size: var(--t-sm); color: var(--ink-2); }
+.ms-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--ink); }
+.ms-st { font: 500 var(--t-xs)/1.3 var(--f-mono); }
+.ms.due { border-left-color: var(--accent); }
+.ms.lag { border-left-color: var(--s2); }
+.ms.overdue { border-left-color: var(--red); }
+.ms .pill { justify-self: start; }
+.ms-note { font-size: var(--t-xs); color: var(--muted); }
+.ms.overdue .ms-st { color: var(--red); }
 </style>
 <a class="skip" href="#main" id="skip">Skip to content</a>
 <header class="topbar">
@@ -1189,7 +1277,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.7</span>
+      Buildout <span class="ver">v0.8</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -1214,14 +1302,14 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
 <section class="view" id="view-desk" aria-labelledby="desk-title">
   <div class="t7" id="today7">
     <div class="t7-head">
-      <p class="eyebrow">Today · October 21, 2026 · Jamie Placco</p>
+      <div class="t7-brand"><span class="hero-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="1" y="1" width="26" height="26" rx="6" fill="var(--accent)"></rect><path class="logo-curve" d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path><circle class="logo-dot" cx="22" cy="8" r="2" fill="var(--surface)"></circle></svg></span><p class="eyebrow">Buildout · Today · October 21, 2026 · Jamie Placco</p></div>
       <h1 id="desk-title">How reliable is your bond hedge in this regime?</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
       <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
     </div>
     <div class="t7-grid">
-      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">What changed, and why it matters to the book</h2><ol class="t7-changes" id="t7-changes"></ol></section>
+      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">What changed, and why it matters to the book</h2><p class="t7-quiet" id="t7-quiet" aria-live="polite"></p><ol class="t7-changes" id="t7-changes"></ol></section>
       <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Your choices</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with your own limits →</a></section>
       <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">What would reverse this</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decide">The decision board →</a></section>
       <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Can I trust it?</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#engine">Methods and tests →</a></section>
@@ -2271,7 +2359,8 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   </section>
 
   <section class="section" aria-labelledby="rz-title">
-    <div class="section-head"><p class="eyebrow">Answer</p><h2 id="rz-title">What the evidence supports</h2><p class="prose" id="rz-answer" aria-live="polite"></p></div>
+    <div class="section-head"><p class="eyebrow">Answer</p><h2 id="rz-title">What the evidence supports</h2><p class="prose" id="rz-answer" aria-live="polite"></p>
+      <div class="rz-record"><button class="btn" id="rz-record" type="button">Record this decision</button><span class="hint" id="rz-record-msg" aria-live="polite">Saves the inputs, the four alternatives, the choice and a content hash to your journal, locked.</span></div></div>
     <div class="lab">
       <form class="panel controls" aria-label="Limits and the current book">
         <div class="field"><div class="field-top"><label for="rz-loss">Loss limit, worst scenario over 3 months</label><output id="rz-loss-o" for="rz-loss"></output></div><input type="range" id="rz-loss" min="5" max="35" step="1" value="15"></div>
@@ -2298,6 +2387,15 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     <h3 class="sub-h">Return by scenario</h3>
     <div class="tablewrap"><table class="rz heatmap" id="rz-heat"></table></div>
     <div class="math"><span class="mlabel">The search</span>maximize &Sigma;<sub>s</sub> &pi;<sub>s</sub> ln(1 + <var>R</var><sub>s</sub>(<var>e</var>, <var>h</var>, <var>p</var>, <var>g</var>)) over equity <var>e</var> &isin; {0, 0.05, &hellip;, 1.5}, TLT ratio <var>h</var> &isin; {0, 0.1, &hellip;, 1}, put premium <var>p</var> &isin; {0, 0.25%, &hellip;, 2%}, gold <var>g</var> &isin; {0, 2%, &hellip;, 10%}, subject to min<sub>s</sub> <var>R</var><sub>s</sub> &ge; &minus;limit, <var>e</var>(1 + <var>h</var>) + <var>g</var> &le; 2. <var>R</var><sub>s</sub> = <var>e</var>(1.15 m<sub>s</sub> + a<sub>s</sub>) + <var>e</var><var>h</var>(y&tau; &minus; 16.5&Delta;y + &frac12;&middot;360&Delta;y<sup>2</sup> &minus; r&tau;) + (<var>p</var>/c)&middot;payoff<sub>95/85</sub> &minus; <var>p</var> + <var>g</var>&middot;gold<sub>s</sub> + cash&middot;r&tau;. Posterior &pi; &prop; prior &times; &prod;<sub>drivers</sub> exp(mean log-likelihood).</div>
+  </section>
+
+  <section class="section" aria-labelledby="rzb-title">
+    <div class="section-head"><p class="eyebrow">Decision boundary</p><h2 id="rzb-title">Where the answer changes, and how wide the safe region is</h2><p class="prose" id="rz-bnd-out"></p></div>
+    <figure class="chart panel"><div class="chart-head"><span class="chart-title">Optimal equity by downside odds (across) and loss limit (down)</span><span class="ev ev-asm">Assumed ranges</span></div><div class="svgbox" id="rz-bnd"></div></figure>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Five kinds of uncertainty in this choice</span><div id="rz-unc"></div></div>
+      <div class="panel"><span class="panel-title">Does the choice survive without each evidence family?</span><div id="rz-loo"></div><p class="hint">Signals that share a driver are one family: removing the family and re-solving shows whether one source carries the decision. Repetition is not corroboration.</p></div>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="rzn-title">
@@ -2425,12 +2523,13 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   <div class="vhead">
     <p class="eyebrow">The brain · higher-order thinking, computed</p>
     <h1 id="br-title">Carry every assumption to its fourth-order conclusion.</h1>
-    <p class="lede">Twenty-one parts of the system, forty-eight signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and yours to change. Shock any node and watch it travel: what arrives first, second, third and fourth, which loops amplify it, which single assumption carries the answer, and the cheapest combination of shocks that would produce a given outcome.</p>
+    <p class="lede">Thirty-four parts of the system, from Hormuz and the Fed through credit and the curve to each holding and your book, joined by a hundred and ten signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and yours to change. Shock any node and watch it travel. Or let the brain think: it reads what moved, infers the most likely causes, checks what else must then be true, doubts its own map, and tells you what to look at next.</p>
   </div>
   <section class="section" aria-labelledby="brm-title">
     <h2 class="sr-only" id="brm-title">The map</h2>
     <div class="brain-lab">
       <form class="panel controls" id="br-form" aria-label="Brain inputs">
+        <div class="field"><span class="flabel" id="br-view-l">The map shows</span><div class="seg" role="group" aria-labelledby="br-view-l" id="br-view"><button type="button" data-v="shock" aria-pressed="true">A shock, propagated</button><button type="button" data-v="think" aria-pressed="false">What the brain infers</button></div></div>
         <div class="field"><span class="flabel" id="br-pre-l">Scenario</span><div class="seg" role="group" aria-labelledby="br-pre-l" id="br-presets"></div></div>
         <div class="field"><label for="br-shock">Shock this node</label><select id="br-shock"></select></div>
         <div class="field"><div class="field-top"><label for="br-size">Shock size</label><output id="br-size-o" for="br-size"></output></div><input type="range" id="br-size" min="-3" max="3" step="0.25" value="1.5"></div>
@@ -2458,6 +2557,36 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
       </div>
     </div>
   </section>
+  <section class="section" id="br-think-sec" aria-labelledby="brt-title">
+    <div class="section-head"><p class="eyebrow">The brain thinks</p><h2 id="brt-title">From what moved, to why, to what must also be true</h2><p class="prose" id="br-think-sum" aria-live="polite"></p></div>
+    <div class="brain-think">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">The reasoning, step by step</span><button class="btn" id="br-think-go" type="button">Think it through</button></div>
+        <ol class="br-steps" id="br-steps"></ol>
+        <p class="hint">Each step is computed, not written: abduction by ridge regression on the graph's total effects, competing explanations by exact Bayesian evidence, predictions with their uncertainty, the link most likely wrong by the gradient of the misfit, and the next observation by mutual information. Select a step to light up the nodes it uses.</p>
+      </div>
+      <div class="panel">
+        <span class="panel-title">What it observes</span>
+        <div class="tablewrap"><table class="rz" id="br-obs"><thead><tr><th>Node</th><th class="r">Reading</th><th>Source</th><th></th></tr></thead><tbody></tbody></table></div>
+        <div class="obs-add">
+          <div class="field"><label for="br-obs-node">Add or change an observation</label><select id="br-obs-node"></select></div>
+          <div class="field"><div class="field-top"><label for="br-obs-v">Reading, 3-month change in σ</label><output id="br-obs-v-o" for="br-obs-v"></output></div><input type="range" id="br-obs-v" min="-3" max="3" step="0.1" value="1"></div>
+          <div class="seg"><button type="button" id="br-obs-add">Observe it</button><button type="button" id="br-obs-reset">Back to the data</button></div>
+        </div>
+        <p class="hint">Field notes count: if a supplier tells you lead times fell, observe "Memory prices" at −1 and watch the explanation change. Saved in this browser only.</p>
+      </div>
+    </div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Which single cause explains the readings best</span><span class="ev ev-hyp">Hypothesis</span></div><div class="svgbox" id="br-expl"></div></figure>
+      <div class="panel"><span class="panel-title">If the inference is right, these follow</span><div class="tablewrap"><table class="rz" id="br-pred"><thead><tr><th>Node</th><th class="r">Implied</th><th class="r">± 1 sd</th><th>Kind</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="panel"><span class="panel-title">What to look at next</span><ol class="br-list" id="br-next"></ol><p class="hint">Information each unobserved node carries about which explanation is right (mutual information). The top one is the cheapest way to change the brain's mind.</p></div>
+      <div class="panel"><span class="panel-title">Seeing is not doing</span><p class="sentence" id="br-sd"></p><p class="hint">Uses the shock node, size and target from the controls above. Doing cuts the node's incoming links (Pearl's do-operator); seeing infers its causes first.</p></div>
+      <div class="panel"><span class="panel-title">Different names, same bet</span><div class="tablewrap"><table class="rz heatmap" id="br-shared"></table></div><p class="hint">Cosine similarity of each pair of holdings' sensitivities to the root causes. Near 1: two tickers, one exposure.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Where the book is exposed</span></div><div class="svgbox" id="br-booksens"></div></figure>
+    </div>
+    <div class="math"><span class="mlabel">How it thinks</span><var>T</var> = &Sigma;<sub>k=0..K</sub>(<var>W</var>&#8868;)<sup>k</sup>. Causes: <var>s</var> = (<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup><var>A</var>&#8868;<var>y</var>, <var>A</var> = <var>T</var>[observed, roots], &lambda; = (0.5/1)<sup>2</sup>, posterior covariance 0.5<sup>2</sup>(<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup>. Explanations: log evidence of <var>y</var> ~ N(0, 0.5<sup>2</sup><var>I</var> + <var>a</var><var>a</var>&#8868;) for each single cause and for noise alone. Next observation: I(H; X<sub>u</sub>) = h(mixture) &minus; &Sigma;<sub>h</sub> p<sub>h</sub> h(X<sub>u</sub> | h). Doing: <var>T</var> with the node's incoming links removed.</div>
+  </section>
+
   <section class="section" aria-labelledby="brw-title">
     <div class="section-head"><p class="eyebrow">Reasoning</p><h2 id="brw-title">How the answer is built</h2><p class="prose">Each order is one more link in the chain. Most people stop at the first; the graph does not.</p></div>
     <div class="grid2">
@@ -2848,6 +2977,79 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   <footer class="foot"><p>Ideas are paraphrased and attributed to the work named on each card; only public-domain texts (1841, 1873, 1923) are quoted. Lenses are the desk's application, not the legends' views on today's market.</p></footer>
 </section>
 
+<!-- ======================= FIELD ======================= -->
+<section class="view" id="view-field" hidden aria-labelledby="fd-title">
+  <div class="vhead">
+    <p class="eyebrow">Field · Research outside the screen</p>
+    <h1 id="fd-title">An anecdote is a question. Date it, source it, name what else could explain it, then check the evidence that separates the stories.</h1>
+    <p class="lede">From the fifth review: observations from suppliers, lenders, landlords and job sites often move before the reported numbers. They earn a place in the book only after they are written down with provenance, matched to a later measurable outcome and tested. Nothing on this desk is validated yet; it is the method for getting there.</p>
+  </div>
+  <section class="section" aria-labelledby="fdc-title">
+    <div class="section-head"><p class="eyebrow">Three clocks</p><h2 id="fdc-title">Every observation sits on three clocks, and they rarely agree</h2></div>
+    <div class="fd-clocks">
+      <div class="fd-clock"><b>Economic clock</b><span>When the activity actually changed: a supplier asked for deposits, a lender tightened, a lease was signed.</span></div>
+      <div class="fd-clock"><b>Publication clock</b><span>When an official series or filing shows it: often a month to two quarters later, then revised.</span></div>
+      <div class="fd-clock"><b>Market clock</b><span>When prices reflect it: sometimes before the economic clock (expectations), sometimes long after the publication clock.</span></div>
+    </div>
+    <p class="prose">Edge comes from the gaps between the clocks, never from the observation alone. Each note below records the first two dates (event and learned) so the gap can be measured later.</p>
+  </section>
+  <section class="section" aria-labelledby="fde-title">
+    <div class="section-head"><p class="eyebrow">Compare explanations</p><h2 id="fde-title">Which story fits, and what to check next</h2>
+      <p class="prose">Pick an observation. Mark what you have checked. Bayes' rule updates the explanations; the ranking shows which unchecked evidence would remove the most doubt (expected information, in bits). The likelihoods are judged, so argue with them.</p></div>
+    <div class="field"><label for="fd-case">Observation</label><select id="fd-case"></select></div>
+    <div class="fd-grid">
+      <div><h3 class="h3">Evidence</h3><div id="fd-ev" class="fd-ev"></div></div>
+      <div><h3 class="h3">Explanations</h3><div id="fd-post" class="fd-post" aria-live="polite"></div>
+        <h3 class="h3">Check next</h3><ol id="fd-next" class="fd-next"></ol></div>
+    </div>
+    <p class="callout" id="fd-out" aria-live="polite"></p>
+  </section>
+  <section class="section" aria-labelledby="fdi-title">
+    <div class="section-head"><p class="eyebrow">Indicator registry</p><h2 id="fdi-title">Ten unusual observations, each registered before it is tested</h2>
+      <p class="prose">Every candidate names its mechanism, its competing explanation, its clock and the later measured outcome that would score it. Registering first is what keeps a lucky story from becoming a rule.</p></div>
+    <div class="tablewrap"><table id="fd-ind"></table></div>
+  </section>
+  <section class="section" aria-labelledby="fdm-title">
+    <div class="section-head"><p class="eyebrow">Milestone monitor</p><h2 id="fdm-title">Expected events, and what silence means</h2>
+      <p class="prose">An absent report is not an absent event. Each milestone carries its usual reporting lag; only after that lag does "overdue" mean something worth checking.</p></div>
+    <ul class="ms-list" id="fd-ms"></ul>
+    <form class="jr-form fd-ms-form" id="ms-form">
+      <fieldset><legend>Register a milestone</legend>
+        <div class="fd-row3"><label>Name<input type="text" id="ms-t" maxlength="120"></label><label>Expected date<input type="date" id="ms-due"></label><label>Usual reporting lag, days<input type="text" id="ms-lag" inputmode="numeric" value="7"></label></div>
+        <label>Evidence that it happened<input type="text" id="ms-ev" maxlength="200"></label>
+        <div class="fd-actions"><button type="button" class="pill" id="ms-add">Register</button><span class="hint" id="ms-msg" aria-live="polite"></span></div>
+      </fieldset>
+    </form>
+  </section>
+  <section class="section" aria-labelledby="fdn-title">
+    <div class="section-head"><p class="eyebrow">Capture</p><h2 id="fdn-title">Write it down the way the review asks</h2>
+      <p class="prose">Saved in this browser only. Attach it to a brain node with a reading in σ and the brain re-reasons with it as an observation.</p></div>
+    <form class="jr-form" id="fn-form">
+      <fieldset><legend>When and who</legend>
+        <div class="fd-row3"><label>Event date<input type="date" id="fn-event"></label><label>Date learned<input type="date" id="fn-learned"></label><label>Entity<input type="text" id="fn-entity" maxlength="120"></label></div>
+        <label>What was observed<textarea id="fn-claim" maxlength="600"></textarea></label>
+        <label>Access<select id="fn-access"><option value="direct">Direct: I saw the record</option><option value="firsthand">Firsthand: told by the person who did it</option><option value="hearsay">Hearsay: told by someone who heard</option></select></label>
+      </fieldset>
+      <fieldset><legend>How much</legend>
+        <div class="fd-row4"><label>Quantity<input type="text" id="fn-qty" maxlength="40"></label><label>Units<input type="text" id="fn-units" maxlength="40"></label><label>Baseline<input type="text" id="fn-base" maxlength="60"></label><label>Denominator<input type="text" id="fn-denom" maxlength="60"></label></div>
+      </fieldset>
+      <fieldset><legend>Source and limits</legend>
+        <div class="fd-row3"><label>Source role<input type="text" id="fn-role" maxlength="80"><small>buyer, supplier, lender, landlord</small></label><label>Source family<input type="text" id="fn-family" maxlength="80"><small>notes from one family are not independent</small></label><label>Coverage<input type="text" id="fn-coverage" maxlength="80"><small>one site, one region, one product</small></label></div>
+        <label>Use<select id="fn-use"><option value="public">Public or permitted to use</option><option value="restricted">Restricted: use only as context</option><option value="confidential">Confidential (will not be saved)</option></select></label>
+      </fieldset>
+      <fieldset><legend>Alternatives and resolution</legend>
+        <label>Competing explanation<input type="text" id="fn-alt" maxlength="200"></label>
+        <label>What would settle it, and when<input type="text" id="fn-resolve" maxlength="200"></label>
+        <div class="fd-row3"><label>Brain node<select id="fn-node"></select></label><label>Reading, σ<input type="text" id="fn-z" inputmode="decimal" value="0"><small>−3 to 3; 0 leaves the brain alone</small></label></div>
+      </fieldset>
+      <div class="fd-actions"><button type="button" class="pill" id="fn-save">Save note</button><button type="button" class="pill" id="fn-copy">Copy all as JSON</button><span class="hint" id="fn-msg" aria-live="polite"></span></div>
+      <textarea id="fn-export" class="fd-export" hidden readonly aria-label="Exported notes"></textarea>
+    </form>
+    <div id="fd-notes" class="tablewrap"></div>
+  </section>
+  <footer class="foot"><p>Field notes are research inputs, not trading signals. Keep material non-public information out entirely; record only what you are permitted to use. Likelihoods on this desk are hypotheses, labelled as such.</p></footer>
+</section>
+
 <!-- ======================= LAB ======================= -->
 <section class="view" id="view-lab" hidden aria-labelledby="lab-title">
   <div class="vhead">
@@ -2892,7 +3094,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">165 of 165 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">179 of 179 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2914,6 +3116,10 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
           <tr><td>Solver, game against Nature, value of information, reverse stress, Python and page</td><td class="r">same choice; agree to 1e-9</td></tr>
           <tr><td>Nash solver on known games; capex race; crowded exit's Laplace limit</td><td class="r">exact; 4/9 and 9/8; exact</td></tr>
           <tr><td>A newer filing reversing Oracle's coverage</td><td class="r">row, label, date and game update together</td></tr>
+          <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
+          <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
+          <tr><td>MCP server: handshake, eight tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>
@@ -3731,6 +3937,30 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     return { shock: Sb.map((x) => -loss * x / q), sigmas: d, p_normal: ncdf(-d), port_sd: Math.sqrt(q) };
   }
 
+  // v0.8: the decision boundary. Tilt the odds of the four downside scenarios by f (renormalized) and move the loss
+  // limit; at every pair, the grid's optimal equity. Where the colour changes is where the preferred action changes.
+  const RZ_DOWN = ["termprem", "digest", "stagfl", "crash"];
+  function rzTilt(post, f) {
+    const w = post.map((p, i) => p * (RZ_DOWN.includes(RZ_SCENARIOS[i].id) ? f : 1)), z = w.reduce((a, b) => a + b, 0);
+    return w.map((x) => x / z);
+  }
+  function rzBoundary(post, scen, P, tilts, losses) {
+    return losses.map((L) => tilts.map((f) => {
+      const b = rzSolve(rzTilt(post, f), scen, Object.assign({}, P, { max_loss: L }));
+      return b ? { port: b.port, elog: b.elog } : null;
+    }));
+  }
+  // leave one evidence family (driver) out at a time: does the choice survive without it?
+  function rzLeaveOneOut(priors, signals, observed, scen, P) {
+    const fams = [...new Set(signals.map((s) => s.cluster))], base = rzSolve(rzPosterior(priors, signals, observed).posterior, scen, P);
+    return fams.map((fam) => {
+      const obs = Object.assign({}, observed);
+      signals.filter((s) => s.cluster === fam).forEach((s) => { delete obs[s.id]; });
+      const b = rzSolve(rzPosterior(priors, signals, obs).posterior, scen, P);
+      return { family: fam, port: b ? b.port : null, same: !!(b && base && b.port.every((x, i) => x === base.port[i])), used: signals.some((s) => s.cluster === fam && observed[s.id] != null) };
+    });
+  }
+
   /* ---------- game theory ---------- */
   function solveLinear(M, v) {
     const n = v.length, A = M.map((r, i) => r.map(Number).concat([Number(v[i])]));
@@ -3854,6 +4084,25 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     for (let i = 0; i < r.length - 1; i++) bins.push({ lo: r[i].k, hi: r[i + 1].k, p: fit[i] - fit[i + 1] });
     bins.push({ lo: r[r.length - 1].k, hi: null, p: fit[fit.length - 1] });
     return { mids, coherent_fit: fit, violations: viol, arbitrage: arbs, pmf: bins };
+  }
+
+  /* ---------- v0.8: field research, comparing explanations (mirrors buildout/field.py) ---------- */
+  function fieldPosterior(prior, lik, seen) {
+    let p = prior.map(Number);
+    Object.entries(seen).forEach(([e, v]) => { if (v == null || !(e in lik)) return; p = p.map((pi, i) => pi * (v ? lik[e][i] : 1 - lik[e][i])); });
+    const z = p.reduce((a, b) => a + b, 0);
+    return z > 0 ? p.map((x) => x / z) : p.map(() => 1 / p.length);
+  }
+  const entropy2 = (p) => -p.reduce((a, x) => a + (x > 0 ? x * Math.log2(x) : 0), 0);
+  function fieldNext(prior, lik, seen) {
+    const post = fieldPosterior(prior, lik, seen), h0 = entropy2(post), out = [];
+    Object.entries(lik).forEach(([e, ls]) => {
+      if (seen[e] != null) return;
+      const pYes = post.reduce((a, p, i) => a + p * ls[i], 0);
+      const hy = pYes > 0 ? entropy2(fieldPosterior(post, { [e]: ls }, { [e]: true })) : 0, hn = pYes < 1 ? entropy2(fieldPosterior(post, { [e]: ls }, { [e]: false })) : 0;
+      out.push({ evidence: e, p_yes: pYes, info_bits: h0 - pYes * hy - (1 - pYes) * hn });
+    });
+    return out.sort((a, b) => b.info_bits - a.info_bits);
   }
 
   /* ---------- fill quality (review sections 20 and 21) ---------- */
@@ -3991,6 +4240,28 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
      ===================================================================================== */
   const NS = "http://www.w3.org/2000/svg";
   const $ = (s, r = document) => r.querySelector(s);
+
+  /* ---------- the Buildout mark (v0.8): one definition, used in the header, every desk, empty states and the brain ---------- */
+  function markEl(cls) {
+    const wrap = document.createElement("span");
+    wrap.className = cls || "vmark";
+    wrap.setAttribute("aria-hidden", "true");
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("viewBox", "0 0 28 28");
+    s.innerHTML = '<rect x="1" y="1" width="26" height="26" rx="6" fill="var(--accent)"></rect><path class="logo-curve" d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path><circle class="logo-dot" cx="22" cy="8" r="2" fill="var(--surface)"></circle>';
+    wrap.append(s);
+    return wrap;
+  }
+  function placeMarks() {
+    document.querySelectorAll(".view > .vhead > .eyebrow").forEach((e) => { if (!e.querySelector(".vmark")) e.prepend(markEl("vmark")); });
+    document.querySelectorAll(".view > .foot").forEach((f) => {
+      if (f.previousElementSibling && f.previousElementSibling.classList.contains("mark-end")) return;
+      const end = h("div", "mark-end");
+      end.setAttribute("aria-hidden", "true");
+      end.append(markEl("brand-mark"), h("span", null, "Buildout"));
+      f.before(end);
+    });
+  }
 
   /* ---------- DOM and SVG helpers ---------- */
   function h(tag, cls, txt) {
@@ -4198,7 +4469,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   // vertical bars over categories; a row may carry { lo, hi } to draw a range instead of a bar
   function noData(box, msg) {
     const e = h("div", "empty");
-    e.append(h("strong", null, msg || "No data yet."), h("span", null, "The chart fills in when the daily run supplies it."));
+    e.append(markEl("vmark"), h("strong", null, msg || "No data yet."), h("span", null, "The chart fills in when the daily run supplies it."));
     box.replaceChildren(e);
   }
   function barsV(box, rows, cfg = {}) {
@@ -4584,6 +4855,11 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     { id: "cash-eps", term: "Cash EPS", def: "Earnings per share after setting depreciation to economic life, counting stock pay as pay, expensing capitalized software and crediting deferred revenue.", at: "bsc-title" },
     { id: "moonbag", term: "Moonbag", def: "What is left of a winner after selling enough to recover the original cost: a free position on the right tail.", at: "bsz-title" },
     { id: "student-t", term: "Student-t", def: "A bell-shaped distribution with fat tails. Fitted to 155 years of monthly stocks, it has about 3.8 degrees of freedom.", at: "bst-title" },
+    { id: "abduction", term: "Abduction", alt: ["inference to the best explanation"], def: "Reasoning from effects back to causes: which root shocks, taken together, best explain every reading at once. The brain solves it exactly as a ridge regression of the readings on the root causes.", at: "brt-title" },
+    { id: "mutual-information", term: "Mutual information", alt: ["information gain"], def: "How much learning one thing is expected to reduce doubt about another, in bits or nats. The brain and the Field desk use it to pick what to look at next.", at: "brt-title" },
+    { id: "do-intervention", term: "Doing vs seeing", alt: ["intervention"], def: "Setting a value cuts its causes, so only what lies downstream moves; seeing the same value also tells you something about its causes. The gap is what the observation signals.", at: "brt-title" },
+    { id: "three-clocks", term: "Three clocks", def: "When something happened (economic), when a series or filing shows it (publication), and when prices reflect it (market). Field observations record the first two.", at: "fdc-title" },
+    { id: "hearsay", term: "Hearsay", def: "A claim relayed by someone who did not see it. On the Field desk it can raise a question but never settle one.", at: "fdn-title" },
     { id: "heat-score", term: "Heat score", alt: ["niche skew"], def: "How unusual today's mentions of a theme are against its last 28 days; niche skew is how much of the talk comes from sources few people read.", at: "nws-title" },
   ];
 
@@ -4662,6 +4938,9 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   ];
 
   const FAQ = [
+    { g: "v0.8", q: "Does the brain actually think?", a: "It reasons in four exact steps. It explains (which root shocks fit every reading at once, and which single cause is most likely against \"nothing happened\"), deduces (what must then be true of each holding and the book, with uncertainty), doubts (which reading it cannot explain and which link is most to blame), and asks (which unobserved node would best separate the explanations it cannot tell apart). Every step is linear algebra on a published graph, checked against Python." },
+    { g: "v0.8", q: "Why is an anecdote not a signal?", a: "Because it has no date, no denominator, no baseline and no competing explanation until someone writes them down. The Field desk forces those fields, compares the explanations by Bayes' rule, and registers each unusual indicator with its target and horizon before it is tested, so a lucky story cannot quietly become a rule." },
+    { g: "v0.8", q: "Can the MCP server trade?", a: "No. It has eight tools and none places, routes or cancels an order. create_order_proposal returns a hashed proposal marked unexecuted for a person to review. The server refuses the private config with real positions; tests check both." },
     { g: "v0.7", q: "Is the solver a forecast?", a: "No. It turns stated assumptions (scenarios, their priors and the likelihood of each signal) into a choice that respects your loss limit, and shows which assumption moves that choice. The scenarios and likelihoods are labelled Assumed and Hypothesis; the signals are Observed; covariances are Estimated." },
     { g: "v0.7", q: "Why does the solver hold less equity than the engine's size?", a: "Different questions. The engine sizes the equity book to a volatility target and a drawdown cap. The solver asks what keeps the worst of seven 3-month scenarios inside a loss limit while growing fastest. With a 15% limit and a liquidity crash on the list, the full book fails; the solver cuts equity, adds put spreads and gold, and says which signal would change that." },
     { g: "v0.7", q: "What is game theory doing in a risk tool?", a: "Other players set the prices the book lives on. The builders' capex race explains why returns on capacity fall even when demand is strong; the crowded-exit game gives the threshold at which a crowded trade runs; Kyle's model prices what your own order reveals. Each is solved exactly and labelled with its assumptions." },
@@ -4721,6 +5000,15 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     { g: "v0.6", q: "Why does the challenge simulator's pass rate jump around?", a: "Because the rules are discrete. Above a certain risk per trade, one day of losses breaches the daily limit, and the number of winning trades needed to reach the target falls one whole trade at a time. The risk that maximizes the pass rate sits just below such a step." },
     { g: "v0.6", q: "Is market making just collecting the spread?", a: "No. The spread pays for adverse selection and inventory risk. The simulator shows that skewing quotes for inventory gives up a little average profit for much less risk, and the adverse-selection tool shows why uninformed retail flow is worth paying for." },
   ];
+
+  METHODS.push({ group: "The brain thinks, and the Field desk (v0.8)", items: [
+    { name: "Abduction", f: "ŝ = (A′A + λI)<sup>−1</sup>A′y, A = T[observed, roots], λ = σ<sub>obs</sub>²/σ<sub>prior</sub>², Cov = σ<sub>obs</sub>²(A′A + λI)<sup>−1</sup>", say: "T = Σ<sub>k≤K</sub>(W′)<sup>k</sup>. The root shocks that best explain every reading at once, with their uncertainty and the share of the readings they explain.", where: "thinking.py · The brain" },
+    { name: "Competing single causes", f: "y | cause j ~ N(0, σ<sub>obs</sub>²I + σ<sub>prior</sub>²a<sub>j</sub>a<sub>j</sub>′); ln p by Sherman-Morrison and the determinant lemma", say: "Each root alone, plus noise only, ranked by exact evidence with equal priors. Two causes with near-equal evidence are flagged as indistinguishable.", where: "thinking.py · The brain" },
+    { name: "What to look at next", f: "I(H; X<sub>u</sub>) = h(Σ<sub>j</sub> p<sub>j</sub>N(μ<sub>uj</sub>, s<sub>uj</sub>²)) − Σ<sub>j</sub> p<sub>j</sub> ½ln(2πe s<sub>uj</sub>²)", say: "Mixture entropy by 801-point quadrature; the unobserved node whose value best separates the explanations.", where: "thinking.py · The brain" },
+    { name: "Criticism", f: "r = (y − Aŝ)/σ<sub>obs</sub>; ∂‖r‖²/∂w<sub>e</sub> by finite difference", say: "The reading the map cannot explain, and the link whose change would cut the misfit fastest.", where: "thinking.py · The brain" },
+    { name: "Doing vs seeing", f: "do(x<sub>i</sub> = v): T<sub>cut</sub>[:, i]·v with i's incoming links removed; seeing: re-abduce with y<sub>i</sub> = v", say: "Setting a value moves only its descendants; observing it also updates its causes.", where: "thinking.py · The brain" },
+    { name: "Comparing explanations", f: "P(h | e) ∝ P(h)Π P(e<sub>k</sub> | h); value of checking e = H(h) − E<sub>e</sub>[H(h | e)] in bits", say: "Judged likelihoods per explanation; the unchecked evidence ranked by expected information.", where: "field.py · Field" },
+  ] });
 
   METHODS.push({ group: "The solver, game theory and the policy contract (v0.7)", items: [
     { name: "Tempered Bayes", f: "π<sub>s</sub> ∝ prior<sub>s</sub> · Π<sub>drivers d</sub> exp(mean<sub>i∈d</sub> ln L<sub>i</sub>(o<sub>i</sub> | s))", say: "Seven signals, seven 3-month scenarios. Signals that share a driver are averaged, not multiplied, so one cause is counted once. Likelihoods are hypotheses, published on the page.", where: "reasoner.py · Solve" },
@@ -4943,6 +5231,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   ];
 
   const CHANGELOG = [
+    ["v0.8", "Oct 21, 2026", "Built from the fifth project review, and the brain thinks. The brain grew to 34 parts and about 110 links, down to every holding and the model book, and reasons in steps you can watch: observe, explain (abduction and competing single causes against noise only), infer, deduce, doubt (the reading it cannot explain and the link most to blame), apply to the book, look next (mutual information), and what would change its mind; doing and seeing are kept apart. A Field desk turns anecdotes into dated, sourced observations on three clocks, compares explanations with the evidence that separates them, registers ten unusual indicators before testing, and monitors expected events without reading silence as news; a note can become an observation in the brain. The solver gained a decision boundary across loss limits and tilts, an uncertainty breakdown and a leave-one-out test, and records its decision with a content hash. Today shows each headline's previous value and a quiet state. The logo marks every desk. The engine is now an MCP server with eight research and proposal tools and no way to trade."],
     ["v0.7", "Oct 21, 2026", "Built from the third project review. Correctness: one NAV and return convention (costs inside the first return, Sharpe over accrued cash, next-session fills, every variant on the same dates, a cash-only baseline); one versioned hedge policy (hedge.tlt.v2) shared by the recommendation, its text and the backtest; Kelly is a check, not a size input; a portfolio gross limit that includes the bond leg; effective risk contributors and effective independent bets reported separately; trims labelled as examples. Evidence: the hedge line is chosen on training data only, walked forward, bootstrapped and tested on an untouched decade, and can come back as no reliable threshold; the inflation gate adds no out-of-sample value over the correlation rule since 1901, and the page says so. Fundamentals: one effective dataset where newer filings replace snapshot fields and every dependent view redraws; descriptive coverage categories replace the Minsky labels. The engine: a solver (tempered Bayes, a constrained growth search over 18,414 portfolios, four alternatives with regret, a zero-sum game against Nature, value of information, reverse stress), game theory (capex race, crowded exit, Kyle, a Nash solver, a prediction-market ladder), a fill-quality lab, and an exact calculator in search. Today opens with the question, the answer and its evidence labels."],
     ["v0.6", "Oct 21, 2026", "The brain: twenty-one parts of the system and forty-eight signed links, eleven measured in two regimes, with propagation by order, loops, load-bearing links, Monte Carlo robustness, the inverse problem and PM or quant modes. Noteworthy: ten trends on the curve from niche to consensus, each with a bottom line, numbers and a watch list, linked to X, Substack and Telegram, plus a feed scraper that scores heat, niche skew and lead time. Trading: prop (edge, challenge simulator, pod economics) and market making (Avellaneda-Stoikov, adverse selection, square-root impact and Almgren-Chriss). Buyside 2026: the field manual as engine modules (regime and gross, hedge selector, Student-t shortfall, replays, red flags, credit stress, reverse DCF) and a reconciliation with the data. Today: risk rings, what changed since your last visit, a morning check-in. 91 data sources."],
     ["v0.5", "Oct 21, 2026", "The decision layer. Six sections with grouped desks. Today opens with a three-line brief and a system map. Decide: seven decisions traced from data to rule to action with confidence and distance to a flip, rates of change for eleven signals, fifteen weighted assumptions, known knowns to unknown unknowns, and five shocks run to the fourth order. Journal: a private decision tracker with Kelly sizing, a locked forecast, after-action reviews and a luck-or-skill scorecard. Swans: fat tails since 1871, twelve named swans, Taleb's toolkit and the compound-growth test. Fundamentals from 10-K and 10-Q facts: Minsky stages, paper profits, the depreciation wave, backlog and server lives. Physics: watts, the grid, booms as a share of GDP, megaproject base rates. Findings: eight original results on 155 years of data. Legends: twenty lenses on today's data. Math lab: seven toys. Show-the-math toggle. Fixed: a missing October 2025 CPI print had turned recent 12-month inflation into 13 months; Shiller's preliminary CPI and a stray 2019 yield no longer override the official series."],
@@ -5479,7 +5768,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   function errorState(box, title, detail) {
     if (!box) return;
     const e = h("div", "empty error");
-    e.append(h("strong", null, title), h("span", null, detail));
+    e.append(markEl("vmark"), h("strong", null, title), h("span", null, detail));
     box.replaceChildren(e);
   }
   // error boundary: one failing panel shows a contained message; the rest of the page keeps working
@@ -6403,7 +6692,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
-    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games" };
+    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
     "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {
@@ -7878,6 +8167,12 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
       status: r.status === "closed" ? "closed" : "open", created: isoOk(r.created) ? r.created : new Date().toISOString(), lockedAt: isoOk(r.lockedAt) ? r.lockedAt : null, edited: !!r.edited,
     };
     if (r.example) out.example = true;
+    // v0.8: the decision record a solver run leaves behind; kept verbatim (bounded), never rewritten
+    if (r.snapshot && typeof r.snapshot === "object") {
+      try { const js = JSON.stringify(r.snapshot); if (js.length < 60000) out.snapshot = JSON.parse(js); } catch (e) { /* drop a malformed snapshot */ }
+    }
+    if (typeof r.hash === "string" && /^[a-z0-9:]{8,80}$/.test(r.hash)) out.hash = r.hash;
+    if (Array.isArray(r.revisions)) out.revisions = r.revisions.slice(0, 200).map((v) => ({ at: isoOk(v && v.at) ? v.at : null, what: clip(v && v.what, 300) })).filter((v) => v.at);
     if (out.status === "closed") {
       out.closed = date(r.closed) || todayIso();
       out.ret = num(r.ret, -10, 10, 0);
@@ -7979,6 +8274,12 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     const rec = cleanRecord(r);
     if (!rec || rec.example) return null;
     const i = JR.recs.findIndex((x) => x.id === rec.id);
+    if (i >= 0) {                                         // append-only history: every saved change is an event, the original stays visible
+      const old = JR.recs[i], keys = ["title", "hypothesis", "p", "win", "loss", "size", "horizon", "kill", "status", "ret", "right"];
+      const changed = keys.filter((k) => JSON.stringify(old[k]) !== JSON.stringify(rec[k]));
+      if (changed.length) rec.revisions = (old.revisions || []).concat([{ at: new Date().toISOString(), what: `Changed ${changed.join(", ")}${changed.some((k) => JR_LOCKED.includes(k)) && old.lockedAt ? " after logging (the forecast no longer counts as logged before)" : ""}` }]).slice(-200);
+      else rec.revisions = old.revisions || rec.revisions;
+    }
     if (i >= 0) JR.recs[i] = rec; else JR.recs.push(rec);
     if (JR.mode === "cloud" && JR.col) {
       try {
@@ -8069,6 +8370,51 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     r.kill = strip(d.flip).slice(0, 400);
     r.thesis = d.id === "d-names" || d.id === "d-credit" ? "t1" : d.id === "d-inflation" ? "t3" : d.id === "d-tail" ? "t8" : "t2";
     r.direction = d.id === "d-gross" || d.id === "d-names" ? "long" : "hedge";
+  }
+  // the record a solver run leaves: inputs with dates, the alternatives considered, the choice, and a content hash
+  function recordBlock(r) {
+    const S = r.snapshot, d = h("details", "jr-record");
+    d.open = true;
+    d.append(h("summary", null, `Decision record · ${S.model || "solver"} · hash ${String(r.hash || "n/a").slice(0, 22)}`));
+    const inner = h("div", "inner");
+    inner.append(h("p", "hint", `Recorded ${String(S.at || "").slice(0, 16).replace("T", " ")} UTC with policies ${(S.policies || []).join(", ")}. The record is append-only: later changes are listed below with their reason, and the original stays as it was.`));
+    if (Array.isArray(S.alternatives)) inner.append(tableBlock(["Alternative considered", "Equity", "TLT", "Puts", "Gold", "Worst", "Growth"], S.alternatives.map((a) => [a.name, xx(a.port[0]), fx(a.port[1], 1) + "x", fx(a.port[2] * 100, 2) + "%", fx(a.port[3] * 100, 0) + "%", sPct(a.worst, 1), sPct(a.ce, 1)])));
+    if (Array.isArray(S.signals)) inner.append(tableBlock(["Signal at the time", "State", "Value", "As of"], S.signals.map((x) => [x.name, x.state == null ? "unknown" : x.state ? "on" : "off", x.show || "n/a", x.d || "n/a"])));
+    if ((r.revisions || []).length) { const ul = h("ul", "jr-revs"); r.revisions.forEach((v) => ul.append(h("li", null, `${v.at.slice(0, 16).replace("T", " ")}: ${v.what}`))); inner.append(ul); }
+    d.append(inner);
+    return d;
+  }
+  async function contentHash(obj) {
+    const txt = JSON.stringify(obj);
+    try {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+      return "sha256:" + Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+    } catch (e) {
+      let hsh = 0x811c9dc5;
+      for (let i = 0; i < txt.length; i++) { hsh ^= txt.charCodeAt(i); hsh = Math.imul(hsh, 0x01000193) >>> 0; }
+      return "fnv1a:" + hsh.toString(16).padStart(8, "0");
+    }
+  }
+  // turn the solver's current answer into a logged, hashed decision with its alternatives
+  async function recordSolverDecision(R, sig) {
+    const names = { keep: "Keep the exposure", reduce: "Reduce until the limit holds", hedge: "Same equity, best hedge", optimal: "Optimal on the grid" };
+    const alts = ["keep", "reduce", "hedge", "optimal"].filter((k) => R.alts[k]).map((k) => ({ name: names[k], key: k, port: R.alts[k].port, worst: R.alts[k].worst, ce: R.alts[k].ce, feasible: R.alts[k].feasible }));
+    const opt = R.alts.optimal || R.alts.reduce, keep = R.alts.keep;
+    const pBeat = R.post.posterior.reduce((a, p, i) => a + (opt.rets[i] > keep.rets[i] ? p : 0), 0);
+    const snapshot = { model: "reasoner.v1", at: new Date().toISOString(), policies: ["hedge.tlt.v2", "size.equity.v2", "limits.portfolio.v1"], params: { max_loss: R.P.max_loss, max_premium: R.P.max_premium, vix: R.P.vix },
+      signals: sig.map((x) => ({ id: x.id, name: (RZ_SIGNALS.find((s) => s.id === x.id) || {}).name || x.id, state: R.obs[x.id], show: x.show, d: x.d })),
+      posterior: R.post.posterior, scenarios: RZ_SCENARIOS.map((s) => s.id), alternatives: alts, chosen: "optimal", current: R.cur };
+    const hash = await contentHash(snapshot);
+    const horizon = new Date(Date.now() + 91 * 864e5).toISOString().slice(0, 10);
+    const rec = cleanRecord({ title: `Solver: ${portTxt(opt.port)}`, direction: "hedge", instrument: "Model book", thesis: "t2",
+      hypothesis: `Over the next three months the chosen portfolio (${portTxt(opt.port)}) returns more than keeping the exposure (${portTxt(keep.port)}). The solver puts this at ${pct0(pBeat)} under its scenarios.`,
+      horizon, p: clamp(pBeat, 0.01, 0.99), win: Math.max(0.001, Math.abs(opt.mean - keep.mean)), loss: Math.max(0.001, Math.abs(Math.min(...opt.rets.map((v, i) => v - keep.rets[i])))), size: Math.min(1, opt.port[0]),
+      evidence: sig.map((x) => `${(RZ_SIGNALS.find((s) => s.id === x.id) || {}).name || x.id}: ${x.show}${x.d ? " (" + x.d + ")" : ""}`),
+      kill: `Re-decide if the loss limit binds differently or a signal in the ledger flips; the value-of-information table names which.`, snapshot, hash,
+      revisions: [{ at: snapshot.at, what: "Recorded from the solver" }] });
+    rec.lockedAt = new Date().toISOString();
+    const saved = await saveRec(rec);
+    return saved;
   }
   function renderJrForm() {
     const form = $("#jr-form");
@@ -8245,6 +8591,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
       if (r.edited) bar.append(h("span", "jr-note", "Edited after logging"));
     }
     form.append(bar);
+    if (r.snapshot) form.append(recordBlock(r));
     form.querySelectorAll("input, textarea, select").forEach((el) => {
       if (el.id === "jr-f-from") return;
       el.addEventListener("input", () => { mark(); if (el.id === "jr-f-p") pOut.textContent = Math.round(Number(el.value) * 100) + "%"; updateJrCalc(); });
@@ -9236,13 +9583,13 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   const REASON_SNAP = {"factors":["market","ai","dy","oil","gold"],"horizon_months":3,"regimes":{"low_inflation":{"months":383,"cov":[[0.003937971,0.0,3.74153e-05,0.0023211804,-0.0003489643],[0.0,0.015625,0.0,0.0,0.0],[3.74153e-05,0.0,1.37818e-05,0.0001918413,-3.55751e-05],[0.0023211804,0.0,0.0001918413,0.0313852431,0.0012938507],[-0.0003489643,0.0,-3.55751e-05,0.0012938507,0.0036305936]]},"inflation":{"months":57,"cov":[[0.003650743,0.0,-7.67286e-05,-0.0017287668,0.0005839656],[0.0,0.015625,0.0,0.0,0.0],[-7.67286e-05,0.0,1.51523e-05,0.0001681856,-8.1238e-05],[-0.0017287668,0.0,0.0001681856,0.0288959964,0.0004679302],[0.0005839656,0.0,-8.1238e-05,0.0004679302,0.0047653242]]}}};
 
   /* =====================================================================================
-     brain.js (v0.6): the system as a signed, weighted graph. Shocks propagate order by order
+     brain.js (v0.6, v0.8): the system as a signed, weighted graph, and (v0.8) a reasoner over it. Shocks propagate order by order
      (x_k = W' x_k-1), so the desk can show what arrives first, second, third and fourth.
      Eleven edges are measured from monthly data in two regimes (BRAIN_SNAP, or data/brain.json);
      the rest are judged, labelled as such, and editable. Nothing here is a forecast: it is a
      consistent way to carry assumptions to their conclusions, and to see which ones carry the weight.
      ===================================================================================== */
-  // ring 0 = drivers (outside), 1 = transmission, 2 = outcomes (centre); a = angle in degrees, 0 = right, clockwise
+  // ring 0 = drivers (outside), 1 = transmission, 2 = markets, 3 = holdings, 4 = the book (centre); a = angle in degrees, 0 = right, clockwise
   const BR_NODES = [
     { id: "hormuz", n: "Hormuz disruption", s: "Hormuz", ring: 0, a: 205, d: "nw-oil-physical", why: "Tankers through the strait: 4 a day on Oct 4 against 85 before the war (IMF PortWatch via Straits.live)." },
     { id: "oil", n: "Oil, physical", s: "Oil", ring: 0, a: 240, m: "oil", d: "fi-oil", why: "EIA spot Brent, monthly average. Measured edges start here." },
@@ -9251,6 +9598,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     { id: "capex", n: "AI capex", s: "AI capex", ring: 0, a: 342, d: "fund-table", why: "About $725B of 2026 guidance across four hyperscalers (April)." },
     { id: "memory", n: "Memory prices", s: "Memory", ring: 0, a: 22, d: "nw-memory", why: "DDR5 contracts +57% in Q1 and +50% in Q2 2026; HBM sold out for 2026." },
     { id: "power", n: "Grid power prices", s: "Power", ring: 0, a: 58, d: "nw-power", why: "PJM 2027/28 capacity cleared at the cap, about 6.3 GW short of the reliability target." },
+    { id: "aidemand", n: "AI end demand", s: "AI demand", ring: 0, a: 118, d: "nw-saas", why: "Paid use of AI by businesses and consumers: the revenue that has to justify the build." },
     { id: "cpi", n: "Consumer prices", s: "CPI", ring: 1, a: 246, m: "cpi", d: "d-duration", why: "CPI-U: 3.7% over the year to September; 3.6% annualized over three months." },
     { id: "y10", n: "10-year yield", s: "10-year", ring: 1, a: 284, m: "y10", d: "rates-title", why: "5.15% on Oct 19 (Treasury)." },
     { id: "tp", n: "Term premium", s: "Term prem.", ring: 1, a: 318, d: "rates-title", why: "The extra yield for holding duration; supply pushes it up." },
@@ -9260,11 +9608,23 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     { id: "credit", n: "Credit spreads (HY and CCC)", s: "Credit", ring: 1, a: 144, d: "d-credit", why: "CCC 13.10% against high yield 3.29% on Oct 19: cracks at the bottom." },
     { id: "pcredit", n: "Private credit stress", s: "Private credit", ring: 1, a: 180, d: "nw-private-credit", why: "BCRED capped redemptions for a third straight quarter; 10 of 16 non-traded BDCs hit the cap in Q2." },
     { id: "consumer", n: "Consumer spending", s: "Consumer", ring: 1, a: 214, d: "nw-consumer", why: "UMich sentiment 46.3 (Oct preliminary), near its record low." },
+    { id: "dollar", n: "The dollar", s: "Dollar", ring: 1, a: 344, d: "rates-title", why: "Tighter Fed policy lifts the dollar; a strong dollar weighs on gold and on multinational earnings." },
+    { id: "earn", n: "AI earnings revisions", s: "Earnings", ring: 1, a: 77, d: "fund-table", why: "Analysts' estimates for the builders and their suppliers: where demand, capex and depreciation meet the P&L." },
     { id: "eq", n: "AI book and stocks", s: "AI book", ring: 2, a: 90, m: "eq", d: "d-gross", why: "S&P 500 in the measured edges; the AI book carries more beta." },
     { id: "vix", n: "Volatility", s: "VIX", ring: 2, a: 162, m: "vix", d: "iv-title", why: "18.44 on Oct 19." },
     { id: "gold", n: "Gold", s: "Gold", ring: 2, a: 234, m: "gold", d: "d-inflation", why: "$4,319 average in September." },
     { id: "tlt", n: "Long bonds (TLT)", s: "TLT", ring: 2, a: 306, d: "d-duration", why: "Price moves opposite the yield, about 15.5 times as much." },
     { id: "corr", n: "Stock-bond correlation", s: "Corr.", ring: 2, a: 18, d: "fi-hedge", why: "Positive means bonds fall with stocks: the hedge is broken." },
+    { id: "NVDA", n: "Nvidia", s: "NVDA", ring: 3, a: 270, h: 0.14, d: "fund-table", why: "Sells the GPUs: revenue rises with capex." },
+    { id: "AVGO", n: "Broadcom", s: "AVGO", ring: 3, a: 310, h: 0.08, d: "fund-table", why: "Custom accelerators and networking: capex is revenue." },
+    { id: "MSFT", n: "Microsoft", s: "MSFT", ring: 3, a: 350, h: 0.14, d: "fund-table", why: "Spends on the build; earns from cloud and software." },
+    { id: "GOOGL", n: "Alphabet", s: "GOOGL", ring: 3, a: 30, h: 0.14, d: "fund-table", why: "Spends on the build; marks private AI stakes through income." },
+    { id: "AMZN", n: "Amazon", s: "AMZN", ring: 3, a: 70, h: 0.14, d: "fund-table", why: "Largest spender; capex above operating cash flow." },
+    { id: "META", n: "Meta", s: "META", ring: 3, a: 110, h: 0.12, d: "fund-table", why: "Spends on the build, earns from ads: consumer and capex at once." },
+    { id: "ORCL", n: "Oracle", s: "ORCL", ring: 3, a: 150, h: 0.06, d: "fund-table", why: "Debt-funded build against a large backlog: credit matters most here." },
+    { id: "TSLA", n: "Tesla", s: "TSLA", ring: 3, a: 190, h: 0.10, d: "fund-table", why: "Long-duration growth: rates and the consumer." },
+    { id: "SPCX", n: "SpaceX", s: "SPCX", ring: 3, a: 230, h: 0.08, d: "fund-table", why: "Listed June 2026: liquidity and rates set its multiple." },
+    { id: "book", n: "Your model book", s: "Book", ring: 4, a: 90, d: "d-gross", why: "The model book's weights times each holding's response (an approximation in σ units: it ignores diversification)." },
   ];
   // [from, to, judged weight, why, source]; weights are sigma of the child per sigma of the parent, per step.
   // Edges listed in BR_MEASURED take their weight from the data and ignore the judged value.
@@ -9317,6 +9677,42 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     ["oil", "consumer", -0.25, "Gasoline is a tax on spending", "Judged"],
     ["cpi", "corr", 0.50, "Inflation-driven yields make bonds fall with stocks", "Findings: inflation band 2.75 to 4.25%, 1,868 months"],
     ["y10", "tlt", -0.95, "Price moves opposite the yield", "Bond math"],
+    // v0.8: demand, the dollar, earnings, and the holdings (all judged; the book weights are config.toml)
+    ["aidemand", "capex", 0.45, "Demand pulls the build", "Judged"],
+    ["aidemand", "earn", 0.45, "Paid use becomes revenue", "Judged"],
+    ["aidemand", "eq", 0.15, "Growth narratives lift the market", "Judged"],
+    ["capex", "earn", 0.25, "Suppliers book the spend as revenue", "Fundamentals desk"],
+    ["dep", "earn", -0.35, "Depreciation catches up with the spenders' earnings", "Buyside 2026, depreciation table"],
+    ["consumer", "earn", 0.15, "Ads, devices and retail", "Judged"],
+    ["fed", "dollar", 0.35, "Higher rates attract capital", "Judged"],
+    ["dollar", "gold", -0.30, "Gold is priced in dollars", "Judged"],
+    ["dollar", "eq", -0.10, "Overseas earnings translate into fewer dollars", "Judged"],
+    ["eq", "NVDA", 0.55, "Market beta", "Judged; exposures desk"], ["eq", "AVGO", 0.55, "Market beta", "Judged; exposures desk"],
+    ["eq", "MSFT", 0.60, "Market beta", "Judged; exposures desk"], ["eq", "GOOGL", 0.60, "Market beta", "Judged; exposures desk"],
+    ["eq", "AMZN", 0.60, "Market beta", "Judged; exposures desk"], ["eq", "META", 0.55, "Market beta", "Judged; exposures desk"],
+    ["eq", "ORCL", 0.45, "Market beta", "Judged; exposures desk"], ["eq", "TSLA", 0.45, "Market beta", "Judged; exposures desk"],
+    ["eq", "SPCX", 0.35, "Market beta (short history, shrunk toward TSLA)", "Judged; exposures desk"],
+    ["earn", "NVDA", 0.35, "Supplier revenue", "Judged"], ["earn", "AVGO", 0.30, "Supplier revenue", "Judged"],
+    ["earn", "MSFT", 0.25, "Cloud revenue against depreciation", "Judged"], ["earn", "GOOGL", 0.25, "Cloud and search", "Judged"],
+    ["earn", "AMZN", 0.20, "AWS", "Judged"], ["earn", "META", 0.25, "Ads efficiency", "Judged"], ["earn", "ORCL", 0.20, "Backlog conversion", "Judged"],
+    ["earn", "TSLA", 0.10, "Autonomy optionality", "Judged"],
+    ["capex", "NVDA", 0.35, "The build is Nvidia's revenue", "Fundamentals desk"], ["capex", "AVGO", 0.30, "Custom chips and networking", "Judged"],
+    ["capex", "ORCL", 0.15, "Capacity to fill the backlog", "Judged"],
+    ["dep", "MSFT", -0.12, "Depreciation catch-up", "Buyside 2026"], ["dep", "GOOGL", -0.12, "Depreciation catch-up", "Buyside 2026"],
+    ["dep", "AMZN", -0.12, "Depreciation catch-up", "Buyside 2026"], ["dep", "META", -0.15, "Depreciation catch-up", "Buyside 2026"],
+    ["dep", "ORCL", -0.15, "Depreciation catch-up", "Buyside 2026"],
+    ["power", "ORCL", -0.12, "Campuses wait for power", "Judged"], ["power", "MSFT", -0.05, "Power costs", "Judged"], ["power", "AMZN", -0.05, "Power costs", "Judged"],
+    ["memory", "NVDA", -0.08, "HBM costs squeeze margins", "Judged"], ["memory", "META", -0.05, "Server costs", "Judged"],
+    ["credit", "ORCL", -0.25, "Debt-funded build: credit spreads set its cost", "Fundamentals desk: Oracle's net debt"],
+    ["credit", "TSLA", -0.08, "Auto credit", "Judged"], ["credit", "SPCX", -0.15, "Risk appetite for new issues", "Judged"],
+    ["y10", "TSLA", -0.15, "Long-duration growth", "Judged"], ["y10", "SPCX", -0.12, "Long-duration growth", "Judged"], ["y10", "NVDA", -0.05, "Discount rate", "Judged"],
+    ["consumer", "TSLA", 0.20, "Car buyers", "Judged"], ["consumer", "AMZN", 0.12, "Retail", "Judged"], ["consumer", "META", 0.10, "Ad budgets", "Judged"],
+    ["liq", "SPCX", 0.20, "New listings need liquidity", "Judged"],
+    ["pods", "NVDA", -0.15, "The most crowded long", "Judged"], ["pods", "META", -0.10, "Crowded long", "Judged"],
+    ["NVDA", "book", 0.14, "Book weight", "config.toml"], ["AVGO", "book", 0.08, "Book weight", "config.toml"], ["MSFT", "book", 0.14, "Book weight", "config.toml"],
+    ["GOOGL", "book", 0.14, "Book weight", "config.toml"], ["AMZN", "book", 0.14, "Book weight", "config.toml"], ["META", "book", 0.12, "Book weight", "config.toml"],
+    ["ORCL", "book", 0.06, "Book weight", "config.toml"], ["TSLA", "book", 0.10, "Book weight", "config.toml"], ["SPCX", "book", 0.08, "Book weight", "config.toml"],
+    ["tlt", "book", 0.0, "Your TLT hedge (off today: edit it to add one)", "Policy hedge.tlt.v2"],
   ];
   const BR_MEASURED = ["oil>cpi", "oil>y10", "cpi>y10", "oil>eq", "cpi>eq", "y10>eq", "eq>vix", "y10>vix", "oil>gold", "y10>gold", "eq>gold"];
   const BR_PRESETS = [
@@ -9328,10 +9724,15 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     { id: "gpu-life", n: "GPU life reset", shock: { dep: 1.5 } },
     { id: "gates", n: "Private credit gates spread", shock: { pcredit: 1.5 } },
     { id: "supply", n: "Bond supply glut", shock: { fiscal: 1.5 } },
+    { id: "demand-stall", n: "AI demand stalls", shock: { aidemand: -1.5 } },
+    { id: "demand-surprise", n: "AI demand surprise", shock: { aidemand: 1.5 } },
   ];
   const BR_IDX = Object.fromEntries(BR_NODES.map((n, i) => [n.id, i]));
   const BR_DRIVERS = BR_NODES.filter((n) => n.ring === 0).map((n) => n.id);
-  const BR = { preset: "hormuz", shock: { hormuz: 1.5 }, target: "eq", blend: 1, K: 6, dataOnly: false, edits: LS.get("bo-brain-edits", {}) || {}, sel: null, wired: false };
+  const BR_ROOTS = BR_NODES.filter((n) => n.ring === 0 || n.id === "pods" || n.id === "pcredit").map((n) => n.id);
+  const BR_HOLD = BR_NODES.filter((n) => n.ring === 3).map((n) => n.id);
+  const BR = { preset: "hormuz", shock: { hormuz: 1.5 }, target: "book", blend: 1, K: 6, dataOnly: false, edits: LS.get("bo-brain-edits", {}) || {}, sel: null, wired: false,
+    view: "shock", obs: LS.get("bo-brain-obs", {}) || {}, focus: null, thought: null, step: -1, timer: null };
   const ekey = (e) => e[0] + ">" + e[1];
 
   function brainData() { return LIVE.brain && LIVE.brain.regimes ? LIVE.brain : BRAIN_SNAP; }
@@ -9452,8 +9853,270 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     }
     return out;
   }
+  /* ---------- v0.8: the reasoner (mirrors buildout/thinking.py) ---------- */
+  // T = sum_{k=0..K} (W')^k: the effect on every node of a unit shock at every node within K links
+  function brTotal(W, K) {
+    const n = BR_NODES.length;
+    let P = Array.from({ length: n }, (_, i) => { const r = new Float64Array(n); r[i] = 1; return r; });
+    const T = P.map((r) => Float64Array.from(r));
+    for (let k = 0; k < K; k++) {
+      const N = Array.from({ length: n }, () => new Float64Array(n));
+      for (const e of W) if (e.w) { const src = P[e.from], dst = N[e.to]; for (let j = 0; j < n; j++) dst[j] += e.w * src[j]; }
+      P = N;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) T[i][j] += P[i][j];
+    }
+    return T;
+  }
+  function matInv(M) {
+    const n = M.length, A = M.map((r, i) => r.map(Number).concat(Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))));
+    for (let c = 0; c < n; c++) {
+      let p = c;
+      for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      if (Math.abs(A[p][c]) < 1e-14) throw new Error("singular");
+      [A[c], A[p]] = [A[p], A[c]];
+      const pv = A[c][c];
+      for (let k = 0; k < 2 * n; k++) A[c][k] /= pv;
+      for (let r = 0; r < n; r++) if (r !== c && A[r][c] !== 0) { const f = A[r][c]; for (let k = 0; k < 2 * n; k++) A[r][k] -= f * A[c][k]; }
+    }
+    return A.map((r) => r.slice(n));
+  }
+  // the root shocks that best explain what was observed (ridge MAP), with their uncertainty
+  function brAbduce(T, observed, roots, obsSd = 0.5, priorSd = 1.0) {
+    const obs = Object.keys(observed).map(Number).sort((a, b) => a - b), y = obs.map((i) => observed[i]);
+    const A = obs.map((i) => roots.map((r) => T[i][r])), lam = (obsSd / priorSd) ** 2, m = roots.length;
+    const M = Array.from({ length: m }, (_, a) => Array.from({ length: m }, (__, b) => A.reduce((acc, row) => acc + row[a] * row[b], 0) + (a === b ? lam : 0)));
+    const Minv = matInv(M), Aty = roots.map((_, a) => A.reduce((acc, row, i) => acc + row[a] * y[i], 0));
+    const sv = Minv.map((row) => row.reduce((acc, v, b) => acc + v * Aty[b], 0));
+    const cov = Minv.map((row) => row.map((v) => v * obsSd * obsSd));
+    const fit = A.map((row) => row.reduce((acc, v, b) => acc + v * sv[b], 0));
+    const ssy = y.reduce((a, v) => a + v * v, 0), ssr = y.reduce((a, v, i) => a + (v - fit[i]) ** 2, 0);
+    return { obs, y, roots: roots.slice(), s: sv, sd: cov.map((r, i) => Math.sqrt(r[i])), cov, fit, explained: ssy > 0 ? 1 - ssr / ssy : 0 };
+  }
+  function brPredict(T, ab) {
+    const n = T.length, mean = [], sd = [];
+    for (let i = 0; i < n; i++) {
+      const t = ab.roots.map((r) => T[i][r]);
+      mean.push(t.reduce((a, v, j) => a + v * ab.s[j], 0));
+      let v2 = 0;
+      for (let a = 0; a < t.length; a++) for (let b = 0; b < t.length; b++) v2 += t[a] * ab.cov[a][b] * t[b];
+      sd.push(Math.sqrt(Math.max(v2, 0)));
+    }
+    return { mean, sd };
+  }
+  // what the map cannot explain, and the link whose change would cut the misfit fastest
+  function brCriticize(W, K, ab, obsSd = 0.5, hstep = 1e-4) {
+    const sv = ab.s;
+    const misfit = (Wx) => { const T = brTotal(Wx, K); return ab.obs.reduce((a, o, i) => { const f = ab.roots.reduce((acc, r, j) => acc + T[o][r] * sv[j], 0); return a + (ab.y[i] - f) ** 2; }, 0); };
+    const base = misfit(W);
+    const grad = W.map((e, i) => { if (!e.w) return 0; const W2 = W.slice(); W2[i] = Object.assign({}, e, { w: e.w + hstep }); return (misfit(W2) - base) / hstep; });
+    return { resid: ab.y.map((v, i) => (v - ab.fit[i]) / obsSd), misfit: base, grad };
+  }
+  function logEvidence(y, a, obsSd, priorSd) {
+    const n = y.length, s2 = obsSd * obsSd, yy = y.reduce((acc, v) => acc + v * v, 0);
+    if (!a) return -0.5 * (n * Math.log(2 * Math.PI * s2) + yy / s2);
+    const aa = a.reduce((acc, v) => acc + v * v, 0), ay = a.reduce((acc, v, i) => acc + v * y[i], 0), c = s2 + priorSd * priorSd * aa;
+    const q = (yy - (priorSd * priorSd * ay * ay) / c) / s2;
+    return -0.5 * (n * Math.log(2 * Math.PI) + (n - 1) * Math.log(s2) + Math.log(c) + q);
+  }
+  // single-cause hypotheses ranked by exact Bayesian evidence, with "nothing happened" as a contender
+  function brExplanations(T, observed, roots, obsSd = 0.5, priorSd = 1.0) {
+    const obs = Object.keys(observed).map(Number).sort((a, b) => a - b), y = obs.map((i) => observed[i]);
+    const rows = [{ root: null, logev: logEvidence(y, null, obsSd, priorSd), s: 0, s_sd: 0 }];
+    roots.forEach((r) => {
+      const a = obs.map((i) => T[i][r]), aa = a.reduce((acc, v) => acc + v * v, 0), ay = a.reduce((acc, v, i) => acc + v * y[i], 0);
+      const pv = 1 / (aa / (obsSd * obsSd) + 1 / (priorSd * priorSd));
+      rows.push({ root: r, logev: logEvidence(y, a, obsSd, priorSd), s: (pv * ay) / (obsSd * obsSd), s_sd: Math.sqrt(pv) });
+    });
+    const m = Math.max(...rows.map((r) => r.logev)), z = rows.reduce((acc, r) => acc + Math.exp(r.logev - m), 0);
+    rows.forEach((r) => { r.p = Math.exp(r.logev - m) / z; });
+    return rows.sort((a, b) => b.p - a.p);
+  }
+  function mixtureEntropy(ws, mus, sds, grid = 801) {
+    const lo = Math.min(...mus.map((m, i) => m - 7 * sds[i])), hi = Math.max(...mus.map((m, i) => m + 7 * sds[i])), dx = (hi - lo) / (grid - 1);
+    let tot = 0;
+    for (let g = 0; g < grid; g++) {
+      const x = lo + g * dx;
+      let d = 0;
+      for (let k = 0; k < ws.length; k++) d += ws[k] * Math.exp(-0.5 * ((x - mus[k]) / sds[k]) ** 2) / (sds[k] * Math.sqrt(2 * Math.PI));
+      if (d > 0) tot += -d * Math.log(d);
+    }
+    return tot * dx;
+  }
+  // which unobserved node would best tell the explanations apart (mutual information, nats)
+  function brNextObservation(T, hyps, candidates, obsSd = 0.5, top = 6) {
+    const hs = hyps.filter((r) => r.p > 1e-6).slice(0, top), tot = hs.reduce((a, r) => a + r.p, 0), ws = hs.map((r) => r.p / tot);
+    return candidates.map((u) => {
+      const mus = [], sds = [];
+      hs.forEach((r) => {
+        if (r.root == null) { mus.push(0); sds.push(obsSd); return; }
+        const g = T[u][r.root];
+        mus.push(g * r.s); sds.push(Math.sqrt(g * g * r.s_sd * r.s_sd + obsSd * obsSd));
+      });
+      const cond = ws.reduce((a, w, k) => a + w * 0.5 * Math.log(2 * Math.PI * Math.E * sds[k] * sds[k]), 0);
+      return { node: u, info: Math.max(0, mixtureEntropy(ws, mus, sds) - cond), means: mus };
+    }).sort((a, b) => b.info - a.info);
+  }
+  // do(node = v): cut the node's incoming links, then propagate
+  function brIntervene(W, K, node, v) {
+    const T = brTotal(W.filter((e) => e.to !== node), K);
+    return T.map((row) => row[node] * v);
+  }
+  function brShared(T, holdings, roots) {
+    const V = holdings.map((hh) => roots.map((r) => T[hh][r])), nr = V.map((r) => Math.sqrt(r.reduce((a, v) => a + v * v, 0)) || 1);
+    return { sens: V, cos: V.map((a, i) => V.map((b, j) => a.reduce((acc, v, k) => acc + v * b[k], 0) / (nr[i] * nr[j]))) };
+  }
+  function brThink(W, K, observed, rootIds = BR_ROOTS, holdIds = BR_HOLD, obsSd = 0.5, priorSd = 1.0) {
+    const T = brTotal(W, K), roots = rootIds.map((id) => BR_IDX[id]), holds = holdIds.map((id) => BR_IDX[id]);
+    const ab = brAbduce(T, observed, roots, obsSd, priorSd), pr = brPredict(T, ab), cr = brCriticize(W, K, ab, obsSd);
+    const ex = brExplanations(T, observed, roots, obsSd, priorSd);
+    const cand = BR_NODES.map((_, i) => i).filter((i) => !(i in observed));
+    return { T, abduce: ab, predict: pr, criticize: cr, explanations: ex, next: brNextObservation(T, ex, cand, obsSd), shared: brShared(T, holds, roots) };
+  }
+
   const brName = (i) => BR_NODES[i].s;
   const sg = (v, d = 2) => (fin(v) ? (v > 0.0049 ? "+" : v < -0.0049 ? MINUS : "") + fx(Math.abs(v), d) : "n/a");
+
+  /* ---------- v0.8: what the brain observes, and how it reasons about it ---------- */
+  // measured nodes start from their latest 3-month change in standard deviations; the reader can add, change or drop any
+  function brObserved() {
+    const st = brainData().state || {}, out = {}, src = {};
+    BR_NODES.forEach((n, i) => { if (n.m && st[n.m] && fin(st[n.m].z3m)) { out[i] = st[n.m].z3m; src[i] = `data, 3 months to ${st[n.m].month}`; } });
+    Object.entries(BR.obs || {}).forEach(([id, v]) => {
+      const i = BR_IDX[id];
+      if (i == null) return;
+      if (v === "off") { delete out[i]; delete src[i]; } else if (fin(v)) { out[i] = clamp(v, -4, 4); src[i] = "your observation"; }
+    });
+    return { values: out, src };
+  }
+  const nodeList = (ids) => ids.map((i) => BR_NODES[i].s).join(", ");
+  function brTrace(th, ob, W) {
+    const steps = [], ex = th.explanations, ab = th.abduce, pr = th.predict, cr = th.criticize, obsIdx = ab.obs;
+    const name = (i) => BR_NODES[i].n, hyp = (r) => (r.root == null ? "nothing unusual (noise)" : name(r.root));
+    steps.push({ k: "obs", h: "Observe", nodes: obsIdx, t: `${obsIdx.length} readings: ${obsIdx.map((i, j) => `${BR_NODES[i].s} ${sg(ab.y[j], 2)}σ`).join(", ")}. Measured nodes come from the data; your own observations count the same way.` });
+    const top = ex.slice(0, 3);
+    steps.push({ k: "hyp", h: "Explain", nodes: top.filter((r) => r.root != null).map((r) => r.root), t: `Competing single causes, ranked by how well each explains every reading at once: ${top.map((r) => `${hyp(r)} ${pct0(r.p)}${r.root != null ? ` (${sg(r.s, 1)}σ)` : ""}`).join("; ")}.${top.length > 1 && Math.abs(top[0].p - top[1].p) < 0.05 ? ` The readings cannot tell the first two apart: ${hyp(top[0])} and ${hyp(top[1])} leave the same footprint on what is observed.` : ""}` });
+    const strong = ab.roots.map((r, j) => ({ r, s: ab.s[j], sd: ab.sd[j] })).filter((x) => Math.abs(x.s) >= 0.2).sort((a, b) => Math.abs(b.s) - Math.abs(a.s)).slice(0, 4);
+    steps.push({ k: "est", h: "Infer", nodes: strong.map((x) => x.r), t: strong.length ? `Allowing several causes at once, the readings are best explained by ${strong.map((x) => `${name(x.r)} ${sg(x.s, 2)}σ (±${fx(x.sd, 2)})`).join(", ")}. Together they account for ${pct0(Math.max(0, ab.explained))} of the readings.` : `No cause stands out: the readings sit within noise of zero, and the brain says so rather than inventing one.` });
+    const exclude = new Set(obsIdx.concat(ab.roots));
+    const preds = pr.mean.map((m, i) => ({ i, m, sd: pr.sd[i], z: pr.sd[i] > 0 ? Math.abs(m) / pr.sd[i] : 0 })).filter((x) => !exclude.has(x.i) && Math.abs(x.m) > 0.05).sort((a, b) => b.z - a.z).slice(0, 4);
+    steps.push({ k: "est", h: "Deduce", nodes: preds.map((x) => x.i), t: preds.length ? `If that is right, these should also be true now: ${preds.map((x) => `${name(x.i)} ${sg(x.m, 2)}σ (±${fx(x.sd, 2)})`).join(", ")}. Each is a prediction the data can check.` : "The inference implies nothing notable elsewhere." });
+    const rmax = cr.resid.map((r, j) => ({ r, i: obsIdx[j] })).sort((a, b) => Math.abs(b.r) - Math.abs(a.r))[0];
+    const gi = cr.grad.map((g, j) => ({ g: Math.abs(g), e: W[j] })).filter((x) => x.e.w && x.g > 0).sort((a, b) => b.g - a.g)[0];
+    steps.push({ k: "hyp", h: "Doubt", nodes: [rmax ? rmax.i : null, gi ? gi.e.from : null, gi ? gi.e.to : null].filter((x) => x != null),
+      t: `${rmax && Math.abs(rmax.r) >= 1 ? `The map cannot explain ${name(rmax.i)}: it reads ${fx(Math.abs(rmax.r), 1)} noise units ${rmax.r > 0 ? "above" : "below"} what the inferred causes imply.` : "Every reading sits within one noise unit of the inference."}${gi ? ` The link most likely wrong: ${name(gi.e.from)} → ${name(gi.e.to)} (${gi.e.measured ? "measured" : "judged"} ${sg(gi.e.w)}); changing it would cut the misfit fastest.` : ""}` });
+    const b = BR_IDX.book, bs = ab.roots.map((r, j) => ({ r, c: th.T[b][r] * ab.s[j] })).sort((x, y) => Math.abs(y.c) - Math.abs(x.c));
+    const cos = th.shared.cos, pairs = [];
+    BR_HOLD.forEach((a, i) => BR_HOLD.forEach((c, j) => { if (j > i) pairs.push({ a, c, v: cos[i][j] }); }));
+    pairs.sort((x, y) => y.v - x.v);
+    steps.push({ k: "est", h: "Apply to the book", nodes: [b, BR_IDX[pairs[0].a], BR_IDX[pairs[0].c]].concat(bs[0] ? [bs[0].r] : []),
+      t: `The book's implied move is ${sg(pr.mean[b], 2)}σ (±${fx(pr.sd[b], 2)}), mostly through ${bs[0] ? name(bs[0].r) : "n/a"}. ${pairs[0].a} and ${pairs[0].c} repeat the same bet: their sensitivities to the root causes point the same way (cosine ${fx(pairs[0].v, 2)}).` });
+    const nx = th.next[0];
+    if (nx && top.length >= 2 && nx.info > 1e-4) {
+      const hs = ex.filter((r) => r.p > 1e-6).slice(0, 6), i0 = 0, i1 = 1, mid = (nx.means[i0] + nx.means[i1]) / 2;
+      steps.push({ k: "hyp", h: "Look next", nodes: [nx.node], t: `To tell "${hyp(hs[i0])}" from "${hyp(hs[i1])}", watch ${name(nx.node)}: the first implies ${sg(nx.means[i0], 2)}σ, the second ${sg(nx.means[i1], 2)}σ. It carries ${fx(nx.info, 3)} nats about which explanation is right, the most of any unobserved node.` });
+      steps.push({ k: "hyp", h: "Change my mind", nodes: [nx.node], t: `A reading of ${name(nx.node)} ${nx.means[i1] > nx.means[i0] ? "above" : "below"} ${sg(mid, 2)}σ would favour "${hyp(hs[i1])}" over the current leader. Add it as an observation above and the brain re-reasons.` });
+    }
+    return steps;
+  }
+  function brRunThink(W) {
+    const ob = brObserved();
+    if (Object.keys(ob.values).length < 1) { BR.thought = null; return null; }
+    try { BR.thought = brThink(W, BR.K, ob.values); BR.thought.src = ob.src; BR.thought.steps = brTrace(BR.thought, ob, W); } catch (e) { BR.thought = null; }
+    return BR.thought;
+  }
+  function renderThink(W) {
+    const box = $("#br-steps");
+    if (!box) return;
+    const th = BR.thought;
+    box.replaceChildren();
+    if (!th) { box.append(h("li", "none", "Add at least one observation for the brain to reason about.")); return; }
+    th.steps.forEach((st, i) => {
+      const li = h("li", "br-step" + (i === BR.step ? " active" : ""));
+      li.tabIndex = 0;
+      const head = h("div", "br-step-h");
+      head.append(h("b", null, st.h), evTag(st.k));
+      li.append(head, h("p", null, st.t));
+      const pick = () => { BR.step = i; BR.focus = st.nodes; stopThinking(); renderThinkFocus(); };
+      li.addEventListener("click", pick);
+      li.addEventListener("focus", pick);
+      box.append(li);
+    });
+    // observations
+    const ob = brObserved(), ot = $("#br-obs tbody");
+    ot.replaceChildren();
+    Object.keys(ob.values).map(Number).sort((a, b) => a - b).forEach((i) => {
+      const tr = h("tr"), del = h("button", "pill", "Drop");
+      del.type = "button";
+      del.setAttribute("aria-label", `Drop the ${BR_NODES[i].n} observation`);
+      del.addEventListener("click", () => { BR.obs[BR_NODES[i].id] = "off"; LS.set("bo-brain-obs", BR.obs); updateBrain(); });
+      const td = h("td"); td.append(del);
+      tr.append(h("td", null, BR_NODES[i].n), h("td", "r num", sg(ob.values[i], 2) + "σ"), h("td", "cat", ob.src[i]), td);
+      ot.append(tr);
+    });
+    // explanations
+    barsH($("#br-expl"), th.explanations.slice(0, 7).map((r) => ({ label: r.root == null ? "Nothing unusual" : BR_NODES[r.root].n, v: r.p * 100, lbl: pct0(r.p),
+      color: r.root == null ? "var(--muted)" : "var(--s1)", tip: () => [[pct0(r.p), "posterior"], [r.root == null ? "noise only" : `${sg(r.s, 2)}σ ± ${fx(r.s_sd, 2)}`, "implied size of the cause"]] })),
+      { label: "Posterior probability of each single-cause explanation", fmt: (v) => fx(v, 0) + "%", labelW: 190 });
+    // predictions for what was not observed
+    const pt = $("#br-pred tbody");
+    pt.replaceChildren();
+    const obsSet = new Set(th.abduce.obs);
+    th.predict.mean.map((m, i) => ({ m, i, sd: th.predict.sd[i] })).filter((x) => !obsSet.has(x.i)).sort((a, b) => Math.abs(b.m) - Math.abs(a.m)).slice(0, 10).forEach((x) => {
+      const tr = h("tr"), root = th.abduce.roots.includes(x.i);
+      tr.append(h("td", null, BR_NODES[x.i].n), h("td", "r num", sg(x.m, 2) + "σ"), h("td", "r num", "±" + fx(x.sd, 2)), h("td", "cat", root ? "inferred cause" : BR_NODES[x.i].ring === 3 ? "holding" : x.i === BR_IDX.book ? "the book" : "implied"));
+      pt.append(tr);
+    });
+    // next observations
+    const nl = $("#br-next");
+    nl.replaceChildren();
+    th.next.slice(0, 5).forEach((r) => { const li = h("li"); li.append(h("span", null, BR_NODES[r.node].n), h("b", "num", fx(r.info, 3) + " nats")); nl.append(li); });
+    // shared exposure
+    const sh = $("#br-shared");
+    sh.replaceChildren();
+    const thead = h("thead"), hr = h("tr");
+    hr.append(h("th", null, ""));
+    BR_HOLD.forEach((id) => hr.append(h("th", "r", id)));
+    thead.append(hr);
+    const tb = h("tbody");
+    BR_HOLD.forEach((id, i) => {
+      const tr = h("tr");
+      tr.append(h("th", null, id));
+      th.shared.cos[i].forEach((v, j) => { const td = h("td", "r num heat", i === j ? "1" : fx(v, 2)); td.style.background = `color-mix(in srgb, var(--s2) ${Math.round(Math.max(0, v) ** 3 * 45)}%, transparent)`; tr.append(td); });
+      tb.append(tr);
+    });
+    sh.append(thead, tb);
+    const b = BR_IDX.book;
+    barsH($("#br-booksens"), BR_ROOTS.map((id) => ({ label: BR_NODES[BR_IDX[id]].n, v: th.T[b][BR_IDX[id]] })).sort((x, y) => Math.abs(y.v) - Math.abs(x.v)).slice(0, 8)
+      .map((r) => Object.assign(r, { color: r.v < 0 ? "var(--s1)" : "var(--s2)", lbl: sg(r.v, 2) })), { label: "The book's move per 1σ of each root cause", fmt: (v) => sg(v, 2), labelW: 190 });
+    // seeing against doing
+    const sId = Object.keys(BR.shock)[0], sIdx = BR_IDX[sId], size = BR.shock[sId], t = BR_IDX[BR.target];
+    const doing = brIntervene(W, BR.K, sIdx, size)[t];
+    let seeing = NaN;
+    try { const T = th.T, roots = BR_ROOTS.map((id) => BR_IDX[id]); const ab = brAbduce(T, { [sIdx]: size }, roots); seeing = brPredict(T, ab).mean[t]; } catch (e) { seeing = NaN; }
+    $("#br-sd").textContent = `Doing: if ${BR_NODES[sIdx].n} is set to ${sg(size, 1)}σ from outside (its own causes cut), ${BR_NODES[t].n} moves ${sg(doing, 2)}σ. Seeing: if ${BR_NODES[sIdx].n} is merely observed at ${sg(size, 1)}σ, the brain first asks what caused it, and that inference implies ${sg(seeing, 2)}σ. ${fin(seeing) && Math.abs(seeing - doing) > 0.1 ? "The gap is what the observation signals about its causes: a move you cause and a move you see are not the same news." : "Here the two agree: the move carries little news about its causes."}`;
+    $("#br-think-sum").textContent = th.steps[1] ? th.steps[1].t : "";
+  }
+  function renderThinkFocus() {
+    document.querySelectorAll("#br-steps .br-step").forEach((li, i) => li.classList.toggle("active", i === BR.step));
+    drawBrain(BR.lastW, BR.lastRes, BR.lastS, BR.lastT, BR.lastSize);
+  }
+  function stopThinking() { if (BR.timer) { clearInterval(BR.timer); BR.timer = null; } const b = $("#br-think-go"); if (b) b.textContent = "Think it through"; }
+  function startThinking() {
+    stopThinking();
+    if (!BR.thought) return;
+    const motion = !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    BR.view = "think";
+    syncViewButtons();
+    if (!motion) { BR.step = -1; BR.focus = null; renderThinkFocus(); return; }
+    BR.step = 0; BR.focus = BR.thought.steps[0].nodes; renderThinkFocus();
+    const b = $("#br-think-go"); if (b) b.textContent = "Stop";
+    BR.timer = setInterval(() => {
+      BR.step += 1;
+      if (!BR.thought || BR.step >= BR.thought.steps.length) { stopThinking(); BR.step = -1; BR.focus = null; renderThinkFocus(); return; }
+      BR.focus = BR.thought.steps[BR.step].nodes; renderThinkFocus();
+    }, 1600);
+  }
+  function syncViewButtons() { const v = $("#br-view"); if (v) v.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === BR.view ? "true" : "false")); }
 
   /* ---------- render ---------- */
   function buildBrain() {
@@ -9478,6 +10141,19 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     $("#br-w").addEventListener("input", () => { if (!BR.sel) return; BR.edits[BR.sel] = Number($("#br-w").value); LS.set("bo-brain-edits", BR.edits); updateBrain(); });
     $("#br-w-reset").addEventListener("click", () => { if (BR.sel) delete BR.edits[BR.sel]; LS.set("bo-brain-edits", BR.edits); syncEdgeEditor(); updateBrain(); });
     $("#br-reset-all").addEventListener("click", () => { BR.edits = {}; LS.set("bo-brain-edits", BR.edits); syncEdgeEditor(); updateBrain(); });
+    const vw = $("#br-view");
+    if (vw) vw.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { BR.view = b.dataset.v; BR.focus = null; BR.step = -1; stopThinking(); syncViewButtons(); updateBrain(); }));
+    const go = $("#br-think-go");
+    if (go) go.addEventListener("click", () => { if (BR.timer) { stopThinking(); BR.focus = null; BR.step = -1; renderThinkFocus(); } else startThinking(); });
+    const on = $("#br-obs-node");
+    if (on) {
+      BR_NODES.forEach((n) => on.append(new Option(n.n, n.id)));
+      on.value = "credit";
+      $("#br-obs-v").addEventListener("input", () => { $("#br-obs-v-o").textContent = sg(Number($("#br-obs-v").value), 2) + "σ"; });
+      $("#br-obs-v-o").textContent = sg(Number($("#br-obs-v").value), 2) + "σ";
+      $("#br-obs-add").addEventListener("click", () => { BR.obs[on.value] = Number($("#br-obs-v").value); LS.set("bo-brain-obs", BR.obs); BR.view = "think"; syncViewButtons(); updateBrain(); });
+      $("#br-obs-reset").addEventListener("click", () => { BR.obs = {}; LS.set("bo-brain-obs", BR.obs); updateBrain(); });
+    }
     BR.wired = true;
     BR.sel = "y10>eq";
     syncBrainControls();
@@ -9580,41 +10256,56 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
       const st = n.m && brainData().state && brainData().state[n.m];
       return [n.n, sg(res.total[i] + (i === sIdx ? size : 0)), st ? sg(st.z3m, 1) : "n/a", n.m ? "Measured" : "Judged"];
     }), 1);
+    brRunThink(W);
+    Object.assign(BR, { lastW: W, lastRes: res, lastS: sIdx, lastT: t, lastSize: size });
+    guard("The brain's reasoning", () => renderThink(W), $("#br-steps"));
+    syncViewButtons();
     drawBrain(W, res, sIdx, t, size);
     syncEdgeEditor();
   }
 
+  // the Buildout mark: a rounded square, a rising curve and a dot (the same paths as the header logo)
+  function logoMark(parent, x, y, size, attrs = {}) {
+    const g = svg("g", Object.assign({ transform: `translate(${(x - size / 2).toFixed(1)},${(y - size / 2).toFixed(1)}) scale(${(size / 28).toFixed(4)})`, class: "logo-mark" }, attrs), parent);
+    svg("rect", { x: 1, y: 1, width: 26, height: 26, rx: 6, fill: "var(--accent)" }, g);
+    svg("path", { d: "M6 20 C10 19, 12 15, 14 13 S19 8, 22 8", fill: "none", stroke: "var(--surface)", "stroke-width": 2.2, "stroke-linecap": "round", class: "logo-curve" }, g);
+    svg("circle", { cx: 22, cy: 8, r: 2, fill: "var(--surface)" }, g);
+    return g;
+  }
   function drawBrain(W, res, sIdx, t, size) {
     const box = $("#br-svg-box");
-    if (!box || !box.clientWidth) return;
-    const narrow = Wd0() < 560;
-    function Wd0() { return boxWidth(box); }
-    const Wd = boxWidth(box), Hd = narrow ? Math.round(Wd * 1.18) : Math.round(Math.min(680, Math.max(420, Wd * 0.72))), cx = Wd / 2, cy = Hd / 2, R = Math.min(Wd, Hd) / 2 - (narrow ? 30 : 46);
-    const radii = [R, R * 0.64, R * 0.27];
+    if (!box || !box.clientWidth || !W) return;
+    const Wd = boxWidth(box), narrow = Wd < 560;
+    const Hd = narrow ? Math.round(Wd * 1.2) : Math.round(Math.min(760, Math.max(460, Wd * 0.8))), cx = Wd / 2, cy = Hd / 2, R = Math.min(Wd, Hd) / 2 - (narrow ? 30 : 46);
+    const radii = [R, R * 0.77, R * 0.55, R * 0.33, 0];
     const pos = BR_NODES.map((n) => { const a = (n.a * Math.PI) / 180, r = radii[n.ring]; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
-    const resp = BR_NODES.map((_, i) => res.total[i] + (i === sIdx ? size : 0));
+    const th = BR.thought, think = BR.view === "think" && th;
+    const obsSet = think ? new Set(th.abduce.obs) : new Set(), rootS = think ? Object.fromEntries(th.abduce.roots.map((r, j) => [r, th.abduce.s[j]])) : {};
+    const resp = think ? th.predict.mean.slice() : BR_NODES.map((_, i) => res.total[i] + (i === sIdx ? size : 0));
+    if (think) th.abduce.obs.forEach((o, j) => { resp[o] = th.abduce.y[j]; });
+    const focus = BR.focus && BR.focus.length ? new Set(BR.focus) : null;
     box.replaceChildren();
-    const s = svg("svg", { viewBox: `0 0 ${Wd} ${Hd}`, width: Wd, height: Hd, role: "group", "aria-label": "The brain: nodes are parts of the system, lines are signed links; glow shows each node's response to the shock" }, box);
+    const s = svg("svg", { viewBox: `0 0 ${Wd} ${Hd}`, width: Wd, height: Hd, role: "group", "aria-label": think ? "The brain's inference: observed nodes are ringed, inferred causes glow, every other node shows what the inference implies" : "The brain: nodes are parts of the system, lines are signed links; glow shows each node's response to the shock" }, box);
     const defs = svg("defs", {}, s);
     const rg = svg("radialGradient", { id: "br-bg", cx: "50%", cy: "50%", r: "65%" }, defs);
     svg("stop", { offset: "0%", "stop-color": "#1b1640" }, rg); svg("stop", { offset: "55%", "stop-color": "#0d0b22" }, rg); svg("stop", { offset: "100%", "stop-color": "#05050d" }, rg);
     const fl = svg("filter", { id: "br-glow", x: "-80%", y: "-80%", width: "260%", height: "260%" }, defs);
     svg("feGaussianBlur", { stdDeviation: "7" }, fl);
     svg("rect", { x: 0, y: 0, width: Wd, height: Hd, rx: 16, fill: "url(#br-bg)" }, s);
-    radii.forEach((r, i) => svg("circle", { cx, cy, r, fill: "none", stroke: "#3b3670", "stroke-opacity": 0.55 - i * 0.12, "stroke-dasharray": i === 1 ? "2 6" : "none" }, s));
-    // flows: each edge carries |w * x(from)| summed over orders
-    const flow = W.map((e) => res.orders.reduce((a, o, k) => a + Math.abs(e.w * (k === 0 ? (e.from === sIdx ? size : 0) : res.orders[k - 1][e.from])), 0));
+    radii.slice(0, 4).forEach((r, i) => svg("circle", { cx, cy, r, fill: "none", stroke: "#3b3670", "stroke-opacity": 0.55 - i * 0.1, "stroke-dasharray": i % 2 ? "2 6" : "none" }, s));
+    // flows: in the shock view, |w x(from)| summed over orders; in the inference view, |w x(from)| at the inferred state
+    const flow = W.map((e) => (think ? Math.abs(e.w * resp[e.from]) : res.orders.reduce((a, o, k) => a + Math.abs(e.w * (k === 0 ? (e.from === sIdx ? size : 0) : res.orders[k - 1][e.from])), 0)));
     const maxF = Math.max(1e-9, ...flow);
     const gE = svg("g", {}, s);
     W.forEach((e, i) => {
       if (!e.w) return;
       const [x1, y1] = pos[e.from], [x2, y2] = pos[e.to];
-      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, pull = 0.35;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, pull = 0.3;
       const qx = mx + (cx - mx) * pull, qy = my + (cy - my) * pull;
       const d = `M${x1.toFixed(1)},${y1.toFixed(1)} Q${qx.toFixed(1)},${qy.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
-      const f = flow[i] / maxF, active = f > 0.04;
+      const f = flow[i] / maxF, active = f > 0.04, dim = focus && !(focus.has(e.from) && focus.has(e.to));
       const col = e.w > 0 ? "#ff9e5e" : "#5ec8ff";
-      const p = svg("path", { d, fill: "none", stroke: col, "stroke-width": (0.6 + 3.2 * Math.min(1, Math.abs(e.w))).toFixed(2), "stroke-opacity": (active ? 0.35 + 0.6 * f : 0.16).toFixed(2), class: "br-edge" + (active ? " flow" : "") + (e.key === BR.sel ? " sel" : "") + (e.measured ? "" : " judged") }, gE);
+      const p = svg("path", { d, fill: "none", stroke: col, "stroke-width": (0.5 + 3 * Math.min(1, Math.abs(e.w))).toFixed(2), "stroke-opacity": (dim ? 0.06 : active ? 0.32 + 0.6 * f : 0.13).toFixed(2), class: "br-edge" + (active && !dim ? " flow" : "") + (e.key === BR.sel ? " sel" : "") + (e.measured ? "" : " judged") }, gE);
       if (active) p.style.animationDuration = (2.6 - 1.9 * f).toFixed(2) + "s";
       const hit = svg("path", { d, fill: "none", stroke: "transparent", "stroke-width": 12, class: "br-hit", tabindex: "-1", "aria-label": `${BR_NODES[e.from].n} to ${BR_NODES[e.to].n}: ${sg(e.w)}` }, gE);
       hit.addEventListener("click", () => { BR.sel = e.key; syncEdgeEditor(); updateBrain(); $("#br-w").focus(); });
@@ -9622,28 +10313,39 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     });
     const maxR = Math.max(0.05, ...resp.map(Math.abs));
     BR_NODES.forEach((n, i) => {
-      const [x, y] = pos[i], v = resp[i], m = Math.abs(v) / maxR;
-      const g = svg("g", { class: "br-node", tabindex: "0", role: "button", "aria-label": `${n.n}: response ${sg(v)} sigma. Enter shocks it; T makes it the target.` }, s);
+      const [x, y] = pos[i], v = resp[i], m = Math.abs(v) / maxR, dim = focus && !focus.has(i);
+      const g = svg("g", { class: "br-node" + (dim ? " dim" : "") + (focus && focus.has(i) ? " focus" : ""), tabindex: "0", role: "button",
+        "aria-label": `${n.n}: ${think ? (obsSet.has(i) ? "observed" : i in rootS ? "inferred cause" : "implied") : "response"} ${sg(v)} sigma. Enter shocks it; T makes it the target.` }, s);
       const warm = v > 0, hue = warm ? "#ff7a59" : "#45b8ff";
       if (m > 0.02) {
-        const halo = svg("circle", { cx: x, cy: y, r: (14 + 30 * m).toFixed(1), fill: hue, opacity: (0.25 + 0.5 * m).toFixed(2), filter: "url(#br-glow)", class: "br-halo" }, g);
+        const halo = svg("circle", { cx: x, cy: y, r: ((n.ring === 4 ? 26 : n.ring === 3 ? 9 : 14) + (n.ring === 3 ? 18 : 30) * m).toFixed(1), fill: hue, opacity: (0.22 + 0.5 * m).toFixed(2), filter: "url(#br-glow)", class: "br-halo" }, g);
         halo.style.animationDuration = (3.2 - 1.6 * m).toFixed(2) + "s";
       }
-      const core = n.ring === 2 ? 13 : 11;
-      svg("circle", { cx: x, cy: y, r: core, fill: "#151233", stroke: i === sIdx ? "#ffd166" : i === t ? "#ffffff" : n.m ? "#9fe3c9" : "#8f88c9", "stroke-width": i === sIdx || i === t ? 2.6 : 1.4, "stroke-dasharray": i === t && i !== sIdx ? "3 2" : "none" }, g);
-      svg("circle", { cx: x, cy: y, r: Math.max(2.5, core * 0.45 * Math.min(1, m + 0.2)), fill: m > 0.02 ? hue : "#5b5591" }, g);
-      const right = Math.cos((n.a * Math.PI) / 180) >= -0.2, below = narrow || n.ring === 2;
-      const lx = below ? Math.min(Wd - 34, Math.max(34, x)) : x + (right ? core + 6 : -core - 6), ly = below ? y + core + 12 : y + 4;
-      const anchor = below ? "middle" : right ? "start" : "end";
-      const lab = text(g, lx, ly, n.s, "br-label" + (narrow ? " small" : ""), anchor);
-      if (m > 0.02 && (!narrow || m > 0.3 || i === sIdx || i === t)) text(g, lx, ly + (narrow ? 11 : 13), sg(v) + "σ", "br-val" + (warm ? " warm" : " cool") + (narrow ? " small" : ""), anchor);
-      lab.setAttribute("font-weight", i === sIdx || i === t ? "700" : "500");
-      const pick = (asTarget) => { if (asTarget) BR.target = n.id; else { BR.preset = null; BR.shock = { [n.id]: Number($("#br-size").value) || 1 }; } syncBrainControls(); updateBrain(); };
+      if (n.ring === 4) {
+        const L = narrow ? 34 : 46;
+        svg("circle", { cx: x, cy: y, r: L * 0.78, fill: "#151233", stroke: i === t ? "#ffffff" : "#8f88c9", "stroke-width": i === t ? 2.4 : 1.2, "stroke-dasharray": i === t ? "3 2" : "none" }, g);
+        logoMark(g, x, y, L * 0.82);
+        text(g, x, y + L * 0.78 + 13, `${n.s} ${sg(v)}σ`, "br-label" + (narrow ? " small" : ""), "middle").setAttribute("font-weight", "700");
+      } else {
+        const core = n.ring === 2 ? 12 : n.ring === 3 ? 8 : 10;
+        if (think && obsSet.has(i)) svg("circle", { cx: x, cy: y, r: core + 5, fill: "none", stroke: "#ffffff", "stroke-width": 1.4, "stroke-opacity": 0.9 }, g);
+        if (think && i in rootS && Math.abs(rootS[i]) >= 0.2) svg("circle", { cx: x, cy: y, r: core + 9, fill: "none", stroke: "#ffd166", "stroke-width": 1.6, "stroke-dasharray": "2 3", class: "br-root" }, g);
+        svg("circle", { cx: x, cy: y, r: core, fill: "#151233", stroke: !think && i === sIdx ? "#ffd166" : i === t ? "#ffffff" : n.m ? "#9fe3c9" : n.ring === 3 ? "#c9c3ff" : "#8f88c9", "stroke-width": (!think && i === sIdx) || i === t ? 2.6 : 1.4, "stroke-dasharray": i === t && i !== sIdx ? "3 2" : "none" }, g);
+        svg("circle", { cx: x, cy: y, r: Math.max(2, core * 0.45 * Math.min(1, m + 0.2)), fill: m > 0.02 ? hue : "#5b5591" }, g);
+        const right = Math.cos((n.a * Math.PI) / 180) >= -0.2, below = narrow || n.ring >= 2;
+        const lx = below ? Math.min(Wd - 34, Math.max(34, x)) : x + (right ? core + 6 : -core - 6), ly = below ? y + core + 12 : y + 4;
+        const anchor = below ? "middle" : right ? "start" : "end";
+        const lab = text(g, lx, ly, n.s, "br-label" + (narrow || n.ring === 3 ? " small" : ""), anchor);
+        if (m > 0.02 && (!narrow || m > 0.3 || i === sIdx || i === t) && (n.ring !== 3 || m > 0.25)) text(g, lx, ly + (narrow || n.ring === 3 ? 11 : 13), sg(v) + "σ", "br-val" + (warm ? " warm" : " cool") + (narrow || n.ring === 3 ? " small" : ""), anchor);
+        lab.setAttribute("font-weight", i === sIdx || i === t ? "700" : "500");
+      }
+      const pick = (asTarget) => { if (asTarget) BR.target = n.id; else { BR.preset = null; BR.view = "shock"; BR.shock = { [n.id]: Number($("#br-size").value) || 1 }; } syncBrainControls(); updateBrain(); };
       g.addEventListener("click", (ev) => pick(ev.shiftKey || ev.altKey));
       g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(false); } else if (ev.key === "t" || ev.key === "T") { ev.preventDefault(); pick(true); } });
-      bindTip(g, () => [[`${sg(v)}σ`, `${n.n}${n.m ? " · measured node" : ""}. ${n.why}`]]);
+      bindTip(g, () => [[`${sg(v)}σ`, `${n.n}${think ? (obsSet.has(i) ? " · observed" : i in rootS ? " · inferred cause" : " · implied by the inference") : n.m ? " · measured node" : ""}. ${n.why}`]]);
     });
-    text(s, 14, Hd - 12, narrow ? "Tap a node to shock it · tap a line to edit it" : "Click a node to shock it · shift-click to make it the target · click a line to edit it", "br-hintline", "start");
+    const step = think && BR.step >= 0 && th.steps[BR.step];
+    text(s, 14, Hd - 12, step ? `${BR.step + 1}. ${step.h}` : think ? (narrow ? "Inference: ringed = observed, dashed gold = inferred cause" : "Inference view: ringed nodes are observed, dashed gold rings are inferred causes, everything else is implied") : narrow ? "Tap a node to shock it · tap a line to edit it" : "Click a node to shock it · shift-click to make it the target · click a line to edit it", "br-hintline", "start");
   }
   function renderBrainMeasured() {
     const t = $("#br-meas");
@@ -10703,11 +11405,64 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
       : "The book has no exposure to these factors.";
     fixChartRoles($("#view-solve"));
   }
+  /* ---------- v0.8: the boundary of the decision, its robustness, and five kinds of uncertainty ---------- */
+  const BND_TILTS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3], BND_LOSSES = [0.05, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20, 0.25, 0.30, 0.35];
+  function renderBoundary() {
+    const box = $("#rz-bnd");
+    if (!box || !RZ_LAST) return;
+    const R = RZ_LAST, grid = rzBoundary(R.post.posterior, RZ_SCENARIOS, R.P, BND_TILTS, BND_LOSSES), opt = R.alts.optimal;
+    let agree = 0, tot = 0;
+    grid.forEach((row) => row.forEach((c) => { if (c) { tot += 1; if (opt && Math.abs(c.port[0] - opt.port[0]) <= 0.1 + 1e-9) agree += 1; } }));
+    const W = boxWidth(box), padL = 54, padB = 40, padT = 10, cw = (W - padL - 10) / BND_TILTS.length, chh = 26, Hh = padT + chh * BND_LOSSES.length + padB;
+    box.replaceChildren();
+    const sv = svg("svg", { viewBox: `0 0 ${W} ${Hh}`, width: W, height: Hh, role: "img", "aria-label": `Decision boundary: optimal equity by downside odds and loss limit. The current choice holds in ${tot ? Math.round((agree / tot) * 100) : 0}% of the grid.` }, box);
+    const col = (e) => `color-mix(in srgb, var(--q5) ${Math.round((e / 1.5) * 100)}%, var(--q1))`;
+    BND_LOSSES.forEach((L, i) => {
+      const y = padT + (BND_LOSSES.length - 1 - i) * chh;
+      text(sv, padL - 8, y + chh / 2 + 4, `${Math.round(L * 100)}%`, "ax", "end");
+      BND_TILTS.forEach((f, j) => {
+        const c = grid[i][j], x = padL + j * cw;
+        const r = svg("rect", { x: x + 1, y: y + 1, width: cw - 2, height: chh - 2, rx: 4, fill: c ? col(c.port[0]) : "var(--grid)" }, sv);
+        if (c) text(sv, x + cw / 2, y + chh / 2 + 4, `${fx(c.port[0], 2)}${c.port[2] > 0 ? "·p" : ""}`, c.port[0] > 0.8 ? "bnd-l dark" : "bnd-l", "middle");
+        const here = Math.abs(f - 1) < 1e-9 && Math.abs(L - R.P.max_loss) < 1e-9;
+        if (here) svg("rect", { x: x + 1, y: y + 1, width: cw - 2, height: chh - 2, rx: 4, fill: "none", stroke: "var(--ink)", "stroke-width": 2.2 }, sv);
+        bindTip(r, () => [[c ? `${xx(c.port[0])} equity` : "nothing feasible", `downside odds ×${f}, loss limit ${Math.round(L * 100)}%`], [c ? `TLT ${fx(c.port[1], 1)}x · puts ${fx(c.port[2] * 100, 2)}% · gold ${fx(c.port[3] * 100, 0)}%` : "", "rest of the portfolio"]]);
+      });
+    });
+    BND_TILTS.forEach((f, j) => text(sv, padL + j * cw + cw / 2, Hh - padB + 16, `×${f}`, "ax", "middle"));
+    text(sv, padL + (W - padL) / 2, Hh - 6, "Odds on the four downside scenarios, times today's posterior", "ax", "middle");
+    $("#rz-bnd-out").textContent = `The current choice (${opt ? xx(opt.port[0]) : "n/a"} equity, within 0.10x) is optimal in ${tot ? Math.round((agree / tot) * 100) : 0}% of the ${tot} assumption pairs tested. That is scenario robustness across stated assumptions, not a probability. "·p" marks cells that buy put spreads. Your current limit and today's odds are outlined.`;
+    RZ_LAST.robust_share = tot ? agree / tot : NaN;
+    renderUncertainty();
+  }
+  function renderUncertainty() {
+    const box = $("#rz-unc");
+    if (!box || !RZ_LAST) return;
+    const R = RZ_LAST, sig = observeSignals(), live = sig.filter((x) => x.live).length, known = sig.filter((x) => x.on != null).length;
+    const H = -R.post.posterior.reduce((a, p) => a + (p > 0 ? p * Math.log(p) : 0), 0) / Math.log(R.post.posterior.length);
+    const opt = R.alts.optimal, spread = opt ? Math.max(...opt.rets) - Math.min(...opt.rets) : NaN;
+    const mm = R.alts.minimax_regret, robustPick = R.robust.names[R.robust.mix.indexOf(Math.max(...R.robust.mix))];
+    const loo = rzLeaveOneOut(R.pri, RZ_SIGNALS, R.obs, RZ_SCENARIOS, R.P), flipsFam = loo.filter((x) => x.used && !x.same);
+    const flipSig = R.voi ? R.voi.signals.filter((x) => x.flip_changes_choice) : [];
+    const months = R.cov.regimes.inflation ? R.cov.regimes.inflation.months : null;
+    const grade = (bad, mid) => (bad ? ["High", "bad"] : mid ? ["Medium", "warn"] : ["Low", "good"]);
+    const rows = [
+      ["Data quality", grade(known < 5, live < known), `${known} of ${sig.length} signals observed, ${live} from the latest daily files; the rest from the dated snapshot.`],
+      ["Forecast uncertainty", grade(H > 0.85, H > 0.6), `Posterior entropy ${fx(H, 2)} of its maximum; the chosen portfolio's 3-month outcomes span ${fx(spread * 100, 1)} points across scenarios.`],
+      ["Model disagreement", grade(mm !== "optimal" && robustPick !== "optimal", mm !== "optimal" || robustPick !== "optimal"), `Growth-optimal picks "optimal"; minimax regret picks "${mm}"; the game against Nature leans to "${robustPick}".`],
+      ["Assumption sensitivity", grade(flipSig.length >= 3 || (fin(R.robust_share) && R.robust_share < 0.3), flipSig.length >= 1 || flipsFam.length >= 1), `${flipSig.length} signal${flipSig.length === 1 ? "" : "s"} would flip the choice; dropping ${flipsFam.length ? flipsFam.map((x) => `the ${x.family} family`).join(" or ") : "no single evidence family"} changes it${fin(R.robust_share) ? `; robust in ${pct0(R.robust_share)} of the boundary grid` : ""}.`],
+      ["Applicability", grade(months != null && months < 36, months != null && months < 120), `Covariances for the current regime rest on ${months || "n/a"} months; scenarios and likelihoods are assumptions, not fitted to these conditions.`],
+    ];
+    box.replaceChildren(tableBlock(["Dimension", "Level", "Why"], rows.map(([k, [lvl], why]) => [k, lvl, why])));
+    box.querySelectorAll("tbody tr").forEach((tr, i) => { const td = tr.children[1]; td.className = "lvl-" + rows[i][1][1]; });
+    const lt = $("#rz-loo");
+    if (lt) lt.replaceChildren(tableBlock(["Evidence family left out", "Used today", "Choice without it", "Same choice?"], loo.map((x) => [x.family, x.used ? "yes" : "no", x.port ? shortPort(x.port) : "nothing feasible", x.same ? "yes" : "no"])));
+  }
   let solveTimer = null;
   function scheduleSolve() {
     renderSolve(false);                                   // instant: posterior and choices
     clearTimeout(solveTimer);
-    solveTimer = setTimeout(() => guard("Value of information", () => renderSolve(true), $("#rz-voi")), 180);
+    solveTimer = setTimeout(() => { guard("Value of information", () => renderSolve(true), $("#rz-voi")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); }, 180);
   }
   function buildSolve() {
     if (!$("#rz-ledger")) return;
@@ -10731,7 +11486,22 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     const reset = $("#rz-reset");
     if (reset && !reset.dataset.wired) { reset.dataset.wired = "1"; reset.addEventListener("click", () => { RZS.over = {}; LS.set("bo-rz-over", {}); renderSolve(true); }); }
     wireCalc($("#calc-in"), $("#calc-out"), $("#calc-hist"));
+    const rec = $("#rz-record");
+    if (rec && !rec.dataset.wired) {
+      rec.dataset.wired = "1";
+      rec.addEventListener("click", async () => {
+        rec.disabled = true;
+        const msg = $("#rz-record-msg");
+        try {
+          const R = RZ_LAST || runReasoner(true), saved = await recordSolverDecision(R, observeSignals());
+          if (saved) { msg.replaceChildren(document.createTextNode(`Recorded with hash ${saved.hash}. `)); const a = h("a", null, "Open it in the journal →"); a.href = "#journal"; a.addEventListener("click", () => { JR.sel = saved.id; JR.draft = Object.assign({}, saved); JR.showEx = false; }); msg.append(a); if (typeof renderJournal === "function") renderJournal(); }
+          else msg.textContent = "Could not save here; export from the journal to keep it.";
+        } catch (e) { msg.textContent = "Could not record: " + (e && e.message ? e.message : e); }
+        rec.disabled = false;
+      });
+    }
     renderSolve(true);
+    guard("Decision boundary", renderBoundary, $("#rz-bnd"));
   }
 
   /* =====================================================================================
@@ -10951,6 +11721,180 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   function drawGames() { guard("Crowded exit", renderExit, $("#gt-exit-chart")); guard("Ladder", renderLadderResult, $("#gt-pmf")); fixChartRoles($("#view-games")); }
 
   /* =====================================================================================
+     field.js (v0.8): field research from the fifth review. Three clocks, a registry of unusual
+     indicators, competing explanations with the next most discriminating observation, a capture
+     form that keeps provenance, and a monitor for expected events that did not appear.
+     ===================================================================================== */
+  // P(evidence is seen | explanation). Hypotheses for the reader to argue with, not fitted numbers.
+  const FIELD_CASES = [
+    { id: "leadtime", n: "Equipment lead times got shorter", node: "memory", hyps: ["Supply capacity expanded", "Demand weakened", "Ordering behaviour normalized", "Product mix changed"],
+      ev: { "Output and deliveries rise": [0.85, 0.20, 0.50, 0.40], "Utilization and orders stay firm": [0.80, 0.15, 0.55, 0.50], "Deferrals and cancellations rise": [0.10, 0.85, 0.35, 0.20],
+        "Idle capacity and discounts increase": [0.25, 0.80, 0.30, 0.30], "Duplicate reservations unwind while deployment continues": [0.15, 0.30, 0.85, 0.20], "Some specifications free up, others stay constrained": [0.25, 0.25, 0.30, 0.85] } },
+    { id: "pipeline", n: "The announced AI pipeline grows while energization slips", node: "power", hyps: ["Power is the binding bottleneck", "Announcements double-count the same demand", "Ordinary reporting lag", "Demand is weakening"],
+      ev: { "Equipment arrives before usable power": [0.85, 0.30, 0.40, 0.25], "Interconnection requests are withdrawn": [0.30, 0.55, 0.15, 0.80], "One campus appears in several parties' announcements": [0.20, 0.90, 0.20, 0.30],
+        "Missed milestones catch up within two quarters": [0.25, 0.20, 0.85, 0.10], "Deposits refunded or commitments cancelled": [0.15, 0.40, 0.10, 0.85], "Utilities sign new large-load agreements": [0.70, 0.50, 0.60, 0.15] } },
+    { id: "credit", n: "Monthly payments look more affordable", node: "credit", hyps: ["Prices fell", "Longer terms and more financing risk", "Lenders shifted to stronger borrowers"],
+      ev: { "Average loan term lengthens": [0.20, 0.90, 0.25], "Down payments fall": [0.30, 0.80, 0.15], "Early delinquency rises in recent cohorts at the same age": [0.15, 0.80, 0.10],
+        "Approval rates for weaker profiles fall": [0.40, 0.25, 0.90], "Collateral values fall": [0.85, 0.35, 0.30] } },
+  ];
+  // page 50 of the review: candidate mechanisms, registered with a clock, a target and a competing explanation; none validated
+  const FIELD_INDICATORS = [
+    ["More deposits or cash on delivery", "Trade credit withdraws before reported distress", "Supplier policy or customer mix", "Economic", "Supplier days payable, next two quarters", "credit"],
+    ["Higher expedite premiums", "Urgency, or a particular bottleneck", "Temporary disruption, seasonality, route mix", "Economic", "Lead times and spot freight, 3 months", "hormuz"],
+    ["More equipment immediately available", "Cancellations, financing problems or excess capacity", "New supply, technology change, product mix", "Economic", "Supplier backlog and orders, next quarter", "capex"],
+    ["Repair rises while replacement falls", "Customers extend asset lives to preserve cash", "Better repair economics or durability", "Economic", "Capex guidance revisions, 2 quarters", "dep"],
+    ["More rental concessions, stable advertised rents", "Effective pricing weakens beneath headline rents", "Lease mix, incentives for longer terms, seasonality", "Publication", "CPI shelter, 6 months", "cpi"],
+    ["Deductible, exclusion or collateral changes", "Risk transfers back to the customer", "Broader underwriting or regulatory changes", "Economic", "Insurer loss ratios and spreads, 2 quarters", "credit"],
+    ["Paid AI use rises; correction time stays high", "Adoption outpaces economically useful automation", "Early training and implementation costs", "Economic", "AI revenue per seat, 4 quarters", "aidemand"],
+    ["Contract headlines outpace execution evidence", "Announcements convert slowly into activity", "Normal procurement and acceptance lags", "Publication", "Obligations versus outlays (USAspending), 2 quarters", "capex"],
+    ["Weaker tips or discretionary purchases in a stable panel", "Particular groups cut discretionary spending", "Hours, tourism, events, location, payment mix", "Economic", "Retail sales control group, 3 months", "consumer"],
+    ["Complaint composition changes", "Operational or product problems emerge", "Publicity, categories, customer base or reporting", "Publication", "CFPB complaints by product, 3 months", "pcredit"],
+  ];
+  // expected events: an absent report is not an absent event, so each carries its usual publication lag
+  const FIELD_MILESTONES = [
+    { id: "fomc", t: "FOMC decision", due: "2026-10-28", lag: 0, node: "fed", ev: "Statement and rate decision; hike odds were 16 to 18% on Oct 9", src: "Federal Reserve calendar" },
+    { id: "cpi-oct", t: "October CPI", due: "2026-11-10", lag: 0, node: "cpi", ev: "Whether 36-month inflation leaves the 2.75 to 4.25% band", src: "BLS release schedule, 8:30 ET" },
+    { id: "sloos", t: "Senior Loan Officer Survey (October)", due: "2026-11-09", lag: 7, node: "credit", ev: "Tightening standards for commercial and consumer loans", src: "Federal Reserve, expected early November" },
+    { id: "nvda", t: "Nvidia quarterly results", due: "2026-11-18", lag: 7, node: "NVDA", ev: "Data-center revenue against the builders' capex", src: "Expected date; confirm on the company's calendar" },
+    { id: "bcred", t: "Non-traded BDC tender results (Q4)", due: "2027-01-15", lag: 21, node: "pcredit", ev: "Requests against the 5% cap", src: "Fund filings, expected mid-January" },
+  ];
+  const FD = { caseId: "leadtime", seen: {}, notes: LS.get("bo-field-notes", []) || [], ms: LS.get("bo-field-ms", []) || [] };
+  // stored data is untrusted: keep only well-formed entries, and render every field as text
+  const str = (v, n) => (typeof v === "string" ? v.slice(0, n) : "");
+  FD.notes = (Array.isArray(FD.notes) ? FD.notes : []).filter((n) => n && typeof n === "object" && typeof n.entity === "string" && typeof n.claim === "string")
+    .map((n) => Object.fromEntries(Object.entries(n).map(([k, v]) => [k, typeof v === "number" ? v : str(v, 600)])));
+  FD.ms = (Array.isArray(FD.ms) ? FD.ms : []).filter((m) => m && typeof m === "object" && typeof m.t === "string" && isoOk(m.due))
+    .map((m) => ({ id: str(m.id, 40) || "ms-x", t: str(m.t, 120), due: m.due, lag: fin(m.lag) ? clamp(m.lag, 0, 365) : 0, ev: str(m.ev, 200), src: "Your registration", node: "" }));
+  const fieldCase = () => FIELD_CASES.find((c) => c.id === FD.caseId) || FIELD_CASES[0];
+
+  function renderFieldCompare() {
+    const box = $("#fd-ev");
+    if (!box) return;
+    const c = fieldCase(), prior = c.hyps.map(() => 1 / c.hyps.length), post = fieldPosterior(prior, c.ev, FD.seen), nx = fieldNext(prior, c.ev, FD.seen);
+    box.replaceChildren();
+    Object.keys(c.ev).forEach((e) => {
+      const row = h("div", "fd-row"), seg = h("div", "seg");
+      seg.setAttribute("role", "group");
+      seg.setAttribute("aria-label", e);
+      [["unknown", null], ["seen", true], ["not seen", false]].forEach(([lab, v]) => {
+        const b = h("button", null, lab);
+        b.type = "button";
+        b.setAttribute("aria-pressed", FD.seen[e] === v || (v == null && FD.seen[e] == null) ? "true" : "false");
+        b.addEventListener("click", () => { if (v == null) delete FD.seen[e]; else FD.seen[e] = v; renderFieldCompare(); });
+        seg.append(b);
+      });
+      row.append(h("span", null, e), seg);
+      box.append(row);
+    });
+    const pb = $("#fd-post"), top = Math.max(...post);
+    pb.replaceChildren();
+    c.hyps.forEach((hh, i) => {
+      const row = h("div", "fd-p" + (post[i] === top && Object.keys(FD.seen).length ? " lead" : "")), lab = h("div", "fd-p-l"), bar = h("div", "fd-p-bar"), fill = h("i");
+      lab.append(h("span", null, hh), h("b", "num", pct0(post[i])));
+      fill.style.width = (post[i] * 100).toFixed(1) + "%";
+      bar.append(fill);
+      row.append(lab, bar);
+      pb.append(row);
+    });
+    const nl = $("#fd-next");
+    nl.replaceChildren();
+    nx.slice(0, 4).forEach((r) => { const li = h("li"); li.append(h("span", null, `${r.evidence} (likely ${pct0(r.p_yes)})`), h("b", "num", fx(r.info_bits, 3) + " bits")); nl.append(li); });
+    if (!nx.length) nl.append(h("li", "none", "Every listed piece of evidence has been checked."));
+    const lead = post.indexOf(Math.max(...post));
+    $("#fd-out").textContent = Object.keys(FD.seen).length
+      ? `Leading: "${c.hyps[lead]}" at ${pct0(post[lead])}. ${nx[0] ? `The cheapest way to settle it: check "${nx[0].evidence}" (${fx(nx[0].info_bits, 2)} bits of the ${fx(entropy2(post), 2)} bits of doubt left).` : ""}`
+      : `Nothing checked yet: all ${c.hyps.length} explanations start equal. Check "${nx[0].evidence}" first: it separates them most (${fx(nx[0].info_bits, 2)} bits).`;
+  }
+  function renderFieldRegistry() {
+    const t = $("#fd-ind");
+    if (!t) return;
+    fillTable(t, ["Observation", "Mechanism to investigate", "Competing explanation", "Clock", "Target and horizon", "Brain node", "Status"],
+      FIELD_INDICATORS.map((r) => [r[0], r[1], r[2], r[3], r[4], (BR_NODES[BR_IDX[r[5]]] || {}).n || r[5], "Registered, not validated"]), 7);
+  }
+  function msStatus(m, today) {
+    const due = Date.parse(m.due), now = Date.parse(today), days = Math.round((due - now) / 864e5);
+    if (days > 7) return ["upcoming", `in ${days} days`];
+    if (days >= 0) return ["due", days === 0 ? "due today" : `due in ${days} day${days === 1 ? "" : "s"}`];
+    if (-days <= (m.lag || 0)) return ["lag", `${-days} day${-days === 1 ? "" : "s"} past due`, `Inside the usual ${m.lag}-day reporting lag: silence means nothing yet.`];
+    return ["overdue", `${-days} days overdue`, "Check source coverage and publication delays before reading the absence as an event."];
+  }
+  function renderMilestones() {
+    const box = $("#fd-ms");
+    if (!box) return;
+    const today = new Date().toISOString().slice(0, 10), all = FIELD_MILESTONES.concat(FD.ms.map((m) => Object.assign({ mine: true }, m)));
+    box.replaceChildren();
+    all.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach((m) => {
+      const [st, txt, note] = msStatus(m, today), li = h("li", "ms " + st);
+      const top = h("div", "ms-top");
+      top.append(h("b", null, m.t), h("span", "ms-st", txt));
+      li.append(top, h("span", null, `${isoNice(m.due)} · ${m.ev} · ${m.src}${m.node && BR_IDX[m.node] != null ? ` · brain: ${BR_NODES[BR_IDX[m.node]].n}` : ""}`));
+      if (note) li.append(h("span", "ms-note", note));
+      if (m.mine) { const b = h("button", "pill", "Remove"); b.type = "button"; b.addEventListener("click", () => { FD.ms = FD.ms.filter((x) => x.id !== m.id); LS.set("bo-field-ms", FD.ms); renderMilestones(); }); li.append(b); }
+      box.append(li);
+    });
+  }
+  // capture: the fields the review lists, so an anecdote can become a dated, sourced observation
+  function readNoteForm() {
+    const v = (id) => { const e = $("#" + id); return e ? e.value.trim() : ""; };
+    return { event: v("fn-event"), learned: v("fn-learned"), entity: v("fn-entity"), access: v("fn-access"), qty: v("fn-qty"), units: v("fn-units"), base: v("fn-base"), denom: v("fn-denom"),
+      role: v("fn-role"), family: v("fn-family"), coverage: v("fn-coverage"), use: v("fn-use"), claim: v("fn-claim"), alt: v("fn-alt"), resolve: v("fn-resolve"), node: v("fn-node"), z: Number(v("fn-z")) };
+  }
+  function renderNotes() {
+    const t = $("#fd-notes");
+    if (!t) return;
+    if (!FD.notes.length) { t.replaceChildren(h("p", "hint", "No field notes yet. They stay in this browser until you copy them out.")); return; }
+    t.replaceChildren(tableBlock(["Learned", "Entity", "Claim", "Access", "Family", "Resolves when", ""], FD.notes.map((n) => [n.learned || "n/a", n.entity, n.claim, n.access, n.family || "n/a", n.resolve || "n/a", ""]), 7));
+    t.querySelectorAll("tbody tr").forEach((tr, i) => {
+      const b = h("button", "pill", "Delete"); b.type = "button";
+      b.setAttribute("aria-label", `Delete the note about ${FD.notes[i].entity}`);
+      b.addEventListener("click", () => { FD.notes.splice(i, 1); LS.set("bo-field-notes", FD.notes); renderNotes(); });
+      tr.lastChild.append(b);
+    });
+  }
+  function buildField() {
+    const sel = $("#fd-case");
+    if (!sel || sel.dataset.wired) return;
+    sel.dataset.wired = "1";
+    ["#fn-form", "#ms-form"].forEach((f) => { const el = $(f); if (el) el.addEventListener("submit", (e) => e.preventDefault()); });
+    FIELD_CASES.forEach((c) => sel.append(new Option(c.n, c.id)));
+    sel.addEventListener("change", () => { FD.caseId = sel.value; FD.seen = {}; renderFieldCompare(); });
+    const nodeSel = $("#fn-node");
+    nodeSel.append(new Option("(none)", ""));
+    BR_NODES.forEach((n) => nodeSel.append(new Option(n.n, n.id)));
+    $("#fn-save").addEventListener("click", () => {
+      const n = readNoteForm(), msg = $("#fn-msg");
+      const missing = [["event", "event date"], ["learned", "date learned"], ["entity", "entity"], ["claim", "what was observed"], ["resolve", "what would settle it"]].filter(([k]) => !n[k]).map(([, l]) => l);
+      if (missing.length) { msg.textContent = `Needed before saving: ${missing.join(", ")}.`; return; }
+      if (n.use === "confidential") { msg.textContent = "Confidential material stays out of this tool. Record only what you are permitted to use."; return; }
+      if (n.learned < n.event) { msg.textContent = "The date learned cannot be before the event."; return; }
+      n.id = "fn-" + Date.now().toString(36);
+      n.saved = new Date().toISOString();
+      FD.notes.unshift(n);
+      FD.notes = FD.notes.slice(0, 200);
+      LS.set("bo-field-notes", FD.notes);
+      let extra = "";
+      if (n.node && fin(n.z) && n.z !== 0 && BR_IDX[n.node] != null) { BR.obs[n.node] = clamp(n.z, -3, 3); LS.set("bo-brain-obs", BR.obs); BR.view = "think"; extra = ` It is now an observation in the brain (${BR_NODES[BR_IDX[n.node]].n} ${sg(n.z, 1)}σ): open the brain to see it re-reason.`; }
+      msg.textContent = `Saved with its provenance.${n.access === "hearsay" ? " Marked as hearsay: it can raise a question, not settle one." : ""}${extra}`;
+      renderNotes();
+    });
+    $("#fn-copy").addEventListener("click", async () => {
+      const txt = JSON.stringify({ exported: new Date().toISOString(), notes: FD.notes }, null, 2), msg = $("#fn-msg");
+      try { await navigator.clipboard.writeText(txt); msg.textContent = `Copied ${FD.notes.length} notes as JSON.`; }
+      catch (e) { const ta = $("#fn-export"); ta.hidden = false; ta.value = txt; ta.select(); msg.textContent = "Copy was blocked here: the JSON is selected below."; }
+    });
+    $("#ms-add").addEventListener("click", () => {
+      const t = $("#ms-t").value.trim(), due = $("#ms-due").value, ev = $("#ms-ev").value.trim();
+      if (!t || !isoOk(due)) { $("#ms-msg").textContent = "A milestone needs a name and an expected date."; return; }
+      FD.ms.push({ id: "ms-" + Date.now().toString(36), t: t.slice(0, 120), due, lag: Math.max(0, Number($("#ms-lag").value) || 0), ev: ev.slice(0, 200) || "Evidence to be defined", src: "Your registration", node: "" });
+      LS.set("bo-field-ms", FD.ms);
+      ["#ms-t", "#ms-ev"].forEach((id) => { $(id).value = ""; });
+      $("#ms-msg").textContent = "Registered. Its original expected date is kept; moving it later is a new event, not an edit.";
+      renderMilestones();
+    });
+    renderFieldCompare(); renderFieldRegistry(); renderMilestones(); renderNotes();
+  }
+
+  /* =====================================================================================
      today7.js (v0.7): the first screen answers five questions (what changed, why it matters to the book,
      what the choices are, what would reverse the call, and whether to trust it), plus the shared helpers
      for the hedge policy and the one effective fundamentals dataset.
@@ -10996,27 +11940,41 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   function todayChanges(I, TD) {
     const HL = I.HL, out = [];
     const st = TD.gates.state.value;
-    out.push({ k: "obs", what: `Stocks and bonds ${st === "amplifying" ? "are moving together" : st === "hedging" ? "are moving opposite" : "have no clear relationship"}`,
+    out.push({ id: "corr", k: "obs", what: `Stocks and bonds ${st === "amplifying" ? "are moving together" : st === "hedging" ? "are moving opposite" : "have no clear relationship"}`,
       v: `correlation ${sgn2(I.corr.v)}`, d: I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d), live: I.corr.live,
       why: `TLT hedge: ${TD.status !== "ok" ? "unavailable" : TD.on ? "on" : "off"} under policy hedge.tlt.v2. It returns at −0.10 (${fx(Math.max(0, I.corr.v + 0.1), 2)} away).`, href: "#d-duration" });
     const inBand = HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1];
-    out.push({ k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 155 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
+    out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 155 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
       v: `${pctPts(I.infl.avg36)} over 36 months${HL.band ? `; band ${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""}`, d: monthNice(I.infl.d), live: I.infl.live,
       why: `Inflation sleeve: ${I.infl.avg36 >= I.lineAt ? "8%, half gold, half energy" : "2%"}. TLT inflation gate ${TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`, href: "#fi-hedge" });
     let third = null;
     try {
       const near = rocRows().filter((x) => !x.row.meanReverting && x.at13.state === "line" && x.at13.esc && fin(x.at13.weeks)).sort((a, b) => a.at13.weeks - b.at13.weeks)[0];
-      if (near && near.at13.weeks <= 26) third = { k: "est", what: `${near.row.n} is heading for a rule line`, v: `${fmtRocLevel(near.row, near.at13.at)} in ${durTxt(near.at13.weeks)} at the 13-week pace`, d: isoNice(near.r.date), live: !!near.r.live,
+      if (near && near.at13.weeks <= 26) third = { id: "roc", k: "est", what: `${near.row.n} is heading for a rule line`, v: `${fmtRocLevel(near.row, near.at13.at)} in ${durTxt(near.at13.weeks)} at the 13-week pace`, d: isoNice(near.r.date), live: !!near.r.live,
         why: `Crossing it reads "${near.at13.label}". A straight-line projection, not a forecast of the date.`, href: "#roc-title" };
     } catch (e) { third = null; }
     if (!third) {
       const ratio = I.capexTTM / I.ocfTTM, fresh = FUND.rows.filter((r) => r.refreshed).length;
-      third = { k: "obs", what: fresh ? "New filings changed the builders' cash coverage" : "The five builders spend most of their cash flow on capex",
+      third = { id: "capex", k: "obs", what: fresh ? "New filings changed the builders' cash coverage" : "The five builders spend most of their cash flow on capex",
         v: `${pct0(ratio)} of operating cash flow`, d: FUND.as_of.replace("SEC filings through ", ""), live: fresh > 0,
         why: "AI equity scenarios: the capex-digestion signal is on above 80%; the reasoner weighs it.", href: "#fu-t-title" };
     }
     out.push(third);
     return out;
+  }
+  // previous values: what each headline read at the last data date this browser saw, so a change shows its "was"
+  function todayCompare(items, asof) {
+    let hist = LS.get("bo-today-hist", []);
+    if (!Array.isArray(hist)) hist = [];
+    hist = hist.filter((e) => e && isoOk(e.asof) && e.vals && typeof e.vals === "object");
+    const vals = {};
+    items.forEach((c) => { if (c.id) vals[c.id] = c.v; });
+    const prev = hist.filter((e) => e.asof < asof).sort((a, b) => b.asof.localeCompare(a.asof))[0] || null;
+    hist = hist.filter((e) => e.asof !== asof).concat([{ asof, vals }]).sort((a, b) => a.asof.localeCompare(b.asof)).slice(-12);
+    LS.set("bo-today-hist", hist);
+    if (!prev) return { prev: null, note: `First look at data through ${isoNice(asof)} in this browser. Next time, each line shows what it read before.` };
+    const moved = Object.keys(vals).filter((k) => prev.vals[k] != null && prev.vals[k] !== vals[k]).length;
+    return { prev, note: moved ? `${moved} of ${Object.keys(vals).length} headlines moved since ${isoNice(prev.asof)}.` : `Quiet: nothing on this screen moved since ${isoNice(prev.asof)}. No action is a decision too; the policies above still hold.` };
   }
   function renderToday7() {
     const box = $("#today7");
@@ -11032,15 +11990,19 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
       evTag("obs"), document.createTextNode(` Inflation of ${pctPts(I.infl.avg36)} over three years sits ${HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1] ? "inside" : "outside"} the ${HL.band ? `${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""} band where the data cannot pin the line. `), evTag("est"));
     $("#t7-status").textContent = `Model book, not personal positions · data through ${isoNice(latestDataDate())} · policies hedge.tlt.v2 and size.equity.v2${LIVE.status && Array.isArray(LIVE.status.checks) ? ` · ${LIVE.status.checks.filter((c) => c.ok).length} of ${LIVE.status.checks.length} data checks pass` : " · snapshot"}`;
     // what changed and why it matters
-    const ch = $("#t7-changes");
+    const ch = $("#t7-changes"), items = todayChanges(I, TD), cmp = todayCompare(items, latestDataDate());
     ch.replaceChildren();
-    todayChanges(I, TD).forEach((c) => {
+    items.forEach((c) => {
       const li = h("li"), top = h("div", "t7-what");
       top.append(h("strong", null, c.what), evTag(c.k, c.live ? "latest available" : "snapshot"));
       const a = h("a", null, "Details →"); a.href = c.href;
-      li.append(top, h("span", "t7-v num", `${c.v} · ${c.d}`), h("span", "t7-why", c.why), a);
+      const v = h("span", "t7-v num", `${c.v} · ${c.d}`), was = cmp.prev && cmp.prev.vals[c.id];
+      if (was && was !== c.v) v.append(h("span", "t7-was", ` · was ${was} on ${isoNice(cmp.prev.asof)}`));
+      li.append(top, v, h("span", "t7-why", c.why), a);
       ch.append(li);
     });
+    const q = $("#t7-quiet");
+    if (q) q.textContent = cmp.note;
     // the choices, from the reasoner (no value-of-information pass: that runs on the Solve desk)
     const R = RZ_LAST || runReasoner(false), cl = $("#t7-choices");
     cl.replaceChildren();
@@ -11083,7 +12045,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     today: { name: "Today", views: ["desk", "noteworthy"] },
     decide: { name: "Decide", views: ["solve", "decide", "games", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
-    research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "lab"] },
+    research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
     reference: { name: "Methods", views: ["engine", "appendix"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
@@ -11108,6 +12070,7 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
     noteworthy: () => {}, buyside: drawBuyside, solve: () => guard("The solver", () => renderSolve(false), $("#rz-ledger")), games: drawGames,
     brain: () => guard("The brain", updateBrain, $("#br-svg-box")),
+    field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
     making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },
   };
@@ -11216,13 +12179,13 @@ table.pm-ladder td, table.pm-ladder th { padding: 4px 6px; }
   }
 
   /* ---------- boot ---------- */
-  [["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
+  [["The mark", placeMarks], ["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
    ["Decide", buildDecide], ["Fundamentals", buildFundamentals], ["Physics", buildPhysics], ["Findings", buildFindings, "#fi-list"], ["Swans", buildSwans, "#sw-grid"], ["Legends", buildLegends, "#lg-grid"], ["Math lab", buildLab, "#lab-list"],
    ["Noteworthy", buildNoteworthy, "#nw-grid"], ["Brain", buildBrain, "#br-svg-box"], ["Trading", buildTrading], ["Buyside", buildBuyside, "#bs-sel"], ["Brain links", renderBrainMeasured, "#br-meas"], ["Pulse", buildPulse, "#pulse"],
    ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
-   ["Solver", buildSolve, "#rz-ledger"], ["Policy record", renderPolicyLive, "#pol-live"], ["Games", buildGames, "#gt-matrix"], ["Today", renderToday7, "#today7"],
+   ["Solver", buildSolve, "#rz-ledger"], ["Policy record", renderPolicyLive, "#pol-live"], ["Games", buildGames, "#gt-matrix"], ["Field", buildField, "#fd-ev"], ["Today", renderToday7, "#today7"],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
    ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
 

@@ -37,7 +37,7 @@ from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
-         "legends", "lenses", "lab", "engine", "appendix", "solve", "games"]
+         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -214,6 +214,7 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
+                        ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
                         ("nw-memory", "noteworthy"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
         await page.wait_for_timeout(250)
@@ -420,6 +421,7 @@ async def main() -> int:
         browser = await pw.chromium.launch()
         await scenario(browser, "good data", site_with(good), extra=extreme_inputs)
         await scenario(browser, "good data, journal", site_with(good), extra=journal_flow)
+        await scenario(browser, "good data, the brain thinks and the field desk", site_with(good), extra=think_and_field)
         await scenario(browser, "good data, live research", site_with(good), extra=live_research)
         newer = copy.deepcopy(good)
         newer["capex.json"]["ttm"]["ORCL"] = {"quarter_end": "2026-11-30", "ocf": 90.0, "capex": 70.0, "cash": 50.0, "capex_to_ocf": 70 / 90}
@@ -439,6 +441,82 @@ async def main() -> int:
         await browser.close()
     print(f"\n{len(FAILURES)} failures")
     return 1 if FAILURES else 0
+
+
+async def think_and_field(page, label: str) -> None:
+    """v0.8: the brain's reasoning under extreme and missing observations, and the field desk end to end."""
+    import re
+    def bad_text(txt):
+        return [b for b in BAD_TEXT if b in txt] + (["null"] if re.search(r"\bnull\b", txt) else [])
+    await page.evaluate("location.hash = 'brain'")
+    await page.wait_for_timeout(400)
+    await page.click("#br-view button[data-v=think]")
+    for node, v in [("capex", 3), ("vix", -3), ("tlt", 3), ("book", -3), ("hormuz", 0)]:
+        await setv(page, "#br-obs-node", node)
+        await setv(page, "#br-obs-v", v)
+        await page.click("#br-obs-add")
+    await page.wait_for_timeout(300)
+    # remove every observation, then think: the page must say there is nothing to explain, not break
+    n = await page.evaluate("""() => { let k = 0; for (let i = 0; i < 60; i++) { const b = document.querySelector('#br-obs button'); if (!b) break; b.click(); k++; } return k; }""")
+    await page.click("#br-think-go")
+    await page.wait_for_timeout(600)
+    txt = await page.evaluate("document.querySelector('#view-brain').innerText")
+    if bad_text(txt):
+        fail(f"{label}: brain think with {n} observations removed shows {bad_text(txt)}")
+    await page.click("#br-obs-reset")
+    await page.wait_for_timeout(300)
+    if await page.evaluate("document.querySelectorAll('#br-obs tbody tr').length") < 3:
+        fail(f"{label}: back to the data did not restore the measured readings")
+    # field desk
+    await page.evaluate("location.hash = 'field'")
+    await page.wait_for_timeout(400)
+    for case in ["pipeline", "credit", "leadtime"]:
+        await setv(page, "#fd-case", case)
+        await page.evaluate("document.querySelectorAll('#fd-ev .fd-row').forEach((r, i) => r.querySelectorAll('button')[1 + (i % 2)].click())")
+        await page.wait_for_timeout(150)
+        total = await page.evaluate("[...document.querySelectorAll('#fd-post .fd-p b')].reduce((a, b) => a + parseFloat(b.textContent), 0)")
+        if not 97 <= total <= 103:
+            fail(f"{label}: field case {case} posteriors sum to {total}%")
+    evil = '<img src=x onerror="window.__pwned=7">'
+    await page.click("#fn-save")
+    if "Needed before saving" not in await page.inner_text("#fn-msg"):
+        fail(f"{label}: an empty field note was not refused")
+    for sel, v in [("#fn-event", "2026-10-10"), ("#fn-learned", "2026-10-01"), ("#fn-entity", evil), ("#fn-claim", evil), ("#fn-resolve", "Q4 filings")]:
+        await setv(page, sel, v)
+    await page.click("#fn-save")
+    if "cannot be before" not in await page.inner_text("#fn-msg"):
+        fail(f"{label}: a note learned before the event was accepted")
+    await setv(page, "#fn-learned", "2026-10-15")
+    await setv(page, "#fn-use", "confidential")
+    await page.click("#fn-save")
+    if "Confidential" not in await page.inner_text("#fn-msg"):
+        fail(f"{label}: confidential material was saved")
+    await setv(page, "#fn-use", "public")
+    await setv(page, "#fn-node", "power")
+    await setv(page, "#fn-z", "99")
+    await page.click("#fn-save")
+    await page.wait_for_timeout(200)
+    obs = await page.evaluate("JSON.parse(localStorage.getItem('bo-brain-obs') || '{}').power")
+    if obs != 3:
+        fail(f"{label}: a field note's reading reached the brain as {obs}, expected clamped to 3")
+    await setv(page, "#ms-t", evil)
+    await setv(page, "#ms-due", "2026-01-01")
+    await page.click("#ms-add")
+    await page.evaluate("localStorage.setItem('bo-field-ms', JSON.stringify(JSON.parse(localStorage.getItem('bo-field-ms')).concat([null, 5, {t: 'x', due: 'soon'}, {t: 'ok', due: '2026-12-01', lag: 1e9}])))")
+    await page.evaluate("localStorage.setItem('bo-field-notes', JSON.stringify(JSON.parse(localStorage.getItem('bo-field-notes')).concat([null, 'x', {entity: 5}])))")
+    await page.reload()
+    await page.wait_for_timeout(900)
+    await page.evaluate("location.hash = 'field'")
+    await page.wait_for_timeout(500)
+    if await page.evaluate("window.__pwned"):
+        fail(f"{label}: a field note executed script")
+    if await page.evaluate("document.querySelectorAll('#fd-notes tbody tr').length") != 1:
+        fail(f"{label}: field notes did not survive a reload cleanly")
+    if await page.evaluate("document.querySelectorAll('#fd-ms li').length") != 7:
+        fail(f"{label}: milestones after hostile storage: {await page.evaluate('document.querySelectorAll(\"#fd-ms li\").length')}")
+    txt = await page.evaluate("document.querySelector('#view-field').innerText")
+    if bad_text(txt):
+        fail(f"{label}: field desk shows {bad_text(txt)}")
 
 
 async def filing_propagation(page, label: str) -> None:

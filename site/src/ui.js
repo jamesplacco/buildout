@@ -4,6 +4,28 @@
   const NS = "http://www.w3.org/2000/svg";
   const $ = (s, r = document) => r.querySelector(s);
 
+  /* ---------- the Buildout mark (v0.8): one definition, used in the header, every desk, empty states and the brain ---------- */
+  function markEl(cls) {
+    const wrap = document.createElement("span");
+    wrap.className = cls || "vmark";
+    wrap.setAttribute("aria-hidden", "true");
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("viewBox", "0 0 28 28");
+    s.innerHTML = '<rect x="1" y="1" width="26" height="26" rx="6" fill="var(--accent)"></rect><path class="logo-curve" d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path><circle class="logo-dot" cx="22" cy="8" r="2" fill="var(--surface)"></circle>';
+    wrap.append(s);
+    return wrap;
+  }
+  function placeMarks() {
+    document.querySelectorAll(".view > .vhead > .eyebrow").forEach((e) => { if (!e.querySelector(".vmark")) e.prepend(markEl("vmark")); });
+    document.querySelectorAll(".view > .foot").forEach((f) => {
+      if (f.previousElementSibling && f.previousElementSibling.classList.contains("mark-end")) return;
+      const end = h("div", "mark-end");
+      end.setAttribute("aria-hidden", "true");
+      end.append(markEl("brand-mark"), h("span", null, "Buildout"));
+      f.before(end);
+    });
+  }
+
   /* ---------- DOM and SVG helpers ---------- */
   function h(tag, cls, txt) {
     const e = document.createElement(tag);
@@ -210,7 +232,7 @@
   // vertical bars over categories; a row may carry { lo, hi } to draw a range instead of a bar
   function noData(box, msg) {
     const e = h("div", "empty");
-    e.append(h("strong", null, msg || "No data yet."), h("span", null, "The chart fills in when the daily run supplies it."));
+    e.append(markEl("vmark"), h("strong", null, msg || "No data yet."), h("span", null, "The chart fills in when the daily run supplies it."));
     box.replaceChildren(e);
   }
   function barsV(box, rows, cfg = {}) {

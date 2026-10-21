@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.7</span>
+      Buildout <span class="ver">v0.8</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -34,14 +34,14 @@
 <section class="view" id="view-desk" aria-labelledby="desk-title">
   <div class="t7" id="today7">
     <div class="t7-head">
-      <p class="eyebrow">Today · October 21, 2026 · Jamie Placco</p>
+      <div class="t7-brand"><span class="hero-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="1" y="1" width="26" height="26" rx="6" fill="var(--accent)"></rect><path class="logo-curve" d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path><circle class="logo-dot" cx="22" cy="8" r="2" fill="var(--surface)"></circle></svg></span><p class="eyebrow">Buildout · Today · October 21, 2026 · Jamie Placco</p></div>
       <h1 id="desk-title">How reliable is your bond hedge in this regime?</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
       <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
     </div>
     <div class="t7-grid">
-      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">What changed, and why it matters to the book</h2><ol class="t7-changes" id="t7-changes"></ol></section>
+      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">What changed, and why it matters to the book</h2><p class="t7-quiet" id="t7-quiet" aria-live="polite"></p><ol class="t7-changes" id="t7-changes"></ol></section>
       <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Your choices</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with your own limits →</a></section>
       <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">What would reverse this</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decide">The decision board →</a></section>
       <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Can I trust it?</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#engine">Methods and tests →</a></section>
@@ -1091,7 +1091,8 @@
   </section>
 
   <section class="section" aria-labelledby="rz-title">
-    <div class="section-head"><p class="eyebrow">Answer</p><h2 id="rz-title">What the evidence supports</h2><p class="prose" id="rz-answer" aria-live="polite"></p></div>
+    <div class="section-head"><p class="eyebrow">Answer</p><h2 id="rz-title">What the evidence supports</h2><p class="prose" id="rz-answer" aria-live="polite"></p>
+      <div class="rz-record"><button class="btn" id="rz-record" type="button">Record this decision</button><span class="hint" id="rz-record-msg" aria-live="polite">Saves the inputs, the four alternatives, the choice and a content hash to your journal, locked.</span></div></div>
     <div class="lab">
       <form class="panel controls" aria-label="Limits and the current book">
         <div class="field"><div class="field-top"><label for="rz-loss">Loss limit, worst scenario over 3 months</label><output id="rz-loss-o" for="rz-loss"></output></div><input type="range" id="rz-loss" min="5" max="35" step="1" value="15"></div>
@@ -1118,6 +1119,15 @@
     <h3 class="sub-h">Return by scenario</h3>
     <div class="tablewrap"><table class="rz heatmap" id="rz-heat"></table></div>
     <div class="math"><span class="mlabel">The search</span>maximize &Sigma;<sub>s</sub> &pi;<sub>s</sub> ln(1 + <var>R</var><sub>s</sub>(<var>e</var>, <var>h</var>, <var>p</var>, <var>g</var>)) over equity <var>e</var> &isin; {0, 0.05, &hellip;, 1.5}, TLT ratio <var>h</var> &isin; {0, 0.1, &hellip;, 1}, put premium <var>p</var> &isin; {0, 0.25%, &hellip;, 2%}, gold <var>g</var> &isin; {0, 2%, &hellip;, 10%}, subject to min<sub>s</sub> <var>R</var><sub>s</sub> &ge; &minus;limit, <var>e</var>(1 + <var>h</var>) + <var>g</var> &le; 2. <var>R</var><sub>s</sub> = <var>e</var>(1.15 m<sub>s</sub> + a<sub>s</sub>) + <var>e</var><var>h</var>(y&tau; &minus; 16.5&Delta;y + &frac12;&middot;360&Delta;y<sup>2</sup> &minus; r&tau;) + (<var>p</var>/c)&middot;payoff<sub>95/85</sub> &minus; <var>p</var> + <var>g</var>&middot;gold<sub>s</sub> + cash&middot;r&tau;. Posterior &pi; &prop; prior &times; &prod;<sub>drivers</sub> exp(mean log-likelihood).</div>
+  </section>
+
+  <section class="section" aria-labelledby="rzb-title">
+    <div class="section-head"><p class="eyebrow">Decision boundary</p><h2 id="rzb-title">Where the answer changes, and how wide the safe region is</h2><p class="prose" id="rz-bnd-out"></p></div>
+    <figure class="chart panel"><div class="chart-head"><span class="chart-title">Optimal equity by downside odds (across) and loss limit (down)</span><span class="ev ev-asm">Assumed ranges</span></div><div class="svgbox" id="rz-bnd"></div></figure>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Five kinds of uncertainty in this choice</span><div id="rz-unc"></div></div>
+      <div class="panel"><span class="panel-title">Does the choice survive without each evidence family?</span><div id="rz-loo"></div><p class="hint">Signals that share a driver are one family: removing the family and re-solving shows whether one source carries the decision. Repetition is not corroboration.</p></div>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="rzn-title">
@@ -1245,12 +1255,13 @@
   <div class="vhead">
     <p class="eyebrow">The brain · higher-order thinking, computed</p>
     <h1 id="br-title">Carry every assumption to its fourth-order conclusion.</h1>
-    <p class="lede">Twenty-one parts of the system, forty-eight signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and yours to change. Shock any node and watch it travel: what arrives first, second, third and fourth, which loops amplify it, which single assumption carries the answer, and the cheapest combination of shocks that would produce a given outcome.</p>
+    <p class="lede">Thirty-four parts of the system, from Hormuz and the Fed through credit and the curve to each holding and your book, joined by a hundred and ten signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and yours to change. Shock any node and watch it travel. Or let the brain think: it reads what moved, infers the most likely causes, checks what else must then be true, doubts its own map, and tells you what to look at next.</p>
   </div>
   <section class="section" aria-labelledby="brm-title">
     <h2 class="sr-only" id="brm-title">The map</h2>
     <div class="brain-lab">
       <form class="panel controls" id="br-form" aria-label="Brain inputs">
+        <div class="field"><span class="flabel" id="br-view-l">The map shows</span><div class="seg" role="group" aria-labelledby="br-view-l" id="br-view"><button type="button" data-v="shock" aria-pressed="true">A shock, propagated</button><button type="button" data-v="think" aria-pressed="false">What the brain infers</button></div></div>
         <div class="field"><span class="flabel" id="br-pre-l">Scenario</span><div class="seg" role="group" aria-labelledby="br-pre-l" id="br-presets"></div></div>
         <div class="field"><label for="br-shock">Shock this node</label><select id="br-shock"></select></div>
         <div class="field"><div class="field-top"><label for="br-size">Shock size</label><output id="br-size-o" for="br-size"></output></div><input type="range" id="br-size" min="-3" max="3" step="0.25" value="1.5"></div>
@@ -1278,6 +1289,36 @@
       </div>
     </div>
   </section>
+  <section class="section" id="br-think-sec" aria-labelledby="brt-title">
+    <div class="section-head"><p class="eyebrow">The brain thinks</p><h2 id="brt-title">From what moved, to why, to what must also be true</h2><p class="prose" id="br-think-sum" aria-live="polite"></p></div>
+    <div class="brain-think">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">The reasoning, step by step</span><button class="btn" id="br-think-go" type="button">Think it through</button></div>
+        <ol class="br-steps" id="br-steps"></ol>
+        <p class="hint">Each step is computed, not written: abduction by ridge regression on the graph's total effects, competing explanations by exact Bayesian evidence, predictions with their uncertainty, the link most likely wrong by the gradient of the misfit, and the next observation by mutual information. Select a step to light up the nodes it uses.</p>
+      </div>
+      <div class="panel">
+        <span class="panel-title">What it observes</span>
+        <div class="tablewrap"><table class="rz" id="br-obs"><thead><tr><th>Node</th><th class="r">Reading</th><th>Source</th><th></th></tr></thead><tbody></tbody></table></div>
+        <div class="obs-add">
+          <div class="field"><label for="br-obs-node">Add or change an observation</label><select id="br-obs-node"></select></div>
+          <div class="field"><div class="field-top"><label for="br-obs-v">Reading, 3-month change in σ</label><output id="br-obs-v-o" for="br-obs-v"></output></div><input type="range" id="br-obs-v" min="-3" max="3" step="0.1" value="1"></div>
+          <div class="seg"><button type="button" id="br-obs-add">Observe it</button><button type="button" id="br-obs-reset">Back to the data</button></div>
+        </div>
+        <p class="hint">Field notes count: if a supplier tells you lead times fell, observe "Memory prices" at −1 and watch the explanation change. Saved in this browser only.</p>
+      </div>
+    </div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Which single cause explains the readings best</span><span class="ev ev-hyp">Hypothesis</span></div><div class="svgbox" id="br-expl"></div></figure>
+      <div class="panel"><span class="panel-title">If the inference is right, these follow</span><div class="tablewrap"><table class="rz" id="br-pred"><thead><tr><th>Node</th><th class="r">Implied</th><th class="r">± 1 sd</th><th>Kind</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="panel"><span class="panel-title">What to look at next</span><ol class="br-list" id="br-next"></ol><p class="hint">Information each unobserved node carries about which explanation is right (mutual information). The top one is the cheapest way to change the brain's mind.</p></div>
+      <div class="panel"><span class="panel-title">Seeing is not doing</span><p class="sentence" id="br-sd"></p><p class="hint">Uses the shock node, size and target from the controls above. Doing cuts the node's incoming links (Pearl's do-operator); seeing infers its causes first.</p></div>
+      <div class="panel"><span class="panel-title">Different names, same bet</span><div class="tablewrap"><table class="rz heatmap" id="br-shared"></table></div><p class="hint">Cosine similarity of each pair of holdings' sensitivities to the root causes. Near 1: two tickers, one exposure.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Where the book is exposed</span></div><div class="svgbox" id="br-booksens"></div></figure>
+    </div>
+    <div class="math"><span class="mlabel">How it thinks</span><var>T</var> = &Sigma;<sub>k=0..K</sub>(<var>W</var>&#8868;)<sup>k</sup>. Causes: <var>s</var> = (<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup><var>A</var>&#8868;<var>y</var>, <var>A</var> = <var>T</var>[observed, roots], &lambda; = (0.5/1)<sup>2</sup>, posterior covariance 0.5<sup>2</sup>(<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup>. Explanations: log evidence of <var>y</var> ~ N(0, 0.5<sup>2</sup><var>I</var> + <var>a</var><var>a</var>&#8868;) for each single cause and for noise alone. Next observation: I(H; X<sub>u</sub>) = h(mixture) &minus; &Sigma;<sub>h</sub> p<sub>h</sub> h(X<sub>u</sub> | h). Doing: <var>T</var> with the node's incoming links removed.</div>
+  </section>
+
   <section class="section" aria-labelledby="brw-title">
     <div class="section-head"><p class="eyebrow">Reasoning</p><h2 id="brw-title">How the answer is built</h2><p class="prose">Each order is one more link in the chain. Most people stop at the first; the graph does not.</p></div>
     <div class="grid2">
@@ -1668,6 +1709,79 @@
   <footer class="foot"><p>Ideas are paraphrased and attributed to the work named on each card; only public-domain texts (1841, 1873, 1923) are quoted. Lenses are the desk's application, not the legends' views on today's market.</p></footer>
 </section>
 
+<!-- ======================= FIELD ======================= -->
+<section class="view" id="view-field" hidden aria-labelledby="fd-title">
+  <div class="vhead">
+    <p class="eyebrow">Field · Research outside the screen</p>
+    <h1 id="fd-title">An anecdote is a question. Date it, source it, name what else could explain it, then check the evidence that separates the stories.</h1>
+    <p class="lede">From the fifth review: observations from suppliers, lenders, landlords and job sites often move before the reported numbers. They earn a place in the book only after they are written down with provenance, matched to a later measurable outcome and tested. Nothing on this desk is validated yet; it is the method for getting there.</p>
+  </div>
+  <section class="section" aria-labelledby="fdc-title">
+    <div class="section-head"><p class="eyebrow">Three clocks</p><h2 id="fdc-title">Every observation sits on three clocks, and they rarely agree</h2></div>
+    <div class="fd-clocks">
+      <div class="fd-clock"><b>Economic clock</b><span>When the activity actually changed: a supplier asked for deposits, a lender tightened, a lease was signed.</span></div>
+      <div class="fd-clock"><b>Publication clock</b><span>When an official series or filing shows it: often a month to two quarters later, then revised.</span></div>
+      <div class="fd-clock"><b>Market clock</b><span>When prices reflect it: sometimes before the economic clock (expectations), sometimes long after the publication clock.</span></div>
+    </div>
+    <p class="prose">Edge comes from the gaps between the clocks, never from the observation alone. Each note below records the first two dates (event and learned) so the gap can be measured later.</p>
+  </section>
+  <section class="section" aria-labelledby="fde-title">
+    <div class="section-head"><p class="eyebrow">Compare explanations</p><h2 id="fde-title">Which story fits, and what to check next</h2>
+      <p class="prose">Pick an observation. Mark what you have checked. Bayes' rule updates the explanations; the ranking shows which unchecked evidence would remove the most doubt (expected information, in bits). The likelihoods are judged, so argue with them.</p></div>
+    <div class="field"><label for="fd-case">Observation</label><select id="fd-case"></select></div>
+    <div class="fd-grid">
+      <div><h3 class="h3">Evidence</h3><div id="fd-ev" class="fd-ev"></div></div>
+      <div><h3 class="h3">Explanations</h3><div id="fd-post" class="fd-post" aria-live="polite"></div>
+        <h3 class="h3">Check next</h3><ol id="fd-next" class="fd-next"></ol></div>
+    </div>
+    <p class="callout" id="fd-out" aria-live="polite"></p>
+  </section>
+  <section class="section" aria-labelledby="fdi-title">
+    <div class="section-head"><p class="eyebrow">Indicator registry</p><h2 id="fdi-title">Ten unusual observations, each registered before it is tested</h2>
+      <p class="prose">Every candidate names its mechanism, its competing explanation, its clock and the later measured outcome that would score it. Registering first is what keeps a lucky story from becoming a rule.</p></div>
+    <div class="tablewrap"><table id="fd-ind"></table></div>
+  </section>
+  <section class="section" aria-labelledby="fdm-title">
+    <div class="section-head"><p class="eyebrow">Milestone monitor</p><h2 id="fdm-title">Expected events, and what silence means</h2>
+      <p class="prose">An absent report is not an absent event. Each milestone carries its usual reporting lag; only after that lag does "overdue" mean something worth checking.</p></div>
+    <ul class="ms-list" id="fd-ms"></ul>
+    <form class="jr-form fd-ms-form" id="ms-form">
+      <fieldset><legend>Register a milestone</legend>
+        <div class="fd-row3"><label>Name<input type="text" id="ms-t" maxlength="120"></label><label>Expected date<input type="date" id="ms-due"></label><label>Usual reporting lag, days<input type="text" id="ms-lag" inputmode="numeric" value="7"></label></div>
+        <label>Evidence that it happened<input type="text" id="ms-ev" maxlength="200"></label>
+        <div class="fd-actions"><button type="button" class="pill" id="ms-add">Register</button><span class="hint" id="ms-msg" aria-live="polite"></span></div>
+      </fieldset>
+    </form>
+  </section>
+  <section class="section" aria-labelledby="fdn-title">
+    <div class="section-head"><p class="eyebrow">Capture</p><h2 id="fdn-title">Write it down the way the review asks</h2>
+      <p class="prose">Saved in this browser only. Attach it to a brain node with a reading in σ and the brain re-reasons with it as an observation.</p></div>
+    <form class="jr-form" id="fn-form">
+      <fieldset><legend>When and who</legend>
+        <div class="fd-row3"><label>Event date<input type="date" id="fn-event"></label><label>Date learned<input type="date" id="fn-learned"></label><label>Entity<input type="text" id="fn-entity" maxlength="120"></label></div>
+        <label>What was observed<textarea id="fn-claim" maxlength="600"></textarea></label>
+        <label>Access<select id="fn-access"><option value="direct">Direct: I saw the record</option><option value="firsthand">Firsthand: told by the person who did it</option><option value="hearsay">Hearsay: told by someone who heard</option></select></label>
+      </fieldset>
+      <fieldset><legend>How much</legend>
+        <div class="fd-row4"><label>Quantity<input type="text" id="fn-qty" maxlength="40"></label><label>Units<input type="text" id="fn-units" maxlength="40"></label><label>Baseline<input type="text" id="fn-base" maxlength="60"></label><label>Denominator<input type="text" id="fn-denom" maxlength="60"></label></div>
+      </fieldset>
+      <fieldset><legend>Source and limits</legend>
+        <div class="fd-row3"><label>Source role<input type="text" id="fn-role" maxlength="80"><small>buyer, supplier, lender, landlord</small></label><label>Source family<input type="text" id="fn-family" maxlength="80"><small>notes from one family are not independent</small></label><label>Coverage<input type="text" id="fn-coverage" maxlength="80"><small>one site, one region, one product</small></label></div>
+        <label>Use<select id="fn-use"><option value="public">Public or permitted to use</option><option value="restricted">Restricted: use only as context</option><option value="confidential">Confidential (will not be saved)</option></select></label>
+      </fieldset>
+      <fieldset><legend>Alternatives and resolution</legend>
+        <label>Competing explanation<input type="text" id="fn-alt" maxlength="200"></label>
+        <label>What would settle it, and when<input type="text" id="fn-resolve" maxlength="200"></label>
+        <div class="fd-row3"><label>Brain node<select id="fn-node"></select></label><label>Reading, σ<input type="text" id="fn-z" inputmode="decimal" value="0"><small>−3 to 3; 0 leaves the brain alone</small></label></div>
+      </fieldset>
+      <div class="fd-actions"><button type="button" class="pill" id="fn-save">Save note</button><button type="button" class="pill" id="fn-copy">Copy all as JSON</button><span class="hint" id="fn-msg" aria-live="polite"></span></div>
+      <textarea id="fn-export" class="fd-export" hidden readonly aria-label="Exported notes"></textarea>
+    </form>
+    <div id="fd-notes" class="tablewrap"></div>
+  </section>
+  <footer class="foot"><p>Field notes are research inputs, not trading signals. Keep material non-public information out entirely; record only what you are permitted to use. Likelihoods on this desk are hypotheses, labelled as such.</p></footer>
+</section>
+
 <!-- ======================= LAB ======================= -->
 <section class="view" id="view-lab" hidden aria-labelledby="lab-title">
   <div class="vhead">
@@ -1712,7 +1826,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">165 of 165 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">179 of 179 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1734,6 +1848,10 @@
           <tr><td>Solver, game against Nature, value of information, reverse stress, Python and page</td><td class="r">same choice; agree to 1e-9</td></tr>
           <tr><td>Nash solver on known games; capex race; crowded exit's Laplace limit</td><td class="r">exact; 4/9 and 9/8; exact</td></tr>
           <tr><td>A newer filing reversing Oracle's coverage</td><td class="r">row, label, date and game update together</td></tr>
+          <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
+          <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
+          <tr><td>MCP server: handshake, eight tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>

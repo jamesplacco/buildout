@@ -44,27 +44,41 @@
   function todayChanges(I, TD) {
     const HL = I.HL, out = [];
     const st = TD.gates.state.value;
-    out.push({ k: "obs", what: `Stocks and bonds ${st === "amplifying" ? "are moving together" : st === "hedging" ? "are moving opposite" : "have no clear relationship"}`,
+    out.push({ id: "corr", k: "obs", what: `Stocks and bonds ${st === "amplifying" ? "are moving together" : st === "hedging" ? "are moving opposite" : "have no clear relationship"}`,
       v: `correlation ${sgn2(I.corr.v)}`, d: I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d), live: I.corr.live,
       why: `TLT hedge: ${TD.status !== "ok" ? "unavailable" : TD.on ? "on" : "off"} under policy hedge.tlt.v2. It returns at −0.10 (${fx(Math.max(0, I.corr.v + 0.1), 2)} away).`, href: "#d-duration" });
     const inBand = HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1];
-    out.push({ k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 155 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
+    out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 155 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
       v: `${pctPts(I.infl.avg36)} over 36 months${HL.band ? `; band ${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""}`, d: monthNice(I.infl.d), live: I.infl.live,
       why: `Inflation sleeve: ${I.infl.avg36 >= I.lineAt ? "8%, half gold, half energy" : "2%"}. TLT inflation gate ${TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`, href: "#fi-hedge" });
     let third = null;
     try {
       const near = rocRows().filter((x) => !x.row.meanReverting && x.at13.state === "line" && x.at13.esc && fin(x.at13.weeks)).sort((a, b) => a.at13.weeks - b.at13.weeks)[0];
-      if (near && near.at13.weeks <= 26) third = { k: "est", what: `${near.row.n} is heading for a rule line`, v: `${fmtRocLevel(near.row, near.at13.at)} in ${durTxt(near.at13.weeks)} at the 13-week pace`, d: isoNice(near.r.date), live: !!near.r.live,
+      if (near && near.at13.weeks <= 26) third = { id: "roc", k: "est", what: `${near.row.n} is heading for a rule line`, v: `${fmtRocLevel(near.row, near.at13.at)} in ${durTxt(near.at13.weeks)} at the 13-week pace`, d: isoNice(near.r.date), live: !!near.r.live,
         why: `Crossing it reads "${near.at13.label}". A straight-line projection, not a forecast of the date.`, href: "#roc-title" };
     } catch (e) { third = null; }
     if (!third) {
       const ratio = I.capexTTM / I.ocfTTM, fresh = FUND.rows.filter((r) => r.refreshed).length;
-      third = { k: "obs", what: fresh ? "New filings changed the builders' cash coverage" : "The five builders spend most of their cash flow on capex",
+      third = { id: "capex", k: "obs", what: fresh ? "New filings changed the builders' cash coverage" : "The five builders spend most of their cash flow on capex",
         v: `${pct0(ratio)} of operating cash flow`, d: FUND.as_of.replace("SEC filings through ", ""), live: fresh > 0,
         why: "AI equity scenarios: the capex-digestion signal is on above 80%; the reasoner weighs it.", href: "#fu-t-title" };
     }
     out.push(third);
     return out;
+  }
+  // previous values: what each headline read at the last data date this browser saw, so a change shows its "was"
+  function todayCompare(items, asof) {
+    let hist = LS.get("bo-today-hist", []);
+    if (!Array.isArray(hist)) hist = [];
+    hist = hist.filter((e) => e && isoOk(e.asof) && e.vals && typeof e.vals === "object");
+    const vals = {};
+    items.forEach((c) => { if (c.id) vals[c.id] = c.v; });
+    const prev = hist.filter((e) => e.asof < asof).sort((a, b) => b.asof.localeCompare(a.asof))[0] || null;
+    hist = hist.filter((e) => e.asof !== asof).concat([{ asof, vals }]).sort((a, b) => a.asof.localeCompare(b.asof)).slice(-12);
+    LS.set("bo-today-hist", hist);
+    if (!prev) return { prev: null, note: `First look at data through ${isoNice(asof)} in this browser. Next time, each line shows what it read before.` };
+    const moved = Object.keys(vals).filter((k) => prev.vals[k] != null && prev.vals[k] !== vals[k]).length;
+    return { prev, note: moved ? `${moved} of ${Object.keys(vals).length} headlines moved since ${isoNice(prev.asof)}.` : `Quiet: nothing on this screen moved since ${isoNice(prev.asof)}. No action is a decision too; the policies above still hold.` };
   }
   function renderToday7() {
     const box = $("#today7");
@@ -80,15 +94,19 @@
       evTag("obs"), document.createTextNode(` Inflation of ${pctPts(I.infl.avg36)} over three years sits ${HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1] ? "inside" : "outside"} the ${HL.band ? `${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""} band where the data cannot pin the line. `), evTag("est"));
     $("#t7-status").textContent = `Model book, not personal positions · data through ${isoNice(latestDataDate())} · policies hedge.tlt.v2 and size.equity.v2${LIVE.status && Array.isArray(LIVE.status.checks) ? ` · ${LIVE.status.checks.filter((c) => c.ok).length} of ${LIVE.status.checks.length} data checks pass` : " · snapshot"}`;
     // what changed and why it matters
-    const ch = $("#t7-changes");
+    const ch = $("#t7-changes"), items = todayChanges(I, TD), cmp = todayCompare(items, latestDataDate());
     ch.replaceChildren();
-    todayChanges(I, TD).forEach((c) => {
+    items.forEach((c) => {
       const li = h("li"), top = h("div", "t7-what");
       top.append(h("strong", null, c.what), evTag(c.k, c.live ? "latest available" : "snapshot"));
       const a = h("a", null, "Details →"); a.href = c.href;
-      li.append(top, h("span", "t7-v num", `${c.v} · ${c.d}`), h("span", "t7-why", c.why), a);
+      const v = h("span", "t7-v num", `${c.v} · ${c.d}`), was = cmp.prev && cmp.prev.vals[c.id];
+      if (was && was !== c.v) v.append(h("span", "t7-was", ` · was ${was} on ${isoNice(cmp.prev.asof)}`));
+      li.append(top, v, h("span", "t7-why", c.why), a);
       ch.append(li);
     });
+    const q = $("#t7-quiet");
+    if (q) q.textContent = cmp.note;
     // the choices, from the reasoner (no value-of-information pass: that runs on the Solve desk)
     const R = RZ_LAST || runReasoner(false), cl = $("#t7-choices");
     cl.replaceChildren();

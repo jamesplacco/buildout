@@ -3,7 +3,18 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.7 answers the third project review. It fixes the accounting (one NAV and return convention, costs in
+Version 0.8 answers the fifth project review and makes the brain think. The brain now reasons from what moved to
+why (`thinking.py`): abduction finds the root shocks that best explain every reading at once, single-cause
+explanations are ranked by exact Bayesian evidence against "noise only", predictions carry standard deviations,
+criticism names the reading the map cannot explain and the link most to blame, the next observation is the one with
+the most mutual information, and doing (cut the node's causes) is kept apart from seeing. It has 34 parts and about
+110 links, down to each holding and the book. A Field desk (`field.py`) turns anecdotes into dated, sourced
+observations on three clocks, compares competing explanations and ranks the evidence that separates them, registers
+ten unusual indicators before testing them, and watches expected events without reading silence as news. Today shows
+what each headline read before, and says so when nothing moved. The engine is also an MCP server
+(`mcp_server.py`): eight research and proposal tools for any assistant, none of which can place an order.
+
+Version 0.7 answered the third project review. It fixes the accounting (one NAV and return convention, costs in
 the first return, Sharpe over accrued cash, next-session fills, every variant on the same dates beside a cash-only
 baseline), puts every decision under a versioned policy shared by the recommendation and the backtest
 (`policy.py`), makes the hedge line earn its place out of sample or come back as "no reliable threshold", builds
@@ -127,7 +138,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 165 tests, no data needed
+pytest                                    # 179 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -143,10 +154,36 @@ python -m buildout buyside --out out      # regime and gross, hedge selector, St
 python -m buildout feeds --out out        # Noteworthy: reads feeds.toml (add any Substack, Telegram channel or RSS)
 python -m buildout sources --out out      # every source the engine reads
 python -m buildout kalshi KXFED           # prediction-market Fed path (series names change; check Kalshi)
+python -m buildout mcp --data out         # MCP server on stdio (see below)
+python scripts/export_graph.py            # after editing the brain or field cases on the page (needs node)
 ```
 
 `config.toml` is the model book the page shows. Keep real positions in `config.private.toml` (git-ignored)
 and run with `--config config.private.toml`.
+
+## MCP server
+
+`python -m buildout mcp --data out` (or `python -m buildout.mcp_server`) speaks the Model Context Protocol over stdio,
+standard library only. Register it with any MCP client, for example:
+
+```json
+{"mcpServers": {"buildout": {"command": "python", "args": ["-m", "buildout", "mcp", "--data", "out"], "cwd": "/path/to/buildout"}}}
+```
+
+| Tool | Answers |
+|---|---|
+| `get_research_snapshot` | The out-of-sample hedge line and band, the stock-bond regime, data checks, scenario probabilities, brain readings, with dates |
+| `get_portfolio_risk` | The model book, its limits, the engine's risk summary, which holdings are the same bet, the book's sensitivity to each root cause |
+| `run_hedge_scenario` | hedge.tlt.v2 on any correlation path and inflation reading, every gate visible |
+| `evaluate_trade` | A portfolio on the seven scenarios: growth, worst case, loss limit, regret, the best portfolio on the grid |
+| `create_order_proposal` | A hashed proposal checked against gross, single-name and universe limits. Never executed |
+| `review_decision` | Process score and luck quadrant for one decision, or the full journal scorecard |
+| `compare_explanations` | Bayes over competing explanations and the evidence worth checking next, in bits |
+| `trace_exposure` | The brain's reasoning: causes, implications for each holding, the link most to blame, what to observe next, doing vs seeing |
+
+Every tool is read-only research or a proposal. The server refuses `config.private.toml`, never reads a brokerage
+account and has no order, routing or cancel tool; tests check all three. It reasons on `buildout/assets/brain_graph.json`,
+exported from the page by `scripts/export_graph.py`; a test fails if the export and the page drift apart.
 
 ## Data
 
@@ -173,6 +210,9 @@ and run with `--config config.private.toml`.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.8 | `thinking.py` | The brain's reasoning: total effects within K links, ridge abduction of root shocks with posterior covariance, predictions with sd, residuals and misfit gradients per link, single-cause evidence by Sherman-Morrison, mutual information for the next observation, do-interventions, shared exposure |
+| | `field.py` | Discrete Bayes over competing explanations and expected information (bits) of each unchecked piece of evidence |
+| | `mcp_server.py` | MCP over stdio: eight research and proposal tools; never executes |
 | v0.7 | `policy.py` | hedge.tlt.v2, size.equity.v2, limits.portfolio.v1: one function each for recommendation, text and backtest; unavailable inputs block, never default; decision snapshot |
 | | `reasoner.py` | Tempered Bayes posterior, scenario returns (duration, convexity, Black-Scholes put spreads, financing), exact grid search with a loss limit, alternatives with regret, simplex game against Nature, EVPI and EVSI, reverse stress from measured covariances; `python -m buildout reason` writes reason.json |
 | | `games.py` | Nash equilibria (pure and support enumeration), asymmetric Cournot calibrated to filings, the capex dilemma, Morris-Shin crowded exit, Kyle, prediction-ladder coherence and fee-aware arbitrage |
@@ -190,7 +230,7 @@ and run with `--config config.private.toml`.
 | Sizing | `analytics/sizing.py` | Vol targeting, shrunk fractional Kelly, equal risk contribution, drawdown-capped leverage, trim bands |
 | Stress | `analytics/stress.py` | Historical episodes (2020, 2022, 2024, 2025, 2026) and hypothetical factor shocks |
 | Proof | `analytics/backtest.py`, `metrics.py`, `signals.py` | Dollar-exact backtester, deflated Sharpe, purged walk-forward model judged on calibration |
-| Page | `site/src/`, `scripts/assemble_page.py`, `scripts/build_site.py` | Twenty-three-desk research site assembled into `site/page.html` (reads `site/data/*.json`); `build_site.py` wraps it for GitHub Pages |
+| Page | `site/src/`, `scripts/assemble_page.py`, `scripts/build_site.py` | Twenty-four-desk research site assembled into `site/page.html` (reads `site/data/*.json`); `build_site.py` wraps it for GitHub Pages |
 
 ## What the tests prove
 
@@ -227,6 +267,13 @@ and run with `--config config.private.toml`.
   languages; the zero-sum solver gets matching pennies, rock-paper-scissors and a dominance game exactly; the capex
   game reproduces the textbook 4/9 cost of racing and 9/8 price of anarchy; the crowded exit hits the Laplace limit.
 - The calculator is exact against SciPy and refuses what it cannot read.
+- v0.8: abduction recovers a planted cause; "noise only" wins when nothing moved; the next observation is the one
+  that separates two causes with the same footprint elsewhere; doing and seeing differ upstream of a node; criticism
+  blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
+- The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
+  is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- The MCP server completes the handshake over stdio, answers every tool in agreement with the engine, rejects bad
+  input as tool errors, has no execution tool, marks every proposal unexecuted and refuses the private config.
 - The feed scraper survives dead sources and a missing X token, finds a planted lead time, and its text cannot
   inject markup or script into the page.
 

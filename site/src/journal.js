@@ -31,6 +31,12 @@
       status: r.status === "closed" ? "closed" : "open", created: isoOk(r.created) ? r.created : new Date().toISOString(), lockedAt: isoOk(r.lockedAt) ? r.lockedAt : null, edited: !!r.edited,
     };
     if (r.example) out.example = true;
+    // v0.8: the decision record a solver run leaves behind; kept verbatim (bounded), never rewritten
+    if (r.snapshot && typeof r.snapshot === "object") {
+      try { const js = JSON.stringify(r.snapshot); if (js.length < 60000) out.snapshot = JSON.parse(js); } catch (e) { /* drop a malformed snapshot */ }
+    }
+    if (typeof r.hash === "string" && /^[a-z0-9:]{8,80}$/.test(r.hash)) out.hash = r.hash;
+    if (Array.isArray(r.revisions)) out.revisions = r.revisions.slice(0, 200).map((v) => ({ at: isoOk(v && v.at) ? v.at : null, what: clip(v && v.what, 300) })).filter((v) => v.at);
     if (out.status === "closed") {
       out.closed = date(r.closed) || todayIso();
       out.ret = num(r.ret, -10, 10, 0);
@@ -132,6 +138,12 @@
     const rec = cleanRecord(r);
     if (!rec || rec.example) return null;
     const i = JR.recs.findIndex((x) => x.id === rec.id);
+    if (i >= 0) {                                         // append-only history: every saved change is an event, the original stays visible
+      const old = JR.recs[i], keys = ["title", "hypothesis", "p", "win", "loss", "size", "horizon", "kill", "status", "ret", "right"];
+      const changed = keys.filter((k) => JSON.stringify(old[k]) !== JSON.stringify(rec[k]));
+      if (changed.length) rec.revisions = (old.revisions || []).concat([{ at: new Date().toISOString(), what: `Changed ${changed.join(", ")}${changed.some((k) => JR_LOCKED.includes(k)) && old.lockedAt ? " after logging (the forecast no longer counts as logged before)" : ""}` }]).slice(-200);
+      else rec.revisions = old.revisions || rec.revisions;
+    }
     if (i >= 0) JR.recs[i] = rec; else JR.recs.push(rec);
     if (JR.mode === "cloud" && JR.col) {
       try {
@@ -222,6 +234,51 @@
     r.kill = strip(d.flip).slice(0, 400);
     r.thesis = d.id === "d-names" || d.id === "d-credit" ? "t1" : d.id === "d-inflation" ? "t3" : d.id === "d-tail" ? "t8" : "t2";
     r.direction = d.id === "d-gross" || d.id === "d-names" ? "long" : "hedge";
+  }
+  // the record a solver run leaves: inputs with dates, the alternatives considered, the choice, and a content hash
+  function recordBlock(r) {
+    const S = r.snapshot, d = h("details", "jr-record");
+    d.open = true;
+    d.append(h("summary", null, `Decision record · ${S.model || "solver"} · hash ${String(r.hash || "n/a").slice(0, 22)}`));
+    const inner = h("div", "inner");
+    inner.append(h("p", "hint", `Recorded ${String(S.at || "").slice(0, 16).replace("T", " ")} UTC with policies ${(S.policies || []).join(", ")}. The record is append-only: later changes are listed below with their reason, and the original stays as it was.`));
+    if (Array.isArray(S.alternatives)) inner.append(tableBlock(["Alternative considered", "Equity", "TLT", "Puts", "Gold", "Worst", "Growth"], S.alternatives.map((a) => [a.name, xx(a.port[0]), fx(a.port[1], 1) + "x", fx(a.port[2] * 100, 2) + "%", fx(a.port[3] * 100, 0) + "%", sPct(a.worst, 1), sPct(a.ce, 1)])));
+    if (Array.isArray(S.signals)) inner.append(tableBlock(["Signal at the time", "State", "Value", "As of"], S.signals.map((x) => [x.name, x.state == null ? "unknown" : x.state ? "on" : "off", x.show || "n/a", x.d || "n/a"])));
+    if ((r.revisions || []).length) { const ul = h("ul", "jr-revs"); r.revisions.forEach((v) => ul.append(h("li", null, `${v.at.slice(0, 16).replace("T", " ")}: ${v.what}`))); inner.append(ul); }
+    d.append(inner);
+    return d;
+  }
+  async function contentHash(obj) {
+    const txt = JSON.stringify(obj);
+    try {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+      return "sha256:" + Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+    } catch (e) {
+      let hsh = 0x811c9dc5;
+      for (let i = 0; i < txt.length; i++) { hsh ^= txt.charCodeAt(i); hsh = Math.imul(hsh, 0x01000193) >>> 0; }
+      return "fnv1a:" + hsh.toString(16).padStart(8, "0");
+    }
+  }
+  // turn the solver's current answer into a logged, hashed decision with its alternatives
+  async function recordSolverDecision(R, sig) {
+    const names = { keep: "Keep the exposure", reduce: "Reduce until the limit holds", hedge: "Same equity, best hedge", optimal: "Optimal on the grid" };
+    const alts = ["keep", "reduce", "hedge", "optimal"].filter((k) => R.alts[k]).map((k) => ({ name: names[k], key: k, port: R.alts[k].port, worst: R.alts[k].worst, ce: R.alts[k].ce, feasible: R.alts[k].feasible }));
+    const opt = R.alts.optimal || R.alts.reduce, keep = R.alts.keep;
+    const pBeat = R.post.posterior.reduce((a, p, i) => a + (opt.rets[i] > keep.rets[i] ? p : 0), 0);
+    const snapshot = { model: "reasoner.v1", at: new Date().toISOString(), policies: ["hedge.tlt.v2", "size.equity.v2", "limits.portfolio.v1"], params: { max_loss: R.P.max_loss, max_premium: R.P.max_premium, vix: R.P.vix },
+      signals: sig.map((x) => ({ id: x.id, name: (RZ_SIGNALS.find((s) => s.id === x.id) || {}).name || x.id, state: R.obs[x.id], show: x.show, d: x.d })),
+      posterior: R.post.posterior, scenarios: RZ_SCENARIOS.map((s) => s.id), alternatives: alts, chosen: "optimal", current: R.cur };
+    const hash = await contentHash(snapshot);
+    const horizon = new Date(Date.now() + 91 * 864e5).toISOString().slice(0, 10);
+    const rec = cleanRecord({ title: `Solver: ${portTxt(opt.port)}`, direction: "hedge", instrument: "Model book", thesis: "t2",
+      hypothesis: `Over the next three months the chosen portfolio (${portTxt(opt.port)}) returns more than keeping the exposure (${portTxt(keep.port)}). The solver puts this at ${pct0(pBeat)} under its scenarios.`,
+      horizon, p: clamp(pBeat, 0.01, 0.99), win: Math.max(0.001, Math.abs(opt.mean - keep.mean)), loss: Math.max(0.001, Math.abs(Math.min(...opt.rets.map((v, i) => v - keep.rets[i])))), size: Math.min(1, opt.port[0]),
+      evidence: sig.map((x) => `${(RZ_SIGNALS.find((s) => s.id === x.id) || {}).name || x.id}: ${x.show}${x.d ? " (" + x.d + ")" : ""}`),
+      kill: `Re-decide if the loss limit binds differently or a signal in the ledger flips; the value-of-information table names which.`, snapshot, hash,
+      revisions: [{ at: snapshot.at, what: "Recorded from the solver" }] });
+    rec.lockedAt = new Date().toISOString();
+    const saved = await saveRec(rec);
+    return saved;
   }
   function renderJrForm() {
     const form = $("#jr-form");
@@ -398,6 +455,7 @@
       if (r.edited) bar.append(h("span", "jr-note", "Edited after logging"));
     }
     form.append(bar);
+    if (r.snapshot) form.append(recordBlock(r));
     form.querySelectorAll("input, textarea, select").forEach((el) => {
       if (el.id === "jr-f-from") return;
       el.addEventListener("input", () => { mark(); if (el.id === "jr-f-p") pOut.textContent = Math.round(Number(el.value) * 100) + "%"; updateJrCalc(); });

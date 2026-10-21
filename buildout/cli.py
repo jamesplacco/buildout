@@ -13,6 +13,7 @@
   python -m buildout buyside --out site/data    the field manual's engine: regime and gross, hedge selector, fat tails, replays
   python -m buildout feeds --out site/data      Noteworthy: RSS, Substack, Telegram, X (with a token), Reddit, HN, news
   python -m buildout sources --out site/data    the registry of every source the engine and the page read
+  python -m buildout mcp --data site/data       MCP server on stdio: research, risk and reasoning tools, never orders
 """
 from __future__ import annotations
 
@@ -74,8 +75,15 @@ def main(argv: list[str] | None = None) -> None:
     rz.add_argument("--out", default="out", help="folder with the other daily files; reason.json is written there")
     jn = sub.add_parser("journal")
     jn.add_argument("path", help="decision journal exported from the page (JSON)")
+    mc = sub.add_parser("mcp")
+    mc.add_argument("--data", default=None, help="folder with the engine's JSON outputs")
+    mc.add_argument("--config", default=None, help="model config; config.private.toml is refused")
     a = ap.parse_args(argv)
 
+    if a.cmd == "mcp":
+        from .mcp_server import Context, serve
+        serve(Context(a.data, a.config))
+        return
     if a.cmd == "demo":
         cfg = default_config()
         cfg.data.source = "synthetic"
