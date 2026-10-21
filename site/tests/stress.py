@@ -6,8 +6,11 @@ keyboard-only use, deep links and print. Needs Playwright with Chromium:
 
 It serves site/page.html (wrapped the way GitHub Pages serves it) from temporary folders, one per
 data scenario, and fails on any script error, any NaN/undefined/Infinity/null on screen, any horizontal
-page scroll, or any panel that should have rendered but did not. The print scenario prints every desk
-to PDF and, when poppler's pdftotext is installed, fails on text printed over text.
+page scroll, any duplicate id, or any panel that should have rendered but did not. The print scenario
+prints every desk to PDF and, when poppler's pdftotext is installed, fails on text printed over text.
+The journal scenario writes, locks, unlocks, closes, scores, exports, imports and deletes decisions and
+checks they survive a reload. With AXE_JS pointing at axe-core's axe.min.js, every desk is also
+checked for serious and critical accessibility violations.
 """
 from __future__ import annotations
 
@@ -19,6 +22,8 @@ import json
 import shutil
 import subprocess
 import sys
+import os
+import re
 import tempfile
 import threading
 from pathlib import Path
@@ -31,7 +36,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
-VIEWS = ["desk", "rates", "options", "hedges", "securities", "insurers", "theses", "lenses", "engine", "appendix"]
+VIEWS = ["desk", "decide", "journal", "swans", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
+         "legends", "lenses", "lab", "engine", "appendix"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -75,8 +81,12 @@ async def check_page(page, label: str, views=VIEWS) -> None:
           const txt = view ? view.innerText : '';
           const hits = bad.filter((b) => txt.includes(b));
           if (/\bnull\b/.test(txt)) hits.push("null");
-          return { overflow: de.scrollWidth - de.clientWidth, bad: hits, view: view && view.id };
+          const seen = {}, dup = [];
+          document.querySelectorAll("[id]").forEach((e) => { if (seen[e.id]) dup.push(e.id); seen[e.id] = 1; });
+          return { overflow: de.scrollWidth - de.clientWidth, bad: hits, view: view && view.id, dup };
         }""", BAD_TEXT)
+        if res["dup"]:
+            fail(f"{label} #{v}: duplicate ids {sorted(set(res['dup']))[:6]}")
         if res["overflow"] > 1:
             fail(f"{label} #{v}: page scrolls sideways by {res['overflow']}px")
         if res["bad"]:
@@ -121,6 +131,15 @@ async def extreme_inputs(page, label: str) -> None:
                    ("#s-mu", 0), ("#s-sig", 60), ("#s-tv", 5), ("#s-dd", 10), ("#s-conf", "0.99"), ("#s-kf", "1"), ("#s-r", 7), ("#s-sp", 3),
                    ("#fu-book", 10000), ("#fu-beta", 0), ("#fu-ndx", 1000), ("#fu-share", 100), ("#fu-tlt", 0), ("#fu-book", ""), ("#fu-beta", 3), ("#fu-tlt", 100)],
     }
+    cases.update({
+        "fundamentals": [("#dw-life", 2), ("#dw-g", -0.3), ("#dw-life", 7), ("#dw-g", 0.6), ("#dw-co", "CRWV"), ("#dw-co", "ORCL"), ("#dw-life", 4)],
+        "physics": [("#ph-capex", 100), ("#ph-cost", 80), ("#ph-load", 0.4), ("#ph-capex", 1500), ("#ph-cost", 25), ("#ph-load", 0.95)],
+        "swans": [("#th-p", 0.3), ("#th-crash", -0.7), ("#th-norm", 0), ("#th-cost", 0.05), ("#th-mult", 0), ("#th-mult", 40), ("#th-cost", 0), ("#th-p", 0.02)],
+        "lab": [("#lab-coin-f", 0.05), ("#lab-coin-n", 200), ("#lab-coin-f", 1), ("#lab-kelly-p", 0.35), ("#lab-kelly-b", 0.5), ("#lab-kelly-p", 0.85), ("#lab-kelly-b", 4),
+                ("#lab-lev-mu", 0.02), ("#lab-lev-sig", 0.6), ("#lab-lev-r", 0.07), ("#lab-lev-sig", 0.05), ("#lab-conj-n", 15), ("#lab-conj-p", 0.5),
+                ("#lab-bayes-prior", 0.02), ("#lab-bayes-fpr", 0.5), ("#lab-bayes-sens", 0.99), ("#lab-luck-sr", 0.1), ("#lab-luck-z", 3), ("#lab-div-n", 1), ("#lab-div-rho", 0.95), ("#lab-div-n", 50)],
+        "decide": [("#as-a-oil", 0.05), ("#as-a-line", 0.99), ("#as-a-capex", 0.05)],
+    })
     for view, steps in cases.items():
         await page.evaluate(f"location.hash = '{view}'")
         await page.wait_for_timeout(300)
@@ -128,7 +147,7 @@ async def extreme_inputs(page, label: str) -> None:
             await setv(sel, val)
         await page.wait_for_timeout(500)
         for btn in ["#bs-type button[data-v=call]", "#po-strat button[data-k=barbell]", "#po-strat button[data-k=collar]", "#fu-eq button[data-v=NQ]", "#fu-rt button[data-v=ZN]"]:
-            if view == "options" and "fu-" in btn or view == "hedges" and ("bs-" in btn or "po-" in btn) or view == "rates":
+            if view not in ("options", "hedges") or view == "options" and "fu-" in btn or view == "hedges" and ("bs-" in btn or "po-" in btn):
                 continue
             await page.click(btn)
         await page.wait_for_timeout(300)
@@ -156,22 +175,49 @@ async def keyboard_and_links(page, label: str) -> None:
     await page.keyboard.press("Escape")
     await page.keyboard.press("3")
     await page.wait_for_timeout(300)
+    if await page.evaluate("location.hash") != "#insurers":            # the last Markets desk the reader opened
+        fail(f"{label}: key 3 did not reopen the Markets group where the reader left it: {await page.evaluate('location.hash')}")
+    await page.evaluate("location.hash = 'options'")
+    await page.wait_for_timeout(200)
+    await page.keyboard.press("1")
+    await page.wait_for_timeout(200)
+    await page.keyboard.press("3")
+    await page.wait_for_timeout(300)
     if await page.evaluate("location.hash") != "#options":
-        fail(f"{label}: key 3 did not open Options")
-    for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("faq-12", "appendix"), ("pb-credit", "hedges"),
-                        ("sig-vix", "desk"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges")]:
+        fail(f"{label}: the Markets group did not reopen the last desk read in it")
+    sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
+    if ["Options", "page"] not in sub or len(sub) != 5:
+        fail(f"{label}: Markets subtabs wrong: {sub}")
+    await page.keyboard.press("m")
+    on = await page.evaluate("document.documentElement.classList.contains('math-on') && document.getElementById('math-toggle').getAttribute('aria-pressed') === 'true'")
+    await page.keyboard.press("M")
+    off = await page.evaluate("!document.documentElement.classList.contains('math-on')")
+    if not (on and off):
+        fail(f"{label}: M did not toggle the math")
+    for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
+                        ("sig-vix", "desk"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"),
+                        ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
+                        ("fi-hedge", "findings"), ("lab-coin", "lab"), ("research", "findings"), ("wisdom", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
         await page.wait_for_timeout(250)
         got = await page.evaluate("document.querySelector('.view:not([hidden])').id")
         if got != "view-" + view:
             fail(f"{label}: #{token} opened {got}, expected {view}")
-    opened = await page.evaluate("(() => { location.hash = 'faq-12'; return new Promise((r) => setTimeout(() => r(document.getElementById('faq-12').open), 250)); })()")
+    opened = await page.evaluate("(() => { location.hash = 'faq-why-does-the-desk-say-bonds-will-not-hedge'; return new Promise((r) => setTimeout(() => r(document.getElementById('faq-why-does-the-desk-say-bonds-will-not-hedge').open), 250)); })()")
     if not opened:
         fail(f"{label}: deep link to a question did not open it")
+    await page.evaluate("location.hash = 'desk'")
+    await page.keyboard.press("/")
+    await page.keyboard.type("inflation line")
+    await page.wait_for_timeout(150)
+    kinds = await page.evaluate("[...document.querySelectorAll('#palette-list li em')].map((e) => e.textContent)")
+    if not {"Finding", "Decision"} & set(kinds):
+        fail(f"{label}: search does not reach the v0.5 desks: {kinds}")
+    await page.keyboard.press("Escape")
 
 
 async def print_all(page, label: str) -> None:
-    """Print every desk: the PDF holds all ten desks with the questions answered, no text lands on
+    """Print every desk: the PDF holds all eighteen desks with the questions answered, no text lands on
     text, and the page goes back to the desk and the closed questions the reader had."""
     await page.evaluate("location.hash = 'hedges'")
     await page.wait_for_timeout(300)
@@ -189,7 +235,7 @@ async def print_all(page, label: str) -> None:
     if missing:
         fail(f"{label}: desks missing from the PDF: {missing}")
     n = len(printcheck.pages(str(out)))
-    if n < 40:
+    if n < 60:
         fail(f"{label}: only {n} pages printed")
     hits = printcheck.overlaps(str(out))
     if hits:
@@ -200,10 +246,131 @@ async def print_all(page, label: str) -> None:
     print(f"     printed {n} pages, no text over text")
 
 
+async def setv(page, sel: str, value) -> None:
+    await page.evaluate("([s, v]) => { const el = document.querySelector(s); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }", [sel, str(value)])
+
+
+async def journal_flow(page, label: str) -> None:
+    """A decision from blank to scored: prefill from the board, lock, unlock, close, export, import, delete, reload."""
+    await page.evaluate("location.hash = 'journal'")
+    await page.wait_for_timeout(300)
+    if await page.evaluate("document.querySelectorAll('#jr-list .jr-item .ex').length") != 6:
+        fail(f"{label}: a first visit should show the six examples")
+    await page.click("#jr-new")
+    await page.select_option("#jr-f-from", "d-duration")
+    await page.wait_for_timeout(200)
+    filled = await page.evaluate("({ t: document.getElementById('jr-f-title').value, ev: document.getElementById('jr-f-evidence').value.split('\\n').length, as: document.querySelectorAll('#jr-f-as .as-row input[id^=jr-f-as-t]').length })")
+    if not filled["t"] or filled["ev"] < 4 or filled["as"] < 3:
+        fail(f"{label}: prefill from the board did not fill the entry: {filled}")
+    await page.fill("#jr-f-title", "Test: no TLT hedge into the next drawdown")
+    await setv(page, "#jr-f-p", 0.62)
+    await page.fill("#jr-f-win", "4")
+    await page.fill("#jr-f-loss", "2")
+    await page.fill("#jr-f-size", "3")
+    await page.click("#jr-form .jr-bar .btn")                       # save and lock
+    await page.wait_for_timeout(300)
+    st = await page.evaluate("({ n: document.querySelectorAll('#jr-list .jr-item:not(:has(.ex))').length, locked: document.getElementById('jr-f-p').disabled, title: document.getElementById('jr-f-title').disabled })")
+    if st["n"] != 1 or not st["locked"] or st["title"]:
+        fail(f"{label}: saving did not lock the forecast only: {st}")
+    kelly = await page.evaluate("document.getElementById('jr-calc').innerText")
+    if "Kelly" not in kelly or "NaN" in kelly:
+        fail(f"{label}: sizing panel broken: {kelly[:120]}")
+    await page.click("#jr-form .jr-bar button:text-is('Unlock the forecast')")
+    await page.click("#jr-form .jr-bar button:text-is('Close and review')")
+    await page.wait_for_timeout(150)
+    await page.fill("#jr-f-ret", "1.5")
+    await page.fill("#jr-f-bench_ret", "-2")
+    await page.select_option("#jr-f-right", "1")
+    await page.click("#jr-form .jr-bar .btn")
+    await page.wait_for_timeout(300)
+    verdict = await page.evaluate("document.getElementById('jr-verdict') && document.getElementById('jr-verdict').textContent")
+    if not verdict or "Alpha" not in verdict:
+        fail(f"{label}: closing did not score the decision: {verdict}")
+    if await page.evaluate("document.getElementById('jr-f-pr-logged_before').checked"):
+        fail(f"{label}: an entry edited after logging still passes the logged-before check")
+    await page.click("#jr-ex")                                         # hide the examples: score only mine
+    await page.wait_for_timeout(200)
+    sub = await page.evaluate("document.getElementById('jrs-sub').textContent")
+    if not sub.startswith("1 closed decision"):
+        fail(f"{label}: scorecard should count one closed decision: {sub}")
+    await page.click("#jr-export")
+    await page.wait_for_timeout(200)
+    exported = await page.evaluate("document.getElementById('jr-export-text').value")
+    try:
+        doc = json.loads(exported)
+        assert len(doc["decisions"]) == 1 and not doc["decisions"][0].get("example")
+    except Exception as exc:  # noqa: BLE001
+        fail(f"{label}: export is not a one-decision journal: {exc}")
+    tmp = Path(tempfile.mkdtemp(prefix="buildout-journal-")) / "in.json"
+    bad = {"decisions": [{"id": "../../etc", "title": "<img src=x onerror=alert(1)>", "p": 7, "win": "lots", "status": "closed", "right": 3, "ret": "x"},
+                         {"id": "d-imported-1", "title": "Imported", "p": 0.55, "win": 0.1, "loss": 0.05, "status": "open", "lockedAt": "2026-10-01T00:00:00Z"},
+                         {"id": "ex-9", "example": True, "title": "An example must never import"}]}
+    tmp.write_text(json.dumps(bad))
+    await page.set_input_files("#jr-file", str(tmp))
+    await page.wait_for_timeout(500)
+    names = await page.evaluate("[...document.querySelectorAll('#jr-list .jr-item strong')].map((e) => e.textContent)")
+    if "Imported" not in names or "An example must never import" in names or len(names) != 3:
+        fail(f"{label}: import did not clean and add the entries: {names}")
+    if await page.evaluate("document.querySelectorAll('#jr-list img').length"):
+        fail(f"{label}: an imported title became markup")
+    await page.reload(wait_until="load")
+    await page.wait_for_timeout(900)
+    await page.evaluate("location.hash = 'journal'")
+    await page.wait_for_timeout(300)
+    if await page.evaluate("document.querySelectorAll('#jr-list .jr-item').length") != 3:
+        fail(f"{label}: entries did not survive a reload")
+    await page.click("#jr-list .jr-item")
+    await page.click("#jr-form .jr-bar button:text-is('Delete')")
+    if not await page.evaluate("!!document.querySelector('#jr-confirm .confirm')"):
+        fail(f"{label}: delete did not ask in the page")
+    await page.click("#jr-confirm button:text-is('Cancel')")
+    await page.click("#jr-form .jr-bar button:text-is('Delete')")
+    await page.click("#jr-confirm button.danger")
+    await page.wait_for_timeout(300)
+    if await page.evaluate("document.querySelectorAll('#jr-list .jr-item').length") != 2:
+        fail(f"{label}: delete did not remove exactly one entry")
+
+
+async def live_research(page, label: str) -> None:
+    """With research.json from the daily run, the findings, swans and decisions read it instead of the snapshot."""
+    await page.evaluate("location.hash = 'findings'")
+    await page.wait_for_timeout(400)
+    txt = await page.evaluate("document.getElementById('fi-hedge').innerText")
+    if "5.00%" not in txt:
+        fail(f"{label}: the findings did not switch to the live research file")
+    await page.evaluate("location.hash = 'decide'")
+    await page.wait_for_timeout(300)
+    rule = await page.evaluate("document.querySelector('#d-duration .rule-box').textContent")
+    if "5.00% line" not in rule:
+        fail(f"{label}: decision 2 did not use the live hedge line: {rule[:90]}")
+    note = await page.evaluate("location.hash = 'fundamentals', new Promise((r) => setTimeout(() => r(document.getElementById('fu-note').textContent), 300))")
+    if "Newer filings" not in note:
+        fail(f"{label}: the newer filing in capex.json was not noted")
+
+
+async def accessibility(page, label: str) -> None:
+    axe = os.environ.get("AXE_JS")
+    if not axe or not Path(axe).exists():
+        print("     (AXE_JS not set: skipped the accessibility scan)")
+        return
+    await page.emulate_media(reduced_motion="reduce")     # the desks fade in; measure contrast at rest
+    await page.add_script_tag(path=axe)
+    for v in VIEWS:
+        await page.evaluate(f"location.hash = '{v}'")
+        await page.wait_for_timeout(300)
+        res = await page.evaluate("""async () => {
+          const r = await axe.run(document.querySelector('.view:not([hidden])'), { runOnly: ['wcag2a', 'wcag2aa'], resultTypes: ['violations'] });
+          return r.violations.filter((x) => x.impact === 'serious' || x.impact === 'critical').map((x) => x.id + ' (' + x.nodes.length + '): ' + x.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(', '));
+        }""")
+        if res:
+            fail(f"{label} #{v}: accessibility {res[:4]}")
+
+
 async def main() -> int:
     from fixtures import make_fixtures
     base = make_fixtures(Path(tempfile.mkdtemp(prefix="buildout-fixtures-")))
-    good = {n: json.loads((base / n).read_text()) for n in ["macro.json", "report.json", "capex.json", "status.json"]}
+    good = {n: json.loads((base / n).read_text()) for n in ["macro.json", "report.json", "capex.json", "status.json", "research.json"]}
+    snapshot_only = {k: v for k, v in good.items() if k != "research.json"}
     stale = copy.deepcopy(good)
     stale["macro.json"]["latest"]["as_of"] = "2026-09-01"
     for lv in stale["macro.json"]["rates"]["levels"].values():
@@ -217,12 +384,19 @@ async def main() -> int:
     hostile["macro.json"]["schema"] = 99
     hostile["capex.json"]["companies"] = {"GOOGL": [{"quarter_end": "2026-06-30", "ocf": None, "capex": None}], "MSFT": []}
     hostile["status.json"]["checks"] = "all good"
+    hostile["capex.json"]["ttm"] = {"MSFT": {"quarter_end": "soon", "capex_to_ocf": "high"}, "GOOGL": None, "ZZZ": 5}
+    hostile["research.json"] = {"panel": {"months": 12, "end": "2099-01"}, "hedge": {"rows": "many"}}
+    hostile["macro.json"]["macro_state"] = {"inflation": {"avg36": "hot", "yoy": None, "date": 5}, "nfci": {"value": "loose"}, "sahm": None}
     huge = copy.deepcopy(good)
     for p in huge["macro.json"]["rates"]["curves"]["latest"]["points"]:
         p["yield"] = 1e6
     async with async_playwright() as pw:
         browser = await pw.chromium.launch()
         await scenario(browser, "good data", site_with(good), extra=extreme_inputs)
+        await scenario(browser, "good data, journal", site_with(good), extra=journal_flow)
+        await scenario(browser, "good data, live research", site_with(good), extra=live_research)
+        await scenario(browser, "snapshot research", site_with(snapshot_only))
+        await scenario(browser, "good data, accessibility", site_with(good), extra=accessibility)
         await scenario(browser, "good data, keyboard and links", site_with(good), extra=keyboard_and_links)
         await scenario(browser, "good data, print every desk", site_with(good), extra=print_all)
         await scenario(browser, "no data at all", site_with(None))

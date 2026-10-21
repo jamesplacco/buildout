@@ -33,24 +33,89 @@ def test_no_banned_text():
     assert "intersection" not in PAGE.lower()
 
 
+JS_FILES = ["ui.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js", "boot.js"]
+
+
 def test_every_referenced_id_exists():
-    js = "".join((SRC / f).read_text() for f in ["ui.js", "views.js"])
+    js = "".join((SRC / f).read_text() for f in JS_FILES)
     body = (SRC / "body.html").read_text()
     defined = set(re.findall(r'\bid="([\w-]+)"', body))
     for line in js.splitlines():                      # ids created at runtime
         if "figureBlock(" in line or ".id =" in line:
             defined |= set(re.findall(r'"([a-z][\w-]*)"\)', line)) | set(re.findall(r'\.id = "([\w-]+)"', line))
+    defined |= set(re.findall(r'(?:inputEl|selectEl)\((?:"\w+", )?"([\w-]+)"', js))      # the journal form builds its fields
     referenced = set(re.findall(r'\$\("#([\w-]+)"\)', js)) | set(re.findall(r'getElementById\("([\w-]+)"\)', js))
     missing = sorted(referenced - defined)
     assert not missing, f"ids used by the script but never defined: {missing}"
 
 
+def test_no_duplicate_ids_in_the_markup():
+    body = (SRC / "body.html").read_text()
+    ids = re.findall(r'\bid="([\w-]+)"', body)
+    dup = sorted({i for i in ids if ids.count(i) > 1})
+    assert not dup, f"ids defined twice: {dup}"
+
+
+GROUPS = {"today", "decide", "markets", "research", "wisdom", "reference"}
+RUNTIME_IDS = r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+|d-[\w-]+|as-[\w-]+|ch-[\w-]+|sw-[\w-]+|lg-[\w-]+|fi-[\w-]+|lab-[\w-]+)"
+
+
 def test_hash_targets_resolve():
     body = (SRC / "body.html").read_text()
     defined = set(re.findall(r'\bid="([\w-]+)"', body))
-    views = set(re.findall(r'data-view="([\w-]+)"', body))
+    views = set(re.findall(r'id="view-([\w-]+)"', body)) | GROUPS
     for target in re.findall(r'href="#([\w-]+)"', body):
-        assert target in views or target in defined or re.fullmatch(r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+)", target), target
+        assert target in views or target in defined or re.fullmatch(RUNTIME_IDS, target), target
+
+
+def test_v05_links_resolve():
+    """Every link the decision layer draws (map nodes, overlooked cards, decision cards, chains, assumptions) lands on something."""
+    body, res, dec = (SRC / "body.html").read_text(), (SRC / "research.js").read_text(), (SRC / "decide.js").read_text()
+    ids = set(re.findall(r'\bid="([\w-]+)"', body)) | set(re.findall(r'id="view-([\w-]+)"', body))
+    swans = set(re.findall(r'\{ id: "(sw-[\w-]+)"', res))
+    legends = set(re.findall(r'\{ id: "(lg-[\w-]+)"', res))
+    decisions = set(re.findall(r'out\.push\(\{ id: "(d-[\w-]+)"', dec))
+    findings = set(re.findall(r'findingCard\("(fi-[\w-]+)"', (SRC / "desks.js").read_text()))
+    chains = set(re.findall(r'\{ id: "(ch-[\w-]+)"', res))
+    known = ids | swans | legends | decisions | findings | chains | {"size", "hedge"}
+    assert len(decisions) == 7 and len(findings) == 8 and len(swans) == 12 and len(legends) == 20
+    map_block = res[res.index("const MAP"):res.index("const JR_EXAMPLES")]
+    for t in re.findall(r'at: "([\w-]+)"', map_block):
+        assert t in known, f"system map points at missing #{t}"
+    over = res[res.index("const OVERLOOKED"):res.index("const ASSUMPTIONS")]
+    for t in re.findall(r'at: "([\w-]+)"', over):
+        assert t in known, f"overlooked card points at missing #{t}"
+    for t in re.findall(r'link: "([\w-]+)"', dec):
+        assert t in known, f"decision links to missing #{t}"
+    assum = res[res.index("const ASSUMPTIONS"):res.index("const CHAINS")]
+    for group in re.findall(r'dec: \[([^\]]*)\]', assum):
+        for t in re.findall(r'"([\w-]+)"', group):
+            assert t in decisions, f"assumption feeds missing decision {t}"
+    used = set(re.findall(r'as: \[([^\]]*)\]', dec))
+    ids_as = set(re.findall(r'\{ id: "(a-[\w-]+)"', assum))
+    for group in used:
+        for t in re.findall(r'"([\w-]+)"', group):
+            assert t in ids_as, f"decision rests on missing assumption {t}"
+    chains_block = res[res.index("const CHAINS"):res.index("const KNOWNS")]
+    cases = set(re.findall(r'case "(\w+)":', dec[dec.index("function watchValue"):dec.index("const ORDER_NAME")]))
+    for w in re.findall(r'w: "([^"]+)"', chains_block):
+        assert w.startswith("text:") or w in cases, f"chain watches unknown signal {w}"
+
+
+def _json_const(src, name):
+    return json.loads(re.search(rf"const {name} = (\{{.*?\}});\n", src, flags=re.S).group(1))
+
+
+def test_headline_and_snapshots_agree():
+    """The hero's number, the inflation snapshot and the long-history findings are the same measurement."""
+    res, body = (SRC / "research.js").read_text(), (SRC / "body.html").read_text()
+    F, R = _json_const(res, "FINDINGS"), _json_const(res, "ROC_SNAP")
+    hero = float(re.search(r"We are at ([\d.]+)%", body).group(1))
+    assert hero == round(R["cpi"]["avg36"], 1)
+    assert abs(F["hedge"]["latest"]["infl_avg"] * 100 - R["cpi"]["avg36"]) < 0.005
+    assert abs(F["spells"]["latest"] * 100 - R["cpi"]["value"]) < 0.005
+    assert F["hedge"]["latest"]["month"] == R["cpi"]["date"][:7] == F["spells"]["month"]
+    assert re.search(r"We are at", body) and f"{F['hedge']['line'] * 100:.2f}%" in body
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -221,3 +286,93 @@ def test_question_links_are_unique_and_stable():
     assert len(qs) >= 30
     ids = ["faq-" + _slug(q)[:60].rstrip("-") for q in qs]
     assert len(ids) == len(set(ids)), "two questions share an id"
+
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_rates_of_change_match_the_engine():
+    """Velocity, acceleration and time to trigger: the page and buildout/roc.py give the same numbers."""
+    import numpy as np
+    import pandas as pd
+    from buildout import roc
+    rng = np.random.default_rng(11)
+    idx = pd.date_range(end="2026-10-16", periods=60, freq="W-FRI")
+    vals = 2.0 + np.cumsum(rng.normal(0.02, 0.05, 60))
+    cases = [{"fn": "roc", "dates": [d.strftime("%Y-%m-%d") for d in idx], "values": list(map(float, vals)), "weeks": w} for w in (4, 13)]
+    cases += [{"fn": "ttt", "level": 2.77, "v": 0.041, "th": 3.0}, {"fn": "ttt", "level": 2.77, "v": -0.041, "th": 3.0}, {"fn": "ttt", "level": 3.0, "v": 1.0, "th": 3.0}]
+    got = _node(cases)
+    s = pd.Series(vals, index=idx)
+    for c, g in zip(cases[:2], got[:2]):
+        assert g[0] == pytest.approx(roc.velocity(s, c["weeks"]), abs=1e-12)
+        assert g[1] == pytest.approx(roc.acceleration(s, c["weeks"]), abs=1e-12)
+    assert got[2] == pytest.approx(roc.time_to_trigger(2.77, 0.041, 3.0)) and got[3] == "inf" and got[4] == 0
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_decision_math_matches_the_engine():
+    from buildout import decisions as dc
+    c = {"fn": "dec", "p": 0.58, "b": 1.7, "f": 0.12, "ps": [0.9, 0.7, 0.6, 0.3, 0.55, 0.8], "ys": [1, 1, 0, 0, 1, 1], "n": 14, "k": 10,
+         "sr": 0.7, "mu": 0.09, "sig": 0.22, "r": 0.04, "L": 1.4, "prior": 0.15, "sens": 0.9, "spec": 0.85, "nd": 12, "rho": 0.3,
+         "scen": [[0.85, 0.11], [0.1, -0.25], [0.05, -0.45]], "cost": 0.015, "payoff": {"1": 0.05, "2": 0.25}}
+    [g] = _node([c])
+    assert g["kelly"] == pytest.approx(dc.kelly(0.58, 1.7), abs=1e-15)
+    assert g["lg"] == pytest.approx(dc.log_growth(0.12, 0.58, 1.7), abs=1e-15)
+    assert g["brier"] == pytest.approx(dc.brier(c["ps"], c["ys"]), abs=1e-15)
+    want = dc.calibration(c["ps"], c["ys"])
+    flat = lambda rows: [v for x in rows for v in (x["n"], x["stated"], x["realized"])]  # noqa: E731
+    assert flat(g["cal"]) == pytest.approx(flat(want))
+    assert g["tail"] == pytest.approx(dc.binom_tail(14, 10, 0.5), rel=1e-12)
+    assert g["yrs"] == pytest.approx(dc.years_to_significance(0.7))
+    assert g["lev"] == pytest.approx(dc.lev_growth(0.09, 0.22, 0.04, 1.4))
+    assert g["conj"] == pytest.approx(dc.conjunction(c["ps"]))
+    assert g["bayes"] == pytest.approx(dc.bayes(0.15, 0.9, 0.85))
+    assert g["div"] == pytest.approx(dc.div_ratio(12, 0.3))
+    assert g["cagr"] == pytest.approx(dc.hedge_cagr([tuple(x) for x in c["scen"]], 0.015, {1: 0.05, 2: 0.25}), abs=1e-14)
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_journal_scorecard_matches_the_engine():
+    """The journal's luck-versus-skill numbers are the engine's numbers, on the page's own examples."""
+    from buildout import decisions as dc
+    js = "const fs=require('fs');const src=fs.readFileSync(process.argv[1],'utf8');" \
+         "process.stdout.write(JSON.stringify(new Function(src + ';return JR_EXAMPLES;')()));"
+    recs = json.loads(subprocess.run([NODE, "-e", js, str(SRC / "research.js")], capture_output=True, text=True, check=True).stdout)
+    assert len(recs) >= 5 and all(r.get("example") for r in recs)
+    [g] = _node([{"fn": "score", "records": recs}])
+    want = dc.scorecard(recs)
+    assert g["n"] == want["n_closed"] and g["open"] == want["n_open"] and g["grid"] == want["grid"]
+    assert g["brier"] == pytest.approx(want["brier"]) and g["hit"] == pytest.approx(want["hit_rate"])
+    assert g["alpha"] == pytest.approx(want["alpha"]["mean"]) and g["t"] == pytest.approx(want["alpha"]["t"])
+    assert g["luck"] == pytest.approx(want["luck_p_value"]) and g["payoff"] == pytest.approx(want["payoff_ratio"])
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_depreciation_model_matches_the_engine():
+    from buildout import fundamentals as fu
+    capex = {2021: 20.622, 2022: 23.886, 2023: 28.107, 2024: 44.477, 2025: 64.551, 2026: 115.948, 2027: 255.0}
+    [g] = _node([{"fn": "depr", "capex": {str(k): v for k, v in capex.items()}, "fit": 2026, "actual": 34.3, "life": 6.0, "short": 4.0, "years": [2026, 2027]}])
+    share = fu.fit_server_share(capex, 2026, 34.3, 6.0)
+    assert g["share"] == pytest.approx(share, abs=1e-12)
+    want = fu.depreciation_path(capex, share, 6.0, 25.0, [2026, 2027])
+    assert [g["path"]["2026"], g["path"]["2027"]] == pytest.approx([want[2026], want[2027]], abs=1e-9)
+    assert g["path"]["2026"] == pytest.approx(34.3, abs=1e-9)
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_ergodicity_game_has_the_right_long_run_behavior():
+    [g] = _node([{"fn": "ergo", "players": 4000, "rounds": 60, "up": 0.5, "down": 0.4, "f": 1.0, "seed": 7}])
+    assert g["ensemble"] == pytest.approx(1.05 ** 60) and g["typical"] == pytest.approx(0.9 ** 30)
+    assert g["median"] < 0.2 < g["mean"]             # the average player is rich, the typical player is broke
+    assert g["top1"] > 0.5                            # the top 1% hold most of the wealth
+
+
+def test_fundamentals_snapshot_matches_the_filings():
+    """The Fundamentals desk shows exactly what scripts/snapshot_fundamentals.py computes from the SEC facts."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from snapshot_fundamentals import build
+    want = build()
+    src = (SRC / "research.js").read_text()
+    m = re.search(r"const FUND = (\{.*?\});\n", src)
+    assert m, "FUND block not found in research.js"
+    got = json.loads(m.group(1))
+    assert got == json.loads(json.dumps(want)), "research.js FUND is stale: rerun scripts/snapshot_fundamentals.py"

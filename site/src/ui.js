@@ -158,3 +158,82 @@
       if (e.key === "ArrowLeft") { e.preventDefault(); at(idx - 1); }
     });
   }
+
+  /* ---------- v0.5: generic bar charts. One scale per chart, recessive grid, labels in ink tokens ---------- */
+  // horizontal bars; values may cross zero (diverging); rows: { label, v, color, tip: () => rows, lbl: "value label" }
+  function barsH(box, rows, cfg = {}) {
+    if (!box || !box.clientWidth || !rows.length) return;
+    if (!rows.some((r) => fin(r.v) && (!cfg.log || r.v > 0))) { noData(box); return; }
+    const W = boxWidth(box), rowH = cfg.rowH || 30, top = 4, bottom = 24;
+    const labelW = cfg.labelW || Math.round(Math.min(230, Math.max(96, W * 0.34))), padR = cfg.padR || 64;
+    const Hh = top + rows.length * rowH + bottom;
+    const vals = rows.map((r) => r.v).filter(fin);
+    const log = !!cfg.log;
+    let lo, hi, sx;
+    if (log) {
+      const pos = vals.filter((v) => v > 0);
+      lo = Math.floor(Math.log10(Math.min(...pos, cfg.min || Infinity))); hi = Math.ceil(Math.log10(Math.max(...pos)));
+      sx = (v) => labelW + ((Math.log10(Math.max(v, Math.pow(10, lo))) - lo) / (hi - lo || 1)) * (W - labelW - padR);
+    } else {
+      const ticks = niceTicks(Math.min(0, ...vals, cfg.min ?? 0), Math.max(0, ...vals, cfg.max ?? 0), cfg.ticks || 4);
+      lo = ticks[0]; hi = ticks[ticks.length - 1];
+      sx = (v) => labelW + ((v - lo) / (hi - lo || 1)) * (W - labelW - padR);
+    }
+    box.replaceChildren();
+    const s = svg("svg", { viewBox: `0 0 ${W} ${Hh}`, width: W, height: Hh, role: "img", "aria-label": cfg.label || "Bar chart" }, box);
+    const tickVals = log ? Array.from({ length: hi - lo + 1 }, (_, i) => Math.pow(10, lo + i)).filter((_, i, a) => a.length <= 6 || i % 2 === 0) : niceTicks(lo, hi, cfg.ticks || 4);
+    tickVals.forEach((t) => {
+      const x = sx(t);
+      svg("line", { x1: x, x2: x, y1: top, y2: Hh - bottom, class: !log && t === 0 ? "baseline" : "gridline" }, s);
+      text(s, x, Hh - 8, cfg.tfmt ? cfg.tfmt(t) : log ? (t >= 1 ? String(t) : t.toExponential(0).replace("e-", "e−")) : String(t), "ax", "middle");
+    });
+    rows.forEach((r, i) => {
+      const y = top + i * rowH + (rowH - 14) / 2;
+      text(s, labelW - 10, y + 11, r.label, r.strong ? "lbl-strong" : "cat", "end");
+      if (!fin(r.v)) { text(s, sx(log ? Math.pow(10, lo) : 0) + 6, y + 11, "n/a", "ax", "start"); return; }
+      const x0 = log ? labelW : sx(0), x1 = sx(r.v);
+      svg("path", { d: hbar(x0, x1, y, 14), fill: r.color || "var(--s1)" }, s);
+      const lbl = r.lbl != null ? r.lbl : cfg.fmt ? cfg.fmt(r.v) : String(r.v);
+      if (r.v >= 0 || log) text(s, Math.max(x0, x1) + 6, y + 11, lbl, "lbl-strong", "start");
+      else if (Math.min(x0, x1) - labelW < 52) text(s, x0 + 6, y + 11, lbl, "lbl-strong", "start");   // no room left of a short negative bar: label it right of zero
+      else text(s, Math.min(x0, x1) - 6, y + 11, lbl, "lbl-strong", "end");
+      if (r.mark != null && fin(r.mark)) svg("line", { x1: sx(r.mark), x2: sx(r.mark), y1: y - 3, y2: y + 17, stroke: "var(--ink)", "stroke-width": 2 }, s);
+      const hit = svg("rect", { x: 0, y: top + i * rowH, width: W, height: rowH, class: "hit", tabindex: "0", "aria-label": `${r.label}: ${lbl}` }, s);
+      bindTip(hit, r.tip || (() => [[lbl, r.label]]));
+    });
+  }
+  // vertical bars over categories; a row may carry { lo, hi } to draw a range instead of a bar
+  function noData(box, msg) {
+    const e = h("div", "empty");
+    e.append(h("strong", null, msg || "No data yet."), h("span", null, "The chart fills in when the daily run supplies it."));
+    box.replaceChildren(e);
+  }
+  function barsV(box, rows, cfg = {}) {
+    if (!box || !box.clientWidth || !rows.length) return;
+    const vals = rows.flatMap((r) => [r.v, r.lo, r.hi]).filter(fin);
+    if (!vals.length) { noData(box); return; }
+    const W = boxWidth(box), Hh = cfg.height || 230, padL = cfg.padL || 44, padR = 10, top = 20, bottom = 30;
+    const ticks = niceTicks(Math.min(0, ...vals), Math.max(0, ...vals, cfg.max || 0), cfg.ticks || 4), y0 = ticks[0], y1 = ticks[ticks.length - 1];
+    const sy = (v) => top + (1 - (v - y0) / (y1 - y0 || 1)) * (Hh - top - bottom);
+    const band = (W - padL - padR) / rows.length, bw = Math.min(54, band * 0.56);
+    box.replaceChildren();
+    const s = svg("svg", { viewBox: `0 0 ${W} ${Hh}`, width: W, height: Hh, role: "img", "aria-label": cfg.label || "Bar chart" }, box);
+    ticks.forEach((t) => { svg("line", { x1: padL, x2: W - padR, y1: sy(t), y2: sy(t), class: t === 0 ? "baseline" : "gridline" }, s); text(s, padL - 8, sy(t) + 4, cfg.yfmt ? cfg.yfmt(t) : String(t), "ax", "end"); });
+    rows.forEach((r, i) => {
+      const x = padL + band * i + (band - bw) / 2;
+      text(s, x + bw / 2, Hh - 9, r.label, "ax", "middle");
+      let lbl;
+      if (fin(r.lo) && fin(r.hi)) {
+        svg("path", { d: vbar(x, bw, sy(r.lo), sy(r.hi)), fill: r.color || "var(--s1)", opacity: 0.35 }, s);
+        svg("line", { x1: x, x2: x + bw, y1: sy(r.lo), y2: sy(r.lo), stroke: r.color || "var(--s1)", "stroke-width": 2 }, s);
+        lbl = r.lbl || `${r.lo} to ${r.hi}`;
+        text(s, x + bw / 2, sy(r.hi) - 6, lbl, "lbl-strong", "middle");
+      } else if (fin(r.v)) {
+        svg("path", { d: vbar(x, bw, sy(0), sy(r.v)), fill: r.color || "var(--s1)" }, s);
+        lbl = r.lbl != null ? r.lbl : cfg.fmt ? cfg.fmt(r.v) : String(r.v);
+        text(s, x + bw / 2, r.v >= 0 ? sy(r.v) - 6 : sy(r.v) + 14, lbl, "lbl-strong", "middle");
+      }
+      const hit = svg("rect", { x: padL + band * i, y: top, width: band, height: Hh - top - bottom, class: "hit", tabindex: "0", "aria-label": `${r.label}: ${lbl || "n/a"}` }, s);
+      bindTip(hit, r.tip || (() => [[lbl || "n/a", r.label]]));
+    });
+  }

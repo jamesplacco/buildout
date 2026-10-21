@@ -27,7 +27,10 @@ def clean(o):
     if isinstance(o, pd.Series):
         return clean(o.to_dict())
     if isinstance(o, (np.floating, float)):
-        return None if not np.isfinite(o) else round(float(o), 6)
+        if not np.isfinite(o):
+            return None
+        x = float(o)
+        return round(x, 6) if x == 0 or abs(x) >= 1e-4 else float(f"{x:.4g}")   # keep tiny probabilities (1.84e-06) significant
     if isinstance(o, (np.integer,)):
         return int(o)
     if isinstance(o, np.bool_):

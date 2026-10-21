@@ -242,3 +242,146 @@
     for (let i = 0; i < 100; i++) { const mid = (lo + hi) / 2; if (bs(S, K, T, r, q, mid, type).price > price) hi = mid; else lo = mid; }
     return (lo + hi) / 2;
   }
+
+  /* ---------- v0.5: rates of change (mirrors buildout/roc.py) ---------- */
+  const WEEK_MS = 7 * 86400000;
+  function olsSlope(xs, ys) {
+    const p = xs.map((x, i) => [x, ys[i]]).filter(([x, y]) => fin(x) && fin(y));
+    if (p.length < 3) return NaN;
+    const mx = p.reduce((a, q) => a + q[0], 0) / p.length, my = p.reduce((a, q) => a + q[1], 0) / p.length;
+    let sxx = 0, sxy = 0;
+    p.forEach(([x, y]) => { sxx += (x - mx) * (x - mx); sxy += (x - mx) * (y - my); });
+    return sxx > 0 ? sxy / sxx : NaN;
+  }
+  // slope per week over the `weeks` before endMs (default: the last point); pts are [ms, value]
+  function velocity(pts, weeks = 13, endMs) {
+    const ok = pts.filter((q) => fin(q[0]) && fin(q[1]));
+    if (!ok.length) return NaN;
+    const end = endMs == null ? ok[ok.length - 1][0] : endMs;
+    const w = ok.filter((q) => q[0] <= end && q[0] >= end - weeks * WEEK_MS);
+    return olsSlope(w.map((q) => (q[0] - end) / WEEK_MS), w.map((q) => q[1]));
+  }
+  function acceleration(pts, weeks = 13) {
+    const ok = pts.filter((q) => fin(q[0]) && fin(q[1]));
+    if (!ok.length) return NaN;
+    const end = ok[ok.length - 1][0], prior = end - weeks * WEEK_MS;
+    if (ok[0][0] > prior - (weeks / 2) * WEEK_MS) return NaN;
+    return velocity(ok, weeks, end) - velocity(ok, weeks, prior);
+  }
+  // weeks until level reaches threshold at velocity v: 0 if there, Infinity if moving away or still
+  function timeToTrigger(level, v, threshold) {
+    if (!fin(level) || !fin(threshold)) return NaN;
+    const gap = threshold - level;
+    if (gap === 0) return 0;
+    if (!fin(v) || v === 0 || (gap > 0) !== (v > 0)) return Infinity;
+    return gap / v;
+  }
+
+  /* ---------- v0.5: decision math (mirrors buildout/decisions.py) ---------- */
+  const kelly = (p, b) => (!(p >= 0 && p <= 1) || !(b > 0) ? NaN : Math.max(0, p - (1 - p) / b));
+  function logGrowth(f, p, b) {
+    if (f >= 1) return p < 1 ? -Infinity : Math.log1p(b * f);
+    return p * Math.log1p(b * f) + (1 - p) * Math.log1p(-f);
+  }
+  function brier(ps, ys) {
+    if (!ps.length || ps.length !== ys.length) return NaN;
+    return ps.reduce((a, p, i) => a + (p - ys[i]) * (p - ys[i]), 0) / ps.length;
+  }
+  function calibration(ps, ys, edges = [0, 0.2, 0.4, 0.6, 0.8, 1.0001]) {
+    const out = [];
+    for (let i = 0; i < edges.length - 1; i++) {
+      const lo = edges[i], hi = edges[i + 1], pick = ps.map((p, j) => [p, ys[j]]).filter(([p]) => p >= lo && p < hi);
+      if (pick.length) out.push({ lo, hi: Math.min(hi, 1), n: pick.length, stated: pick.reduce((a, q) => a + q[0], 0) / pick.length, realized: pick.reduce((a, q) => a + q[1], 0) / pick.length });
+    }
+    return out;
+  }
+  function binomTail(n, k, p = 0.5) {
+    if (k <= 0) return 1;
+    if (k > n) return 0;
+    let c = 1, tot = 0;                       // c = C(n, i), built up term by term
+    for (let i = 0; i <= n; i++) {
+      if (i > 0) c = (c * (n - i + 1)) / i;
+      if (i >= k) tot += c * Math.pow(p, i) * Math.pow(1 - p, n - i);
+    }
+    return tot;
+  }
+  const yearsToSig = (sr, z = 2) => (sr <= 0 ? Infinity : (z / sr) * (z / sr));
+  const levGrowth = (mu, sig, r, L) => r + L * (mu - r) - 0.5 * L * L * sig * sig;
+  const conjunction = (ps) => ps.reduce((a, p) => a * p, 1);
+  function bayes(prior, sens, spec) {
+    const tp = prior * sens, fp = (1 - prior) * (1 - spec);
+    return tp + fp > 0 ? tp / (tp + fp) : NaN;
+  }
+  const divRatio = (n, rho) => Math.sqrt((1 + (n - 1) * rho) / n);
+  // compound growth across [probability, return] scenarios; a hedge costs `cost` and pays payoff[i] in scenario i
+  function hedgeCagr(scen, cost, payoff = {}) {
+    let tot = 0;
+    for (let i = 0; i < scen.length; i++) {
+      const x = 1 + scen[i][1] - cost + (payoff[i] || 0);
+      if (x <= 0) return -1;
+      tot += scen[i][0] * Math.log(x);
+    }
+    return Math.exp(tot) - 1;
+  }
+  function alphaStats(rets, bench, betas) {
+    const a = rets.map((r, i) => r - betas[i] * bench[i]), n = a.length;
+    if (n < 2) return { n, mean: n ? a[0] : NaN, sd: NaN, t: NaN, need: Infinity };
+    const mean = a.reduce((s, x) => s + x, 0) / n, sd = Math.sqrt(a.reduce((s, x) => s + (x - mean) * (x - mean), 0) / (n - 1));
+    return { n, mean, sd, t: sd > 0 ? mean / (sd / Math.sqrt(n)) : NaN, need: mean > 0 && sd > 0 ? Math.pow((2 * sd) / mean, 2) : Infinity };
+  }
+  const PROCESS_ITEMS = ["logged_before", "sized_by_rule", "kill_respected", "two_sources"];
+  function processScore(rec) {
+    const pr = rec.process || {};
+    const vals = PROCESS_ITEMS.filter((k) => k in pr).map((k) => !!pr[k]);
+    return vals.length ? vals.filter(Boolean).length / PROCESS_ITEMS.length : null;
+  }
+  function scorecard(records) {
+    const closed = records.filter((r) => r.status === "closed" && [0, 1, 0.5].includes(r.right) && fin(r.p) && fin(r.ret));
+    const ps = closed.map((r) => r.p), ys = closed.map((r) => (r.right === 1 ? 1 : 0)), rets = closed.map((r) => r.ret);
+    const bench = closed.map((r) => (fin(r.bench_ret) ? r.bench_ret : 0)), betas = closed.map((r) => (fin(r.beta) ? r.beta : 1));
+    const wins = rets.filter((x) => x > 0), losses = rets.filter((x) => x < 0).map((x) => -x);
+    const grid = { earned: 0, bad_luck: 0, dumb_luck: 0, deserved: 0 };
+    closed.forEach((r, i) => {
+      const goodP = (processScore(r) || 0) >= 0.75, goodO = rets[i] - betas[i] * bench[i] > 0;
+      grid[goodP ? (goodO ? "earned" : "bad_luck") : (goodO ? "dumb_luck" : "deserved")] += 1;
+    });
+    const n = closed.length, hits = ys.reduce((a, y) => a + y, 0), mean = (xs) => xs.reduce((a, x) => a + x, 0) / xs.length;
+    return { nClosed: n, nOpen: records.filter((r) => r.status !== "closed").length, brier: n ? brier(ps, ys) : NaN,
+      stated: n ? mean(ps) : NaN, hitRate: n ? hits / n : NaN, over: n ? mean(ps) - hits / n : NaN, cal: n ? calibration(ps, ys) : [],
+      payoff: wins.length && losses.length ? mean(wins) / mean(losses) : NaN, expectancy: n ? mean(rets) : NaN,
+      alpha: n ? alphaStats(rets, bench, betas) : null, luckP: n ? binomTail(n, hits, 0.5) : NaN, grid };
+  }
+
+  /* ---------- v0.5: depreciation model (mirrors buildout/fundamentals.py) ---------- */
+  function deprPath(capex, share, lifeS, lifeO = 25, years) {
+    const out = {};
+    years.forEach((t) => {
+      let tot = 0;
+      Object.entries(capex).forEach(([v, c]) => {
+        [[share, lifeS], [1 - share, lifeO]].forEach(([sh, life]) => {
+          const a = Number(v) + 0.5, b = a + life, overlap = Math.max(0, Math.min(t + 1, b) - Math.max(t, a));
+          tot += c * sh * overlap / life;
+        });
+      });
+      out[t] = tot;
+    });
+    return out;
+  }
+  function fitShare(capex, year, actual, lifeS, lifeO = 25) {
+    const a = deprPath(capex, 1, lifeS, lifeO, [year])[year], b = deprPath(capex, 0, lifeS, lifeO, [year])[year];
+    return a === b ? NaN : Math.min(1, Math.max(0, (actual - b) / (a - b)));
+  }
+
+  /* ---------- v0.5: a seeded random walk for the ergodicity game ---------- */
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  // players bet fraction f of wealth on a fair coin that pays +up or -down; returns the ensemble's fate
+  function ergodicGame(players, rounds, up, down, f, seed = 7) {
+    const rnd = mulberry32(seed), w = new Float64Array(players).fill(1);
+    for (let t = 0; t < rounds; t++) for (let i = 0; i < players; i++) w[i] *= rnd() < 0.5 ? 1 + f * up : 1 - f * down;
+    const sorted = Array.from(w).sort((a, b) => a - b), mean = sorted.reduce((a, x) => a + x, 0) / players;
+    return { mean, median: sorted[Math.floor(players / 2)], ruined: sorted.filter((x) => x < 0.1).length / players, top1: sorted.slice(Math.floor(players * 0.99)).reduce((a, x) => a + x, 0) / (mean * players),
+      ensemble: Math.pow(1 + f * (up - down) / 2, rounds), typical: Math.pow((1 + f * up) * (1 - f * down), rounds / 2) };
+  }

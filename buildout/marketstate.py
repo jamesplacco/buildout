@@ -13,6 +13,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from . import roc
 from .jsonout import series
 
 # (key, label, FRED id or (a, b) for a - b, kind). kind: pct (prices), bp (yields and spreads), pts (vol indexes)
@@ -38,6 +39,9 @@ MOVES = [
 VOL_PAIRS = [("spx", "S&P 500", "SP500", "VIXCLS"), ("ndx", "Nasdaq-100", "NASDAQ100", "VXNCLS")]
 TERM_IDS = ("VIXCLS", "VXVCLS")                      # VIX and 3-month VIX
 LIQ_IDS = ["WALCL", "WTREGEN", "RRPONTSYD", "WRESBAL", "SOFR", "IORB"]
+# v0.5 macro state: inflation (the hedge line), labor, the curve, financial conditions
+MACRO_IDS = ["CPIAUCSL", "SAHMREALTIME", "UNRATE", "T10Y3M", "NFCI", "ICSA"]
+HEDGE_LINE = 0.0275   # average inflation over 36 months above which bonds rarely hedged stocks, 1871-2026
 MIN_Z_OBS = 100                                      # fewer seven-day changes than this: no z-score
 
 
@@ -47,7 +51,7 @@ def ids() -> list[str]:
         out += list(sid) if isinstance(sid, tuple) else [sid]
     for _, _, px, iv in VOL_PAIRS:
         out += [px, iv]
-    out += list(TERM_IDS) + LIQ_IDS
+    out += list(TERM_IDS) + LIQ_IDS + MACRO_IDS
     return list(dict.fromkeys(out))
 
 
@@ -109,6 +113,11 @@ def move_row(key: str, label: str, s: pd.Series, kind: str) -> dict:
         ten = s.loc[last - pd.DateOffset(years=10):]
         row["rank10y"] = float((ten <= v).mean()) if len(ten) >= 250 else None
     row["spark"] = series(s.loc[last - pd.DateOffset(years=1):])
+    # rates of change in the unit the desk quotes: bp per week for rates, points per week for vol, % per week for prices
+    if kind == "pct":
+        row.update(roc.roc_row(np.log(s.where(s > 0)).dropna(), scale=100))
+    else:
+        row.update(roc.roc_row(s, scale=100 if kind == "bp" else 1))
     return row
 
 
@@ -206,3 +215,48 @@ def liquidity_block(fred: pd.DataFrame) -> dict:
                                  "days_above_1y": int((gap.loc[last - pd.DateOffset(years=1):] > 0).sum())}
             history["funding_gap_bp"] = series(gap.loc[last - pd.DateOffset(years=3):], freq=None)
     return {"latest": latest, "history": history}
+
+
+def monthly_roc(s: pd.Series, name: str) -> dict:
+    """Rates of change of a monthly series, per month: v3 is the least-squares slope of the last four prints
+    (three months, the monthly twin of the 13-week pace), v1 the last one-month change, a3 = v3 now minus v3
+    three months earlier."""
+    def slope(w: pd.Series) -> float | None:
+        return float(np.polyfit(np.arange(len(w)), w.to_numpy(), 1)[0]) if len(w) == 4 and w.notna().all() else None
+    v3, v3p = slope(s.iloc[-4:]), slope(s.iloc[-7:-3])
+    return {f"{name}_v3": v3, f"{name}_v1": float(s.iloc[-1] - s.iloc[-2]) if len(s) > 1 else None,
+            f"{name}_a3": v3 - v3p if v3 is not None and v3p is not None else None}
+
+
+def macro_state_block(fred: pd.DataFrame) -> dict:
+    """Inflation against the hedge line, the labor market, the curve and financial conditions."""
+    out: dict = {"hedge_line": HEDGE_LINE}
+    cpi = _col(fred, "CPIAUCSL")
+    if cpi is not None and len(cpi) > 37:
+        # complete calendar: BLS published no October 2025 CPI, and a dropped month turns 12-month changes into 13-month ones
+        m = np.exp(np.log(cpi.resample("MS").last()).interpolate(limit=2, limit_area="inside")).dropna()
+        last = m.index[-1]
+        yoy = float(m.iloc[-1] / m.iloc[-13] - 1)
+        infl36 = float((m.iloc[-1] / m.iloc[-37]) ** (1 / 3) - 1)
+        # months until the 36-month average falls below the line if inflation from here runs at 2% a year
+        months, path = None, list(m.to_numpy())
+        for k in range(1, 61):
+            path.append(path[-1] * (1.02 ** (1 / 12)))
+            if (path[-1] / path[-37]) ** (1 / 3) - 1 < HEDGE_LINE:
+                months = k
+                break
+        yoy_s = (m / m.shift(12) - 1).dropna()
+        avg_s = ((m / m.shift(36)) ** (1 / 3) - 1).dropna()
+        out["inflation"] = {"date": last.strftime("%Y-%m-%d"), "yoy": yoy, "avg36": infl36, "above_line": infl36 >= HEDGE_LINE,
+                            "months_to_line_at_2pct": months, "yoy_3m_ago": float(m.iloc[-4] / m.iloc[-16] - 1) if len(m) > 16 else None,
+                            **monthly_roc(yoy_s, "yoy"), **monthly_roc(avg_s, "avg36")}
+    for key, sid, scale in (("sahm", "SAHMREALTIME", 1), ("unrate", "UNRATE", 1), ("t10y3m", "T10Y3M", 100), ("nfci", "NFCI", 1), ("claims", "ICSA", 1)):
+        s = _col(fred, sid)
+        if s is None:
+            continue
+        row = {"date": s.index[-1].strftime("%Y-%m-%d"), "value": float(s.iloc[-1])}
+        if sid == "ICSA":
+            row["avg4w"] = float(s.iloc[-4:].mean())
+        row.update(roc.roc_row(s, scale=scale))
+        out[key] = row
+    return out

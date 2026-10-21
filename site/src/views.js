@@ -1096,8 +1096,10 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix" };
-  const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity" };
+  const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
+    decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab" };
+  const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
+    "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {
     if (/^pb-/.test(target)) { const p = PLAYBOOKS.find((x) => x.id === target); return p ? `Playbook: ${p.t}` : "Playbook"; }
     if (/^t\d$/.test(target)) return `Thesis ${target.slice(1)}`;
@@ -1395,6 +1397,7 @@
     $("#sig-sub").textContent = nLive
       ? `${nLive} of ${SIGNALS.length} signals read live from the daily run; the rest show the dated snapshot. Each has a rule and an action.`
       : `${SIGNALS.length} signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.`;
+    LIVE.sigStates = Object.fromEntries(states.map((x) => [x.sg.id, x]));
     guard("Desk read", () => renderDeskRead(states), $("#desk-read"));
   }
 
@@ -1801,7 +1804,7 @@
   function buildTOCs() {
     VIEWS.forEach((v) => {
       const view = $("#view-" + v), heads = [...view.querySelectorAll(":scope > .section > .section-head h2[id]")];
-      if (heads.length < 3) return;
+      if (heads.length < 3 || view.querySelector(":scope > .toc")) return;
       const nav = h("nav", "toc");
       nav.setAttribute("aria-label", "On this desk");
       nav.append(h("span", "flabel", "On this desk"));
@@ -1945,6 +1948,7 @@
     $("#keys-close").addEventListener("click", () => closeDialog($("#keys")));
     $("#keys-open").addEventListener("click", () => { palReturn = document.activeElement; $("#keys").hidden = false; $("#keys-close").focus(); });
     $("#print-all").addEventListener("click", () => window.print());
+    if (window.claude) $("#print-all").hidden = true;          // the artifact viewer cannot open a print dialog
     $("#skip").addEventListener("click", (e) => { e.preventDefault(); const t = $("#view-" + current + " h1") || $("#main"); t.setAttribute("tabindex", "-1"); t.focus(); });
     document.addEventListener("keydown", (e) => {
       const typing = e.target.closest && e.target.closest("input, textarea, select, [contenteditable]");
@@ -1953,7 +1957,8 @@
       if (typing || e.metaKey || e.ctrlKey || e.altKey || !$("#palette").hidden) return;
       if (e.key === "/") { e.preventDefault(); openPalette(); }
       else if (e.key === "?") { e.preventDefault(); palReturn = document.activeElement; $("#keys").hidden = false; $("#keys-close").focus(); }
-      else if (/^[0-9]$/.test(e.key) && $("#keys").hidden) { const v = VIEWS[e.key === "0" ? 9 : Number(e.key) - 1]; if (v) location.hash = v; }
+      else if (/^[1-6]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
+      else if ((e.key === "m" || e.key === "M") && $("#keys").hidden) toggleMath();
     });
     $("#keys").addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); $("#keys-close").focus(); } });
     // print every desk with every hard question answered, then put the page back exactly as it was
@@ -1977,113 +1982,3 @@
       if (current) guard(TAB_NAME[current], RENDER[current]);
     });
   }
-
-  /* =====================================================================================
-     ROUTING AND BOOT
-     ===================================================================================== */
-  const VIEWS = ["desk", "rates", "options", "hedges", "securities", "insurers", "theses", "lenses", "engine", "appendix"];
-  const RENDER = {
-    desk: () => { guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
-    rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
-    options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
-    hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
-    securities: () => guard("Risk drivers", renderDrivers, $("#drv-chart")),
-    insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {},
-    theses: () => { guard("Alphabet chart", renderGoog, $("#goog-chart")); guard("Guidance chart", renderGuide, $("#guide-chart")); guard("Capex panel", drawCapex); },
-  };
-  let current = null;
-  // any element id is a deep link: the view that contains it opens and the element scrolls into view
-  function resolve(token) {
-    if (!token) return { view: "desk", el: null };
-    if (VIEWS.includes(token)) return { view: token, el: null };
-    let el = document.getElementById(token);
-    if (!el && /^sec-/.test(token) && secFilter !== "All") { secFilter = "All"; renderSecurities(); el = document.getElementById(token); }
-    if (!el && /^ep-/.test(token) && epKind !== "All") { epKind = "All"; buildEpisodes(); el = document.getElementById(token); }
-    const v = el && el.closest(".view");
-    return v ? { view: v.id.slice(5), el } : { view: "desk", el: null };
-  }
-  function show(token, scroll) {
-    let t = token;
-    try { t = decodeURIComponent(token); } catch (e) { t = ""; }
-    const { view, el } = resolve(t);
-    VIEWS.forEach((v) => { $("#view-" + v).hidden = v !== view; });
-    document.querySelectorAll(".tabs a").forEach((a) => { if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
-    current = view;
-    guard(TAB_NAME[view], RENDER[view]);
-    hideTip();
-    if (el) {
-      if (el.tagName === "DETAILS") el.open = true;
-      const d = el.parentElement && el.parentElement.closest("details");
-      if (d) d.open = true;
-      el.scrollIntoView({ block: "start" });
-    } else if (scroll) window.scrollTo(0, 0);
-  }
-
-  [["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
-   ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
-   ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
-   ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
-   ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
-   ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Navigation", wireNavigation]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
-
-  ["#bc-cpn", "#bc-yld", "#bc-mat", "#bc-face", "#bc-shock"].forEach((id) => $(id).addEventListener("input", () => guard("Bond calculator", updateBond)));
-  ["#ct-dv01", "#ct-d2", "#ct-d10"].forEach((id) => $(id).addEventListener("input", () => guard("Curve trade", updateCurveTrade)));
-  ["#bs-S", "#bs-K", "#bs-T", "#bs-v", "#bs-r", "#bs-q", "#bs-mkt"].forEach((id) => $(id).addEventListener("input", () => guard("Option pricer", updateBS)));
-  $("#bs-type").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-    bsType = b.dataset.v;
-    $("#bs-type").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-    guard("Option pricer", updateBS);
-  }));
-  ["#po-v", "#po-T"].forEach((id) => $(id).addEventListener("input", () => guard("Payoff builder", updatePayoff)));
-  ["#tb-k", "#tb-T", "#tb-v", "#tb-n"].forEach((id) => $(id).addEventListener("input", () => guard("Tail budget", updateTail)));
-  document.querySelectorAll("form").forEach((f) => f.addEventListener("submit", (e) => e.preventDefault()));
-  [["Bond calculator", updateBond], ["Curve trade", updateCurveTrade], ["Option pricer", updateBS], ["Hedge lab", updateHedge], ["Sizing lab", () => labelsSize(sizeState())], ["Futures hedge", updateFutures], ["Payoff builder", updatePayoff]]
-    .forEach(([name, fn]) => guard(name, fn));
-  show(location.hash.slice(1), false);
-  window.addEventListener("hashchange", () => show(location.hash.slice(1), true));
-
-  let raf = 0, lastW = 0;
-  if (typeof ResizeObserver === "function") {
-    new ResizeObserver(() => {
-      const w = document.body.clientWidth;
-      if (w === lastW) return;
-      lastW = w;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => { if (current) guard(TAB_NAME[current], RENDER[current]); });
-    }).observe(document.body);
-  }
-  const redrawTheme = () => { if (current === "desk") guard("Rosette", () => drawRosette(false)); };
-  const mq = window.matchMedia("(prefers-color-scheme: dark)");
-  if (mq.addEventListener) mq.addEventListener("change", redrawTheme);
-  new MutationObserver(redrawTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-
-  Promise.all(["macro", "report", "capex", "status"].map((n) => loadJSON(`data/${n}.json`))).then(([m, r, cx, st]) => {
-    if (cx) guard("Capex panel", () => renderCapex(cx), $("#capex-live"));
-    if (m && m.latest) {
-      const miss = missingFields(m, MACRO_SPEC);
-      if (miss.length) errorState($("#macro-body"), "The market file is incomplete.", `Missing or malformed: ${miss.join(", ")}. The rest of the page uses the dated snapshot.`);
-      else {
-        LIVE.macro = m;
-        guard("Engine readout", () => renderMacro(m), $("#macro-body"));
-        guard("Key levels", () => renderLevels(m), $("#levels"));
-        guard("Live rates", () => buildRatesLive(m), $("#rates-live"));
-        guard("What moved", renderMoves, $("#mv-table"));
-        guard("Insurance", renderInsurance, $("#iv-tiles"));
-        guard("Liquidity", renderLiquidity, $("#liq-tiles"));
-        guard("Numbers to know", buildRules, $("#rules"));
-        guard("Worked examples", buildExamples, $("#examples"));
-        guard("Forward dates", buildForwardDates);
-        guard("Data dictionary", buildDict);
-        guard("Episode atlas", buildEpisodes, $("#ep-grid"));
-      }
-    } else if (m) errorState($("#macro-body"), "The market file is incomplete.", "It has no latest block. The rest of the page uses the dated snapshot.");
-    if (r && r.summary && r.summary.data && r.summary.data !== "synthetic") {
-      const miss = missingFields(r, BOOK_SPEC);
-      if (miss.length) errorState($("#book-body"), "The book file is incomplete.", `Missing or malformed: ${miss.join(", ")}.`);
-      else { LIVE.report = r; guard("Model book", () => renderBook(r), $("#book-body")); }
-    }
-    if (st) { LIVE.status = st; guard("System status", () => renderStatus(st), $("#status-body")); }
-    guard("Signals", renderSignals, $("#signals-grid"));
-    guard("Futures defaults", futuresDefaults);
-    if (current) guard(TAB_NAME[current], RENDER[current]);
-  });

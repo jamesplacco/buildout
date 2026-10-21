@@ -100,6 +100,8 @@ class EdgarSource:
             self._map = {v["ticker"].upper(): int(v["cik_str"]) for v in raw.values()}
         return self._map[ticker.upper()]
 
-    def fundamentals(self, ticker: str) -> pd.DataFrame:
-        facts = http.get_json(FACTS_URL.format(cik=self.cik(ticker)), self.ua)
-        return fundamentals_table(facts)
+    def facts(self, ticker: str) -> dict:
+        return http.get_json(FACTS_URL.format(cik=self.cik(ticker)), self.ua)
+
+    def fundamentals(self, ticker: str, facts: dict | None = None) -> pd.DataFrame:
+        return fundamentals_table(facts if facts is not None else self.facts(ticker))

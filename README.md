@@ -3,6 +3,9 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.5 adds the decision layer: every reading becomes a written rule, a sized action, a confidence and a
+distance to a flip, and every decision you make can be logged, locked and scored for luck against skill.
+
 It answers three questions every day, with the data behind each answer:
 
 1. **How big?** Volatility targeting and a drawdown-constrained leverage cap set the size. Fractional Kelly
@@ -21,7 +24,8 @@ session's close. It can also be started by hand from the Actions tab (Run workfl
 | Tests | nothing | |
 | Market regime: Nasdaq-100 vs the long Treasury | nothing (FRED is free) | `site/data/macro.json` |
 | Book run: exposures, regime, hedge, sizing, stress, backtest | secret `DATABENTO_API_KEY` | `site/data/report.json` |
-| Fundamentals: capex, cash flow, debt from SEC filings | variable `SEC_USER_AGENT` | `site/data/capex.json` |
+| Fundamentals: capex, cash flow, debt from SEC filings; last-twelve-month analysis and Minsky stages | variable `SEC_USER_AGENT` | `site/data/capex.json` |
+| Long-history research: 155 years of public data (Shiller, BLS, Treasury, EIA, CBOE, gold) | nothing | `site/data/research.json` |
 | Status: which files exist, how fresh each is, sanity checks (always runs, even after a failure) | nothing | `site/data/status.json` |
 
 Steps without their secret or variable skip themselves with a notice. Results are committed back to `main`
@@ -39,14 +43,23 @@ by `github-actions[bot]`. Only derived analytics are committed; raw market data 
 
 ## The page
 
-`site/page.html` is one self-contained page with ten desks. Market figures carry a source and a date;
+`site/page.html` is one self-contained page with eighteen desks in six sections (Today, Decide, Markets,
+Research, Wisdom, Reference). Market figures carry a source and a date;
 tiles marked Live are replaced by the daily run's numbers, and a Stale badge appears when a file is more
 than three weekdays old. The bond, curve, option, hedge and sizing tools run in the browser with the same
 formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked against it to 1e-9.
 
 | Desk | What it holds |
 |---|---|
-| Desk | Start-here cards, signals board (nine signals, each with a rule and an action), key levels, Dalio regime map, stock-bond correlation gauge, engine readout, calendar |
+| Today | A three-line brief (do, risk, watch), twelve signals each with a rule and an action, the system map (nine parts of the financial system and the channels between them, red where stress is flowing), what moved, key levels, regime map, engine readout, calendar |
+| Decide | Seven decisions traced from data to rule to action, each with a confidence (the product of its assumptions) and the distance to a flip; rates of change (velocity, acceleration, time to each rule's line) for eleven signals; fifteen weighted assumptions with sliders; known knowns to unknown unknowns; five shocks run to the fourth order |
+| Journal | A private decision tracker: hypothesis, evidence, weighted assumptions, kill line, pre-mortem, Kelly sizing; the forecast locks when logged; after-action reviews; Brier score, calibration, alpha after beta, a luck test and a process-against-outcome grid |
+| Swans | Fat tails since 1871, twelve named swans with the hedge that pays and the one that fails, Taleb's toolkit as rules, Spitznagel's compound-growth test |
+| Fundamentals | From 10-K and 10-Q facts: last-twelve-month capex against cash flow, Minsky stages, paper profits, the depreciation wave (fitted to reported depreciation), backlog and leases, every server-life change |
+| Physics | Capex in gigawatts, terawatt-hours and homes; data-center demand; PJM capacity prices; booms as a share of GDP; Perez's cycle; megaproject base rates |
+| Findings | Eight original results on 155 years of data, each with method, caveat and the rule it changes |
+| Legends | Twenty lenses (Druckenmiller, Buffett, Munger, Griffin, Dalio, Soros, Marks, Simons, Thorp, Taleb, Spitznagel, Minsky, Keynes and more), each read against today's data, and what most desks skip |
+| Math lab | Seven toys: the ergodicity coin game, the Kelly hill, volatility drag, conjunction, Bayes, luck against skill, diversification |
 | Rates | 2026 Treasury curves, spreads, forward curve with one-year carry and roll-down, real yield vs breakeven, bond calculator, DV01-neutral curve trade |
 | Options | Black-Scholes pricer with Greeks and an implied-volatility solver, hedge payoff builder, spot-vol revaluation grid, tail-hedge budget |
 | Hedges | Fifteen hedges graded across six scenarios, six scenario playbooks, the two kinds of AI selloff, TLT hedge lab, futures hedge calculator (NQ/MNQ against ZN/TN/ZB/UB), Monte Carlo sizing lab |
@@ -55,32 +68,42 @@ formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked
 | Theses | Eight theses with evidence, expression, hedge, kill criteria and the strongest case against each; live SEC capex vs cash flow |
 | Lenses | Taleb, Dalio, Marks, Druckenmiller, Soros, Burry, Buffett and Munger, BowTiedBull, Kobeissi, Six Sigma, Walters |
 | Engine | Pipeline, system status from the daily run, self-tests, model book, data plan, roadmap |
-| Appendix | Glossary (86 terms, linked from the text), methods and formulas, 30 hard questions, model risk register, data dictionary, episode atlas (15 stresses since 1987), reading list, checklists, changelog |
+| Appendix | Glossary (126 terms, linked from the text), methods and formulas, 48 hard questions, model risk register, data dictionary, episode atlas (15 stresses since 1987), reading list, checklists, changelog |
 
 Navigation: `/` or Ctrl/Cmd+K searches every desk, term, security, thesis, episode and question; `?` lists
-the shortcuts; digits 1 to 0 open the desks; any element id is a deep link (`#g-dv01`, `#ep-covid-2020`,
-`#faq-12`). Print all (Appendix) prints every desk with every question answered.
+the shortcuts; digits 1 to 6 open the sections (each reopens the desk last read in it); M shows every formula;
+any element id is a deep link (`#g-dv01`, `#d-duration`, `#fi-hedge`, `#sw-credit`). Print all (Appendix)
+prints every desk with every question answered (outside the artifact viewer, which cannot print).
+
+The journal stores entries in the viewer's private space when the page runs as a published artifact
+(`db` and `user` capabilities: nobody else can read them, the owner included), in browser storage
+anywhere else, and exports JSON that `python -m buildout journal decisions.json` scores.
 
 ### Editing the page
 
 The page is assembled from `site/src/` (`head.html`, `body.html`, and `math.js`, `ui.js`, `data.js`,
-`reference.js`, `views.js` inside one strict-mode script). Edit the parts, then:
+`reference.js`, `research.js`, `views.js`, `decide.js`, `journal.js`, `desks.js`, `wisdom.js`, `lab.js`,
+`boot.js` inside one strict-mode script). Edit the parts, then:
 
 ```bash
 python scripts/assemble_page.py           # writes site/page.html; --check fails CI if it is stale
 python site/tests/stress.py               # browser suite (needs: pip install playwright; playwright install chromium)
+python scripts/snapshot_fundamentals.py   # regenerate the Fundamentals snapshot from the SEC facts in tests/fixtures
 ```
 
 The browser suite builds the site from engine-generated fixtures and feeds it hostile files (wrong shapes,
-truncated JSON, stale dates, absurd yields), extreme tool inputs, keyboard-only use, deep links, 320 to
-1920px widths and print. It fails on any script error, any NaN, undefined, Infinity or null on screen, any
-sideways scroll, any panel that did not render, and (with poppler's `pdftotext`) any text printed over text.
+truncated JSON, stale dates, absurd yields), extreme tool inputs, keyboard-only use, deep links, the journal
+end to end (log, lock, unlock, close, score, export, import hostile files, delete, reload), live research,
+320 to 1920px widths and print. It fails on any script error, any NaN, undefined, Infinity or null on screen,
+any duplicate id, any sideways scroll, any panel that did not render, and (with poppler's `pdftotext`) any
+text printed over text. With `AXE_JS` pointing at axe-core's `axe.min.js` it also fails on any serious or
+critical accessibility violation.
 
 ## Local use
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 62 tests, no data needed
+pytest                                    # 114 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -88,6 +111,8 @@ export DATABENTO_API_KEY=db-...           # never commit it
 python -m buildout cost --config config.toml   # price the pull before paying for it
 python -m buildout run  --config config.toml --out out
 python -m buildout capex GOOGL MSFT AMZN META ORCL TSLA --ua "Your Name you@example.com"
+python -m buildout research --out out     # 155 years of public data: the hedge line, fat tails, base rates
+python -m buildout journal decisions.json # score an exported journal: Brier, calibration, alpha, luck
 python -m buildout kalshi KXFED           # prediction-market Fed path (series names change; check Kalshi)
 ```
 
@@ -99,8 +124,9 @@ and run with `--config config.private.toml`.
 | Source | What | Cost |
 |---|---|---|
 | Databento | Daily (and minute) bars for equities and ETFs, split and dividend adjustment factors, CME Treasury futures (ZN, UB) | Pay-as-you-go historical; new accounts get $125 credit |
-| FRED | Nasdaq-100, the Treasury curve from 1 month to 30 years, TIPS real yields, breakevens, term premium, IG and HY spreads, VIX, broad dollar, Brent and WTI | Free |
-| SEC EDGAR | Quarterly operating cash flow, capex, free cash flow, debt from XBRL filings | Free (contact required) |
+| FRED | Nasdaq-100, the Treasury curve from 1 month to 30 years, TIPS real yields, breakevens, term premium, IG, HY and CCC spreads, VIX and VXN, broad dollar, Brent and WTI, the Fed's balance sheet and repo rates, CPI, unemployment, Sahm, NFCI, claims | Free |
+| SEC EDGAR | Revenue, operating cash flow, capex, leases, depreciation, operating and non-operating income, interest, debt, cash and backlog from XBRL filings | Free (contact required) |
+| GitHub datasets | Shiller's S&P 500 since 1871, BLS CPI-U, the 10-year Treasury, EIA Brent, CBOE VIX, monthly gold | Free |
 | Kalshi | Prediction-market probabilities (Fed path, CPI, recession) | Free public endpoints |
 
 ## Modules
@@ -112,6 +138,9 @@ and run with `--config config.private.toml`.
 | | `data/synthetic.py` | Regime-switching market with known betas and regimes, for testing |
 | Monitor | `macro.py` | Free daily regime read: Nasdaq-100 vs a 20-year par bond rebuilt from DGS20, back to 1993; curves, spreads, levels; episode atlas; per-series failures reported, not fatal |
 | | `status.py` | Run status: files present, valid and fresh; sanity checks on correlations, hedge ratios, yields, gross and VaR |
+| | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
+| Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
+| Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
 | Exposure | `analytics/exposures.py` | Recursive exponentially weighted betas to market, AI and rates factors; IPO shrinkage |
 | Regime | `analytics/regime.py` | Stock-bond correlation with hysteresis; worst-day shock table |
 | Hedge | `analytics/hedge.py` | Min-variance ratios, four policies judged out of sample, DV01 futures sizing |
@@ -121,7 +150,7 @@ and run with `--config config.private.toml`.
 | Sizing | `analytics/sizing.py` | Vol targeting, shrunk fractional Kelly, equal risk contribution, drawdown-capped leverage, trim bands |
 | Stress | `analytics/stress.py` | Historical episodes (2020, 2022, 2024, 2025, 2026) and hypothetical factor shocks |
 | Proof | `analytics/backtest.py`, `metrics.py`, `signals.py` | Dollar-exact backtester, deflated Sharpe, purged walk-forward model judged on calibration |
-| Page | `site/src/`, `scripts/assemble_page.py`, `scripts/build_site.py` | Ten-desk research site assembled into `site/page.html` (reads `site/data/*.json`); `build_site.py` wraps it for GitHub Pages |
+| Page | `site/src/`, `scripts/assemble_page.py`, `scripts/build_site.py` | Eighteen-desk research site assembled into `site/page.html` (reads `site/data/*.json`); `build_site.py` wraps it for GitHub Pages |
 
 ## What the tests prove
 
@@ -135,6 +164,13 @@ and run with `--config config.private.toml`.
 - Split factors remove split jumps; futures rolls do not create fake returns; restated SEC filings win.
 - The page's bond, curve and option math matches the engine on a grid of inputs (Node evaluates `math.js`).
 - Missing FRED series, truncated files and stale data are reported in `status.json`, never fatal.
+- A missing month (BLS published no October 2025 CPI) never shortens a window: 12 months stays 12.
+- The research recovers an inflation threshold planted in synthetic data, and invents none when none is planted.
+- The depreciation model reproduces each company's reported depreciation in its fit year; the Fundamentals
+  snapshot on the page is regenerated from the SEC facts and checked number for number.
+- Kelly's closed form for a position matches a numerical maximization of log growth.
+- The page's rates of change, decision math, journal scorecard, depreciation model and ergodicity game
+  match the engine; every link the decision layer draws lands on something.
 
 ## Principles
 
@@ -143,5 +179,8 @@ and run with `--config config.private.toml`.
 - A hedge removes at most rho squared of variance. At a -0.3 correlation that is 9%. Long bonds are a
   scenario hedge (growth scares), not a variance hedge; size them to the scenario.
 - Every backtest result carries a deflated Sharpe that charges for the number of variants tried.
+- Rates of change outrank levels; a rule's line and the time to reach it beat a forecast.
+- A decision's confidence is the product of its assumptions. Write them down, weight them, and test them.
+- Write the forecast down before the outcome, and score process separately from outcome.
 
 Research tool, not investment advice.

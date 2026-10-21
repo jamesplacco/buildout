@@ -7,6 +7,8 @@
   python -m buildout capex GOOGL MSFT --ua "Name email" [--json site/data/capex.json]
   python -m buildout kalshi KXFED               prediction-market probabilities for a series
   python -m buildout status --out site/data     freshness and sanity checks on every output, for the page
+  python -m buildout research --out site/data   155 years of public data: when bonds hedge, fat tails, base rates
+  python -m buildout journal decisions.json     score an exported decision journal: calibration, alpha, luck
 """
 from __future__ import annotations
 
@@ -39,6 +41,11 @@ def main(argv: list[str] | None = None) -> None:
     k.add_argument("series")
     st = sub.add_parser("status")
     st.add_argument("--out", default="out")
+    rs = sub.add_parser("research")
+    rs.add_argument("--out", default="out")
+    rs.add_argument("--data", help="folder with shiller.csv, cpi.csv, y10.csv, brent.csv, vix.csv, gold.csv instead of downloading")
+    jn = sub.add_parser("journal")
+    jn.add_argument("path", help="decision journal exported from the page (JSON)")
     a = ap.parse_args(argv)
 
     if a.cmd == "demo":
@@ -79,13 +86,19 @@ def main(argv: list[str] | None = None) -> None:
     elif a.cmd == "capex":
         from .data.edgar_source import EdgarSource
         src = EdgarSource(a.ua)
-        out, failed = {}, []
+        from .fundamentals import analyze_company, from_companyfacts
+        out, failed, ttm = {}, [], {}
         for t in a.tickers:
             try:
-                df = src.fundamentals(t).tail(12)
+                facts = src.facts(t)
+                df = src.fundamentals(t, facts).tail(12)
             except Exception as exc:          # a new listing may not have XBRL facts yet
                 failed.append(f"{t}: {exc}")
                 continue
+            try:
+                ttm[t] = analyze_company(from_companyfacts(facts))
+            except Exception as exc:
+                failed.append(f"{t} (trailing twelve months): {exc}")
             usd = ["ocf", "capex", "fcf", "long_term_debt", "cash"]
             df[usd] = df[usd] / 1e9
             print(f"\n{t} ($bn)\n", df.round(2).to_string())
@@ -95,7 +108,7 @@ def main(argv: list[str] | None = None) -> None:
         if a.json:
             from pathlib import Path
             from .jsonout import write
-            print("wrote", write({"units": "USD billions", "companies": out, "skipped": failed},
+            print("wrote", write({"units": "USD billions", "companies": out, "ttm": ttm, "skipped": failed},
                                  Path(a.json).parent, Path(a.json).name))
     elif a.cmd == "status":
         from .status import build_status
@@ -105,6 +118,25 @@ def main(argv: list[str] | None = None) -> None:
         for c in stat["checks"]:
             print(("PASS " if c["ok"] else "FAIL ") + c["name"] + (f": {c['detail']}" if c["detail"] else ""))
         print("wrote", write(stat, a.out, "status.json"))
+    elif a.cmd == "research":
+        from .jsonout import write
+        from .research import SOURCES, compact, download, run
+        if a.data:                            # offline: shiller.csv, cpi.csv, y10.csv, brent.csv, vix.csv, gold.csv
+            import pandas as pd
+            from pathlib import Path
+            raw = {k: pd.read_csv(Path(a.data) / f"{k}.csv") for k in SOURCES}
+        else:
+            raw = download()
+        res = run(raw)
+        hl = res["hedge_line"]
+        print(f"hedge line {hl['line']:.2%} (band {hl['zone'][0]:.2%} to {hl['zone'][1]:.2%}); "
+              f"latest 36-month inflation {hl['latest']['infl_avg']:.2%}, correlation {hl['latest']['corr']:+.2f}")
+        print("wrote", write(compact(res), a.out, "research.json"))      # the page reads this shape directly
+    elif a.cmd == "journal":
+        from .decisions import scorecard
+        doc = json.loads(open(a.path).read())
+        recs = doc.get("decisions", doc) if isinstance(doc, dict) else doc
+        print(json.dumps(scorecard([r for r in recs if not r.get("example")]), indent=1, default=str))
     elif a.cmd == "kalshi":
         from .data.kalshi_source import KalshiSource, implied_probabilities
         print(implied_probabilities(KalshiSource().markets(a.series)).head(30).to_string())

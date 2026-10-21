@@ -45,3 +45,20 @@ def test_range_bound_handles_api_shapes():
 def test_clean_makes_json_safe():
     out = clean({"a": np.float64("nan"), "b": np.int64(3), "c": pd.Timestamp("2026-10-20"), "d": np.bool_(True)})
     assert out == {"a": None, "b": 3, "c": "2026-10-20", "d": True}
+
+
+def test_status_reads_month_dated_files():
+    """research.json is dated by month ("2026-09"): its age counts from the month's last day, and it never crashes the run."""
+    from datetime import datetime, timezone
+    from buildout.status import weekdays_since
+    now = datetime(2026, 10, 20, 12, tzinfo=timezone.utc)
+    assert weekdays_since("2026-09", now) == weekdays_since("2026-09-30", now) == 14
+    assert weekdays_since("2026-12", datetime(2027, 1, 4, tzinfo=timezone.utc)) == 2      # Fri Jan 1 and Mon Jan 4
+    assert weekdays_since("not a date", now) is None and weekdays_since(None, now) is None
+
+
+def test_json_keeps_tiny_values_significant():
+    """A normal model's once-in-84-million-years probability must not round to zero or to one digit on its way to the page."""
+    from buildout.jsonout import clean
+    assert clean(1.8419591332853758e-06) == 1.842e-06
+    assert clean(0.12345678) == 0.123457 and clean(0.0) == 0.0 and clean(float("nan")) is None

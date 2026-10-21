@@ -9,26 +9,24 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.4</span>
+      Buildout <span class="ver">v0.5</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
       <span class="search-label">Search</span><kbd>/</kbd>
     </button>
+    <button class="tool-btn" id="math-toggle" type="button" aria-pressed="false" title="Show every formula on the page"><span class="sym" aria-hidden="true">&sum;</span><span class="lab-t">Show the math</span></button>
     </div>
-    <nav class="tabs" aria-label="Desks">
-      <a href="#desk" data-view="desk">Desk</a>
-      <a href="#rates" data-view="rates">Rates</a>
-      <a href="#options" data-view="options">Options</a>
-      <a href="#hedges" data-view="hedges">Hedges</a>
-      <a href="#securities" data-view="securities">Securities</a>
-      <a href="#insurers" data-view="insurers">Insurers</a>
-      <a href="#theses" data-view="theses">Theses</a>
-      <a href="#lenses" data-view="lenses">Lenses</a>
-      <a href="#engine" data-view="engine">Engine</a>
-      <a href="#appendix" data-view="appendix">Appendix</a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#desk" data-group="today">Today</a>
+      <a href="#decide" data-group="decide">Decide</a>
+      <a href="#rates" data-group="markets">Markets</a>
+      <a href="#fundamentals" data-group="research">Research</a>
+      <a href="#legends" data-group="wisdom">Wisdom</a>
+      <a href="#engine" data-group="reference">Reference</a>
     </nav>
   </div>
+  <nav class="subtabs" id="subtabs" aria-label="Desks in this section"></nav>
 </header>
 
 <main class="page" id="main" tabindex="-1">
@@ -37,18 +35,32 @@
 <section class="view" id="view-desk" aria-labelledby="desk-title">
   <div class="hero">
     <div class="hero-text">
-      <p class="eyebrow">Risk note · October 20, 2026 · Jamie Placco</p>
-      <h1 id="desk-title">Real yields above 2.7%. Brent above $120. AI credit <em>starting to crack.</em></h1>
-      <p class="lede">Buildout is a cross-asset risk desk built around one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit and volatility every day, prices the hedges, and sizes positions to survive. Right now long Treasuries are an unreliable hedge, so the desk leans on convexity and position size, and lets the data say when duration works again.</p>
+      <p class="eyebrow">Risk note · October 21, 2026 · Jamie Placco</p>
+      <h1 id="desk-title">Bonds stop hedging above 2.75% inflation. <em>We are at 3.1%.</em></h1>
+      <p class="lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit, volatility, filings and the grid every day, turns each reading into a written rule and a sized action, and keeps score of its own calls. The headline is its own finding from 155 years of data.</p>
       <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 85 of 85 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 114 of 114 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
-        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 19, 2026</span>
+        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 20, 2026</span>
       </div>
     </div>
     <div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout · 2026</span></div>
   </div>
+
+  <section class="section" id="brief-sec" aria-labelledby="brief-title">
+    <h2 class="sr-only" id="brief-title">The brief</h2>
+    <div class="brief" id="brief"></div>
+  </section>
+
+  <section class="section" id="miss" aria-labelledby="miss-title">
+    <div class="section-head">
+      <p class="eyebrow">Connections</p>
+      <h2 id="miss-title">Six things most portfolios miss right now</h2>
+      <p class="prose">Each is a link between two parts of the system, measured, with the evidence one click away.</p>
+    </div>
+    <div class="cards3" id="miss-list"></div>
+  </section>
 
   <nav class="start" aria-label="Start here">
     <a class="start-card" href="#size"><span class="eyebrow">Question 1</span><strong>How big?</strong><span>Risk limits set the size; Kelly checks the edge.</span></a>
@@ -66,6 +78,15 @@
     <div class="read" id="desk-read" aria-live="polite"></div>
     <div class="signals" id="signals-grid"></div>
     <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
+  </section>
+
+  <section class="section" id="sysmap" aria-labelledby="map-title">
+    <div class="section-head">
+      <p class="eyebrow">System map</p>
+      <h2 id="map-title">How the pieces push on each other right now</h2>
+      <p class="prose">Each box is a part of the financial system this book depends on, outlined by its signals' state; each line is a transmission channel, red where it is carrying stress today. Select a box to open its desk.</p>
+    </div>
+    <div class="panel"><div class="sysmap" id="map-box"></div><div class="sysmap-key"><span><i></i>Channel</span><span><i class="hot"></i>Carrying stress now</span><span>Outline: green calm, amber watch, red act</span></div></div>
   </section>
 
   <section class="section" id="moves" aria-labelledby="mv-title">
@@ -157,6 +178,8 @@
       <li><b>Oct 21</b><span>Meta Q3 results after the close. Q2 free cash flow was $0.8B against $8.6B a year earlier, and the stock fell about 10% between Oct 13 and Oct 19. <a class="src" href="https://vantagemarkets.com/market-analysis/meta-stock-price-today-q3-earnings-ahead-october-20-2026">Vantage Markets</a></span></li>
       <li><b>Oct 27–28</b><span>FOMC. Market odds of a second straight hike fell from 70% on Sep 28 to 19% on Oct 8, then rose to about 33% by Oct 16. UOB expects hikes in December and early 2027 to a 4.50% upper bound. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a> · <a class="src" href="https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026">ROIC (Reuters)</a></span></li>
       <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">FXStreet</a></span></li>
+      <li><b>Nov 10</b><span>October CPI. September printed 3.7% for the year; three-year inflation sits 0.31 points above the 2.75% hedge line. <a class="src" href="https://www.bls.gov/news.release/CPI.htm">BLS</a></span></li>
+      <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. The founder's 6.4 billion shares stay locked to Jun 12, 2027. <a class="src" href="https://www.webull.com/news/15414125170107392">Webull, citing Reuters</a></span></li>
       <li><b>Now</b><span>AI credit: credit default swaps on CoreWeave traded at distress levels on Oct 15, and the Nasdaq posted its worst week since June on Oct 16 on AI selling and oil. <a class="src" href="https://vantagemarkets.com/market-analysis/meta-stock-price-today-q3-earnings-ahead-october-20-2026">Vantage (citing CNBC)</a> · <a class="src" href="https://www.cnbc.com/2026/10/15/stock-market-today-live-updates.html">CNBC</a></span></li>
     </ul>
   </section>
@@ -716,16 +739,289 @@
   </section>
 </section>
 
+<!-- ======================= DECIDE ======================= -->
+<section class="view" id="view-decide" hidden aria-labelledby="decide-title">
+  <div class="vhead">
+    <p class="eyebrow">Decide · From data to rule to action</p>
+    <h1 id="decide-title">Seven decisions, each traced from the data to the rule to the trade.</h1>
+    <p class="lede">Each card shows the inputs with their source and date, the rule written down in advance, the action it produces today, how confident the desk can be given the assumptions underneath, and how far the data is from flipping the call. Toggle <strong>Show the math</strong> in the top band to see every formula.</p>
+  </div>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#dec-title">Decisions</a><a href="#roc-title">Rates of change</a><a href="#as-title">Assumptions</a><a href="#kk-title">Knowns and unknowns</a><a href="#ch-title">2nd to 4th order</a></nav>
+
+  <section class="section" id="decisions" aria-labelledby="dec-title">
+    <div class="section-head">
+      <p class="eyebrow">The board</p>
+      <h2 id="dec-title">Today's decisions</h2>
+      <p class="prose" id="dec-sub">Seven calls the desk makes every morning. Live inputs replace the dated snapshot after each daily run.</p>
+    </div>
+    <div class="read" id="dec-read" aria-live="polite"></div>
+    <div class="decisions" id="dec-board"></div>
+    <div class="math"><span class="mlabel">Confidence</span>Confidence in a call = &prod; <var>p</var><sub>i</sub> over the assumptions it rests on (independence makes this a floor when the assumptions move together). Flip distance = |threshold &minus; level|; weeks to flip = distance &divide; velocity when the velocity points at the threshold.</div>
+  </section>
+
+  <section class="section" id="roc" aria-labelledby="roc-title">
+    <div class="section-head">
+      <p class="eyebrow">Rates of change</p>
+      <h2 id="roc-title">How fast each signal is moving, and when its rule fires</h2>
+      <p class="prose">Level says where a market is. Velocity says where it is going, acceleration says whether it is speeding up, and time to trigger says when the rule fires if the pace holds. A 13-week pace that disagrees with the 4-week pace is a turn in progress.</p>
+    </div>
+    <div class="panel"><div class="tablewrap"><table class="roc" id="roc-table"></table></div><p class="hint" id="roc-note"></p></div>
+    <div class="math"><span class="mlabel">Velocity, acceleration, time to trigger</span><var>v</var><sub>13</sub> = least-squares slope of the last 13 weeks of prints, per week. <var>a</var> = <var>v</var><sub>13</sub>(now) &minus; <var>v</var><sub>13</sub>(13 weeks ago). <var>T</var> = (<var>L</var><sup>*</sup> &minus; <var>L</var>) &divide; <var>v</var> weeks, defined only when <var>v</var> points at the line <var>L</var><sup>*</sup>. A least-squares slope uses every print in the window, so one bad print moves it far less than a two-point change.</div>
+  </section>
+
+  <section class="section" id="assumptions" aria-labelledby="as-title">
+    <div class="section-head">
+      <p class="eyebrow">Weighted assumptions</p>
+      <h2 id="as-title">What has to be true, how likely it is, and what breaks if it is not</h2>
+      <p class="prose">Fragility = (1 &minus; <var>p</var>) &times; impact. The most fragile assumptions sit at the top. Move a slider to change your own probability; every decision that rests on it updates.</p>
+    </div>
+    <div class="chainmath" id="as-math"></div>
+    <div class="panel"><div class="tablewrap"><table class="assume" id="as-table"></table></div>
+      <p class="hint">Probabilities are the desk's judgment, written down so they can be argued with. Each row names the evidence and the test that would falsify it. Your changes stay in this browser.</p></div>
+  </section>
+
+  <section class="section" id="knowns" aria-labelledby="kk-title">
+    <div class="section-head">
+      <p class="eyebrow">Known knowns to unknown unknowns</p>
+      <h2 id="kk-title">What we know, what we know we don't, and what we pretend not to</h2>
+      <p class="prose">Each quadrant gets a different response. Facts get acted on, ranges get sized, blind spots get audited, and the unknowable gets prepared for, never predicted.</p>
+    </div>
+    <div class="kk" id="kk-grid"></div>
+  </section>
+
+  <section class="section" id="chains" aria-labelledby="ch-title">
+    <div class="section-head">
+      <p class="eyebrow">Second to fourth order</p>
+      <h2 id="ch-title">Five shocks, run to the fourth order</h2>
+      <p class="prose">Keynes's beauty contest, applied: the first order is what everyone sees; the money is in what the first order forces others to do. Each step names what to watch, with today's reading, and what to do at that order.</p>
+    </div>
+    <div class="chains" id="chain-list"></div>
+  </section>
+  <footer class="foot"><p>Rules and probabilities are the desk's judgment, stated so they can be argued with. Research desk, not investment advice.</p></footer>
+</section>
+
+<!-- ======================= JOURNAL ======================= -->
+<section class="view" id="view-journal" hidden aria-labelledby="jr-title">
+  <div class="vhead">
+    <p class="eyebrow">Journal · Decisions, written down and scored</p>
+    <h1 id="jr-title">Write the forecast down before you know how it ends.</h1>
+    <p class="lede">A hypothesis, the data behind it, the assumptions with their odds, the kill line, the size and the pre-mortem, locked in before the outcome. When it closes, the journal separates the market's contribution from yours and scores your calibration the way forecasters are scored.</p>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Decisions</span><span class="jr-store" id="jr-store">Saved in this browser</span></div>
+    <div class="jr-bar">
+      <button type="button" class="btn" id="jr-new">New decision</button>
+      <button type="button" class="btn ghost" id="jr-ex" aria-pressed="false">Show examples</button>
+      <button type="button" class="btn ghost" id="jr-export">Export</button>
+      <label class="btn ghost" for="jr-file">Import<input type="file" id="jr-file" accept="application/json,.json" class="sr-only"></label>
+      <span class="jr-note" id="jr-msg" aria-live="polite"></span>
+    </div>
+    <div id="jr-confirm"></div>
+    <div class="jr">
+      <div class="jr-list" id="jr-list" aria-label="Decisions"></div>
+      <form class="jr-form" id="jr-form" autocomplete="off" novalidate></form>
+    </div>
+    <div id="jr-exportbox" hidden><p class="hint">Copy this and keep it (or commit it as decisions.json and score it with <code>python -m buildout journal decisions.json</code>).</p><textarea class="jr-export" id="jr-export-text" readonly aria-label="Exported journal"></textarea></div>
+  </div>
+
+  <section class="section" id="jr-score" aria-labelledby="jrs-title">
+    <div class="section-head">
+      <p class="eyebrow">Scorecard</p>
+      <h2 id="jrs-title">Luck or skill?</h2>
+      <p class="prose" id="jrs-sub">Closed decisions only. With fewer than 20, read every number as a hint, not a verdict.</p>
+    </div>
+    <div class="tiles compact" id="jrs-tiles"></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Calibration: stated odds against how often you were right</span></div><div class="svgbox" id="jrs-cal"></div><p class="hint">On the diagonal you are calibrated. Below it you are overconfident; above it, underconfident.</p></figure>
+      <div class="panel"><div class="panel-head"><span class="panel-title">Process against outcome</span><span class="src">Outcome = return after the market's share (beta)</span></div><div class="pog" id="jrs-pog"></div>
+        <p class="hint">Good process means at least three of four: logged before entry, sized by the rule, kill line respected, two independent sources. Judge the process, not the outcome (Annie Duke calls the opposite "resulting").</p></div>
+    </div>
+    <div class="panel" id="jrs-luck"></div>
+    <div class="math"><span class="mlabel">The scorecard</span>Brier = (1/<var>n</var>) &sum; (<var>p</var><sub>i</sub> &minus; <var>y</var><sub>i</sub>)<sup>2</sup>: 0 is perfect, 0.25 is a coin flip. Alpha<sub>i</sub> = <var>r</var><sub>i</sub> &minus; &beta;<sub>i</sub> <var>r</var><sub>bench</sub>; <var>t</var> = mean(alpha) &divide; (sd/&radic;<var>n</var>). Luck test: P(at least <var>k</var> hits in <var>n</var> | coin flip). Decisions needed for <var>t</var> = 2: (2&middot;sd &divide; mean)<sup>2</sup>. Kelly: <var>f</var><sup>*</sup> = <var>p</var> &minus; (1 &minus; <var>p</var>) &divide; <var>b</var>, with <var>b</var> = win &divide; loss.</div>
+  </section>
+  <footer class="foot"><p>Your entries are private to you: in the published page they live in your own space on the artifact (no one else can read them, the owner included); elsewhere they stay in this browser. Examples are illustrative and never saved.</p></footer>
+</section>
+
+<!-- ======================= SWANS ======================= -->
+<section class="view" id="view-swans" hidden aria-labelledby="sw-title">
+  <div class="vhead">
+    <p class="eyebrow">Swans · Fat tails and the hedges that survive them</p>
+    <h1 id="sw-title">You cannot predict the tail. You can own it cheaply.</h1>
+    <p class="lede">A normal model says a six-sigma month comes once in 84 million years. Since 1871 the S&amp;P 500 has had two. The desk's answer is Taleb's: name the gray swans you can, own convexity for the ones you can't, and never size so that one of them is ruin.</p>
+  </div>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#tails-title">Fat tails</a><a href="#atlas-title">Swan atlas</a><a href="#tal-title">Taleb's toolkit</a><a href="#tl-title">Tail-hedge lab</a></nav>
+  <section class="section" aria-labelledby="tails-title">
+    <div class="section-head"><p class="eyebrow">Evidence</p><h2 id="tails-title">How fat the tails really are</h2><p class="prose" id="tails-sub">Monthly S&amp;P 500 total returns, 1871 to 2026, against what a normal distribution with the same volatility allows.</p></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Down months beyond k standard deviations: observed against normal</span><span class="src">Log scale</span></div><div class="svgbox" id="sw-tails"></div></figure>
+      <div class="panel"><div class="tiles compact" id="sw-tail-tiles"></div><div id="sw-worst"></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="atlas-title">
+    <div class="section-head"><p class="eyebrow">Atlas</p><h2 id="atlas-title">Twelve swans this book can name</h2><p class="prose">Each with the evidence, the first hit to the book, the hedge that pays, the one that fails, and what it costs to carry.</p></div>
+    <div class="cards3" id="sw-grid"></div>
+  </section>
+  <section class="section" aria-labelledby="tal-title">
+    <div class="section-head"><p class="eyebrow">Taleb's toolkit</p><h2 id="tal-title">Eight principles, each turned into a rule</h2></div>
+    <div class="cards2" id="taleb-grid"></div>
+  </section>
+  <section class="section" id="tail-lab" aria-labelledby="tl-title">
+    <div class="section-head"><p class="eyebrow">Lab</p><h2 id="tl-title">Does the hedge pay for itself? The compound-growth test</h2>
+      <p class="prose">Mark Spitznagel's test: a tail hedge is worth owning only if the book's compound growth is higher with it than without it. A hedge can lose money on average and still raise compound growth, because it shrinks the losses that compounding punishes most.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="th-form">
+        <div class="field"><div class="field-top"><label for="th-p">Chance of a crash in a year</label><output id="th-p-o" for="th-p"></output></div><input type="range" id="th-p" min="0.02" max="0.3" step="0.01" value="0.1"></div>
+        <div class="field"><div class="field-top"><label for="th-crash">Crash return for the book</label><output id="th-crash-o" for="th-crash"></output></div><input type="range" id="th-crash" min="-0.7" max="-0.15" step="0.01" value="-0.4"></div>
+        <div class="field"><div class="field-top"><label for="th-norm">Return in a normal year</label><output id="th-norm-o" for="th-norm"></output></div><input type="range" id="th-norm" min="0" max="0.25" step="0.005" value="0.12"></div>
+        <div class="field"><div class="field-top"><label for="th-cost">Hedge cost per year</label><output id="th-cost-o" for="th-cost"></output></div><input type="range" id="th-cost" min="0" max="0.05" step="0.0025" value="0.02"></div>
+        <div class="field"><div class="field-top"><label for="th-mult">Payoff in a crash, multiple of the cost</label><output id="th-mult-o" for="th-mult"></output></div><input type="range" id="th-mult" min="0" max="40" step="0.5" value="7.5"></div>
+      </form>
+      <div class="panel"><div class="readouts" id="th-out"></div><p class="sentence" id="th-read"></p><figure class="chart" style="margin:0"><div class="chart-head"><span class="chart-title">Compound growth against the hedge budget</span></div><div class="svgbox" id="th-chart"></div></figure>
+        <div class="math"><span class="mlabel">Compound growth</span><var>g</var> = exp(&sum; <var>p</var><sub>s</sub> ln(1 + <var>r</var><sub>s</sub> &minus; <var>c</var> + <var>h</var><sub>s</sub>)) &minus; 1, where <var>c</var> is the hedge cost and <var>h</var><sub>s</sub> its payoff in scenario <var>s</var>.</div></div>
+    </div>
+  </section>
+  <footer class="foot"><p>Swans are illustrative of exposures, not predictions. Hedge costs are typical ranges, not quotes.</p></footer>
+</section>
+
+<!-- ======================= FUNDAMENTALS ======================= -->
+<section class="view" id="view-fundamentals" hidden aria-labelledby="fu-title">
+  <div class="vhead">
+    <p class="eyebrow">Fundamentals · Straight from the 10-Ks and 10-Qs</p>
+    <h1 id="fu-title">The build now costs what the business earns.</h1>
+    <p class="lede" id="fu-lede">Five builders spent $586B on capex in the last twelve months against $707B of operating cash flow, and their 2026 guidance adds up to more than that cash flow. Underneath: Minsky stages from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.</p>
+  </div>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#fu-t-title">The table</a><a href="#mi-title">Minsky stages</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
+  <section class="section" aria-labelledby="fu-t-title">
+    <div class="section-head"><p class="eyebrow">Last twelve months</p><h2 id="fu-t-title">The builders, from their filings</h2><p class="prose" id="fu-t-sub">$ billions, trailing twelve months to each company's latest quarter. Every figure is a sum of discrete quarters recovered from the SEC's XBRL facts; the engine refreshes it daily once the SEC contact is set.</p></div>
+    <div class="panel"><div class="tablewrap"><table class="fund" id="fund-table"></table></div><p class="hint" id="fu-note"></p></div>
+  </section>
+  <section class="section" aria-labelledby="mi-title">
+    <div class="section-head"><p class="eyebrow">Hyman Minsky, from the filings</p><h2 id="mi-title">Who is in hedge, speculative and Ponzi finance</h2><p class="prose">Minsky's three postures applied to the build. The move from left to right is how booms end; it happens one balance sheet at a time.</p></div>
+    <div class="minsky" id="fu-minsky"></div>
+  </section>
+  <section class="section" aria-labelledby="pp-title">
+    <div class="section-head"><p class="eyebrow">Earnings quality</p><h2 id="pp-title">Paper profits: earnings from marking each other up</h2><p class="prose">Non-operating income is mostly gains on stakes in other AI companies. It counts in earnings per share, it is reflexive (it rises with the boom), and it reverses faster than the business.</p></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Operating against non-operating income, last twelve months</span><span class="legend"><span><i style="background:var(--s1)"></i>Operating</span><span><i style="background:var(--s2)"></i>Non-operating</span></span></div><div class="svgbox" id="fu-paper"></div></figure>
+      <div class="panel" id="fu-paper-read"></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="dw-title">
+    <div class="section-head"><p class="eyebrow">The depreciation wave</p><h2 id="dw-title">What today's capex adds to tomorrow's costs</h2><p class="prose">Capex hits the income statement later, as depreciation. The model below is fitted to each company's reported depreciation, then run forward on its guidance, at the stated server life and at a shorter one.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="dw-form">
+        <div class="field"><label class="flabel" for="dw-co">Company</label><select id="dw-co"></select></div>
+        <div class="field"><div class="field-top"><label for="dw-life">Server life to test (years)</label><output id="dw-life-o" for="dw-life"></output></div><input type="range" id="dw-life" min="2" max="7" step="0.5" value="4"></div>
+        <div class="field"><div class="field-top"><label for="dw-g">Capex growth the year after guidance</label><output id="dw-g-o" for="dw-g"></output></div><input type="range" id="dw-g" min="-0.3" max="0.6" step="0.05" value="0.15"></div>
+        <p class="hint" id="dw-fit"></p>
+      </form>
+      <div class="panel"><div class="readouts" id="dw-out"></div><figure class="chart" style="margin:0"><div class="chart-head"><span class="chart-title" id="dw-chart-title">Depreciation by year</span><span class="legend" id="dw-legend"></span></div><div class="svgbox" id="dw-chart"></div></figure>
+        <p class="sentence" id="dw-read"></p>
+        <div class="math"><span class="mlabel">The model</span>Each year's capex <var>C</var><sub>v</sub> enters service mid-year; a share <var>s</var> depreciates over the server life <var>L</var><sub>s</sub>, the rest over 25 years. <var>D</var><sub>t</sub> = &sum;<sub>v</sub> <var>C</var><sub>v</sub> [ <var>s</var>&middot;overlap(<var>t</var>, <var>v</var>, <var>L</var><sub>s</sub>)/<var>L</var><sub>s</sub> + (1 &minus; <var>s</var>)&middot;overlap(<var>t</var>, <var>v</var>, 25)/25 ]. <var>s</var> is solved so the model reproduces the reported depreciation in the fit year. Land and construction in progress are not separated, so the wave arrives later than modeled.</div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="bl-title">
+    <div class="section-head"><p class="eyebrow">Off the income statement</p><h2 id="bl-title">Backlog, leases and the server-life choices</h2></div>
+    <div class="cards3" id="fu-backlog"></div>
+    <div class="panel"><div class="panel-head"><span class="panel-title">Server useful lives: every change and what it did to earnings</span></div><div class="tablewrap"><table id="fu-lives"></table></div></div>
+  </section>
+  <footer class="foot"><p>Figures are from SEC XBRL facts as filed, with the few supplements named in the table note. Ratios, stages and the depreciation model are the desk's analysis, not the companies' statements.</p></footer>
+</section>
+
+<!-- ======================= PHYSICS ======================= -->
+<section class="view" id="view-physics" hidden aria-labelledby="ph-title">
+  <div class="vhead">
+    <p class="eyebrow">Physics · Watts, wafers and concrete</p>
+    <h1 id="ph-title">The AI buildout is limited by watts, not dollars.</h1>
+    <p class="lede">Turn the capex into physical units and the binding constraint shows: the grid, the turbines and the time it takes to build anything large. These sources are not financial: grid auctions, engineering order books, megaproject statistics and economic history.</p>
+  </div>
+  <section class="section" aria-labelledby="dw2-title">
+    <div class="section-head"><p class="eyebrow">Calculator</p><h2 id="dw2-title">From dollars to watts</h2><p class="prose">What a year of AI capex asks of the grid, at today's cost per gigawatt.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="ph-form">
+        <div class="field"><div class="field-top"><label for="ph-capex">AI capex per year ($B)</label><output id="ph-capex-o" for="ph-capex"></output></div><input type="range" id="ph-capex" min="100" max="1500" step="10" value="800"></div>
+        <div class="field"><div class="field-top"><label for="ph-cost">All-in cost per gigawatt ($B)</label><output id="ph-cost-o" for="ph-cost"></output></div><input type="range" id="ph-cost" min="25" max="80" step="1" value="45"></div>
+        <div class="field"><div class="field-top"><label for="ph-load">Average load (utilization)</label><output id="ph-load-o" for="ph-load"></output></div><input type="range" id="ph-load" min="0.4" max="0.95" step="0.05" value="0.8"></div>
+        <p class="hint">Cost per gigawatt: about $41B (Brookings, 2025) to about $50B (Nvidia, 2025). Some capex (warehouses, offices) is not AI; treat the result as an upper bound.</p>
+      </form>
+      <div class="panel"><div class="readouts" id="ph-out"></div><p class="sentence" id="ph-read"></p>
+        <div class="math"><span class="mlabel">The conversion</span>GW = capex &divide; cost per GW. TWh a year = GW &times; 8,760 hours &times; load &divide; 1,000. Homes = TWh &times; 10<sup>9</sup> &divide; 10,791 kWh (EIA's 2022 average US home). Share of US use = TWh &divide; 4,000 (176 TWh was 4.4% in 2023).</div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="gr-title">
+    <div class="section-head"><p class="eyebrow">The grid</p><h2 id="gr-title">Demand arrives faster than supply can be built</h2></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">US data-center electricity use, TWh a year</span><span class="src">2028 is LBNL's projected range</span></div><div class="svgbox" id="ph-dc"></div></figure>
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">PJM capacity price, $ per MW-day, by delivery year</span><span class="src">The last two cleared at the cap</span></div><div class="svgbox" id="ph-pjm"></div></figure>
+    </div>
+    <div class="tiles compact" id="ph-tiles"></div>
+  </section>
+  <section class="section" aria-labelledby="hi-title">
+    <div class="section-head"><p class="eyebrow">History</p><h2 id="hi-title">The largest build as a share of the economy since the railroads</h2><p class="prose">Average yearly investment as a share of GDP during each boom (Brookings Papers, 2026). Carlota Perez's work on five technological revolutions finds the same arc each time: installation, a financial frenzy, a turning point (the crash), then a long deployment that pays off for users more than for builders.</p></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Investment during the boom, % of GDP a year</span></div><div class="svgbox" id="ph-booms"></div></figure>
+      <div class="panel"><div class="panel-head"><span class="panel-title">Where the cycle stands, by Perez's markers</span></div><ul class="facts" id="ph-perez"></ul></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="mp-title">
+    <div class="section-head"><p class="eyebrow">Base rates</p><h2 id="mp-title">Big things are late and over budget</h2><p class="prose">Bent Flyvbjerg's database of more than 16,000 projects: 8.5% come in on time and on budget, and 0.5% also deliver the promised benefits. A data center campus is a megaproject with a power plant attached.</p></div>
+    <div class="grid2"><figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Out of 1,000 big projects</span></div><div class="svgbox" id="ph-flyv"></div></figure><div class="panel"><ul class="facts" id="ph-flyv-read"></ul></div></div>
+  </section>
+  <footer class="foot"><p>Physical conversions are approximations stated with their inputs. Sources are linked on each figure.</p></footer>
+</section>
+
+<!-- ======================= FINDINGS ======================= -->
+<section class="view" id="view-findings" hidden aria-labelledby="fi-title">
+  <div class="vhead">
+    <p class="eyebrow">Findings · Original research on 155 years of data</p>
+    <h1 id="fi-title">Eight things the data says that most portfolios ignore.</h1>
+    <p class="lede">Each finding states the claim, shows the numbers, explains the method and the caveat, and says what it changes on the desk. All of it is reproducible with one command, <code>python -m buildout research</code>, which reruns on public data every day.</p>
+  </div>
+  <div class="read" id="fi-read"></div>
+  <div class="section" id="fi-list"></div>
+  <footer class="foot"><p>Monthly data overlap, so counts of months overstate the number of independent observations; small samples (oil shocks, VIX spikes) are direction, not law. Sources: Shiller, BLS, EIA, CBOE, the Treasury.</p></footer>
+</section>
+
+<!-- ======================= LEGENDS ======================= -->
+<section class="view" id="view-legends" hidden aria-labelledby="lg-title">
+  <div class="vhead">
+    <p class="eyebrow">Legends · The council</p>
+    <h1 id="lg-title">Twenty minds, one desk: each adds a rule, and each reads today.</h1>
+    <p class="lede">From Bagehot in 1873 to Griffin and Spitznagel, each legend's core idea in plain words, the rule it adds to the engine, and what their lens says about today's data. Then the sections most desks skip.</p>
+  </div>
+  <section class="section" aria-labelledby="cv-title">
+    <div class="section-head"><p class="eyebrow">The vote</p><h2 id="cv-title">What the council says today</h2><p class="prose" id="cv-sub"></p></div>
+    <div class="tally" id="lg-tally" role="img" aria-label="Council vote"></div>
+    <div class="filters" id="lg-filter"></div>
+    <div class="cards3" id="lg-grid"></div>
+  </section>
+  <section class="section" aria-labelledby="ov-title">
+    <div class="section-head"><p class="eyebrow">Often overlooked</p><h2 id="ov-title">What most desks skip</h2></div>
+    <div class="cards2" id="ov-grid"></div>
+  </section>
+  <footer class="foot"><p>Ideas are paraphrased and attributed to the work named on each card; only public-domain texts (1841, 1873, 1923) are quoted. Lenses are the desk's application, not the legends' views on today's market.</p></footer>
+</section>
+
+<!-- ======================= LAB ======================= -->
+<section class="view" id="view-lab" hidden aria-labelledby="lab-title">
+  <div class="vhead">
+    <p class="eyebrow">Lab · The math behind the desk</p>
+    <h1 id="lab-title">Seven toys that explain why the desk does what it does.</h1>
+    <p class="lede">Each one is a formula the engine uses, made into something you can move. Start with the coin game: it explains leverage, Kelly and Taleb's ruin in one picture.</p>
+  </div>
+  <div id="lab-list" class="section"></div>
+</section>
+
 <!-- ======================= ENGINE ======================= -->
 <section class="view" id="view-engine" hidden aria-labelledby="eng-title">
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">The engine behind the desk.</h1>
-    <p class="lede">Python, about 3,500 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 5,000 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
-    <li><h3>Data</h3><p>FRED curve, credit, volatility and oil daily; Databento bars with split and dividend factors; CME Treasury futures; SEC filings; Kalshi odds.</p></li>
+    <li><h3>Data</h3><p>FRED curve, credit, volatility, oil, inflation, jobs and financial conditions daily; SEC 10-K and 10-Q facts; 155 years of public data monthly; Databento bars with split and dividend factors; Kalshi odds.</p></li>
     <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
     <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
     <li><h3>Hedge &amp; size</h3><p>Min-variance TLT ratio when the regime allows it. Vol target and drawdown cap set gross; Kelly checks the edge.</p></li>
@@ -751,8 +1047,12 @@
           <tr><td>Costs, financing, compounding</td><td class="r">exact to 1e-12</td></tr>
           <tr><td>Page bond, curve and option math against the engine</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Missing FRED series, truncated files, stale data</td><td class="r">reported, not fatal</td></tr>
+          <tr><td>A missing month of CPI (October 2025)</td><td class="r">12 months stays 12</td></tr>
+          <tr><td>Research on a planted inflation threshold, and on none</td><td class="r">found; nothing invented</td></tr>
+          <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
+          <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Property tests: thousands of random bonds, curves and options</td><td class="r">2 bugs found, fixed</td></tr>
-          <tr><td>Browser suite: hostile files, random use, 320 to 1920px, print, accessibility</td><td class="r">18 scenarios, 0 failures</td></tr>
+          <tr><td>Browser suite: hostile files, extreme inputs, the journal end to end, live research, 320 to 1920px, print, accessibility</td><td class="r">16 scenarios, 0 failures</td></tr>
         </tbody>
       </table></div>
       <p class="hint">Ten years of simulated daily data with two correlation regimes and known betas. Passing proves the machinery; it says nothing about markets until real data runs through it.</p>
@@ -877,7 +1177,7 @@
     <h2 id="keys-title">Keyboard shortcuts</h2>
     <dl class="dlist">
       <dt>/ or Ctrl K</dt><dd>Search everything: tools, terms, securities, theses, episodes, questions</dd>
-      <dt>1 to 9, 0</dt><dd>Jump to a desk, Desk through Engine, then 0 for the Appendix</dd>
+      <dt>1 to 6</dt><dd>Jump to a section: Today, Decide, Markets, Research, Wisdom, Reference</dd><dt>M</dt><dd>Show or hide the math</dd>
       <dt>← →</dt><dd>Step through a focused chart</dd>
       <dt>?</dt><dd>This list</dd>
       <dt>Esc</dt><dd>Close a dialog</dd>

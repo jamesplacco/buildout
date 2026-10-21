@@ -19,6 +19,8 @@ from buildout.data.synthetic import simulate  # noqa: E402
 from buildout.jsonout import write  # noqa: E402
 from buildout.macro import analyze_macro  # noqa: E402
 from buildout.pipeline import analyze, load_inputs, write_report  # noqa: E402
+from buildout.fundamentals import analyze_company, parse_fixture  # noqa: E402
+from buildout.research import compact, run  # noqa: E402
 from buildout.status import build_status  # noqa: E402
 
 BOOK = ["MSFT", "AMZN", "GOOGL", "META", "NVDA", "AVGO", "TSLA", "SPCX", "ORCL"]
@@ -52,6 +54,15 @@ def fake_fred(seed: int = 3) -> pd.DataFrame:
     df["RRPONTSYD"] = np.abs(walk(300, 3))
     df["IORB"] = 3.90
     df["SOFR"] = 3.90 + rng.normal(-0.02, 0.01, len(idx))
+    # v0.5 macro state: monthly CPI and labor, daily curve, weekly conditions and claims
+    month_starts = idx[~idx.to_period("M").duplicated()]
+    df.loc[month_starts, "CPIAUCSL"] = 300 * np.exp(np.cumsum(rng.normal(0.0027, 0.002, len(month_starts))))
+    df.loc[month_starts, "SAHMREALTIME"] = np.clip(walk(0.1, 0.03)[: len(month_starts)], -0.2, 1.2)
+    df.loc[month_starts, "UNRATE"] = np.clip(walk(4.2, 0.05)[: len(month_starts)], 3, 9)
+    df["T10Y3M"] = df["DGS10"] - df["DGS3MO"]
+    fri = idx[idx.dayofweek == 4]
+    df.loc[fri, "NFCI"] = walk(-0.5, 0.01)[: len(fri)]
+    df.loc[fri, "ICSA"] = np.abs(walk(220000, 2000)[: len(fri)]) + 150000
     return df
 
 
@@ -70,9 +81,35 @@ def make_fixtures(out: Path) -> Path:
         d = d.iloc[-3:] if t == "SPCX" else d
         d["fcf"], d["capex_to_ocf"] = d["ocf"] - d["capex"], d["capex"] / d["ocf"]
         companies[t] = d.reset_index(names="quarter_end")
-    write({"units": "USD billions", "companies": companies, "skipped": []}, out, "capex.json")
+    facts = parse_fixture(ROOT / "tests" / "fixtures" / "sec_facts_2026q3.txt")
+    ttm = {t: analyze_company(facts[t]) for t in ("MSFT", "GOOGL", "AMZN", "META", "ORCL")}
+    ttm["MSFT"]["quarter_end"] = "2026-09-30"            # a newer filing than the page's snapshot
+    write({"units": "USD billions", "companies": companies, "ttm": ttm, "skipped": []}, out, "capex.json")
+    write(fake_research(), out, "research.json")
     write(build_status(out, now=datetime(2026, 10, 20, 12, tzinfo=timezone.utc)), out, "status.json")
     return out
+
+
+def fake_research(seed: int = 3) -> dict:
+    """The long-history research run on synthetic files in the shape of the public datasets, through 2026-09."""
+    rng = np.random.default_rng(seed)
+    m = pd.date_range("1871-01-01", "2026-09-01", freq="MS")
+    n = len(m)
+    px = 4 * np.exp(np.cumsum(0.004 + 0.04 * rng.standard_t(4, n) / np.sqrt(2)))
+    infl = 0.0025 + 0.0045 * np.sin(np.arange(n) / 90)                # inflation regimes from deflation to above 6%
+    cpi = 10 * np.exp(np.cumsum(infl + 0.003 * rng.normal(size=n)))
+    y10 = np.clip(4 + np.cumsum(0.05 * rng.normal(size=n)), 0.5, 15)
+    eps = px / 15 * np.exp(0.1 * np.sin(np.arange(n) / 30))
+    sh = pd.DataFrame({"Date": m.strftime("%Y-%m-%d"), "SP500": px, "Dividend": px * 0.04, "Earnings": eps, "Consumer Price Index": cpi,
+                       "Long Interest Rate": y10, "PE10": px / eps * 1.2})
+    bls = pd.DataFrame({"Date": m[m >= "1913-01-01"].strftime("%Y-%m-%d"), "Index": cpi[m >= "1913-01-01"]})
+    gs10 = pd.DataFrame({"Date": m[m >= "1953-04-01"].strftime("%Y-%m-%d"), "Rate": y10[m >= "1953-04-01"]})
+    d = pd.bdate_range("1987-05-20", "2026-10-14")
+    brent = pd.DataFrame({"Date": d.strftime("%Y-%m-%d"), "Price": 20 * np.exp(np.cumsum(0.0002 + 0.02 * rng.normal(size=len(d))))})
+    dv = pd.bdate_range("1990-01-02", "2026-10-19")
+    vix = pd.DataFrame({"DATE": dv.strftime("%Y-%m-%d"), "CLOSE": np.exp(np.log(18) + 0.3 * np.sin(np.arange(len(dv)) / 40) + 0.05 * rng.normal(size=len(dv)))})
+    gold = pd.DataFrame({"Date": m.strftime("%Y-%m"), "Price": 20 * np.exp(np.cumsum(0.003 + 0.03 * rng.normal(size=n)))})
+    return compact(run({"shiller": sh, "cpi": bls, "y10": gs10, "brent": brent, "vix": vix, "gold": gold}))
 
 
 if __name__ == "__main__":

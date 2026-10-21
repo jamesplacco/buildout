@@ -79,3 +79,17 @@ def test_liquidity_block_units_and_alignment():
     assert L["funding"]["gap_bp"] == pytest.approx(-2.0)
     assert L["funding"]["days_above_1y"] == 0
     assert set(ms.LIQ_IDS) <= set(ms.ids())
+
+
+def test_inflation_state_survives_a_missing_month_and_reports_its_pace():
+    idx = pd.date_range("2018-01-01", "2026-09-01", freq="MS")
+    cpi = pd.Series(250 * 1.0025 ** np.arange(len(idx)), index=idx)       # 3.04% a year, every month
+    fred = pd.DataFrame({"CPIAUCSL": cpi.drop(pd.Timestamp("2025-10-01"))})
+    inf = ms.macro_state_block(fred)["inflation"]
+    assert inf["yoy"] == pytest.approx(1.0025 ** 12 - 1, rel=1e-9)
+    assert inf["avg36"] == pytest.approx(1.0025 ** 12 - 1, rel=1e-9)
+    assert inf["above_line"] and inf["months_to_line_at_2pct"] == 11          # 36a - k(a - b) < 3 ln(1.0275) first at k = 11
+    assert inf["yoy_v3"] == pytest.approx(0, abs=1e-12) and inf["yoy_v1"] == pytest.approx(0, abs=1e-12)
+    ramp = pd.Series(250 * np.exp(np.cumsum(np.linspace(0.001, 0.004, len(idx)))), index=idx)  # inflation speeding up
+    inf2 = ms.macro_state_block(pd.DataFrame({"CPIAUCSL": ramp}))["inflation"]
+    assert inf2["yoy_v3"] > 0 and inf2["avg36_v3"] > 0

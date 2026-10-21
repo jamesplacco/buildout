@@ -1,0 +1,198 @@
+  /* =====================================================================================
+     boot.js (v0.5): six groups, their desks, the math toggle, deep links, live data, boot
+     ===================================================================================== */
+  const GROUPS = {
+    today: { name: "Today", views: ["desk"] },
+    decide: { name: "Decide", views: ["decide", "journal", "swans"] },
+    markets: { name: "Markets", views: ["rates", "options", "hedges", "securities", "insurers"] },
+    research: { name: "Research", views: ["fundamentals", "physics", "findings", "theses"] },
+    wisdom: { name: "Wisdom", views: ["legends", "lenses", "lab"] },
+    reference: { name: "Reference", views: ["engine", "appendix"] },
+  };
+  const GROUP_ORDER = ["today", "decide", "markets", "research", "wisdom", "reference"];
+  const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
+  const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
+  const lastInGroup = {};
+  function goGroup(g) {
+    if (!GROUPS[g]) return;
+    const v = lastInGroup[g] || GROUPS[g].views[0];
+    if (location.hash === "#" + v) show(v, true); else location.hash = v;
+  }
+  const RENDER = {
+    desk: () => { guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
+    rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
+    options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
+    hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
+    securities: () => guard("Risk drivers", renderDrivers, $("#drv-chart")),
+    insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {}, decide: () => {}, legends: () => {},
+    theses: () => { guard("Alphabet chart", renderGoog, $("#goog-chart")); guard("Guidance chart", renderGuide, $("#guide-chart")); guard("Capex panel", drawCapex); },
+    journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
+    swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
+    fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
+  };
+  let current = null;
+  // any element id is a deep link: the view that contains it opens and the element scrolls into view
+  function resolve(token) {
+    if (!token) return { view: "desk", el: null };
+    if (VIEWS.includes(token)) return { view: token, el: null };
+    if (GROUPS[token]) return { view: lastInGroup[token] || GROUPS[token].views[0], el: null };
+    let el = document.getElementById(token);
+    if (!el && /^sec-/.test(token) && secFilter !== "All") { secFilter = "All"; renderSecurities(); el = document.getElementById(token); }
+    if (!el && /^ep-/.test(token) && epKind !== "All") { epKind = "All"; buildEpisodes(); el = document.getElementById(token); }
+    if (!el && /^lg-/.test(token) && lgGroup !== "All") { lgGroup = "All"; renderLegends(); el = document.getElementById(token); }
+    const v = el && el.closest(".view");
+    return v ? { view: v.id.slice(5), el } : { view: "desk", el: null };
+  }
+  function renderSubtabs(view) {
+    const g = groupOf(view), nav = $("#subtabs");
+    document.querySelectorAll(".tabs a[data-group]").forEach((a) => {
+      if (a.dataset.group === g) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+      const v = lastInGroup[a.dataset.group] || GROUPS[a.dataset.group].views[0];
+      a.href = "#" + v;
+    });
+    if (!nav) return;
+    nav.replaceChildren();
+    if (GROUPS[g].views.length < 2) return;
+    nav.append(h("span", "sub-label", GROUPS[g].name));
+    GROUPS[g].views.forEach((v) => {
+      const a = h("a", null, TAB_NAME[v]);
+      a.href = "#" + v;
+      if (v === view) a.setAttribute("aria-current", "page");
+      nav.append(a);
+    });
+  }
+  function show(token, scroll) {
+    let t = token;
+    try { t = decodeURIComponent(token); } catch (e) { t = ""; }
+    const { view, el } = resolve(t);
+    VIEWS.forEach((v) => { $("#view-" + v).hidden = v !== view; });
+    current = view;
+    lastInGroup[groupOf(view)] = view;
+    renderSubtabs(view);
+    document.title = (view === "desk" ? "" : TAB_NAME[view] + " · ") + "Buildout Risk Engine";
+    guard(TAB_NAME[view], RENDER[view]);
+    hideTip();
+    if (el) {
+      if (el.tagName === "DETAILS") el.open = true;
+      const d = el.parentElement && el.parentElement.closest("details");
+      if (d) d.open = true;
+      el.scrollIntoView({ block: "start" });
+    } else if (scroll) window.scrollTo(0, 0);
+  }
+
+  /* ---------- show the math ---------- */
+  function setMath(on) {
+    document.documentElement.classList.toggle("math-on", on);
+    const b = $("#math-toggle");
+    if (b) { b.setAttribute("aria-pressed", on ? "true" : "false"); b.title = on ? "Hide the formulas" : "Show every formula on the page"; }
+    LS.set("bo-math", on);
+  }
+  const toggleMath = () => setMath(!document.documentElement.classList.contains("math-on"));
+  function wireMath() {
+    const b = $("#math-toggle");
+    if (b) b.addEventListener("click", toggleMath);
+    setMath(LS.get("bo-math", false) === true);
+  }
+
+  /* ---------- search: the v0.5 desks join the index ---------- */
+  function buildIndex5() {
+    const add = (title, sub, kind, target, keys = "") => INDEX.push({ title, sub, kind, target, t: title.toLowerCase(), hay: `${title} ${sub} ${keys}`.toLowerCase() });
+    (LIVE.decisions || decisions()).forEach((d, i) => add(`Decision ${i + 1}: ${d.n}`, d.act, "Decision", d.id, `${d.q} ${d.rule}`));
+    ASSUMPTIONS.forEach((a) => add(a.t, `${a.kind} assumption · ${Math.round(a.p * 100)}% · ${a.ev}`, "Assumption", "as-" + a.id + "-row", a.test));
+    CHAINS.forEach((c) => add(c.n, c.so, "Chain", c.id, c.steps.map((s) => s.t + " " + s.do).join(" ")));
+    SWANS.forEach((s) => add(s.n, `${s.kind} · ${s.hit}`, "Swan", s.id, `${s.ev} ${s.pays} ${s.fails}`));
+    LEGENDS.forEach((l) => add(l.n, l.idea, "Legend", l.id, `${l.who} ${l.rule} ${l.g}`));
+    TALEB.forEach((t) => add(t.n, t.t, "Principle", "tal-title", t.rule));
+    OVERLOOKED.forEach((o) => add(o.n, o.t, "Overlooked", o.at));
+    TOYS.forEach((t) => add(t.title, t.intro, "Tool", t.id));
+    document.querySelectorAll("#fi-list .finding").forEach((f) => { const h3 = f.querySelector("h3"), c = f.querySelector(".claim"); if (h3) add(h3.textContent, c ? c.textContent : "", "Finding", f.id); });
+    FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${r.stage || "n/a"} finance`, "Company", "fu-t-title", r.t));
+    Object.assign(KIND_RANK, { Decision: 8, Finding: 7, Chain: 5, Swan: 5, Company: 5, Legend: 4, Assumption: 4, Principle: 3, Overlooked: 3 });
+  }
+
+  /* ---------- boot ---------- */
+  [["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
+   ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
+   ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
+   ["Decide", buildDecide], ["Fundamentals", buildFundamentals], ["Physics", buildPhysics], ["Findings", buildFindings, "#fi-list"], ["Swans", buildSwans, "#sw-grid"], ["Legends", buildLegends, "#lg-grid"], ["Math lab", buildLab, "#lab-list"],
+   ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
+   ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
+   ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
+
+  ["#bc-cpn", "#bc-yld", "#bc-mat", "#bc-face", "#bc-shock"].forEach((id) => $(id).addEventListener("input", () => guard("Bond calculator", updateBond)));
+  ["#ct-dv01", "#ct-d2", "#ct-d10"].forEach((id) => $(id).addEventListener("input", () => guard("Curve trade", updateCurveTrade)));
+  ["#bs-S", "#bs-K", "#bs-T", "#bs-v", "#bs-r", "#bs-q", "#bs-mkt"].forEach((id) => $(id).addEventListener("input", () => guard("Option pricer", updateBS)));
+  $("#bs-type").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    bsType = b.dataset.v;
+    $("#bs-type").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    guard("Option pricer", updateBS);
+  }));
+  ["#po-v", "#po-T"].forEach((id) => $(id).addEventListener("input", () => guard("Payoff builder", updatePayoff)));
+  ["#tb-k", "#tb-T", "#tb-v", "#tb-n"].forEach((id) => $(id).addEventListener("input", () => guard("Tail budget", updateTail)));
+  document.querySelectorAll("form").forEach((f) => f.addEventListener("submit", (e) => e.preventDefault()));
+  [["Bond calculator", updateBond], ["Curve trade", updateCurveTrade], ["Option pricer", updateBS], ["Hedge lab", updateHedge], ["Sizing lab", () => labelsSize(sizeState())], ["Futures hedge", updateFutures], ["Payoff builder", updatePayoff]]
+    .forEach(([name, fn]) => guard(name, fn));
+  show(location.hash.slice(1), false);
+  window.addEventListener("hashchange", () => show(location.hash.slice(1), true));
+
+  let raf = 0, lastW = 0;
+  if (typeof ResizeObserver === "function") {
+    new ResizeObserver(() => {
+      const w = document.body.clientWidth;
+      if (w === lastW) return;
+      lastW = w;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { if (current) guard(TAB_NAME[current], RENDER[current]); });
+    }).observe(document.body);
+  }
+  const redrawTheme = () => { if (current === "desk") guard("Rosette", () => drawRosette(false)); };
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  if (mq.addEventListener) mq.addEventListener("change", redrawTheme);
+  new MutationObserver(redrawTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // the long-history research file must look like the snapshot it replaces, or the snapshot stays
+  function researchOk(r) {
+    try {
+      return !!(r && r.panel && r.panel.months >= 1500 && isoOk(r.panel.end + "-01") && Array.isArray(r.hedge.rows) && r.hedge.rows.length >= 5 && fin(r.hedge.line) && r.hedge.latest && fin(r.hedge.latest.corr)
+        && r.tails && Array.isArray(r.tails.rows) && r.tails.rows.length === 4 && r.roc && r.roc.rows.length === 4 && r.oil && r.oil.summary && r.vix && r.vix.s30 && r.spells && r.gold && r.cape && r.cape.rows.length === 10 && r.panel.end >= FINDINGS.panel.end);
+    } catch (e) { return false; }
+  }
+  Promise.all(["macro", "report", "capex", "status", "research"].map((n) => loadJSON(`data/${n}.json`))).then(([m, r, cx, st, rs]) => {
+    if (cx) {
+      guard("Capex panel", () => renderCapex(cx), $("#capex-live"));
+      if (cx.ttm && typeof cx.ttm === "object") { LIVE.capexTTM = cx.ttm; guard("Fundamentals table", renderFundTable, $("#fund-table")); }
+    }
+    if (rs && researchOk(rs)) {
+      LIVE.research = rs;
+      guard("Findings", buildFindings, $("#fi-list"));
+      guard("Swans", renderSwansStatic, $("#sw-grid"));
+    } else if (rs) LIVE.problems.push("research.json did not match the expected shape; the page keeps its snapshot");
+    if (m && m.latest) {
+      const miss = missingFields(m, MACRO_SPEC);
+      if (miss.length) errorState($("#macro-body"), "The market file is incomplete.", `Missing or malformed: ${miss.join(", ")}. The rest of the page uses the dated snapshot.`);
+      else {
+        LIVE.macro = m;
+        guard("Engine readout", () => renderMacro(m), $("#macro-body"));
+        guard("Key levels", () => renderLevels(m), $("#levels"));
+        guard("Live rates", () => buildRatesLive(m), $("#rates-live"));
+        guard("What moved", renderMoves, $("#mv-table"));
+        guard("Insurance", renderInsurance, $("#iv-tiles"));
+        guard("Liquidity", renderLiquidity, $("#liq-tiles"));
+        guard("Numbers to know", buildRules, $("#rules"));
+        guard("Worked examples", buildExamples, $("#examples"));
+        guard("Forward dates", buildForwardDates);
+        guard("Data dictionary", buildDict);
+        guard("Episode atlas", buildEpisodes, $("#ep-grid"));
+      }
+    } else if (m) errorState($("#macro-body"), "The market file is incomplete.", "It has no latest block. The rest of the page uses the dated snapshot.");
+    if (r && r.summary && r.summary.data && r.summary.data !== "synthetic") {
+      const miss = missingFields(r, BOOK_SPEC);
+      if (miss.length) errorState($("#book-body"), "The book file is incomplete.", `Missing or malformed: ${miss.join(", ")}.`);
+      else { LIVE.report = r; guard("Model book", () => renderBook(r), $("#book-body")); }
+    }
+    if (st) { LIVE.status = st; guard("System status", () => renderStatus(st), $("#status-body")); }
+    guard("Signals", renderSignals, $("#signals-grid"));
+    guard("Futures defaults", futuresDefaults);
+    if (LIVE.macro || LIVE.report || LIVE.research) { guard("Decide", buildDecide); guard("Legends", renderLegends, $("#lg-grid")); }
+    if (current) guard(TAB_NAME[current], RENDER[current]);
+  });

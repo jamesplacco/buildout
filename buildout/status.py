@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import os
 import platform
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -21,7 +21,15 @@ def weekdays_since(as_of: str | None, now: datetime) -> int | None:
     """Weekdays strictly after `as_of` up to and including today (matches weekdaysSince in the page)."""
     if not as_of:
         return None
-    d = date.fromisoformat(as_of[:10])
+    s = str(as_of)[:10]
+    try:
+        if len(s) == 7:                       # a month ("2026-09"): monthly data runs to the month's last day
+            y, m = int(s[:4]), int(s[5:7])
+            d = date(y + m // 12, m % 12 + 1, 1) - timedelta(days=1)
+        else:
+            d = date.fromisoformat(s)
+    except ValueError:
+        return None
     one = np.timedelta64(1, "D")
     return int(np.busday_count(np.datetime64(d, "D") + one, np.datetime64(now.date(), "D") + one))
 
@@ -113,6 +121,24 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
             days = (now.date() - date.fromisoformat(newest[:10])).days
             check(f"SEC filings include a quarter ended in the last {QUARTER_LAG_DAYS} days", days <= QUARTER_LAG_DAYS,
                   f"latest quarter ended {newest}, {days} days ago")
+
+        ttm = capex.get("ttm") or {}
+        if ttm:
+            bad = [t for t, m in ttm.items() if isinstance(m, dict) and isinstance(m.get("capex_to_ocf"), (int, float))
+                   and not (-5 < m["capex_to_ocf"] < 20)]
+            check("Capex to cash flow ratios are plausible", not bad, ", ".join(bad))
+
+    research = load("research.json", "panel.end")
+    if research is not None:
+        rows = _get(research, "hedge.rows") or []
+        check("Long-history research covers at least 1,500 months", (_get(research, "panel.months") or 0) >= 1500,
+              f"{_get(research, 'panel.months')} months")
+        check("Hedge-line table has every inflation bucket", len(rows) >= 5, f"{len(rows)} buckets")
+        files["research.json"]["cadence"] = "monthly"
+        end = _get(research, "panel.end")
+        if isinstance(end, str) and len(end) >= 7:
+            days = (now.date() - date.fromisoformat(end[:7] + "-01")).days
+            check("Research data ends within the last 120 days", days <= 120, f"ends {end}, {days} days ago")
 
     return {
         "generated_utc": now.isoformat(timespec="seconds"),

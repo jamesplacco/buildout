@@ -218,6 +218,7 @@ def analyze_macro(fred: pd.DataFrame, halflife: int = 63, q: float = 0.05, since
         "moves": marketstate.moves_block(fred),
         "vol": marketstate.vol_block(fred),
         "liquidity": marketstate.liquidity_block(fred),
+        "macro_state": marketstate.macro_state_block(fred),
         "episodes": episode_atlas(fred),
         "coverage": coverage(fred),
         "failed_series": failed or {},

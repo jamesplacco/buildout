@@ -35,6 +35,10 @@ jobs:
       - name: Market regime (FRED, free)
         run: python -m buildout macro --out site/data
 
+      - name: Long-history research (public datasets on GitHub, free)
+        continue-on-error: true   # a dataset mirror being down must never block the market data
+        run: python -m buildout research --out site/data
+
       - name: Book run (Databento)
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
@@ -54,7 +58,7 @@ jobs:
             echo "::notice::SEC_USER_AGENT variable is not set; skipping fundamentals."
             exit 0
           fi
-          python -m buildout capex GOOGL MSFT AMZN META ORCL TSLA SPCX --ua "$SEC_UA" --json site/data/capex.json
+          python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
 
       - name: Status (freshness and sanity checks for the page)
         if: always()
