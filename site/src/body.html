@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.3</span>
+      Buildout <span class="ver">v0.4</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -38,10 +38,10 @@
   <div class="hero">
     <div class="hero-text">
       <p class="eyebrow">Risk note · October 20, 2026 · Jamie Placco</p>
-      <h1 id="desk-title">Real yields near 3%. Brent above $120. AI credit <em>starting to crack.</em></h1>
+      <h1 id="desk-title">Real yields above 2.7%. Brent above $120. AI credit <em>starting to crack.</em></h1>
       <p class="lede">Buildout is a cross-asset risk desk built around one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit and volatility every day, prices the hedges, and sizes positions to survive. Right now long Treasuries are an unreliable hedge, so the desk leans on convexity and position size, and lets the data say when duration works again.</p>
       <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 62 of 62 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 85 of 85 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot idle"></span>Snapshot: Oct 19, 2026</span>
@@ -61,10 +61,20 @@
     <div class="section-head">
       <p class="eyebrow">Signals</p>
       <h2 id="sig-title">What the desk is watching</h2>
-      <p class="prose" id="sig-sub">Nine signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.</p>
+      <p class="prose" id="sig-sub">Twelve signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.</p>
     </div>
+    <div class="read" id="desk-read" aria-live="polite"></div>
     <div class="signals" id="signals-grid"></div>
-    <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds.</p>
+    <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
+  </section>
+
+  <section class="section" id="moves" aria-labelledby="mv-title">
+    <div class="section-head">
+      <p class="eyebrow">This week</p>
+      <h2 id="mv-title">What moved</h2>
+      <p class="prose" id="mv-sub">Fifteen markets the desk reads, from FRED. The daily run adds day, month, year-to-date and one-year changes, and flags any weekly move that is unusual against the past three years.</p>
+    </div>
+    <div class="panel"><div class="tablewrap"><table class="moves" id="mv-table"></table></div><p class="hint" id="mv-note"></p></div>
   </section>
 
   <section class="section" aria-labelledby="levels-title">
@@ -87,10 +97,10 @@
         <div class="quad-wrap">
           <div class="quad-y">Inflation rising ↑</div>
           <div class="quad">
-            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h4>Stagflation</h4><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
-            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h4>Inflationary boom</h4><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
-            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h4>Deflationary bust</h4><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
-            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h4>Goldilocks</h4><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h3>Stagflation</h3><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
+            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h3>Inflationary boom</h3><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h3>Deflationary bust</h3><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
+            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h3>Goldilocks</h3><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
           </div>
           <div class="quad-x">Growth rising →</div>
         </div>
@@ -215,6 +225,17 @@
       <article class="tile"><span class="label">UK Bank Rate</span><span class="value">3.75%</span><span class="note">As of Oct 7.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">MacroRadar</a></span></article>
       <article class="tile"><span class="label">Fed balance sheet</span><span class="value">$6.74T</span><span class="note">September; Treasury cash account $949B.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">FRED via MacroRadar</a></span></article>
     </div>
+  </section>
+
+  <section class="section" id="liquidity" aria-labelledby="liq-title">
+    <div class="section-head"><p class="eyebrow">Plumbing</p><h2 id="liq-title">Liquidity and funding</h2><p class="prose">Net liquidity is the Fed's balance sheet minus the Treasury's cash account and the overnight reverse repo facility: roughly the cash the Fed leaves in the private system. SOFR against the rate the Fed pays on reserves (IORB) says whether that cash is getting scarce. The Fed stopped shrinking its balance sheet on Dec 1, 2025, citing money-market conditions. <a class="src" href="https://federalreserve.gov/monetarypolicy/policy-normalization.htm">Federal Reserve</a></p></div>
+    <div class="tiles compact" id="liq-tiles"></div>
+    <p class="sentence" id="liq-read"></p>
+    <div class="grid2" id="liq-charts" hidden>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">Net liquidity, $ trillions, weekly</span></div><div class="svgbox" id="liq-net"></div><span class="src">FRED: WALCL minus WTREGEN minus RRPONTSYD</span></figure>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">SOFR minus IORB, basis points, daily</span></div><div class="svgbox" id="liq-gap"></div><span class="src">FRED: SOFR and IORB</span></figure>
+    </div>
+    <p class="hint">Net liquidity is an accounting identity, not a law of stock prices. Use it for the plumbing (who is draining cash, and how close reserves are to scarce), not to time the index.</p>
   </section>
 
   <section class="section" id="rates-live-sec" aria-labelledby="rlive-title">
@@ -350,6 +371,17 @@
       <div class="tablewrap"><table class="svgrid" id="sv-grid"></table></div>
       <p class="hint">Strategy, volatility and tenor come from the payoff builder. Volatility shifts are in points and apply to every strike; real markets add skew, so put volatility usually rises more than call volatility in a selloff.</p>
     </div>
+  </section>
+
+  <section class="section" id="insurance" aria-labelledby="iv-title">
+    <div class="section-head"><p class="eyebrow">Price of protection</p><h2 id="iv-title">Is insurance cheap?</h2><p class="prose">Implied volatility is what an option charges; realized volatility is what the market delivered. The gap is the volatility risk premium: on average buyers of protection pay sellers for carrying crash risk. The desk buys convexity when it is cheap, not when it is needed.</p></div>
+    <div class="tiles compact" id="iv-tiles"></div>
+    <p class="sentence" id="iv-read"></p>
+    <div class="grid2" id="iv-charts" hidden>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">Nasdaq-100: implied (VXN) against realized volatility, points</span><span class="legend" id="iv-legend"></span></div><div class="svgbox" id="iv-chart"></div><span class="src">FRED: VXNCLS and NASDAQ100; realized is 21 trading days, annualized</span></figure>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">VIX over 3-month VIX: above 1 the curve is inverted</span></div><div class="svgbox" id="iv-term"></div><span class="src">FRED: VIXCLS and VXVCLS</span></figure>
+    </div>
+    <p class="hint">Desk rules: buy convexity when implied sits in the bottom third of its ten-year range and within about two points of its median premium; prefer put spreads and collars when implied is in the top fifth; when the VIX curve inverts, stress is priced now, so monetize in stages instead of buying.</p>
   </section>
 
   <section class="section" aria-labelledby="tb-title">
@@ -587,9 +619,9 @@
   <section class="section" aria-labelledby="how-title">
     <div class="section-head"><p class="eyebrow">Model</p><h2 id="how-title">How an insurer makes money</h2></div>
     <div class="flow">
-      <div><span class="step">Collect</span><h4>Float</h4><p>Premiums arrive before claims are paid. Berkshire's float was about $177.5B at June 30, 2026, money it invests but does not own.</p></div>
-      <div><span class="step">Match</span><h4>Duration</h4><p>Life and annuity liabilities run decades, so insurers buy long bonds and private loans to match them. That makes them price-setters for the long end.</p></div>
-      <div><span class="step">Earn</span><h4>Two engines</h4><p>Profit = underwriting result + investment spread. Higher yields raise the second engine; credit losses hit it.</p></div>
+      <div><span class="step">Collect</span><h3>Float</h3><p>Premiums arrive before claims are paid. Berkshire's float was about $177.5B at June 30, 2026, money it invests but does not own.</p></div>
+      <div><span class="step">Match</span><h3>Duration</h3><p>Life and annuity liabilities run decades, so insurers buy long bonds and private loans to match them. That makes them price-setters for the long end.</p></div>
+      <div><span class="step">Earn</span><h3>Two engines</h3><p>Profit = underwriting result + investment spread. Higher yields raise the second engine; credit losses hit it.</p></div>
     </div>
     <span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Hathaway Q2 2026 release (SEC)</a></span>
   </section>
@@ -597,10 +629,10 @@
   <section class="section" aria-labelledby="chainf-title">
     <div class="section-head"><p class="eyebrow">Case study</p><h2 id="chainf-title">How a data center gets financed off a hyperscaler's balance sheet</h2><p class="prose">Meta's Hyperion campus in Louisiana, October 2025. The template now repeats across the buildout.</p></div>
     <div class="chainflow">
-      <div class="node"><span class="tag">Tenant</span><h4>Meta, 20%</h4><p>Builds and manages the campus, leases it on four-year initial terms, and guarantees residual value for the first 16 years.</p></div>
-      <div class="node"><span class="tag">Owner</span><h4>Joint venture</h4><p>Blue Owl funds hold 80% of a project of about $27B; they put in about $7B of cash.</p></div>
-      <div class="node"><span class="tag">Lender</span><h4>PIMCO and bond investors</h4><p>Part of Blue Owl's capital is debt sold privately to PIMCO and other buyers, with Morgan Stanley as bookrunner.</p></div>
-      <div class="node"><span class="tag">Ultimate holder</span><h4>Allianz and policyholders</h4><p>PIMCO is owned by Allianz. The credit risk of the AI buildout ends up in insurance and retirement portfolios.</p></div>
+      <div class="node"><span class="tag">Tenant</span><h3>Meta, 20%</h3><p>Builds and manages the campus, leases it on four-year initial terms, and guarantees residual value for the first 16 years.</p></div>
+      <div class="node"><span class="tag">Owner</span><h3>Joint venture</h3><p>Blue Owl funds hold 80% of a project of about $27B; they put in about $7B of cash.</p></div>
+      <div class="node"><span class="tag">Lender</span><h3>PIMCO and bond investors</h3><p>Part of Blue Owl's capital is debt sold privately to PIMCO and other buyers, with Morgan Stanley as bookrunner.</p></div>
+      <div class="node"><span class="tag">Ultimate holder</span><h3>Allianz and policyholders</h3><p>PIMCO is owned by Allianz. The credit risk of the AI buildout ends up in insurance and retirement portfolios.</p></div>
     </div>
     <span class="src"><a href="https://about.fb.com/news/2025/10/meta-blue-owl-capital-develop-hyperion-data-center/">Meta newsroom, Oct 21, 2025</a> · <a href="https://www.globaldatacenterhub.com/p/could-meta-pimco-and-blue-owls-29b">Global Data Center Hub</a></span>
   </section>
@@ -619,12 +651,12 @@
   <section class="section" aria-labelledby="cos-title">
     <div class="section-head"><p class="eyebrow">Watchlist</p><h2 id="cos-title">Six balance sheets to know</h2><p class="prose">Figures are the latest each company or a cited source published. No prices; this is about business models.</p></div>
     <div class="co-grid">
-      <article class="co"><span class="model">Composite insurer + asset manager</span><h4>Allianz</h4><ul><li><strong>€2.04T</strong> third-party assets at Mar 31, 2026, a record, with €45.2B of Q1 net inflows.</li><li>Owns <strong>PIMCO</strong> and Allianz Global Investors.</li><li>Solvency II ratio <strong>221%</strong>; 2026 operating profit outlook €17.4B ± €1B.</li></ul><span class="src"><a href="https://www.allianz.com/en/mediacenter/news/media-releases/financials/260513-1q-2026-earnings-release.html">Allianz 1Q 2026 release</a></span></article>
-      <article class="co"><span class="model">Float compounder</span><h4>Berkshire Hathaway</h4><ul><li>Insurance float about <strong>$177.5B</strong> at June 30, 2026.</li><li>Q2 operating earnings <strong>$13.0B</strong>; insurance investment income $3.1B.</li><li>About <strong>$4.5B</strong> of buybacks in Q2.</li></ul><span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Q2 2026 release</a></span></article>
-      <article class="co"><span class="model">PE-affiliated annuity writer</span><h4>Apollo / Athene</h4><ul><li>Annuity balance sheet funding private credit origination.</li><li>Reported near a <strong>$35B</strong> lending deal for Nvidia chips leased to xAI (Feb 2026).</li><li>Private credit above 15% of assets at some PE-affiliated insurers.</li></ul><span class="src"><a href="https://www.roic.ai/news/apollo-nears-35-billion-lending-deal-for-nvidia-chips-leased-to-xai-02-09-2026">ROIC</a> · <a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
-      <article class="co"><span class="model">PE-affiliated annuity writer</span><h4>KKR / Global Atlantic</h4><ul><li>Same model as Athene: annuities fund private credit.</li><li>Named with Athene among insurers whose private credit share exceeds 15%.</li></ul><span class="src"><a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
-      <article class="co"><span class="model">Reinsurers and insurance-linked securities</span><h4>Munich Re, Swiss Re</h4><ul><li>Transfer catastrophe risk to capital markets through cat bonds.</li><li>Cat bond issuance hit a record <strong>$17.3B</strong> in the first half of 2026.</li></ul><span class="src"><a href="https://www.captive.com/news/catastrophe-bond-issuance-hits-record-173-billion-in-first-half">Captive.com</a></span></article>
-      <article class="co"><span class="model">Japanese life insurers</span><h4>Japan's long end</h4><ul><li>Japan's 30-year auction cleared at <strong>4.11%</strong> on Oct 8.</li><li>Higher yields at home reduce the pull of US Treasuries for the largest pool of long-duration buyers abroad.</li></ul><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
+      <article class="co"><span class="model">Composite insurer + asset manager</span><h3>Allianz</h3><ul><li><strong>€2.04T</strong> third-party assets at Mar 31, 2026, a record, with €45.2B of Q1 net inflows.</li><li>Owns <strong>PIMCO</strong> and Allianz Global Investors.</li><li>Solvency II ratio <strong>221%</strong>; 2026 operating profit outlook €17.4B ± €1B.</li></ul><span class="src"><a href="https://www.allianz.com/en/mediacenter/news/media-releases/financials/260513-1q-2026-earnings-release.html">Allianz 1Q 2026 release</a></span></article>
+      <article class="co"><span class="model">Float compounder</span><h3>Berkshire Hathaway</h3><ul><li>Insurance float about <strong>$177.5B</strong> at June 30, 2026.</li><li>Q2 operating earnings <strong>$13.0B</strong>; insurance investment income $3.1B.</li><li>About <strong>$4.5B</strong> of buybacks in Q2.</li></ul><span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Q2 2026 release</a></span></article>
+      <article class="co"><span class="model">PE-affiliated annuity writer</span><h3>Apollo / Athene</h3><ul><li>Annuity balance sheet funding private credit origination.</li><li>Reported near a <strong>$35B</strong> lending deal for Nvidia chips leased to xAI (Feb 2026).</li><li>Private credit above 15% of assets at some PE-affiliated insurers.</li></ul><span class="src"><a href="https://www.roic.ai/news/apollo-nears-35-billion-lending-deal-for-nvidia-chips-leased-to-xai-02-09-2026">ROIC</a> · <a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
+      <article class="co"><span class="model">PE-affiliated annuity writer</span><h3>KKR / Global Atlantic</h3><ul><li>Same model as Athene: annuities fund private credit.</li><li>Named with Athene among insurers whose private credit share exceeds 15%.</li></ul><span class="src"><a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
+      <article class="co"><span class="model">Reinsurers and insurance-linked securities</span><h3>Munich Re, Swiss Re</h3><ul><li>Transfer catastrophe risk to capital markets through cat bonds.</li><li>Cat bond issuance hit a record <strong>$17.3B</strong> in the first half of 2026.</li></ul><span class="src"><a href="https://www.captive.com/news/catastrophe-bond-issuance-hits-record-173-billion-in-first-half">Captive.com</a></span></article>
+      <article class="co"><span class="model">Japanese life insurers</span><h3>Japan's long end</h3><ul><li>Japan's 30-year auction cleared at <strong>4.11%</strong> on Oct 8.</li><li>Higher yields at home reduce the pull of US Treasuries for the largest pool of long-duration buyers abroad.</li></ul><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
     </div>
   </section>
   <p class="callout">The link to the book: insurers are the marginal buyers of the long-dated debt that funds AI data centers. If their appetite slows, through rising defaults or capital rules, AI financing costs rise. That is the <a href="#hedges">financing-shock lane</a>, the one where long bonds fail as a hedge.</p>
@@ -670,7 +702,7 @@
     <h1 id="lens-title">Borrowed minds, turned into rules.</h1>
     <p class="lede">The desk reads widely and keeps only what it can encode. Each lens below is paraphrased in one line, then mapped to the rule or view where the engine uses it.</p>
   </div>
-  <section class="section" aria-label="Thinkers"><div class="lens-grid" id="lens-grid"></div></section>
+  <section class="section" aria-labelledby="thinkers-title"><h2 class="sr-only" id="thinkers-title">The thinkers</h2><div class="lens-grid" id="lens-grid"></div></section>
   <section class="section" aria-labelledby="pr-title">
     <div class="section-head"><p class="eyebrow">Desk principles</p><h2 id="pr-title">From a market maker's advice</h2><p class="prose">Notes from a conversation with a trader who built his own prop firm and market-making business.</p></div>
     <ol class="steps">
@@ -691,7 +723,8 @@
     <h1 id="eng-title">The engine behind the desk.</h1>
     <p class="lede">Python, about 3,500 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
-  <ol class="pipeline">
+  <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
+  <ol class="pipeline" aria-labelledby="pipe-title">
     <li><h3>Data</h3><p>FRED curve, credit, volatility and oil daily; Databento bars with split and dividend factors; CME Treasury futures; SEC filings; Kalshi odds.</p></li>
     <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
     <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
@@ -704,7 +737,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">62 of 62 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">85 of 85 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -718,7 +751,8 @@
           <tr><td>Costs, financing, compounding</td><td class="r">exact to 1e-12</td></tr>
           <tr><td>Page bond, curve and option math against the engine</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Missing FRED series, truncated files, stale data</td><td class="r">reported, not fatal</td></tr>
-          <tr><td>Browser suite: hostile files, extreme inputs, 320 to 1920px, print</td><td class="r">12 scenarios, 0 failures</td></tr>
+          <tr><td>Property tests: thousands of random bonds, curves and options</td><td class="r">2 bugs found, fixed</td></tr>
+          <tr><td>Browser suite: hostile files, random use, 320 to 1920px, print, accessibility</td><td class="r">18 scenarios, 0 failures</td></tr>
         </tbody>
       </table></div>
       <p class="hint">Ten years of simulated daily data with two correlation regimes and known betas. Passing proves the machinery; it says nothing about markets until real data runs through it.</p>
@@ -778,22 +812,30 @@
   <section class="section" aria-labelledby="gl-title">
     <div class="section-head"><p class="eyebrow">A</p><h2 id="gl-title">Glossary</h2><p class="prose" id="gl-sub">Terms with a dotted underline anywhere on the site open their entry here.</p></div>
     <div class="az" id="gl-az" aria-label="Jump to letter"></div>
-    <dl class="gloss" id="gloss"></dl>
+    <div class="gloss" id="gloss"></div>
   </section>
   <section class="section" aria-labelledby="me-title">
     <div class="section-head"><p class="eyebrow">B</p><h2 id="me-title">Methods and formulas</h2><p class="prose">Every formula the engine and the page use, in plain notation, with where it lives. The page's versions are tested against the engine's on every push.</p></div>
     <div class="methods" id="methods"></div>
   </section>
+  <section class="section" aria-labelledby="nk-title">
+    <div class="section-head"><p class="eyebrow">C</p><h2 id="nk-title">Numbers to know</h2><p class="prose">Rules of thumb a desk uses without a calculator, with today's numbers where they help.</p></div>
+    <div class="nk-grid" id="rules"></div>
+  </section>
+  <section class="section" aria-labelledby="wx-title">
+    <div class="section-head"><p class="eyebrow">D</p><h2 id="wx-title">Worked examples</h2><p class="prose" id="wx-sub">Eight questions the tools answer, worked step by step with the page's own math on the latest curve.</p></div>
+    <div class="wx-grid" id="examples"></div>
+  </section>
   <section class="section" aria-labelledby="faq-title">
-    <div class="section-head"><p class="eyebrow">C</p><h2 id="faq-title">Hard questions</h2><p class="prose">The questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.</p></div>
+    <div class="section-head"><p class="eyebrow">E</p><h2 id="faq-title">Hard questions</h2><p class="prose">The questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.</p></div>
     <div class="faq" id="faq"></div>
   </section>
   <section class="section" aria-labelledby="mr-title">
-    <div class="section-head"><p class="eyebrow">D</p><h2 id="mr-title">Model risk register</h2><p class="prose">What each model assumes, when it breaks, and what the desk does about it.</p></div>
+    <div class="section-head"><p class="eyebrow">F</p><h2 id="mr-title">Model risk register</h2><p class="prose">What each model assumes, when it breaks, and what the desk does about it.</p></div>
     <div class="panel"><div class="tablewrap"><table id="mr-table"></table></div></div>
   </section>
   <section class="section" aria-labelledby="dict-title">
-    <div class="section-head"><p class="eyebrow">E</p><h2 id="dict-title">Data dictionary</h2><p class="prose">Every series the daily run reads and every file it writes. Coverage dates fill in from the live run.</p></div>
+    <div class="section-head"><p class="eyebrow">G</p><h2 id="dict-title">Data dictionary</h2><p class="prose">Every series the daily run reads and every file it writes. Coverage dates fill in from the live run.</p></div>
     <div class="panel"><span class="panel-title">FRED series</span><div class="tablewrap"><table id="dict-fred"></table></div></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Other sources</span><div class="tablewrap"><table id="dict-other"></table></div></div>
@@ -801,21 +843,21 @@
     </div>
   </section>
   <section class="section" aria-labelledby="ep-title">
-    <div class="section-head"><p class="eyebrow">F</p><h2 id="ep-title">Episode atlas</h2><p class="prose" id="ep-sub">Fifteen stress episodes since 1987: what stocks did, what bonds did, what hedged, and the lesson. After each daily run, exact moves from FRED appear on every card.</p></div>
+    <div class="section-head"><p class="eyebrow">H</p><h2 id="ep-title">Episode atlas</h2><p class="prose" id="ep-sub">Fifteen stress episodes since 1987: what stocks did, what bonds did, what hedged, and the lesson. After each daily run, exact moves from FRED appear on every card.</p></div>
     <div class="seg" id="ep-filters" role="group" aria-label="Filter episodes by kind"></div>
     <div class="ep-grid" id="ep-grid"></div>
     <p class="hint">Static figures are S&amp;P 500, close to close, unless stated. Live figures use the Nasdaq-100 and a 20-year par bond (the 30-year before 1993), peak to trough inside each episode's window.</p>
   </section>
   <section class="section" aria-labelledby="rd-title">
-    <div class="section-head"><p class="eyebrow">G</p><h2 id="rd-title">Reading list</h2><p class="prose">The papers and books behind each method, with links where a free version exists.</p></div>
+    <div class="section-head"><p class="eyebrow">I</p><h2 id="rd-title">Reading list</h2><p class="prose">The papers and books behind each method, with links where a free version exists.</p></div>
     <div class="reading" id="reading"></div>
   </section>
   <section class="section" aria-labelledby="ck-title">
-    <div class="section-head"><p class="eyebrow">H</p><h2 id="ck-title">Checklists</h2><p class="prose">The routines that turn the desk into decisions.</p></div>
+    <div class="section-head"><p class="eyebrow">J</p><h2 id="ck-title">Checklists</h2><p class="prose">The routines that turn the desk into decisions.</p></div>
     <div class="ck-grid" id="checklists"></div>
   </section>
   <section class="section" aria-labelledby="cl-title">
-    <div class="section-head"><p class="eyebrow">I</p><h2 id="cl-title">Changelog</h2></div>
+    <div class="section-head"><p class="eyebrow">K</p><h2 id="cl-title">Changelog</h2></div>
     <div class="panel"><div class="tablewrap"><table id="changelog"></table></div></div>
   </section>
   <footer class="foot"><p>Research desk, not investment advice. Every market figure links to its source and date; thresholds and grades are the desk's judgment, stated so they can be argued with.</p></footer>

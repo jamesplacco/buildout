@@ -45,11 +45,16 @@
   }
 
   const EXTRA_NOTE = { vix: "S&P 500 implied volatility, 30 days.", hy_oas: "ICE BofA US High Yield, option-adjusted.", ig_oas: "ICE BofA US Corporate, option-adjusted.",
-    term_premium10: "Kim-Wright model, 10-year zero.", dollar_broad: "Fed nominal broad index." };
+    term_premium10: "Kim-Wright model, 10-year zero.", dollar_broad: "Fed nominal broad index.", fwd5y5y: "Inflation expected for the five years starting five years out." };
+  const LEVEL_NOTE = { real10: "10-year TIPS yield.", breakeven10: "10-year nominal minus TIPS.", brent: "Europe Brent spot, per barrel.", vix: "S&P 500 implied volatility, 30 days.",
+    vxn: "Nasdaq-100 implied volatility, 30 days.", hy_oas: "ICE BofA US High Yield, option-adjusted.", ccc_oas: "ICE BofA CCC and lower, option-adjusted.",
+    usdjpy: "Yen per dollar.", bitcoin: "Coinbase, daily." };
   // a "Live" badge that turns into "Stale" once data is more than STALE_AFTER weekdays old
   const STALE_AFTER = 3;
-  function liveBadge(iso) {
-    const old = weekdaysSince(iso) > STALE_AFTER;
+  // series that publish with a lag (EIA oil, the Kim-Wright model, the Fed's weekly balance sheet) get a longer leash
+  const STALE_DAYS = { brent: 8, wti: 8, oil: 8, term_premium10: 8, weekly: 8 };
+  function liveBadge(iso, maxAge = STALE_AFTER) {
+    const old = weekdaysSince(iso) > maxAge;
     const b = h("span", "badge" + (old ? " stale" : ""), (old ? "Stale · " : "Live · ") + (niceDate(iso) || iso || "n/a"));
     if (old) b.title = `Last daily run data is from ${niceDate(iso)}; check System status on the Engine desk.`;
     return b;
@@ -60,7 +65,7 @@
     list.forEach(([label, url], i) => { if (i) el.append(document.createTextNode(" · ")); const a = h("a", null, label); a.href = url; el.append(a); });
     return el;
   }
-  const LIVE_FMT = { "%": (v) => fx(v, 2) + "%", "$": (v) => "$" + fx(v, 2), n0: (v) => Math.round(v).toLocaleString("en-US"), n2: (v) => fx(v, 2) };
+  const LIVE_FMT = { "%": (v) => fx(v, 2) + "%", "$": (v) => "$" + fx(v, 2), "$0": (v) => "$" + Math.round(v).toLocaleString("en-US"), n0: (v) => Math.round(v).toLocaleString("en-US"), n2: (v) => fx(v, 2) };
   function renderLevels(live) {
     const box = $("#levels");
     box.replaceChildren();
@@ -80,23 +85,23 @@
           note = fin(soyMap[k]) ? `${bp((curveMap[k] - soyMap[k]) * 100)} since ${niceDate(lv.curves.start_of_year.date)}.` : "Treasury constant maturity.";
         } else if (kind === "level" && lv && lv.levels && lv.levels[k] && fin(lv.levels[k].value)) {
           value = fmt(lv.levels[k].value); liveDate = lv.levels[k].date;
-          note = { real10: "10-year TIPS yield.", breakeven10: "10-year nominal minus TIPS.", brent: "Europe Brent spot, per barrel.", vix: "S&P 500 implied volatility, 30 days." }[k] || "";
+          note = LEVEL_NOTE[k] || "";
         } else if (kind === "latest" && lat && fin(lat[k])) {
           value = fmt(lat[k]); liveDate = lat[k + "_date"] || lat.as_of; note = "Daily close.";
         }
       }
       const t = h("article", "tile" + (liveDate ? " live" : ""));
-      if (liveDate) t.append(liveBadge(liveDate));
+      if (liveDate) t.append(liveBadge(liveDate, STALE_DAYS[L.live[1]] || STALE_AFTER));
       t.append(h("span", "label", L.label), h("span", "value", value), h("span", "note", note));
-      t.append(liveDate ? srcNode(["FRED", "https://fred.stlouisfed.org/"]) : srcNode(L.src));
+      t.append(liveDate ? srcNode(L.fid ? F(L.fid) : ["FRED", "https://fred.stlouisfed.org/"]) : srcNode(L.src));
       box.append(t);
     });
     if (lv && lv.levels) {
-      LIVE_EXTRA.forEach(([k, label, fmt]) => {
+      LIVE_EXTRA.forEach(([k, label, fmt, fid]) => {
         const o = lv.levels[k];
         if (!o || !fin(o.value)) return;
         const t = h("article", "tile live");
-        t.append(liveBadge(o.date), h("span", "label", label), h("span", "value", fmt(o.value)), h("span", "note", EXTRA_NOTE[k] || ""), srcNode(["FRED", "https://fred.stlouisfed.org/"]));
+        t.append(liveBadge(o.date, STALE_DAYS[k] || STALE_AFTER), h("span", "label", label), h("span", "value", fmt(o.value)), h("span", "note", EXTRA_NOTE[k] || ""), srcNode(F(fid)));
         box.append(t);
       });
       $("#levels-sub").textContent = "Live tiles come from the engine's daily FRED run; the rest are a dated snapshot from official and market sources.";
@@ -173,8 +178,14 @@
     box.replaceChildren(e);
   }
   // error boundary: one failing panel shows a contained message; the rest of the page keeps working
+  let rolesQueued = false;
+  const scheduleRoles = () => {
+    if (rolesQueued || typeof requestAnimationFrame !== "function") return;
+    rolesQueued = true;
+    requestAnimationFrame(() => { rolesQueued = false; fixChartRoles(); });
+  };
   function guard(name, fn, box) {
-    try { return fn(); } catch (e) {
+    try { const out = fn(); scheduleRoles(); return out; } catch (e) {
       console.error("[buildout] " + name, e);
       LIVE.problems.push(`${name}: ${e && e.message ? e.message : e}`);
       errorState(box, `${name} could not render.`, "The rest of the page is unaffected. Details are in the browser console.");
@@ -345,8 +356,8 @@
     DEC.forEach(([when, real, be, nom]) => {
       const row = h("div", "decomp-row"), bar = h("div", "decomp-bar");
       const a = h("span", null, `Real ${real.toFixed(2)}%`), b = h("span", null, `Inflation ${be.toFixed(2)}%`);
-      a.style.width = (real / scale * 100) + "%"; a.style.background = "var(--s1)";
-      b.style.width = (be / scale * 100) + "%"; b.style.background = "var(--s2)";
+      a.style.width = (real / scale * 100) + "%"; a.style.background = "var(--decomp-real)";
+      b.style.width = (be / scale * 100) + "%"; b.style.background = "var(--decomp-infl)";
       bar.append(a, b);
       const head = h("div", "decomp-head");
       head.append(h("span", null, when), h("strong", null, `10-year ${nom.toFixed(2)}%`));
@@ -883,7 +894,7 @@
     list.forEach((s) => {
       const c = h("article", "sec");
       c.id = "sec-" + slug(s.n);
-      c.append(h("span", "fam", s.f), h("h4", null, s.n), h("p", null, s.w));
+      c.append(h("span", "fam", s.f), h("h3", null, s.n), h("p", null, s.w));
       const dr = h("div", "drivers");
       s.d.forEach((d) => dr.append(h("span", "drv", d)));
       const dl = h("dl");
@@ -1000,7 +1011,7 @@
       const label = t.st === "active" ? "Active" : t.st === "watch" ? "Watch" : "Risk";
       head.append(h("h3", null, t.t), h("span", "status " + t.st, label));
       const left = h("div", "col"), right = h("div", "col");
-      const sec = (title, node) => { const d = h("div"); d.append(h("h5", null, title), node); return d; };
+      const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (items) => { const u = h("ul"); items.forEach((x) => u.append(h("li", null, x))); return u; };
       left.append(h("p", "stance", t.stance), sec("Evidence", ul(t.ev)));
       if (BEAR[t.id]) left.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
@@ -1014,7 +1025,7 @@
     LENSES.forEach((L) => {
       const c = h("article", "lens");
       c.id = "lens-" + slug(L.n);
-      c.append(h("h4", null, L.n), h("p", "idea", L.idea));
+      c.append(h("h3", null, L.n), h("p", "idea", L.idea));
       const rule = h("p", "rule");
       rule.append(h("b", null, "How the desk uses it"), document.createTextNode(L.rule));
       c.append(rule, h("p", "read", L.read));
@@ -1086,11 +1097,222 @@
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix" };
-  const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab" };
+  const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity" };
   function linkLabel(target) {
     if (/^pb-/.test(target)) { const p = PLAYBOOKS.find((x) => x.id === target); return p ? `Playbook: ${p.t}` : "Playbook"; }
     if (/^t\d$/.test(target)) return `Thesis ${target.slice(1)}`;
     return LINK_NAME[target] || "Details";
+  }
+
+  /* =====================================================================================
+     WHAT MOVED, THE PRICE OF INSURANCE, AND THE PLUMBING: three reads from the daily FRED run
+     ===================================================================================== */
+  const ord = (n) => { const x = ["th", "st", "nd", "rd"], v = n % 100; return n + (x[(v - 20) % 10] || x[v] || x[0]); };
+  const rankTxt = (r) => (fin(r) ? `${ord(Math.round(r * 100))} percentile of ten years` : "");
+  const moveChange = (kind, a, b) => (kind === "pct" ? b / a - 1 : kind === "bp" ? (b - a) * 100 : b - a);
+  const fmtMove = (kind, v) => (!fin(v) ? "n/a" : kind === "pct" ? pct(v, 1) : kind === "bp" ? bp(v) : (Math.abs(v) < 0.005 ? "0.00" : (v > 0 ? "+" : MINUS) + fx(Math.abs(v), 2)));
+  const MOVE_PREFIX = { brent: "$", btc: "$", DCOILBRENTEU: "$", CBBTCUSD: "$" };
+  function fmtLevel(key, kind, v) {
+    if (!fin(v)) return "n/a";
+    if (key === "c2s10s") return bp(v * 100);
+    if (kind === "bp") return fx(v, 2) + "%";
+    if (kind === "pts") return fx(v, 2);
+    return (MOVE_PREFIX[key] || "") + (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString("en-US") : fx(v, 2));
+  }
+  const okMove = (r) => r && typeof r.label === "string" && ["bp", "pts", "pct"].includes(r.kind) && fin(r.value) && isoOk(r.date);
+  const zOk = (z) => (fin(z) && Math.abs(z) < 50 ? z : null);      // a 50σ week is a data error, not news
+  const liveMoves = () => (LIVE.macro && Array.isArray(LIVE.macro.moves) ? LIVE.macro.moves.filter(okMove) : []);
+  function weekMoves() {
+    const live = liveMoves();
+    if (live.length) return { live: true, rows: live.map((r) => ({ key: r.key, label: r.label, kind: r.kind, w1: fin(r.w1) ? r.w1 : null, z: zOk(r.z_w1) })) };
+    return { live: false, rows: STATIC_MOVES.rows.map(([label, kind, a, b, date, fid, lead]) => ({ key: fid, label, kind, w1: moveChange(kind, a, b), lead: !!lead })) };
+  }
+  function weekLine() {
+    const { live, rows } = weekMoves();
+    const pick = live ? rows.filter((r) => r.z != null && r.w1 != null).sort((a, b) => Math.abs(b.z) - Math.abs(a.z)).slice(0, 4) : rows.filter((r) => r.lead);
+    if (!pick.length) return "";
+    const eq = rows.find((r) => r.key === "ndx" || r.key === "NASDAQ100");
+    const bond = rows.find((r) => r.key === "y30" || r.key === "DGS30") || rows.find((r) => r.key === "y10" || r.key === "DGS10");
+    let tail = "";
+    if (eq && bond && fin(eq.w1) && fin(bond.w1) && eq.w1 < -0.01) {
+      tail = bond.w1 <= -2 ? " Long yields fell as stocks did: bonds hedged this week." : bond.w1 >= 2 ? " Long yields rose as stocks fell: bonds amplified this week." : " Long yields barely moved as stocks fell.";
+    }
+    const lead = live ? "Largest moves this week, against three years of weekly moves: " : `Since the ${STATIC_MOVES.from} close: `;
+    return lead + pick.map((r) => `${r.label} ${fmtMove(r.kind, r.w1)}${live && r.z != null ? ` (${fx(r.z, 1)}σ)` : ""}`).join(", ") + "." + tail;
+  }
+  function spark(o, w = 84, hgt = 22) {
+    const pts = seriesPts(o), s = svg("svg", { viewBox: `0 0 ${w} ${hgt}`, width: w, height: hgt, class: "spark", "aria-hidden": "true" });
+    if (pts.length < 2) return s;
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const sx = (x) => 1 + ((x - x0) / (x1 - x0 || 1)) * (w - 4), sy = (y) => hgt - 3 - ((y - y0) / (y1 - y0 || 1)) * (hgt - 6);
+    svg("path", { d: pts.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1)).join(" "), fill: "none", stroke: "var(--s1)", "stroke-width": 1.25, "stroke-linejoin": "round" }, s);
+    const last = pts[pts.length - 1];
+    svg("circle", { cx: sx(last[0]), cy: sy(last[1]), r: 2.25, fill: "var(--s1)" }, s);
+    return s;
+  }
+  function renderMoves() {
+    const tbl = $("#mv-table");
+    if (!tbl) return;
+    const live = liveMoves(), thead = h("thead"), hr = h("tr"), tb = h("tbody");
+    const cols = live.length
+      ? [["Market", ""], ["Level", "r"], ["1 day", "r opt"], ["1 week", "r"], ["1 month", "r opt"], ["Year to date", "r"], ["1 year", "r opt"], ["Unusual", "r"], ["Past year", "opt"]]
+      : [["Market", ""], ["Level", "r"], [`Since ${STATIC_MOVES.from}`, "r"], ["As of", "r"]];
+    cols.forEach(([t, c]) => { const th = h("th", c || null, t); th.scope = "col"; hr.append(th); });
+    thead.append(hr);
+    if (live.length) {
+      live.forEach((r) => {
+        const tr = h("tr"), z = zOk(r.z_w1), th = h("th", null, r.label);
+        th.scope = "row";
+        if (z != null && Math.abs(Number(z.toFixed(1))) >= 2) tr.className = "hot";   // same rounding as the cell shows
+        tr.append(th, h("td", "r", fmtLevel(r.key, r.kind, r.value)));
+        [["d1", "r opt"], ["w1", "r"], ["m1", "r opt"], ["ytd", "r"], ["y1", "r opt"]].forEach(([k, c]) => tr.append(h("td", c, fmtMove(r.kind, r[k]))));
+        tr.append(h("td", "r", z == null ? "n/a" : `${fx(z, 1)}σ`));
+        const sp = h("td", "opt");
+        sp.append(spark(r.spark));
+        tr.append(sp);
+        tb.append(tr);
+      });
+      const last = live.map((r) => r.date).sort().pop();
+      $("#mv-note").textContent = `FRED, latest prints through ${niceDate(last)}. Unusual is this week's change in standard deviations of every seven-day change over the past three years; rows at 2σ or more are highlighted. Yields and spreads move in basis points, volatility in points, prices in percent.`;
+    } else {
+      STATIC_MOVES.rows.forEach(([label, kind, a, b, date, fid]) => {
+        const tr = h("tr"), th = h("th", null, label);
+        th.scope = "row";
+        tr.append(th, h("td", "r", fmtLevel(fid, kind, b)), h("td", "r", fmtMove(kind, moveChange(kind, a, b))), h("td", "r", date));
+        tb.append(tr);
+      });
+      $("#mv-note").textContent = `Snapshot from FRED: the ${STATIC_MOVES.from} close against each series' latest close. The daily run replaces it with day, month, year-to-date and one-year changes and flags unusual moves.`;
+    }
+    tbl.replaceChildren(thead, tb);
+  }
+
+  function tileLive(label, value, note, date, maxAge) { const t = tile(label, value, note); t.classList.add("live"); t.prepend(liveBadge(date, maxAge)); return t; }
+  function renderInsurance() {
+    const tiles = $("#iv-tiles"), read = $("#iv-read");
+    if (!tiles || !read) return;
+    const v = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.latest ? LIVE.macro.vol.latest : null;
+    const okVol = (x) => x && fin(x.implied) && fin(x.realized) && fin(x.vrp) && isoOk(x.date);
+    const ndx = v && okVol(v.ndx) ? v.ndx : null, spx = v && okVol(v.spx) ? v.spx : null, term = v && v.term && fin(v.term.ratio) && isoOk(v.term.date) ? v.term : null;
+    const S = STATIC_VOL, signed = (x) => (x >= 0 ? "+" : MINUS) + fx(Math.abs(x), 1);
+    tiles.replaceChildren();
+    if (ndx) {
+      tiles.append(tileLive("VXN, Nasdaq-100 implied", fx(ndx.implied, 1), rankTxt(ndx.implied_rank10y) || "Points of annualized volatility.", ndx.date),
+        tileLive("Realized, 21 trading days", fx(ndx.realized, 1), "Nasdaq-100, close to close, annualized.", ndx.date),
+        tileLive("Premium: implied minus realized", signed(ndx.vrp), fin(ndx.vrp_median10y) ? `Ten-year median ${signed(ndx.vrp_median10y)} points.` : "", ndx.date));
+      if (spx) tiles.append(tileLive("VIX against S&P 500 realized", `${fx(spx.implied, 1)} vs ${fx(spx.realized, 1)}`, fin(spx.earned_mean5y) ? `Over five years, VIX averaged ${signed(spx.earned_mean5y)} points above what the next month delivered.` : "", spx.date));
+    } else {
+      tiles.append(tile("VXN, Nasdaq-100 implied", fx(S.vxn[0], 2), `${S.vxn[1]} close.`), tile("VIX, S&P 500 implied", fx(S.vix[0], 2), `${S.vix[1]} close.`),
+        tile("Realized and the premium", "Daily run", "Realized volatility needs price history; it fills in after the first run."));
+    }
+    const ratio = term ? term.ratio : S.vix[0] / S.vix3m[0];
+    tiles.append(term ? tileLive("VIX over 3-month VIX", fx(ratio, 2), `${fin(term.days_inverted_1y) ? term.days_inverted_1y : "n/a"} inverted days in the past year.`, term.date)
+      : tile("VIX over 3-month VIX", fx(ratio, 2), `${fx(S.vix[0], 2)} against ${fx(S.vix3m[0], 2)}, ${S.vix3m[1]}.`));
+    const rank = ndx && fin(ndx.implied_rank10y) ? ndx.implied_rank10y : null, flat = ratio >= 0.95 ? " The VIX curve is flattening: near-term fear is building." : "";
+    let cls = "", msg;
+    if (ratio >= 1) { cls = "warn"; msg = `Stress is priced now: the VIX curve is inverted at ${fx(ratio, 2)}. Monetize puts in stages; if you must buy, buy spreads.`; }
+    else if (ndx && rank != null && rank <= 1 / 3 && (!fin(ndx.vrp_median10y) || ndx.vrp <= ndx.vrp_median10y + 2)) { cls = "ok"; msg = `Insurance is cheap: VXN sits at the ${rankTxt(rank)} and only ${signed(ndx.vrp)} points over realized. Buy convexity: puts and put spreads, at longer tenors.${flat}`; }
+    else if (ndx && rank != null && rank >= 0.8) { cls = "warn"; msg = `Insurance is expensive: VXN sits at the ${rankTxt(rank)}. Prefer put spreads and collars to outright puts, and size from the budget, not from fear.${flat}`; }
+    else if (ndx) { msg = `Fairly priced: VXN at the ${rankTxt(rank) || "middle of its range"}, ${signed(ndx.vrp)} points over realized${fin(ndx.vrp_median10y) ? ` against a ten-year median of ${signed(ndx.vrp_median10y)}` : ""}.${flat}`; }
+    else { msg = (ratio >= 0.95 ? `The VIX curve is nearly flat at ${fx(ratio, 2)}: near-term fear is building, so protection is not cheap.` : `The VIX curve is in normal contango at ${fx(ratio, 2)}.`) + " Realized volatility and the premium fill in after the first daily run."; }
+    read.className = "sentence" + (cls ? " " + cls : "");
+    read.textContent = msg;
+    const H = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.history;
+    $("#iv-charts").hidden = !(H && ((H.ndx && hasSeries(H.ndx.implied)) || hasSeries(H.term)));
+    drawInsurance();
+  }
+  function drawInsurance() {
+    const H = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.history;
+    if (!H) return;
+    const box = $("#iv-chart");
+    if (box && box.clientWidth && H.ndx && hasSeries(H.ndx.implied)) {
+      const imp = seriesPts(H.ndx.implied), rea = seriesPts(H.ndx.realized);
+      legendLines($("#iv-legend"), [["var(--s1)", "Implied (VXN)"], ["var(--s2)", "Realized, 21 days"]]);
+      xyChart(box, { series: [{ name: "Implied (VXN)", color: "var(--s1)", pts: imp }, { name: "Realized", color: "var(--s2)", pts: rea, width: 1.5 }], yfmt: (x) => fx(x, 0),
+        xticks: yearTicks(imp[0][0], imp[imp.length - 1][0]), xfmt: dateLabel, height: 230, label: "Nasdaq-100 implied and realized volatility, weekly" });
+    }
+    const tb = $("#iv-term");
+    if (tb && tb.clientWidth && hasSeries(H.term)) {
+      const pts = seriesPts(H.term);
+      xyChart(tb, { series: [{ name: "VIX over 3-month VIX", color: "var(--s1)", pts }], hlines: [{ y: 1, color: "var(--bad)", label: "Inverted above 1" }], yfmt: (x) => fx(x, 2),
+        xticks: yearTicks(pts[0][0], pts[pts.length - 1][0]), xfmt: dateLabel, height: 230, label: "VIX over 3-month VIX, weekly" });
+    }
+  }
+
+  function renderLiquidity() {
+    const tiles = $("#liq-tiles"), read = $("#liq-read");
+    if (!tiles || !read) return;
+    const L = LIVE.macro && LIVE.macro.liquidity && LIVE.macro.liquidity.latest ? LIVE.macro.liquidity.latest : null;
+    const net = L && L.net && fin(L.net.value) && fin(L.net.fed_assets) && fin(L.net.tga) && fin(L.net.rrp) && isoOk(L.net.date) ? L.net : null;
+    const res = L && L.reserves && fin(L.reserves.value) && isoOk(L.reserves.date) ? L.reserves : null;
+    const fund = L && L.funding && fin(L.funding.gap_bp) && fin(L.funding.gap_5d_bp) && isoOk(L.funding.date) ? L.funding : null;
+    const S = STATIC_LIQ, T = (x) => "$" + fx(x, 2) + "T", B = (t) => "$" + fx(t * 1000, t < 0.01 ? 2 : 0) + "B";
+    const chg = (x, w) => (fin(x) ? `${x >= 0 ? "+" : MINUS}$${fx(Math.abs(x), 2)}T over ${w} weeks.` : "");
+    tiles.replaceChildren();
+    const wk = STALE_DAYS.weekly;
+    if (net) tiles.append(tileLive("Net liquidity", T(net.value), chg(net.chg_13w, 13), net.date, wk), tileLive("Fed assets", T(net.fed_assets), "Wednesday level.", net.date, wk),
+      tileLive("Treasury cash (TGA)", T(net.tga), "Week average.", net.date, wk), tileLive("Reverse repo", B(net.rrp), "Overnight facility, on the same Wednesday.", net.date, wk));
+    else tiles.append(tile("Net liquidity", T(S.assets[0] - S.tga[0] - S.rrp[0]), `${S.assets[1]}: Fed assets minus Treasury cash minus reverse repo.`), tile("Fed assets", T(S.assets[0]), `${S.assets[1]}, Wednesday level.`),
+      tile("Treasury cash (TGA)", T(S.tga[0]), `${S.tga[1]}, week average.`), tile("Reverse repo", B(S.rrp[0]), `${S.rrp[1]}: the facility is all but empty.`));
+    tiles.append(res ? tileLive("Bank reserves", T(res.value), chg(res.chg_13w, 13), res.date, wk) : tile("Bank reserves", T(S.reserves[0]), `${S.reserves[1]}, week average.`));
+    const gap = fund ? fund.gap_5d_bp : (S.sofr[0] - S.iorb[0]) * 100;
+    tiles.append(fund ? tileLive("SOFR minus IORB", bp(fund.gap_bp), `5-day average ${bp(fund.gap_5d_bp)}; 3-month high ${bp(fund.gap_max_3m_bp)}.`, fund.date)
+      : tile("SOFR minus IORB", bp(gap), `SOFR ${fx(S.sofr[0], 2)}% against IORB ${fx(S.iorb[0], 2)}%, ${S.sofr[1]}.`));
+    const rrp = net ? net.rrp : S.rrp[0], state = gap >= 10 ? "Stress" : gap > 0 ? "Tight" : "Ample";
+    read.className = "sentence " + (gap > 0 ? "warn" : "ok");
+    read.textContent = `${state}: repo trades ${gap > 0 ? "above" : "below"} the rate the Fed pays on reserves, ${bp(gap)}${fund ? " over five days" : ""}. `
+      + (rrp < 0.05 ? "The reverse repo facility is all but empty, so any further drain (a larger Treasury cash balance or a smaller Fed) comes out of bank reserves." : `Reverse repo still holds ${B(rrp)} that can drain before reserves do.`)
+      + (net && fin(net.chg_13w) ? ` Net liquidity ${net.chg_13w >= 0 ? "rose" : "fell"} ${T(Math.abs(net.chg_13w))} over 13 weeks.` : "");
+    const H = LIVE.macro && LIVE.macro.liquidity && LIVE.macro.liquidity.history;
+    $("#liq-charts").hidden = !(H && (hasSeries(H.net) || hasSeries(H.funding_gap_bp)));
+    drawLiquidity();
+  }
+  function drawLiquidity() {
+    const H = LIVE.macro && LIVE.macro.liquidity && LIVE.macro.liquidity.history;
+    if (!H) return;
+    const nb = $("#liq-net");
+    if (nb && nb.clientWidth && hasSeries(H.net)) {
+      const pts = seriesPts(H.net);
+      xyChart(nb, { series: [{ name: "Net liquidity", color: "var(--s1)", pts, endLabel: "$" + fx(pts[pts.length - 1][1], 2) + "T" }], yfmt: (x) => "$" + fx(x, 1) + "T",
+        xticks: yearTicks(pts[0][0], pts[pts.length - 1][0]), xfmt: dateLabel, height: 230, label: "Net liquidity in trillions of dollars, weekly" });
+    }
+    const gb = $("#liq-gap");
+    if (gb && gb.clientWidth && hasSeries(H.funding_gap_bp)) {
+      const pts = seriesPts(H.funding_gap_bp);
+      xyChart(gb, { series: [{ name: "SOFR minus IORB", color: "var(--s2)", pts, width: 1.25 }], zero: true, yfmt: (x) => fx(x, 0),
+        xticks: yearTicks(pts[0][0], pts[pts.length - 1][0]), xfmt: dateLabel, height: 230, label: "SOFR minus IORB in basis points, daily" });
+    }
+  }
+
+  // one sentence for the whole board: what is red, which playbook the signals argue for, and what this week did
+  const SIG_SHORT = { corr: "stock-bond correlation", real: "real yields", be: "breakevens", curve: "2s10s", hy: "high yield", ccc: "CCC credit", vix: "VIX",
+    vts: "VIX curve", oil: "Brent", capex: "capex funding", funding: "repo funding", fed: "Fed" };
+  function renderDeskRead(states) {
+    const box = $("#desk-read");
+    if (!box) return;
+    box.replaceChildren();
+    const red = states.filter((x) => x.level === 2), amber = states.filter((x) => x.level === 1), score = {};
+    states.forEach(({ sg, level }) => {
+      const pb = level != null && sg.pb ? sg.pb[level] : null;
+      if (pb) score[pb] = (score[pb] || 0) + (level === 2 ? 2 : 1);
+    });
+    const ranked = Object.entries(score).sort((a, b) => b[1] - a[1]);
+    const list = (xs) => xs.map(({ sg, level }) => `${SIG_SHORT[sg.id] || sg.name} (${sg.labels[level].toLowerCase()})`).join(", ");
+    const p1 = h("p");
+    p1.append(h("strong", null, `Desk read: ${red.length} red, ${amber.length} amber of ${states.length} signals. `));
+    if (red.length) p1.append(document.createTextNode(`Red: ${list(red)}. `));
+    if (amber.length) p1.append(document.createTextNode(`Amber: ${list(amber)}.`));
+    const p2 = h("p"), top = ranked[0], pb = top && PLAYBOOKS.find((x) => x.id === top[0]);
+    if (pb && top[1] >= 3) {
+      const a = h("a", null, `${pb.t} →`);
+      a.href = "#" + pb.id;
+      p2.append(h("strong", null, "Closest playbook: "), a, document.createTextNode(` (${pb.tag.toLowerCase()}).`));
+      const nx = ranked[1] && PLAYBOOKS.find((x) => x.id === ranked[1][0]);
+      if (nx && ranked[1][1] >= 2) p2.append(document.createTextNode(` Next: ${nx.t.toLowerCase()}.`));
+    } else p2.append(document.createTextNode("No playbook has enough signals behind it: run the base book with its standing hedges."));
+    box.append(p1, p2);
+    const wk = weekLine();
+    if (wk) box.append(h("p", "wk", wk));
   }
 
   /* =====================================================================================
@@ -1111,6 +1333,15 @@
       case "real": return L("real10");
       case "be": return L("breakeven10");
       case "hy": return L("hy_oas");
+      case "ccc": return L("ccc_oas");
+      case "vts": {
+        const t = m && m.vol && m.vol.latest && m.vol.latest.term;
+        return t && fin(t.ratio) && isoOk(t.date) ? { v: t.ratio, date: t.date, note: fin(t.vix) && fin(t.vix3m) ? `VIX ${fx(t.vix, 2)} against 3-month VIX ${fx(t.vix3m, 2)}` : null } : null;
+      }
+      case "funding": {
+        const f = m && m.liquidity && m.liquidity.latest && m.liquidity.latest.funding;
+        return f && fin(f.gap_5d_bp) && isoOk(f.date) ? { v: f.gap_5d_bp, date: f.date, note: fin(f.sofr) && fin(f.iorb) ? `5-day average; SOFR ${fx(f.sofr, 2)}% against IORB ${fx(f.iorb, 2)}%` : "5-day average" } : null;
+      }
       case "vix": return L("vix");
       case "oil": return L("brent");
       case "curve": { const c = curveNow(); return c && fin(c.by["10Y"]) && fin(c.by["2Y"]) ? { v: (c.by["10Y"] - c.by["2Y"]) * 100, date: c.date } : null; }
@@ -1129,18 +1360,21 @@
     if (sg.unit === "bp") return bp(v);
     if (sg.unit === "$") return "$" + fx(v, 2);
     if (sg.unit === "ratio") return pctPlain(v, 0) + " of cash flow";
+    if (sg.unit === "x") return fx(v, 2);
     return fx(v, 2);
   }
   function renderSignals() {
     const box = $("#signals-grid");
     box.replaceChildren();
     let nLive = 0;
+    const states = [];
     SIGNALS.forEach((sg) => {
       const lv = signalLive(sg), use = lv || sg.snap;
       let level = null, val = "Waiting for the daily run";
       if (sg.unit === "text") { if (use) { level = use.lvl; val = use.text; } }
       else if (use && fin(use.v)) { level = sg.level(use.v); val = fmtSignal(sg, use.v); }
       if (lv) nLive++;
+      states.push({ sg, level, live: !!lv });
       const card = h("article", "sig " + (level == null ? "lx" : "l" + level));
       card.id = "sig-" + sg.id;
       const top = h("div", "sig-top");
@@ -1151,7 +1385,7 @@
       if (level != null) card.append(h("span", "sig-act", sg.act[level]));
       const foot = h("div", "sig-foot");
       if (lv && sg.id === "capex") foot.append(h("span", "src", `SEC filings · quarter ended ${niceDate(lv.date)}`));
-      else if (lv) foot.append(liveBadge(lv.date));
+      else if (lv) foot.append(liveBadge(lv.date, STALE_DAYS[sg.id] || STALE_AFTER));
       else if (use && use.src) { const sp = h("span", "src"); sp.append(document.createTextNode("Snapshot · " + use.date + " · ")); const a = h("a", null, use.src[0]); a.href = use.src[1]; sp.append(a); foot.append(sp); }
       else foot.append(h("span", "src", "Live only: fills in after the first daily run"));
       if (sg.link) { const a = h("a", null, linkLabel(sg.link) + " →"); a.href = "#" + sg.link; a.className = "src"; foot.append(a); }
@@ -1161,6 +1395,7 @@
     $("#sig-sub").textContent = nLive
       ? `${nLive} of ${SIGNALS.length} signals read live from the daily run; the rest show the dated snapshot. Each has a rule and an action.`
       : `${SIGNALS.length} signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.`;
+    guard("Desk read", () => renderDeskRead(states), $("#desk-read"));
   }
 
   /* =====================================================================================
@@ -1172,7 +1407,9 @@
     const c = LIVE.macro && LIVE.macro.rates && LIVE.macro.rates.curves && LIVE.macro.rates.curves.latest;
     if (c && Array.isArray(c.points)) {
       const pts = c.points.filter((p) => fin(p.yield) && fin(p.years)).sort((a, b) => a.years - b.years);
-      if (pts.length >= 8 && pts[pts.length - 1].years >= 20) sets.push({ label: "FRED " + niceDate(c.date), years: pts.map((p) => p.years), y: pts.map((p) => p.yield / 100), live: true });
+      const years = pts.map((p) => p.years), y = pts.map((p) => p.yield / 100);
+      // a live curve joins only if it bootstraps to positive discount factors all the way out
+      if (pts.length >= 8 && years[years.length - 1] >= 20 && bootstrap(years, y).ok) sets.push({ label: "FRED " + niceDate(c.date), years, y, live: true });
     }
     return sets;
   }
@@ -1242,7 +1479,7 @@
     PLAYBOOKS.forEach((p) => {
       const c = h("article", "pb");
       c.id = p.id;
-      const sec = (title, node) => { const d = h("div"); d.append(h("h5", null, title), node); return d; };
+      const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (xs) => { const u = h("ul"); xs.forEach((x) => u.append(h("li", null, x))); return u; };
       c.append(h("span", "tagline", p.tag), h("h3", null, p.t), sec("Early signals", ul(p.sig)), sec("What usually moves", h("p", null, p.moves)),
         sec("First moves", ul(p.first)), sec("Avoid", h("p", null, p.avoid)), sec("All-clear", h("p", null, p.clear)));
@@ -1346,15 +1583,18 @@
       box.append(grp);
     });
   }
+  // stable deep links: a question's id comes from its words, so adding questions never renumbers old links
+  const faqId = (f) => "faq-" + slug(f.q).slice(0, 60).replace(/-+$/, "");
   function buildFAQ() {
     const box = $("#faq");
-    let group = null, n = 0;
-    FAQ.forEach((f) => {
-      if (f.g !== group) { group = f.g; box.append(h("h3", null, group)); }
-      const d = h("details");
-      d.id = "faq-" + ++n;
-      d.append(h("summary", null, f.q), h("p", null, f.a));
-      box.append(d);
+    [...new Set(FAQ.map((f) => f.g))].forEach((g) => {
+      box.append(h("h3", null, g));
+      FAQ.filter((f) => f.g === g).forEach((f) => {
+        const d = h("details");
+        d.id = faqId(f);
+        d.append(h("summary", null, f.q), h("p", null, f.a));
+        box.append(d);
+      });
     });
     $("#faq-title").parentElement.querySelector(".prose").textContent = `${FAQ.length} questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.`;
   }
@@ -1393,7 +1633,7 @@
     const c = h("article", "ep");
     c.id = "ep-" + e.key;
     c.dataset.key = e.key;
-    c.append(h("span", "kind", e.kind), h("h4", null, e.name), h("span", "when", e.when));
+    c.append(h("span", "kind", e.kind), h("h3", null, e.name), h("span", "when", e.when));
     const dl = h("dl");
     [["Stocks", e.eq], ["Bonds", e.bonds], ["What worked", e.worked]].forEach(([k, v]) => dl.append(h("dt", null, k), h("dd", null, v)));
     c.append(dl, h("p", "lesson", e.lesson));
@@ -1434,11 +1674,102 @@
     CHECKLISTS.forEach((c) => {
       const card = h("article", "ck"), ol = h("ol");
       c.items.forEach((x) => ol.append(h("li", null, x)));
-      card.append(h("h4", null, c.t), ol);
+      card.append(h("h3", null, c.t), ol);
       box.append(card);
     });
   }
   function buildChangelog() { fillTable($("#changelog"), ["Version", "Date", "What changed"], CHANGELOG, 3); }
+
+  /* ---------- numbers to know and worked examples: the page's own math, shown step by step ---------- */
+  function vixNow() {
+    const lv = LIVE.macro && LIVE.macro.rates && LIVE.macro.rates.levels && LIVE.macro.rates.levels.vix;
+    return lv && fin(lv.value) && isoOk(lv.date) ? { v: lv.value, date: niceDate(lv.date) } : { v: STATIC_VOL.vix[0], date: STATIC_VOL.vix[1] };
+  }
+  function curveNowSet() { const sets = curveSets(); return sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 19") || sets[sets.length - 1]; }
+  function curveYield(tenor) { const set = curveNowSet(); return parAt(set.years, set.y, { "3M": 0.25, "2Y": 2, "10Y": 10, "30Y": 30 }[tenor]); }
+  function examples() {
+    const set = curveNowSet(), on = set.label, y = (t) => parAt(set.years, set.y, t), repo = y(0.25), out = [];
+    const vxl = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.latest && LIVE.macro.vol.latest.ndx;
+    const vxn = vxl && fin(vxl.implied) && isoOk(vxl.date) ? { v: vxl.implied, d: niceDate(vxl.date) } : { v: STATIC_VOL.vxn[0], d: STATIC_VOL.vxn[1] };
+    const lat = LIVE.macro && LIVE.macro.latest;
+    const ndx = lat && fin(lat.NASDAQ100) ? { v: lat.NASDAQ100, d: niceDate(lat.NASDAQ100_date || lat.as_of) } : { v: 29529.34, d: "Oct 19" };
+    {
+      const yy = y(10), dc = durCvx(yy, 10, yy), dv = dc.dur * 1e6 * 1e-4;
+      out.push({ id: "dv01", q: "What is a basis point worth on $1 million of 10-year notes?", link: ["bc-title", "Bond calculator"],
+        steps: [[`10-year par yield, ${on}`, fx(yy * 100, 2) + "%"], ["Modified duration of a par bond", fx(dc.dur, 2) + " years"], ["DV01 = duration × $1,000,000 × 0.0001", money(dv, 0)]],
+        a: `About ${money(dv, 0)} per basis point, so a 10bp move is about ${money(Math.round(dv) * 10, 0)}.` });
+    }
+    {
+      const yy = y(30), up = longBondReturn(yy, 100, 15.5), dn = longBondReturn(yy, -100, 15.5);
+      out.push({ id: "tlt100", q: "What does a 100bp rise in long yields do to TLT?", link: ["hedge", "Hedge lab"],
+        steps: [["Duration alone: −15.5 × 1%", pct(-0.155, 1)], [`Exact repricing of a TLT-like bond from ${fx(yy * 100, 2)}%`, pct(up, 2)], ["The same bond after a 100bp fall", pct(dn, 2)]],
+        a: `About ${pct(up, 1)}. Convexity makes the loss smaller than duration alone says and the gain larger: ${pct(dn, 1)} for a 100bp fall.` });
+    }
+    {
+      const f = futuresDV01(set.years, set.y, "ZN"), dv = 1e6 * 15.5 * 1e-4, n = dv / f.dv01;
+      out.push({ id: "zn", q: "How many 10-year futures replace $1 million of TLT?", link: ["fut-title", "Futures hedge"],
+        steps: [["TLT DV01 = $1,000,000 × 15.5 × 0.0001", money(dv, 0)], [`ZN: cheapest to deliver ${fx(f.ctdYears, 1)} years, conversion factor ${fx(f.cf, 4)}`, money(f.dv01, 2) + " a contract"], ["Contracts = TLT DV01 ÷ ZN DV01", fx(n, 1)]],
+        a: `About ${Math.round(n)} ZN contracts carry the rate risk of $1 million of TLT, for margin instead of cash.` });
+    }
+    {
+      const usd = 1e6 * 1.15 * 0.5, per = ndx.v * 2, n = usd / per;
+      out.push({ id: "mnq", q: "How many micro Nasdaq futures take half the beta off a $1 million book?", link: ["fut-title", "Futures hedge"],
+        steps: [["Beta dollars = $1,000,000 × 1.15 beta × 50%", money(usd, 0)], [`One MNQ = Nasdaq-100 at ${Math.round(ndx.v).toLocaleString("en-US")} (${ndx.d}) × $2`, money(per, 0)], ["Contracts = beta dollars ÷ notional per contract", fx(n, 1)]],
+        a: `Sell about ${Math.round(n)} MNQ; one NQ equals ten. Re-size when beta or the index moves.` });
+    }
+    {
+      const v = (vxn.v + 3) / 100, T = 91 / 365, o = bs(100, 90, T, repo, 0.006, v, "put"), cost = o.price / 100;
+      out.push({ id: "put90", q: "What does a 3-month 90% put on the Nasdaq-100 cost?", link: ["bs-title", "Option pricer"],
+        steps: [[`VXN ${fx(vxn.v, 2)} (${vxn.d}) plus about 3 points of skew at a 10% out-of-the-money strike`, fx(v * 100, 1) + "%"], [`Black-Scholes, 91 days, rate ${fx(repo * 100, 2)}%, dividend yield 0.6%`, pctPlain(cost, 2) + " of spot"], ["Rolled four times a year", pctPlain(cost * 365 / 91, 1) + " a year"]],
+        a: `About ${pctPlain(cost, 2)} of the position for three months, ${pctPlain(cost * 365 / 91, 1)} a year if rolled: why the desk reaches for put spreads when implied volatility is high.` });
+    }
+    {
+      const c = carryRoll(set.years, set.y, 10, repo);
+      out.push({ id: "carry10", q: "What does a financed 10-year earn in a year if the curve does not move?", link: ["fw-title", "Carry and roll-down"],
+        steps: [[`Carry: ${fx(c.coupon * 100, 2)}% coupon minus the ${fx(repo * 100, 2)}% 3-month bill`, pct(c.carry, 2)], ["Roll-down as it ages into a 9-year", pct(c.roll, 2)], ["One year in total", pct(c.total, 2)], ["Yield rise that uses it up", bp(c.breakevenBp)]],
+        a: `${pct(c.total, 2)} over the year, and the position survives a ${Math.round(c.breakevenBp)}bp rise in the 10-year yield.` });
+    }
+    {
+      const c = carryRoll(set.years, set.y, 30, repo);
+      out.push({ id: "carry30", q: "How far can the 30-year yield rise before a year of carry is gone?", link: ["fw-title", "Carry and roll-down"],
+        steps: [[`Carry: ${fx(c.coupon * 100, 2)}% coupon minus ${fx(repo * 100, 2)}% financing`, pct(c.carry, 2)], ["Roll-down into the 29-year point", pct(c.roll, 2)], ["Duration after a year", fx(c.durH, 1) + " years"], ["Breakeven: the rise that zeroes the year, solved exactly", bp(c.breakevenBp)]],
+        a: `Only about ${Math.round(c.breakevenBp)}bp: the long end carries little cushion for its risk${c.roll < 0 ? ", because the 20-year kink makes it roll up the curve instead of down" : ""}.` });
+    }
+    {
+      const sig = 0.32, L = 1.5, need = L * sig * sig;
+      out.push({ id: "kelly", q: "What edge would justify running a 32%-volatility book at 1.5x?", link: ["size", "Sizing lab"],
+        steps: [["Kelly leverage = edge ÷ variance, so full Kelly needs edge = 1.5 × 0.32²", pctPlain(need, 1) + " a year"], ["Half Kelly needs twice that", pctPlain(need * 2, 1) + " a year"], ["Quarter Kelly needs four times", pctPlain(need * 4, 1) + " a year"]],
+        a: `About ${pctPlain(need * 4, 0)} a year over cash at quarter Kelly. No honest forecast clears that, so the risk limits, not the forecast, set the size.` });
+    }
+    return out;
+  }
+  function buildExamples() {
+    const box = $("#examples"), list = examples();
+    box.replaceChildren();
+    list.forEach((x) => {
+      const c = h("article", "wx"), ol = h("ol", "wx-steps"), a = h("a", "src", x.link[1] + " →");
+      c.id = "wx-" + x.id;
+      x.steps.forEach(([k, v]) => { const li = h("li"); li.append(h("span", null, k), h("b", null, v)); ol.append(li); });
+      a.href = "#" + x.link[0];
+      c.append(h("h3", null, x.q), ol, h("p", "wx-ans", x.a), a);
+      box.append(c);
+    });
+    $("#wx-sub").textContent = `${list.length} questions the tools answer, worked step by step with the page's own math on the ${curveNowSet().label} curve.`;
+  }
+  function buildRules() {
+    const box = $("#rules");
+    box.replaceChildren();
+    RULES.forEach((r) => {
+      const c = h("article", "nk");
+      c.id = "nk-" + slug(r.t);
+      c.append(h("h3", null, r.t), h("p", null, r.r));
+      let now = "";
+      try { now = r.v ? r.v() : ""; } catch (e) { now = ""; }
+      if (now) c.append(h("p", "nk-now", now));
+      if (r.at) { const a = h("a", "src", "Where it is used →"); a.href = "#" + r.at; c.append(a); }
+      box.append(c);
+    });
+  }
 
   /* =====================================================================================
      ENGINE: system status from data/status.json
@@ -1541,11 +1872,13 @@
     LENSES.forEach((L) => add(L.n, L.idea, "Lens", "lens-" + slug(L.n), L.read));
     EPISODES.forEach((e) => add(e.name, `${e.when} · ${e.lesson}`, "Episode", "ep-" + e.key, `${e.kind} ${e.worked}`));
     PLAYBOOKS.forEach((p) => add(`${p.t} playbook`, p.moves, "Playbook", p.id, p.sig.join(" ")));
-    FAQ.forEach((f, i) => add(f.q, f.a, "Question", "faq-" + (i + 1), f.g));
+    FAQ.forEach((f) => add(f.q, f.a, "Question", faqId(f), f.g));
+    RULES.forEach((r) => add(r.t, r.r, "Rule", "nk-" + slug(r.t)));
+    examples().forEach((x) => add(x.q, x.a, "Example", "wx-" + x.id));
     MATRIX.forEach((m) => add(`${m.h} as a hedge`, m.note, "Hedge", "mx-title", m.sub));
     SIGNALS.forEach((sg) => add(`${sg.name} signal`, sg.rule, "Signal", "sig-" + sg.id));
   }
-  const KIND_RANK = { Desk: 9, Tool: 8, Term: 7, Signal: 6, Playbook: 6, Section: 5, Thesis: 5, Hedge: 4, Security: 4, Episode: 3, Question: 3, Lens: 2 };
+  const KIND_RANK = { Desk: 9, Tool: 8, Term: 7, Signal: 6, Playbook: 6, Section: 5, Thesis: 5, Rule: 5, Example: 5, Hedge: 4, Security: 4, Episode: 3, Question: 3, Lens: 2 };
   function searchIndex(q) {
     const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
     if (!terms.length) return INDEX.filter((x) => x.kind === "Desk" || x.kind === "Tool");
@@ -1651,8 +1984,8 @@
   const VIEWS = ["desk", "rates", "options", "hedges", "securities", "insurers", "theses", "lenses", "engine", "appendix"];
   const RENDER = {
     desk: () => { guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
-    rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); },
-    options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); },
+    rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
+    options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
     securities: () => guard("Risk drivers", renderDrivers, $("#drv-chart")),
     insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {},
@@ -1686,10 +2019,10 @@
     } else if (scroll) window.scrollTo(0, 0);
   }
 
-  [["Key levels", () => renderLevels(null), "#levels"], ["Signals", renderSignals, "#signals-grid"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
+  [["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
-   ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
+   ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
    ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Navigation", wireNavigation]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
 
@@ -1734,6 +2067,11 @@
         guard("Engine readout", () => renderMacro(m), $("#macro-body"));
         guard("Key levels", () => renderLevels(m), $("#levels"));
         guard("Live rates", () => buildRatesLive(m), $("#rates-live"));
+        guard("What moved", renderMoves, $("#mv-table"));
+        guard("Insurance", renderInsurance, $("#iv-tiles"));
+        guard("Liquidity", renderLiquidity, $("#liq-tiles"));
+        guard("Numbers to know", buildRules, $("#rules"));
+        guard("Worked examples", buildExamples, $("#examples"));
         guard("Forward dates", buildForwardDates);
         guard("Data dictionary", buildDict);
         guard("Episode atlas", buildEpisodes, $("#ep-grid"));

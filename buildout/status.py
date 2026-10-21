@@ -75,6 +75,16 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
         failed = macro.get("failed_series") or {}
         check("Every FRED series downloaded", not failed, ", ".join(sorted(failed)) if failed else "")
         check("Episode atlas computed", len(macro.get("episodes") or []) >= 10, f"{len(macro.get('episodes') or [])} episodes")
+        # unit checks: a units mix-up (millions read as billions) shows up as an impossible number
+        nv = _get(macro, "vol.latest.ndx.implied")
+        if nv is not None:
+            check("Nasdaq-100 implied volatility is plausible (1 to 150 points)", isinstance(nv, (int, float)) and 1 <= nv <= 150, f"{nv}")
+        nl = _get(macro, "liquidity.latest.net.value")
+        if nl is not None:
+            check("Net liquidity is plausible ($1T to $15T)", isinstance(nl, (int, float)) and 1 <= nl <= 15, f"{nl}")
+        gap = _get(macro, "liquidity.latest.funding.gap_bp")
+        if gap is not None:
+            check("SOFR minus IORB is within 100bp", isinstance(gap, (int, float)) and abs(gap) <= 100, f"{gap}")
 
     report = load("report.json", "summary.as_of")
     if report is not None:

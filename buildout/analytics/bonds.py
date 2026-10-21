@@ -31,8 +31,14 @@ def shock_return(y0: float, dy: float, maturity: float, coupon: float, horizon_y
 
 
 def calibrate_coupon(y: float, maturity: float, target_duration: float, freq: int = 2) -> float:
-    """Coupon that gives a representative bond the target modified duration (e.g. TLT's ~15.5y)."""
-    lo, hi = 0.0, 0.15
+    """Coupon that gives a representative bond the target modified duration (e.g. TLT's ~15.5y).
+
+    Duration falls as the coupon rises, from the zero-coupon bond's down to a 100% coupon's. A target outside
+    that range has no answer, so the result is NaN rather than the nearest wrong bond.
+    """
+    lo, hi = 0.0, 1.0
+    if not (duration_convexity(y, maturity, hi, freq)[0] <= target_duration <= duration_convexity(y, maturity, lo, freq)[0]):
+        return float("nan")
     for _ in range(80):
         mid = (lo + hi) / 2
         d, _ = duration_convexity(y, maturity, mid, freq)

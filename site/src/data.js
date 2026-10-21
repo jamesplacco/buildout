@@ -11,7 +11,10 @@
     tipswatch: ["Tipswatch", "https://tipswatch.com/2026/09/17/10-year-tips-reopening-gets-real-yield-of-2-653-highest-in-nearly-18-years/"],
     roic: ["ROIC (Reuters)", "https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026"],
     fred: ["FRED", "https://fred.stlouisfed.org/series/NASDAQ100"],
+    fedpolicy: ["Federal Reserve", "https://federalreserve.gov/monetarypolicy/policy-normalization.htm"],
+    macrotrends: ["Macrotrends", "https://www.macrotrends.net/3094/ccc-lower-high-yield-spread"],
   };
+  const F = (id) => ["FRED", "https://fred.stlouisfed.org/series/" + id];
 
   const CURVES = {
     tenors: ["1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"],
@@ -27,25 +30,50 @@
 
   const LEVELS = [
     { label: "Fed funds target", value: "3.75–4.00%", note: "Hiked 25bp on Sep 16. October hike odds about 33% on Oct 16, up from 19% on Oct 8.", src: [SRC.fxstreet, SRC.roic] },
-    { label: "Nasdaq-100", value: "29,529", note: "Oct 19 close.", src: SRC.fred, live: ["latest", "NASDAQ100", "n0"] },
-    { label: "VIX", value: "21.41", note: "Oct 16; up from 16.44, a four-month high.", src: SRC.roic, live: ["level", "vix", "n2"] },
+    { label: "Nasdaq-100", value: "29,529", note: "Oct 19 close; 30,569 on Oct 13.", src: SRC.fred, live: ["latest", "NASDAQ100", "n0"], fid: "NASDAQ100" },
+    { label: "VIX", value: "19.99", note: "Oct 16 close; 16.46 the day before.", src: F("VIXCLS"), live: ["level", "vix", "n2"], fid: "VIXCLS" },
+    { label: "Nasdaq-100 volatility", value: "25.56", note: "VXN, Oct 19; 21.14 on Oct 13.", src: F("VXNCLS"), live: ["level", "vxn", "n2"], fid: "VXNCLS" },
     { label: "3-month bill", value: "4.27%", note: "Oct 19 close.", src: SRC.treasury, live: ["curve", "3M"] },
     { label: "2-year Treasury", value: "4.77%", note: "Oct 19; up 130bp since Jan 2.", src: SRC.treasury, live: ["curve", "2Y"] },
     { label: "10-year Treasury", value: "5.15%", note: "Oct 19; up 96bp since Jan 2.", src: SRC.treasury, live: ["curve", "10Y"] },
     { label: "30-year Treasury", value: "5.48%", note: "Oct 19; 5.66% on Oct 5.", src: SRC.treasury, live: ["curve", "30Y"] },
-    { label: "10-year real yield", value: "2.91%", note: "TIPS, Oct 7. Near an 18-year high.", src: SRC.macroradar, live: ["level", "real10"] },
-    { label: "10-year breakeven", value: "2.36%", note: "Oct 7. Little changed since spring.", src: SRC.macroradar, live: ["level", "breakeven10"] },
+    { label: "10-year real yield", value: "2.74%", note: "TIPS, Oct 16; 2.91% on Oct 7, near an 18-year high.", src: [F("DFII10"), SRC.macroradar], live: ["level", "real10"], fid: "DFII10" },
+    { label: "10-year breakeven", value: "2.35%", note: "Oct 19; 2.46% on Apr 29.", src: F("T10YIE"), live: ["level", "breakeven10"], fid: "T10YIE" },
+    { label: "High-yield spread", value: "3.29%", note: "Oct 19; 3.16% on Oct 13.", src: F("BAMLH0A0HYM2"), live: ["level", "hy_oas"], fid: "BAMLH0A0HYM2" },
+    { label: "CCC spread", value: "12.97%", note: "Oct 16; 8.53% in July 2025. The weakest borrowers first.", src: [F("BAMLH0A3HYC"), SRC.macrotrends], live: ["level", "ccc_oas"], fid: "BAMLH0A3HYC" },
     { label: "Japan 30-year", value: "4.11%", note: "Oct 8 auction average yield.", src: SRC.mof },
-    { label: "Brent crude", value: "$125.44", note: "Oct 7; WTI $96.24. Iran war since Feb 28.", src: SRC.macroradar, live: ["level", "brent", "$"] },
+    { label: "Brent crude", value: "$126.55", note: "Oct 14; WTI $101.91. Iran war since Feb 28.", src: F("DCOILBRENTEU"), live: ["level", "brent", "$"], fid: "DCOILBRENTEU" },
     { label: "Gold", value: "$4,182", note: "Oct 13; up 2.6% from a year earlier.", src: SRC.fortune },
-    { label: "Bitcoin", value: "$82,046", note: "Oct 16; down 0.6% on the week.", src: SRC.rio },
-    { label: "USD/JPY", value: "157.81", note: "Oct 5.", src: SRC.macroradar },
+    { label: "Bitcoin", value: "$81,804", note: "Oct 19, Coinbase.", src: F("CBBTCUSD"), live: ["level", "bitcoin", "$0"], fid: "CBBTCUSD" },
+    { label: "USD/JPY", value: "158.00", note: "Oct 16; yen per dollar.", src: F("DEXJPUS"), live: ["level", "usdjpy", "n2"], fid: "DEXJPUS" },
   ];
   const LIVE_EXTRA = [
-    ["hy_oas", "High-yield spread", (v) => fx(v, 2) + "%"],
-    ["ig_oas", "Investment-grade spread", (v) => fx(v, 2) + "%"], ["term_premium10", "10-year term premium", (v) => fx(v, 2) + "%"],
-    ["dollar_broad", "Broad dollar index", (v) => fx(v, 1)],
+    ["ig_oas", "Investment-grade spread", (v) => fx(v, 2) + "%", "BAMLC0A0CM"], ["term_premium10", "10-year term premium", (v) => fx(v, 2) + "%", "THREEFYTP10"],
+    ["fwd5y5y", "5y5y inflation expectation", (v) => fx(v, 2) + "%", "T5YIFR"], ["dollar_broad", "Broad dollar index", (v) => fx(v, 1), "DTWEXBGS"],
   ];
+
+  // What moved this week, from FRED: the Oct 13 close against each series' latest close (dates per row).
+  // [label, kind, from, to, to-date, FRED id, lead]; the daily run replaces it with day to one-year changes and z-scores.
+  const STATIC_MOVES = { from: "Oct 13", rows: [
+    ["Nasdaq-100", "pct", 30569.48, 29529.34, "Oct 19", "NASDAQ100", true],
+    ["S&P 500", "pct", 7805.45, 7690.73, "Oct 19", "SP500"],
+    ["2-year Treasury", "bp", 4.79, 4.74, "Oct 16", "DGS2"],
+    ["10-year Treasury", "bp", 5.21, 5.15, "Oct 19", "DGS10"],
+    ["30-year Treasury", "bp", 5.56, 5.43, "Oct 16", "DGS30", true],
+    ["10-year real yield", "bp", 2.88, 2.74, "Oct 16", "DFII10"],
+    ["10-year breakeven", "bp", 2.33, 2.35, "Oct 19", "T10YIE"],
+    ["Investment-grade spread", "bp", 0.83, 0.87, "Oct 19", "BAMLC0A0CM"],
+    ["High-yield spread", "bp", 3.16, 3.29, "Oct 19", "BAMLH0A0HYM2"],
+    ["CCC spread", "bp", 12.67, 12.97, "Oct 16", "BAMLH0A3HYC", true],
+    ["VIX", "pts", 15.27, 19.99, "Oct 16", "VIXCLS", true],
+    ["Nasdaq-100 volatility (VXN)", "pts", 21.14, 25.56, "Oct 19", "VXNCLS"],
+    ["Brent crude", "pct", 125.78, 126.55, "Oct 14", "DCOILBRENTEU"],
+    ["Broad dollar", "pct", 121.4433, 121.4048, "Oct 16", "DTWEXBGS"],
+    ["Yen per dollar", "pct", 158.36, 158.0, "Oct 16", "DEXJPUS"],
+  ] };
+  // insurance and plumbing snapshot, from FRED (values in index points, percent, and $ trillions)
+  const STATIC_VOL = { vxn: [25.56, "Oct 19"], vix: [19.99, "Oct 16"], vix3m: [20.5, "Oct 16"] };
+  const STATIC_LIQ = { assets: [6.755639, "Oct 14"], tga: [0.883373, "Oct 14"], rrp: [0.00033, "Oct 19"], reserves: [3.02214, "Oct 14"], sofr: [3.88, "Oct 16"], iorb: [3.9, "Oct 16"] };
 
   // the model book (config.toml), used to weight the engine's betas in the futures calculator
   const BOOK = { MSFT: 0.14, AMZN: 0.14, GOOGL: 0.14, NVDA: 0.14, META: 0.12, TSLA: 0.10, AVGO: 0.08, SPCX: 0.08, ORCL: 0.06 };

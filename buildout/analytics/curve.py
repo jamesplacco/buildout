@@ -72,7 +72,12 @@ def par_at(years: list[float], yields: list[float], t: float) -> float:
 class ZeroCurve:
     grid: np.ndarray      # 0.5, 1.0, ... years
     df: np.ndarray        # discount factors
-    zero: np.ndarray      # zero rates, semiannual compounding
+    zero: np.ndarray      # zero rates, semiannual compounding (NaN past valid_to)
+    valid_to: float = 30.0  # last maturity with a positive discount factor
+
+    @property
+    def ok(self) -> bool:
+        return bool(np.all(self.df > 0))
 
 
 def bootstrap(years: list[float], yields: list[float], max_t: float = 30.0) -> ZeroCurve:
@@ -86,12 +91,20 @@ def bootstrap(years: list[float], yields: list[float], max_t: float = 30.0) -> Z
         df.append(d)
         total += d
     grid_a, df_a = np.array(grid), np.array(df)
-    return ZeroCurve(grid_a, df_a, 2 * (df_a ** (-1 / (2 * grid_a)) - 1))
+    # a kinked par curve (a bad print can do it) implies a non-positive discount factor: no zero curve past it
+    bad = np.flatnonzero(~(df_a > 0))
+    first = int(bad[0]) if len(bad) else len(df_a)
+    zero = np.full(len(df_a), np.nan)
+    with np.errstate(invalid="ignore"):
+        zero[:first] = 2 * (df_a[:first] ** (-1 / (2 * grid_a[:first])) - 1)
+    return ZeroCurve(grid_a, df_a, zero, float(grid_a[first - 1]) if first > 0 else 0.0)
 
 
 def df_at(curve: ZeroCurve, t: float) -> float:
     if t <= 0:
         return 1.0
+    if t > curve.valid_to + 1e-9:
+        return float("nan")
     i = int(np.floor(t * 2 + 0.5)) - 1
     if 0 <= i < len(curve.grid) and abs(curve.grid[i] - t) < 1e-9:
         return float(curve.df[i])

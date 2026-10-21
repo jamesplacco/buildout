@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from . import marketstate
 from .analytics import hedge, regime
 from .analytics.bonds import constant_maturity_returns
 from .jsonout import series
@@ -17,8 +18,13 @@ CURVE = [("1M", "DGS1MO", 1 / 12), ("3M", "DGS3MO", 0.25), ("6M", "DGS6MO", 0.5)
          ("10Y", "DGS10", 10.0), ("20Y", "DGS20", 20.0), ("30Y", "DGS30", 30.0)]
 MARKETS = {"real10": "DFII10", "breakeven10": "T10YIE", "term_premium10": "THREEFYTP10", "ig_oas": "BAMLC0A0CM",
            "hy_oas": "BAMLH0A0HYM2", "vix": "VIXCLS", "dollar_broad": "DTWEXBGS", "brent": "DCOILBRENTEU",
-           "wti": "DCOILWTICO"}
-FRED_IDS = ["NASDAQ100"] + [c for _, c, _ in CURVE] + list(MARKETS.values())
+           "wti": "DCOILWTICO", "breakeven5": "T5YIE", "fwd5y5y": "T5YIFR", "bbb_oas": "BAMLC0A4CBBB",
+           "ccc_oas": "BAMLH0A3HYC"}
+# latest level only (no history in the payload): tiles and signals
+LEVELS_ONLY = {"vxn": "VXNCLS", "vix3m": "VXVCLS", "sp500": "SP500", "usdjpy": "DEXJPUS", "bitcoin": "CBBTCUSD",
+               "sofr": "SOFR", "iorb": "IORB"}
+FRED_IDS = list(dict.fromkeys(["NASDAQ100"] + [c for _, c, _ in CURVE] + list(MARKETS.values())
+                              + list(LEVELS_ONLY.values()) + marketstate.ids()))
 REQUIRED = ["NASDAQ100", "DGS20"]
 # Stress episodes: (key, name, kind, search window). The code finds the Nasdaq-100 peak and trough inside
 # each window, so the windows only need to bracket the event. kind: growth | inflation | liquidity | credit | rates | mixed
@@ -82,7 +88,7 @@ def rates_block(fred: pd.DataFrame, since: str = "2000-01-01") -> dict:
             spreads[name] = series((fred[a] - fred[b]).dropna().loc[since:] * 100)
     history = {k: series(fred[c].dropna().loc[since:]) for k, c in MARKETS.items() if c in fred and fred[c].notna().any()}
     levels = {}
-    for k, c in MARKETS.items():
+    for k, c in {**MARKETS, **LEVELS_ONLY}.items():
         v, d = _last(fred, c)
         if v is not None:
             levels[k] = {"value": v, "date": d}
@@ -209,6 +215,9 @@ def analyze_macro(fred: pd.DataFrame, halflife: int = 63, q: float = 0.05, since
         "policies_full": hedge.evaluate_policies(eq, bd, pol, q),
         "policies_since_2022": hedge.evaluate_policies(eq.loc[recent], bd.loc[recent], pol.loc[recent], q),
         "rates": rates_block(fred),
+        "moves": marketstate.moves_block(fred),
+        "vol": marketstate.vol_block(fred),
+        "liquidity": marketstate.liquidity_block(fred),
         "episodes": episode_atlas(fred),
         "coverage": coverage(fred),
         "failed_series": failed or {},

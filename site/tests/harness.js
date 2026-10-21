@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const src = fs.readFileSync(path.join(__dirname, "..", "src", "math.js"), "utf8");
-const M = new Function(`"use strict";\n${src}\nreturn { bondPrice, durCvx, longBondReturn, billDur, bs, impliedVol, parAt, bootstrap, forwardRate, carryRoll, futuresDV01, ncdf, pct, bp, money, niceDate, weekdaysSince };`)();
+const M = new Function(`"use strict";\n${src}\nreturn { bondPrice, durCvx, longBondReturn, billDur, bs, impliedVol, parAt, bootstrap, dfAt, forwardRate, carryRoll, futuresDV01, ncdf, calibrateCoupon, pct, bp, money, niceDate, weekdaysSince };`)();
 const cases = JSON.parse(fs.readFileSync(0, "utf8"));
 const out = cases.map((c) => {
   switch (c.fn) {
@@ -18,6 +18,8 @@ const out = cases.map((c) => {
         carry: c.carry.map((m) => { const r = M.carryRoll(c.years, c.yields, m, c.repo); return [r.carry, r.roll, r.total, r.durH, r.breakevenBp]; }),
         fut: ["ZN", "TN", "ZB", "UB"].map((k) => { const r = M.futuresDV01(c.years, c.yields, k); return [r.cf, r.ctdDV01, r.dv01]; }) };
     }
+    case "calib": { const cpn = M.calibrateCoupon(c.y, c.mat, c.D); return Number.isNaN(cpn) ? null : cpn; }
+    case "boot": { const z = M.bootstrap(c.years, c.yields); return { ok: z.ok, validTo: z.validTo, df30: Number.isNaN(M.dfAt(z, 30)) ? null : M.dfAt(z, 30) }; }
     case "fmt": return [M.pct(c.v, 1), M.bp(c.b), M.money(c.m, 0), M.niceDate(c.iso)];
     case "weekdays": return M.weekdaysSince(c.iso, new Date(c.now));
     default: throw new Error("unknown case " + c.fn);

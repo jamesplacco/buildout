@@ -14,8 +14,14 @@
   function svg(tag, attrs, parent) {
     const e = document.createElementNS(NS, tag);
     for (const k in attrs) e.setAttribute(k, attrs[k]);
+    // a labelled shape needs a role for assistive tech to read the label (a focusable data point is an image)
+    if (tag !== "svg" && attrs && attrs["aria-label"] && !attrs.role) e.setAttribute("role", "img");
     if (parent) parent.appendChild(e);
     return e;
+  }
+  // a chart whose points can take focus is a group of images, not one image (an image hides its children)
+  function fixChartRoles(root = document) {
+    root.querySelectorAll('svg[role="img"]').forEach((s) => { if (s.querySelector("[tabindex]")) s.setAttribute("role", "group"); });
   }
   function text(parent, x, y, str, cls, anchor = "start", extra = {}) {
     const t = svg("text", Object.assign({ x, y, class: cls, "text-anchor": anchor }, extra), parent);

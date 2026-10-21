@@ -50,7 +50,7 @@ def test_hash_targets_resolve():
     defined = set(re.findall(r'\bid="([\w-]+)"', body))
     views = set(re.findall(r'data-view="([\w-]+)"', body))
     for target in re.findall(r'href="#([\w-]+)"', body):
-        assert target in views or target in defined or re.fullmatch(r"(t\d|g-[\w-]+|faq-\d+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+)", target), target
+        assert target in views or target in defined or re.fullmatch(r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+)", target), target
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -189,3 +189,35 @@ def test_pchip_matches_scipy():
     ref = PchipInterpolator(CURVE_YEARS, y)
     for t in [0.1, 0.3, 0.75, 1.5, 2.5, 4, 6, 8.5, 12, 15, 19.9, 22, 27.5, 29.9]:
         assert curve.par_at(CURVE_YEARS, y, t) == pytest.approx(float(ref(t)), abs=1e-15)
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_impossible_bonds_and_curves_are_rejected_like_the_engine():
+    """An unreachable duration target and a kinked par curve fail the same way in both languages."""
+    cases = [{"fn": "calib", "y": y, "mat": m, "D": D} for y in (0.01, 0.05, 0.12) for m in (10, 25.8) for D in (2.0, 8.0, 15.5, 40.0)]
+    kinked = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.002, 0.15]
+    good = [y / 100 for y in OCT19]
+    cases += [{"fn": "boot", "years": CURVE_YEARS, "yields": kinked}, {"fn": "boot", "years": CURVE_YEARS, "yields": good}]
+    got = _node(cases)
+    for c, g in zip(cases[:-2], got[:-2]):
+        want = bonds.calibrate_coupon(c["y"], c["mat"], c["D"])
+        if math.isnan(want):
+            assert g is None, c
+        else:
+            assert g == pytest.approx(want, abs=1e-9), c
+    for c, g in zip(cases[-2:], got[-2:]):
+        z = curve.bootstrap(CURVE_YEARS, c["yields"])
+        assert g["ok"] == z.ok and g["validTo"] == pytest.approx(z.valid_to)
+        d30 = curve.df_at(z, 30.0)
+        assert (g["df30"] is None) == math.isnan(d30)
+    assert got[-2]["ok"] is False and got[-1]["ok"] is True
+
+
+def test_question_links_are_unique_and_stable():
+    """Every hard question gets a readable, unique id from its own words, so a link to it survives reordering."""
+    ref = (SRC / "reference.js").read_text()
+    faq = ref[ref.index("const FAQ"):ref.index("const MODEL_RISK")]
+    qs = re.findall(r'\{ g: "[^"]+", q: "([^"]+)"', faq)
+    assert len(qs) >= 30
+    ids = ["faq-" + _slug(q)[:60].rstrip("-") for q in qs]
+    assert len(ids) == len(set(ids)), "two questions share an id"

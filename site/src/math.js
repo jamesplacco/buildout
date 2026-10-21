@@ -101,8 +101,10 @@
   }
   // a bill has one cash flow: modified duration t / (1 + y t)
   const billDur = (y, t) => t / (1 + y * t);
+  // duration falls as the coupon rises (zero coupon down to a 100% coupon); outside that range there is no answer
   function calibrateCoupon(y, mat, D) {
-    let lo = 0, hi = 0.15;
+    let lo = 0, hi = 1;
+    if (!(durCvx(y, mat, hi).dur <= D && D <= durCvx(y, mat, lo).dur)) return NaN;
     for (let i = 0; i < 60; i++) {
       const mid = (lo + hi) / 2;
       if (durCvx(y, mat, mid).dur > D) lo = mid; else hi = mid;
@@ -157,11 +159,14 @@
       const d = t <= 1 ? Math.pow(1 + c / 2, -2 * t) : (1 - (c / 2) * sum) / (1 + c / 2);
       grid.push(t); df.push(d); sum += d;
     }
-    const zero = grid.map((t, i) => 2 * (Math.pow(df[i], -1 / (2 * t)) - 1));
-    return { grid, df, zero };
+    // a par curve that implies a non-positive discount factor (a bad print can) has no zero curve past it
+    const bad = df.findIndex((d) => !(d > 0)), first = bad < 0 ? df.length : bad;
+    const zero = grid.map((t, i) => (i < first ? 2 * (Math.pow(df[i], -1 / (2 * t)) - 1) : NaN));
+    return { grid, df, zero, ok: bad < 0, validTo: first > 0 ? grid[first - 1] : 0 };
   }
   function dfAt(curve, t) {
     if (t <= 0) return 1;
+    if (t > curve.validTo + 1e-9) return NaN;
     const i = Math.round(t * 2) - 1;
     if (Math.abs(curve.grid[i] - t) < 1e-9) return curve.df[i];
     // between grid points: interpolate the zero rate linearly; flat before the first and after the last point

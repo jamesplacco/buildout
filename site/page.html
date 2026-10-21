@@ -15,7 +15,7 @@
   --surface: #fbfcfa;
   --ink: #13201b;
   --ink-2: #46544e;
-  --muted: #6f7c76;
+  --muted: #5e6a64;
   --rule: #d5dcd7;
   --grid: #e3e8e4;
   --accent: #1d5b49;
@@ -40,6 +40,8 @@
   --band: rgba(242, 245, 241, 0.92);
   --grid-pos: rgba(42, 120, 214, 0.28);
   --grid-neg: rgba(227, 73, 72, 0.28);
+  --decomp-real: #1c5cab;
+  --decomp-infl: #b8481a;
   --shadow: 0 1px 2px rgba(19, 32, 27, 0.06), 0 6px 24px rgba(19, 32, 27, 0.06);
   --f-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
   --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -66,6 +68,7 @@
     --band: rgba(13, 18, 16, 0.9);
     --grid-pos: rgba(57, 135, 229, 0.34);
     --grid-neg: rgba(230, 103, 103, 0.34);
+    --decomp-real: #256abf; --decomp-infl: #b9481a;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 24px rgba(0, 0, 0, 0.25);
     color-scheme: dark;
   }
@@ -81,6 +84,7 @@
   --band: rgba(13, 18, 16, 0.9);
   --grid-pos: rgba(57, 135, 229, 0.34);
   --grid-neg: rgba(230, 103, 103, 0.34);
+  --decomp-real: #256abf; --decomp-infl: #b9481a;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 24px rgba(0, 0, 0, 0.25);
   color-scheme: dark;
 }
@@ -179,9 +183,10 @@ code { font: 400 0.82em var(--f-mono); background: var(--accent-wash); padding: 
 .quad-x { grid-column: 2; text-align: center; font: 500 0.6875rem/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); align-self: center; }
 .quad { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; }
 .qcell { position: relative; border-radius: 10px; padding: 14px; background: var(--paper); border: 1px solid var(--rule); display: grid; gap: 6px; align-content: start; min-height: 138px; }
-.qcell h4 { font: 700 var(--t-lg)/1.05 var(--f-display); letter-spacing: 0.02em; text-transform: uppercase; }
+.qcell h3 { font: 700 var(--t-lg)/1.05 var(--f-display); letter-spacing: 0.02em; text-transform: uppercase; }
 .qcell p { font-size: 0.8125rem; color: var(--ink-2); }
 .qcell.now { background: var(--zone-warn); border-color: transparent; }
+.qcell.now .eyebrow { color: var(--ink-2); }
 .qmark { display: inline-flex; align-items: center; gap: 6px; font: 600 0.6875rem/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
 .qmark::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 0 3px var(--surface); }
 
@@ -261,6 +266,11 @@ svg text { font-family: var(--f-body); }
 .wash { opacity: 0.1; }
 details.tableview summary { cursor: pointer; font-size: var(--t-xs); color: var(--muted); }
 .tablewrap { overflow-x: auto; }
+/* grid items default to their content's width; an opened wide table must scroll inside its box, not widen the page */
+.chart > *, .panel > *, .lane > *, .section > *, details.tableview, .tablewrap { min-width: 0; }
+/* a huge input (a $10 billion face) must wrap inside its box, never push the page wider */
+.ro, .tile, .sig, .nk, .wx, .pb, .ep, .sec, .co, .lens { min-width: 0; }
+.ro .v, .tile .value, .sig-val, .sentence, .read { overflow-wrap: anywhere; }
 table { border-collapse: collapse; width: 100%; font-size: var(--t-sm); }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-weight: 600; color: var(--ink-2); font-size: var(--t-xs); }
@@ -309,7 +319,7 @@ td.r { white-space: nowrap; }
 .filters .flabel { font-size: var(--t-xs); color: var(--muted); margin-right: 4px; }
 .sec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .sec { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; }
-.sec h4 { font: 600 var(--t-md)/1.25 var(--f-body); }
+.sec h3 { font: 600 var(--t-md)/1.25 var(--f-body); }
 .sec .fam { font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .sec p { font-size: var(--t-sm); color: var(--ink-2); }
 .sec dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 0.8125rem; }
@@ -338,18 +348,18 @@ td.r { white-space: nowrap; }
 .flow > div:first-child { border-radius: 12px 0 0 12px; }
 .flow > div:last-child { border-radius: 0 12px 12px 0; }
 .flow > div + div { border-left: 0; }
-.flow h4 { font: 700 var(--t-lg)/1.05 var(--f-display); text-transform: uppercase; letter-spacing: 0.02em; }
+.flow h3 { font: 700 var(--t-lg)/1.05 var(--f-display); text-transform: uppercase; letter-spacing: 0.02em; }
 .flow p { font-size: var(--t-sm); color: var(--ink-2); }
 .flow .step { font: 500 0.625rem/1 var(--f-mono); color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
 .chainflow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; align-items: stretch; }
 .node { background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; position: relative; }
-.node h4 { font: 600 var(--t-md)/1.25 var(--f-body); }
+.node h3 { font: 600 var(--t-md)/1.25 var(--f-body); }
 .node p { font-size: 0.8125rem; color: var(--ink-2); }
 .node .tag { font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
 .node:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 50%; transform: translate(50%, -50%); color: var(--muted); font-size: 18px; line-height: 1; z-index: 1; }
 .co-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .co { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; }
-.co h4 { font: 700 var(--t-lg)/1.1 var(--f-display); letter-spacing: 0.02em; text-transform: uppercase; }
+.co h3 { font: 700 var(--t-lg)/1.1 var(--f-display); letter-spacing: 0.02em; text-transform: uppercase; }
 .co .model { font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .co ul { padding-left: 16px; display: grid; gap: 4px; font-size: var(--t-sm); color: var(--ink-2); }
 .co ul strong { color: var(--ink); font-weight: 600; }
@@ -360,7 +370,7 @@ td.r { white-space: nowrap; }
 .thesis-head { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
 .thesis-head h3 { font: 700 var(--t-xl)/1.05 var(--f-display); letter-spacing: 0.01em; max-width: 46ch; }
 .thesis .stance { font-size: var(--t-sm); color: var(--ink); font-weight: 500; }
-.thesis h5 { margin: 0 0 6px; font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.thesis h4 { margin: 0 0 6px; font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .thesis ul { padding-left: 16px; display: grid; gap: 5px; font-size: var(--t-sm); color: var(--ink-2); }
 .thesis .col { display: grid; gap: 14px; align-content: start; min-width: 0; }
 .status { display: inline-flex; align-items: center; gap: 6px; font: 600 0.6875rem/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; }
@@ -374,7 +384,7 @@ td.r { white-space: nowrap; }
 /* lenses */
 .lens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 .lens { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; }
-.lens h4 { font: 700 var(--t-xl)/1.05 var(--f-display); letter-spacing: 0.01em; }
+.lens h3 { font: 700 var(--t-xl)/1.05 var(--f-display); letter-spacing: 0.01em; }
 .lens .idea { font-size: var(--t-sm); color: var(--ink); }
 .lens .rule { font-size: var(--t-sm); color: var(--ink-2); padding: 10px 12px; border-radius: 8px; background: var(--paper); border: 1px solid var(--rule); }
 .lens .rule b { font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 4px; }
@@ -486,7 +496,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
 .pb { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; scroll-margin-top: 104px; }
 .pb h3 { font: 700 var(--t-xl)/1.05 var(--f-display); letter-spacing: 0.01em; }
 .pb .tagline { justify-self: start; font: 600 0.6875rem/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; background: var(--accent-wash); color: var(--accent); }
-.pb h5 { margin: 0 0 4px; font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.pb h4 { margin: 0 0 4px; font: 500 0.625rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .pb ul { padding-left: 16px; display: grid; gap: 3px; font-size: 0.8125rem; color: var(--ink-2); }
 .pb p { font-size: 0.8125rem; color: var(--ink-2); }
 .pb .eps { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -530,7 +540,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
 .faq details p { margin: 8px 0 0 24px; color: var(--ink-2); font-size: var(--t-sm); max-width: 80ch; }
 .ep-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .ep { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; scroll-margin-top: 104px; }
-.ep h4 { font: 700 var(--t-lg)/1.1 var(--f-display); letter-spacing: 0.01em; }
+.ep h3 { font: 700 var(--t-lg)/1.1 var(--f-display); letter-spacing: 0.01em; }
 .ep .when { font: 500 0.6875rem/1.2 var(--f-mono); color: var(--muted); }
 .ep .kind { justify-self: start; font: 600 0.625rem/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--paper); border: 1px solid var(--rule); color: var(--ink-2); }
 .ep dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 0.8125rem; }
@@ -549,7 +559,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
 .reading li span { display: block; color: var(--ink-2); font-size: 0.8125rem; }
 .ck-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .ck { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; }
-.ck h4 { font-weight: 700; }
+.ck h3 { font-weight: 700; }
 .ck ol { padding-left: 18px; display: grid; gap: 5px; font-size: 0.8125rem; color: var(--ink-2); }
 .checks { list-style: none; padding: 0; display: grid; gap: 6px; font-size: var(--t-sm); }
 .checks li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; }
@@ -586,6 +596,40 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   .search-btn { padding: 0 8px; }
 }
 
+/* ---------- v0.4: desk read, what moved ---------- */
+.read { display: grid; gap: 6px; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--accent); font-size: var(--t-sm); color: var(--ink-2); }
+.read:empty { display: none; }
+.read strong { color: var(--ink); font-weight: 600; }
+.read a { font-weight: 600; }
+table.moves th[scope="row"] { font: 500 var(--t-sm)/1.35 var(--f-body); color: var(--ink); white-space: nowrap; }
+table.moves td { white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: middle; }
+table.moves tr.hot th, table.moves tr.hot td { background: var(--zone-warn); }
+table.moves tr.hot td:nth-last-child(2) { font-weight: 700; color: var(--ink); }
+.spark { display: block; }
+@media (max-width: 720px) {
+  table.moves .opt { display: none; }
+  table.moves th, table.moves td { padding: 8px 5px; }
+  table.moves th[scope="row"] { white-space: normal; min-width: 96px; }
+}
+
+/* numbers to know, worked examples */
+.nk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.nk { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; scroll-margin-top: 104px; }
+.nk h3 { font: 700 var(--t-lg)/1.1 var(--f-display); letter-spacing: 0.01em; }
+.nk p { font-size: var(--t-sm); color: var(--ink-2); }
+.nk .nk-now { font: 500 0.75rem/1.5 var(--f-mono); color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 8px; }
+.wx-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.wx { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; scroll-margin-top: 104px; }
+.wx h3 { font-weight: 700; font-size: var(--t-md); line-height: 1.3; }
+.wx-steps { margin: 0; padding: 0; list-style: none; counter-reset: wx; display: grid; }
+.wx-steps li { counter-increment: wx; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--rule); font-size: 0.8125rem; color: var(--ink-2); }
+.wx-steps li::before { content: counter(wx); font: 600 var(--t-xs)/1 var(--f-mono); color: var(--accent); }
+.wx-steps b { font: 600 var(--t-sm)/1.2 var(--f-body); color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.wx-ans { font-size: var(--t-sm); color: var(--ink); border-left: 3px solid var(--accent); padding-left: 10px; }
+.nk:target, .wx:target { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (max-width: 960px) { .nk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wx-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 720px) { .nk-grid { grid-template-columns: minmax(0, 1fr); } }
+
 /* print: every desk, light ink on white, no chrome */
 @media print {
   :root:not(#print) { --paper: #ffffff; --surface: #ffffff; --ink: #111111; --ink-2: #333333; --muted: #555555; --rule: #cccccc; --grid: #e5e5e5; --accent: #1d5b49; --accent-wash: #eef3f0; color-scheme: light; }
@@ -604,7 +648,8 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   .view { padding-block: 12px; }
   .view + .view { break-before: page; }
   h1, h2, h3, h4, .section-head, .panel-head, .chart-head { break-after: avoid; }
-  .panel, .tile, .thesis, .sec, .lens, .co, .ep, .pb, .sig, .ck, .method, .faq details, figure, .lane, .rung, .gloss .entry, tr { break-inside: avoid; }
+  .panel, .tile, .thesis, .sec, .lens, .co, .ep, .pb, .sig, .ck, .method, .faq details, figure, .lane, .rung, .gloss .entry, tr, .nk, .wx, .read { break-inside: avoid; }
+  .nk-grid, .wx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .controls { box-shadow: none; }
   a { color: inherit; }
   /* A Letter page is about 720 CSS px wide, which trips the phone rules; restore the desk layouts. */
@@ -635,6 +680,8 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   .matrix th:first-child, .matrix td:first-child { min-width: 150px; }
   .tablewrap { overflow: visible; }
   .svgrid { min-width: 0; }
+  table.moves .opt { display: table-cell !important; }
+  #iv-charts[hidden], #liq-charts[hidden] { display: none !important; }
 }
 @page { margin: 0.5in; }
 
@@ -653,7 +700,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.3</span>
+      Buildout <span class="ver">v0.4</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -682,10 +729,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   <div class="hero">
     <div class="hero-text">
       <p class="eyebrow">Risk note · October 20, 2026 · Jamie Placco</p>
-      <h1 id="desk-title">Real yields near 3%. Brent above $120. AI credit <em>starting to crack.</em></h1>
+      <h1 id="desk-title">Real yields above 2.7%. Brent above $120. AI credit <em>starting to crack.</em></h1>
       <p class="lede">Buildout is a cross-asset risk desk built around one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit and volatility every day, prices the hedges, and sizes positions to survive. Right now long Treasuries are an unreliable hedge, so the desk leans on convexity and position size, and lets the data say when duration works again.</p>
       <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 62 of 62 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 85 of 85 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot idle"></span>Snapshot: Oct 19, 2026</span>
@@ -705,10 +752,20 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     <div class="section-head">
       <p class="eyebrow">Signals</p>
       <h2 id="sig-title">What the desk is watching</h2>
-      <p class="prose" id="sig-sub">Nine signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.</p>
+      <p class="prose" id="sig-sub">Twelve signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.</p>
     </div>
+    <div class="read" id="desk-read" aria-live="polite"></div>
     <div class="signals" id="signals-grid"></div>
-    <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds.</p>
+    <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
+  </section>
+
+  <section class="section" id="moves" aria-labelledby="mv-title">
+    <div class="section-head">
+      <p class="eyebrow">This week</p>
+      <h2 id="mv-title">What moved</h2>
+      <p class="prose" id="mv-sub">Fifteen markets the desk reads, from FRED. The daily run adds day, month, year-to-date and one-year changes, and flags any weekly move that is unusual against the past three years.</p>
+    </div>
+    <div class="panel"><div class="tablewrap"><table class="moves" id="mv-table"></table></div><p class="hint" id="mv-note"></p></div>
   </section>
 
   <section class="section" aria-labelledby="levels-title">
@@ -731,10 +788,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
         <div class="quad-wrap">
           <div class="quad-y">Inflation rising ↑</div>
           <div class="quad">
-            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h4>Stagflation</h4><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
-            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h4>Inflationary boom</h4><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
-            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h4>Deflationary bust</h4><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
-            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h4>Goldilocks</h4><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h3>Stagflation</h3><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
+            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h3>Inflationary boom</h3><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h3>Deflationary bust</h3><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
+            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h3>Goldilocks</h3><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
           </div>
           <div class="quad-x">Growth rising →</div>
         </div>
@@ -859,6 +916,17 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       <article class="tile"><span class="label">UK Bank Rate</span><span class="value">3.75%</span><span class="note">As of Oct 7.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">MacroRadar</a></span></article>
       <article class="tile"><span class="label">Fed balance sheet</span><span class="value">$6.74T</span><span class="note">September; Treasury cash account $949B.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">FRED via MacroRadar</a></span></article>
     </div>
+  </section>
+
+  <section class="section" id="liquidity" aria-labelledby="liq-title">
+    <div class="section-head"><p class="eyebrow">Plumbing</p><h2 id="liq-title">Liquidity and funding</h2><p class="prose">Net liquidity is the Fed's balance sheet minus the Treasury's cash account and the overnight reverse repo facility: roughly the cash the Fed leaves in the private system. SOFR against the rate the Fed pays on reserves (IORB) says whether that cash is getting scarce. The Fed stopped shrinking its balance sheet on Dec 1, 2025, citing money-market conditions. <a class="src" href="https://federalreserve.gov/monetarypolicy/policy-normalization.htm">Federal Reserve</a></p></div>
+    <div class="tiles compact" id="liq-tiles"></div>
+    <p class="sentence" id="liq-read"></p>
+    <div class="grid2" id="liq-charts" hidden>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">Net liquidity, $ trillions, weekly</span></div><div class="svgbox" id="liq-net"></div><span class="src">FRED: WALCL minus WTREGEN minus RRPONTSYD</span></figure>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">SOFR minus IORB, basis points, daily</span></div><div class="svgbox" id="liq-gap"></div><span class="src">FRED: SOFR and IORB</span></figure>
+    </div>
+    <p class="hint">Net liquidity is an accounting identity, not a law of stock prices. Use it for the plumbing (who is draining cash, and how close reserves are to scarce), not to time the index.</p>
   </section>
 
   <section class="section" id="rates-live-sec" aria-labelledby="rlive-title">
@@ -994,6 +1062,17 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       <div class="tablewrap"><table class="svgrid" id="sv-grid"></table></div>
       <p class="hint">Strategy, volatility and tenor come from the payoff builder. Volatility shifts are in points and apply to every strike; real markets add skew, so put volatility usually rises more than call volatility in a selloff.</p>
     </div>
+  </section>
+
+  <section class="section" id="insurance" aria-labelledby="iv-title">
+    <div class="section-head"><p class="eyebrow">Price of protection</p><h2 id="iv-title">Is insurance cheap?</h2><p class="prose">Implied volatility is what an option charges; realized volatility is what the market delivered. The gap is the volatility risk premium: on average buyers of protection pay sellers for carrying crash risk. The desk buys convexity when it is cheap, not when it is needed.</p></div>
+    <div class="tiles compact" id="iv-tiles"></div>
+    <p class="sentence" id="iv-read"></p>
+    <div class="grid2" id="iv-charts" hidden>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">Nasdaq-100: implied (VXN) against realized volatility, points</span><span class="legend" id="iv-legend"></span></div><div class="svgbox" id="iv-chart"></div><span class="src">FRED: VXNCLS and NASDAQ100; realized is 21 trading days, annualized</span></figure>
+      <figure class="panel chart"><div class="chart-head"><span class="chart-title">VIX over 3-month VIX: above 1 the curve is inverted</span></div><div class="svgbox" id="iv-term"></div><span class="src">FRED: VIXCLS and VXVCLS</span></figure>
+    </div>
+    <p class="hint">Desk rules: buy convexity when implied sits in the bottom third of its ten-year range and within about two points of its median premium; prefer put spreads and collars when implied is in the top fifth; when the VIX curve inverts, stress is priced now, so monetize in stages instead of buying.</p>
   </section>
 
   <section class="section" aria-labelledby="tb-title">
@@ -1231,9 +1310,9 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   <section class="section" aria-labelledby="how-title">
     <div class="section-head"><p class="eyebrow">Model</p><h2 id="how-title">How an insurer makes money</h2></div>
     <div class="flow">
-      <div><span class="step">Collect</span><h4>Float</h4><p>Premiums arrive before claims are paid. Berkshire's float was about $177.5B at June 30, 2026, money it invests but does not own.</p></div>
-      <div><span class="step">Match</span><h4>Duration</h4><p>Life and annuity liabilities run decades, so insurers buy long bonds and private loans to match them. That makes them price-setters for the long end.</p></div>
-      <div><span class="step">Earn</span><h4>Two engines</h4><p>Profit = underwriting result + investment spread. Higher yields raise the second engine; credit losses hit it.</p></div>
+      <div><span class="step">Collect</span><h3>Float</h3><p>Premiums arrive before claims are paid. Berkshire's float was about $177.5B at June 30, 2026, money it invests but does not own.</p></div>
+      <div><span class="step">Match</span><h3>Duration</h3><p>Life and annuity liabilities run decades, so insurers buy long bonds and private loans to match them. That makes them price-setters for the long end.</p></div>
+      <div><span class="step">Earn</span><h3>Two engines</h3><p>Profit = underwriting result + investment spread. Higher yields raise the second engine; credit losses hit it.</p></div>
     </div>
     <span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Hathaway Q2 2026 release (SEC)</a></span>
   </section>
@@ -1241,10 +1320,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   <section class="section" aria-labelledby="chainf-title">
     <div class="section-head"><p class="eyebrow">Case study</p><h2 id="chainf-title">How a data center gets financed off a hyperscaler's balance sheet</h2><p class="prose">Meta's Hyperion campus in Louisiana, October 2025. The template now repeats across the buildout.</p></div>
     <div class="chainflow">
-      <div class="node"><span class="tag">Tenant</span><h4>Meta, 20%</h4><p>Builds and manages the campus, leases it on four-year initial terms, and guarantees residual value for the first 16 years.</p></div>
-      <div class="node"><span class="tag">Owner</span><h4>Joint venture</h4><p>Blue Owl funds hold 80% of a project of about $27B; they put in about $7B of cash.</p></div>
-      <div class="node"><span class="tag">Lender</span><h4>PIMCO and bond investors</h4><p>Part of Blue Owl's capital is debt sold privately to PIMCO and other buyers, with Morgan Stanley as bookrunner.</p></div>
-      <div class="node"><span class="tag">Ultimate holder</span><h4>Allianz and policyholders</h4><p>PIMCO is owned by Allianz. The credit risk of the AI buildout ends up in insurance and retirement portfolios.</p></div>
+      <div class="node"><span class="tag">Tenant</span><h3>Meta, 20%</h3><p>Builds and manages the campus, leases it on four-year initial terms, and guarantees residual value for the first 16 years.</p></div>
+      <div class="node"><span class="tag">Owner</span><h3>Joint venture</h3><p>Blue Owl funds hold 80% of a project of about $27B; they put in about $7B of cash.</p></div>
+      <div class="node"><span class="tag">Lender</span><h3>PIMCO and bond investors</h3><p>Part of Blue Owl's capital is debt sold privately to PIMCO and other buyers, with Morgan Stanley as bookrunner.</p></div>
+      <div class="node"><span class="tag">Ultimate holder</span><h3>Allianz and policyholders</h3><p>PIMCO is owned by Allianz. The credit risk of the AI buildout ends up in insurance and retirement portfolios.</p></div>
     </div>
     <span class="src"><a href="https://about.fb.com/news/2025/10/meta-blue-owl-capital-develop-hyperion-data-center/">Meta newsroom, Oct 21, 2025</a> · <a href="https://www.globaldatacenterhub.com/p/could-meta-pimco-and-blue-owls-29b">Global Data Center Hub</a></span>
   </section>
@@ -1263,12 +1342,12 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   <section class="section" aria-labelledby="cos-title">
     <div class="section-head"><p class="eyebrow">Watchlist</p><h2 id="cos-title">Six balance sheets to know</h2><p class="prose">Figures are the latest each company or a cited source published. No prices; this is about business models.</p></div>
     <div class="co-grid">
-      <article class="co"><span class="model">Composite insurer + asset manager</span><h4>Allianz</h4><ul><li><strong>€2.04T</strong> third-party assets at Mar 31, 2026, a record, with €45.2B of Q1 net inflows.</li><li>Owns <strong>PIMCO</strong> and Allianz Global Investors.</li><li>Solvency II ratio <strong>221%</strong>; 2026 operating profit outlook €17.4B ± €1B.</li></ul><span class="src"><a href="https://www.allianz.com/en/mediacenter/news/media-releases/financials/260513-1q-2026-earnings-release.html">Allianz 1Q 2026 release</a></span></article>
-      <article class="co"><span class="model">Float compounder</span><h4>Berkshire Hathaway</h4><ul><li>Insurance float about <strong>$177.5B</strong> at June 30, 2026.</li><li>Q2 operating earnings <strong>$13.0B</strong>; insurance investment income $3.1B.</li><li>About <strong>$4.5B</strong> of buybacks in Q2.</li></ul><span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Q2 2026 release</a></span></article>
-      <article class="co"><span class="model">PE-affiliated annuity writer</span><h4>Apollo / Athene</h4><ul><li>Annuity balance sheet funding private credit origination.</li><li>Reported near a <strong>$35B</strong> lending deal for Nvidia chips leased to xAI (Feb 2026).</li><li>Private credit above 15% of assets at some PE-affiliated insurers.</li></ul><span class="src"><a href="https://www.roic.ai/news/apollo-nears-35-billion-lending-deal-for-nvidia-chips-leased-to-xai-02-09-2026">ROIC</a> · <a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
-      <article class="co"><span class="model">PE-affiliated annuity writer</span><h4>KKR / Global Atlantic</h4><ul><li>Same model as Athene: annuities fund private credit.</li><li>Named with Athene among insurers whose private credit share exceeds 15%.</li></ul><span class="src"><a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
-      <article class="co"><span class="model">Reinsurers and insurance-linked securities</span><h4>Munich Re, Swiss Re</h4><ul><li>Transfer catastrophe risk to capital markets through cat bonds.</li><li>Cat bond issuance hit a record <strong>$17.3B</strong> in the first half of 2026.</li></ul><span class="src"><a href="https://www.captive.com/news/catastrophe-bond-issuance-hits-record-173-billion-in-first-half">Captive.com</a></span></article>
-      <article class="co"><span class="model">Japanese life insurers</span><h4>Japan's long end</h4><ul><li>Japan's 30-year auction cleared at <strong>4.11%</strong> on Oct 8.</li><li>Higher yields at home reduce the pull of US Treasuries for the largest pool of long-duration buyers abroad.</li></ul><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
+      <article class="co"><span class="model">Composite insurer + asset manager</span><h3>Allianz</h3><ul><li><strong>€2.04T</strong> third-party assets at Mar 31, 2026, a record, with €45.2B of Q1 net inflows.</li><li>Owns <strong>PIMCO</strong> and Allianz Global Investors.</li><li>Solvency II ratio <strong>221%</strong>; 2026 operating profit outlook €17.4B ± €1B.</li></ul><span class="src"><a href="https://www.allianz.com/en/mediacenter/news/media-releases/financials/260513-1q-2026-earnings-release.html">Allianz 1Q 2026 release</a></span></article>
+      <article class="co"><span class="model">Float compounder</span><h3>Berkshire Hathaway</h3><ul><li>Insurance float about <strong>$177.5B</strong> at June 30, 2026.</li><li>Q2 operating earnings <strong>$13.0B</strong>; insurance investment income $3.1B.</li><li>About <strong>$4.5B</strong> of buybacks in Q2.</li></ul><span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Q2 2026 release</a></span></article>
+      <article class="co"><span class="model">PE-affiliated annuity writer</span><h3>Apollo / Athene</h3><ul><li>Annuity balance sheet funding private credit origination.</li><li>Reported near a <strong>$35B</strong> lending deal for Nvidia chips leased to xAI (Feb 2026).</li><li>Private credit above 15% of assets at some PE-affiliated insurers.</li></ul><span class="src"><a href="https://www.roic.ai/news/apollo-nears-35-billion-lending-deal-for-nvidia-chips-leased-to-xai-02-09-2026">ROIC</a> · <a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
+      <article class="co"><span class="model">PE-affiliated annuity writer</span><h3>KKR / Global Atlantic</h3><ul><li>Same model as Athene: annuities fund private credit.</li><li>Named with Athene among insurers whose private credit share exceeds 15%.</li></ul><span class="src"><a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
+      <article class="co"><span class="model">Reinsurers and insurance-linked securities</span><h3>Munich Re, Swiss Re</h3><ul><li>Transfer catastrophe risk to capital markets through cat bonds.</li><li>Cat bond issuance hit a record <strong>$17.3B</strong> in the first half of 2026.</li></ul><span class="src"><a href="https://www.captive.com/news/catastrophe-bond-issuance-hits-record-173-billion-in-first-half">Captive.com</a></span></article>
+      <article class="co"><span class="model">Japanese life insurers</span><h3>Japan's long end</h3><ul><li>Japan's 30-year auction cleared at <strong>4.11%</strong> on Oct 8.</li><li>Higher yields at home reduce the pull of US Treasuries for the largest pool of long-duration buyers abroad.</li></ul><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
     </div>
   </section>
   <p class="callout">The link to the book: insurers are the marginal buyers of the long-dated debt that funds AI data centers. If their appetite slows, through rising defaults or capital rules, AI financing costs rise. That is the <a href="#hedges">financing-shock lane</a>, the one where long bonds fail as a hedge.</p>
@@ -1314,7 +1393,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     <h1 id="lens-title">Borrowed minds, turned into rules.</h1>
     <p class="lede">The desk reads widely and keeps only what it can encode. Each lens below is paraphrased in one line, then mapped to the rule or view where the engine uses it.</p>
   </div>
-  <section class="section" aria-label="Thinkers"><div class="lens-grid" id="lens-grid"></div></section>
+  <section class="section" aria-labelledby="thinkers-title"><h2 class="sr-only" id="thinkers-title">The thinkers</h2><div class="lens-grid" id="lens-grid"></div></section>
   <section class="section" aria-labelledby="pr-title">
     <div class="section-head"><p class="eyebrow">Desk principles</p><h2 id="pr-title">From a market maker's advice</h2><p class="prose">Notes from a conversation with a trader who built his own prop firm and market-making business.</p></div>
     <ol class="steps">
@@ -1335,7 +1414,8 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     <h1 id="eng-title">The engine behind the desk.</h1>
     <p class="lede">Python, about 3,500 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
-  <ol class="pipeline">
+  <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
+  <ol class="pipeline" aria-labelledby="pipe-title">
     <li><h3>Data</h3><p>FRED curve, credit, volatility and oil daily; Databento bars with split and dividend factors; CME Treasury futures; SEC filings; Kalshi odds.</p></li>
     <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
     <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
@@ -1348,7 +1428,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">62 of 62 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">85 of 85 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1362,7 +1442,8 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
           <tr><td>Costs, financing, compounding</td><td class="r">exact to 1e-12</td></tr>
           <tr><td>Page bond, curve and option math against the engine</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Missing FRED series, truncated files, stale data</td><td class="r">reported, not fatal</td></tr>
-          <tr><td>Browser suite: hostile files, extreme inputs, 320 to 1920px, print</td><td class="r">12 scenarios, 0 failures</td></tr>
+          <tr><td>Property tests: thousands of random bonds, curves and options</td><td class="r">2 bugs found, fixed</td></tr>
+          <tr><td>Browser suite: hostile files, random use, 320 to 1920px, print, accessibility</td><td class="r">18 scenarios, 0 failures</td></tr>
         </tbody>
       </table></div>
       <p class="hint">Ten years of simulated daily data with two correlation regimes and known betas. Passing proves the machinery; it says nothing about markets until real data runs through it.</p>
@@ -1422,22 +1503,30 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   <section class="section" aria-labelledby="gl-title">
     <div class="section-head"><p class="eyebrow">A</p><h2 id="gl-title">Glossary</h2><p class="prose" id="gl-sub">Terms with a dotted underline anywhere on the site open their entry here.</p></div>
     <div class="az" id="gl-az" aria-label="Jump to letter"></div>
-    <dl class="gloss" id="gloss"></dl>
+    <div class="gloss" id="gloss"></div>
   </section>
   <section class="section" aria-labelledby="me-title">
     <div class="section-head"><p class="eyebrow">B</p><h2 id="me-title">Methods and formulas</h2><p class="prose">Every formula the engine and the page use, in plain notation, with where it lives. The page's versions are tested against the engine's on every push.</p></div>
     <div class="methods" id="methods"></div>
   </section>
+  <section class="section" aria-labelledby="nk-title">
+    <div class="section-head"><p class="eyebrow">C</p><h2 id="nk-title">Numbers to know</h2><p class="prose">Rules of thumb a desk uses without a calculator, with today's numbers where they help.</p></div>
+    <div class="nk-grid" id="rules"></div>
+  </section>
+  <section class="section" aria-labelledby="wx-title">
+    <div class="section-head"><p class="eyebrow">D</p><h2 id="wx-title">Worked examples</h2><p class="prose" id="wx-sub">Eight questions the tools answer, worked step by step with the page's own math on the latest curve.</p></div>
+    <div class="wx-grid" id="examples"></div>
+  </section>
   <section class="section" aria-labelledby="faq-title">
-    <div class="section-head"><p class="eyebrow">C</p><h2 id="faq-title">Hard questions</h2><p class="prose">The questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.</p></div>
+    <div class="section-head"><p class="eyebrow">E</p><h2 id="faq-title">Hard questions</h2><p class="prose">The questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.</p></div>
     <div class="faq" id="faq"></div>
   </section>
   <section class="section" aria-labelledby="mr-title">
-    <div class="section-head"><p class="eyebrow">D</p><h2 id="mr-title">Model risk register</h2><p class="prose">What each model assumes, when it breaks, and what the desk does about it.</p></div>
+    <div class="section-head"><p class="eyebrow">F</p><h2 id="mr-title">Model risk register</h2><p class="prose">What each model assumes, when it breaks, and what the desk does about it.</p></div>
     <div class="panel"><div class="tablewrap"><table id="mr-table"></table></div></div>
   </section>
   <section class="section" aria-labelledby="dict-title">
-    <div class="section-head"><p class="eyebrow">E</p><h2 id="dict-title">Data dictionary</h2><p class="prose">Every series the daily run reads and every file it writes. Coverage dates fill in from the live run.</p></div>
+    <div class="section-head"><p class="eyebrow">G</p><h2 id="dict-title">Data dictionary</h2><p class="prose">Every series the daily run reads and every file it writes. Coverage dates fill in from the live run.</p></div>
     <div class="panel"><span class="panel-title">FRED series</span><div class="tablewrap"><table id="dict-fred"></table></div></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Other sources</span><div class="tablewrap"><table id="dict-other"></table></div></div>
@@ -1445,21 +1534,21 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     </div>
   </section>
   <section class="section" aria-labelledby="ep-title">
-    <div class="section-head"><p class="eyebrow">F</p><h2 id="ep-title">Episode atlas</h2><p class="prose" id="ep-sub">Fifteen stress episodes since 1987: what stocks did, what bonds did, what hedged, and the lesson. After each daily run, exact moves from FRED appear on every card.</p></div>
+    <div class="section-head"><p class="eyebrow">H</p><h2 id="ep-title">Episode atlas</h2><p class="prose" id="ep-sub">Fifteen stress episodes since 1987: what stocks did, what bonds did, what hedged, and the lesson. After each daily run, exact moves from FRED appear on every card.</p></div>
     <div class="seg" id="ep-filters" role="group" aria-label="Filter episodes by kind"></div>
     <div class="ep-grid" id="ep-grid"></div>
     <p class="hint">Static figures are S&amp;P 500, close to close, unless stated. Live figures use the Nasdaq-100 and a 20-year par bond (the 30-year before 1993), peak to trough inside each episode's window.</p>
   </section>
   <section class="section" aria-labelledby="rd-title">
-    <div class="section-head"><p class="eyebrow">G</p><h2 id="rd-title">Reading list</h2><p class="prose">The papers and books behind each method, with links where a free version exists.</p></div>
+    <div class="section-head"><p class="eyebrow">I</p><h2 id="rd-title">Reading list</h2><p class="prose">The papers and books behind each method, with links where a free version exists.</p></div>
     <div class="reading" id="reading"></div>
   </section>
   <section class="section" aria-labelledby="ck-title">
-    <div class="section-head"><p class="eyebrow">H</p><h2 id="ck-title">Checklists</h2><p class="prose">The routines that turn the desk into decisions.</p></div>
+    <div class="section-head"><p class="eyebrow">J</p><h2 id="ck-title">Checklists</h2><p class="prose">The routines that turn the desk into decisions.</p></div>
     <div class="ck-grid" id="checklists"></div>
   </section>
   <section class="section" aria-labelledby="cl-title">
-    <div class="section-head"><p class="eyebrow">I</p><h2 id="cl-title">Changelog</h2></div>
+    <div class="section-head"><p class="eyebrow">K</p><h2 id="cl-title">Changelog</h2></div>
     <div class="panel"><div class="tablewrap"><table id="changelog"></table></div></div>
   </section>
   <footer class="foot"><p>Research desk, not investment advice. Every market figure links to its source and date; thresholds and grades are the desk's judgment, stated so they can be argued with.</p></footer>
@@ -1594,8 +1683,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   }
   // a bill has one cash flow: modified duration t / (1 + y t)
   const billDur = (y, t) => t / (1 + y * t);
+  // duration falls as the coupon rises (zero coupon down to a 100% coupon); outside that range there is no answer
   function calibrateCoupon(y, mat, D) {
-    let lo = 0, hi = 0.15;
+    let lo = 0, hi = 1;
+    if (!(durCvx(y, mat, hi).dur <= D && D <= durCvx(y, mat, lo).dur)) return NaN;
     for (let i = 0; i < 60; i++) {
       const mid = (lo + hi) / 2;
       if (durCvx(y, mat, mid).dur > D) lo = mid; else hi = mid;
@@ -1650,11 +1741,14 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       const d = t <= 1 ? Math.pow(1 + c / 2, -2 * t) : (1 - (c / 2) * sum) / (1 + c / 2);
       grid.push(t); df.push(d); sum += d;
     }
-    const zero = grid.map((t, i) => 2 * (Math.pow(df[i], -1 / (2 * t)) - 1));
-    return { grid, df, zero };
+    // a par curve that implies a non-positive discount factor (a bad print can) has no zero curve past it
+    const bad = df.findIndex((d) => !(d > 0)), first = bad < 0 ? df.length : bad;
+    const zero = grid.map((t, i) => (i < first ? 2 * (Math.pow(df[i], -1 / (2 * t)) - 1) : NaN));
+    return { grid, df, zero, ok: bad < 0, validTo: first > 0 ? grid[first - 1] : 0 };
   }
   function dfAt(curve, t) {
     if (t <= 0) return 1;
+    if (t > curve.validTo + 1e-9) return NaN;
     const i = Math.round(t * 2) - 1;
     if (Math.abs(curve.grid[i] - t) < 1e-9) return curve.df[i];
     // between grid points: interpolate the zero rate linearly; flat before the first and after the last point
@@ -1747,8 +1841,14 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   function svg(tag, attrs, parent) {
     const e = document.createElementNS(NS, tag);
     for (const k in attrs) e.setAttribute(k, attrs[k]);
+    // a labelled shape needs a role for assistive tech to read the label (a focusable data point is an image)
+    if (tag !== "svg" && attrs && attrs["aria-label"] && !attrs.role) e.setAttribute("role", "img");
     if (parent) parent.appendChild(e);
     return e;
+  }
+  // a chart whose points can take focus is a group of images, not one image (an image hides its children)
+  function fixChartRoles(root = document) {
+    root.querySelectorAll('svg[role="img"]').forEach((s) => { if (s.querySelector("[tabindex]")) s.setAttribute("role", "group"); });
   }
   function text(parent, x, y, str, cls, anchor = "start", extra = {}) {
     const t = svg("text", Object.assign({ x, y, class: cls, "text-anchor": anchor }, extra), parent);
@@ -1899,7 +1999,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     tipswatch: ["Tipswatch", "https://tipswatch.com/2026/09/17/10-year-tips-reopening-gets-real-yield-of-2-653-highest-in-nearly-18-years/"],
     roic: ["ROIC (Reuters)", "https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026"],
     fred: ["FRED", "https://fred.stlouisfed.org/series/NASDAQ100"],
+    fedpolicy: ["Federal Reserve", "https://federalreserve.gov/monetarypolicy/policy-normalization.htm"],
+    macrotrends: ["Macrotrends", "https://www.macrotrends.net/3094/ccc-lower-high-yield-spread"],
   };
+  const F = (id) => ["FRED", "https://fred.stlouisfed.org/series/" + id];
 
   const CURVES = {
     tenors: ["1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"],
@@ -1915,25 +2018,50 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
 
   const LEVELS = [
     { label: "Fed funds target", value: "3.75–4.00%", note: "Hiked 25bp on Sep 16. October hike odds about 33% on Oct 16, up from 19% on Oct 8.", src: [SRC.fxstreet, SRC.roic] },
-    { label: "Nasdaq-100", value: "29,529", note: "Oct 19 close.", src: SRC.fred, live: ["latest", "NASDAQ100", "n0"] },
-    { label: "VIX", value: "21.41", note: "Oct 16; up from 16.44, a four-month high.", src: SRC.roic, live: ["level", "vix", "n2"] },
+    { label: "Nasdaq-100", value: "29,529", note: "Oct 19 close; 30,569 on Oct 13.", src: SRC.fred, live: ["latest", "NASDAQ100", "n0"], fid: "NASDAQ100" },
+    { label: "VIX", value: "19.99", note: "Oct 16 close; 16.46 the day before.", src: F("VIXCLS"), live: ["level", "vix", "n2"], fid: "VIXCLS" },
+    { label: "Nasdaq-100 volatility", value: "25.56", note: "VXN, Oct 19; 21.14 on Oct 13.", src: F("VXNCLS"), live: ["level", "vxn", "n2"], fid: "VXNCLS" },
     { label: "3-month bill", value: "4.27%", note: "Oct 19 close.", src: SRC.treasury, live: ["curve", "3M"] },
     { label: "2-year Treasury", value: "4.77%", note: "Oct 19; up 130bp since Jan 2.", src: SRC.treasury, live: ["curve", "2Y"] },
     { label: "10-year Treasury", value: "5.15%", note: "Oct 19; up 96bp since Jan 2.", src: SRC.treasury, live: ["curve", "10Y"] },
     { label: "30-year Treasury", value: "5.48%", note: "Oct 19; 5.66% on Oct 5.", src: SRC.treasury, live: ["curve", "30Y"] },
-    { label: "10-year real yield", value: "2.91%", note: "TIPS, Oct 7. Near an 18-year high.", src: SRC.macroradar, live: ["level", "real10"] },
-    { label: "10-year breakeven", value: "2.36%", note: "Oct 7. Little changed since spring.", src: SRC.macroradar, live: ["level", "breakeven10"] },
+    { label: "10-year real yield", value: "2.74%", note: "TIPS, Oct 16; 2.91% on Oct 7, near an 18-year high.", src: [F("DFII10"), SRC.macroradar], live: ["level", "real10"], fid: "DFII10" },
+    { label: "10-year breakeven", value: "2.35%", note: "Oct 19; 2.46% on Apr 29.", src: F("T10YIE"), live: ["level", "breakeven10"], fid: "T10YIE" },
+    { label: "High-yield spread", value: "3.29%", note: "Oct 19; 3.16% on Oct 13.", src: F("BAMLH0A0HYM2"), live: ["level", "hy_oas"], fid: "BAMLH0A0HYM2" },
+    { label: "CCC spread", value: "12.97%", note: "Oct 16; 8.53% in July 2025. The weakest borrowers first.", src: [F("BAMLH0A3HYC"), SRC.macrotrends], live: ["level", "ccc_oas"], fid: "BAMLH0A3HYC" },
     { label: "Japan 30-year", value: "4.11%", note: "Oct 8 auction average yield.", src: SRC.mof },
-    { label: "Brent crude", value: "$125.44", note: "Oct 7; WTI $96.24. Iran war since Feb 28.", src: SRC.macroradar, live: ["level", "brent", "$"] },
+    { label: "Brent crude", value: "$126.55", note: "Oct 14; WTI $101.91. Iran war since Feb 28.", src: F("DCOILBRENTEU"), live: ["level", "brent", "$"], fid: "DCOILBRENTEU" },
     { label: "Gold", value: "$4,182", note: "Oct 13; up 2.6% from a year earlier.", src: SRC.fortune },
-    { label: "Bitcoin", value: "$82,046", note: "Oct 16; down 0.6% on the week.", src: SRC.rio },
-    { label: "USD/JPY", value: "157.81", note: "Oct 5.", src: SRC.macroradar },
+    { label: "Bitcoin", value: "$81,804", note: "Oct 19, Coinbase.", src: F("CBBTCUSD"), live: ["level", "bitcoin", "$0"], fid: "CBBTCUSD" },
+    { label: "USD/JPY", value: "158.00", note: "Oct 16; yen per dollar.", src: F("DEXJPUS"), live: ["level", "usdjpy", "n2"], fid: "DEXJPUS" },
   ];
   const LIVE_EXTRA = [
-    ["hy_oas", "High-yield spread", (v) => fx(v, 2) + "%"],
-    ["ig_oas", "Investment-grade spread", (v) => fx(v, 2) + "%"], ["term_premium10", "10-year term premium", (v) => fx(v, 2) + "%"],
-    ["dollar_broad", "Broad dollar index", (v) => fx(v, 1)],
+    ["ig_oas", "Investment-grade spread", (v) => fx(v, 2) + "%", "BAMLC0A0CM"], ["term_premium10", "10-year term premium", (v) => fx(v, 2) + "%", "THREEFYTP10"],
+    ["fwd5y5y", "5y5y inflation expectation", (v) => fx(v, 2) + "%", "T5YIFR"], ["dollar_broad", "Broad dollar index", (v) => fx(v, 1), "DTWEXBGS"],
   ];
+
+  // What moved this week, from FRED: the Oct 13 close against each series' latest close (dates per row).
+  // [label, kind, from, to, to-date, FRED id, lead]; the daily run replaces it with day to one-year changes and z-scores.
+  const STATIC_MOVES = { from: "Oct 13", rows: [
+    ["Nasdaq-100", "pct", 30569.48, 29529.34, "Oct 19", "NASDAQ100", true],
+    ["S&P 500", "pct", 7805.45, 7690.73, "Oct 19", "SP500"],
+    ["2-year Treasury", "bp", 4.79, 4.74, "Oct 16", "DGS2"],
+    ["10-year Treasury", "bp", 5.21, 5.15, "Oct 19", "DGS10"],
+    ["30-year Treasury", "bp", 5.56, 5.43, "Oct 16", "DGS30", true],
+    ["10-year real yield", "bp", 2.88, 2.74, "Oct 16", "DFII10"],
+    ["10-year breakeven", "bp", 2.33, 2.35, "Oct 19", "T10YIE"],
+    ["Investment-grade spread", "bp", 0.83, 0.87, "Oct 19", "BAMLC0A0CM"],
+    ["High-yield spread", "bp", 3.16, 3.29, "Oct 19", "BAMLH0A0HYM2"],
+    ["CCC spread", "bp", 12.67, 12.97, "Oct 16", "BAMLH0A3HYC", true],
+    ["VIX", "pts", 15.27, 19.99, "Oct 16", "VIXCLS", true],
+    ["Nasdaq-100 volatility (VXN)", "pts", 21.14, 25.56, "Oct 19", "VXNCLS"],
+    ["Brent crude", "pct", 125.78, 126.55, "Oct 14", "DCOILBRENTEU"],
+    ["Broad dollar", "pct", 121.4433, 121.4048, "Oct 16", "DTWEXBGS"],
+    ["Yen per dollar", "pct", 158.36, 158.0, "Oct 16", "DEXJPUS"],
+  ] };
+  // insurance and plumbing snapshot, from FRED (values in index points, percent, and $ trillions)
+  const STATIC_VOL = { vxn: [25.56, "Oct 19"], vix: [19.99, "Oct 16"], vix3m: [20.5, "Oct 16"] };
+  const STATIC_LIQ = { assets: [6.755639, "Oct 14"], tga: [0.883373, "Oct 14"], rrp: [0.00033, "Oct 19"], reserves: [3.02214, "Oct 14"], sofr: [3.88, "Oct 16"], iorb: [3.9, "Oct 16"] };
 
   // the model book (config.toml), used to weight the engine's betas in the futures calculator
   const BOOK = { MSFT: 0.14, AMZN: 0.14, GOOGL: 0.14, NVDA: 0.14, META: 0.12, TSLA: 0.10, AVGO: 0.08, SPCX: 0.08, ORCL: 0.06 };
@@ -2081,9 +2209,17 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     { id: "treasury-futures", term: "Treasury futures", def: "Exchange-traded contracts on notes and bonds (ZN, TN, ZB, UB). They add or remove duration for margin instead of cash.", at: "fut-title" },
     { id: "basis-trade", term: "Basis trade", def: "Long cash Treasuries, short futures, financed in repo and run at high leverage. Its unwinds can make Treasuries fall in a crisis, as in March 2020.", at: "ep-covid-2020" },
     { id: "repo", term: "Repo", def: "A collateralized short-term loan against securities; the financing rate for levered bond positions.", at: "fw-title" },
+    { id: "sofr", term: "SOFR", def: "The Secured Overnight Financing Rate: what it costs to borrow cash overnight against Treasuries.", at: "liq-title" },
+    { id: "iorb", term: "IORB", alt: ["interest on reserve balances"], def: "The rate the Fed pays banks on their reserves. Repo trading above it means cash is scarce.", at: "liq-title" },
+    { id: "reserves", term: "Bank reserves", alt: ["reserves"], def: "Banks' deposits at the Fed, the system's settlement cash. When they get scarce, repo rates jump, as in September 2019.", at: "liq-title" },
+    { id: "tga", term: "Treasury General Account", alt: ["TGA"], def: "The Treasury's cash account at the Fed. When it rises on tax receipts or new debt, bank reserves fall, all else equal.", at: "liq-title" },
+    { id: "rrp", term: "Overnight reverse repo", alt: ["reverse repo", "ON RRP"], def: "A Fed facility where money funds park cash overnight. It held more than $2 trillion in 2022 and is now nearly empty, so drains come out of bank reserves.", at: "liq-title" },
+    { id: "net-liquidity", term: "Net liquidity", def: "Fed assets minus the Treasury General Account minus overnight reverse repo: a rough measure of the cash the Fed leaves in the private system.", at: "liq-title" },
+    { id: "qt", term: "Quantitative tightening", alt: ["QT"], def: "The Fed shrinking its balance sheet by letting bonds mature without reinvesting. It ended on Dec 1, 2025.", at: "liq-title" },
     { id: "credit-spread", term: "Credit spread", alt: ["spreads"], def: "Extra yield over Treasuries that pays for default and liquidity risk.", at: "rates-live-sec" },
     { id: "oas", term: "OAS", alt: ["option-adjusted spread"], def: "Option-adjusted spread: the credit spread after stripping out embedded options. The ICE BofA indices on FRED report it.", at: "rates-live-sec" },
     { id: "high-yield", term: "High yield", alt: ["junk"], def: "Bonds rated below BBB−.", at: "sec-high-yield-bonds" },
+    { id: "ccc", term: "CCC spread", def: "The option-adjusted spread on the lowest-rated junk bonds, CCC and below: where credit stress shows first.", at: "signals" },
     { id: "investment-grade", term: "Investment grade", def: "Bonds rated BBB− or better.", at: "sec-investment-grade-corporates" },
     { id: "cds", term: "Credit default swap", alt: ["CDS"], def: "Insurance on a borrower's default, paid as an annual spread.", at: "sec-credit-default-swaps" },
     { id: "private-credit", term: "Private credit", def: "Loans made by funds and insurers instead of banks, held to maturity and marked by models.", at: "pc-title" },
@@ -2098,7 +2234,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     { id: "call-put", term: "Call and put", alt: ["call", "put", "puts", "calls"], def: "A call is the right to buy at the strike; a put is the right to sell.", at: "bs-title" },
     { id: "strike", term: "Strike", def: "The price at which an option can be exercised.", at: "bs-title" },
     { id: "implied-vol", term: "Implied volatility", alt: ["implied vol"], def: "The volatility that makes Black-Scholes match an option's market price: the market's price of future movement.", at: "bs-title" },
-    { id: "realized-vol", term: "Realized volatility", def: "How much a price actually moved, annualized. Implied minus realized is the volatility risk premium that option sellers earn.", at: "t8" },
+    { id: "realized-vol", term: "Realized volatility", def: "How much a price actually moved, annualized. Implied minus realized is the volatility risk premium that option sellers earn.", at: "iv-title" },
+    { id: "vrp", term: "Volatility risk premium", alt: ["volatility premium"], def: "Implied minus realized volatility: what buyers of protection pay sellers, on average, for carrying crash risk. Usually positive; negative in a crash, when realized outruns implied.", why: "The price of insurance relative to the risk it covers.", at: "iv-title" },
+    { id: "vix-term", term: "VIX term structure", alt: ["contango", "backwardation"], def: "VIX against longer-dated implied volatility such as the 3-month VIX. Normally upward sloping (contango); inverted (backwardation) when fear is concentrated in the next month.", at: "iv-title" },
+    { id: "vxn", term: "VXN", def: "Cboe's Nasdaq-100 volatility index: the VIX for the index this book tracks.", at: "iv-title" },
     { id: "black-scholes", term: "Black-Scholes", def: "The 1973 option-pricing model, here with a dividend yield. It assumes one constant volatility, which skew contradicts.", at: "bs-title" },
     { id: "delta", term: "Delta", def: "Option price change per $1 move in the underlying.", at: "bs-title" },
     { id: "gamma", term: "Gamma", def: "How fast delta changes as the underlying moves. Long options are long gamma: they gain from large moves either way.", at: "bs-title" },
@@ -2142,6 +2281,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     { id: "all-weather", term: "All Weather", def: "Bridgewater's risk-balanced portfolio, built to hold up across growth and inflation surprises.", at: "regime-title" },
     { id: "reflexivity", term: "Reflexivity", def: "Soros's idea that prices feed back into the fundamentals they reflect.", at: "lens-george-soros" },
     { id: "prediction-market", term: "Prediction market", alt: ["prediction markets"], def: "Contracts that pay $1 if an event happens; the price reads as a probability.", at: "sec-prediction-markets" },
+    { id: "carry-trade", term: "Carry trade", def: "Borrowing in a low-yielding currency, often the yen, to buy higher-yielding assets. It earns slowly and unwinds fast, as in August 2024.", at: "ep-carry-2024" },
+    { id: "z-score", term: "Z-score", alt: ["standard deviations"], def: "How many standard deviations a move sits from the average. Under a normal distribution a 2σ week comes about once in 22; fat tails make it more common.", at: "mv-title" },
+    { id: "fwd-inflation", term: "5y5y inflation expectation", def: "The breakeven inflation rate for the five years starting five years from now. The Fed reads it as long-run inflation credibility.", at: "levels-title" },
+    { id: "desk-read", term: "Desk read", def: "The one-line summary above the signals board: how many signals are red or amber, and which playbook they argue for.", at: "signals" },
   ];
 
   // formulas render as HTML: <var> for symbols, <sub>/<sup>, .frac for fractions
@@ -2180,6 +2323,15 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       { name: "Kelly as an edge check", f: "<var>f</var>* = (μ − <var>r</var>) / σ<sup>2</sup>; at fraction <var>k</var>, leverage <var>L</var> needs μ − <var>r</var> = <var>L</var>σ<sup>2</sup>/<var>k</var>", say: "A 32%-volatility book at 1.5x needs about 15% a year over cash at full Kelly, 61% at quarter Kelly.", where: "sizing.py · Sizing lab" },
       { name: "Drawdown cap", f: "largest <var>L</var> with the <var>q</var>-quantile of one-year max drawdown ≤ limit", say: "2,000 simulated years, rebalanced daily, borrowing at cash plus a spread. Size to run = min(vol target, drawdown cap, gross limit).", where: "sizing.py · Sizing lab" },
     ] },
+    { group: "Market reads", items: [
+      { name: "What moved", f: "Δ<sub>w</sub> = <var>x</var><sub>t</sub> − <var>x</var><sub>t−7d</sub> (yields, spreads, volatility) or ln(<var>P</var><sub>t</sub>/<var>P</var><sub>t−7d</sub>) (prices); &nbsp; <var>z</var> = (Δ<sub>w</sub> − mean)/sd over every seven-day change in three years", say: "Unusual means 2σ or more. Overlapping weeks give a large sample; fat tails make 2σ weeks more common than one in 22.", where: "marketstate.py · What moved" },
+      { name: "Realized volatility", f: "σ<sub>21</sub> = sd(ln <var>P</var><sub>t</sub>/<var>P</var><sub>t−1</sub>, last 21 days) × √252 × 100", say: "Close to close, in the same volatility points as VIX and VXN.", where: "marketstate.py · Is insurance cheap?" },
+      { name: "Volatility risk premium", f: "VRP<sub>t</sub> = IV<sub>t</sub> − σ<sub>21,t</sub>; &nbsp; earned<sub>t</sub> = IV<sub>t</sub> − σ<sub>21,t+21</sub>", say: "The first compares today's price with the past month; the second with the month the option covered, which is what sellers actually earn.", where: "marketstate.py · Is insurance cheap?" },
+      { name: "VIX term structure", f: "VIX / VIX3M; above 1 the curve is inverted", say: "Near-term fear priced above three-month fear.", where: "marketstate.py · Signals" },
+      { name: "Net liquidity", f: "(WALCL − WTREGEN − 1,000 × RRPONTSYD) / 10<sup>6</sup>, in $ trillions", say: "Weekly on the Fed's Wednesday balance sheet; WALCL and WTREGEN are in millions, reverse repo in billions, taken on the same day.", where: "marketstate.py · Liquidity" },
+      { name: "Funding gap", f: "SOFR − IORB, in basis points; the signal uses the five-day average", say: "Above zero, repo pays more than reserves: cash is scarce.", where: "marketstate.py · Signals" },
+      { name: "Desk read", f: "score(playbook) = Σ<sub>signals</sub> [2 if red, 1 if amber or a mapped green]; closest = highest score, at least 3", say: "A tally, not a model: it says which playbook the evidence argues for, and the reader decides.", where: "views.js · Signals" },
+    ] },
     { group: "Risk and validation", items: [
       { name: "VaR and expected shortfall", f: "VaR<sub>99</sub> = −quantile<sub>1%</sub>(<var>r</var>), &nbsp; ES = −mean(<var>r</var> | <var>r</var> ≤ −VaR); FHS: <var>r̃</var><sub>t</sub> = <var>r</var><sub>t</sub> · σ̂<sub>today</sub>/σ̂<sub>t</sub>", say: "Filtered history makes VaR respond to today's volatility.", where: "risk.py · Engine readout" },
       { name: "Probabilistic Sharpe", f: "PSR = Φ[(SR − SR*) √(<var>n</var>−1) / √(1 − γ<sub>3</sub>SR + (γ<sub>4</sub>−1)SR<sup>2</sup>/4)]", say: "SR per period; γ<sub>3</sub> skew, γ<sub>4</sub> kurtosis.", where: "metrics.py" },
@@ -2214,11 +2366,21 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     { g: "Markets", q: "Why does an insurer's balance sheet matter to an equity book?", a: "Insurers are the marginal buyers of the long-dated debt that funds data centers; Meta's Hyperion bonds went to PIMCO, which Allianz owns. If their appetite slows, AI financing costs rise: the lane where bonds fail as a hedge." },
     { g: "Markets", q: "What is the curve paying for duration right now?", a: "On the Oct 19 curve, a financed 2-year earns about 0.76% a year from carry and roll-down and can absorb a 79bp rise; a 30-year earns about 1.0% and absorbs only 7bp, because the 20-year kink makes it roll up the curve, not down. Per unit of risk, the front end is where carry is." },
     { g: "Markets", q: "What is the single most important insight here?", a: "A bond hedge is a bet on which kind of selloff comes next. Measure the regime every day, and buy protection that pays regardless of the cause." },
+    { g: "Market reads", q: "What is the desk read, and how is it computed?", a: "A one-line summary above the signals board. Each signal maps its amber or red state to the playbook it argues for; the read adds the votes, red counting twice, and names the closest playbook once it has three or more. It is a tally, not a model." },
+    { g: "Market reads", q: "Why can bonds hedge in a week while the regime says they amplify?", a: "The regime is a 63-day average and a week can go the other way. From Oct 13 to Oct 16, the 30-year yield fell 13bp while the Nasdaq-100 dropped on AI credit worries: a growth-and-credit scare inside an inflation regime. The rule holds no bond hedge until the correlation crosses −0.10, so one good week does not flip it." },
+    { g: "Market reads", q: "How do I know whether puts are cheap right now?", a: "Compare implied volatility with its own history and with realized. The Options desk ranks VXN against ten years and against the Nasdaq-100's realized volatility; cheap is the bottom third with a small premium. The VIX curve adds timing: when it inverts, stress is already priced." },
+    { g: "Market reads", q: "What does an inverted VIX curve mean for a hedger?", a: "The market prices the next month as more dangerous than the next three. It shows up in sharp selloffs and is usually the worst moment to buy protection and a good one to start monetizing it. The engine counts the inverted days in the past year." },
+    { g: "Market reads", q: "What is net liquidity, and does it drive stocks?", a: "Fed assets minus the Treasury's cash account minus reverse repo: the cash the Fed leaves in the private system. It is an accounting identity, not a law of prices. The desk uses it to see who is draining cash and how close reserves are to scarce, not to time the index." },
+    { g: "Market reads", q: "Why watch SOFR against IORB?", a: "Banks can earn IORB at the Fed without risk, so repo should trade a little below it while reserves are ample. Repo above IORB means cash is scarce. In September 2019 repo rates spiked and the Fed had to add cash; in October 2025 it cited money-market conditions when it decided to stop shrinking its balance sheet." },
+    { g: "Market reads", q: "Why does the CCC spread matter when high yield looks calm?", a: "The weakest borrowers feel tight money first. On Oct 16 the broad high-yield spread was about 3.3%, tight by history, while CCC and lower paid 12.97%, up from 8.53% in July 2025: stress concentrated at the bottom of the ratings, where thesis 6 expects private-credit losses to surface." },
+    { g: "Market reads", q: "Why is the yen in the table?", a: "The yen funds global carry trades. A sharp yen rally forces them to unwind, as in August 2024, when the Nikkei fell 12.4% in a day. The table flags an unusual weekly yen move before it reaches volatility." },
+    { g: "Market reads", q: "Is a 2σ week rare?", a: "Under a normal distribution about one week in 22 is a 2σ move. Market changes have fat tails, so they come more often: treat 2σ as worth a look and 3σ as news." },
+    { g: "Data", q: "Why do the credit spread charts start in 2023?", a: "Since April 2026 FRED carries only the last three years of the ICE BofA spread indices; older history is licensed from ICE. The engine reads what FRED has, so the episode atlas shows credit moves only for recent episodes." },
     { g: "Implementation", q: "How would you put the hedge on?", a: "TLT for simplicity, or ZB and UB futures matched in DV01 to keep cash free; index put spreads on QQQ or NDX for convexity; HYG puts or CDX HY for credit. The futures calculator sizes the contracts." },
     { g: "Implementation", q: "How often would you rebalance?", a: "Daily signals, banded trades. The hedge ratio and gross update every day, but positions trade only when they leave a band (the 20% trim rule), which keeps costs and noise down." },
     { g: "Implementation", q: "What would you add with more resources?", a: "Listed option chains for real skew, intraday data for execution and liquidity, positioning data (CFTC, dealer gamma), and a paper-trading log that scores the desk against its own forecasts." },
     { g: "Engineering", q: "What is the stack?", a: "Python (numpy, pandas, scipy) for the engine, one self-contained HTML page with no framework, GitHub Actions for the daily run, and JSON files as the contract between them." },
-    { g: "Engineering", q: "How is the page tested?", a: "Its bond, curve and option math runs in Node against the Python engine on every push, agreeing to about 1e−9. Tests also check that the page is rebuilt from source, that every element the script touches exists, and that the house style holds." },
+    { g: "Engineering", q: "How is the page tested?", a: "Its bond, curve and option math runs in Node against the Python engine on every push, agreeing to about 1e−9, and property tests throw thousands of random bonds, curves and options at the engine (they found two real bugs). A browser suite feeds the page hostile and truncated files, hundreds of random inputs, clicks and resizes, every width from 320 to 1920 pixels, a full print and an accessibility audit; any script error, broken number on screen, sideways scroll or serious accessibility issue fails it." },
     { g: "Engineering", q: "How do I add a ticker or a thesis?", a: "Tickers and weights live in config.toml (priors for short histories too); theses live in site/src/data.js. Run the tests, run scripts/assemble_page.py, push." },
   ];
 
@@ -2236,7 +2398,11 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     ["Curve analytics", "Monotone cubic interpolation of par yields; bills as zeros", "Kinks such as the 20-year trading above the 30-year", "Exact at the tenors; forwards between them depend on the interpolation, so read them as shapes, not quotes"],
     ["Futures DV01", "The cheapest to deliver is the shortest deliverable", "Yields rise above 6% or the CTD switches", "Labeled approximate; the engine measures empirical DV01 from futures prices"],
     ["Hedge matrix grades", "Judgment from mechanism and past episodes", "A new kind of shock", "The episode atlas and live correlations replace judgment as data accumulates"],
-    ["Data", "FRED, Databento and the SEC are right", "Revisions, renamed series, outages", "Per-series failure handling, status checks, and a date on every number"],
+    ["What moved z-scores", "Three years of weekly changes describe normal", "A regime shift makes the past three years the wrong yardstick", "Read the z-score with the level and the one-year change; 2σ is a prompt, not a trade"],
+    ["Volatility premium", "21-day close-to-close realized volatility measures what an option covers", "Gaps and intraday swings; VXN covers 30 calendar days, realized 21 trading days", "Compare the premium with its own ten-year history, not with zero"],
+    ["Net liquidity", "Fed assets minus TGA minus reverse repo is the cash in the system", "Other Fed liabilities also move; weekly data arrives a day late", "Used for the plumbing, not to time the index; a date on every tile"],
+    ["Desk read", "Signals vote independently", "Signals share drivers: oil, breakevens and real yields often reflect one shock", "It names the closest playbook and shows its votes; it never trades"],
+    ["Data", "FRED, Databento and the SEC are right", "Revisions, renamed series, outages, shortened history (ICE spreads keep three years on FRED)", "Per-series failure handling, status checks, and a date on every number"],
   ];
 
   const FRED_DICT = [
@@ -2246,11 +2412,17 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     ["DFII10", "10-year TIPS real yield", "Real-rate signal; decomposition of the 10-year"],
     ["T10YIE", "10-year breakeven inflation", "Inflation-lane signal"],
     ["THREEFYTP10", "10-year term premium (Kim-Wright)", "Term premium signal"],
-    ["BAMLC0A0CM", "ICE BofA US Corporate index OAS", "Investment-grade spread"],
-    ["BAMLH0A0HYM2", "ICE BofA US High Yield index OAS", "Credit-event signal"],
-    ["VIXCLS", "Cboe VIX, daily close", "Volatility signal; episode peaks"],
-    ["DTWEXBGS", "Nominal broad US dollar index", "Dollar as a hedge"],
-    ["DCOILBRENTEU, DCOILWTICO", "Brent and WTI spot, $ per barrel", "Oil-shock lane"],
+    ["T5YIE, T5YIFR", "5-year breakeven; 5y5y forward inflation expectation", "Inflation expectations"],
+    ["BAMLC0A0CM, BAMLC0A4CBBB", "ICE BofA US Corporate and BBB OAS; FRED keeps three years since April 2026", "Investment-grade spread"],
+    ["BAMLH0A0HYM2, BAMLH0A3HYC", "ICE BofA US High Yield and CCC-and-lower OAS; three years on FRED", "Credit-event and CCC signals"],
+    ["VIXCLS, VXVCLS, VXNCLS", "Cboe VIX, 3-month VIX, Nasdaq-100 volatility index, daily close", "Volatility signal, term structure, insurance price, episode peaks"],
+    ["SP500", "S&P 500 index, daily; FRED keeps ten years", "Realized volatility against VIX"],
+    ["DTWEXBGS, DEXJPUS", "Nominal broad dollar index; yen per dollar", "Dollar as a hedge; carry-trade watch"],
+    ["DCOILBRENTEU, DCOILWTICO", "Brent and WTI spot, $ per barrel; EIA data, a few days late", "Oil-shock lane"],
+    ["CBBTCUSD", "Coinbase bitcoin, daily including weekends", "Debasement sleeve"],
+    ["WALCL, WTREGEN, WRESBAL", "Fed total assets (Wednesday level), Treasury General Account and reserve balances (week averages), $ millions", "Net liquidity, reserves"],
+    ["RRPONTSYD", "Overnight reverse repo, daily, $ billions", "Net liquidity"],
+    ["SOFR, IORB", "Secured overnight financing rate; interest on reserve balances, percent", "Funding signal"],
   ];
   const OTHER_DICT = [
     ["Databento", "EQUS.SUMMARY daily bars (XNAS.ITCH for older history), adjustment factors, GLBX.MDP3 CME futures (ZN, UB continuous)", "The model book, its hedges, and futures DV01"],
@@ -2258,7 +2430,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     ["Kalshi", "Public market data for event contracts", "Fed-path and CPI odds (roadmap input)"],
   ];
   const JSON_DICT = [
-    ["macro.json", "latest (as_of, corr63, corr252, regime, regime_since, hedge ratios, yields), corr63 and corr252 weekly, yearly, shock_by_era, policies, rates (curves, spreads_bp, history, levels), episodes, coverage, failed_series"],
+    ["macro.json", "latest (as_of, corr63, corr252, regime, regime_since, hedge ratios, yields), corr63 and corr252 weekly, yearly, shock_by_era, policies, rates (curves, spreads_bp, history, levels), moves (level, d1, w1, m1, ytd, y1, z_w1, rank10y, spark), vol (latest spx, ndx, term; history), liquidity (latest net, reserves, funding; history), episodes, coverage, failed_series"],
     ["report.json", "summary (regime, hedge ratio, size to run, VaR, limits), exposures, risk_contributions, erc_weights, hedge, stress, backtest (stats, curves), signal, trims"],
     ["capex.json", "units, companies (per ticker: quarter_end, ocf, capex, fcf, capex_to_ocf, long_term_debt, cash), skipped"],
     ["status.json", "generated_utc, commit, files (present, valid, schema, as_of, weekdays_old), checks (name, ok, detail), ok"],
@@ -2331,45 +2503,77 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     { id: "pb-debasement", t: "Debasement or fiscal stress", tag: "Hard money", sig: ["Term premium rising; weak long-end auctions", "The dollar falls while long yields rise", "Gold and bitcoin rally"], moves: "Long bonds fall; gold, bitcoin and real assets rise; foreign buyers step back.", first: ["A small hard-money sleeve", "Short-duration safe leg", "Real assets"], avoid: "Long nominal duration; assuming the dollar is a crisis hedge.", clear: "Term premium falls; credible fiscal consolidation.", ep: ["tariffs-2025"] },
   ];
 
-  // the signals board: desk rules of thumb, evaluated on live data when present and the dated snapshot otherwise
+  // the signals board: desk rules of thumb, evaluated on live data when present and the dated snapshot otherwise.
+  // pb maps a state (0 green, 1 amber, 2 red) to the playbook it argues for; the desk read adds them up.
+  const FS = (id) => ["FRED", "https://fred.stlouisfed.org/series/" + id];
   const SIGNALS = [
     { id: "corr", name: "Stock-bond correlation", unit: "corr", rule: "Below −0.10 bonds hedge; above +0.10 they amplify.",
       snap: { v: 0.21, date: "Jul 31, 2026", src: ["Federal Reserve", "https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm"], note: "S&P 500 vs 10-year, one-year window" },
-      level: (v) => (v <= -0.10 ? 0 : v >= 0.10 ? 2 : 1), labels: ["Bonds hedge", "Neutral", "Bonds amplify"],
+      level: (v) => (v <= -0.10 ? 0 : v >= 0.10 ? 2 : 1), labels: ["Bonds hedge", "Neutral", "Bonds amplify"], pb: { 0: "pb-growth", 2: "pb-inflation" },
       act: ["Hold TLT at the minimum-variance ratio.", "No bond hedge; lean on options.", "No duration hedge: puts, energy, credit protection."], link: "pb-growth" },
     { id: "real", name: "10-year real yield", unit: "%", rule: "Above 2.0% is tight; above 2.5% restrictive for long-duration equity.",
-      snap: { v: 2.91, date: "Oct 7, 2026", src: ["FRED via MacroRadar", "https://www.macroradar.io/as-of/2026-10-07"] },
-      level: (v) => (v >= 2.5 ? 2 : v >= 2.0 ? 1 : 0), labels: ["Easy", "Tight", "Restrictive"],
+      snap: { v: 2.74, date: "Oct 16, 2026", src: FS("DFII10"), note: "2.91% on Oct 7" },
+      level: (v) => (v >= 2.5 ? 2 : v >= 2.0 ? 1 : 0), labels: ["Easy", "Tight", "Restrictive"], pb: { 2: "pb-inflation" },
       act: ["Duration and growth stocks have a tailwind.", "Watch long-duration names.", "Safe leg in bills and TIPS, not long nominals."], link: "t2" },
     { id: "be", name: "10-year breakeven", unit: "%", rule: "Above 2.5% the inflation lane is in play; above 3.0% it is active.",
-      snap: { v: 2.36, date: "Oct 7, 2026", src: ["FRED via MacroRadar", "https://www.macroradar.io/as-of/2026-10-07"] },
-      level: (v) => (v >= 3.0 ? 2 : v >= 2.5 ? 1 : 0), labels: ["Anchored", "Rising", "Unanchored"],
+      snap: { v: 2.35, date: "Oct 19, 2026", src: FS("T10YIE") },
+      level: (v) => (v >= 3.0 ? 2 : v >= 2.5 ? 1 : 0), labels: ["Anchored", "Rising", "Unanchored"], pb: { 1: "pb-inflation", 2: "pb-inflation" },
       act: ["Inflation is not the driver.", "Watch oil and wages.", "Run the inflation playbook."], link: "pb-inflation" },
     { id: "curve", name: "2s10s curve", unit: "bp", rule: "Inverted below zero; a fast re-steepening from inversion often comes as the Fed cuts into weakness.",
       snap: { v: 38, date: "Oct 19, 2026", src: ["US Treasury", "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/2026/all?type=daily_treasury_yield_curve"] },
-      level: (v) => (v < 0 ? 2 : v < 25 ? 1 : 0), labels: ["Positive", "Flat", "Inverted"],
+      level: (v) => (v < 0 ? 2 : v < 25 ? 1 : 0), labels: ["Positive", "Flat", "Inverted"], pb: { 2: "pb-growth" },
       act: ["Normal slope; carry pays at the front end.", "Late-cycle flattening.", "Recession signal; watch for the re-steepening."], link: "fw-title" },
     { id: "hy", name: "High-yield spread", unit: "%", rule: "Above 4.5% is stress; above 6% a credit event.",
-      snap: null, level: (v) => (v >= 6 ? 2 : v >= 4.5 ? 1 : 0), labels: ["Calm", "Stress", "Credit event"],
+      snap: { v: 3.29, date: "Oct 19, 2026", src: FS("BAMLH0A0HYM2"), note: "tight: the broad market is still open" },
+      level: (v) => (v >= 6 ? 2 : v >= 4.5 ? 1 : 0), labels: ["Calm", "Stress", "Credit event"], pb: { 1: "pb-credit", 2: "pb-credit" },
       act: ["Credit is open.", "Add credit protection.", "Run the credit playbook."], link: "pb-credit" },
+    { id: "ccc", name: "CCC spread", unit: "%", rule: "The weakest borrowers crack first. Above 9% is stress; above 14% distress spreads up the ratings.",
+      snap: { v: 12.97, date: "Oct 16, 2026", src: FS("BAMLH0A3HYC"), note: "8.53% in July 2025" },
+      level: (v) => (v >= 14 ? 2 : v >= 9 ? 1 : 0), labels: ["Calm", "Stress", "Distress"], pb: { 1: "pb-credit", 2: "pb-credit" },
+      act: ["Low-quality credit is funded.", "Cracks at the bottom: watch BDCs and AI-linked borrowers; price credit protection.", "Run the credit playbook."], link: "pb-credit" },
     { id: "vix", name: "VIX", unit: "", rule: "Below 15 protection is cheap; above 30, monetize hedges in stages.",
-      snap: { v: 21.41, date: "Oct 16, 2026", src: ["ROIC", "https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026"], note: "a four-month high" },
-      level: (v) => (v >= 30 ? 2 : v >= 20 ? 1 : 0), labels: ["Calm", "Elevated", "Stress"],
+      snap: { v: 19.99, date: "Oct 16, 2026", src: FS("VIXCLS"), note: "16.46 the day before" },
+      level: (v) => (v >= 30 ? 2 : v >= 20 ? 1 : 0), labels: ["Calm", "Elevated", "Stress"], pb: { 2: "pb-liquidity" },
       act: ["Buy convexity while it is cheap.", "Hold hedges; do not chase.", "Monetize puts in stages."], link: "tb-title" },
+    { id: "vts", name: "VIX term structure", unit: "x", rule: "VIX over 3-month VIX. Below 0.95 is normal contango; 0.95 to 1.0 near-term fear; above 1.0 inverted.",
+      snap: { v: 19.99 / 20.5, date: "Oct 16, 2026", src: FS("VXVCLS"), note: "VIX 19.99 against 3-month VIX 20.50" },
+      level: (v) => (v >= 1 ? 2 : v >= 0.95 ? 1 : 0), labels: ["Contango", "Flattening", "Inverted"], pb: { 2: "pb-liquidity" },
+      act: ["Protection costs more the longer it runs; normal.", "Fear is building at the front: buy before the curve inverts.", "Stress is priced now: monetize puts in stages, roll into spreads."], link: "iv-title" },
     { id: "oil", name: "Brent crude", unit: "$", rule: "Above $85 watch; above $100 the oil-shock lane is active.",
-      snap: { v: 125.44, date: "Oct 7, 2026", src: ["FRED via MacroRadar", "https://www.macroradar.io/as-of/2026-10-07"] },
-      level: (v) => (v >= 100 ? 2 : v >= 85 ? 1 : 0), labels: ["Normal", "Elevated", "Shock"],
+      snap: { v: 126.55, date: "Oct 14, 2026", src: FS("DCOILBRENTEU") },
+      level: (v) => (v >= 100 ? 2 : v >= 85 ? 1 : 0), labels: ["Normal", "Elevated", "Shock"], pb: { 1: "pb-inflation", 2: "pb-inflation" },
       act: ["No oil hedge needed.", "Size an energy sleeve.", "Energy is the hedge; bonds are not."], link: "t3" },
     { id: "capex", name: "Hyperscaler capex vs cash flow", unit: "ratio", rule: "Above 100% of operating cash flow, the buildout is funded with cash reserves or debt.",
       snap: { v: 1.15, date: "Q2 2026", src: ["TIKR", "https://www.tikr.com/blog/alphabets-free-cash-flow-just-went-negative-heres-what-the-debt-behind-it-says"], note: "Alphabet: capex $44.9B against operating cash flow of $39.0B" },
-      level: (v) => (v >= 1 ? 2 : v >= 0.8 ? 1 : 0), labels: ["Self-funded", "Stretched", "Debt-funded"],
+      level: (v) => (v >= 1 ? 2 : v >= 0.8 ? 1 : 0), labels: ["Self-funded", "Stretched", "Debt-funded"], pb: { 2: "pb-credit" },
       act: ["Free cash flow covers the build.", "Watch issuance.", "Thesis 1 is live: watch credit."], link: "t1" },
+    { id: "funding", name: "Funding: SOFR minus IORB", unit: "bp", rule: "Repo above the rate the Fed pays on reserves means cash is scarce. Above 0 is tight; above +10bp is stress.",
+      snap: { v: -2, date: "Oct 16, 2026", src: FS("SOFR"), note: "SOFR 3.88% against IORB 3.90%" },
+      level: (v) => (v >= 10 ? 2 : v > 0 ? 1 : 0), labels: ["Ample", "Tight", "Stress"], pb: { 1: "pb-liquidity", 2: "pb-liquidity" },
+      act: ["Reserves are ample.", "Watch month-ends and the Treasury's cash balance.", "Funding stress reaches every leveraged trade: liquidity playbook."], link: "liq-title" },
     { id: "fed", name: "Fed path", unit: "text", rule: "Hikes into a slowdown are the worst mix for this book.",
       snap: { text: "Hiking: 3.75–4.00%; about 33% odds of an October hike", date: "Oct 16, 2026", src: ["ROIC (Reuters)", "https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026"], lvl: 1 },
-      labels: ["Easing", "Hiking", "Hiking into weakness"], act: ["Liquidity tailwind.", "Real rates stay high: thesis 2.", "Cut gross."], link: "t2" },
+      labels: ["Easing", "Hiking", "Hiking into weakness"], pb: { 1: "pb-inflation", 2: "pb-growth" }, act: ["Liquidity tailwind.", "Real rates stay high: thesis 2.", "Cut gross."], link: "t2" },
+  ];
+
+  // numbers to know: rules of thumb a desk uses without a calculator; v() adds today's number where it helps
+  const RULES = [
+    { t: "Rule of 16", r: "VIX ÷ 16 is roughly the S&P 500's expected daily move in percent, because √252 ≈ 15.9.", v: () => { const x = vixNow(); return `VIX ${fx(x.v, 2)} (${x.date}): about ${fx(x.v / Math.sqrt(252), 2)}% a day.`; }, at: "iv-title" },
+    { t: "A month of VIX", r: "VIX ÷ √12 is roughly one standard deviation of the index over a month.", v: () => { const x = vixNow(); return `VIX ${fx(x.v, 2)}: about ${fx(x.v / Math.sqrt(12), 1)}% over a month, up or down.`; }, at: "iv-title" },
+    { t: "Duration", r: "Price change ≈ −duration × yield change. TLT's duration near 15.5 means roughly −15.5% for a 100bp rise, a little less after convexity.", v: () => { const y = curveYield("30Y"); return `Exact on a TLT-like bond at ${fx(y * 100, 2)}%: ${pct(longBondReturn(y, 100, 15.5), 1)} for +100bp, ${pct(longBondReturn(y, -100, 15.5), 1)} for −100bp.`; }, at: "bc-title" },
+    { t: "DV01", r: "Dollars per basis point ≈ duration × market value × 0.0001.", v: () => { const y = curveYield("10Y"); return `$1 million of par 10-year notes at ${fx(y * 100, 2)}%: about ${money(durCvx(y, 10, y).dur * 100, 0)} per bp.`; }, at: "ct-title" },
+    { t: "Breakeven inflation", r: "Nominal yield = real yield + breakeven inflation.", v: () => "Oct 16: a 5.09% 10-year = 2.74% real + 2.35% breakeven.", at: "decomp" },
+    { t: "Carry", r: "A financed bond earns its coupon minus repo, plus roll-down. The yield rise it can absorb in a year is about that return ÷ duration.", at: "fw-title" },
+    { t: "ρ² rule", r: "A hedge removes at most the squared correlation of a book's variance: 9% at −0.3, 49% at −0.7.", at: "lanes-title" },
+    { t: "Recovery math", r: "A loss of x needs a gain of x ÷ (1 − x) to get back: −20% needs +25%, −50% needs +100%.", at: "size" },
+    { t: "Volatility drag", r: "Compound growth ≈ average return − σ²/2. A 32%-volatility book gives up about 5 points a year to drag.", at: "size" },
+    { t: "Options and time", r: "An at-the-money option's price grows with the square root of time: a year costs about twice three months, not four times.", at: "bs-title" },
+    { t: "Sharpe and evidence", r: "A backtest's t-statistic ≈ Sharpe × √years: a Sharpe of 0.5 needs 16 years of data to reach t = 2.", at: "eng-title" },
+    { t: "2σ weeks", r: "Under a normal distribution about one week in 22 moves 2σ or more; fat tails make them more common.", at: "mv-title" },
   ];
 
   const CHANGELOG = [
+    ["v0.4", "Oct 20, 2026", "Desk read: one line that tallies the signals into the closest playbook. Twelve signals, adding the VIX term structure, repo funding (SOFR minus IORB) and the CCC spread. What moved: fifteen markets with day to one-year changes and a z-score for unusual weeks. Is insurance cheap: VXN against Nasdaq-100 realized volatility, the premium sellers earned, the VIX curve. Liquidity and funding: net liquidity, reserves, reverse repo, the repo gap. Appendix: numbers to know, eight worked examples, ten new hard questions with stable links. Snapshot refreshed from FRED. Accessibility: zero axe-core issues on every desk in light and dark (contrast, chart roles, heading order). Fixes found by new tests: an unreachable duration target returned the wrong bond, a kinked curve produced negative discount factors, an opened table or a huge input widened the page on phones. Engine: marketstate.py with unit checks in the run status; property-based tests; a fuzzing and accessibility browser suite."],
     ["v0.3", "Oct 20, 2026", "Appendix desk (glossary, methods, hard questions, model risk, data dictionary, episode atlas, reading list, checklists). Search, deep links, contents on every desk, print-all. Signals board and six scenario playbooks. Forward curve with carry and roll-down; futures hedge calculator; implied-volatility solver; spot-vol grid; the strongest case against every thesis. System status from the daily run. Print-all checked for text printed over text. Engine: curve and options modules, episode atlas, status checks (including SEC filing freshness), per-series FRED failures, atomic JSON writes, and the page's math tested against the engine. A browser suite feeds the page hostile files and extreme inputs."],
     ["v0.2", "Oct 20, 2026", "Nine desks: rates and curves, options, hedges, securities, insurers, theses, lenses, engine; live FRED curve, spreads and SEC capex panels."],
     ["v0.1", "Oct 20, 2026", "Engine, daily GitHub run on free FRED data, and a one-page readout."],
@@ -2434,11 +2638,16 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   }
 
   const EXTRA_NOTE = { vix: "S&P 500 implied volatility, 30 days.", hy_oas: "ICE BofA US High Yield, option-adjusted.", ig_oas: "ICE BofA US Corporate, option-adjusted.",
-    term_premium10: "Kim-Wright model, 10-year zero.", dollar_broad: "Fed nominal broad index." };
+    term_premium10: "Kim-Wright model, 10-year zero.", dollar_broad: "Fed nominal broad index.", fwd5y5y: "Inflation expected for the five years starting five years out." };
+  const LEVEL_NOTE = { real10: "10-year TIPS yield.", breakeven10: "10-year nominal minus TIPS.", brent: "Europe Brent spot, per barrel.", vix: "S&P 500 implied volatility, 30 days.",
+    vxn: "Nasdaq-100 implied volatility, 30 days.", hy_oas: "ICE BofA US High Yield, option-adjusted.", ccc_oas: "ICE BofA CCC and lower, option-adjusted.",
+    usdjpy: "Yen per dollar.", bitcoin: "Coinbase, daily." };
   // a "Live" badge that turns into "Stale" once data is more than STALE_AFTER weekdays old
   const STALE_AFTER = 3;
-  function liveBadge(iso) {
-    const old = weekdaysSince(iso) > STALE_AFTER;
+  // series that publish with a lag (EIA oil, the Kim-Wright model, the Fed's weekly balance sheet) get a longer leash
+  const STALE_DAYS = { brent: 8, wti: 8, oil: 8, term_premium10: 8, weekly: 8 };
+  function liveBadge(iso, maxAge = STALE_AFTER) {
+    const old = weekdaysSince(iso) > maxAge;
     const b = h("span", "badge" + (old ? " stale" : ""), (old ? "Stale · " : "Live · ") + (niceDate(iso) || iso || "n/a"));
     if (old) b.title = `Last daily run data is from ${niceDate(iso)}; check System status on the Engine desk.`;
     return b;
@@ -2449,7 +2658,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     list.forEach(([label, url], i) => { if (i) el.append(document.createTextNode(" · ")); const a = h("a", null, label); a.href = url; el.append(a); });
     return el;
   }
-  const LIVE_FMT = { "%": (v) => fx(v, 2) + "%", "$": (v) => "$" + fx(v, 2), n0: (v) => Math.round(v).toLocaleString("en-US"), n2: (v) => fx(v, 2) };
+  const LIVE_FMT = { "%": (v) => fx(v, 2) + "%", "$": (v) => "$" + fx(v, 2), "$0": (v) => "$" + Math.round(v).toLocaleString("en-US"), n0: (v) => Math.round(v).toLocaleString("en-US"), n2: (v) => fx(v, 2) };
   function renderLevels(live) {
     const box = $("#levels");
     box.replaceChildren();
@@ -2469,23 +2678,23 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
           note = fin(soyMap[k]) ? `${bp((curveMap[k] - soyMap[k]) * 100)} since ${niceDate(lv.curves.start_of_year.date)}.` : "Treasury constant maturity.";
         } else if (kind === "level" && lv && lv.levels && lv.levels[k] && fin(lv.levels[k].value)) {
           value = fmt(lv.levels[k].value); liveDate = lv.levels[k].date;
-          note = { real10: "10-year TIPS yield.", breakeven10: "10-year nominal minus TIPS.", brent: "Europe Brent spot, per barrel.", vix: "S&P 500 implied volatility, 30 days." }[k] || "";
+          note = LEVEL_NOTE[k] || "";
         } else if (kind === "latest" && lat && fin(lat[k])) {
           value = fmt(lat[k]); liveDate = lat[k + "_date"] || lat.as_of; note = "Daily close.";
         }
       }
       const t = h("article", "tile" + (liveDate ? " live" : ""));
-      if (liveDate) t.append(liveBadge(liveDate));
+      if (liveDate) t.append(liveBadge(liveDate, STALE_DAYS[L.live[1]] || STALE_AFTER));
       t.append(h("span", "label", L.label), h("span", "value", value), h("span", "note", note));
-      t.append(liveDate ? srcNode(["FRED", "https://fred.stlouisfed.org/"]) : srcNode(L.src));
+      t.append(liveDate ? srcNode(L.fid ? F(L.fid) : ["FRED", "https://fred.stlouisfed.org/"]) : srcNode(L.src));
       box.append(t);
     });
     if (lv && lv.levels) {
-      LIVE_EXTRA.forEach(([k, label, fmt]) => {
+      LIVE_EXTRA.forEach(([k, label, fmt, fid]) => {
         const o = lv.levels[k];
         if (!o || !fin(o.value)) return;
         const t = h("article", "tile live");
-        t.append(liveBadge(o.date), h("span", "label", label), h("span", "value", fmt(o.value)), h("span", "note", EXTRA_NOTE[k] || ""), srcNode(["FRED", "https://fred.stlouisfed.org/"]));
+        t.append(liveBadge(o.date, STALE_DAYS[k] || STALE_AFTER), h("span", "label", label), h("span", "value", fmt(o.value)), h("span", "note", EXTRA_NOTE[k] || ""), srcNode(F(fid)));
         box.append(t);
       });
       $("#levels-sub").textContent = "Live tiles come from the engine's daily FRED run; the rest are a dated snapshot from official and market sources.";
@@ -2562,8 +2771,14 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     box.replaceChildren(e);
   }
   // error boundary: one failing panel shows a contained message; the rest of the page keeps working
+  let rolesQueued = false;
+  const scheduleRoles = () => {
+    if (rolesQueued || typeof requestAnimationFrame !== "function") return;
+    rolesQueued = true;
+    requestAnimationFrame(() => { rolesQueued = false; fixChartRoles(); });
+  };
   function guard(name, fn, box) {
-    try { return fn(); } catch (e) {
+    try { const out = fn(); scheduleRoles(); return out; } catch (e) {
       console.error("[buildout] " + name, e);
       LIVE.problems.push(`${name}: ${e && e.message ? e.message : e}`);
       errorState(box, `${name} could not render.`, "The rest of the page is unaffected. Details are in the browser console.");
@@ -2734,8 +2949,8 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     DEC.forEach(([when, real, be, nom]) => {
       const row = h("div", "decomp-row"), bar = h("div", "decomp-bar");
       const a = h("span", null, `Real ${real.toFixed(2)}%`), b = h("span", null, `Inflation ${be.toFixed(2)}%`);
-      a.style.width = (real / scale * 100) + "%"; a.style.background = "var(--s1)";
-      b.style.width = (be / scale * 100) + "%"; b.style.background = "var(--s2)";
+      a.style.width = (real / scale * 100) + "%"; a.style.background = "var(--decomp-real)";
+      b.style.width = (be / scale * 100) + "%"; b.style.background = "var(--decomp-infl)";
       bar.append(a, b);
       const head = h("div", "decomp-head");
       head.append(h("span", null, when), h("strong", null, `10-year ${nom.toFixed(2)}%`));
@@ -3272,7 +3487,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     list.forEach((s) => {
       const c = h("article", "sec");
       c.id = "sec-" + slug(s.n);
-      c.append(h("span", "fam", s.f), h("h4", null, s.n), h("p", null, s.w));
+      c.append(h("span", "fam", s.f), h("h3", null, s.n), h("p", null, s.w));
       const dr = h("div", "drivers");
       s.d.forEach((d) => dr.append(h("span", "drv", d)));
       const dl = h("dl");
@@ -3389,7 +3604,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       const label = t.st === "active" ? "Active" : t.st === "watch" ? "Watch" : "Risk";
       head.append(h("h3", null, t.t), h("span", "status " + t.st, label));
       const left = h("div", "col"), right = h("div", "col");
-      const sec = (title, node) => { const d = h("div"); d.append(h("h5", null, title), node); return d; };
+      const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (items) => { const u = h("ul"); items.forEach((x) => u.append(h("li", null, x))); return u; };
       left.append(h("p", "stance", t.stance), sec("Evidence", ul(t.ev)));
       if (BEAR[t.id]) left.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
@@ -3403,7 +3618,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     LENSES.forEach((L) => {
       const c = h("article", "lens");
       c.id = "lens-" + slug(L.n);
-      c.append(h("h4", null, L.n), h("p", "idea", L.idea));
+      c.append(h("h3", null, L.n), h("p", "idea", L.idea));
       const rule = h("p", "rule");
       rule.append(h("b", null, "How the desk uses it"), document.createTextNode(L.rule));
       c.append(rule, h("p", "read", L.read));
@@ -3475,11 +3690,222 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix" };
-  const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab" };
+  const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity" };
   function linkLabel(target) {
     if (/^pb-/.test(target)) { const p = PLAYBOOKS.find((x) => x.id === target); return p ? `Playbook: ${p.t}` : "Playbook"; }
     if (/^t\d$/.test(target)) return `Thesis ${target.slice(1)}`;
     return LINK_NAME[target] || "Details";
+  }
+
+  /* =====================================================================================
+     WHAT MOVED, THE PRICE OF INSURANCE, AND THE PLUMBING: three reads from the daily FRED run
+     ===================================================================================== */
+  const ord = (n) => { const x = ["th", "st", "nd", "rd"], v = n % 100; return n + (x[(v - 20) % 10] || x[v] || x[0]); };
+  const rankTxt = (r) => (fin(r) ? `${ord(Math.round(r * 100))} percentile of ten years` : "");
+  const moveChange = (kind, a, b) => (kind === "pct" ? b / a - 1 : kind === "bp" ? (b - a) * 100 : b - a);
+  const fmtMove = (kind, v) => (!fin(v) ? "n/a" : kind === "pct" ? pct(v, 1) : kind === "bp" ? bp(v) : (Math.abs(v) < 0.005 ? "0.00" : (v > 0 ? "+" : MINUS) + fx(Math.abs(v), 2)));
+  const MOVE_PREFIX = { brent: "$", btc: "$", DCOILBRENTEU: "$", CBBTCUSD: "$" };
+  function fmtLevel(key, kind, v) {
+    if (!fin(v)) return "n/a";
+    if (key === "c2s10s") return bp(v * 100);
+    if (kind === "bp") return fx(v, 2) + "%";
+    if (kind === "pts") return fx(v, 2);
+    return (MOVE_PREFIX[key] || "") + (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString("en-US") : fx(v, 2));
+  }
+  const okMove = (r) => r && typeof r.label === "string" && ["bp", "pts", "pct"].includes(r.kind) && fin(r.value) && isoOk(r.date);
+  const zOk = (z) => (fin(z) && Math.abs(z) < 50 ? z : null);      // a 50σ week is a data error, not news
+  const liveMoves = () => (LIVE.macro && Array.isArray(LIVE.macro.moves) ? LIVE.macro.moves.filter(okMove) : []);
+  function weekMoves() {
+    const live = liveMoves();
+    if (live.length) return { live: true, rows: live.map((r) => ({ key: r.key, label: r.label, kind: r.kind, w1: fin(r.w1) ? r.w1 : null, z: zOk(r.z_w1) })) };
+    return { live: false, rows: STATIC_MOVES.rows.map(([label, kind, a, b, date, fid, lead]) => ({ key: fid, label, kind, w1: moveChange(kind, a, b), lead: !!lead })) };
+  }
+  function weekLine() {
+    const { live, rows } = weekMoves();
+    const pick = live ? rows.filter((r) => r.z != null && r.w1 != null).sort((a, b) => Math.abs(b.z) - Math.abs(a.z)).slice(0, 4) : rows.filter((r) => r.lead);
+    if (!pick.length) return "";
+    const eq = rows.find((r) => r.key === "ndx" || r.key === "NASDAQ100");
+    const bond = rows.find((r) => r.key === "y30" || r.key === "DGS30") || rows.find((r) => r.key === "y10" || r.key === "DGS10");
+    let tail = "";
+    if (eq && bond && fin(eq.w1) && fin(bond.w1) && eq.w1 < -0.01) {
+      tail = bond.w1 <= -2 ? " Long yields fell as stocks did: bonds hedged this week." : bond.w1 >= 2 ? " Long yields rose as stocks fell: bonds amplified this week." : " Long yields barely moved as stocks fell.";
+    }
+    const lead = live ? "Largest moves this week, against three years of weekly moves: " : `Since the ${STATIC_MOVES.from} close: `;
+    return lead + pick.map((r) => `${r.label} ${fmtMove(r.kind, r.w1)}${live && r.z != null ? ` (${fx(r.z, 1)}σ)` : ""}`).join(", ") + "." + tail;
+  }
+  function spark(o, w = 84, hgt = 22) {
+    const pts = seriesPts(o), s = svg("svg", { viewBox: `0 0 ${w} ${hgt}`, width: w, height: hgt, class: "spark", "aria-hidden": "true" });
+    if (pts.length < 2) return s;
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const sx = (x) => 1 + ((x - x0) / (x1 - x0 || 1)) * (w - 4), sy = (y) => hgt - 3 - ((y - y0) / (y1 - y0 || 1)) * (hgt - 6);
+    svg("path", { d: pts.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1)).join(" "), fill: "none", stroke: "var(--s1)", "stroke-width": 1.25, "stroke-linejoin": "round" }, s);
+    const last = pts[pts.length - 1];
+    svg("circle", { cx: sx(last[0]), cy: sy(last[1]), r: 2.25, fill: "var(--s1)" }, s);
+    return s;
+  }
+  function renderMoves() {
+    const tbl = $("#mv-table");
+    if (!tbl) return;
+    const live = liveMoves(), thead = h("thead"), hr = h("tr"), tb = h("tbody");
+    const cols = live.length
+      ? [["Market", ""], ["Level", "r"], ["1 day", "r opt"], ["1 week", "r"], ["1 month", "r opt"], ["Year to date", "r"], ["1 year", "r opt"], ["Unusual", "r"], ["Past year", "opt"]]
+      : [["Market", ""], ["Level", "r"], [`Since ${STATIC_MOVES.from}`, "r"], ["As of", "r"]];
+    cols.forEach(([t, c]) => { const th = h("th", c || null, t); th.scope = "col"; hr.append(th); });
+    thead.append(hr);
+    if (live.length) {
+      live.forEach((r) => {
+        const tr = h("tr"), z = zOk(r.z_w1), th = h("th", null, r.label);
+        th.scope = "row";
+        if (z != null && Math.abs(Number(z.toFixed(1))) >= 2) tr.className = "hot";   // same rounding as the cell shows
+        tr.append(th, h("td", "r", fmtLevel(r.key, r.kind, r.value)));
+        [["d1", "r opt"], ["w1", "r"], ["m1", "r opt"], ["ytd", "r"], ["y1", "r opt"]].forEach(([k, c]) => tr.append(h("td", c, fmtMove(r.kind, r[k]))));
+        tr.append(h("td", "r", z == null ? "n/a" : `${fx(z, 1)}σ`));
+        const sp = h("td", "opt");
+        sp.append(spark(r.spark));
+        tr.append(sp);
+        tb.append(tr);
+      });
+      const last = live.map((r) => r.date).sort().pop();
+      $("#mv-note").textContent = `FRED, latest prints through ${niceDate(last)}. Unusual is this week's change in standard deviations of every seven-day change over the past three years; rows at 2σ or more are highlighted. Yields and spreads move in basis points, volatility in points, prices in percent.`;
+    } else {
+      STATIC_MOVES.rows.forEach(([label, kind, a, b, date, fid]) => {
+        const tr = h("tr"), th = h("th", null, label);
+        th.scope = "row";
+        tr.append(th, h("td", "r", fmtLevel(fid, kind, b)), h("td", "r", fmtMove(kind, moveChange(kind, a, b))), h("td", "r", date));
+        tb.append(tr);
+      });
+      $("#mv-note").textContent = `Snapshot from FRED: the ${STATIC_MOVES.from} close against each series' latest close. The daily run replaces it with day, month, year-to-date and one-year changes and flags unusual moves.`;
+    }
+    tbl.replaceChildren(thead, tb);
+  }
+
+  function tileLive(label, value, note, date, maxAge) { const t = tile(label, value, note); t.classList.add("live"); t.prepend(liveBadge(date, maxAge)); return t; }
+  function renderInsurance() {
+    const tiles = $("#iv-tiles"), read = $("#iv-read");
+    if (!tiles || !read) return;
+    const v = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.latest ? LIVE.macro.vol.latest : null;
+    const okVol = (x) => x && fin(x.implied) && fin(x.realized) && fin(x.vrp) && isoOk(x.date);
+    const ndx = v && okVol(v.ndx) ? v.ndx : null, spx = v && okVol(v.spx) ? v.spx : null, term = v && v.term && fin(v.term.ratio) && isoOk(v.term.date) ? v.term : null;
+    const S = STATIC_VOL, signed = (x) => (x >= 0 ? "+" : MINUS) + fx(Math.abs(x), 1);
+    tiles.replaceChildren();
+    if (ndx) {
+      tiles.append(tileLive("VXN, Nasdaq-100 implied", fx(ndx.implied, 1), rankTxt(ndx.implied_rank10y) || "Points of annualized volatility.", ndx.date),
+        tileLive("Realized, 21 trading days", fx(ndx.realized, 1), "Nasdaq-100, close to close, annualized.", ndx.date),
+        tileLive("Premium: implied minus realized", signed(ndx.vrp), fin(ndx.vrp_median10y) ? `Ten-year median ${signed(ndx.vrp_median10y)} points.` : "", ndx.date));
+      if (spx) tiles.append(tileLive("VIX against S&P 500 realized", `${fx(spx.implied, 1)} vs ${fx(spx.realized, 1)}`, fin(spx.earned_mean5y) ? `Over five years, VIX averaged ${signed(spx.earned_mean5y)} points above what the next month delivered.` : "", spx.date));
+    } else {
+      tiles.append(tile("VXN, Nasdaq-100 implied", fx(S.vxn[0], 2), `${S.vxn[1]} close.`), tile("VIX, S&P 500 implied", fx(S.vix[0], 2), `${S.vix[1]} close.`),
+        tile("Realized and the premium", "Daily run", "Realized volatility needs price history; it fills in after the first run."));
+    }
+    const ratio = term ? term.ratio : S.vix[0] / S.vix3m[0];
+    tiles.append(term ? tileLive("VIX over 3-month VIX", fx(ratio, 2), `${fin(term.days_inverted_1y) ? term.days_inverted_1y : "n/a"} inverted days in the past year.`, term.date)
+      : tile("VIX over 3-month VIX", fx(ratio, 2), `${fx(S.vix[0], 2)} against ${fx(S.vix3m[0], 2)}, ${S.vix3m[1]}.`));
+    const rank = ndx && fin(ndx.implied_rank10y) ? ndx.implied_rank10y : null, flat = ratio >= 0.95 ? " The VIX curve is flattening: near-term fear is building." : "";
+    let cls = "", msg;
+    if (ratio >= 1) { cls = "warn"; msg = `Stress is priced now: the VIX curve is inverted at ${fx(ratio, 2)}. Monetize puts in stages; if you must buy, buy spreads.`; }
+    else if (ndx && rank != null && rank <= 1 / 3 && (!fin(ndx.vrp_median10y) || ndx.vrp <= ndx.vrp_median10y + 2)) { cls = "ok"; msg = `Insurance is cheap: VXN sits at the ${rankTxt(rank)} and only ${signed(ndx.vrp)} points over realized. Buy convexity: puts and put spreads, at longer tenors.${flat}`; }
+    else if (ndx && rank != null && rank >= 0.8) { cls = "warn"; msg = `Insurance is expensive: VXN sits at the ${rankTxt(rank)}. Prefer put spreads and collars to outright puts, and size from the budget, not from fear.${flat}`; }
+    else if (ndx) { msg = `Fairly priced: VXN at the ${rankTxt(rank) || "middle of its range"}, ${signed(ndx.vrp)} points over realized${fin(ndx.vrp_median10y) ? ` against a ten-year median of ${signed(ndx.vrp_median10y)}` : ""}.${flat}`; }
+    else { msg = (ratio >= 0.95 ? `The VIX curve is nearly flat at ${fx(ratio, 2)}: near-term fear is building, so protection is not cheap.` : `The VIX curve is in normal contango at ${fx(ratio, 2)}.`) + " Realized volatility and the premium fill in after the first daily run."; }
+    read.className = "sentence" + (cls ? " " + cls : "");
+    read.textContent = msg;
+    const H = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.history;
+    $("#iv-charts").hidden = !(H && ((H.ndx && hasSeries(H.ndx.implied)) || hasSeries(H.term)));
+    drawInsurance();
+  }
+  function drawInsurance() {
+    const H = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.history;
+    if (!H) return;
+    const box = $("#iv-chart");
+    if (box && box.clientWidth && H.ndx && hasSeries(H.ndx.implied)) {
+      const imp = seriesPts(H.ndx.implied), rea = seriesPts(H.ndx.realized);
+      legendLines($("#iv-legend"), [["var(--s1)", "Implied (VXN)"], ["var(--s2)", "Realized, 21 days"]]);
+      xyChart(box, { series: [{ name: "Implied (VXN)", color: "var(--s1)", pts: imp }, { name: "Realized", color: "var(--s2)", pts: rea, width: 1.5 }], yfmt: (x) => fx(x, 0),
+        xticks: yearTicks(imp[0][0], imp[imp.length - 1][0]), xfmt: dateLabel, height: 230, label: "Nasdaq-100 implied and realized volatility, weekly" });
+    }
+    const tb = $("#iv-term");
+    if (tb && tb.clientWidth && hasSeries(H.term)) {
+      const pts = seriesPts(H.term);
+      xyChart(tb, { series: [{ name: "VIX over 3-month VIX", color: "var(--s1)", pts }], hlines: [{ y: 1, color: "var(--bad)", label: "Inverted above 1" }], yfmt: (x) => fx(x, 2),
+        xticks: yearTicks(pts[0][0], pts[pts.length - 1][0]), xfmt: dateLabel, height: 230, label: "VIX over 3-month VIX, weekly" });
+    }
+  }
+
+  function renderLiquidity() {
+    const tiles = $("#liq-tiles"), read = $("#liq-read");
+    if (!tiles || !read) return;
+    const L = LIVE.macro && LIVE.macro.liquidity && LIVE.macro.liquidity.latest ? LIVE.macro.liquidity.latest : null;
+    const net = L && L.net && fin(L.net.value) && fin(L.net.fed_assets) && fin(L.net.tga) && fin(L.net.rrp) && isoOk(L.net.date) ? L.net : null;
+    const res = L && L.reserves && fin(L.reserves.value) && isoOk(L.reserves.date) ? L.reserves : null;
+    const fund = L && L.funding && fin(L.funding.gap_bp) && fin(L.funding.gap_5d_bp) && isoOk(L.funding.date) ? L.funding : null;
+    const S = STATIC_LIQ, T = (x) => "$" + fx(x, 2) + "T", B = (t) => "$" + fx(t * 1000, t < 0.01 ? 2 : 0) + "B";
+    const chg = (x, w) => (fin(x) ? `${x >= 0 ? "+" : MINUS}$${fx(Math.abs(x), 2)}T over ${w} weeks.` : "");
+    tiles.replaceChildren();
+    const wk = STALE_DAYS.weekly;
+    if (net) tiles.append(tileLive("Net liquidity", T(net.value), chg(net.chg_13w, 13), net.date, wk), tileLive("Fed assets", T(net.fed_assets), "Wednesday level.", net.date, wk),
+      tileLive("Treasury cash (TGA)", T(net.tga), "Week average.", net.date, wk), tileLive("Reverse repo", B(net.rrp), "Overnight facility, on the same Wednesday.", net.date, wk));
+    else tiles.append(tile("Net liquidity", T(S.assets[0] - S.tga[0] - S.rrp[0]), `${S.assets[1]}: Fed assets minus Treasury cash minus reverse repo.`), tile("Fed assets", T(S.assets[0]), `${S.assets[1]}, Wednesday level.`),
+      tile("Treasury cash (TGA)", T(S.tga[0]), `${S.tga[1]}, week average.`), tile("Reverse repo", B(S.rrp[0]), `${S.rrp[1]}: the facility is all but empty.`));
+    tiles.append(res ? tileLive("Bank reserves", T(res.value), chg(res.chg_13w, 13), res.date, wk) : tile("Bank reserves", T(S.reserves[0]), `${S.reserves[1]}, week average.`));
+    const gap = fund ? fund.gap_5d_bp : (S.sofr[0] - S.iorb[0]) * 100;
+    tiles.append(fund ? tileLive("SOFR minus IORB", bp(fund.gap_bp), `5-day average ${bp(fund.gap_5d_bp)}; 3-month high ${bp(fund.gap_max_3m_bp)}.`, fund.date)
+      : tile("SOFR minus IORB", bp(gap), `SOFR ${fx(S.sofr[0], 2)}% against IORB ${fx(S.iorb[0], 2)}%, ${S.sofr[1]}.`));
+    const rrp = net ? net.rrp : S.rrp[0], state = gap >= 10 ? "Stress" : gap > 0 ? "Tight" : "Ample";
+    read.className = "sentence " + (gap > 0 ? "warn" : "ok");
+    read.textContent = `${state}: repo trades ${gap > 0 ? "above" : "below"} the rate the Fed pays on reserves, ${bp(gap)}${fund ? " over five days" : ""}. `
+      + (rrp < 0.05 ? "The reverse repo facility is all but empty, so any further drain (a larger Treasury cash balance or a smaller Fed) comes out of bank reserves." : `Reverse repo still holds ${B(rrp)} that can drain before reserves do.`)
+      + (net && fin(net.chg_13w) ? ` Net liquidity ${net.chg_13w >= 0 ? "rose" : "fell"} ${T(Math.abs(net.chg_13w))} over 13 weeks.` : "");
+    const H = LIVE.macro && LIVE.macro.liquidity && LIVE.macro.liquidity.history;
+    $("#liq-charts").hidden = !(H && (hasSeries(H.net) || hasSeries(H.funding_gap_bp)));
+    drawLiquidity();
+  }
+  function drawLiquidity() {
+    const H = LIVE.macro && LIVE.macro.liquidity && LIVE.macro.liquidity.history;
+    if (!H) return;
+    const nb = $("#liq-net");
+    if (nb && nb.clientWidth && hasSeries(H.net)) {
+      const pts = seriesPts(H.net);
+      xyChart(nb, { series: [{ name: "Net liquidity", color: "var(--s1)", pts, endLabel: "$" + fx(pts[pts.length - 1][1], 2) + "T" }], yfmt: (x) => "$" + fx(x, 1) + "T",
+        xticks: yearTicks(pts[0][0], pts[pts.length - 1][0]), xfmt: dateLabel, height: 230, label: "Net liquidity in trillions of dollars, weekly" });
+    }
+    const gb = $("#liq-gap");
+    if (gb && gb.clientWidth && hasSeries(H.funding_gap_bp)) {
+      const pts = seriesPts(H.funding_gap_bp);
+      xyChart(gb, { series: [{ name: "SOFR minus IORB", color: "var(--s2)", pts, width: 1.25 }], zero: true, yfmt: (x) => fx(x, 0),
+        xticks: yearTicks(pts[0][0], pts[pts.length - 1][0]), xfmt: dateLabel, height: 230, label: "SOFR minus IORB in basis points, daily" });
+    }
+  }
+
+  // one sentence for the whole board: what is red, which playbook the signals argue for, and what this week did
+  const SIG_SHORT = { corr: "stock-bond correlation", real: "real yields", be: "breakevens", curve: "2s10s", hy: "high yield", ccc: "CCC credit", vix: "VIX",
+    vts: "VIX curve", oil: "Brent", capex: "capex funding", funding: "repo funding", fed: "Fed" };
+  function renderDeskRead(states) {
+    const box = $("#desk-read");
+    if (!box) return;
+    box.replaceChildren();
+    const red = states.filter((x) => x.level === 2), amber = states.filter((x) => x.level === 1), score = {};
+    states.forEach(({ sg, level }) => {
+      const pb = level != null && sg.pb ? sg.pb[level] : null;
+      if (pb) score[pb] = (score[pb] || 0) + (level === 2 ? 2 : 1);
+    });
+    const ranked = Object.entries(score).sort((a, b) => b[1] - a[1]);
+    const list = (xs) => xs.map(({ sg, level }) => `${SIG_SHORT[sg.id] || sg.name} (${sg.labels[level].toLowerCase()})`).join(", ");
+    const p1 = h("p");
+    p1.append(h("strong", null, `Desk read: ${red.length} red, ${amber.length} amber of ${states.length} signals. `));
+    if (red.length) p1.append(document.createTextNode(`Red: ${list(red)}. `));
+    if (amber.length) p1.append(document.createTextNode(`Amber: ${list(amber)}.`));
+    const p2 = h("p"), top = ranked[0], pb = top && PLAYBOOKS.find((x) => x.id === top[0]);
+    if (pb && top[1] >= 3) {
+      const a = h("a", null, `${pb.t} →`);
+      a.href = "#" + pb.id;
+      p2.append(h("strong", null, "Closest playbook: "), a, document.createTextNode(` (${pb.tag.toLowerCase()}).`));
+      const nx = ranked[1] && PLAYBOOKS.find((x) => x.id === ranked[1][0]);
+      if (nx && ranked[1][1] >= 2) p2.append(document.createTextNode(` Next: ${nx.t.toLowerCase()}.`));
+    } else p2.append(document.createTextNode("No playbook has enough signals behind it: run the base book with its standing hedges."));
+    box.append(p1, p2);
+    const wk = weekLine();
+    if (wk) box.append(h("p", "wk", wk));
   }
 
   /* =====================================================================================
@@ -3500,6 +3926,15 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       case "real": return L("real10");
       case "be": return L("breakeven10");
       case "hy": return L("hy_oas");
+      case "ccc": return L("ccc_oas");
+      case "vts": {
+        const t = m && m.vol && m.vol.latest && m.vol.latest.term;
+        return t && fin(t.ratio) && isoOk(t.date) ? { v: t.ratio, date: t.date, note: fin(t.vix) && fin(t.vix3m) ? `VIX ${fx(t.vix, 2)} against 3-month VIX ${fx(t.vix3m, 2)}` : null } : null;
+      }
+      case "funding": {
+        const f = m && m.liquidity && m.liquidity.latest && m.liquidity.latest.funding;
+        return f && fin(f.gap_5d_bp) && isoOk(f.date) ? { v: f.gap_5d_bp, date: f.date, note: fin(f.sofr) && fin(f.iorb) ? `5-day average; SOFR ${fx(f.sofr, 2)}% against IORB ${fx(f.iorb, 2)}%` : "5-day average" } : null;
+      }
       case "vix": return L("vix");
       case "oil": return L("brent");
       case "curve": { const c = curveNow(); return c && fin(c.by["10Y"]) && fin(c.by["2Y"]) ? { v: (c.by["10Y"] - c.by["2Y"]) * 100, date: c.date } : null; }
@@ -3518,18 +3953,21 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     if (sg.unit === "bp") return bp(v);
     if (sg.unit === "$") return "$" + fx(v, 2);
     if (sg.unit === "ratio") return pctPlain(v, 0) + " of cash flow";
+    if (sg.unit === "x") return fx(v, 2);
     return fx(v, 2);
   }
   function renderSignals() {
     const box = $("#signals-grid");
     box.replaceChildren();
     let nLive = 0;
+    const states = [];
     SIGNALS.forEach((sg) => {
       const lv = signalLive(sg), use = lv || sg.snap;
       let level = null, val = "Waiting for the daily run";
       if (sg.unit === "text") { if (use) { level = use.lvl; val = use.text; } }
       else if (use && fin(use.v)) { level = sg.level(use.v); val = fmtSignal(sg, use.v); }
       if (lv) nLive++;
+      states.push({ sg, level, live: !!lv });
       const card = h("article", "sig " + (level == null ? "lx" : "l" + level));
       card.id = "sig-" + sg.id;
       const top = h("div", "sig-top");
@@ -3540,7 +3978,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       if (level != null) card.append(h("span", "sig-act", sg.act[level]));
       const foot = h("div", "sig-foot");
       if (lv && sg.id === "capex") foot.append(h("span", "src", `SEC filings · quarter ended ${niceDate(lv.date)}`));
-      else if (lv) foot.append(liveBadge(lv.date));
+      else if (lv) foot.append(liveBadge(lv.date, STALE_DAYS[sg.id] || STALE_AFTER));
       else if (use && use.src) { const sp = h("span", "src"); sp.append(document.createTextNode("Snapshot · " + use.date + " · ")); const a = h("a", null, use.src[0]); a.href = use.src[1]; sp.append(a); foot.append(sp); }
       else foot.append(h("span", "src", "Live only: fills in after the first daily run"));
       if (sg.link) { const a = h("a", null, linkLabel(sg.link) + " →"); a.href = "#" + sg.link; a.className = "src"; foot.append(a); }
@@ -3550,6 +3988,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     $("#sig-sub").textContent = nLive
       ? `${nLive} of ${SIGNALS.length} signals read live from the daily run; the rest show the dated snapshot. Each has a rule and an action.`
       : `${SIGNALS.length} signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.`;
+    guard("Desk read", () => renderDeskRead(states), $("#desk-read"));
   }
 
   /* =====================================================================================
@@ -3561,7 +4000,9 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     const c = LIVE.macro && LIVE.macro.rates && LIVE.macro.rates.curves && LIVE.macro.rates.curves.latest;
     if (c && Array.isArray(c.points)) {
       const pts = c.points.filter((p) => fin(p.yield) && fin(p.years)).sort((a, b) => a.years - b.years);
-      if (pts.length >= 8 && pts[pts.length - 1].years >= 20) sets.push({ label: "FRED " + niceDate(c.date), years: pts.map((p) => p.years), y: pts.map((p) => p.yield / 100), live: true });
+      const years = pts.map((p) => p.years), y = pts.map((p) => p.yield / 100);
+      // a live curve joins only if it bootstraps to positive discount factors all the way out
+      if (pts.length >= 8 && years[years.length - 1] >= 20 && bootstrap(years, y).ok) sets.push({ label: "FRED " + niceDate(c.date), years, y, live: true });
     }
     return sets;
   }
@@ -3631,7 +4072,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     PLAYBOOKS.forEach((p) => {
       const c = h("article", "pb");
       c.id = p.id;
-      const sec = (title, node) => { const d = h("div"); d.append(h("h5", null, title), node); return d; };
+      const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (xs) => { const u = h("ul"); xs.forEach((x) => u.append(h("li", null, x))); return u; };
       c.append(h("span", "tagline", p.tag), h("h3", null, p.t), sec("Early signals", ul(p.sig)), sec("What usually moves", h("p", null, p.moves)),
         sec("First moves", ul(p.first)), sec("Avoid", h("p", null, p.avoid)), sec("All-clear", h("p", null, p.clear)));
@@ -3735,15 +4176,18 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
       box.append(grp);
     });
   }
+  // stable deep links: a question's id comes from its words, so adding questions never renumbers old links
+  const faqId = (f) => "faq-" + slug(f.q).slice(0, 60).replace(/-+$/, "");
   function buildFAQ() {
     const box = $("#faq");
-    let group = null, n = 0;
-    FAQ.forEach((f) => {
-      if (f.g !== group) { group = f.g; box.append(h("h3", null, group)); }
-      const d = h("details");
-      d.id = "faq-" + ++n;
-      d.append(h("summary", null, f.q), h("p", null, f.a));
-      box.append(d);
+    [...new Set(FAQ.map((f) => f.g))].forEach((g) => {
+      box.append(h("h3", null, g));
+      FAQ.filter((f) => f.g === g).forEach((f) => {
+        const d = h("details");
+        d.id = faqId(f);
+        d.append(h("summary", null, f.q), h("p", null, f.a));
+        box.append(d);
+      });
     });
     $("#faq-title").parentElement.querySelector(".prose").textContent = `${FAQ.length} questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.`;
   }
@@ -3782,7 +4226,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     const c = h("article", "ep");
     c.id = "ep-" + e.key;
     c.dataset.key = e.key;
-    c.append(h("span", "kind", e.kind), h("h4", null, e.name), h("span", "when", e.when));
+    c.append(h("span", "kind", e.kind), h("h3", null, e.name), h("span", "when", e.when));
     const dl = h("dl");
     [["Stocks", e.eq], ["Bonds", e.bonds], ["What worked", e.worked]].forEach(([k, v]) => dl.append(h("dt", null, k), h("dd", null, v)));
     c.append(dl, h("p", "lesson", e.lesson));
@@ -3823,11 +4267,102 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     CHECKLISTS.forEach((c) => {
       const card = h("article", "ck"), ol = h("ol");
       c.items.forEach((x) => ol.append(h("li", null, x)));
-      card.append(h("h4", null, c.t), ol);
+      card.append(h("h3", null, c.t), ol);
       box.append(card);
     });
   }
   function buildChangelog() { fillTable($("#changelog"), ["Version", "Date", "What changed"], CHANGELOG, 3); }
+
+  /* ---------- numbers to know and worked examples: the page's own math, shown step by step ---------- */
+  function vixNow() {
+    const lv = LIVE.macro && LIVE.macro.rates && LIVE.macro.rates.levels && LIVE.macro.rates.levels.vix;
+    return lv && fin(lv.value) && isoOk(lv.date) ? { v: lv.value, date: niceDate(lv.date) } : { v: STATIC_VOL.vix[0], date: STATIC_VOL.vix[1] };
+  }
+  function curveNowSet() { const sets = curveSets(); return sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 19") || sets[sets.length - 1]; }
+  function curveYield(tenor) { const set = curveNowSet(); return parAt(set.years, set.y, { "3M": 0.25, "2Y": 2, "10Y": 10, "30Y": 30 }[tenor]); }
+  function examples() {
+    const set = curveNowSet(), on = set.label, y = (t) => parAt(set.years, set.y, t), repo = y(0.25), out = [];
+    const vxl = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.latest && LIVE.macro.vol.latest.ndx;
+    const vxn = vxl && fin(vxl.implied) && isoOk(vxl.date) ? { v: vxl.implied, d: niceDate(vxl.date) } : { v: STATIC_VOL.vxn[0], d: STATIC_VOL.vxn[1] };
+    const lat = LIVE.macro && LIVE.macro.latest;
+    const ndx = lat && fin(lat.NASDAQ100) ? { v: lat.NASDAQ100, d: niceDate(lat.NASDAQ100_date || lat.as_of) } : { v: 29529.34, d: "Oct 19" };
+    {
+      const yy = y(10), dc = durCvx(yy, 10, yy), dv = dc.dur * 1e6 * 1e-4;
+      out.push({ id: "dv01", q: "What is a basis point worth on $1 million of 10-year notes?", link: ["bc-title", "Bond calculator"],
+        steps: [[`10-year par yield, ${on}`, fx(yy * 100, 2) + "%"], ["Modified duration of a par bond", fx(dc.dur, 2) + " years"], ["DV01 = duration × $1,000,000 × 0.0001", money(dv, 0)]],
+        a: `About ${money(dv, 0)} per basis point, so a 10bp move is about ${money(Math.round(dv) * 10, 0)}.` });
+    }
+    {
+      const yy = y(30), up = longBondReturn(yy, 100, 15.5), dn = longBondReturn(yy, -100, 15.5);
+      out.push({ id: "tlt100", q: "What does a 100bp rise in long yields do to TLT?", link: ["hedge", "Hedge lab"],
+        steps: [["Duration alone: −15.5 × 1%", pct(-0.155, 1)], [`Exact repricing of a TLT-like bond from ${fx(yy * 100, 2)}%`, pct(up, 2)], ["The same bond after a 100bp fall", pct(dn, 2)]],
+        a: `About ${pct(up, 1)}. Convexity makes the loss smaller than duration alone says and the gain larger: ${pct(dn, 1)} for a 100bp fall.` });
+    }
+    {
+      const f = futuresDV01(set.years, set.y, "ZN"), dv = 1e6 * 15.5 * 1e-4, n = dv / f.dv01;
+      out.push({ id: "zn", q: "How many 10-year futures replace $1 million of TLT?", link: ["fut-title", "Futures hedge"],
+        steps: [["TLT DV01 = $1,000,000 × 15.5 × 0.0001", money(dv, 0)], [`ZN: cheapest to deliver ${fx(f.ctdYears, 1)} years, conversion factor ${fx(f.cf, 4)}`, money(f.dv01, 2) + " a contract"], ["Contracts = TLT DV01 ÷ ZN DV01", fx(n, 1)]],
+        a: `About ${Math.round(n)} ZN contracts carry the rate risk of $1 million of TLT, for margin instead of cash.` });
+    }
+    {
+      const usd = 1e6 * 1.15 * 0.5, per = ndx.v * 2, n = usd / per;
+      out.push({ id: "mnq", q: "How many micro Nasdaq futures take half the beta off a $1 million book?", link: ["fut-title", "Futures hedge"],
+        steps: [["Beta dollars = $1,000,000 × 1.15 beta × 50%", money(usd, 0)], [`One MNQ = Nasdaq-100 at ${Math.round(ndx.v).toLocaleString("en-US")} (${ndx.d}) × $2`, money(per, 0)], ["Contracts = beta dollars ÷ notional per contract", fx(n, 1)]],
+        a: `Sell about ${Math.round(n)} MNQ; one NQ equals ten. Re-size when beta or the index moves.` });
+    }
+    {
+      const v = (vxn.v + 3) / 100, T = 91 / 365, o = bs(100, 90, T, repo, 0.006, v, "put"), cost = o.price / 100;
+      out.push({ id: "put90", q: "What does a 3-month 90% put on the Nasdaq-100 cost?", link: ["bs-title", "Option pricer"],
+        steps: [[`VXN ${fx(vxn.v, 2)} (${vxn.d}) plus about 3 points of skew at a 10% out-of-the-money strike`, fx(v * 100, 1) + "%"], [`Black-Scholes, 91 days, rate ${fx(repo * 100, 2)}%, dividend yield 0.6%`, pctPlain(cost, 2) + " of spot"], ["Rolled four times a year", pctPlain(cost * 365 / 91, 1) + " a year"]],
+        a: `About ${pctPlain(cost, 2)} of the position for three months, ${pctPlain(cost * 365 / 91, 1)} a year if rolled: why the desk reaches for put spreads when implied volatility is high.` });
+    }
+    {
+      const c = carryRoll(set.years, set.y, 10, repo);
+      out.push({ id: "carry10", q: "What does a financed 10-year earn in a year if the curve does not move?", link: ["fw-title", "Carry and roll-down"],
+        steps: [[`Carry: ${fx(c.coupon * 100, 2)}% coupon minus the ${fx(repo * 100, 2)}% 3-month bill`, pct(c.carry, 2)], ["Roll-down as it ages into a 9-year", pct(c.roll, 2)], ["One year in total", pct(c.total, 2)], ["Yield rise that uses it up", bp(c.breakevenBp)]],
+        a: `${pct(c.total, 2)} over the year, and the position survives a ${Math.round(c.breakevenBp)}bp rise in the 10-year yield.` });
+    }
+    {
+      const c = carryRoll(set.years, set.y, 30, repo);
+      out.push({ id: "carry30", q: "How far can the 30-year yield rise before a year of carry is gone?", link: ["fw-title", "Carry and roll-down"],
+        steps: [[`Carry: ${fx(c.coupon * 100, 2)}% coupon minus ${fx(repo * 100, 2)}% financing`, pct(c.carry, 2)], ["Roll-down into the 29-year point", pct(c.roll, 2)], ["Duration after a year", fx(c.durH, 1) + " years"], ["Breakeven: the rise that zeroes the year, solved exactly", bp(c.breakevenBp)]],
+        a: `Only about ${Math.round(c.breakevenBp)}bp: the long end carries little cushion for its risk${c.roll < 0 ? ", because the 20-year kink makes it roll up the curve instead of down" : ""}.` });
+    }
+    {
+      const sig = 0.32, L = 1.5, need = L * sig * sig;
+      out.push({ id: "kelly", q: "What edge would justify running a 32%-volatility book at 1.5x?", link: ["size", "Sizing lab"],
+        steps: [["Kelly leverage = edge ÷ variance, so full Kelly needs edge = 1.5 × 0.32²", pctPlain(need, 1) + " a year"], ["Half Kelly needs twice that", pctPlain(need * 2, 1) + " a year"], ["Quarter Kelly needs four times", pctPlain(need * 4, 1) + " a year"]],
+        a: `About ${pctPlain(need * 4, 0)} a year over cash at quarter Kelly. No honest forecast clears that, so the risk limits, not the forecast, set the size.` });
+    }
+    return out;
+  }
+  function buildExamples() {
+    const box = $("#examples"), list = examples();
+    box.replaceChildren();
+    list.forEach((x) => {
+      const c = h("article", "wx"), ol = h("ol", "wx-steps"), a = h("a", "src", x.link[1] + " →");
+      c.id = "wx-" + x.id;
+      x.steps.forEach(([k, v]) => { const li = h("li"); li.append(h("span", null, k), h("b", null, v)); ol.append(li); });
+      a.href = "#" + x.link[0];
+      c.append(h("h3", null, x.q), ol, h("p", "wx-ans", x.a), a);
+      box.append(c);
+    });
+    $("#wx-sub").textContent = `${list.length} questions the tools answer, worked step by step with the page's own math on the ${curveNowSet().label} curve.`;
+  }
+  function buildRules() {
+    const box = $("#rules");
+    box.replaceChildren();
+    RULES.forEach((r) => {
+      const c = h("article", "nk");
+      c.id = "nk-" + slug(r.t);
+      c.append(h("h3", null, r.t), h("p", null, r.r));
+      let now = "";
+      try { now = r.v ? r.v() : ""; } catch (e) { now = ""; }
+      if (now) c.append(h("p", "nk-now", now));
+      if (r.at) { const a = h("a", "src", "Where it is used →"); a.href = "#" + r.at; c.append(a); }
+      box.append(c);
+    });
+  }
 
   /* =====================================================================================
      ENGINE: system status from data/status.json
@@ -3930,11 +4465,13 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     LENSES.forEach((L) => add(L.n, L.idea, "Lens", "lens-" + slug(L.n), L.read));
     EPISODES.forEach((e) => add(e.name, `${e.when} · ${e.lesson}`, "Episode", "ep-" + e.key, `${e.kind} ${e.worked}`));
     PLAYBOOKS.forEach((p) => add(`${p.t} playbook`, p.moves, "Playbook", p.id, p.sig.join(" ")));
-    FAQ.forEach((f, i) => add(f.q, f.a, "Question", "faq-" + (i + 1), f.g));
+    FAQ.forEach((f) => add(f.q, f.a, "Question", faqId(f), f.g));
+    RULES.forEach((r) => add(r.t, r.r, "Rule", "nk-" + slug(r.t)));
+    examples().forEach((x) => add(x.q, x.a, "Example", "wx-" + x.id));
     MATRIX.forEach((m) => add(`${m.h} as a hedge`, m.note, "Hedge", "mx-title", m.sub));
     SIGNALS.forEach((sg) => add(`${sg.name} signal`, sg.rule, "Signal", "sig-" + sg.id));
   }
-  const KIND_RANK = { Desk: 9, Tool: 8, Term: 7, Signal: 6, Playbook: 6, Section: 5, Thesis: 5, Hedge: 4, Security: 4, Episode: 3, Question: 3, Lens: 2 };
+  const KIND_RANK = { Desk: 9, Tool: 8, Term: 7, Signal: 6, Playbook: 6, Section: 5, Thesis: 5, Rule: 5, Example: 5, Hedge: 4, Security: 4, Episode: 3, Question: 3, Lens: 2 };
   function searchIndex(q) {
     const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
     if (!terms.length) return INDEX.filter((x) => x.kind === "Desk" || x.kind === "Tool");
@@ -4040,8 +4577,8 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
   const VIEWS = ["desk", "rates", "options", "hedges", "securities", "insurers", "theses", "lenses", "engine", "appendix"];
   const RENDER = {
     desk: () => { guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
-    rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); },
-    options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); },
+    rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
+    options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
     securities: () => guard("Risk drivers", renderDrivers, $("#drv-chart")),
     insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {},
@@ -4075,10 +4612,10 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
     } else if (scroll) window.scrollTo(0, 0);
   }
 
-  [["Key levels", () => renderLevels(null), "#levels"], ["Signals", renderSignals, "#signals-grid"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
+  [["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
-   ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
+   ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
    ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Navigation", wireNavigation]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
 
@@ -4123,6 +4660,11 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
         guard("Engine readout", () => renderMacro(m), $("#macro-body"));
         guard("Key levels", () => renderLevels(m), $("#levels"));
         guard("Live rates", () => buildRatesLive(m), $("#rates-live"));
+        guard("What moved", renderMoves, $("#mv-table"));
+        guard("Insurance", renderInsurance, $("#iv-tiles"));
+        guard("Liquidity", renderLiquidity, $("#liq-tiles"));
+        guard("Numbers to know", buildRules, $("#rules"));
+        guard("Worked examples", buildExamples, $("#examples"));
         guard("Forward dates", buildForwardDates);
         guard("Data dictionary", buildDict);
         guard("Episode atlas", buildEpisodes, $("#ep-grid"));

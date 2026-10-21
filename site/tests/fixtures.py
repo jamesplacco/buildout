@@ -38,6 +38,20 @@ def fake_fred(seed: int = 3) -> pd.DataFrame:
     df["BAMLC0A0CM"], df["BAMLH0A0HYM2"] = np.abs(walk(1.1, 0.01)), np.abs(walk(3.5, 0.03)) + 1
     df["VIXCLS"], df["DTWEXBGS"] = np.abs(walk(18, 0.3)) + 10, walk(120, 0.2)
     df["DCOILBRENTEU"], df["DCOILWTICO"] = np.abs(walk(80, 1)) + 20, np.abs(walk(75, 1)) + 20
+    # v0.4 market reads: more spreads, volatility indexes, prices, and the Fed's plumbing
+    df["T5YIE"], df["T5YIFR"] = walk(2.4, 0.01), walk(2.3, 0.01)
+    df["BAMLC0A4CBBB"], df["BAMLH0A3HYC"] = np.abs(walk(1.4, 0.01)), np.abs(walk(9.0, 0.05)) + 3
+    df["VXNCLS"] = df["VIXCLS"] * 1.25
+    df["VXVCLS"] = df["VIXCLS"] * 1.05 + 1
+    df["SP500"] = w.prices["QQQ"] * 20
+    df["DEXJPUS"], df["CBBTCUSD"] = np.abs(walk(150, 0.4)) + 50, np.abs(walk(60000, 900)) + 5000
+    wed = idx[idx.dayofweek == 2]
+    df.loc[wed, "WALCL"] = np.abs(walk(6.8e6, 2e3))[: len(wed)]
+    df.loc[wed, "WTREGEN"] = np.abs(walk(8.0e5, 5e3))[: len(wed)]
+    df.loc[wed, "WRESBAL"] = np.abs(walk(3.1e3, 8))[: len(wed)]
+    df["RRPONTSYD"] = np.abs(walk(300, 3))
+    df["IORB"] = 3.90
+    df["SOFR"] = 3.90 + rng.normal(-0.02, 0.01, len(idx))
     return df
 
 
