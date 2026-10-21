@@ -166,8 +166,15 @@ and run with `--config config.private.toml`.
 `python -m buildout mcp --data out` (or `python -m buildout.mcp_server`) speaks the Model Context Protocol over stdio,
 standard library only. Register it with any MCP client, for example:
 
+```bash
+pip install -e .                                   # once, so the module resolves from any folder
+claude mcp add buildout -- /path/to/venv/bin/python -m buildout mcp --data /path/to/buildout/site/data   # Claude Code
+```
+
+Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app does not start in the repo):
+
 ```json
-{"mcpServers": {"buildout": {"command": "python", "args": ["-m", "buildout", "mcp", "--data", "out"], "cwd": "/path/to/buildout"}}}
+{"mcpServers": {"buildout": {"command": "/path/to/venv/bin/python", "args": ["-m", "buildout", "mcp", "--data", "/path/to/buildout/site/data"]}}}
 ```
 
 | Tool | Answers |
