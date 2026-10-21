@@ -1,0 +1,43 @@
+# Buildout engine configuration. Copy to config.toml and edit.
+# The public page uses this MODEL book. Keep real positions in a private config that is never committed.
+
+[universe]
+market = "QQQ"                     # market factor
+hedges = ["TLT", "IEF"]            # hedge candidates (add GLD, UUP, SH etc. to compare)
+ai_factor = ["MSFT", "AMZN", "GOOGL", "META", "NVDA", "AVGO", "TSLA", "SPCX", "ORCL"]
+
+[universe.book]                    # fraction of NAV; the engine decides leverage and hedge on top
+MSFT  = 0.14
+AMZN  = 0.14
+GOOGL = 0.14
+META  = 0.12
+NVDA  = 0.14
+AVGO  = 0.08
+TSLA  = 0.10
+SPCX  = 0.08                       # IPO June 12, 2026: short history, beta shrinks toward its prior
+ORCL  = 0.06
+
+[universe.priors]
+SPCX = "TSLA"                      # seed SPCX's betas from TSLA until its own history is long enough
+
+[risk]
+target_vol = 0.20
+max_gross = 1.50
+kelly_fraction = 0.25
+max_drawdown = 0.25
+trim_band = 0.20
+max_hedge_ratio = 1.0
+cost_bps = 2.0
+financing_spread_bps = 100.0
+corr_halflife = 63
+beta_halflife = 126
+
+[data]
+source = "databento"               # databento | csv | synthetic
+start = "2018-05-01"               # XNAS.ITCH history begins 2018-05-01
+equities_dataset = "auto"
+futures_dataset = "GLBX.MDP3"
+futures_roots = ["ZN", "UB"]       # 10y note and ultra bond futures for DV01 hedging
+cache_dir = ".cache"
+use_fred = true
+sec_user_agent = "Your Name your@email.com"

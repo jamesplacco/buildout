@@ -1,0 +1,24 @@
+[project]
+name = "buildout"
+version = "0.1.0"
+description = "Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.24", "pandas>=2.0", "scipy>=1.10", "pyarrow>=14"]
+
+[project.optional-dependencies]
+databento = ["databento>=0.40"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+buildout = "buildout.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["buildout*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

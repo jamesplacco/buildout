@@ -1,0 +1,846 @@
+
+<a class="skip" href="#main" id="skip">Skip to content</a>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-group">
+    <a class="brand" href="#desk">
+      <svg viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="1" y="1" width="26" height="26" rx="6" fill="var(--accent)"></rect>
+        <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
+        <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
+      </svg>
+      Buildout <span class="ver">v0.3</span>
+    </a>
+    <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+      <span class="search-label">Search</span><kbd>/</kbd>
+    </button>
+    </div>
+    <nav class="tabs" aria-label="Desks">
+      <a href="#desk" data-view="desk">Desk</a>
+      <a href="#rates" data-view="rates">Rates</a>
+      <a href="#options" data-view="options">Options</a>
+      <a href="#hedges" data-view="hedges">Hedges</a>
+      <a href="#securities" data-view="securities">Securities</a>
+      <a href="#insurers" data-view="insurers">Insurers</a>
+      <a href="#theses" data-view="theses">Theses</a>
+      <a href="#lenses" data-view="lenses">Lenses</a>
+      <a href="#engine" data-view="engine">Engine</a>
+      <a href="#appendix" data-view="appendix">Appendix</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page" id="main" tabindex="-1">
+
+<!-- ======================= DESK ======================= -->
+<section class="view" id="view-desk" aria-labelledby="desk-title">
+  <div class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Risk note · October 20, 2026 · Jamie Placco</p>
+      <h1 id="desk-title">Real yields near 3%. Brent above $120. AI credit <em>starting to crack.</em></h1>
+      <p class="lede">Buildout is a cross-asset risk desk built around one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit and volatility every day, prices the hedges, and sizes positions to survive. Right now long Treasuries are an unreliable hedge, so the desk leans on convexity and position size, and lets the data say when duration works again.</p>
+      <div class="chips" aria-label="Status">
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 62 of 62 pass</span></span>
+        <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
+        <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
+        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 19, 2026</span>
+      </div>
+    </div>
+    <div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout · 2026</span></div>
+  </div>
+
+  <nav class="start" aria-label="Start here">
+    <a class="start-card" href="#size"><span class="eyebrow">Question 1</span><strong>How big?</strong><span>Risk limits set the size; Kelly checks the edge.</span></a>
+    <a class="start-card" href="#hedge"><span class="eyebrow">Question 2</span><strong>How much hedge?</strong><span>Price a TLT hedge against five AI scenarios.</span></a>
+    <a class="start-card" href="#regime-title"><span class="eyebrow">Question 3</span><strong>When does the hedge stop working?</strong><span>The stock-bond regime, read every day.</span></a>
+    <a class="start-card" href="#pb-title"><span class="eyebrow">Playbooks</span><strong>What do I do when it happens?</strong><span>Signals, first moves and the all-clear for six scenarios.</span></a>
+  </nav>
+
+  <section class="section" id="signals" aria-labelledby="sig-title">
+    <div class="section-head">
+      <p class="eyebrow">Signals</p>
+      <h2 id="sig-title">What the desk is watching</h2>
+      <p class="prose" id="sig-sub">Nine signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.</p>
+    </div>
+    <div class="signals" id="signals-grid"></div>
+    <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds.</p>
+  </section>
+
+  <section class="section" aria-labelledby="levels-title">
+    <div class="section-head">
+      <p class="eyebrow">Market</p>
+      <h2 id="levels-title">Key levels</h2>
+      <p class="prose" id="levels-sub">A dated snapshot from official and market sources. Tiles marked live refresh from the engine's daily run.</p>
+    </div>
+    <div class="tiles" id="levels"></div>
+  </section>
+
+  <section class="section" aria-labelledby="regime-title">
+    <div class="section-head">
+      <p class="eyebrow">Regime</p>
+      <h2 id="regime-title">Where we are</h2>
+      <p class="prose">Ray Dalio's four economic environments, mapped to today. Growth is still holding up and inflation is rising with oil. That corner rewards commodities and inflation-linked assets and punishes nominal bonds and long-duration growth stocks.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="quad-wrap">
+          <div class="quad-y">Inflation rising ↑</div>
+          <div class="quad">
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h4>Stagflation</h4><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
+            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h4>Inflationary boom</h4><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h4>Deflationary bust</h4><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
+            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h4>Goldilocks</h4><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
+          </div>
+          <div class="quad-x">Growth rising →</div>
+        </div>
+        <p class="hint">Asset placement is the desk's synthesis of Bridgewater's All Weather framework. Growth read: the Fed's September statement (solid expansion, steady unemployment). Inflation read: energy-led CPI of 4.2% in May and Brent at $125 on Oct 7. "Edging left": the Nasdaq's worst week since June and AI credit stress.</p>
+      </div>
+      <figure class="panel chart" style="margin:0">
+        <div class="chart-head"><span class="chart-title">Are bonds hedging stocks?</span><span class="src">Stock-bond return correlation, one-year window</span></div>
+        <div class="svgbox" id="gauge" role="img" aria-label="Stock-bond return correlation: about -0.6 in 2020, about +0.05 on average after 2021, +0.21 on July 31, 2026."></div>
+        <p class="hint">S&amp;P 500 against the 10-year Treasury. The Fed reports stock returns against yield changes; the sign is flipped so that negative means bonds rose when stocks fell. Source: <a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve, FEDS Notes, Oct 16, 2026</a>.</p>
+        <dl class="dlist glist">
+          <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
+          <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
+          <dt>Engine rule</dt><dd>Hold the long-bond hedge only after the correlation (63-day half-life) falls below −0.10, and drop it once it turns positive.</dd>
+        </dl>
+        <p class="sentence" id="gauge-live" hidden></p>
+      </figure>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">What protects the book in this regime</span><a class="src" href="#hedges">Full hedge matrix</a></div>
+      <div class="grid3">
+        <div><p><strong>Convexity first.</strong></p><p class="prose">Index put spreads pay in any fast drawdown, whatever the cause. Their cost is known on day one.</p></div>
+        <div><p><strong>Cover the oil lane.</strong></p><p class="prose">Energy and inflation-linked exposure rise in the one scenario where bonds and stocks fall together.</p></div>
+        <div><p><strong>Duration on a leash.</strong></p><p class="prose">Hold long Treasuries only while the engine's correlation says they hedge. Credit protection covers an AI financing break.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="live" aria-labelledby="live-title">
+    <div class="section-head">
+      <p class="eyebrow">Live data</p>
+      <h2 id="live-title">Engine readout</h2>
+      <p class="prose">Computed every weekday morning on GitHub Actions. The market panel runs on free FRED data; the book panel switches on once the Databento key is in place.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Waiting for the first daily run</span></div>
+      <div id="macro-body" class="section">
+        <div class="empty"><strong>First daily run pending.</strong><span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Model book</span><span class="src" id="book-asof">Needs the Databento key</span></div>
+      <div id="book-body" class="section">
+        <div class="empty"><strong>Book analytics start with the Databento key.</strong><span>Once the key is saved as a repository secret, each daily run adds the book's own regime, the hedge ratio it implies, a four-policy backtest with deflated Sharpe ratios, factor exposures, and the size to run.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="cal-title">
+    <div class="section-head">
+      <p class="eyebrow">Calendar</p>
+      <h2 id="cal-title">What could move it next</h2>
+    </div>
+    <ul class="cal">
+      <li><b>Oct 21</b><span>Meta Q3 results after the close. Q2 free cash flow was $0.8B against $8.6B a year earlier, and the stock fell about 10% between Oct 13 and Oct 19. <a class="src" href="https://vantagemarkets.com/market-analysis/meta-stock-price-today-q3-earnings-ahead-october-20-2026">Vantage Markets</a></span></li>
+      <li><b>Oct 27–28</b><span>FOMC. Market odds of a second straight hike fell from 70% on Sep 28 to 19% on Oct 8, then rose to about 33% by Oct 16. UOB expects hikes in December and early 2027 to a 4.50% upper bound. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a> · <a class="src" href="https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026">ROIC (Reuters)</a></span></li>
+      <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">FXStreet</a></span></li>
+      <li><b>Now</b><span>AI credit: credit default swaps on CoreWeave traded at distress levels on Oct 15, and the Nasdaq posted its worst week since June on Oct 16 on AI selling and oil. <a class="src" href="https://vantagemarkets.com/market-analysis/meta-stock-price-today-q3-earnings-ahead-october-20-2026">Vantage (citing CNBC)</a> · <a class="src" href="https://www.cnbc.com/2026/10/15/stock-market-today-live-updates.html">CNBC</a></span></li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="tq-title">
+    <div class="section-head">
+      <p class="eyebrow">Theses</p>
+      <h2 id="tq-title">Working theses</h2>
+      <p class="prose">Each one has evidence, an expression, a hedge, and the data that would change the desk's mind.</p>
+    </div>
+    <div class="tchips" id="thesis-chips"></div>
+  </section>
+
+  <footer class="foot"><p>Research desk, not investment advice. The model book is illustrative. Scenario sizes and tool inputs are assumptions; every market figure links to its source and date.</p></footer>
+</section>
+
+<!-- ======================= RATES ======================= -->
+<section class="view" id="view-rates" hidden aria-labelledby="rates-title">
+  <div class="vhead">
+    <p class="eyebrow">Rates &amp; curves</p>
+    <h1 id="rates-title">The curve moved up as a block, and real yields did the lifting.</h1>
+    <p class="lede">Every Treasury yield from one month to 30 years is 40 to 130bp higher than on Jan 2, led by the 2- and 3-year notes as the Fed turned to hikes. Since spring the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp. That is a real-rate squeeze, the regime in which long bonds stop hedging stocks.</p>
+  </div>
+
+  <section class="section" aria-label="Treasury curve">
+    <div class="panel">
+      <div class="chart-head"><span class="chart-title">US Treasury par yield curve, five dates in 2026</span><span class="legend" id="curve-legend"></span></div>
+      <div class="svgbox" id="curve-chart"></div>
+      <span class="src">Source: <a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/2026/all?type=daily_treasury_yield_curve">US Treasury, daily par yield curve rates</a></span>
+      <details class="tableview"><summary>Show as table, with change since Jan 2</summary><div class="tablewrap"><table id="curve-table"></table></div></details>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Curve spreads, Oct 19 vs Jan 2</span></div>
+        <div class="tiles compact" id="spread-tiles"></div>
+        <p class="hint">2s10s and 10s30s flattened as the front end priced hikes; 3m10y steepened because 2-year and longer yields rose more than bills. 20s30s went from +5bp to −5bp: the 20-year again yields more than the 30-year, the old kink from thin demand for 20-year bonds.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">What the 10-year pays you for</span><span class="src">Sep 17 and Oct 7, 2026</span></div>
+        <div class="decomp" id="decomp"></div>
+        <p class="hint">Nominal yield = real yield (TIPS) + breakeven inflation. The Sep 17 10-year TIPS auction cleared at a 2.653% real yield, the highest in nearly 18 years. Sources: <a href="https://www.macroradar.io/as-of/2026-10-07">FRED via MacroRadar</a> · <a href="https://tipswatch.com/2026/09/17/10-year-tips-reopening-gets-real-yield-of-2-653-highest-in-nearly-18-years/">Tipswatch</a> · <a href="https://www.roic.ai/news/breakeven-rates-on-10-year-tips-rise-to-246-highest-since-february-2025-04-29-2026">ROIC (Apr 29 breakeven 2.46%)</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="fw-title">
+    <div class="section-head"><p class="eyebrow">Analysis</p><h2 id="fw-title">What the curve pays you to own it</h2><p class="prose">Bootstrapped from the par curve: zero rates, the forward curve, and what each tenor earns over a year if nothing moves. The breakeven is the yield rise each position can absorb before carry and roll-down are gone.</p></div>
+    <div class="panel">
+      <div class="chart-head"><span class="chart-title" id="fw-chart-title">Par, zero and forward curves</span><span class="legend" id="fw-legend"></span></div>
+      <div class="seg" id="fw-dates" role="group" aria-label="Curve date"></div>
+      <div class="svgbox" id="fw-chart"></div>
+      <details class="tableview"><summary>Show key forward rates as a table</summary><div class="tablewrap"><table id="fw-table"></table></div></details>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><span class="panel-title">One year of carry and roll-down</span><span class="src">Financed at the 3-month bill; curve unchanged</span></div><div class="tablewrap"><table id="cr-table"></table></div></div>
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Yield rise each tenor can absorb in a year, bp</span></div><div class="svgbox" id="cr-chart"></div><p class="sentence" id="cr-out"></p></figure>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="policy-title">
+    <div class="section-head"><p class="eyebrow">Policy and the global long end</p><h2 id="policy-title">Who sets the price of duration</h2></div>
+    <div class="tiles">
+      <article class="tile"><span class="label">Fed funds target</span><span class="value">3.75–4.00%</span><span class="note">Hiked 25bp on Sep 16; all 19 participants backed it.</span><span class="src"><a href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a></span></article>
+      <article class="tile"><span class="label">Odds of an October hike</span><span class="value">≈33%</span><span class="note">Oct 16, up from 19% on Oct 8 and down from 70% on Sep 28. UOB sees 4.50% by early 2027.</span><span class="src"><a href="https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026">ROIC (Reuters)</a> · <a href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a></span></article>
+      <article class="tile"><span class="label">Japan 30-year auction</span><span class="value">4.11%</span><span class="note">Oct 8 average yield on a 4.2% coupon. Japanese insurers can now earn at home.</span><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
+      <article class="tile"><span class="label">UK Bank Rate</span><span class="value">3.75%</span><span class="note">As of Oct 7.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">MacroRadar</a></span></article>
+      <article class="tile"><span class="label">Fed balance sheet</span><span class="value">$6.74T</span><span class="note">September; Treasury cash account $949B.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">FRED via MacroRadar</a></span></article>
+    </div>
+  </section>
+
+  <section class="section" id="rates-live-sec" aria-labelledby="rlive-title">
+    <div class="section-head"><p class="eyebrow">Live data</p><h2 id="rlive-title">Curve and spreads from the daily run</h2></div>
+    <div id="rates-live"><div class="empty"><strong>Waiting for the first daily run.</strong><span>The run adds today's FRED curve against a year ago, 2s10s and 3m10y since 2000, real yields and breakevens, the 10-year term premium, and credit spreads.</span></div></div>
+  </section>
+
+  <section class="section" aria-labelledby="bc-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="bc-title">Bond calculator</h2><p class="prose">Exact repricing on the coupon grid. Defaults are a 10-year par bond at the Oct 19 yield.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="bc-form" aria-label="Bond inputs">
+        <div class="inline2">
+          <div class="field"><label for="bc-cpn">Coupon, %</label><input type="number" id="bc-cpn" step="0.125" value="5.15"></div>
+          <div class="field"><label for="bc-yld">Yield, %</label><input type="number" id="bc-yld" step="0.01" value="5.15"></div>
+        </div>
+        <div class="inline2">
+          <div class="field"><label for="bc-mat">Years to maturity</label><input type="number" id="bc-mat" step="0.5" min="0.5" max="50" value="10"></div>
+          <div class="field"><label for="bc-face">Face value, $</label><input type="number" id="bc-face" step="1000" min="1000" value="100000"></div>
+        </div>
+        <div class="field"><div class="field-top"><label for="bc-shock">Yield shock</label><output id="bc-shock-o" for="bc-shock"></output></div><input type="range" id="bc-shock" min="-200" max="200" step="5" value="100"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Price per 100</span><span class="v num" id="bc-price"></span></div>
+          <div class="ro"><span class="k">Modified duration</span><span class="v num" id="bc-dur"></span></div>
+          <div class="ro"><span class="k">Convexity</span><span class="v num" id="bc-cvx"></span></div>
+          <div class="ro key"><span class="k">DV01 on this face</span><span class="v num" id="bc-dv01"></span></div>
+        </div>
+        <p class="sentence" id="bc-out"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="ct-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="ct-title">Curve trade</h2><p class="prose">A DV01-neutral 2s10s steepener: long 2-year, short 10-year, sized so a parallel move costs almost nothing and only the spread pays.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="ct-form" aria-label="Curve trade inputs">
+        <div class="field"><div class="field-top"><label for="ct-dv01">Risk, $ per bp</label><output id="ct-dv01-o" for="ct-dv01"></output></div><input type="range" id="ct-dv01" min="100" max="5000" step="100" value="1000"></div>
+        <div class="field"><div class="field-top"><label for="ct-d2">2-year yield change</label><output id="ct-d2-o" for="ct-d2"></output></div><input type="range" id="ct-d2" min="-150" max="150" step="5" value="-50"></div>
+        <div class="field"><div class="field-top"><label for="ct-d10">10-year yield change</label><output id="ct-d10-o" for="ct-d10"></output></div><input type="range" id="ct-d10" min="-150" max="150" step="5" value="-20"></div>
+        <div class="seg" id="ct-presets" role="group" aria-label="Curve presets"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Long 2-year notional</span><span class="v num" id="ct-n2"></span></div>
+          <div class="ro"><span class="k">Short 10-year notional</span><span class="v num" id="ct-n10"></span></div>
+          <div class="ro"><span class="k">Spread change</span><span class="v num" id="ct-ds"></span></div>
+          <div class="ro key"><span class="k">P&amp;L</span><span class="v num" id="ct-pnl"></span></div>
+        </div>
+        <p class="sentence" id="ct-out"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="dm-title">
+    <div class="section-head"><p class="eyebrow">Reference</p><h2 id="dm-title">How to own duration</h2><p class="prose">Par-bond approximation at Oct 19 yields. DV01 is the dollar change per basis point on $100,000.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="duration-table"></table></div></div>
+  </section>
+</section>
+
+<!-- ======================= OPTIONS ======================= -->
+<section class="view" id="view-options" hidden aria-labelledby="options-title">
+  <div class="vhead">
+    <p class="eyebrow">Options &amp; volatility</p>
+    <h1 id="options-title">Insurance with a known premium and a known payout.</h1>
+    <p class="lede">An option is the one hedge whose payoff is written into the contract. It cannot change correlation on you. These tools price the insurance, show the payoff against the book, and size a yearly budget. Cboe flagged volatility and convexity premia at their lowest of the year in mid-August, before October's AI selloff.</p>
+    <span class="src"><a href="https://www.cboe.com/insights/posts/week-of-8-17-2026-volatility-convexity-premia-fall-to-lowest-ytd-levels-on-benign-inflation-data">Cboe, week of Aug 17, 2026</a></span>
+  </div>
+
+  <section class="section" aria-labelledby="bs-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="bs-title">Option pricer</h2><p class="prose">Black-Scholes with a dividend yield. Defaults: a three-month put 10% below spot at 24% implied volatility, rate at the 3-month bill.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="bs-form" aria-label="Option inputs">
+        <div class="field"><span class="flabel" id="bs-type-l">Type</span><div class="seg" role="group" aria-labelledby="bs-type-l" id="bs-type"><button type="button" data-v="put" aria-pressed="true">Put</button><button type="button" data-v="call" aria-pressed="false">Call</button></div></div>
+        <div class="inline2">
+          <div class="field"><label for="bs-S">Spot</label><input type="number" id="bs-S" value="100" step="1" min="0.01"></div>
+          <div class="field"><label for="bs-K">Strike</label><input type="number" id="bs-K" value="90" step="1" min="0.01"></div>
+        </div>
+        <div class="field"><div class="field-top"><label for="bs-T">Days to expiry</label><output id="bs-T-o" for="bs-T"></output></div><input type="range" id="bs-T" min="7" max="730" step="1" value="91"></div>
+        <div class="field"><div class="field-top"><label for="bs-v">Implied volatility</label><output id="bs-v-o" for="bs-v"></output></div><input type="range" id="bs-v" min="5" max="100" step="0.5" value="24"></div>
+        <div class="inline2">
+          <div class="field"><label for="bs-r">Rate, %</label><input type="number" id="bs-r" value="4.27" step="0.01" min="-2" max="20"></div>
+          <div class="field"><label for="bs-q">Dividend yield, %</label><input type="number" id="bs-q" value="0.6" step="0.1" min="0" max="20"></div>
+        </div>
+        <div class="field"><label for="bs-mkt">Market price, optional: solves for implied volatility</label><input type="number" id="bs-mkt" step="0.01" min="0" placeholder="e.g. 1.25"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Premium</span><span class="v num" id="bs-px"></span></div>
+          <div class="ro"><span class="k">Cost, % of spot</span><span class="v num" id="bs-pct"></span></div>
+          <div class="ro"><span class="k">Delta</span><span class="v num" id="bs-delta"></span></div>
+          <div class="ro"><span class="k">Probability in the money</span><span class="v num" id="bs-pitm"></span></div>
+          <div class="ro"><span class="k">Gamma</span><span class="v num" id="bs-gamma"></span></div>
+          <div class="ro"><span class="k">Vega, per vol point</span><span class="v num" id="bs-vega"></span></div>
+          <div class="ro"><span class="k">Theta, per day</span><span class="v num" id="bs-theta"></span></div>
+          <div class="ro"><span class="k">Breakeven at expiry</span><span class="v num" id="bs-be"></span></div>
+        </div>
+        <p class="sentence" id="bs-out"></p>
+        <p class="sentence" id="bs-iv" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="po-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="po-title">Hedge payoff builder</h2><p class="prose">Book plus hedge at expiry, in percent of NAV. Premiums come from the pricer with one implied volatility for every strike, so out-of-the-money puts look a little cheaper than they trade.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="po-form" aria-label="Payoff inputs">
+        <div class="field"><span class="flabel" id="po-strat-l">Strategy</span><div class="seg" role="group" aria-labelledby="po-strat-l" id="po-strat"></div></div>
+        <div class="field"><div class="field-top"><label for="po-v">Implied volatility</label><output id="po-v-o" for="po-v"></output></div><input type="range" id="po-v" min="8" max="80" step="0.5" value="24"></div>
+        <div class="field"><div class="field-top"><label for="po-T">Days to expiry</label><output id="po-T-o" for="po-T"></output></div><input type="range" id="po-T" min="14" max="365" step="1" value="91"></div>
+        <p class="hint" id="po-desc"></p>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Hedge cost, % of NAV</span><span class="v num" id="po-cost"></span></div>
+          <div class="ro"><span class="k">At −20%</span><span class="v num" id="po-m20"></span></div>
+          <div class="ro"><span class="k">At −35%</span><span class="v num" id="po-m35"></span></div>
+          <div class="ro key"><span class="k">At +20%</span><span class="v num" id="po-p20"></span></div>
+        </div>
+        <figure class="chart">
+          <div class="chart-head"><span class="chart-title">P&amp;L at expiry by underlying move, % of NAV</span><span class="legend"><span><i class="ln" style="background:var(--muted)"></i>Book alone</span><span><i class="ln" style="background:var(--s2)"></i>Book with hedge</span></span></div>
+          <div class="svgbox" id="po-chart"></div>
+          <details class="tableview"><summary>Show legs and payoffs as a table</summary><div class="tablewrap"><table id="po-table"></table></div></details>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="grid-title">
+    <div class="section-head"><p class="eyebrow">Risk</p><h2 id="grid-title">Spot-vol grid</h2><p class="prose">The payoff builder's position, revalued instantly across moves in the underlying and in implied volatility. Read across a row for the vega exposure, down a column for delta and gamma.</p></div>
+    <div class="panel">
+      <div class="chart-head"><span class="chart-title" id="grid-cap">Instant P&amp;L, % of NAV</span><span class="legend"><span><i style="background:var(--grid-neg)"></i>Loss</span><span><i style="background:var(--grid-pos)"></i>Gain</span></span></div>
+      <div class="tablewrap"><table class="svgrid" id="sv-grid"></table></div>
+      <p class="hint">Strategy, volatility and tenor come from the payoff builder. Volatility shifts are in points and apply to every strike; real markets add skew, so put volatility usually rises more than call volatility in a selloff.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tb-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="tb-title">Tail-hedge budget</h2><p class="prose">Taleb's trade in one table: a small, steady premium that buys a large payout in a crash. Roll out-of-the-money puts on the full book and see what a year of insurance costs against what one bad quarter pays.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="tb-form" aria-label="Tail budget inputs">
+        <div class="field"><div class="field-top"><label for="tb-k">Put strike, % of spot</label><output id="tb-k-o" for="tb-k"></output></div><input type="range" id="tb-k" min="70" max="98" step="1" value="85"></div>
+        <div class="field"><div class="field-top"><label for="tb-T">Tenor of each put</label><output id="tb-T-o" for="tb-T"></output></div><input type="range" id="tb-T" min="30" max="365" step="1" value="91"></div>
+        <div class="field"><div class="field-top"><label for="tb-v">Implied vol at that strike</label><output id="tb-v-o" for="tb-v"></output></div><input type="range" id="tb-v" min="10" max="70" step="0.5" value="30"></div>
+        <div class="field"><div class="field-top"><label for="tb-n">Hedge notional, % of book</label><output id="tb-n-o" for="tb-n"></output></div><input type="range" id="tb-n" min="25" max="150" step="5" value="100"></div>
+        <p class="hint">Out-of-the-money puts usually trade at a higher implied volatility than at-the-money options; the default allows for that skew.</p>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Premium per roll</span><span class="v num" id="tb-roll"></span></div>
+          <div class="ro"><span class="k">Rolls per year</span><span class="v num" id="tb-rolls"></span></div>
+          <div class="ro key"><span class="k">Yearly budget, % of NAV</span><span class="v num" id="tb-year"></span></div>
+          <div class="ro"><span class="k">Payout in a −35% quarter</span><span class="v num" id="tb-pay"></span></div>
+        </div>
+        <p class="sentence" id="tb-out"></p>
+        <figure class="chart">
+          <div class="chart-head"><span class="chart-title">Book drawdown with and without the hedge, one quarter</span><span class="legend"><span><i style="background:var(--s1)"></i>Unhedged</span><span><i style="background:var(--s2)"></i>Hedged, net of one year's premium</span></span></div>
+          <div class="svgbox" id="tb-chart"></div>
+          <details class="tableview"><summary>Show as table</summary><div class="tablewrap"><table id="tb-table"></table></div></details>
+        </figure>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ======================= HEDGES ======================= -->
+<section class="view" id="view-hedges" hidden aria-labelledby="hedges-title">
+  <div class="vhead">
+    <p class="eyebrow">Risk mitigation</p>
+    <h1 id="hedges-title">Match the hedge to the disease.</h1>
+    <p class="lede">Long bonds cure a growth scare and worsen an inflation shock. Puts pay in any crash and bleed in calm markets. Trend-following earns its keep in slow, persistent moves. The matrix grades fifteen hedges against six scenarios; select any cell for the reasoning.</p>
+  </div>
+
+  <section class="section" aria-labelledby="mx-title">
+    <div class="section-head"><p class="eyebrow">Matrix</p><h2 id="mx-title">Which hedge works where</h2></div>
+    <div class="panel">
+      <div class="matrix-legend"><span><b class="grade g2" style="display:inline;width:auto">●●</b>Strong</span><span><b class="grade g1" style="display:inline;width:auto">●</b>Partial</span><span><b class="grade g0" style="display:inline;width:auto">○</b>Little or none</span><span><b class="grade gx" style="display:inline;width:auto">✕</b>Tends to hurt</span></div>
+      <div class="tablewrap matrix-wrap"><table class="matrix" id="matrix"></table></div>
+      <div class="matrix-m" id="matrix-m"></div>
+      <p class="sentence" id="matrix-detail" aria-live="polite">Select a cell to see why a hedge works, or fails, in that scenario.</p>
+      <p class="hint">Grades are the desk's synthesis from mechanism and past episodes (2008, March 2020, 2022 and 2026). As data accumulates, the engine replaces judgment with measured correlations and payoffs.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="lanes-title">
+    <div class="section-head"><p class="eyebrow">Mechanism</p><h2 id="lanes-title">Two kinds of AI selloff</h2><p class="prose">Whether long Treasuries help depends on why the book is falling. Long yields react to the cause of the selloff, and the two causes push them in opposite directions.</p></div>
+    <div class="lanes">
+      <article class="lane good">
+        <div class="lane-head"><h3>Growth scare</h3><span class="verdict good"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Bonds hedge</span></div>
+        <ol class="chain"><li>AI revenue or demand disappoints</li><li>Growth and rate expectations fall</li><li>Long yields drop</li><li>TLT rallies while the book falls</li></ol>
+        <div class="evidence"><p><strong>Oct 8, 2026.</strong> Reports of weak OpenAI revenue hit AI names; the Nasdaq-100 fell 1.39%. The 30-year yield fell 5.9bp, worth about +0.9% on a bond with TLT's 15.5-year duration.</p><span class="src"><a href="https://investinglive.com/stocks/nasdaq-indices-lead-the-slide-as-ai-stocks-tumble/">investingLive</a></span></div>
+      </article>
+      <article class="lane bad">
+        <div class="lane-head"><h3>Financing or inflation shock</h3><span class="verdict bad"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>Bonds fail</span></div>
+        <ol class="chain"><li>Oil, capex debt or fiscal supply push inflation and issuance up</li><li>Term premium rises; the Fed hikes</li><li>Long yields climb</li><li>TLT falls with the book</li></ol>
+        <div class="evidence"><p><strong>March 2026.</strong> As the Iran war closed the Strait of Hormuz, the S&amp;P 500 fell 5.1% and a 10-year Treasury position lost about 2.0% in the same month. <strong>Dec 12, 2025.</strong> The Nasdaq-100 fell 1.9% on AI capex worries while the 10-year yield rose 4bp.</p><span class="src"><a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve</a> · <a href="https://www.plasticsindustry.org/blog/oil-prices-fall-after-iran-ceasefire-will-u-s-inflation-finally-cool-down/">Plastics Industry Association</a> · <a href="https://www.swissinfo.ch/eng/tech-drags-us-futures-as-global-stocks-eye-records%3A-markets-wrap/90624963">Bloomberg via Swissinfo</a></span></div>
+      </article>
+    </div>
+    <p class="callout">A hedge removes at most <strong>ρ² of the book's variance</strong>: 9% at a −0.3 correlation. Long bonds protect against a scenario; options and lower gross protect against the drawdown itself.</p>
+  </section>
+
+  <section class="section" aria-labelledby="pb-title">
+    <div class="section-head"><p class="eyebrow">Playbooks</p><h2 id="pb-title">What to do when it happens</h2><p class="prose">One card per scenario: the early signals, what usually moves, the first moves, what to avoid, and the all-clear. Each links to the historical episodes it is built from.</p></div>
+    <div class="pb-grid" id="pb-grid"></div>
+  </section>
+
+  <section class="section" id="hedge" aria-labelledby="hedge-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="hedge-title">Hedge lab</h2><p class="prose">Price a TLT hedge against five AI scenarios. Each shock is instant and the bond is repriced exactly, so convexity is included. Scenario sizes are assumptions to stress, not forecasts.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="hedge-form" aria-label="Hedge inputs">
+        <div class="field"><span class="flabel" id="scen-label">Scenario</span><div class="seg" role="group" aria-labelledby="scen-label" id="scen-buttons"></div></div>
+        <div class="field"><div class="field-top"><label for="h-move">AI book move</label><output id="h-move-o" for="h-move"></output></div><input type="range" id="h-move" min="-50" max="40" step="1" value="-30"></div>
+        <div class="field"><div class="field-top"><label for="h-dy">30-year yield change</label><output id="h-dy-o" for="h-dy"></output></div><input type="range" id="h-dy" min="-200" max="200" step="5" value="-75"></div>
+        <div class="field"><div class="field-top"><label for="h-ratio">TLT hedge, % of book</label><output id="h-ratio-o" for="h-ratio"></output></div><input type="range" id="h-ratio" min="0" max="150" step="5" value="30"></div>
+        <div class="field"><div class="field-top"><label for="h-gross">Gross exposure</label><output id="h-gross-o" for="h-gross"></output></div><input type="range" id="h-gross" min="0.5" max="2" step="0.05" value="1"></div>
+        <details class="more"><summary>Bond assumptions</summary><div class="inner">
+          <div class="field"><div class="field-top"><label for="h-y0">Starting 30-year yield</label><output id="h-y0-o" for="h-y0"></output></div><input type="range" id="h-y0" min="3" max="7" step="0.01" value="5.48"></div>
+          <div class="field"><div class="field-top"><label for="h-dur">TLT duration, years</label><output id="h-dur-o" for="h-dur"></output></div><input type="range" id="h-dur" min="12" max="18" step="0.1" value="15.5"></div>
+          <p class="hint">One 25.8-year bond (TLT's weighted average maturity) with its coupon solved to match the duration. Defaults: Oct 19 close; duration per <a href="https://ipo-edge.com/the-spill-a-5-long-bond-yield-has-traders-circling-tlt/">IPO Edge</a>.</p>
+        </div></details>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Book</span><span class="v num" id="r-book"></span></div>
+          <div class="ro"><span class="k">TLT hedge</span><span class="v num" id="r-hedge"></span></div>
+          <div class="ro"><span class="k">TLT price move</span><span class="v num" id="r-bond"></span></div>
+          <div class="ro key"><span class="k">Net, % of NAV</span><span class="v num" id="r-net"></span></div>
+        </div>
+        <p class="sentence" id="r-offset"></p>
+        <figure class="chart">
+          <div class="chart-head"><span class="chart-title">Net P&amp;L by scenario, % of NAV</span><span class="legend"><span><i style="background:var(--s1)"></i>Unhedged</span><span><i style="background:var(--s2)"></i><span id="lg-hedged">With TLT hedge</span></span></span></div>
+          <div class="svgbox" id="scen-chart"></div>
+          <details class="tableview"><summary>Show as table</summary><div class="tablewrap"><table id="scen-table"></table></div></details>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="futures" aria-labelledby="fut-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="fut-title">Hedge with futures</h2><p class="prose">Turn a hedge decision into contracts. Equity beta comes off with Nasdaq-100 futures; TLT-like duration goes on with Treasury futures matched in DV01, for margin instead of cash.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="fut-form" aria-label="Futures hedge inputs">
+        <div class="field"><label for="fu-book">Book value, $</label><input type="number" id="fu-book" value="1000000" step="50000" min="10000" max="10000000000"></div>
+        <div class="inline2">
+          <div class="field"><label for="fu-beta">Book beta to the Nasdaq-100</label><input type="number" id="fu-beta" value="1.15" step="0.05" min="0" max="3"></div>
+          <div class="field"><label for="fu-ndx">Nasdaq-100 level</label><input type="number" id="fu-ndx" value="29529" step="10" min="1000" max="200000"></div>
+        </div>
+        <div class="field"><div class="field-top"><label for="fu-share">Share of beta to hedge</label><output id="fu-share-o" for="fu-share"></output></div><input type="range" id="fu-share" min="0" max="100" step="5" value="50"></div>
+        <div class="field"><span class="flabel" id="fu-eq-l">Equity contract</span><div class="seg" role="group" aria-labelledby="fu-eq-l" id="fu-eq"><button type="button" data-v="NQ" aria-pressed="false">NQ, $20 a point</button><button type="button" data-v="MNQ" aria-pressed="true">MNQ, $2 a point</button></div></div>
+        <div class="field"><div class="field-top"><label for="fu-tlt">TLT-like hedge, % of book</label><output id="fu-tlt-o" for="fu-tlt"></output></div><input type="range" id="fu-tlt" min="0" max="100" step="5" value="30"></div>
+        <div class="field"><span class="flabel" id="fu-rt-l">Rates contract</span><div class="seg" role="group" aria-labelledby="fu-rt-l" id="fu-rt"></div></div>
+        <p class="hint" id="fu-src"></p>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Beta dollars to hedge</span><span class="v num" id="fu-bd"></span></div>
+          <div class="ro key"><span class="k">Equity futures to sell</span><span class="v num" id="fu-n-eq"></span></div>
+          <div class="ro"><span class="k">TLT-like DV01</span><span class="v num" id="fu-dv"></span></div>
+          <div class="ro key"><span class="k">Rates futures to buy</span><span class="v num" id="fu-n-rt"></span></div>
+        </div>
+        <p class="sentence" id="fu-out"></p>
+        <div class="tablewrap"><table id="fu-table"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="size" aria-labelledby="size-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="size-title">Sizing lab</h2><p class="prose">Risk limits set the size: the smaller of the volatility target, the drawdown cap and the engine's 1.5x gross limit. Kelly then checks whether your return assumption supports it. Leverage needs edge: on a 32%-volatility book, full Kelly at 1.5x requires about 15% a year over cash, and the engine's quarter Kelly about 61%.</p></div>
+    <div class="lab">
+      <form class="panel controls" id="size-form" aria-label="Sizing inputs">
+        <div class="field"><div class="field-top"><label for="s-mu">Expected return, per year</label><output id="s-mu-o" for="s-mu"></output></div><input type="range" id="s-mu" min="0" max="30" step="0.5" value="12"></div>
+        <div class="field"><div class="field-top"><label for="s-sig">Book volatility, per year</label><output id="s-sig-o" for="s-sig"></output></div><input type="range" id="s-sig" min="12" max="60" step="0.5" value="32"></div>
+        <div class="field"><div class="field-top"><label for="s-tv">Target volatility</label><output id="s-tv-o" for="s-tv"></output></div><input type="range" id="s-tv" min="5" max="40" step="0.5" value="20"></div>
+        <div class="field"><div class="field-top"><label for="s-dd">Largest drawdown you will accept</label><output id="s-dd-o" for="s-dd"></output></div><input type="range" id="s-dd" min="10" max="50" step="1" value="25"></div>
+        <div class="field"><div class="field-top"><label for="s-conf">Confidence, one-year horizon</label><select id="s-conf"><option value="0.90">90%</option><option value="0.95" selected>95%</option><option value="0.99">99%</option></select></div></div>
+        <div class="field"><div class="field-top"><label for="s-kf">Kelly fraction</label><select id="s-kf"><option value="0.25" selected>Quarter</option><option value="0.5">Half</option><option value="1">Full</option></select></div></div>
+        <details class="more"><summary>Financing</summary><div class="inner">
+          <div class="field"><div class="field-top"><label for="s-r">Cash rate</label><output id="s-r-o" for="s-r"></output></div><input type="range" id="s-r" min="0" max="7" step="0.05" value="4.25"></div>
+          <div class="field"><div class="field-top"><label for="s-sp">Borrow spread over cash</label><output id="s-sp-o" for="s-sp"></output></div><input type="range" id="s-sp" min="0" max="3" step="0.05" value="1"></div>
+          <p class="hint">Cash default is near the 3-month bill (4.27% on Oct 19).</p>
+        </div></details>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro"><span class="k">Vol-target size</span><span class="v num" id="z-vt"></span></div>
+          <div class="ro"><span class="k">Drawdown cap</span><span class="v num" id="z-dd"></span></div>
+          <div class="ro"><span class="k">Kelly size</span><span class="v num" id="z-k"></span></div>
+          <div class="ro key"><span class="k">Size to run</span><span class="v num" id="z-run"></span></div>
+        </div>
+        <p class="sentence" id="z-edge"></p>
+        <figure class="chart">
+          <div class="chart-head"><span class="chart-title" id="dd-title">One-year max drawdown at 95% confidence, by gross exposure</span></div>
+          <div class="svgbox" id="dd-chart"></div>
+          <p class="hint">2,000 simulated one-year paths with leverage rebalanced daily and borrowing at cash plus spread. Real markets gap and have fat tails, so treat this as a floor on the risk.</p>
+          <details class="tableview"><summary>Show as table</summary><div class="tablewrap"><table id="dd-table"></table></div></details>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rules-title">
+    <div class="section-head"><p class="eyebrow">Rules</p><h2 id="rules-title">Survival rules the engine enforces</h2></div>
+    <ol class="steps">
+      <li><div><strong>Ruin is the only unrecoverable loss.</strong><span>Size so the 95th-percentile one-year drawdown stays inside the limit, before any view on return. (Taleb's ergodicity point: a bet you cannot repeat forever is not worth its average.)</span></div></li>
+      <li><div><strong>Barbell the book.</strong><span>Very safe on one side (bills, TIPS), very convex on the other (options, the concentrated AI sleeve). Avoid the fragile middle: leveraged carry that loses everything in one gap.</span></div></li>
+      <li><div><strong>Prefer contracts to correlations.</strong><span>A put pays by contract. A bond hedge pays only if the correlation holds, and it flipped in 2022 and again in 2026.</span></div></li>
+      <li><div><strong>Trim on rules.</strong><span>A position that runs 20% over its target weight gets cut back to target. Sell in pieces; never all or nothing.</span></div></li>
+      <li><div><strong>Know the rate exposure every day.</strong><span>Every name carries a rates beta; the book's total is reported daily next to the hedge ratio.</span></div></li>
+    </ol>
+  </section>
+</section>
+
+<!-- ======================= SECURITIES ======================= -->
+<section class="view" id="view-securities" hidden aria-labelledby="sec-title">
+  <div class="vhead">
+    <p class="eyebrow">Field guide</p>
+    <h1 id="sec-title">Every security is a bundle of a few risks.</h1>
+    <p class="lede">Rates, credit, equity, inflation, volatility, liquidity and currency. Know which ones a security carries, where it sits in the capital structure, and what job it does in the book before you size it.</p>
+  </div>
+  <section class="section" aria-labelledby="ladder-title">
+    <div class="section-head"><p class="eyebrow">Capital structure</p><h2 id="ladder-title">Who gets paid first</h2></div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="ladder-ends"><span>Paid first · lower yield</span></div>
+        <div class="ladder">
+          <div class="rung"><strong>Senior secured loans</strong><em>Floating</em><span>First claim on collateral. Leveraged loans and most private credit live here.</span></div>
+          <div class="rung"><strong>Senior unsecured bonds</strong><em>IG and high yield</em><span>The bulk of corporate debt, including the hyperscalers' bond deals.</span></div>
+          <div class="rung"><strong>Subordinated debt</strong><em>Junior notes</em><span>Paid after senior creditors; bank capital notes sit here.</span></div>
+          <div class="rung"><strong>Convertible bonds</strong><em>Debt plus a call</em><span>A bond with an equity option attached; lower coupon in exchange for upside.</span></div>
+          <div class="rung"><strong>Preferred stock</strong><em>Fixed or floating dividend</em><span>Strategy's STRC pays a 12.00% variable dividend semi-monthly, reset to keep it near $100 par.</span></div>
+          <div class="rung"><strong>Common equity</strong><em>Residual claim</em><span>Everything left after every claim above is paid.</span></div>
+          <div class="rung"><strong>Options and warrants</strong><em>Derivatives</em><span>Claims on the equity itself: the most convex, the most likely to expire worthless.</span></div>
+        </div>
+        <div class="ladder-ends"><span>Paid last · higher expected return</span></div>
+        <span class="src">STRC rate: <a href="https://www.sec.gov/Archives/edgar/data/0001050446/000119312526377583/mstr-20260831.htm">Strategy Inc 8-K, Aug 31, 2026</a></span>
+      </div>
+      <div class="panel">
+        <span class="panel-title">The seven risk drivers</span>
+        <dl class="dlist">
+          <dt>Rates</dt><dd>Price falls when yields rise. Measured by duration and DV01.</dd>
+          <dt>Credit</dt><dd>Loss if the issuer defaults or its spread widens.</dd>
+          <dt>Equity</dt><dd>Exposure to the residual value of a business.</dd>
+          <dt>Inflation</dt><dd>Real value lost, or protected, as prices rise.</dd>
+          <dt>Volatility</dt><dd>Value that moves with the size of price swings rather than their direction.</dd>
+          <dt>Liquidity</dt><dd>Cost and delay of selling when you need to.</dd>
+          <dt>Currency</dt><dd>Value changes from the exchange rate alone.</dd>
+        </dl>
+        <figure class="chart" style="margin:0">
+          <div class="chart-head"><span class="chart-title">How many of the thirty securities carry each driver</span></div>
+          <div class="svgbox" id="drv-chart"></div>
+          <p class="hint">Select a bar to filter the catalog below.</p>
+        </figure>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="cat-title">
+    <div class="section-head"><p class="eyebrow">Catalog</p><h2 id="cat-title">Thirty securities, one card each</h2><p class="prose" id="sec-count">Filter by risk driver.</p></div>
+    <div class="filters" id="sec-filters" role="group" aria-label="Filter by risk driver"></div>
+    <div class="sec-grid" id="sec-grid"></div>
+  </section>
+</section>
+
+<!-- ======================= INSURERS ======================= -->
+<section class="view" id="view-insurers" hidden aria-labelledby="ins-title">
+  <div class="vhead">
+    <p class="eyebrow">Insurers &amp; balance sheets</p>
+    <h1 id="ins-title">The market's long-duration buyers are becoming the AI buildout's lenders.</h1>
+    <p class="lede">Insurers collect premiums today and pay claims years later. That float makes them natural buyers of long-dated debt and, increasingly, of private credit and data-center bonds. Watch them for two signals: where long-end demand comes from, and where credit risk is quietly piling up.</p>
+  </div>
+  <section class="section" aria-labelledby="how-title">
+    <div class="section-head"><p class="eyebrow">Model</p><h2 id="how-title">How an insurer makes money</h2></div>
+    <div class="flow">
+      <div><span class="step">Collect</span><h4>Float</h4><p>Premiums arrive before claims are paid. Berkshire's float was about $177.5B at June 30, 2026, money it invests but does not own.</p></div>
+      <div><span class="step">Match</span><h4>Duration</h4><p>Life and annuity liabilities run decades, so insurers buy long bonds and private loans to match them. That makes them price-setters for the long end.</p></div>
+      <div><span class="step">Earn</span><h4>Two engines</h4><p>Profit = underwriting result + investment spread. Higher yields raise the second engine; credit losses hit it.</p></div>
+    </div>
+    <span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Hathaway Q2 2026 release (SEC)</a></span>
+  </section>
+
+  <section class="section" aria-labelledby="chainf-title">
+    <div class="section-head"><p class="eyebrow">Case study</p><h2 id="chainf-title">How a data center gets financed off a hyperscaler's balance sheet</h2><p class="prose">Meta's Hyperion campus in Louisiana, October 2025. The template now repeats across the buildout.</p></div>
+    <div class="chainflow">
+      <div class="node"><span class="tag">Tenant</span><h4>Meta, 20%</h4><p>Builds and manages the campus, leases it on four-year initial terms, and guarantees residual value for the first 16 years.</p></div>
+      <div class="node"><span class="tag">Owner</span><h4>Joint venture</h4><p>Blue Owl funds hold 80% of a project of about $27B; they put in about $7B of cash.</p></div>
+      <div class="node"><span class="tag">Lender</span><h4>PIMCO and bond investors</h4><p>Part of Blue Owl's capital is debt sold privately to PIMCO and other buyers, with Morgan Stanley as bookrunner.</p></div>
+      <div class="node"><span class="tag">Ultimate holder</span><h4>Allianz and policyholders</h4><p>PIMCO is owned by Allianz. The credit risk of the AI buildout ends up in insurance and retirement portfolios.</p></div>
+    </div>
+    <span class="src"><a href="https://about.fb.com/news/2025/10/meta-blue-owl-capital-develop-hyperion-data-center/">Meta newsroom, Oct 21, 2025</a> · <a href="https://www.globaldatacenterhub.com/p/could-meta-pimco-and-blue-owls-29b">Global Data Center Hub</a></span>
+  </section>
+
+  <section class="section" aria-labelledby="pc-title">
+    <div class="section-head"><p class="eyebrow">Risk</p><h2 id="pc-title">Private credit is where the stress shows first</h2></div>
+    <div class="tiles">
+      <article class="tile"><span class="label">US private credit default rate</span><span class="value">6.0%</span><span class="note">Record, April 2026 (Fitch).</span></article>
+      <article class="tile"><span class="label">Insurers' share of private credit capital</span><span class="value">≈23%</span><span class="note">About $0.9 to $1.1 trillion of exposure.</span></article>
+      <article class="tile"><span class="label">US life insurers' assets in private credit</span><span class="value">≈10%</span><span class="note">After 20%+ growth in 2025; above 15% at some PE-affiliated insurers.</span></article>
+      <article class="tile"><span class="label">Bank credit lines to the sector</span><span class="value">≥$220B</span><span class="note">Per the Financial Stability Board; the US Treasury has a team assessing insurer exposure.</span></article>
+    </div>
+    <span class="src"><a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business, citing Fitch, Barclays, IMF and FSB</a></span>
+  </section>
+
+  <section class="section" aria-labelledby="cos-title">
+    <div class="section-head"><p class="eyebrow">Watchlist</p><h2 id="cos-title">Six balance sheets to know</h2><p class="prose">Figures are the latest each company or a cited source published. No prices; this is about business models.</p></div>
+    <div class="co-grid">
+      <article class="co"><span class="model">Composite insurer + asset manager</span><h4>Allianz</h4><ul><li><strong>€2.04T</strong> third-party assets at Mar 31, 2026, a record, with €45.2B of Q1 net inflows.</li><li>Owns <strong>PIMCO</strong> and Allianz Global Investors.</li><li>Solvency II ratio <strong>221%</strong>; 2026 operating profit outlook €17.4B ± €1B.</li></ul><span class="src"><a href="https://www.allianz.com/en/mediacenter/news/media-releases/financials/260513-1q-2026-earnings-release.html">Allianz 1Q 2026 release</a></span></article>
+      <article class="co"><span class="model">Float compounder</span><h4>Berkshire Hathaway</h4><ul><li>Insurance float about <strong>$177.5B</strong> at June 30, 2026.</li><li>Q2 operating earnings <strong>$13.0B</strong>; insurance investment income $3.1B.</li><li>About <strong>$4.5B</strong> of buybacks in Q2.</li></ul><span class="src"><a href="https://www.sec.gov/Archives/edgar/data/0001067983/000119312526344495/d159922dex991.htm">Berkshire Q2 2026 release</a></span></article>
+      <article class="co"><span class="model">PE-affiliated annuity writer</span><h4>Apollo / Athene</h4><ul><li>Annuity balance sheet funding private credit origination.</li><li>Reported near a <strong>$35B</strong> lending deal for Nvidia chips leased to xAI (Feb 2026).</li><li>Private credit above 15% of assets at some PE-affiliated insurers.</li></ul><span class="src"><a href="https://www.roic.ai/news/apollo-nears-35-billion-lending-deal-for-nvidia-chips-leased-to-xai-02-09-2026">ROIC</a> · <a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
+      <article class="co"><span class="model">PE-affiliated annuity writer</span><h4>KKR / Global Atlantic</h4><ul><li>Same model as Athene: annuities fund private credit.</li><li>Named with Athene among insurers whose private credit share exceeds 15%.</li></ul><span class="src"><a href="https://www.insurancebusinessmag.com/us/news/breaking-news/rising-private-credit-defaults-draw-focus-to-insurers-growing-exposure-576534.aspx">Insurance Business</a></span></article>
+      <article class="co"><span class="model">Reinsurers and insurance-linked securities</span><h4>Munich Re, Swiss Re</h4><ul><li>Transfer catastrophe risk to capital markets through cat bonds.</li><li>Cat bond issuance hit a record <strong>$17.3B</strong> in the first half of 2026.</li></ul><span class="src"><a href="https://www.captive.com/news/catastrophe-bond-issuance-hits-record-173-billion-in-first-half">Captive.com</a></span></article>
+      <article class="co"><span class="model">Japanese life insurers</span><h4>Japan's long end</h4><ul><li>Japan's 30-year auction cleared at <strong>4.11%</strong> on Oct 8.</li><li>Higher yields at home reduce the pull of US Treasuries for the largest pool of long-duration buyers abroad.</li></ul><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
+    </div>
+  </section>
+  <p class="callout">The link to the book: insurers are the marginal buyers of the long-dated debt that funds AI data centers. If their appetite slows, through rising defaults or capital rules, AI financing costs rise. That is the <a href="#hedges">financing-shock lane</a>, the one where long bonds fail as a hedge.</p>
+</section>
+
+<!-- ======================= THESES ======================= -->
+<section class="view" id="view-theses" hidden aria-labelledby="th-title">
+  <div class="vhead">
+    <p class="eyebrow">Theses</p>
+    <h1 id="th-title">Eight working theses, each with a way to be wrong.</h1>
+    <p class="lede">A thesis earns capital only with evidence, an expression, a hedge, and data that would change the desk's mind. These are research positions for the engine to test, not recommendations.</p>
+  </div>
+  <section class="section" aria-labelledby="bn-title">
+    <div class="section-head"><p class="eyebrow">Evidence</p><h2 id="bn-title">The buildout in numbers</h2></div>
+    <div class="grid2">
+      <figure class="chart panel">
+        <div class="chart-head"><span class="chart-title">Alphabet, quarterly capex and free cash flow, $bn</span><span class="legend"><span><i style="background:var(--s1)"></i>Capex</span><span><i style="background:var(--s2)"></i>Free cash flow</span></span></div>
+        <div class="svgbox" id="goog-chart"></div>
+        <span class="src">Source: <a href="https://www.tikr.com/blog/alphabets-free-cash-flow-just-went-negative-heres-what-the-debt-behind-it-says">TIKR</a>, from company filings</span>
+        <details class="tableview"><summary>Show as table</summary><div class="tablewrap"><table id="goog-table"></table></div></details>
+      </figure>
+      <figure class="chart panel">
+        <div class="chart-head"><span class="chart-title">2026 capex guidance, $bn</span></div>
+        <div class="svgbox" id="guide-chart"></div>
+        <span class="src">Combined ≈$725B, guidance as of early August 2026. <a href="https://cryptobriefing.com/amazon-meta-microsoft-ai-earnings-surge/">Crypto Briefing</a> · <a href="https://www.trendforce.com/news/?p=61421">TrendForce (Reuters)</a></span>
+        <details class="tableview"><summary>Show as table</summary><div class="tablewrap"><table id="guide-table"></table></div></details>
+      </figure>
+    </div>
+  </section>
+  <section class="section" id="capex-live-sec" aria-labelledby="cx-title">
+    <div class="section-head"><p class="eyebrow">Live data</p><h2 id="cx-title">Capex against cash flow, from SEC filings</h2><p class="prose">Quarterly operating cash flow and capital spending from each company's XBRL filings, pulled by the daily run. Above 100%, capex exceeds the cash the business generates, and cash on hand or new debt fills the gap.</p></div>
+    <div id="capex-live"><div class="empty"><strong>Waiting for the SEC step of the daily run.</strong><span>Set the SEC_USER_AGENT repository variable to a name and email address (the SEC requires one) and the run adds twelve quarters of capex, operating cash flow, debt and cash for GOOGL, MSFT, AMZN, META, ORCL, TSLA and SPCX.</span></div></div>
+  </section>
+  <section class="section" aria-label="Theses">
+    <div class="thesis-grid" id="thesis-grid"></div>
+  </section>
+</section>
+
+<!-- ======================= LENSES ======================= -->
+<section class="view" id="view-lenses" hidden aria-labelledby="lens-title">
+  <div class="vhead">
+    <p class="eyebrow">Lenses</p>
+    <h1 id="lens-title">Borrowed minds, turned into rules.</h1>
+    <p class="lede">The desk reads widely and keeps only what it can encode. Each lens below is paraphrased in one line, then mapped to the rule or view where the engine uses it.</p>
+  </div>
+  <section class="section" aria-label="Thinkers"><div class="lens-grid" id="lens-grid"></div></section>
+  <section class="section" aria-labelledby="pr-title">
+    <div class="section-head"><p class="eyebrow">Desk principles</p><h2 id="pr-title">From a market maker's advice</h2><p class="prose">Notes from a conversation with a trader who built his own prop firm and market-making business.</p></div>
+    <ol class="steps">
+      <li><div><strong>Process over P&amp;L.</strong><span>Nobody cares that you were up 15% last year. They want to see the system they could plug into theirs.</span></div></li>
+      <li><div><strong>Data first, then judgment.</strong><span>Build the tool, use it, then ask whether the answer makes sense.</span></div></li>
+      <li><div><strong>Trim, don't dump.</strong><span>Break positions into pieces; a winner can be cut 20% without an all-or-nothing call.</span></div></li>
+      <li><div><strong>Always know your rate exposure.</strong><span>Watch long bonds against growth stocks; the relationship decides whether your hedge exists.</span></div></li>
+      <li><div><strong>Speed of learning is the edge.</strong><span>Pattern recognition and a fast observe-decide-act loop beat any single model.</span></div></li>
+      <li><div><strong>Choose who you go to battle with.</strong><span>Proximity to sharp people compounds faster than any position.</span></div></li>
+    </ol>
+  </section>
+</section>
+
+<!-- ======================= ENGINE ======================= -->
+<section class="view" id="view-engine" hidden aria-labelledby="eng-title">
+  <div class="vhead">
+    <p class="eyebrow">System</p>
+    <h1 id="eng-title">The engine behind the desk.</h1>
+    <p class="lede">Python, about 3,500 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+  </div>
+  <ol class="pipeline">
+    <li><h3>Data</h3><p>FRED curve, credit, volatility and oil daily; Databento bars with split and dividend factors; CME Treasury futures; SEC filings; Kalshi odds.</p></li>
+    <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
+    <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
+    <li><h3>Hedge &amp; size</h3><p>Min-variance TLT ratio when the regime allows it. Vol target and drawdown cap set gross; Kelly checks the edge.</p></li>
+    <li><h3>Prove</h3><p>Dollar-exact backtest with costs and financing, deflated Sharpe, and walk-forward forecasts judged on calibration.</p></li>
+  </ol>
+  <section class="section" id="status" aria-labelledby="st-title">
+    <div class="section-head"><p class="eyebrow">Operations</p><h2 id="st-title">System status</h2><p class="prose">Written by the last step of every daily run: what ran, how fresh each output is, and the checks it passed. A stale or failed check shows here and on the Desk.</p></div>
+    <div class="panel" id="status-body"><div class="empty"><strong>No run status yet.</strong><span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
+  </section>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">62 of 62 pass</span></span></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
+        <tbody>
+          <tr><td>Recover planted betas</td><td class="r">mean error 0.03, max 0.09</td></tr>
+          <tr><td>Track planted regimes</td><td class="r">88% of days</td></tr>
+          <tr><td>Variance cut, regime-gated vs fixed 30% TLT</td><td class="r">5.0% vs −0.6%</td></tr>
+          <tr><td>TLT on the book's worst 5% of days</td><td class="r">+0.79% hedging · −0.88% amplifying</td></tr>
+          <tr><td>Look-ahead canary: legit vs peeking signal Sharpe</td><td class="r">0.28 vs 21.0</td></tr>
+          <tr><td>Forecast model where no edge exists</td><td class="r">AUC 0.53, rejected</td></tr>
+          <tr><td>Forecast model with a planted edge</td><td class="r">AUC 0.78, found</td></tr>
+          <tr><td>Costs, financing, compounding</td><td class="r">exact to 1e-12</td></tr>
+          <tr><td>Page bond, curve and option math against the engine</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Missing FRED series, truncated files, stale data</td><td class="r">reported, not fatal</td></tr>
+          <tr><td>Browser suite: hostile files, extreme inputs, 320 to 1920px, print</td><td class="r">12 scenarios, 0 failures</td></tr>
+        </tbody>
+      </table></div>
+      <p class="hint">Ten years of simulated daily data with two correlation regimes and known betas. Passing proves the machinery; it says nothing about markets until real data runs through it.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Model book</span><span class="src">Illustration, not personal positions</span></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Ticker</th><th class="r">Weight</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler</td></tr>
+          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler</td></tr>
+          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2</td></tr>
+          <tr><td>NVDA</td><td class="r">14%</td><td>Compute</td></tr>
+          <tr><td>META</td><td class="r">12%</td><td>Hyperscaler; reports Oct 21</td></tr>
+          <tr><td>TSLA</td><td class="r">10%</td><td>Autonomy, robotics</td></tr>
+          <tr><td>AVGO</td><td class="r">8%</td><td>Custom silicon, networking</td></tr>
+          <tr><td>SPCX</td><td class="r">8%</td><td>IPO Jun 12, 2026 at $135; short history</td></tr>
+          <tr><td>ORCL</td><td class="r">6%</td><td>Cloud capacity; heavy bond issuer</td></tr>
+        </tbody>
+      </table></div>
+      <p class="hint">Hedge candidates: TLT, IEF, and ZN/UB futures sized by DV01. SpaceX listing: <a href="https://www.tribuneindia.com/news/business/spacex-president-gwynne-shotwell-rings-nasdaq-opening-bell-as-rocket-companys-shares-to-begin-trading-soon/">ANI via The Tribune</a>.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Data plan</span><span class="src">The daily run prints a cost quote before each paid pull (<code>buildout cost</code>)</span></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Source</th><th>Feeds</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>FRED</td><td>Nasdaq-100, the full Treasury curve, TIPS real yields, breakevens, term premium, IG and HY spreads, VIX, dollar, Brent and WTI</td><td>Free; runs daily now</td></tr>
+        <tr><td>Databento</td><td>Daily and minute bars for the book and hedges, split and dividend factors, CME ZN and UB futures for DV01 hedging</td><td>Pay as you go with a $125 credit for new accounts; the $199/month plan only for live data</td></tr>
+        <tr><td>SEC EDGAR</td><td>Quarterly operating cash flow, capex and debt from XBRL filings</td><td>Free; needs a contact email</td></tr>
+        <tr><td>Kalshi</td><td>Prediction-market odds on the Fed path, CPI and recession; Databento does not carry prediction markets</td><td>Free public data</td></tr>
+      </tbody>
+    </table></div>
+    <span class="src"><a href="https://databento.com/pricing">Databento pricing</a> · <a href="https://databento.com/docs/examples/adjustment-factors/applying-adjustment-factors">Adjustment method</a></span>
+  </div>
+  <section class="section" aria-labelledby="rm-title">
+    <div class="section-head"><p class="eyebrow">Next</p><h2 id="rm-title">Roadmap</h2></div>
+    <ol class="steps">
+      <li><div><strong>Add the Databento key</strong><span>The daily run already reads the market from FRED. With the key saved as a repository secret, it adds the book's regime, hedge results by regime, and a four-policy backtest.</span></div></li>
+      <li><div><strong>Hedge with futures and options data</strong><span>Size UB and ZN by measured DV01; pull listed option chains to replace assumed implied volatility with market skew.</span></div></li>
+      <li><div><strong>Test the theses</strong><span>Turn each thesis's kill criteria into tracked signals; Kalshi's Fed-path odds become a regime input, walk-forward, kept only if they survive the deflated Sharpe.</span></div></li>
+      <li><div><strong>Publish</strong><span>Make the repository public with GitHub Pages, and write a one-page case study on process and results.</span></div></li>
+    </ol>
+  </section>
+  <footer class="foot"><p>Built by Jamie Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
+</section>
+
+<!-- ======================= APPENDIX ======================= -->
+<section class="view" id="view-appendix" hidden aria-labelledby="app-title">
+  <div class="vhead">
+    <p class="eyebrow">Appendix</p>
+    <h1 id="app-title">Every term, formula, source and hard question in one place.</h1>
+    <p class="lede">The reference behind the desks: what each word means, how each number is computed, what can break each model, where the data comes from, how past crises played out, and straight answers to the questions a skeptic would ask.</p>
+    <div class="app-actions"><button type="button" class="btn" id="print-all">Print or save every desk as a PDF</button><button type="button" class="btn ghost" id="keys-open">Keyboard shortcuts</button></div>
+  </div>
+  <section class="section" aria-labelledby="gl-title">
+    <div class="section-head"><p class="eyebrow">A</p><h2 id="gl-title">Glossary</h2><p class="prose" id="gl-sub">Terms with a dotted underline anywhere on the site open their entry here.</p></div>
+    <div class="az" id="gl-az" aria-label="Jump to letter"></div>
+    <dl class="gloss" id="gloss"></dl>
+  </section>
+  <section class="section" aria-labelledby="me-title">
+    <div class="section-head"><p class="eyebrow">B</p><h2 id="me-title">Methods and formulas</h2><p class="prose">Every formula the engine and the page use, in plain notation, with where it lives. The page's versions are tested against the engine's on every push.</p></div>
+    <div class="methods" id="methods"></div>
+  </section>
+  <section class="section" aria-labelledby="faq-title">
+    <div class="section-head"><p class="eyebrow">C</p><h2 id="faq-title">Hard questions</h2><p class="prose">The questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.</p></div>
+    <div class="faq" id="faq"></div>
+  </section>
+  <section class="section" aria-labelledby="mr-title">
+    <div class="section-head"><p class="eyebrow">D</p><h2 id="mr-title">Model risk register</h2><p class="prose">What each model assumes, when it breaks, and what the desk does about it.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="mr-table"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="dict-title">
+    <div class="section-head"><p class="eyebrow">E</p><h2 id="dict-title">Data dictionary</h2><p class="prose">Every series the daily run reads and every file it writes. Coverage dates fill in from the live run.</p></div>
+    <div class="panel"><span class="panel-title">FRED series</span><div class="tablewrap"><table id="dict-fred"></table></div></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Other sources</span><div class="tablewrap"><table id="dict-other"></table></div></div>
+      <div class="panel"><span class="panel-title">Files the page reads</span><div class="tablewrap"><table id="dict-json"></table></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="ep-title">
+    <div class="section-head"><p class="eyebrow">F</p><h2 id="ep-title">Episode atlas</h2><p class="prose" id="ep-sub">Fifteen stress episodes since 1987: what stocks did, what bonds did, what hedged, and the lesson. After each daily run, exact moves from FRED appear on every card.</p></div>
+    <div class="seg" id="ep-filters" role="group" aria-label="Filter episodes by kind"></div>
+    <div class="ep-grid" id="ep-grid"></div>
+    <p class="hint">Static figures are S&amp;P 500, close to close, unless stated. Live figures use the Nasdaq-100 and a 20-year par bond (the 30-year before 1993), peak to trough inside each episode's window.</p>
+  </section>
+  <section class="section" aria-labelledby="rd-title">
+    <div class="section-head"><p class="eyebrow">G</p><h2 id="rd-title">Reading list</h2><p class="prose">The papers and books behind each method, with links where a free version exists.</p></div>
+    <div class="reading" id="reading"></div>
+  </section>
+  <section class="section" aria-labelledby="ck-title">
+    <div class="section-head"><p class="eyebrow">H</p><h2 id="ck-title">Checklists</h2><p class="prose">The routines that turn the desk into decisions.</p></div>
+    <div class="ck-grid" id="checklists"></div>
+  </section>
+  <section class="section" aria-labelledby="cl-title">
+    <div class="section-head"><p class="eyebrow">I</p><h2 id="cl-title">Changelog</h2></div>
+    <div class="panel"><div class="tablewrap"><table id="changelog"></table></div></div>
+  </section>
+  <footer class="foot"><p>Research desk, not investment advice. Every market figure links to its source and date; thresholds and grades are the desk's judgment, stated so they can be argued with.</p></footer>
+</section>
+
+</main>
+
+<div class="palette" id="palette" hidden>
+  <div class="palette-box" role="dialog" aria-modal="true" aria-label="Search the desk">
+    <input id="palette-q" type="search" autocomplete="off" spellcheck="false" placeholder="Search tools, terms, securities, theses, episodes" role="combobox" aria-expanded="true" aria-controls="palette-list" aria-autocomplete="list" aria-label="Search the desk">
+    <ul id="palette-list" role="listbox" aria-label="Results"></ul>
+    <p class="palette-foot"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span><span><kbd>?</kbd> shortcuts</span></p>
+  </div>
+</div>
+<div class="palette" id="keys" hidden>
+  <div class="palette-box keys" role="dialog" aria-modal="true" aria-labelledby="keys-title">
+    <h2 id="keys-title">Keyboard shortcuts</h2>
+    <dl class="dlist">
+      <dt>/ or Ctrl K</dt><dd>Search everything: tools, terms, securities, theses, episodes, questions</dd>
+      <dt>1 to 9, 0</dt><dd>Jump to a desk, Desk through Engine, then 0 for the Appendix</dd>
+      <dt>← →</dt><dd>Step through a focused chart</dd>
+      <dt>?</dt><dd>This list</dd>
+      <dt>Esc</dt><dd>Close a dialog</dd>
+    </dl>
+    <button type="button" class="btn" id="keys-close">Close</button>
+  </div>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>

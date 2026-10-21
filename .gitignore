@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+
+# Local data and outputs (raw market data never goes in git)
+.cache/
+out/
+_site/
+
+# Secrets and private positions
+.env
+config.private.toml

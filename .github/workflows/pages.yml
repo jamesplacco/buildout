@@ -1,0 +1,44 @@
+name: pages
+
+# Off until you opt in: make the repository public, set Settings > Pages > Source to "GitHub Actions",
+# then add a repository variable PUBLISH_PAGES = true. After that the page redeploys after every daily run.
+on:
+  workflow_run:
+    workflows: [daily-run]
+    types: [completed]
+  push:
+    branches: [main]
+    paths: ["site/**", "scripts/build_site.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: vars.PUBLISH_PAGES == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: python scripts/build_site.py site _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
