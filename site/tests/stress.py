@@ -37,7 +37,7 @@ from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
-         "legends", "lenses", "lab", "engine", "appendix"]
+         "legends", "lenses", "lab", "engine", "appendix", "solve", "games"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -145,7 +145,13 @@ async def extreme_inputs(page, label: str) -> None:
                  ("#pc-p", 30), ("#pc-b", 0.5), ("#pc-r", 3), ("#pc-days", 10), ("#pc-t", 20), ("#pc-dl", 1), ("#pc-p", 70), ("#pc-b", 3),
                  ("#pp-g", 0), ("#pp-pt", 12), ("#pp-mg", 3), ("#pp-pf", 40), ("#pp-vol", 1)],
         "making": [("#as-sig", 5), ("#as-g", 0.01), ("#as-k", 0.5), ("#as-A", 300), ("#as-g", 1), ("#gm-mu", 0), ("#gm-info", 100), ("#gm-s", 0.5), ("#gm-mu", 50),
-                   ("#ex-q", 100), ("#ex-sig", 6), ("#ex-T", 1), ("#ex-l", 0), ("#ex-l", 20), ("#ex-Y", 1.5), ("#ex-q", 0.5), ("#ex-T", 10)],
+                   ("#ex-q", 100), ("#ex-sig", 6), ("#ex-T", 1), ("#ex-l", 0), ("#ex-l", 20), ("#ex-Y", 1.5), ("#ex-q", 0.5), ("#ex-T", 10),
+                   ("#fq-qb", 0), ("#fq-qa", 0), ("#fq-pf", 0), ("#fq-pf", 100), ("#fq-miss", 3), ("#fq-later", 100.05), ("#fq-cf", 0.5)],
+        "solve": [("#rz-loss", 5), ("#rz-prem", 0), ("#rz-eq", 1.5), ("#rz-h", 1), ("#rz-loss", 35), ("#rz-prem", 2), ("#rz-eq", 0), ("#rz-regime", "low_inflation"),
+                  ("#calc-in", "1/0"), ("#calc-in", "foo("), ("#calc-in", "2^1024"), ("#calc-in", "bsput(100, 95, 0.25, ($vix + 3)%)")],
+        "games": [("#gt-p", 28), ("#gt-wacc", 13), ("#gt-orcl", 6), ("#gt-p", 70), ("#gt-wacc", 5), ("#gt-crowd", 1500), ("#gt-adv", 10), ("#gt-vol", 6), ("#gt-cost", 150),
+                  ("#gt-edge", -2), ("#gt-sdpub", 0.1), ("#gt-sdpriv", 5), ("#gt-edge", 4), ("#gt-sdpub", 5), ("#gt-sdpriv", 0.1), ("#gt-sv", 25), ("#gt-su", 50), ("#gt-order", 2000),
+                  ("#gt-preset", "rps"), ("#gt-preset", "stag"), ("#gt-preset", "pennies")],
         "buyside": [("#bd-c", 50), ("#bd-l", 2), ("#bd-l", 7), ("#ce-sh", 0), ("#ce-ni", -500), ("#ce-sh", ""), ("#rd-f", -5), ("#rd-mv", 1e5), ("#rd-f", 1), ("#rd-erp", 1), ("#rd-rf", 2),
                     ("#cs-d", 20), ("#cs-r", 0), ("#cs-m", 2.5), ("#cs-b", 0), ("#cs-d", 0), ("#mb-e", 1e6), ("#mb-p", 0.01), ("#mb-s", 1), ("#mb-atr", 10), ("#mb-e", 10), ("#mb-p", 1e6)],
     })
@@ -195,7 +201,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("location.hash") != "#options":
         fail(f"{label}: the Markets group did not reopen the last desk read in it")
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
-    if ["Options", "page"] not in sub or len(sub) != 5:
+    if ["Options", "page"] not in sub or len(sub) != 7:
         fail(f"{label}: Markets subtabs wrong: {sub}")
     await page.keyboard.press("m")
     on = await page.evaluate("document.documentElement.classList.contains('math-on') && document.getElementById('math-toggle').getAttribute('aria-pressed') === 'true'")
@@ -206,8 +212,9 @@ async def keyboard_and_links(page, label: str) -> None:
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
                         ("sig-vix", "desk"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"),
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
-                        ("fi-hedge", "findings"), ("lab-coin", "lab"), ("research", "findings"), ("wisdom", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
-                        ("nw-memory", "noteworthy"), ("trading", "making"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
+                        ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
+                        ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
+                        ("nw-memory", "noteworthy"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
         await page.wait_for_timeout(250)
         got = await page.evaluate("document.querySelector('.view:not([hidden])').id")
@@ -346,13 +353,13 @@ async def live_research(page, label: str) -> None:
     await page.evaluate("location.hash = 'findings'")
     await page.wait_for_timeout(400)
     txt = await page.evaluate("document.getElementById('fi-hedge').innerText")
-    if "5.00%" not in txt:
-        fail(f"{label}: the findings did not switch to the live research file")
+    if "no line validated (no reliable threshold)" not in txt:             # the fixture's planted effect is too weak to validate
+        fail(f"{label}: the findings did not switch to the live research file's null result")
     await page.evaluate("location.hash = 'decide'")
     await page.wait_for_timeout(300)
     rule = await page.evaluate("document.querySelector('#d-duration .rule-box').textContent")
-    if "5.00% line" not in rule:
-        fail(f"{label}: decision 2 did not use the live hedge line: {rule[:90]}")
+    if "none validated today" not in rule:
+        fail(f"{label}: decision 2 kept an old line after a null research result: {rule[:160]}")
     note = await page.evaluate("location.hash = 'fundamentals', new Promise((r) => setTimeout(() => r(document.getElementById('fu-note').textContent), 300))")
     if "Newer filings" not in note:
         fail(f"{label}: the newer filing in capex.json was not noted")
@@ -400,6 +407,7 @@ async def main() -> int:
     hostile["macro.json"]["macro_state"] = {"inflation": {"avg36": "hot", "yoy": None, "date": 5}, "nfci": {"value": "loose"}, "sahm": None}
     hostile["brain.json"]["regimes"]["inflation"]["edges"]["y10>eq"]["w"] = 50
     hostile["buyside.json"]["tail"] = "fat"
+    hostile["brain.json"]["factor_cov"] = {"regimes": {"inflation": {"cov": "big", "months": None}, "low_inflation": {"cov": [[1e308]]}}}
     evil = '<img src=x onerror="window.__pwned=1">'
     hostile["feeds.json"]["items"] = [{"title": evil, "url": "javascript:window.__pwned=1", "source": evil, "platform": "<b>x</b>", "tier": "niche", "themes": ["memory"]}]
     hostile["feeds.json"]["themes"][0]["top"] = [{"title": evil, "url": "javascript:window.__pwned=2", "source": evil, "tier": "x"}]
@@ -413,6 +421,9 @@ async def main() -> int:
         await scenario(browser, "good data", site_with(good), extra=extreme_inputs)
         await scenario(browser, "good data, journal", site_with(good), extra=journal_flow)
         await scenario(browser, "good data, live research", site_with(good), extra=live_research)
+        newer = copy.deepcopy(good)
+        newer["capex.json"]["ttm"]["ORCL"] = {"quarter_end": "2026-11-30", "ocf": 90.0, "capex": 70.0, "cash": 50.0, "capex_to_ocf": 70 / 90}
+        await scenario(browser, "a newer filing", site_with(newer), extra=filing_propagation)
         await scenario(browser, "snapshot research", site_with(snapshot_only))
         await scenario(browser, "good data, accessibility", site_with(good), extra=accessibility)
         await scenario(browser, "good data, keyboard and links", site_with(good), extra=keyboard_and_links)
@@ -428,6 +439,20 @@ async def main() -> int:
         await browser.close()
     print(f"\n{len(FAILURES)} failures")
     return 1 if FAILURES else 0
+
+
+async def filing_propagation(page, label: str) -> None:
+    """A newer filing that reverses Oracle's cash coverage must update its table row, coverage label and date together."""
+    await page.evaluate("location.hash = 'fundamentals'")
+    await page.wait_for_timeout(500)
+    row = await page.evaluate("(() => { const r = [...document.querySelectorAll('#fund-table tbody tr')].find((tr) => tr.textContent.includes('Oracle')); return r ? r.textContent : ''; })()")
+    if "Self-funded" not in row or "Nov 30, 2026" not in row:
+        fail(f"{label}: Oracle's row did not take the newer filing: {row[:200]}")
+    await page.evaluate("location.hash = 'games'")
+    await page.wait_for_timeout(400)
+    cap = await page.evaluate("document.getElementById('gt-capex-table').textContent")
+    if "$70.0B" not in cap or "new filing" not in cap:
+        fail(f"{label}: the capex game did not use the newer filing")
 
 
 async def no_injection(page, label: str) -> None:

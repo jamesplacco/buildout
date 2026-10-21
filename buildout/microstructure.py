@@ -113,3 +113,28 @@ def bar_liquidity(close, volume) -> dict:
     ret = np.diff(close) / close[:-1]
     dv = (close * volume)[1:]
     return {"roll_spread_bps": roll_spread(close) / float(np.mean(close)) * 1e4, "amihud": amihud(ret, dv), "kyle_lambda": kyle_lambda(ret, dv)}
+
+
+# ---------------------------------------------------------------- v0.7: fill quality (review sections 20-21)
+def book_state(bid: float, ask: float, qb: float, qa: float) -> dict:
+    """Midpoint, queue imbalance I = (Qb - Qa) / (Qb + Qa) and the size-weighted midpoint (a Qb + b Qa) / (Qb + Qa)."""
+    tot = qb + qa
+    return {"mid": (bid + ask) / 2, "spread": ask - bid, "imbalance": (qb - qa) / tot if tot > 0 else 0.0,
+            "weighted_mid": (ask * qb + bid * qa) / tot if tot > 0 else (bid + ask) / 2}
+
+
+def markout(side: int, price: float, mid_now: float, mid_later: float) -> dict:
+    """Signed markout M_h = s (m_{t+h} - p_t), split into the edge at the fill s (m_t - p_t) and the move after it
+    s (m_{t+h} - m_t). side = +1 for a purchase, -1 for a sale."""
+    edge, move = side * (mid_now - price), side * (mid_later - mid_now)
+    return {"markout": edge + move, "edge": edge, "move": move}
+
+
+def post_value(p_fill: float, markout_if_filled: float, cost_if_filled: float, cost_of_miss: float) -> float:
+    """V_post = P(F) (E[M_h | F] - c_F) - (1 - P(F)) C_miss, per unit."""
+    return p_fill * (markout_if_filled - cost_if_filled) - (1 - p_fill) * cost_of_miss
+
+
+def cross_value(markout_cross: float, cost_cross: float) -> float:
+    """Crossing fills for sure: its value is the (usually negative) markout after paying the spread, less fees."""
+    return markout_cross - cost_cross

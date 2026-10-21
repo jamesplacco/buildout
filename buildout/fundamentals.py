@@ -181,6 +181,10 @@ def derive(m: dict) -> dict:
     m["rpo_years"] = div(g("rpo"), g("revenue"))
     m["ocf_to_interest"] = div(g("ocf"), g("interest"))
     m["stage"] = minsky_stage(m)
+    m["coverage"] = coverage(m)
+    gap = None if g("capex") is None or g("ocf") is None else g("capex") - g("ocf")
+    m["funding_gap"] = gap if gap is not None and gap > 0 else (0.0 if gap is not None else None)
+    m["gap_cover_years"] = div(g("cash"), gap) if gap is not None and gap > 0 else None
     # the field manual's red-flag tests (6c), where the filings carry the inputs
     m["fcf_to_ni"] = div(g("fcf"), g("net_income")) if (g("net_income") or 0) > 0 else None
     m["sbc_to_rev"] = div(g("sbc"), g("revenue"))
@@ -190,6 +194,20 @@ def derive(m: dict) -> dict:
     m["red_flags"] = red_flags({"capex_to_dep": m.get("capex_to_da"), "fcf_to_ni": m.get("fcf_to_ni"), "sbc_to_rev": m.get("sbc_to_rev"),
                                 "recv_minus_rev": m.get("recv_minus_rev")})
     return m
+
+
+COVERAGE = {"self_funded": "Cash flow covers capex", "funding_gap": "Capex exceeds cash flow; interest covered",
+            "interest_uncovered": "Operating income below interest, or negative cash flow"}
+
+
+def coverage(m: dict) -> str | None:
+    """Descriptive coverage category (replaces the Minsky labels on the page).
+
+    It measures one year of cash flow against one year of capex and interest. It is NOT a solvency verdict: cash
+    balances, asset sales, discretionary capex and debt maturities (not modelled here) all matter.
+    """
+    s = minsky_stage(m)
+    return None if s is None else {"hedge": "self_funded", "speculative": "funding_gap", "ponzi": "interest_uncovered"}[s]
 
 
 def minsky_stage(m: dict) -> str | None:

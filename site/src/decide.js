@@ -27,7 +27,7 @@
     const li = liveInflation();
     const infl = li ? { avg36: li.avg36 * 100, yoy: li.yoy * 100, d: li.date, live: true, months: li.months_to_line_at_2pct, v3: fin(li.avg36_v3) ? li.avg36_v3 * 100 : NaN }
       : { avg36: R.cpi.avg36, yoy: R.cpi.value, d: R.cpi.date, live: false, months: R.cpi.months_to_line, v3: R.cpi.avg36_v3 };
-    const lineAt = (readF().hedge && fin(readF().hedge.line) ? readF().hedge.line : 0.0275) * 100;
+    const HL = hedgeLineInfo(), lineAt = HL.lo * 100;          // the low edge of the uncertain band (2.75%), for distances and the sleeve
     const corr = m && m.latest && fin(m.latest.corr63) && isoOk(m.latest.as_of)
       ? { v: m.latest.corr63, d: m.latest.as_of, live: true, what: "Nasdaq-100 against the 20-year Treasury, 63-day half-life" }
       : { v: readF().hedge.latest.corr, d: readF().hedge.latest.month + "-01", live: false, what: "S&P 500 against the 10-year Treasury, 36 months (Findings)" };
@@ -43,7 +43,7 @@
     const builders = FUND.rows.filter((r) => ["MSFT", "GOOGL", "AMZN", "META", "ORCL"].includes(r.t));
     const sum = (k) => builders.reduce((a, r) => a + (fin(r[k]) ? r[k] : 0), 0);
     return {
-      infl, lineAt, corr, vxn, term, funding, rrp, gross,
+      infl, lineAt, HL, corr, vxn, term, funding, rrp, gross,
       vix: lvl("vix") || { v: R.vix.value, d: R.vix.date, live: false },
       real: lvl("real10") || { v: R.real.value, d: R.real.date, live: false },
       be: lvl("breakeven10") || { v: R.be.value, d: R.be.date, live: false },
@@ -55,7 +55,7 @@
       capexTTM: sum("capex"), ocfTTM: sum("ocf"),
     };
   }
-  const liveTag = (o) => (o && o.live ? "live" : "snapshot");
+  const liveTag = (o) => (o && o.live ? "latest available" : "snapshot");
 
   /* ---------- assumption probabilities: the desk's, or the viewer's own ---------- */
   let asOverride = LS.get("bo-assume", {});
@@ -67,7 +67,7 @@
   function decisions() {
     const I = inputs(), out = [];
     const pctOf = (x) => (fin(x) ? Math.round(x * 100) + "%" : "n/a");
-    const hedgeOn = I.corr.v < -0.1 && I.infl.avg36 < I.lineAt;
+    const TD = tltNow(I), hedgeOn = TD.on === true;
 
     // 1. gross
     const bookVol = 1.1 * I.vxn.v, byVol = Math.min(0.2 / (bookVol / 100), 1.5), g = I.gross ? I.gross.v : byVol;
@@ -76,26 +76,28 @@
       ins: [["Nasdaq-100 implied volatility (VXN)", fx(I.vxn.v, 2), `${isoNice(I.vxn.d)} · ${liveTag(I.vxn)}`],
         ["Book volatility forecast, 1.1 times VXN", fx(bookVol, 1) + "%", "assumption: the book runs hotter than the index"],
         ["Volatility target", "20%", "config.toml; gross capped at 1.5x"],
-        I.gross ? ["Engine's size to run", xx(I.gross.v), `${isoNice(I.gross.d)}: the smallest of vol target, quarter Kelly and the drawdown cap`] : ["Bond hedge available?", hedgeOn ? "Yes" : "No", "decision 2: options carry the hedge"]],
-      rule: "Gross = 20% target volatility ÷ forecast volatility, capped at 1.5x. With the daily run, the engine also applies quarter Kelly and the 25% drawdown cap and takes the smallest.",
-      act: `Run ${xx(g)} gross`, sub: I.gross ? "From the engine's full sizing stack." : "By the volatility rule alone; the daily run adds the Kelly and drawdown checks.",
+        I.gross ? ["Engine's size to run", xx(I.gross.v), `${isoNice(I.gross.d)}: ${sizeBindingTxt()}`] : ["Bond hedge available?", hedgeOn ? "Yes" : "No", "decision 2: options carry the hedge"]],
+      rule: "Policy size.equity.v2: equity scale = the smallest of 20% target volatility ÷ forecast volatility, the 25% one-year drawdown cap and 1.5x. Quarter Kelly is not a size input: it reports the excess return this size would need.",
+      act: `Run ${xx(g)} gross`, sub: I.gross ? `From the engine's sizing stack; ${sizeBindingTxt()}.` : "By the volatility rule alone; the daily run adds the drawdown cap and the Kelly check.",
       flip: `Gross reaches 1.00x when VXN falls to <strong>${fx(vxnAt1, 1)}</strong>, ${fx(Math.max(0, I.vxn.v - vxnAt1), 1)} points below today.`, as: ["a-beta", "a-vrp", "a-hygiene"], link: "size",
       math: `<var>g</var> = min(0.20 &divide; (1.1 &times; ${fx(I.vxn.v / 100, 4)}), 1.5) = ${fx(byVol, 2)}${I.gross ? `; engine ${fx(I.gross.v, 2)}` : ""}` });
 
-    // 2. the bond hedge
-    const corrGap = I.corr.v + 0.1, inflGap = I.infl.avg36 - I.lineAt;
+    // 2. the bond hedge: policy hedge.tlt.v2, the same function the engine backtests
+    const corrGap = I.corr.v + 0.1, HL = I.HL, inflGap = fin(HL.line) ? I.infl.avg36 - HL.line * 100 : NaN;
     const b = readF().hedge.rows.find((r) => r.bucket === (I.infl.avg36 < 0 ? "Deflation" : I.infl.avg36 < 2 ? "0 to 2%" : I.infl.avg36 < 3 ? "2 to 3%" : I.infl.avg36 < 4 ? "3 to 4%" : I.infl.avg36 < 6 ? "4 to 6%" : "Above 6%"));
-    const paceMonths = fin(I.infl.v3) && I.infl.v3 < 0 && inflGap > 0 ? inflGap / -I.infl.v3 : Infinity;
-    out.push({ id: "d-duration", n: "Hold the TLT hedge?", q: "Long Treasuries as the book's hedge", level: hedgeOn ? 0 : 2,
-      ins: [["Inflation, 36-month average", pctPts(I.infl.avg36), `${monthNice(I.infl.d)} · ${liveTag(I.infl)} · the line is ${fx(I.lineAt, 2)}%`],
-        ["Inflation, past year", pctPts(I.infl.yoy), "BLS CPI-U"],
-        ["Stock-bond correlation", sgn2(I.corr.v), `${I.corr.what} · ${I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d)}`],
+    const gateTxt = TD.gates.inflation.status === "ok" ? `${TD.gates.inflation.pass ? "passes" : "fails"}: ${pctPts(I.infl.avg36)} against the ${fx(HL.line * 100, 2)}% line`
+      : `not applied (${TD.gates.inflation.status.replace(/_/g, " ")})`;
+    out.push({ id: "d-duration", n: "Hold the TLT hedge?", q: "Long Treasuries as the book's hedge", level: TD.status !== "ok" ? 1 : hedgeOn ? 0 : 2,
+      ins: [["Stock-bond state", TD.gates.state.value || "n/a", `correlation ${sgn2(I.corr.v)} · ${I.corr.what} · ${I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d)}`],
+        ["Inflation gate", TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "Passes" : "Fails") : "Not applied", `${pctPts(I.infl.avg36)} over 36 months · ${monthNice(I.infl.d)} · ${liveTag(I.infl)}`],
+        ["Where the line could be", HL.band ? `${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : "n/a", `bootstrap of the threshold choice, ${HL.boot ? HL.boot.independent_windows : "n/a"} independent 3-year windows`],
         [`Since 1871 at ${b ? b.bucket : "this"} inflation, bonds hedged in`, b ? `${Math.round(b.share_hedging * 100)}% of months` : "n/a", `${b ? b.months.toLocaleString("en-US") : "n/a"} months (Findings)`]],
-      rule: `Hold TLT at the minimum-variance ratio only while the correlation is below −0.10 and 36-month inflation is below the ${fx(I.lineAt, 2)}% line. Otherwise hold none.`,
-      act: hedgeOn ? "Hold TLT at the minimum-variance ratio" : "No TLT hedge: 0%", sub: hedgeOn ? "Bonds have hedged in this regime." : "Options, gold and energy carry the hedge instead (decisions 3 to 5).",
-      flip: `For the hedge to come back, 36-month inflation must fall <strong>${fx(Math.max(0, inflGap), 2)} points</strong>. Even if prices rise only 2% a year from here, that takes <strong>${I.infl.months || "n/a"} months</strong>, because the months rolling out of the average ran near 2.5% to 3% (base effects). At the latest three-month pace it takes ${paceMonths === Infinity ? "forever: the average is not falling" : durTxt(paceMonths * WEEKS_PER_MONTH)}. The correlation must also fall ${fx(Math.max(0, corrGap), 2)}.`,
+      rule: `Policy hedge.tlt.v2 (the engine backtests the same function): hold TLT at the minimum-variance ratio only while the stock-bond state is "hedging" (entered at a correlation of −0.10 or below, left only above 0) and, while the research has a validated line, 36-month inflation is below it (${fin(HL.line) ? fx(HL.line * 100, 2) + "%, chosen on data through " + HL.trained : "none validated today"}). A missing input makes the decision unavailable, never zero.`,
+      act: TD.status !== "ok" ? "Unavailable: " + TD.blocked.join("; ") : hedgeOn ? "Hold TLT at the minimum-variance ratio" : "No TLT hedge: 0%",
+      sub: hedgeOn ? "Bonds have hedged in this state." : TD.gates.state.value === "amplifying" ? "Stocks and bonds are moving together: long bonds would add to a sell-off. Options, gold and energy carry the hedge (decisions 3 to 5)." : "The correlation is between the lines; the hedge waits for a clear hedging state.",
+      flip: `The hedge comes back when the correlation falls to <strong>−0.10</strong>, ${fx(Math.max(0, corrGap), 2)} below today${fin(inflGap) && inflGap >= 0 ? `, and 36-month inflation falls <strong>${fx(inflGap, 2)} points</strong> below the line` : ""}. Inflation gate today: ${gateTxt}. Out of sample since 1901, adding the inflation gate to the correlation rule did ${readF().hedge.experiment && readF().hedge.experiment.inflation_adds_value ? "improve" : "not improve"} the worst months (Findings).`,
       as: ["a-line", "a-regime", "a-fed"], link: "fi-hedge",
-      math: `on &hArr; &rho; &lt; &minus;0.10 and &pi;<sub>36</sub> &lt; ${fx(I.lineAt / 100, 4)}. Now &rho; = ${sgn2(I.corr.v)}, &pi;<sub>36</sub> = ${fx(I.infl.avg36 / 100, 4)}. Months to the line on a 2% path: the first <var>k</var> with (CPI<sub>t+k</sub> &divide; CPI<sub>t+k&minus;36</sub>)<sup>1/3</sup> &minus; 1 &lt; ${fx(I.lineAt / 100, 4)}.` });
+      math: `on &hArr; state = hedging and (&pi;<sub>36</sub> &lt; line, when validated). State: enter at &rho; &le; &minus;0.10, leave at &rho; &gt; 0. Now &rho; = ${sgn2(I.corr.v)} (${TD.gates.state.value || "n/a"}), &pi;<sub>36</sub> = ${fx(I.infl.avg36 / 100, 4)}, line = ${fin(HL.line) ? fx(HL.line, 4) : "none"} (${HL.status.replace(/_/g, " ")}).` });
 
     // 3. the inflation sleeve
     const oilRel = I.oil.v / I.oilAvg5, sleeve = I.infl.avg36 >= I.lineAt || oilRel >= 1.3, G = readF().gold;
@@ -104,7 +106,7 @@
         ["Gold when stocks fell 15% (real, 12 months)", sPct(G.stocks_down15.gold, 1), `up ${fin(G.stocks_down15.share_gold_up) ? Math.round(G.stocks_down15.share_gold_up * 100) + "%" : "n/a"} of the time, since ${G.since}`],
         ["Gold in high-inflation years (real)", sPct(G.high_infl.gold, 1), `stocks ${sPct(G.high_infl.stocks, 1)}`],
         ["10-year breakeven", pctPts(I.be.v), `${isoNice(I.be.d)} · ${liveTag(I.be)}`]],
-      rule: "If 36-month inflation is above the line, or Brent is above 1.3 times its 5-year average (a supply shock), hold 8% in inflation assets: half gold, half energy. Otherwise 2%.",
+      rule: "If 36-month inflation is above 2.75% (the low edge of the band where bonds stopped hedging most of the time), or Brent is above 1.3 times its 5-year average (a supply shock), hold 8% in inflation assets: half gold, half energy. Otherwise 2%.",
       act: sleeve ? "Hold 8%: 4% gold, 4% energy" : "Hold 2%: keep the sleeve warm", sub: "Gold hedged equity drawdowns in inflationary years when bonds did not.",
       flip: `The sleeve shrinks only when Brent falls below <strong>$${fx(1.3 * I.oilAvg5, 2)}</strong> and inflation drops below the line.`, as: ["a-line", "a-oil", "a-samples"], link: "fi-gold",
       math: `on &hArr; &pi;<sub>36</sub> &ge; line or Brent &divide; avg<sub>5y</sub> &ge; 1.3. Now ${fx(oilRel, 3)}` });
@@ -178,13 +180,14 @@
       c2.append(h("h4", null, "Rule, written in advance"), h("p", "rule-box", d.rule), mth);
       const fl = h("p", "flip");
       fl.innerHTML = d.flip;
-      const conf = decConf(d.as), meter = h("div", "meter"), bar = h("div", "bar"), fill = h("i"), mk = h("div", "mk");
+      const fr = frechet(d.as.map(asP).filter(fin)), conf = fr.indep, meter = h("div", "meter"), bar = h("div", "bar"), fill = h("i"), rng = h("i", "rng"), mk = h("div", "mk");
       fill.style.width = Math.round(conf * 100) + "%";
-      bar.append(fill);
-      mk.append(h("span", null, `Confidence ${Math.round(conf * 100)}%`), h("b", null, d.as.map((id) => Math.round(asP(id) * 100) + "%").join(" × ")));
+      rng.style.left = Math.round(fr.lo * 100) + "%"; rng.style.width = Math.max(1, Math.round((fr.hi - fr.lo) * 100)) + "%";
+      bar.append(rng, fill);
+      mk.append(h("span", null, `All assumptions hold: ${Math.round(fr.lo * 100)} to ${Math.round(fr.hi * 100)}%`), h("b", null, `${Math.round(conf * 100)}% if independent`));
       meter.append(bar, mk);
       meter.setAttribute("role", "img");
-      meter.setAttribute("aria-label", `Confidence ${Math.round(conf * 100)}%: the product of ${d.as.length} assumption probabilities`);
+      meter.setAttribute("aria-label", `All ${d.as.length} assumptions hold with probability between ${Math.round(fr.lo * 100)}% and ${Math.round(fr.hi * 100)}% (bounds that need no independence assumption); ${Math.round(conf * 100)}% if they were independent`);
       c3.append(h("h4", null, "Action today"), h("p", "act", d.act), h("p", "flip", d.sub), fl, meter);
       const as = h("p", "flip");
       as.append(document.createTextNode("Rests on: "));
@@ -218,7 +221,7 @@
   // risk +1: a rise is the risk; each line is [level, state above it, state below it]
   const ROC_ROWS = [
     { k: "infl36", n: "Inflation, 36-month average", unit: "pp", freq: "m", risk: 1,
-      lines: [[() => readF().hedge.line * 100, "Above the hedge line", "Below the hedge line: bonds can hedge"], [4.0, "Bonds hedged 1 month in 8", "Back to the 3 to 4% bucket"]] },
+      lines: [[() => hedgeLineInfo().lo * 100, "Above 2.75%: bonds hedged in a minority of months", "Below 2.75%: bonds hedged most months"], [() => (fin(hedgeLineInfo().line) ? hedgeLineInfo().line * 100 : NaN), "Above the validated line: the TLT gate fails", "Below the validated line"], [4.0, "Bonds hedged 1 month in 8", "Back to the 3 to 4% bucket"]] },
     { k: "cpi", n: "Inflation, past year", unit: "pp", freq: "m", risk: 1, lines: [[3, "Above 3%", "Below 3%"], [5, "A 5% spell: median 29 months to undo", "Below 5%"]] },
     { k: "real", move: "real10", n: "10-year real yield", unit: "pp", risk: 1, lines: [[2.0, "Tight", "Easy"], [2.5, "Restrictive", "Tight"]] },
     { k: "be", move: "be10", n: "10-year breakeven", unit: "pp", risk: 1, lines: [[2.5, "Rising", "Anchored"], [3.0, "Unanchored", "Rising"]] },
@@ -230,7 +233,7 @@
     { k: "ccc", move: "ccc", n: "CCC spread", unit: "pp", risk: 1, lines: [[9, "Stress", "Calm"], [14, "Distress", "Stress"]] },
     { k: "nfci", n: "Financial conditions (NFCI)", unit: "idx", risk: 1, lines: [[0, "Tighter than average", "Looser than average"]] },
   ];
-  const rocLines = (row) => row.lines.map(([at, up, down]) => [typeof at === "function" ? at() : at, up, down]);
+  const rocLines = (row) => row.lines.map(([at, up, down]) => [typeof at === "function" ? at() : at, up, down]).filter(([at]) => fin(at));
   const fmtRocLevel = (row, v) => (!fin(v) ? "n/a" : row.unit === "bp" ? fx(v, 0) + "bp" : row.unit === "$" ? "$" + fx(v, 2) : row.unit === "idx" ? fx(v, 3) : row.unit === "pts" ? fx(v, 2) : pctPts(v));
   // velocities in level units per week (v13, v4, a13); vm: the per-month pair that monthly rows display
   function rocValues(row) {
@@ -377,7 +380,7 @@
     tbl.replaceChildren(thead, tb);
     const ps = ASSUMPTIONS.map((a) => asP(a.id)), weakest = rows[0], box = $("#as-math");
     box.replaceChildren(
-      tile("All of them hold", Math.round(conjunction(ps) * 100) + "%", `If independent: the product of ${ps.length} probabilities. Good assumptions compound into doubt.`),
+      tile("All of them hold", `${Math.round(frechet(ps).lo * 100)} to ${Math.round(frechet(ps).hi * 100)}%`, `Bounds that need no independence assumption; ${Math.round(conjunction(ps) * 100)}% only if all ${ps.length} were independent. Shared causes push it toward the top.`),
       tile("Expected to fail", fx(ps.reduce((s, p) => s + (1 - p), 0), 1) + " of " + ps.length, "The sum of (1 − p): how many of these the desk should expect to be wrong."),
       tile("Most fragile", weakest.a.kind, weakest.a.t));
     if (Object.keys(asOverride).length) {
@@ -462,11 +465,11 @@
       return d;
     };
     const lower = (s) => s.charAt(0).toLowerCase() + s.slice(1);
-    const above = I.infl.avg36 >= I.lineAt;
+    const above = I.infl.avg36 >= I.lineAt, TD = tltNow(I);
     box.append(
       cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions"),
-      cell("Risk", above ? `Bonds won't hedge: inflation ${pctPts(I.infl.avg36)} against the ${fx(I.lineAt, 2)}% line.` : "Bonds are back below the line and can hedge.",
-        above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `Even at 2% inflation from here, the average stays above the line for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),
+      cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds won't hedge: stocks and bonds move together (${sgn2(I.corr.v)}).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
+        above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `At 2% inflation from here, the 36-month average stays above 2.75% for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),
       near.length ? cell("Watch", near.map((x) => `${x.row.n}: ${fmtRocLevel(x.row, x.at13.at)} in ${durTxt(x.at13.weeks)}`).join("; ") + ".",
         `At the 13-week pace. ${near.map((x) => `${x.row.n}: "${x.at13.label}"`).join("; ")}.`, "#roc-title", "Rates of change")
         : cell("Watch", "No rule line is approaching at the current pace.", "", "#roc-title", "Rates of change"));
@@ -519,7 +522,7 @@
     const I = inputs(), F = readF(), g = fundRow("GOOGL"), O = F.oil.summary, faq = FAQ.find((f) => /inflation figures change/.test(f.q));
     const items = [
       ["The hedge and the book share a borrower.", `The five builders spend ${pct0(I.capexTTM / I.ocfTTM)} of their operating cash flow on capex, and the ones spending more than they earn borrow the gap: Amazon's debt rose ${pct0(fundRow("AMZN").debt_yoy)} in a year; Oracle owes ${B$(fundRow("ORCL").debt, 0)}. That bond supply lifts the long yields the TLT hedge depends on.`, "ch-debt", "The chain"],
-      ["Bonds stay out for months, even if inflation breaks.", `Three-year inflation is ${pctPts(I.infl.avg36)}. At 2% inflation from here, base effects keep it above the ${fx(I.lineAt, 2)}% line for about ${I.infl.months} months.`, "d-duration", "Decision 2"],
+      ["Bonds stay out for months, even if inflation breaks.", `Three-year inflation is ${pctPts(I.infl.avg36)}. At 2% inflation from here, base effects keep it above 2.75% for about ${I.infl.months} months, and stocks and bonds are moving together today.`, "d-duration", "Decision 2"],
       ["Earnings are partly marks on each other.", `${pct0(g.nonop_share)} of Alphabet's pre-tax income over the last twelve months was non-operating, mostly gains on private AI stakes. Those reverse faster than the business.`, "pp-title", "Paper profits"],
       ["Today's oil spike is the kind that hurt.", `Brent is ${fx(I.oil.v / I.oilAvg5, 2)} times its five-year average: a supply shock. Since 1989 those were followed by a ${sPct(O.supply.mean_fwd12, 1)} average year for stocks; demand rebounds by ${sPct(O.rebound.mean_fwd12, 1)}.`, "fi-oil", "The finding"],
       ["The build is limited by watts, not dollars.", "PJM cleared 6,623 MW short of its reliability target, at the price cap; turbine order books run toward 2030; 91.5% of megaprojects finish late, over budget or both.", "physics", "Physics"],

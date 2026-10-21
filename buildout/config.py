@@ -29,6 +29,7 @@ class RiskParams:
     drawdown_confidence: float = 0.95   # ...at this confidence over one year
     trim_band: float = 0.20             # trim a name once it runs 20% above target weight
     max_hedge_ratio: float = 1.0        # long-only hedge, at most $1 of hedge per $1 of book
+    max_total_gross: float = 2.0        # equity + bond notional, after every hedge is added (portfolio limit)
     cost_bps: float = 2.0               # one-way trading cost on turnover
     financing_spread_bps: float = 100.0 # borrow cost over the cash rate on leverage
     corr_halflife: int = 63             # stock-bond correlation half-life (days)
@@ -50,6 +51,7 @@ class DataParams:
     use_fred: bool = True
     sec_user_agent: str = "Your Name your@email.com"  # SEC requires a real contact
     risk_free_series: str = "DGS3MO"
+    max_cost_usd: float = 5.0           # refuse an unattended paid pull whose Databento estimate exceeds this
 
 
 @dataclass

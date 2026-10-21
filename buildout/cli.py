@@ -24,6 +24,18 @@ from .config import default_config, load_config
 from .pipeline import analyze, load_inputs, write_report
 
 
+def research_line(out_dir) -> tuple:
+    """The hedge line and its verdict from the research step's research.json, if that file is in the output folder."""
+    from pathlib import Path
+    p = Path(out_dir) / "research.json"
+    try:
+        h = json.loads(p.read_text())["hedge"]
+        status = h.get("status", "ok" if h.get("line") is not None else "no_reliable_threshold")
+        return (h.get("line"), status)
+    except (OSError, KeyError, ValueError, TypeError):
+        return (None, "unavailable")
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="buildout")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -58,6 +70,8 @@ def main(argv: list[str] | None = None) -> None:
     so = sub.add_parser("sources")
     so.add_argument("--out", default="out")
     so.add_argument("--feeds", default="feeds.toml")
+    rz = sub.add_parser("reason")
+    rz.add_argument("--out", default="out", help="folder with the other daily files; reason.json is written there")
     jn = sub.add_parser("journal")
     jn.add_argument("path", help="decision journal exported from the page (JSON)")
     a = ap.parse_args(argv)
@@ -65,8 +79,8 @@ def main(argv: list[str] | None = None) -> None:
     if a.cmd == "demo":
         cfg = default_config()
         cfg.data.source = "synthetic"
-        rep = analyze(cfg, load_inputs(cfg))
-        print(json.dumps(rep["summary"], indent=1))
+        rep = analyze(cfg, load_inputs(cfg), *research_line(a.out))
+        print(json.dumps(rep["summary"], indent=1, default=str))
         print("wrote", write_report(rep, a.out))
     elif a.cmd == "macro":
         import pandas as pd
@@ -87,8 +101,8 @@ def main(argv: list[str] | None = None) -> None:
         print("wrote", write(rep, a.out, "macro.json"))
     elif a.cmd == "run":
         cfg = load_config(a.config)
-        rep = analyze(cfg, load_inputs(cfg))
-        print(json.dumps(rep["summary"], indent=1))
+        rep = analyze(cfg, load_inputs(cfg), *research_line(a.out))
+        print(json.dumps(rep["summary"], indent=1, default=str))
         print("wrote", write_report(rep, a.out))
     elif a.cmd == "cost":
         from .data.databento_source import DatabentoSource
@@ -132,6 +146,14 @@ def main(argv: list[str] | None = None) -> None:
         for c in stat["checks"]:
             print(("PASS " if c["ok"] else "FAIL ") + c["name"] + (f": {c['detail']}" if c["detail"] else ""))
         print("wrote", write(stat, a.out, "status.json"))
+    elif a.cmd == "reason":
+        from .jsonout import write
+        from .reasoner import build
+        res = build(a.out)
+        best = res["alternatives"]["optimal"]
+        print("posterior", [round(x, 3) for x in res["posterior"]["posterior"]])
+        print("optimal (equity, hedge ratio, put premium, gold):", best["port"] if best else None)
+        print("wrote", write(res, a.out, "reason.json"))
     elif a.cmd == "research":
         from .jsonout import write
         from .research import SOURCES, compact, download, run
@@ -143,8 +165,11 @@ def main(argv: list[str] | None = None) -> None:
             raw = download()
         res = run(raw)
         hl = res["hedge_line"]
-        print(f"hedge line {hl['line']:.2%} (band {hl['zone'][0]:.2%} to {hl['zone'][1]:.2%}); "
-              f"latest 36-month inflation {hl['latest']['infl_avg']:.2%}, correlation {hl['latest']['corr']:+.2f}")
+        if hl["status"] == "ok":
+            print(f"hedge line {hl['line']:.2%} (band {hl['zone'][0]:.2%} to {hl['zone'][1]:.2%}, chosen on data through {hl['trained_through']}); ", end="")
+        else:
+            print(f"hedge line: {hl['status'].replace('_', ' ')}; ", end="")
+        print(f"latest 36-month inflation {hl['latest']['infl_avg']:.2%}, correlation {hl['latest']['corr']:+.2f}")
         print("wrote", write(compact(res), a.out, "research.json"))      # the page reads this shape directly
     elif a.cmd in ("brain", "buyside"):
         from .jsonout import write

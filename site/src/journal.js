@@ -513,6 +513,7 @@
     box.append(h("span", "h"), h("span", "h", "Good outcome (positive alpha)"), h("span", "h", "Bad outcome"),
       h("span", "h", "Good process"), cell("g", G.earned, "Earned", "repeat it"), cell("w", G.bad_luck, "Bad luck", "keep the process"),
       h("span", "h", "Bad process"), cell("w", G.dumb_luck, "Dumb luck", "do not repeat"), cell("b", G.deserved, "Deserved", "fix the process"));
+    if (G.unknown_process) box.append(h("p", "hint pog-note", `${G.unknown_process} decision${G.unknown_process > 1 ? "s" : ""} with no process record: left out as unknown, not counted as bad process.`));
   }
   function renderLuck(sc, mine) {
     const box = $("#jrs-luck");
@@ -520,15 +521,15 @@
     box.replaceChildren(h("div", "panel-head"));
     box.firstChild.append(h("span", "panel-title", "Is it skill yet?"));
     if (!sc.nClosed) { box.append(h("p", "hint", "The luck test needs closed decisions.")); return; }
-    const A = sc.alpha || {}, hits = Math.round(sc.hitRate * sc.nClosed);
+    const A = sc.alpha || {}, hits = sc.fullHits;
     const need = fin(A.need) ? Math.ceil(A.need) : Infinity;
     const t = h("div", "tiles compact");
     t.append(
-      tile("A coin flip does this well", pctPlain(sc.luckP, 0), `P(at least ${hits} right of ${sc.nClosed} | 50% each). Below 5% starts to look like skill.`),
+      tile("Base rates do this well", pctPlain(sc.luckP, 0), `P(at least ${hits} fully right of ${sc.nClosed}) if each call came true at its own base rate (average ${pct0(sc.luckBase)}; 50% where none was logged). Correlated calls overstate the evidence. Not the probability that you were lucky.`),
       tile("Alpha per decision", fin(A.mean) ? `${sBp(A.mean * 100, 2)}%` : "n/a", fin(A.t) ? `t-statistic ${fx(A.t, 2)} (2 is the usual bar)` : "Needs two closed decisions."),
       tile("Decisions to prove it", need === Infinity ? "Never at this alpha" : String(need), need === Infinity ? "Mean alpha is not positive." : `For t = 2 at today's mean and spread; you have ${sc.nClosed}.`));
     box.append(t, h("p", "sentence " + (sc.luckP < 0.05 && A.t >= 2 ? "ok" : "warn"),
-      sc.luckP < 0.05 && A.t >= 2 ? "Both tests pass: the record is unlikely to be luck. Keep scoring: skill decays." : `Not yet distinguishable from luck. A coin flip matches this record ${Math.round(sc.luckP * 100)}% of the time${need !== Infinity ? `, and about ${need} decisions at this edge would be needed to tell` : ""}. ${mine ? "" : "These are the examples; your own entries replace them."}`));
+      sc.luckP < 0.05 && A.t >= 2 ? "Both tests pass: the record is unlikely to be luck. Keep scoring: skill decays." : `Not yet distinguishable from luck. Base rates alone match this record ${Math.round(sc.luckP * 100)}% of the time${need !== Infinity ? `, and about ${need} decisions at this edge would be needed to tell` : ""}. ${mine ? "" : "These are the examples; your own entries replace them."}`));
   }
 
   /* ---------- export and import ---------- */

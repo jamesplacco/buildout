@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.6</span>
+      Buildout <span class="ver">v0.7</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -19,12 +19,10 @@
     </div>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
-      <a href="#decide" data-group="decide">Decide</a>
+      <a href="#solve" data-group="decide">Decide</a>
       <a href="#rates" data-group="markets">Markets</a>
-      <a href="#prop" data-group="trading">Trading</a>
       <a href="#fundamentals" data-group="research">Research</a>
-      <a href="#legends" data-group="wisdom">Wisdom</a>
-      <a href="#engine" data-group="reference">Reference</a>
+      <a href="#engine" data-group="reference">Methods</a>
     </nav>
   </div>
   <nav class="subtabs" id="subtabs" aria-label="Desks in this section"></nav>
@@ -34,20 +32,28 @@
 
 <!-- ======================= DESK ======================= -->
 <section class="view" id="view-desk" aria-labelledby="desk-title">
-  <div class="hero">
-    <div class="hero-text">
-      <p class="eyebrow">Risk note · October 21, 2026 · Jamie Placco</p>
-      <h1 id="desk-title">Bonds stop hedging above 2.75% inflation. <em>We are at 3.1%.</em></h1>
-      <p class="lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. It reads rates, credit, volatility, filings and the grid every day, turns each reading into a written rule and a sized action, and keeps score of its own calls. The headline is its own finding from 155 years of data.</p>
-      <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 135 of 135 pass</span></span>
+  <div class="t7" id="today7">
+    <div class="t7-head">
+      <p class="eyebrow">Today · October 21, 2026 · Jamie Placco</p>
+      <h1 id="desk-title">How reliable is your bond hedge in this regime?</h1>
+      <p class="t7-answer" id="t7-answer"></p>
+      <p class="t7-status" id="t7-status"></p>
+      <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
+    </div>
+    <div class="t7-grid">
+      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">What changed, and why it matters to the book</h2><ol class="t7-changes" id="t7-changes"></ol></section>
+      <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Your choices</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with your own limits →</a></section>
+      <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">What would reverse this</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decide">The decision board →</a></section>
+      <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Can I trust it?</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#engine">Methods and tests →</a></section>
+    </div>
+    <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
+    <div class="chips" aria-label="Status">
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 165 of 165 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
         <span class="chip"><span class="dot idle"></span>Snapshot: Oct 21, 2026</span>
       </div>
-    </div>
-    <div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout · 2026</span></div>
   </div>
 
   <section class="section pulse" id="pulse" aria-labelledby="pulse-title">
@@ -210,6 +216,7 @@
     <div class="tchips" id="thesis-chips"></div>
   </section>
 
+  <div class="rosette-end"><div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout · 2026</span></div></div>
   <footer class="foot"><p>Research desk, not investment advice. The model book is illustrative. Scenario sizes and tool inputs are assumptions; every market figure links to its source and date.</p></footer>
 </section>
 
@@ -923,6 +930,29 @@
     <div class="panel" id="mm-tape"></div>
     <div class="math"><span class="mlabel">Estimators</span>Roll spread = 2&radic;(&minus;cov(&Delta;<var>p</var><sub>t</sub>, &Delta;<var>p</var><sub>t&minus;1</sub>)) when the covariance is negative. Amihud = mean(|<var>r</var>| &divide; dollar volume) per $1M. Kyle &lambda; = cov(<var>r</var>, signed $ volume) &divide; var(signed $ volume), sign from the tick rule.</div>
   </section>
+  <section class="section" id="fill-lab" aria-labelledby="fq-title">
+    <div class="section-head"><p class="eyebrow">Tool · execution lab</p><h2 id="fq-title">Fill quality: was that passive fill any good?</h2><p class="prose">A fill at the bid looks like a win until the midpoint moves. The markout splits the result into the edge at the fill and the move after it, and the posting decision weighs the chance of filling against the cost of missing. Illustrative book: $100.00 bid for 900 shares, $100.02 offered for 100.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Fill quality inputs">
+        <div class="field"><div class="field-top"><label for="fq-qb">Shares on the bid</label><output id="fq-qb-o" for="fq-qb"></output></div><input type="range" id="fq-qb" min="0" max="2000" step="50" value="900"></div>
+        <div class="field"><div class="field-top"><label for="fq-qa">Shares on the offer</label><output id="fq-qa-o" for="fq-qa"></output></div><input type="range" id="fq-qa" min="0" max="2000" step="50" value="100"></div>
+        <div class="field"><div class="field-top"><label for="fq-later">Midpoint one second later</label><output id="fq-later-o" for="fq-later"></output></div><input type="range" id="fq-later" min="99.97" max="100.05" step="0.005" value="99.99"></div>
+        <div class="field"><div class="field-top"><label for="fq-pf">Chance the bid fills</label><output id="fq-pf-o" for="fq-pf"></output></div><input type="range" id="fq-pf" min="0" max="100" step="1" value="60"></div>
+        <div class="field"><div class="field-top"><label for="fq-cf">Fees and costs per share</label><output id="fq-cf-o" for="fq-cf"></output></div><input type="range" id="fq-cf" min="0" max="0.5" step="0.01" value="0.1"></div>
+        <div class="field"><div class="field-top"><label for="fq-miss">Cost of missing the trade</label><output id="fq-miss-o" for="fq-miss"></output></div><input type="range" id="fq-miss" min="0" max="3" step="0.05" value="0.8"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Markout of the passive buy</span><span class="v num" id="fq-mk"></span></div>
+          <div class="ro"><span class="k">Midpoint</span><span class="v num" id="fq-mid"></span></div>
+          <div class="ro"><span class="k">Queue imbalance</span><span class="v num" id="fq-imb"></span></div>
+          <div class="ro"><span class="k">Size-weighted midpoint</span><span class="v num" id="fq-wm"></span></div>
+        </div>
+        <p class="sentence" id="fq-out"></p>
+      </div>
+    </div>
+    <div class="math"><span class="mlabel">Markout and the posting decision</span><var>m</var> = (<var>a</var> + <var>b</var>)/2, <var>I</var> = (<var>Q</var><sub>b</sub> &minus; <var>Q</var><sub>a</sub>)/(<var>Q</var><sub>b</sub> + <var>Q</var><sub>a</sub>), m&#771; = (<var>a</var><var>Q</var><sub>b</sub> + <var>b</var><var>Q</var><sub>a</sub>)/(<var>Q</var><sub>b</sub> + <var>Q</var><sub>a</sub>). <var>M</var><sub>h</sub> = <var>s</var>(<var>m</var><sub>t</sub> &minus; <var>p</var><sub>t</sub>) + <var>s</var>(<var>m</var><sub>t+h</sub> &minus; <var>m</var><sub>t</sub>). <var>V</var><sub>post</sub> = P(F)(E[<var>M</var><sub>h</sub> | F] &minus; <var>c</var><sub>F</sub>) &minus; (1 &minus; P(F))<var>C</var><sub>miss</sub>.</div>
+  </section>
 </section>
 
 <!-- ======================= THESES ======================= -->
@@ -1038,6 +1068,176 @@
     <div class="chains" id="chain-list"></div>
   </section>
   <footer class="foot"><p>Rules and probabilities are the desk's judgment, stated so they can be argued with. Research desk, not investment advice.</p></footer>
+</section>
+
+<!-- ======================= SOLVE ======================= -->
+<section class="view" id="view-solve" hidden aria-labelledby="solve-title">
+  <div class="vhead">
+    <p class="eyebrow">Decide · the solver</p>
+    <h1 id="solve-title">From evidence to a sized choice, with every step shown.</h1>
+    <p class="lede">Seven observed signals update the odds of seven three-month scenarios. A search over 18,414 portfolios finds the one with the highest expected log growth that keeps the worst scenario inside your loss limit. Then the desk plays the same choice against an adversarial Nature, prices what each signal is worth to learn, and finds the most plausible way to breach the limit.</p>
+  </div>
+
+  <section class="section" id="calc" aria-labelledby="calc-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="calc-title">Calculator</h2><p class="prose">Exact arithmetic with finance built in: Black-Scholes, Kelly, NPV and IRR, the normal distribution, square-root impact, and live values such as $vix and $y10. Suffixes read as you would say them: 25bp, 5bn, 3m, 50%. Press Enter to keep a line; also works from search with "=".</p></div>
+    <div class="panel calc">
+      <label class="sr-only" for="calc-in">Expression</label>
+      <input class="calc-in" id="calc-in" type="text" inputmode="text" autocomplete="off" spellcheck="false" value="bsput(100, 95, 0.25, ($vix + 3)%)">
+      <div class="calc-out" id="calc-out" aria-live="polite"></div>
+      <div class="calc-ex" id="calc-ex" aria-label="Examples"></div>
+      <p class="hint" id="calc-vars"></p>
+      <ol class="calc-hist" id="calc-hist" aria-label="Kept results"></ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rz-title">
+    <div class="section-head"><p class="eyebrow">Answer</p><h2 id="rz-title">What the evidence supports</h2><p class="prose" id="rz-answer" aria-live="polite"></p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Limits and the current book">
+        <div class="field"><div class="field-top"><label for="rz-loss">Loss limit, worst scenario over 3 months</label><output id="rz-loss-o" for="rz-loss"></output></div><input type="range" id="rz-loss" min="5" max="35" step="1" value="15"></div>
+        <div class="field"><div class="field-top"><label for="rz-prem">Option premium budget, % of NAV</label><output id="rz-prem-o" for="rz-prem"></output></div><input type="range" id="rz-prem" min="0" max="2" step="0.25" value="2"></div>
+        <div class="field"><div class="field-top"><label for="rz-eq">Current equity, x NAV</label><output id="rz-eq-o" for="rz-eq"></output></div><input type="range" id="rz-eq" min="0" max="1.5" step="0.05" value="1"></div>
+        <div class="field"><div class="field-top"><label for="rz-h">Current TLT hedge, x equity</label><output id="rz-h-o" for="rz-h"></output></div><input type="range" id="rz-h" min="0" max="1" step="0.1" value="0"></div>
+        <button class="btn ghost" id="rz-reset" type="button">Clear my what-ifs</button>
+      </form>
+      <div class="panel">
+        <p class="sentence"><strong>Most likely now:</strong> <span id="rz-top"></span></p>
+        <figure class="chart"><div class="chart-head"><span class="chart-title">Posterior probability by scenario (tick: prior)</span><span class="ev ev-asm">Assumed scenarios</span></div><div class="svgbox" id="rz-post"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rzl-title">
+    <div class="section-head"><p class="eyebrow">Evidence</p><h2 id="rzl-title">The evidence ledger</h2><p class="prose">Each signal is observed from the same inputs the decisions read. Tap a state to ask "what if". Signals that share a driver (inflation and the stock-bond correlation) are averaged, not added, so one cause is not counted twice. The likelihoods are hypotheses, published here so they can be argued with.</p></div>
+    <div class="tablewrap"><table class="rz" id="rz-ledger"><thead><tr><th>Signal</th><th class="r">Value</th><th class="r">As of</th><th>State</th><th>Evidence</th><th>Points toward</th><th>Driver</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="section" aria-labelledby="rza-title">
+    <div class="section-head"><p class="eyebrow">Choices</p><h2 id="rza-title">Four alternatives, on the same scenarios</h2><p class="prose">Keep the exposure, cut it until the loss limit holds, keep the equity and buy the best hedge, or take the grid's optimum. Growth is the certainty equivalent of expected log wealth; regret is the most each choice trails the best one in any scenario.</p></div>
+    <div class="tablewrap"><table class="rz" id="rz-alts"><thead><tr><th>Choice</th><th class="r">Equity</th><th class="r">TLT</th><th class="r">Puts</th><th class="r">Gold</th><th class="r">Expected, 3m</th><th class="r">Growth, 3m</th><th class="r">Worst</th><th class="r">Max regret</th><th class="r">Meets limit</th></tr></thead><tbody></tbody></table></div>
+    <h3 class="sub-h">Return by scenario</h3>
+    <div class="tablewrap"><table class="rz heatmap" id="rz-heat"></table></div>
+    <div class="math"><span class="mlabel">The search</span>maximize &Sigma;<sub>s</sub> &pi;<sub>s</sub> ln(1 + <var>R</var><sub>s</sub>(<var>e</var>, <var>h</var>, <var>p</var>, <var>g</var>)) over equity <var>e</var> &isin; {0, 0.05, &hellip;, 1.5}, TLT ratio <var>h</var> &isin; {0, 0.1, &hellip;, 1}, put premium <var>p</var> &isin; {0, 0.25%, &hellip;, 2%}, gold <var>g</var> &isin; {0, 2%, &hellip;, 10%}, subject to min<sub>s</sub> <var>R</var><sub>s</sub> &ge; &minus;limit, <var>e</var>(1 + <var>h</var>) + <var>g</var> &le; 2. <var>R</var><sub>s</sub> = <var>e</var>(1.15 m<sub>s</sub> + a<sub>s</sub>) + <var>e</var><var>h</var>(y&tau; &minus; 16.5&Delta;y + &frac12;&middot;360&Delta;y<sup>2</sup> &minus; r&tau;) + (<var>p</var>/c)&middot;payoff<sub>95/85</sub> &minus; <var>p</var> + <var>g</var>&middot;gold<sub>s</sub> + cash&middot;r&tau;. Posterior &pi; &prop; prior &times; &prod;<sub>drivers</sub> exp(mean log-likelihood).</div>
+  </section>
+
+  <section class="section" aria-labelledby="rzn-title">
+    <div class="section-head"><p class="eyebrow">Game theory</p><h2 id="rzn-title">Playing against Nature</h2><p class="prose" id="rz-nature"></p></div>
+    <div class="math"><span class="mlabel">Zero-sum game</span>max<sub><var>x</var></sub> min<sub><var>s</var></sub> &Sigma;<sub>i</sub> <var>x</var><sub>i</sub> <var>R</var><sub>i,s</sub>, solved exactly as a linear program (simplex, Bland's rule); Nature's equilibrium mix is the dual.</div>
+  </section>
+
+  <section class="section" aria-labelledby="rzv-title">
+    <div class="section-head"><p class="eyebrow">Research priority</p><h2 id="rzv-title">What is worth learning next</h2><p class="prose" id="rz-evpi"></p></div>
+    <div class="tablewrap"><table class="rz" id="rz-voi"><thead><tr><th>Signal</th><th class="r">Worth to learn, bp</th><th class="r">Chance it is on</th><th class="r">Flipping it changes the choice</th><th>Choice if on / off</th></tr></thead><tbody></tbody></table></div>
+    <div class="math"><span class="mlabel">Value of information</span>EVSI<sub>j</sub> = &Sigma;<sub>o</sub> P(o) max<sub>a</sub> E[ln(1+R<sub>a</sub>) | o] &minus; max<sub>a</sub> E[ln(1+R<sub>a</sub>)], with signal <var>j</var> unobserved; EVPI is the same with the scenario itself revealed. In basis points of certainty-equivalent return over three months.</div>
+  </section>
+
+  <section class="section" aria-labelledby="rzr-title">
+    <div class="section-head"><p class="eyebrow">Reverse stress</p><h2 id="rzr-title">The most plausible way to breach the limit</h2><p class="prose">Ordinary stress tests ask what a given shock does. This asks which joint move of stocks, the AI factor, yields, oil and gold produces the loss with the smallest Mahalanobis distance, using covariances measured in each inflation regime.</p></div>
+    <div class="lab">
+      <div class="panel controls"><div class="field"><label for="rz-regime">Covariance regime</label><select id="rz-regime"><option value="inflation">2022 on (inflation)</option><option value="low_inflation">1990 to 2021 (low inflation)</option></select></div><span class="ev ev-est">Estimated</span></div>
+      <div class="panel"><div class="tablewrap"><table class="rz" id="rz-rev"><thead><tr><th>Factor</th><th class="r">Move</th></tr></thead><tbody></tbody></table></div><p class="sentence" id="rz-rev-out"></p></div>
+    </div>
+    <div class="math"><span class="mlabel">Closest breach</span><var>s</var><sup>*</sup> = &minus;<var>L</var> &Sigma;<var>b</var> &divide; (<var>b</var>&prime;&Sigma;<var>b</var>), distance <var>d</var> = <var>L</var> &divide; &radic;(<var>b</var>&prime;&Sigma;<var>b</var>), where <var>b</var> is the book's first-order exposure to each factor. First order only: the put spread and the bond's convexity are not in <var>b</var>.</div>
+  </section>
+  <footer class="foot"><p>Scenarios, likelihoods and the AI factor's volatility are assumptions; covariances are measured. The solver is exact on its grid, not between grid points.</p></footer>
+</section>
+
+<!-- ======================= GAMES ======================= -->
+<section class="view" id="view-games" hidden aria-labelledby="games-title">
+  <div class="vhead">
+    <p class="eyebrow">Decide · game theory</p>
+    <h1 id="games-title">Other players choose too. Their best response moves your book.</h1>
+    <p class="lede">The capex race is a prisoner's dilemma calibrated to the builders' filings. A crowded trade unwinds like a bank run with a computable threshold. A market maker prices your order as if you might know something. Each model has a closed form, solved here exactly.</p>
+  </div>
+
+  <section class="section" aria-labelledby="gtc-title">
+    <div class="section-head"><p class="eyebrow">Capex race</p><h2 id="gtc-title">Why every builder overbuilds</h2><p class="prose">Five builders choose capacity; the return on capacity falls as total capacity rises (Cournot). Each builder's cost of $1 of capacity a year is depreciation over its stated server life plus its cost of capital. The model is calibrated so its equilibrium reproduces the builders' actual trailing capex.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Capex race inputs">
+        <div class="field"><div class="field-top"><label for="gt-p">Gross return on capacity today</label><output id="gt-p-o" for="gt-p"></output></div><input type="range" id="gt-p" min="28" max="70" step="1" value="40"></div>
+        <div class="field"><div class="field-top"><label for="gt-wacc">Cost of capital</label><output id="gt-wacc-o" for="gt-wacc"></output></div><input type="range" id="gt-wacc" min="5" max="13" step="0.5" value="9"></div>
+        <div class="field"><div class="field-top"><label for="gt-orcl">Oracle's borrowing premium</label><output id="gt-orcl-o" for="gt-orcl"></output></div><input type="range" id="gt-orcl" min="0" max="6" step="0.5" value="2"></div>
+        <div class="field check"><input type="checkbox" id="gt-ent-t"><label for="gt-ent-t">Show a sixth builder (sovereign or neocloud)</label><output id="gt-ent-t-o" for="gt-ent-t" hidden></output></div>
+        <p class="hint"><span class="ev ev-hyp">Hypothesis</span> The return on capacity and the cost of capital are assumptions; capex is observed from filings.</p>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Overbuild vs one coordinated buyer</span><span class="v num" id="gt-over"></span></div>
+          <div class="ro"><span class="k">Profit the five keep</span><span class="v num" id="gt-kept"></span></div>
+          <div class="ro"><span class="k">A sixth builder cuts profit</span><span class="v num" id="gt-ent"></span></div>
+          <div class="ro"><span class="k">Return: race vs coordinated</span><span class="v num" id="gt-price"></span></div>
+        </div>
+        <div id="gt-capex-table"></div>
+        <h3 class="sub-h">One seat at the table: profit a year</h3>
+        <div class="tablewrap"><table class="payoff" id="gt-dilemma"></table></div>
+        <p class="sentence" id="gt-capex-out"></p>
+      </div>
+    </div>
+    <div class="math"><span class="mlabel">Cournot with N firms</span><var>P</var> = <var>a</var> &minus; <var>b</var><var>Q</var>; <var>q</var><sub>i</sub> = (<var>a</var> &minus; (N+1)<var>c</var><sub>i</sub> + &Sigma;<var>c</var><sub>j</sub>) &divide; (<var>b</var>(N+1)); symmetric: industry profit is 4N &divide; (N+1)<sup>2</sup> of the joint maximum (56% at N = 5) and capacity is 2N &divide; (N+1) times it (1.67x).</div>
+  </section>
+
+  <section class="section" aria-labelledby="gtx-title">
+    <div class="section-head"><p class="eyebrow">Crowded exit</p><h2 id="gtx-title">When a crowded trade runs</h2><p class="prose">Pods in the same trade each get a private read of its edge and a common public one. Staying pays the edge minus the fire-sale loss from everyone who leaves; leaving costs the exit. This is a global game (Morris and Shin): there is a threshold read below which a pod exits, and it is unique when private views are precise relative to public news.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Crowded exit inputs">
+        <div class="field"><div class="field-top"><label for="gt-crowd">Crowded positions, $B</label><output id="gt-crowd-o" for="gt-crowd"></output></div><input type="range" id="gt-crowd" min="25" max="1500" step="25" value="400"></div>
+        <div class="field"><div class="field-top"><label for="gt-adv">Daily volume, $B</label><output id="gt-adv-o" for="gt-adv"></output></div><input type="range" id="gt-adv" min="10" max="400" step="5" value="150"></div>
+        <div class="field"><div class="field-top"><label for="gt-vol">Daily volatility</label><output id="gt-vol-o" for="gt-vol"></output></div><input type="range" id="gt-vol" min="0.5" max="6" step="0.1" value="2.2"></div>
+        <div class="field"><div class="field-top"><label for="gt-cost">Cost to exit</label><output id="gt-cost-o" for="gt-cost"></output></div><input type="range" id="gt-cost" min="0" max="150" step="5" value="30"></div>
+        <div class="field"><div class="field-top"><label for="gt-edge">Expected edge of staying, a month</label><output id="gt-edge-o" for="gt-edge"></output></div><input type="range" id="gt-edge" min="-2" max="4" step="0.05" value="1"></div>
+        <div class="field"><div class="field-top"><label for="gt-sdpub">Public uncertainty</label><output id="gt-sdpub-o" for="gt-sdpub"></output></div><input type="range" id="gt-sdpub" min="0.1" max="5" step="0.05" value="2"></div>
+        <div class="field"><div class="field-top"><label for="gt-sdpriv">Private noise</label><output id="gt-sdpriv-o" for="gt-sdpriv"></output></div><input type="range" id="gt-sdpriv" min="0.1" max="5" step="0.05" value="1"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Share of the crowd exiting</span><span class="v num" id="gt-share"></span></div>
+          <div class="ro"><span class="k">Fire-sale cost if all exit</span><span class="v num" id="gt-lam"></span></div>
+          <div class="ro"><span class="k">Exit threshold</span><span class="v num" id="gt-x"></span></div>
+          <div class="ro"><span class="k">Equilibrium</span><span class="v" id="gt-uniq"></span></div>
+        </div>
+        <p class="sentence" id="gt-exit-out"></p>
+        <figure class="chart"><div class="chart-head"><span class="chart-title">Share of the crowd exiting, by the trade's true edge</span></div><div class="svgbox" id="gt-exit-chart"></div></figure>
+      </div>
+    </div>
+    <div class="math"><span class="mlabel">Global game</span>&theta; ~ N(<var>y</var>, 1/&alpha;), <var>x</var><sub>i</sub> = &theta; + &epsilon;, &epsilon; ~ N(0, 1/&beta;). The marginal pod at <var>x</var>* is indifferent: E[&theta; | <var>x</var>*] &minus; &lambda;&Phi;(&radic;&beta;(<var>x</var>* &minus; &mu;*) &divide; &radic;(1 + &beta;/(&alpha;+&beta;))) = &minus;<var>c</var>, with &lambda; = <var>Y</var>&sigma;&radic;(crowd &divide; volume). Diffuse public news gives the Laplace limit <var>x</var>* = &lambda;/2 &minus; <var>c</var>.</div>
+  </section>
+
+  <section class="section" aria-labelledby="gtk-title">
+    <div class="section-head"><p class="eyebrow">Market maker against an informed trader</p><h2 id="gtk-title">What your order tells the market</h2><p class="prose">In Kyle's model the market maker cannot tell informed from uninformed flow, so she moves the price in proportion to net orders. The informed trader trades just enough to stay hidden in the noise.</p></div>
+    <div class="lab">
+      <form class="panel controls" aria-label="Kyle model inputs">
+        <div class="field"><div class="field-top"><label for="gt-sv">Fundamental uncertainty (e.g. an earnings move)</label><output id="gt-sv-o" for="gt-sv"></output></div><input type="range" id="gt-sv" min="1" max="25" step="0.5" value="8"></div>
+        <div class="field"><div class="field-top"><label for="gt-su">Uninformed flow, $M</label><output id="gt-su-o" for="gt-su"></output></div><input type="range" id="gt-su" min="50" max="5000" step="50" value="600"></div>
+        <div class="field"><div class="field-top"><label for="gt-order">Your order, $M</label><output id="gt-order-o" for="gt-order"></output></div><input type="range" id="gt-order" min="10" max="2000" step="10" value="250"></div>
+      </form>
+      <div class="panel" aria-live="polite">
+        <div class="readouts">
+          <div class="ro key"><span class="k">Price impact (Kyle's lambda)</span><span class="v num" id="gt-klam"></span></div>
+          <div class="ro"><span class="k">Your order moves the price</span><span class="v num" id="gt-kmove"></span></div>
+          <div class="ro"><span class="k">Informed profit</span><span class="v num" id="gt-kprof"></span></div>
+        </div>
+        <p class="sentence" id="gt-kyle-out"></p>
+      </div>
+    </div>
+    <div class="math"><span class="mlabel">Kyle (1985)</span>&lambda; = &sigma;<sub>v</sub> &divide; (2&sigma;<sub>u</sub>), &beta; = &sigma;<sub>u</sub> &divide; &sigma;<sub>v</sub>, informed profit &sigma;<sub>u</sub>&sigma;<sub>v</sub> &divide; 2; prices end up revealing half of the private information.</div>
+  </section>
+
+  <section class="section" aria-labelledby="gtm-title">
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="gtm-title">Any two-player game, solved</h2><p class="prose">Pick a situation or type your own payoffs (row player first). The solver finds every Nash equilibrium (pure cells by best response, mixed ones by support enumeration), the dominated strategies, the Pareto-efficient cells and the price of anarchy.</p></div>
+    <div class="lab">
+      <div class="panel controls"><div class="field"><label for="gt-preset">Situation</label><select id="gt-preset"></select></div><p class="hint" id="gt-note"></p></div>
+      <div class="panel" aria-live="polite"><div id="gt-matrix"></div><ul class="eq-list" id="gt-eq"></ul><p class="sentence" id="gt-facts"></p></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="gtl-title">
+    <div class="section-head"><p class="eyebrow">Prediction markets</p><h2 id="gtl-title">Is the ladder coherent, and is it free money?</h2><p class="prose">A ladder of "above k" contracts must price a higher threshold no richer than a lower one. The check below finds incoherent pairs, tests whether buying the cheap side and selling the rich side clears the spread and fees, and reads the implied distribution after an isotonic fix. The quotes are illustrative; type real ones.</p></div>
+    <div class="lab">
+      <div class="panel controls"><div id="gt-ladder"></div><button class="btn ghost" id="gt-ladder-reset" type="button">Reset the example</button><p class="hint"><span class="ev ev-asm">Assumed</span> Fees follow the published general schedule, ceil(0.07 &times; contracts &times; P &times; (1 &minus; P)); check each series' own schedule.</p></div>
+      <div class="panel" aria-live="polite"><p class="sentence" id="gt-ladder-out"></p><figure class="chart"><div class="chart-head"><span class="chart-title">Implied probability by range</span></div><div class="svgbox" id="gt-pmf"></div></figure></div>
+    </div>
+  </section>
+  <footer class="foot"><p>Models with closed forms, solved exactly. Their inputs are assumptions unless labelled Observed; their value is in what changes the answer, not in the point estimate.</p></footer>
 </section>
 
 <!-- ======================= BRAIN ======================= -->
@@ -1181,15 +1381,15 @@
   <div class="vhead">
     <p class="eyebrow">Fundamentals · Straight from the 10-Ks and 10-Qs</p>
     <h1 id="fu-title">The build now costs what the business earns.</h1>
-    <p class="lede" id="fu-lede">Five builders spent $586B on capex in the last twelve months against $707B of operating cash flow, and their 2026 guidance adds up to more than that cash flow. Underneath: Minsky stages from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.</p>
+    <p class="lede" id="fu-lede">Five builders spent $586B on capex in the last twelve months against $707B of operating cash flow, and their 2026 guidance adds up to more than that cash flow. Underneath: cash coverage from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.</p>
   </div>
-  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#fu-t-title">The table</a><a href="#mi-title">Minsky stages</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#fu-t-title">The table</a><a href="#mi-title">Cash coverage</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
   <section class="section" aria-labelledby="fu-t-title">
     <div class="section-head"><p class="eyebrow">Last twelve months</p><h2 id="fu-t-title">The builders, from their filings</h2><p class="prose" id="fu-t-sub">$ billions, trailing twelve months to each company's latest quarter. Every figure is a sum of discrete quarters recovered from the SEC's XBRL facts; the engine refreshes it daily once the SEC contact is set.</p></div>
     <div class="panel"><div class="tablewrap"><table class="fund" id="fund-table"></table></div><p class="hint" id="fu-note"></p></div>
   </section>
   <section class="section" aria-labelledby="mi-title">
-    <div class="section-head"><p class="eyebrow">Hyman Minsky, from the filings</p><h2 id="mi-title">Who is in hedge, speculative and Ponzi finance</h2><p class="prose">Minsky's three postures applied to the build. The move from left to right is how booms end; it happens one balance sheet at a time.</p></div>
+    <div class="section-head"><p class="eyebrow">Coverage, from the filings</p><h2 id="mi-title">Who funds the build from cash flow, and who does not</h2><p class="prose">Descriptive coverage categories from one year of filings (the Minsky framing, without the verdict): cash flow against capex and interest. Capex above cash flow is a funding gap, not proof of distress; cash, asset sales, discretionary spending and debt maturities all matter, and maturities are not modelled here.</p></div>
     <div class="minsky" id="fu-minsky"></div>
   </section>
   <section class="section" aria-labelledby="pp-title">
@@ -1383,7 +1583,7 @@
       </tbody></table></div></div>
   </section>
   <section class="section" aria-labelledby="bsn-title">
-    <div class="section-head"><p class="eyebrow">Build plan</p><h2 id="bsn-title">The manual's 30, 60 and 90 days, and where v0.6 stands</h2></div>
+    <div class="section-head"><p class="eyebrow">Build plan</p><h2 id="bsn-title">The manual's 30, 60 and 90 days, and where v0.7 stands</h2></div>
     <ol class="steps plan">
       <li class="done"><div><strong>Regime module and hedge selector.</strong><span>Built: regime label, rule 7a.1 gross scaler, selector by shortfall per dollar of carry in each inflation regime; the book run repeats it on daily data. TLT tested against 2022 and the 2026 oil shock.</span></div></li>
       <li class="done"><div><strong>Risk engine with fat tails and replays.</strong><span>Built: Student-t and historical shortfall at 97.5%, five episode replays. The book run adds daily shortfall for the model book.</span></div></li>
@@ -1493,13 +1693,26 @@
     <li><h3>Hedge &amp; size</h3><p>Min-variance TLT ratio when the regime allows it. Vol target and drawdown cap set gross; Kelly checks the edge.</p></li>
     <li><h3>Prove</h3><p>Dollar-exact backtest with costs and financing, deflated Sharpe, and walk-forward forecasts judged on calibration.</p></li>
   </ol>
+  <section class="section" id="policies" aria-labelledby="pol-title">
+    <div class="section-head"><p class="eyebrow">v0.7 · the policy contract</p><h2 id="pol-title">Policies, conventions and what each number means</h2><p class="prose">Every displayed decision names the policy that made it, and the engine backtests the same function. These are the specifications and the accounting conventions every performance number follows.</p></div>
+    <div class="cards3">
+      <article class="card"><span class="tag">hedge.tlt.v2</span><p>Hold TLT at the minimum-variance ratio (capped at 1.0x) only while the stock-bond state is "hedging" and, when the research has a validated inflation line, 36-month inflation is below it. The state enters at a correlation of −0.10 or below and leaves only above 0. A missing input makes the decision unavailable.</p></article>
+      <article class="card"><span class="tag">size.equity.v2</span><p>Equity scale = the smallest of the volatility target over forecast volatility, the one-year 25% drawdown cap (95% confidence, simulated) and 1.5x. Quarter Kelly is reported beside it as an edge check, never as a size input.</p></article>
+      <article class="card"><span class="tag">limits.portfolio.v1</span><p>After the hedge is added, equity plus bond notional may not exceed 2.0x NAV; option premium is capped at 2% of NAV. Equity and hedge scale down together when the cap binds.</p></article>
+      <article class="card"><span class="tag">Accounting</span><p>One NAV series: costs and financing come out of NAV the day they occur, the first trade's cost is in the first return, and the product of returns equals final NAV. Signals at the close of day t trade at the close of t+1. Sharpe is in excess of the cash actually accrued.</p></article>
+      <article class="card"><span class="tag">Comparisons</span><p>Every variant runs on the same dates after the warm-up, from the same starting NAV, beside an unhedged book and a cash-only baseline. The deflated Sharpe counts every variant, hedge policy and candidate hedge tried.</p></article>
+      <article class="card"><span class="tag">Concentration</span><p>Effective risk contributors (1 ÷ Σ risk share²) measures concentration by position. Effective independent bets (Meucci, across principal components) measures how many drivers the risk loads on. Two equal, perfectly correlated positions score 2 and 1.</p></article>
+    </div>
+    <div class="read" id="pol-live" aria-live="polite"></div>
+  </section>
+
   <section class="section" id="status" aria-labelledby="st-title">
     <div class="section-head"><p class="eyebrow">Operations</p><h2 id="st-title">System status</h2><p class="prose">Written by the last step of every daily run: what ran, how fresh each output is, and the checks it passed. A stale or failed check shows here and on the Desk.</p></div>
     <div class="panel" id="status-body"><div class="empty"><strong>No run status yet.</strong><span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">135 of 135 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">165 of 165 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1514,7 +1727,13 @@
           <tr><td>Page bond, curve and option math against the engine</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Missing FRED series, truncated files, stale data</td><td class="r">reported, not fatal</td></tr>
           <tr><td>A missing month of CPI (October 2025)</td><td class="r">12 months stays 12</td></tr>
-          <tr><td>Research on a planted inflation threshold, and on none</td><td class="r">found; nothing invented</td></tr>
+          <tr><td>Research on a planted inflation threshold, and on none</td><td class="r">found and validated; none: threshold rejected</td></tr>
+          <tr><td>Review case: 101 flat days, 100% and cash alternating, 2bp costs</td><td class="r">NAV 0.9799987 = product of returns</td></tr>
+          <tr><td>Review case: two perfectly correlated 50% positions</td><td class="r">2 risk contributors, 1 independent bet</td></tr>
+          <tr><td>Hedge policy, Python and page, at the boundaries and through the hysteresis</td><td class="r">identical; missing input blocks</td></tr>
+          <tr><td>Solver, game against Nature, value of information, reverse stress, Python and page</td><td class="r">same choice; agree to 1e-9</td></tr>
+          <tr><td>Nash solver on known games; capex race; crowded exit's Laplace limit</td><td class="r">exact; 4/9 and 9/8; exact</td></tr>
+          <tr><td>A newer filing reversing Oracle's coverage</td><td class="r">row, label, date and game update together</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>
@@ -1647,7 +1866,7 @@
     <h2 id="keys-title">Keyboard shortcuts</h2>
     <dl class="dlist">
       <dt>/ or Ctrl K</dt><dd>Search everything: tools, terms, securities, theses, episodes, questions</dd>
-      <dt>1 to 7</dt><dd>Jump to a section: Today, Decide, Markets, Trading, Research, Wisdom, Reference</dd><dt>M</dt><dd>Show or hide the math</dd>
+      <dt>1 to 5</dt><dd>Jump to a section: Today, Decide, Markets, Research, Methods</dd><dt>=</dt><dd>In search, type arithmetic (= 2bn / 3m, bsput(100, 95, 0.25, 22%)) for an exact answer</dd><dt>M</dt><dd>Show or hide the math</dd>
       <dt>← →</dt><dd>Step through a focused chart</dd>
       <dt>?</dt><dd>This list</dd>
       <dt>Esc</dt><dd>Close a dialog</dd>

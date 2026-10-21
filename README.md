@@ -3,7 +3,17 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.6 adds the brain (a signed network of the financial system that carries any shock or assumption to
+Version 0.7 answers the third project review. It fixes the accounting (one NAV and return convention, costs in
+the first return, Sharpe over accrued cash, next-session fills, every variant on the same dates beside a cash-only
+baseline), puts every decision under a versioned policy shared by the recommendation and the backtest
+(`policy.py`), makes the hedge line earn its place out of sample or come back as "no reliable threshold", builds
+one effective fundamentals dataset, and adds an engine that reasons: tempered Bayes over seven scenarios, a
+constrained growth search, a zero-sum game against Nature, value of information and reverse stress
+(`reasoner.py`), and game theory for the capex race, crowded exits, informed trading and prediction-market
+ladders (`games.py`). The page leads with "How reliable is your bond hedge in this regime?" and labels every
+number Observed, Estimated, Assumed, Historical pattern, Hypothesis or Unavailable.
+
+Version 0.6 added the brain (a signed network of the financial system that carries any shock or assumption to
 its fourth-order effects, with eleven links measured in two regimes), Noteworthy (an asymmetric-information feed
 scraper over Substack, Telegram, X, Reddit, Hacker News and the wires), prop trading and market making desks, and
 the 2026 buyside field manual as engine modules. Version 0.5 added the decision layer: every reading becomes a
@@ -117,7 +127,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 135 tests, no data needed
+pytest                                    # 165 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -128,6 +138,7 @@ python -m buildout capex GOOGL MSFT AMZN META ORCL TSLA --ua "Your Name you@exam
 python -m buildout research --out out     # 155 years of public data: the hedge line, fat tails, base rates
 python -m buildout journal decisions.json # score an exported journal: Brier, calibration, alpha, luck
 python -m buildout brain --out out        # measured links between oil, CPI, yields, stocks, VIX and gold, by regime
+python -m buildout reason --out out       # tempered Bayes, the constrained choice, the game against Nature, value of information, games
 python -m buildout buyside --out out      # regime and gross, hedge selector, Student-t shortfall, replays
 python -m buildout feeds --out out        # Noteworthy: reads feeds.toml (add any Substack, Telegram channel or RSS)
 python -m buildout sources --out out      # every source the engine reads
@@ -162,6 +173,10 @@ and run with `--config config.private.toml`.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.7 | `policy.py` | hedge.tlt.v2, size.equity.v2, limits.portfolio.v1: one function each for recommendation, text and backtest; unavailable inputs block, never default; decision snapshot |
+| | `reasoner.py` | Tempered Bayes posterior, scenario returns (duration, convexity, Black-Scholes put spreads, financing), exact grid search with a loss limit, alternatives with regret, simplex game against Nature, EVPI and EVSI, reverse stress from measured covariances; `python -m buildout reason` writes reason.json |
+| | `games.py` | Nash equilibria (pure and support enumeration), asymmetric Cournot calibrated to filings, the capex dilemma, Morris-Shin crowded exit, Kyle, prediction-ladder coherence and fee-aware arbitrage |
+| | `analytics/risk.py`, `research.py` | Effective risk contributors vs effective independent bets, diversification ratio; hedge line chosen in training only, walk-forward, block bootstrap, holdout, null results, the hedge experiment |
 | v0.6 | `brain.py` | Recursive regressions on standardized monthly changes by regime; propagation, Leontief total, spectral radius |
 | | `buyside.py`, `accounting.py` | Regime label and gross scaler, hedge selector by shortfall per carry, Student-t shortfall, replays; depreciation, cash EPS, reverse DCF, credit stress, red flags |
 | | `microstructure.py` | Avellaneda-Stoikov quotes and simulation, Glosten-Milgrom, square-root impact, Almgren-Chriss, Roll, Amihud, Kyle |
@@ -201,6 +216,17 @@ and run with `--config config.private.toml`.
 - Market-making quotes, impact and Almgren-Chriss schedules match the engine exactly; inventory skew cuts
   inventory risk in simulation; Roll's estimator recovers a planted bid-ask bounce.
 - The field manual's depreciation and private-credit tables are reproduced to the rounding shown.
+- v0.7 regression cases from the review: 101 flat dates alternating 100% and cash at 2bp end at NAV 0.9799987 and the
+  returns say the same; two perfectly correlated 50% positions are 2 effective risk contributors and 1 independent bet.
+- The hedge policy agrees in Python and JavaScript at the boundaries (-0.10 enters, 0 stays, 0.01 leaves), through
+  the hysteresis and with missing inputs; the backtest series equals the decision day by day.
+- A null research result rejects the threshold, prints, and switches the inflation gate to unavailable.
+- A newer filing that reverses Oracle's cash coverage updates its row, its coverage label, its date and the capex
+  game together.
+- The solver's choice, the game against Nature, the value of information and the reverse stress match between
+  languages; the zero-sum solver gets matching pennies, rock-paper-scissors and a dominance game exactly; the capex
+  game reproduces the textbook 4/9 cost of racing and 9/8 price of anarchy; the crowded exit hits the Laplace limit.
+- The calculator is exact against SciPy and refuses what it cannot read.
 - The feed scraper survives dead sources and a missing X token, finds a planted lead time, and its text cannot
   inject markup or script into the page.
 

@@ -1,4 +1,11 @@
-"""Portfolio risk: covariance, risk contributions, effective bets, VaR/CVaR (historical and FHS)."""
+"""Portfolio risk: covariance, risk contributions, concentration and diversification, VaR/CVaR (historical and FHS).
+
+Two different questions, kept apart:
+  effective_risk_contributors   how evenly the risk is spread across POSITIONS (1 / sum of squared risk shares)
+  effective_independent_bets    how many independent DRIVERS the risk loads on (Meucci: entropy of the risk
+                                spread across the covariance's principal components). Two equal positions that
+                                are perfectly correlated score 2 on the first and 1 on the second.
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -21,10 +28,38 @@ def risk_contributions(w: pd.Series, cov: pd.DataFrame, periods: int = 252) -> p
     return pd.DataFrame({"weight": w, "marginal": mrc, "contribution": rc, "share": rc / sigma}, index=cov.index)
 
 
-def effective_bets(shares: pd.Series) -> float:
-    """1 / sum(share^2): 1 means one position drives all the risk."""
+def effective_risk_contributors(shares: pd.Series) -> float:
+    """1 / sum(share^2) of position risk shares: concentration by position, NOT independence."""
     s = shares[shares.abs() > 0]
     return float(1 / np.sum(s ** 2))
+
+
+effective_bets = effective_risk_contributors      # v0.6 name, kept so old callers do not break
+
+
+def effective_independent_bets(w: pd.Series | np.ndarray, cov: pd.DataFrame | np.ndarray) -> float:
+    """exp(entropy) of the portfolio variance split across principal components (Meucci 2009).
+
+    Each component k gets p_k = (w . e_k)^2 lambda_k / (w' S w); the result runs from 1 (one driver) to n.
+    """
+    S = np.asarray(cov, dtype=float)
+    x = np.asarray(w.reindex(cov.index).fillna(0.0) if isinstance(w, pd.Series) and isinstance(cov, pd.DataFrame) else w, dtype=float)
+    lam, E = np.linalg.eigh(S)
+    lam = np.clip(lam, 0.0, None)
+    v = (E.T @ x) ** 2 * lam
+    tot = v.sum()
+    if tot <= 0:
+        return float("nan")
+    p = v[v > tot * 1e-12] / tot
+    return float(np.exp(-(p * np.log(p)).sum()))
+
+
+def diversification_ratio(w: pd.Series | np.ndarray, cov: pd.DataFrame | np.ndarray) -> float:
+    """Weighted average volatility over portfolio volatility (Choueifaty): 1 means no diversification at all."""
+    S = np.asarray(cov, dtype=float)
+    x = np.asarray(w.reindex(cov.index).fillna(0.0) if isinstance(w, pd.Series) and isinstance(cov, pd.DataFrame) else w, dtype=float)
+    port = float(np.sqrt(x @ S @ x))
+    return float(np.abs(x) @ np.sqrt(np.diag(S)) / port) if port > 0 else float("nan")
 
 
 def historical_var(port_ret: pd.Series, q: float = 0.99) -> tuple[float, float]:

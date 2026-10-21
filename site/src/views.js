@@ -1098,7 +1098,7 @@
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
-    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026" };
+    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
     "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {
@@ -1896,6 +1896,11 @@
   function renderPalette() {
     const list = $("#palette-list"), q = $("#palette-q").value;
     palItems = searchIndex(q);
+    // a query that reads as arithmetic is answered first, by the calculator
+    const expr = q.trim().replace(/^=\s*/, "");
+    if (expr && (/^=/.test(q.trim()) || (/[\d)]\s*[-+*/^×÷%]|^[a-z]+\(|^\$/i.test(expr) && /\d|\$/.test(expr)))) {
+      try { const r = calcEval(expr, calcEnv(), {}); palItems.unshift({ title: `= ${calcFormat(r.value)}`, sub: `${expr} · open it in the calculator`, kind: "Math", target: "calc", expr }); } catch (e) { /* not arithmetic: search only */ }
+    }
     palSel = Math.min(palSel, Math.max(0, palItems.length - 1));
     list.replaceChildren();
     if (!palItems.length) { list.append(h("li", "none", `Nothing matches "${q}". Try a ticker, a term like DV01, or a desk name.`)); $("#palette-q").removeAttribute("aria-activedescendant"); return; }
@@ -1906,7 +1911,7 @@
       li.setAttribute("aria-selected", i === palSel ? "true" : "false");
       li.append(h("b", null, x.title), h("small", null, x.sub.length > 110 ? x.sub.slice(0, 108) + "…" : x.sub), h("em", null, x.kind));
       li.addEventListener("mousemove", () => { if (palSel !== i) { palSel = i; mark(); } });
-      li.addEventListener("click", () => go(x.target));
+      li.addEventListener("click", () => go(x.target, x.expr));
       list.append(li);
     });
     mark();
@@ -1931,8 +1936,9 @@
     if (palReturn && document.contains(palReturn)) palReturn.focus();
     palReturn = null;
   }
-  function go(target) {
+  function go(target, expr) {
     closeDialog($("#palette"));
+    if (target === "calc" && expr && $("#calc-in")) { $("#calc-in").value = expr; $("#calc-in").dispatchEvent(new Event("input")); }
     if (location.hash === "#" + target) show(target, true); else location.hash = target;
   }
   function wireNavigation() {
@@ -1941,7 +1947,7 @@
     $("#palette-q").addEventListener("keydown", (e) => {
       if (e.key === "ArrowDown") { e.preventDefault(); palSel = Math.min(palItems.length - 1, palSel + 1); mark(); }
       else if (e.key === "ArrowUp") { e.preventDefault(); palSel = Math.max(0, palSel - 1); mark(); }
-      else if (e.key === "Enter") { e.preventDefault(); if (palItems[palSel]) go(palItems[palSel].target); }
+      else if (e.key === "Enter") { e.preventDefault(); if (palItems[palSel]) go(palItems[palSel].target, palItems[palSel].expr); }
       else if (e.key === "Escape") { e.preventDefault(); closeDialog($("#palette")); }
       else if (e.key === "Tab") e.preventDefault();
     });
@@ -1958,7 +1964,7 @@
       if (typing || e.metaKey || e.ctrlKey || e.altKey || !$("#palette").hidden) return;
       if (e.key === "/") { e.preventDefault(); openPalette(); }
       else if (e.key === "?") { e.preventDefault(); palReturn = document.activeElement; $("#keys").hidden = false; $("#keys-close").focus(); }
-      else if (/^[1-7]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
+      else if (/^[1-5]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
       else if ((e.key === "m" || e.key === "M") && $("#keys").hidden) toggleMath();
     });
     $("#keys").addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); $("#keys-close").focus(); } });

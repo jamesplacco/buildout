@@ -33,7 +33,8 @@ def test_no_banned_text():
     assert "intersection" not in PAGE.lower()
 
 
-JS_FILES = ["ui.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js", "brain.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "boot.js"]
+JS_FILES = ["ui.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js", "brain.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js",
+            "solve.js", "games.js", "today7.js", "boot.js"]
 
 
 def test_every_referenced_id_exists():
@@ -56,7 +57,7 @@ def test_no_duplicate_ids_in_the_markup():
     assert not dup, f"ids defined twice: {dup}"
 
 
-GROUPS = {"today", "decide", "markets", "trading", "research", "wisdom", "reference"}
+GROUPS = {"today", "decide", "markets", "research", "reference"}
 RUNTIME_IDS = r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w-]+|d-[\w-]+|as-[\w-]+|ch-[\w-]+|sw-[\w-]+|lg-[\w-]+|fi-[\w-]+|lab-[\w-]+|nw-[\w-]+)"
 
 
@@ -107,15 +108,18 @@ def _json_const(src, name):
 
 
 def test_headline_and_snapshots_agree():
-    """The hero's number, the inflation snapshot and the long-history findings are the same measurement."""
+    """The first screen asks the review's question; the inflation snapshot and the long-history findings are one measurement,
+    and the research snapshot carries its validation (status, bootstrap band, holdout)."""
     res, body = (SRC / "research.js").read_text(), (SRC / "body.html").read_text()
     F, R = _json_const(res, "FINDINGS"), _json_const(res, "ROC_SNAP")
-    hero = float(re.search(r"We are at ([\d.]+)%", body).group(1))
-    assert hero == round(R["cpi"]["avg36"], 1)
+    assert "How reliable is your bond hedge in this regime?" in body
     assert abs(F["hedge"]["latest"]["infl_avg"] * 100 - R["cpi"]["avg36"]) < 0.005
     assert abs(F["spells"]["latest"] * 100 - R["cpi"]["value"]) < 0.005
     assert F["hedge"]["latest"]["month"] == R["cpi"]["date"][:7] == F["spells"]["month"]
-    assert re.search(r"We are at", body) and f"{F['hedge']['line'] * 100:.2f}%" in body
+    H = F["hedge"]
+    assert H["status"] in ("ok", "no_reliable_threshold", "insufficient_evidence")
+    assert (H["line"] is None) == (H["status"] != "ok")
+    assert H["bootstrap"]["cut_p05"] <= H["bootstrap"]["cut_p95"] and H["holdout"]["months"] == 120
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")

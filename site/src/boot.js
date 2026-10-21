@@ -3,14 +3,12 @@
      ===================================================================================== */
   const GROUPS = {
     today: { name: "Today", views: ["desk", "noteworthy"] },
-    decide: { name: "Decide", views: ["decide", "brain", "journal", "swans"] },
-    markets: { name: "Markets", views: ["rates", "options", "hedges", "securities", "insurers"] },
-    trading: { name: "Trading", views: ["prop", "making"] },
-    research: { name: "Research", views: ["fundamentals", "buyside", "physics", "findings", "theses"] },
-    wisdom: { name: "Wisdom", views: ["legends", "lenses", "lab"] },
-    reference: { name: "Reference", views: ["engine", "appendix"] },
+    decide: { name: "Decide", views: ["solve", "decide", "games", "brain", "journal", "swans"] },
+    markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
+    research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "lab"] },
+    reference: { name: "Methods", views: ["engine", "appendix"] },
   };
-  const GROUP_ORDER = ["today", "decide", "markets", "trading", "research", "wisdom", "reference"];
+  const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
@@ -20,7 +18,7 @@
     if (location.hash === "#" + v) show(v, true); else location.hash = v;
   }
   const RENDER = {
-    desk: () => { guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
+    desk: () => { guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
@@ -30,10 +28,10 @@
     journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
-    noteworthy: () => {}, buyside: drawBuyside,
+    noteworthy: () => {}, buyside: drawBuyside, solve: () => guard("The solver", () => renderSolve(false), $("#rz-ledger")), games: drawGames,
     brain: () => guard("The brain", updateBrain, $("#br-svg-box")),
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
-    making: () => { guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },
+    making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },
   };
   let current = null;
   // any element id is a deep link: the view that contains it opens and the element scrolls into view
@@ -125,17 +123,28 @@
     NW.forEach((t) => add(t.n, t.bluf, "Trend", "nw-" + t.id, t.watch.map((w) => w.join(" ")).join(" ")));
     BR_NODES.forEach((n) => add(`${n.n} in the brain`, n.why, "Node", "brain", n.s));
     BR_PRESETS.forEach((p) => add(`Brain scenario: ${p.n}`, "Shock the system map and read the fourth-order effects", "Tool", "brain"));
-    FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${r.stage || "n/a"} finance`, "Company", "fu-t-title", r.t));
+    FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${COVERAGE[r.coverage] || "coverage n/a"}`, "Company", "fu-t-title", r.t));
+    add("Calculator", "Exact arithmetic with Black-Scholes, Kelly, NPV, IRR and live values; type = in search", "Tool", "calc", "math compute formula expression");
+    add("The solver", "Evidence ledger, posterior, constrained choice, game against Nature, value of information", "Tool", "solve", "bayes optimize reason");
+    add("Reverse stress test", "The most plausible way to breach the loss limit", "Tool", "rzr-title", "mahalanobis breach");
+    add("Value of information", "Which signal is worth learning next", "Tool", "rzv-title", "research priority evsi evpi");
+    add("Capex race (game theory)", "Cournot prisoner's dilemma calibrated to the builders' filings", "Tool", "gtc-title", "nash cournot hyperscaler");
+    add("Crowded exit (global game)", "When a crowded trade runs: the Morris-Shin threshold", "Tool", "gtx-title", "pods de-grossing run");
+    add("Kyle's lambda", "What your order tells the market", "Tool", "gtk-title", "informed trader impact");
+    add("Game solver", "Every Nash equilibrium of a two-player game", "Tool", "gtm-title", "nash equilibrium matrix");
+    add("Prediction-market ladder", "Coherence, arbitrage after fees, implied distribution", "Tool", "gtl-title", "kalshi polymarket");
+    add("Fill quality", "Markouts, queue imbalance and the posting decision", "Tool", "fq-title", "execution markout microprice");
     Object.assign(KIND_RANK, { Decision: 8, Finding: 7, Trend: 6, Chain: 5, Swan: 5, Company: 5, Node: 4, Legend: 4, Assumption: 4, Principle: 3, Overlooked: 3 });
   }
 
   /* ---------- boot ---------- */
-  [["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
+  [["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
    ["Decide", buildDecide], ["Fundamentals", buildFundamentals], ["Physics", buildPhysics], ["Findings", buildFindings, "#fi-list"], ["Swans", buildSwans, "#sw-grid"], ["Legends", buildLegends, "#lg-grid"], ["Math lab", buildLab, "#lab-list"],
    ["Noteworthy", buildNoteworthy, "#nw-grid"], ["Brain", buildBrain, "#br-svg-box"], ["Trading", buildTrading], ["Buyside", buildBuyside, "#bs-sel"], ["Brain links", renderBrainMeasured, "#br-meas"], ["Pulse", buildPulse, "#pulse"],
    ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
+   ["Solver", buildSolve, "#rz-ledger"], ["Policy record", renderPolicyLive, "#pol-live"], ["Games", buildGames, "#gt-matrix"], ["Today", renderToday7, "#today7"],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
    ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
 
@@ -173,7 +182,7 @@
   // the long-history research file must look like the snapshot it replaces, or the snapshot stays
   function researchOk(r) {
     try {
-      return !!(r && r.panel && r.panel.months >= 1500 && isoOk(r.panel.end + "-01") && Array.isArray(r.hedge.rows) && r.hedge.rows.length >= 5 && fin(r.hedge.line) && r.hedge.latest && fin(r.hedge.latest.corr)
+      return !!(r && r.panel && r.panel.months >= 1500 && isoOk(r.panel.end + "-01") && Array.isArray(r.hedge.rows) && r.hedge.rows.length >= 5 && (r.hedge.status ? ["ok", "no_reliable_threshold", "insufficient_evidence", "unavailable"].includes(r.hedge.status) && (r.hedge.status !== "ok" || fin(r.hedge.line)) && (r.hedge.status === "ok" || r.hedge.line == null) : fin(r.hedge.line)) && r.hedge.latest && fin(r.hedge.latest.corr)
         && r.tails && Array.isArray(r.tails.rows) && r.tails.rows.length === 4 && r.roc && r.roc.rows.length === 4 && r.oil && r.oil.summary && r.vix && r.vix.s30 && r.spells && r.gold && r.cape && r.cape.rows.length === 10 && r.panel.end >= FINDINGS.panel.end);
     } catch (e) { return false; }
   }
@@ -190,7 +199,15 @@
   Promise.all(["macro", "report", "capex", "status", "research"].map((n) => loadJSON(`data/${n}.json`))).then(([m, r, cx, st, rs]) => {
     if (cx) {
       guard("Capex panel", () => renderCapex(cx), $("#capex-live"));
-      if (cx.ttm && typeof cx.ttm === "object") { LIVE.capexTTM = cx.ttm; guard("Fundamentals table", renderFundTable, $("#fund-table")); }
+      if (cx.ttm && typeof cx.ttm === "object") {
+        LIVE.capexTTM = cx.ttm;
+        // one effective dataset: newer filings replace snapshot fields, and every dependent view redraws from it
+        if (guard("Effective fundamentals", () => { applyEffectiveFund(); return true; })) {
+          [["Fundamentals table", renderFundTable, "#fund-table"], ["Fundamentals", buildFundamentals], ["Decide", buildDecide], ["Games", renderCapexGame, "#gt-capex-table"], ["Today", renderToday7, "#today7"]]
+            .forEach(([n, fn, b]) => guard(n, fn, b ? $(b) : null));
+          if (current && RENDER[current]) guard(TAB_NAME[current], RENDER[current]);
+        }
+      }
     }
     if (rs && researchOk(rs)) {
       LIVE.research = rs;
@@ -218,7 +235,7 @@
     if (r && r.summary && r.summary.data && r.summary.data !== "synthetic") {
       const miss = missingFields(r, BOOK_SPEC);
       if (miss.length) errorState($("#book-body"), "The book file is incomplete.", `Missing or malformed: ${miss.join(", ")}.`);
-      else { LIVE.report = r; guard("Model book", () => renderBook(r), $("#book-body")); }
+      else { LIVE.report = r; guard("Model book", () => renderBook(r), $("#book-body")); guard("Policy record", renderPolicyLive, $("#pol-live")); guard("Today", renderToday7, $("#today7")); }
     }
     if (st) { LIVE.status = st; guard("System status", () => renderStatus(st), $("#status-body")); }
     guard("Signals", renderSignals, $("#signals-grid"));

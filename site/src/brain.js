@@ -78,7 +78,7 @@
     ["consumer", "cpi", 0.15, "Demand pulls prices", "Judged"],
     ["y10", "consumer", -0.20, "Mortgage and card rates bite", "Judged"],
     ["oil", "consumer", -0.25, "Gasoline is a tax on spending", "Judged"],
-    ["cpi", "corr", 0.50, "Inflation-driven yields make bonds fall with stocks", "Findings: the 2.75% line, 1,868 months"],
+    ["cpi", "corr", 0.50, "Inflation-driven yields make bonds fall with stocks", "Findings: inflation band 2.75 to 4.25%, 1,868 months"],
     ["y10", "tlt", -0.95, "Price moves opposite the yield", "Bond math"],
   ];
   const BR_MEASURED = ["oil>cpi", "oil>y10", "cpi>y10", "oil>eq", "cpi>eq", "y10>eq", "eq>vix", "y10>vix", "oil>gold", "y10>gold", "eq>gold"];
@@ -261,9 +261,11 @@
     $("#br-w").value = fx(e.w, 2).replace(MINUS, "-");
     $("#br-w-o").textContent = sg(e.w);
     const R = brainData().regimes, m = R.low_inflation.edges[e.key], n = R.inflation.edges[e.key];
-    $("#br-edge-note").textContent = e.measured || (m && n)
-      ? `Measured: ${sg(m.w)} (±${fx(m.se, 2)}) in ${R.low_inflation.start.slice(0, 4)} to ${R.low_inflation.end.slice(0, 4)}, ${sg(n.w)} (±${fx(n.se, 2)}) since ${R.inflation.start.slice(0, 4)}. ${e.edited ? "You have overridden it." : "Blended by the regime slider."} ${e.why}.`
-      : `Judged at ${sg(BR_EDGES.find((x) => ekey(x) === e.key)[2])}, uncertainty ±${fx(e.sd, 2)}. ${e.why}. Source: ${e.src}.${e.edited ? " You have overridden it." : ""}`;
+    const note = $("#br-edge-note"), measured = e.measured || (m && n);
+    const txt = measured
+      ? `Measured: ${sg(m.w)} (±${fx(m.se, 2)}) in ${R.low_inflation.start.slice(0, 4)} to ${R.low_inflation.end.slice(0, 4)}, ${sg(n.w)} (±${fx(n.se, 2)}) since ${R.inflation.start.slice(0, 4)}. ${e.edited ? "You have overridden it." : "Blended by the regime slider."} ${e.why}. Falsified if the next 24 months estimate the opposite sign with |t| ≥ 2; identification rests on the stated ordering, not on causality.`
+      : `Judged at ${sg(BR_EDGES.find((x) => ekey(x) === e.key)[2])}, uncertainty ±${fx(e.sd, 2)}. ${e.why}. Source: ${e.src}.${e.edited ? " You have overridden it." : ""} Test: the link is rejected if, once data exists for both ends, their co-movement over two years has the opposite sign; until then it is a hypothesis, not a measurement.`;
+    note.replaceChildren(evTag(e.edited ? "asm" : measured ? "est" : "hyp"), document.createTextNode(" " + txt));
   }
 
   function updateBrain() {

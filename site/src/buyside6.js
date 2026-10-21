@@ -60,7 +60,7 @@
       tile("Rule 7a.1 gross", `${fx(lo * maxG, 2)}x to ${fx(hi * maxG, 2)}x`, `${why}: ${Math.round(lo * 100)} to ${Math.round(hi * 100)}% of the ${fx(maxG, 1)}x maximum.`),
       tile("Volatility rule gross", xx(volG), "Decision 1: 20% target over 1.1 times VXN."),
       tile("Binding constraint", volG <= lo * maxG ? "Volatility" : "Regime", volG <= lo * maxG ? `The volatility rule (${xx(volG)}) is already below the regime band: it binds.` : "The regime band is tighter than the volatility rule: cut to its top."),
-      tile("Long bonds in the stack?", L.corr36 < -0.1 && L.infl36 < 0.0275 ? "Yes" : "No", `Needs the stock-bond correlation below −0.10 (now ${sgn2(L.corr36)}) and 36-month inflation below 2.75% (now ${fx(L.infl36 * 100, 2)}%).`),
+      (() => { const T = tltNow(inputs()); return tile("Long bonds in the stack?", T.status !== "ok" ? "Unavailable" : T.on ? "Yes" : "No", `Policy hedge.tlt.v2, the same rule as Decision 2: the stock-bond state is ${T.gates.state.value || "n/a"}; inflation gate ${T.gates.inflation.status === "ok" ? (T.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`); })(),
       tile("Oil rule on futures", `${fx(fut, 2)}x`, `Spot reads ${fx(L.brent_vs_5y, 2)}x; front futures (about $107, IEA Oct 14) read ${fx(fut, 2)}x, under the 1.3x supply line. The inflation leg keeps the sleeve.`));
   }
   function signalNow(id) {
@@ -75,7 +75,7 @@
     const B = buyData(), S = B.selector || {}, box = $("#bs-sel");
     if (!box) return;
     box.replaceChildren();
-    [["above_line", "Inflation above the 2.75% line"], ["below_line", "Inflation below the line"]].forEach(([k, title]) => {
+    [["above_line", "Inflation above 2.75% (historical split)"], ["below_line", "Inflation below 2.75%"]].forEach(([k, title]) => {
       const reg = S[k];
       if (!reg) return;
       const p = h("div", "panel");

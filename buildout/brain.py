@@ -93,8 +93,9 @@ def run(raw: dict) -> dict:
     sd = df.std()
     dz = (df - df.mean()) / sd
     regimes = {name: estimate(dz, a, b) for name, (a, b) in REGIMES.items()}
+    from .reasoner import factor_cov
     return {"schema": 1, "order": ORDER, "parents": PARENTS, "labels": LABELS, "sd": {k: float(v) for k, v in sd.items()},
-            "regimes": regimes, "state": node_state(df), "y10_eq_corr": stock_bond_flip(dz),
+            "regimes": regimes, "state": node_state(df), "y10_eq_corr": stock_bond_flip(dz), "factor_cov": factor_cov(raw),
             "method": "Recursive regression on standardized monthly changes, ordered oil, CPI, 10-year, stocks, VIX, gold"}
 
 

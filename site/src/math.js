@@ -305,6 +305,11 @@
     }
     return tot;
   }
+  function poissonBinomTail(ps, k) {
+    let dist = [1];
+    ps.forEach((p) => { const nx = new Array(dist.length + 1).fill(0); dist.forEach((q, j) => { nx[j] += q * (1 - p); nx[j + 1] += q * p; }); dist = nx; });
+    return k > ps.length ? 0 : dist.slice(Math.max(k, 0)).reduce((a, b) => a + b, 0);
+  }
   const yearsToSig = (sr, z = 2) => (sr <= 0 ? Infinity : (z / sr) * (z / sr));
   const levGrowth = (mu, sig, r, L) => r + L * (mu - r) - 0.5 * L * L * sig * sig;
   const conjunction = (ps) => ps.reduce((a, p) => a * p, 1);
@@ -337,19 +342,22 @@
   }
   function scorecard(records) {
     const closed = records.filter((r) => r.status === "closed" && [0, 1, 0.5].includes(r.right) && fin(r.p) && fin(r.ret));
-    const ps = closed.map((r) => r.p), ys = closed.map((r) => (r.right === 1 ? 1 : 0)), rets = closed.map((r) => r.ret);
+    const ps = closed.map((r) => r.p), ys = closed.map((r) => r.right), rets = closed.map((r) => r.ret);     // "partly" scores 0.5
     const bench = closed.map((r) => (fin(r.bench_ret) ? r.bench_ret : 0)), betas = closed.map((r) => (fin(r.beta) ? r.beta : 1));
     const wins = rets.filter((x) => x > 0), losses = rets.filter((x) => x < 0).map((x) => -x);
-    const grid = { earned: 0, bad_luck: 0, dumb_luck: 0, deserved: 0 };
+    const grid = { earned: 0, bad_luck: 0, dumb_luck: 0, deserved: 0, unknown_process: 0 };
     closed.forEach((r, i) => {
-      const goodP = (processScore(r) || 0) >= 0.75, goodO = rets[i] - betas[i] * bench[i] > 0;
+      const ps_ = processScore(r);
+      if (ps_ == null) { grid.unknown_process += 1; return; }             // missing process data is unknown, not bad
+      const goodP = ps_ >= 0.75, goodO = rets[i] - betas[i] * bench[i] > 0;
       grid[goodP ? (goodO ? "earned" : "bad_luck") : (goodO ? "dumb_luck" : "deserved")] += 1;
     });
     const n = closed.length, hits = ys.reduce((a, y) => a + y, 0), mean = (xs) => xs.reduce((a, x) => a + x, 0) / xs.length;
+    const fullHits = closed.filter((r) => r.right === 1).length, bases = closed.map((r) => (fin(r.base) && r.base > 0 && r.base < 1 ? r.base : 0.5));
     return { nClosed: n, nOpen: records.filter((r) => r.status !== "closed").length, brier: n ? brier(ps, ys) : NaN,
       stated: n ? mean(ps) : NaN, hitRate: n ? hits / n : NaN, over: n ? mean(ps) - hits / n : NaN, cal: n ? calibration(ps, ys) : [],
       payoff: wins.length && losses.length ? mean(wins) / mean(losses) : NaN, expectancy: n ? mean(rets) : NaN,
-      alpha: n ? alphaStats(rets, bench, betas) : null, luckP: n ? binomTail(n, hits, 0.5) : NaN, grid };
+      alpha: n ? alphaStats(rets, bench, betas) : null, luckP: n ? poissonBinomTail(bases, fullHits) : NaN, luckBase: n ? mean(bases) : NaN, fullHits, grid };
   }
 
   /* ---------- v0.5: depreciation model (mirrors buildout/fundamentals.py) ---------- */

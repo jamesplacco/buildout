@@ -31,13 +31,16 @@ def deflated_sharpe(sr: float, n: int, sk: float, ku: float, n_trials: int, sr_v
     return probabilistic_sharpe(sr, n, sk, ku, expected_max_sharpe(n_trials, sr_var))
 
 
-def perf(returns: pd.Series, periods: int = 252, rf: float = 0.0) -> dict:
+def perf(returns: pd.Series, periods: int = 252, rf: float | pd.Series = 0.0) -> dict:
+    """Statistics from one net return series. rf is the annualized cash rate, a number or a series aligned by date
+    (the excess return for Sharpe and Sortino is over cash actually accrued that day, not over zero)."""
     r = returns.dropna()
     r = r.iloc[r.ne(0).argmax():] if r.ne(0).any() else r
     eq = (1 + r).cumprod()
     years = len(r) / periods
-    ex = r - rf / periods
-    sr = ex.mean() / r.std() if r.std() > 0 else 0.0
+    cash = (rf.reindex(r.index).ffill().fillna(0.0) if isinstance(rf, pd.Series) else pd.Series(float(rf), index=r.index)) / periods
+    ex = r - cash
+    sr = ex.mean() / ex.std() if ex.std() > 0 else 0.0
     downside = np.sqrt((np.minimum(ex, 0) ** 2).mean())
     mdd = max_drawdown(eq)
     cagr = eq.iloc[-1] ** (1 / years) - 1 if years > 0 else np.nan
@@ -47,4 +50,5 @@ def perf(returns: pd.Series, periods: int = 252, rf: float = 0.0) -> dict:
             "max_drawdown": mdd, "calmar": cagr / abs(mdd) if mdd < 0 else np.nan,
             "skew": sk, "kurtosis": ku, "hit_rate": float((r > 0).mean()),
             "worst_day": float(r.min()), "best_day": float(r.max()),
-            "psr": probabilistic_sharpe(sr, len(r), sk, ku), "sr_per_period": sr, "n": len(r), "years": years}
+            "psr": probabilistic_sharpe(sr, len(r), sk, ku), "sr_per_period": sr, "n": len(r), "years": years,
+            "final_equity": float(eq.iloc[-1]) if len(eq) else 1.0, "cash_cagr": float((1 + cash).prod() ** (1 / years) - 1) if years > 0 else np.nan}

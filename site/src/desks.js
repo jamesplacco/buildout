@@ -16,7 +16,7 @@
     const tbl = $("#fund-table");
     if (!tbl) return;
     const thead = h("thead"), hr = h("tr"), tb = h("tbody");
-    [["Company", ""], ["Revenue", "r"], ["Cash flow from operations", "r"], ["Capex", "r"], ["Free cash flow", "r"], ["Capex ÷ cash flow", "r"], ["Capex growth, last quarter", "r"], ["Pre-tax income from marks", "r"], ["Net cash", "r"], ["Minsky stage", ""]]
+    [["Company", ""], ["Revenue", "r"], ["Cash flow from operations", "r"], ["Capex", "r"], ["Free cash flow", "r"], ["Capex ÷ cash flow", "r"], ["Capex growth, last quarter", "r"], ["Pre-tax income from marks", "r"], ["Net cash", "r"], ["Coverage", ""]]
       .forEach(([t, c]) => { const th = h("th", c || null, t); th.scope = "col"; hr.append(th); });
     thead.append(hr);
     BUILDERS.map(fundRow).filter(Boolean).forEach((r) => {
@@ -34,7 +34,9 @@
       const g = h("td", "r", fin(r.capex_last_q_yoy) ? sPct(r.capex_last_q_yoy, 0) + accel : "n/a");
       if (fin(r.capex_accel)) g.title = `Growth ${r.capex_accel > 0 ? "sped up" : "slowed"} by ${fx(Math.abs(r.capex_accel) * 100, 0)} points against the prior quarter's (the second derivative)`;
       const st = h("td");
-      st.append(h("span", "stage " + (r.stage || ""), r.stage === "ponzi" ? "Ponzi edge" : r.stage === "speculative" ? "Speculative" : r.stage === "hedge" ? "Hedge" : "n/a"));
+      st.append(h("span", "stage " + (r.stage || ""), r.coverage === "interest_uncovered" ? "Interest not covered" : r.coverage === "funding_gap" ? `Funding gap ${B$(r.funding_gap, 0)}` : r.coverage === "self_funded" ? "Self-funded" : "n/a"));
+      if (r.refreshed) st.append(h("small", null, ` new filing to ${isoNice(r.quarter_end)}`));
+      if (fin(r.gap_cover_years)) st.title = `Cash on hand covers ${fx(r.gap_cover_years, 1)} years of the gap at this rate; debt maturities are not modelled.`;
       tr.append(th, td(B$(r.revenue)), td(B$(r.ocf)), td(B$(r.capex)), td(B$(r.fcf), r.fcf < 0), td(pct0(r.capex_to_ocf), r.capex_to_ocf > 1), g, td(pct0(r.nonop_share), r.nonop_share > 0.3), td(B$(r.net_cash), r.net_cash < 0), st);
       tb.append(tr);
     });
@@ -46,20 +48,17 @@
     note.append(document.createTextNode(`The five builders: capex ${B$(cx, 0)} against operating cash flow of ${B$(ocf, 0)} (${pct0(cx / ocf)}); next-year guidance adds up to about ${B$(guide, 0)}. Microsoft also took on ${B$(ms.leases)} of finance leases, which are capex by another name. Nvidia, the main supplier, spends ${pct0(nv.capex_to_ocf)} of its ${B$(nv.ocf, 0)} cash flow; Tesla ${pct0(ts.capex_to_ocf)}. Supplements the standard tags miss: ${oc.notes} ${cw.notes} `));
     const s = srcLink(SRC5.secapi), c = srcLink(SRC5.crwv), e = srcLink(SRC5.sec);
     [e, s, c].forEach((x, i) => { if (i) note.append(document.createTextNode(" · ")); note.append(x); });
-    const live = LIVE.capexTTM;
-    if (live) {
-      const newer = Object.entries(live).filter(([t, m]) => m && isoOk(m.quarter_end) && fundRow(t) && m.quarter_end > fundRow(t).quarter_end);
-      if (newer.length) note.append(document.createTextNode(` Newer filings from the daily run: ${newer.map(([t, m]) => `${t} to ${isoNice(m.quarter_end)}, capex ${pct0(m.capex_to_ocf)} of cash flow`).join("; ")}.`));
-    }
+    const newer = FUND.rows.filter((r) => r.refreshed);
+    if (newer.length) note.append(document.createTextNode(` Newer filings from the daily run replace the snapshot field by field, and every view on the page redraws from them: ${newer.map((r) => `${r.t} to ${isoNice(r.quarter_end)}, capex ${pct0(r.capex_to_ocf)} of cash flow (${COVERAGE[r.coverage] || "coverage n/a"})`).join("; ")}.`));
   }
   function renderMinsky() {
     const box = $("#fu-minsky");
     if (!box) return;
     box.replaceChildren();
     const all = FUND.rows.filter((r) => r.stage);
-    [["hedge", "Hedge finance", "Cash flow pays for the build and the interest. Nothing needs to go right for the bills to be paid."],
-      ["speculative", "Speculative finance", "Cash flow covers interest but not the build: the gap is rolled over in credit markets. Fine while they stay open."],
-      ["ponzi", "Ponzi edge", "Operating income does not cover interest: only rising asset prices or new money keep it going (Minsky's term, not an accusation)."]].forEach(([k, t, d]) => {
+    [["hedge", "Cash flow covers capex", "A year of operating cash flow pays for a year of the build and the interest."],
+      ["speculative", "Capex exceeds cash flow", "Interest is covered but the build needs cash on hand, asset sales, leases or new debt. A funding gap, not distress."],
+      ["ponzi", "Interest not covered", "Operating income below interest, or negative cash flow. Survival leans on refinancing; maturities are not modelled here."]].forEach(([k, t, d]) => {
       const col = h("div");
       col.append(h("h3", null, t), h("p", null, d));
       const who = h("div", "who");
@@ -319,16 +318,17 @@
     const below = H.rows.filter((r) => ["Deflation", "0 to 2%", "2 to 3%"].includes(r.bucket)), above = H.rows.filter((r) => !["Deflation", "0 to 2%", "2 to 3%"].includes(r.bucket));
     const wavg = (rs) => rs.reduce((s, r) => s + r.share_hedging * r.months, 0) / rs.reduce((s, r) => s + r.months, 0);
     const cards = [
-      findingCard("fi-hedge", "Bonds stop hedging stocks once inflation runs above about 2.75%",
+      findingCard("fi-hedge", "Above about 3% inflation, bonds have mostly stopped hedging stocks; the exact line is uncertain",
         H.split ? `Across ${F.panel.months.toLocaleString("en-US")} months since ${F.panel.start.slice(0, 4)}, the stock-bond correlation was negative (bonds hedged) in ${pct0(H.split.below)} of months when three-year inflation was below ${pctPts(H.split.cut * 100)}, and in ${pct0(H.split.above)} when it was above.`
           : `Across ${F.panel.months.toLocaleString("en-US")} months since ${F.panel.start.slice(0, 4)}, bonds hedged in ${pct0(wavg(below))} of months with three-year inflation below 3%, and ${pct0(wavg(above))} above.`,
-        pctPts(H.latest.infl_avg * 100), `three-year inflation now (${monthNice(H.latest.month + "-01")}); the line is ${pctPts(H.line * 100)}`,
-        [["Method", `36-month correlation of monthly S&P 500 total returns against a constant-maturity 10-year bond, bucketed by the same 36 months' inflation. The best separating cut is any line from ${pctPts(H.zone[0] * 100)} to ${pctPts(H.zone[1] * 100)}; the desk uses the low edge. A 60-month window gives ${pctPts(H.line60 * 100)}.`],
-          ["Caveat", "Overlapping windows: about 52 independent three-year periods, not 1,868. The direction holds in every subsample the engine tested; the exact line does not."],
-          ["Today", `Correlation ${sgn2(H.latest.corr)} over 36 months. Even if prices rise only 2% a year from here, the average stays above the line for about ${ROC_SNAP.cpi.months_to_line} months: base effects keep it there.`]],
+        pctPts(H.latest.infl_avg * 100), `three-year inflation now (${monthNice(H.latest.month + "-01")}); ${fin(H.line) ? `the validated line is ${pctPts(H.line * 100)}` : `no line validated (${String(H.status || "unavailable").replace(/_/g, " ")})`}`,
+        [["Method", `36-month correlation of monthly S&P 500 total returns against a constant-maturity 10-year bond, bucketed by the same 36 months' inflation. The cut is chosen only on data through ${H.trained_through || "n/a"}${H.zone ? ` (best band ${pctPts(H.zone[0] * 100)} to ${pctPts(H.zone[1] * 100)}; the policy uses the low edge)` : ""}, then tested on the untouched decade after it${H.holdout && fin(H.holdout.gap) ? `: bonds hedged ${pct0(H.holdout.gap)} more often below the line than above it` : ""}.`],
+          ["Uncertainty", H.bootstrap && fin(H.bootstrap.cut_p05) ? `A block bootstrap that re-chooses the cut puts the line anywhere from ${pctPts(H.bootstrap.cut_p05 * 100)} to ${pctPts(H.bootstrap.cut_p95 * 100)}. Walk-forward: the cut chosen on the past held in ${(H.walk_forward || []).filter((w) => w.held).length} of ${(H.walk_forward || []).length} later 20-year blocks. Overlapping windows leave about ${H.bootstrap.independent_windows} independent three-year periods.` : "Overlapping windows: about 52 independent three-year periods, not 1,868."],
+          ["Does it add value?", H.experiment ? `Out of sample since ${H.experiment.from.slice(0, 4)}, a 30% bond overlay gated by correlation and inflation had worst-month losses of ${sPct(H.experiment.rules.correlation_and_inflation.worst5, 2)}, against ${sPct(H.experiment.rules.correlation_only.worst5, 2)} for the correlation rule alone and ${sPct(H.experiment.rules.never.worst5, 2)} unhedged. ${H.experiment.inflation_adds_value ? "Inflation conditioning helped." : "Inflation conditioning added nothing measurable: the correlation state is the gate that matters."}` : "Not yet tested."],
+          ["Today", `Correlation ${sgn2(H.latest.corr)} over 36 months. At 2% inflation from here, the average stays above 2.75% for about ${ROC_SNAP.cpi.months_to_line} months: base effects keep it there.`]],
         "Share of months bonds hedged, by three-year inflation",
         (box) => barsV(box, H.rows.map((r) => ({ label: r.bucket.replace(" to ", "–"), v: r.share_hedging * 100, lbl: pct0(r.share_hedging), color: ["3 to 4%", "4 to 6%", "Above 6%"].includes(r.bucket) ? "var(--bad)" : "var(--s1)", tip: () => [[pct0(r.share_hedging) + " of months", `${r.bucket} · ${r.months} months · mean correlation ${sgn2(r.mean_corr)}`]] })), { label: "Share of months with a negative stock-bond correlation, by inflation bucket", yfmt: (t) => t + "%", max: 70 }),
-        "No TLT hedge above the line; options, gold and energy instead.", ["d-duration", "Decision 2"]),
+        "The TLT hedge waits for the stock-bond state; options, gold and energy carry the hedge meanwhile.", ["d-duration", "Decision 2"]),
       findingCard("fi-tails", "Crashes are thousands of times more common than a bell curve allows",
         `Monthly stock returns since 1871 had ${T.rows[3].obs} six-sigma down months; a normal distribution with the same volatility expects one every ${fx(T.rows[3].every / 1e6, 1)} million years.`,
         "α " + fx(T.alpha, 2), "tail index (Hill, worst 5% of months): moments of order α and above do not exist, so kurtosis is infinite",

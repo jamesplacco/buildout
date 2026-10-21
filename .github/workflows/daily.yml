@@ -75,6 +75,10 @@ jobs:
           fi
           python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
 
+      - name: Reasoner and games (reads the files above; no network)
+        continue-on-error: true
+        run: python -m buildout reason --out site/data
+
       - name: Status (freshness and sanity checks for the page)
         if: always()
         run: python -m buildout status --out site/data

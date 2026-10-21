@@ -18,8 +18,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "site" / "src"
 OUT = ROOT / "site" / "page.html"
-SCRIPTS = ["math.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js", "lab.js",
-           "snap6.js", "brain.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "boot.js"]
+SCRIPTS = ["math.js", "engine7.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js",
+           "lab.js", "snap6.js", "snap7.js", "brain.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "today7.js",
+           "boot.js"]
 
 
 def assemble(src: Path = SRC) -> str:

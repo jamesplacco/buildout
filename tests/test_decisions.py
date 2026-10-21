@@ -82,7 +82,7 @@ def test_scorecard_separates_luck_from_skill():
     ]
     sc = dc.scorecard(recs)
     assert sc["n_closed"] == 4 and sc["n_open"] == 1
-    assert sc["grid"] == {"earned": 1, "bad_luck": 1, "dumb_luck": 0, "deserved": 2}
+    assert sc["grid"] == {"earned": 1, "bad_luck": 1, "dumb_luck": 0, "deserved": 1, "unknown_process": 1}   # {} is unknown, not bad
     assert sc["brier"] == pytest.approx(((0.7 - 1) ** 2 + 0.6 ** 2 + (0.8 - 1) ** 2 + 0.5 ** 2) / 4)
     assert sc["alpha"]["mean"] == pytest.approx((0.08 - 0.06 - 0.05 - 0.10) / 4)
     assert sc["hit_rate"] == 0.5 and sc["overconfidence"] == pytest.approx(0.65 - 0.5)
@@ -100,3 +100,14 @@ def test_position_kelly_is_the_growth_maximizer():
         assert f == pytest.approx(max(0.0, dc.kelly(p, w / l) / l), abs=1e-12)
     assert position_kelly(0.55, 0.06, 0.08) == 0.0          # negative expectancy: 0.55 x 6% < 0.45 x 8%
     assert np.isnan(position_kelly(0.5, 0.1, 0))
+
+
+def test_partly_right_scores_half_and_luck_uses_base_rates():
+    base = {"status": "closed", "beta": 1.0, "ret": 0.01, "bench_ret": 0.0}
+    sc = dc.scorecard([dict(base, p=0.7, right=0.5), dict(base, p=0.9, right=1, base=0.8), dict(base, p=0.9, right=1, base=0.8)])
+    assert sc["brier"] == pytest.approx(((0.7 - 0.5) ** 2 + 0.1 ** 2 + 0.1 ** 2) / 3)
+    assert sc["hit_rate"] == pytest.approx(2.5 / 3)
+    # two full hits from calls whose base rates were 50%, 80% and 80%
+    p = dc.poisson_binom_tail([0.5, 0.8, 0.8], 2)
+    assert sc["luck_p_value"] == pytest.approx(p) and p > dc.binom_tail(3, 2, 0.5)
+    assert dc.poisson_binom_tail([0.5] * 10, 7) == pytest.approx(dc.binom_tail(10, 7, 0.5))

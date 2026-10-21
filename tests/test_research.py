@@ -32,6 +32,37 @@ def test_hedge_line_finds_nothing_when_nothing_is_planted():
     out = rs.hedge_line(_panel(planted=False, seed=2), 36)
     shares = [r["share_hedging"] for r in out["rows"] if r["months"] > 100]
     assert max(shares) - min(shares) < 0.35          # no regime: hedging is a coin flip in every bucket
+    # and the engine must REJECT a threshold, not report the best of the noise
+    assert out["status"] in ("no_reliable_threshold", "insufficient_evidence") and out["line"] is None and out["zone"] is None
+
+
+def test_planted_threshold_survives_validation():
+    out = rs.hedge_line(_panel(n=1500), 36)
+    assert out["status"] == "ok" and out["bootstrap"]["gap_p05"] > 0.05
+    assert all(w["held"] for w in out["walk_forward"]) and out["holdout"]["months"] == 120
+
+
+def test_null_result_flows_through_cli_and_policy(tmp_path, capsys):
+    """A null finding prints, writes, and switches the inflation gate to 'unavailable' instead of reusing an old line."""
+    import json
+    from buildout import policy as P
+    from buildout.cli import research_line
+    (tmp_path / "research.json").write_text(json.dumps({"hedge": {"line": None, "status": "no_reliable_threshold"}}))
+    line, status = research_line(tmp_path)
+    assert line is None and status == "no_reliable_threshold"
+    d = P.tlt_decision("hedging", 0.031, line, status, 0.4)
+    assert d["gates"]["inflation"]["status"] == "no_reliable_threshold" and d["on"] is True and d["ratio"] == 0.4
+    assert research_line(tmp_path / "missing") == (None, "unavailable")
+
+
+def test_hedge_experiment_is_information_timed():
+    df = _panel(n=1500)
+    df["y10"] = 4.0
+    out = rs.hedge_experiment(df, start="1940-01-01")
+    assert set(out["rules"]) == {"never", "always", "correlation_only", "correlation_and_inflation", "less_equity"}
+    assert out["rules"]["never"]["share_on"] == 0 and out["rules"]["always"]["share_on"] == 1
+    # with a planted regime, conditioning on inflation must not do worse in the tail than ignoring it
+    assert out["rules"]["correlation_and_inflation"]["worst5"] >= out["rules"]["never"]["worst5"] - 1e-9
 
 
 def test_fat_tails_counts_against_the_normal():
@@ -116,8 +147,21 @@ def test_compact_output_has_exactly_the_pages_shape():
             return {k: shape(v) for k, v in x.items()}
         if isinstance(x, list):
             return [shape(x[0])] if x and isinstance(x[0], (dict, list)) else "list"
-        return "leaf"
+        return "any" if x is None else "leaf"
+
+    def same(a, b, path="root"):
+        """'any' (a null) matches anything: a null result is a valid shape. Empty lists match any list."""
+        if "any" in (a, b) or (a == "list" and isinstance(b, list)) or (b == "list" and isinstance(a, list)):
+            return
+        if isinstance(a, dict) and isinstance(b, dict):
+            assert set(a) == set(b), (path, set(a) ^ set(b))
+            for k in a:
+                same(a[k], b[k], f"{path}.{k}")
+        elif isinstance(a, list) and isinstance(b, list):
+            same(a[0], b[0], path + "[]")
+        else:
+            assert a == b, (path, a, b)
     got, want = shape(out), shape(page)
     got.pop("source")
-    assert got == want
+    same(got, want)
     assert out["panel"]["months"] == len(pd.date_range("1871-02-01", "2026-09-01", freq="MS"))

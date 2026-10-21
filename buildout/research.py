@@ -101,7 +101,42 @@ def monthly_panel(sh: pd.DataFrame, cpi: pd.Series, y10: pd.Series) -> pd.DataFr
     return df
 
 
-def hedge_line(df: pd.DataFrame, win: int = 36) -> dict:
+def _scan(d: pd.DataFrame, min_side: int = 60) -> list[dict]:
+    scan = []
+    for cut in np.round(np.arange(0.01, 0.0501, 0.0025), 4):
+        lo, hi = d[d["infl"] < cut]["corr"], d[d["infl"] >= cut]["corr"]
+        if len(lo) > min_side and len(hi) > min_side:
+            scan.append({"cut": float(cut), "below_hedging": float((lo < 0).mean()), "above_hedging": float((hi < 0).mean()),
+                         "gap": float((lo < 0).mean() - (hi < 0).mean())})
+    return scan
+
+
+def _select(scan: list[dict], tol: float = 0.01) -> tuple[dict | None, list[float] | None]:
+    """Best cut, and the band of cuts within `tol` of it (the separation is flat across a band, so report the band)."""
+    if not scan:
+        return None, None
+    best = max(scan, key=lambda r: r["gap"])
+    near = [r["cut"] for r in scan if r["gap"] >= best["gap"] - tol]
+    return best, [min(near), max(near)]
+
+
+def _gap_at(d: pd.DataFrame, cut: float) -> float | None:
+    lo, hi = d[d["infl"] < cut]["corr"], d[d["infl"] >= cut]["corr"]
+    if len(lo) < 12 or len(hi) < 12:
+        return None
+    return float((lo < 0).mean() - (hi < 0).mean())
+
+
+def hedge_line(df: pd.DataFrame, win: int = 36, holdout_months: int = 120, n_boot: int = 400, seed: int = 7) -> dict:
+    """Stock-bond correlation by inflation, with the threshold chosen out of sample and allowed to fail.
+
+    1. The line is chosen ONLY on data before an untouched holdout (the last `holdout_months` windows).
+    2. Walk-forward: for each 20-year block, choose the cut on everything before it and test it inside it.
+    3. Circular block bootstrap with blocks of `win` months (overlapping windows are not independent), re-choosing
+       the cut in every resample: the spread of chosen cuts is the selection uncertainty, and the gap at the
+       chosen line gets a 90% interval.
+    status: ok | no_reliable_threshold | insufficient_evidence. Only "ok" carries a line.
+    """
     corr = df["r_eq"].rolling(win).corr(df["r_bd"])
     avg = (df["cpi"] / df["cpi"].shift(win)) ** (12 / win) - 1
     d = pd.DataFrame({"corr": corr, "infl": avg}).dropna()
@@ -113,21 +148,111 @@ def hedge_line(df: pd.DataFrame, win: int = 36) -> dict:
         if len(g):
             rows.append({"bucket": lab, "months": int(len(g)), "mean_corr": float(g.mean()), "median_corr": float(g.median()),
                          "share_hedging": float((g < 0).mean())})
-    scan = []
-    for cut in np.round(np.arange(0.01, 0.0501, 0.0025), 4):
-        lo, hi = d[d["infl"] < cut]["corr"], d[d["infl"] >= cut]["corr"]
-        if len(lo) > 60 and len(hi) > 60:
-            scan.append({"cut": float(cut), "below_hedging": float((lo < 0).mean()), "above_hedging": float((hi < 0).mean()),
-                         "gap": float((lo < 0).mean() - (hi < 0).mean())})
-    best = max(scan, key=lambda r: r["gap"]) if scan else None
-    # the separation is nearly flat across a band of cuts: report the band, and use its low edge as the line
-    near = [r["cut"] for r in scan if best and r["gap"] >= best["gap"] - 0.01]
-    zone = [min(near), max(near)] if near else None
+    scan = _scan(d)
+    best_full, zone_full = _select(scan)
+    train, hold = (d.iloc[:-holdout_months], d.iloc[-holdout_months:]) if len(d) > holdout_months + 360 else (d, d.iloc[0:0])
+    tscan = _scan(train)
+    best, zone = _select(tscan)
+    status, line = "ok", (zone[0] if zone else None)
+    out_wf, boot = [], {}
+    if line is None or len(train) < 360:
+        status, line = "insufficient_evidence", None
+    else:
+        # walk-forward blocks
+        step = 240
+        for b0 in range(360, len(train), step):
+            tr, te = train.iloc[:b0], train.iloc[b0:b0 + step]
+            bb, zz = _select(_scan(tr, 36))
+            if zz is None or len(te) < 60:
+                continue
+            g = _gap_at(te, zz[0])
+            out_wf.append({"from": te.index[0].strftime("%Y-%m"), "to": te.index[-1].strftime("%Y-%m"), "cut": zz[0],
+                           "oos_gap": g, "held": bool(g is not None and g > 0)})
+        # block bootstrap, re-selecting the cut each time
+        rng = np.random.default_rng(seed)
+        n = len(train)
+        nb = int(np.ceil(n / win))
+        cuts, gaps = [], []
+        for _ in range(n_boot):
+            starts = rng.integers(0, n, nb)
+            ix = np.concatenate([(np.arange(s0, s0 + win) % n) for s0 in starts])[:n]
+            sample = train.iloc[ix]
+            bb, zz = _select(_scan(sample))
+            if zz is not None:
+                cuts.append(zz[0])
+            g = _gap_at(sample, line)
+            if g is not None:
+                gaps.append(g)
+        boot = {"reps": n_boot, "block_months": win, "cut_p05": float(np.quantile(cuts, 0.05)) if cuts else None,
+                "cut_p95": float(np.quantile(cuts, 0.95)) if cuts else None,
+                "gap_p05": float(np.quantile(gaps, 0.05)) if gaps else None, "gap_p95": float(np.quantile(gaps, 0.95)) if gaps else None,
+                "independent_windows": int(n // win)}
+        held = [w["held"] for w in out_wf]
+        if not gaps or boot["gap_p05"] <= 0.05 or (held and sum(held) / len(held) < 0.6):
+            status, line = "no_reliable_threshold", None
+    hg = _gap_at(hold, zone[0]) if (zone and len(hold)) else None
     decades = d.groupby((d.index.year // 10) * 10)["corr"].mean()
-    return {"window_months": win, "rows": rows, "scan": scan, "line": zone[0] if zone else None, "zone": zone, "best": best,
+    return {"window_months": win, "rows": rows, "scan": scan, "line": line, "status": status,
+            "zone": zone if status == "ok" else None, "zone_full_sample": zone_full, "best": best,
+            "trained_through": train.index[-1].strftime("%Y-%m"), "walk_forward": out_wf, "bootstrap": boot,
+            "holdout": {"from": hold.index[0].strftime("%Y-%m") if len(hold) else None, "months": int(len(hold)), "gap": hg,
+                        "agrees": bool(hg is not None and hg > 0)},
             "latest": {"month": d.index[-1].strftime("%Y-%m"), "corr": float(d["corr"].iloc[-1]), "infl_avg": float(d["infl"].iloc[-1])},
             "decades": {str(int(k)): float(v) for k, v in decades.items()},
             "n_months": int(len(d)), "start": d.index[0].strftime("%Y-%m")}
+
+
+def hedge_experiment(df: pd.DataFrame, win: int = 36, hedge: float = 0.30, start: str = "1901-01-01") -> dict:
+    """Does inflation conditioning add decision value over a plain correlation rule, and over holding less equity?
+
+    Monthly, 1901 on, every rule decided with information published before the month starts: the correlation
+    through t-1, inflation through t-2 (CPI arrives mid-month), and the inflation cut chosen on data before t only
+    (expanding window, re-chosen each January). Book = stocks + `hedge` x 10-year bond when the rule says hedge.
+    The bond overlay is financed: it earns the bond's return minus its own starting yield (no history-long cash
+    rate exists), so carry cannot pass for protection. The cash baseline holds less equity at the volatility of
+    the always-hedged book.
+    """
+    corr = df["r_eq"].rolling(win).corr(df["r_bd"])
+    infl = (df["cpi"] / df["cpi"].shift(win)) ** (12 / win) - 1
+    d = pd.DataFrame({"eq": df["r_eq"], "bd": df["r_bd"] - df["y10"].shift(1) / 1200, "corr": corr.shift(1), "infl": infl.shift(2)}).dropna()
+    hist = pd.DataFrame({"corr": corr, "infl": infl}).dropna()
+    cut = pd.Series(np.nan, index=d.index)
+    for y in sorted(set(d.index.year)):
+        if pd.Timestamp(f"{y}-01-01") < pd.Timestamp(start):
+            continue
+        prior = hist.loc[: pd.Timestamp(f"{y}-01-01") - pd.DateOffset(months=2)]
+        _, z = _select(_scan(prior, 36))
+        if z:
+            cut[d.index.year == y] = z[0]
+    d = d.loc[start:].assign(cut=cut.loc[start:]).dropna()
+    rules = {
+        "never": np.zeros(len(d)), "always": np.ones(len(d)),
+        "correlation_only": (d["corr"] < -0.10).to_numpy(float),
+        "correlation_and_inflation": ((d["corr"] < -0.10) & (d["infl"] < d["cut"])).to_numpy(float),
+    }
+    out = {}
+    eq = d["eq"].to_numpy()
+    for k, on in rules.items():
+        r = eq + hedge * on * d["bd"].to_numpy()
+        out[k] = _rule_stats(r, eq, on)
+    target_vol = out["always"]["vol"]
+    scale = target_vol / out["never"]["vol"]
+    out["less_equity"] = _rule_stats(scale * eq, eq, np.zeros(len(d))) | {"equity_scale": float(scale)}
+    for k, v in out.items():
+        v["per_unit_vol_tail"] = v["worst5"] / v["vol"] if v["vol"] else None
+    best_tail = max(out, key=lambda k: out[k]["worst5"])
+    return {"from": d.index[0].strftime("%Y-%m"), "to": d.index[-1].strftime("%Y-%m"), "months": int(len(d)), "hedge": hedge,
+            "rules": out, "best_tail_rule": best_tail,
+            "inflation_adds_value": bool(out["correlation_and_inflation"]["worst5"] > out["correlation_only"]["worst5"] and
+                                         out["correlation_and_inflation"]["mean"] >= out["correlation_only"]["mean"] - 0.0005),
+            "note": "Information-timed and out of sample; 36-month windows overlap, so treat differences under ~0.2 points a month as noise."}
+
+
+def _rule_stats(r: np.ndarray, eq: np.ndarray, on: np.ndarray) -> dict:
+    tail = eq <= np.quantile(eq, 0.05)
+    return {"mean": float(r.mean()), "vol": float(r.std() * np.sqrt(12)), "worst5": float(r[tail].mean()),
+            "cvar5": float(np.sort(r)[: max(1, int(0.05 * len(r)))].mean()), "share_on": float(on.mean()),
+            "growth": float(np.exp(np.log1p(r).sum() / (len(r) / 12)) - 1)}
 
 
 def fat_tails(r: pd.Series) -> dict:
@@ -269,6 +394,7 @@ def run(raw: dict[str, pd.DataFrame]) -> dict:
         "panel": {"start": df.index[1].strftime("%Y-%m"), "end": df.index[-1].strftime("%Y-%m"), "months": int(df["r_eq"].notna().sum())},
         "hedge_line": hedge_line(df, 36),
         "hedge_line_60": hedge_line(df, 60),
+        "hedge_experiment": hedge_experiment(df),
         "fat_tails": fat_tails(df["r_eq"]),
         "earnings_roc": earnings_roc(df),
         "oil_shocks": oil_shocks(t["brent"], px, t["y10"]),
@@ -294,10 +420,16 @@ def compact(r: dict) -> dict:
         "source": r.get("source"),
         "panel": r["panel"],
         "hedge": {"rows": [{k: _r(v) for k, v in x.items()} for x in hl["rows"]], "line": hl["line"], "zone": hl["zone"],
+                  "status": hl["status"], "zone_full": hl["zone_full_sample"], "trained_through": hl["trained_through"],
+                  "walk_forward": [{k: _r(v, 4) for k, v in w.items()} for w in hl["walk_forward"]],
+                  "bootstrap": {k: _r(v, 4) for k, v in hl["bootstrap"].items()},
+                  "holdout": {k: _r(v, 4) for k, v in hl["holdout"].items()},
+                  "experiment": {**{k: v for k, v in r["hedge_experiment"].items() if k != "rules"},
+                                 "rules": {k: {kk: _r(vv, 5) for kk, vv in v.items()} for k, v in r["hedge_experiment"]["rules"].items()}},
                   "latest": {k: _r(v) for k, v in hl["latest"].items()}, "decades": {k: round(v, 3) for k, v in hl["decades"].items()},
                   "n": hl["n_months"], "start": hl["start"], "line60": r["hedge_line_60"]["line"], "zone60": r["hedge_line_60"]["zone"],
                   "split": next(({"cut": x["cut"], "below": round(x["below_hedging"], 6), "above": round(x["above_hedging"], 6)}
-                                 for x in hl["scan"] if x["cut"] == hl["line"]), None)},
+                                 for x in hl["scan"] if x["cut"] == (hl["line"] if hl["line"] is not None else (hl["zone_full_sample"] or [None])[0])), None)},
         "tails": {"months": ft["months"], "sigma": round(ft["sigma_monthly"], 6), "alpha": round(ft["hill_alpha"], 2),
                   "rows": [{"k": x["sigma"], "obs": x["observed"], "exp": sig(x["expected_normal"]), "every": sig(x["normal_once_every_years"])} for x in ft["rows"]],
                   "worst": [{"m": w["month"], "s": round(w["sigmas"], 1), "r": round(w["log_return"], 6)} for w in ft["worst"]]},

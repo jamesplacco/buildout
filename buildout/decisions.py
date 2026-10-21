@@ -68,6 +68,19 @@ def binom_tail(n: int, k: int, p: float = 0.5) -> float:
     return sum(math.comb(n, i) * p ** i * (1 - p) ** (n - i) for i in range(k, n + 1))
 
 
+def poisson_binom_tail(ps: Sequence[float], k: int) -> float:
+    """P(at least k successes) when trial i succeeds with probability ps[i] (exact dynamic programme).
+    The luck test uses each forecast's own base rate, not a coin flip."""
+    dist = [1.0]
+    for p in ps:
+        nxt = [0.0] * (len(dist) + 1)
+        for j, q in enumerate(dist):
+            nxt[j] += q * (1 - p)
+            nxt[j + 1] += q * p
+        dist = nxt
+    return float(sum(dist[max(k, 0):])) if k <= len(ps) else 0.0
+
+
 def years_to_significance(sharpe: float, z: float = 2.0) -> float:
     """t = SR * sqrt(T) for annual Sharpe SR, so T = (z / SR)^2 years to reach a t-statistic of z."""
     return float("inf") if sharpe <= 0 else (z / sharpe) ** 2
@@ -138,20 +151,26 @@ def scorecard(records: Sequence[dict]) -> dict:
     closed = [r for r in records if r.get("status") == "closed" and r.get("right") in (0, 1, 0.5)
               and isinstance(r.get("p"), (int, float)) and isinstance(r.get("ret"), (int, float))]
     ps = [float(r["p"]) for r in closed]
-    ys = [1 if r["right"] == 1 else 0 for r in closed]
+    ys = [float(r["right"]) for r in closed]                     # "partly" scores 0.5 in Brier and the hit rate
     rets = [float(r["ret"]) for r in closed]
     bench = [float(r.get("bench_ret") or 0.0) for r in closed]
     betas = [float(r.get("beta") if r.get("beta") is not None else 1.0) for r in closed]
     wins = [x for x in rets if x > 0]
     losses = [-x for x in rets if x < 0]
-    grid = {"earned": 0, "bad_luck": 0, "dumb_luck": 0, "deserved": 0}
+    grid = {"earned": 0, "bad_luck": 0, "dumb_luck": 0, "deserved": 0, "unknown_process": 0}
     for r, a in zip(closed, [x - b * m for x, m, b in zip(rets, bench, betas)]):
-        good_process = (process_score(r) or 0) >= 0.75
+        ps_ = process_score(r)
+        if ps_ is None:                                          # missing process data is unknown, not bad
+            grid["unknown_process"] += 1
+            continue
+        good_process = ps_ >= 0.75
         good_outcome = a > 0
         key = ("earned" if good_outcome else "bad_luck") if good_process else ("dumb_luck" if good_outcome else "deserved")
         grid[key] += 1
     n = len(closed)
     hits = sum(ys)
+    full_hits = sum(1 for r in closed if r["right"] == 1)
+    bases = [float(r["base"]) if isinstance(r.get("base"), (int, float)) and 0 < r["base"] < 1 else 0.5 for r in closed]
     return {
         "n_closed": n, "n_open": sum(1 for r in records if r.get("status") != "closed"),
         "brier": brier(ps, ys) if n else None,
@@ -161,6 +180,7 @@ def scorecard(records: Sequence[dict]) -> dict:
         "payoff_ratio": (sum(wins) / len(wins)) / (sum(losses) / len(losses)) if wins and losses else None,
         "expectancy": sum(rets) / n if n else None,
         "alpha": alpha_stats(rets, bench, betas) if n else None,
-        "luck_p_value": binom_tail(n, hits, 0.5) if n else None,
+        "luck_p_value": poisson_binom_tail(bases, full_hits) if n else None,
+        "luck_baseline": sum(bases) / n if n else None,
         "grid": grid,
     }

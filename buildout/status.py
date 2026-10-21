@@ -62,7 +62,8 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
             return None
         as_of = _get(data, as_of_path) if as_of_path else None
         files[name] = {"present": True, "valid": True, "schema": data.get("schema"), "as_of": as_of,
-                       "bytes": p.stat().st_size, "weekdays_old": weekdays_since(as_of, now)}
+                       "bytes": p.stat().st_size, "weekdays_old": weekdays_since(as_of, now),
+                       "written_utc": datetime.fromtimestamp(p.stat().st_mtime, timezone.utc).strftime("%Y-%m-%dT%H:%MZ")}
         return data
 
     macro = load("macro.json", "latest.as_of")
@@ -162,6 +163,18 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
         check("Feed scraper read at least half its sources", n_ok >= n_bad, f"{n_ok} read, {n_bad} failed or skipped")
         check("Feed items are links, not markup", all(str(it.get("url", "")).startswith(("https://", "http://", "")) and "<" not in str(it.get("title", ""))
                                                     for it in feeds.get("items") or []))
+
+    reason = load("reason.json", None)
+    if reason is not None:
+        post = (reason.get("posterior") or {}).get("posterior") or []
+        check("Reasoner posterior is a probability distribution", bool(post) and all(isinstance(p, (int, float)) and 0 <= p <= 1 for p in post)
+              and abs(sum(post) - 1) < 1e-6, f"{len(post)} scenarios")
+        opt = (reason.get("alternatives") or {}).get("optimal") or {}
+        check("Reasoner's optimal portfolio respects the loss limit", opt.get("feasible") is True, str(opt.get("port")))
+    # files written on different days must not silently form one decision: flag the spread of their dates
+    stamps = sorted(v["written_utc"][:10] for v in files.values() if v.get("written_utc"))
+    if stamps:
+        check("Every file comes from the same run day", stamps[0] == stamps[-1], f"{stamps[0]} to {stamps[-1]}")
 
     return {
         "generated_utc": now.isoformat(timespec="seconds"),
