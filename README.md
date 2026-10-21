@@ -3,7 +3,15 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.9 makes the brain check itself and answer questions. It asks which world the readings come from (Bayesian
+Version 0.10 makes the engine robust. Every measured link is re-estimated with Huber regression and Newey-West
+errors, with each month's exact influence and the number of the most influential months whose removal reverses its
+sign (`robust.py`): the 2022-on 10-year-to-stocks link the hedge rests on reverses on three. The solver gains a
+distributionally robust mode, the best worst case over every set of scenario odds within a KL radius, with the price
+of that protection (`reasoner.solve_robust`). Each book run adds block-bootstrapped intervals, the probability of
+backtest overfitting across 30 neighbouring hedge rules, a plateau check on the chosen thresholds
+(`analytics/robust_bt.py`), and a price screen for bad prints, frozen feeds and gaps (`data/quality.py`).
+
+Version 0.9 made the brain check itself and answer questions. It asks which world the readings come from (Bayesian
 model comparison across the two regimes), how surprised it should be (Mahalanobis distance, exact leave-one-out),
 what would have happened otherwise (counterfactuals that keep today's evidence, and but-for shares that add up), which
 channels carry each cause to the book (every walk, summing exactly), and how a bad quarter most plausibly happens
@@ -154,7 +162,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 195 tests, no data needed
+pytest                                    # 210 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -200,12 +208,12 @@ Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app doe
 | `get_portfolio_risk` | The model book, its limits, the engine's risk summary, which holdings are the same bet, the book's sensitivity to each root cause |
 | `analyze_positions` | YOUR holdings, passed in for one call (for example from Robinhood's MCP): weights, limit checks, same-bet pairs, root-cause sensitivity, gap to the model book. Nothing stored |
 | `run_hedge_scenario` | hedge.tlt.v2 on any correlation path and inflation reading, every gate visible |
-| `evaluate_trade` | A portfolio on the seven scenarios: growth, worst case, loss limit, regret, the best portfolio on the grid |
+| `evaluate_trade` | A portfolio on the seven scenarios: growth, worst case, loss limit, regret, the best portfolio on the grid; with `ambiguity`, its worst case over doubtful odds and the robust choice |
 | `create_order_proposal` | A hashed proposal checked against gross, single-name and universe limits. Never executed |
 | `review_decision` | Process score and luck quadrant for one decision, or the full journal scorecard |
 | `compare_explanations` | Bayes over competing explanations and the evidence worth checking next, in bits |
 | `trace_exposure` | The brain's reasoning: causes, implications for each holding, the link most to blame, what to observe next, doing vs seeing, which world fits, surprise, but-for shares, channels, a bad-quarter story, counterfactuals |
-| `learned_structure` | The causal order learned from the data against the assumed one, and each measured link's path over time |
+| `learned_structure` | The causal order learned from the data against the assumed one, each measured link's path over time, and how fragile each link is |
 
 Every tool is read-only research or a proposal. The server refuses `config.private.toml`, never reads a brokerage
 account and has no order, routing or cancel tool; tests check all three. It reasons on `buildout/assets/brain_graph.json`,
@@ -241,6 +249,10 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.10 | `robust.py` | Huber IRLS, Newey-West HAC, exact leave-one-out influence, verified months-to-flip for every measured link and regime |
+| | `reasoner.py` (robust) | KL-ball worst case by its convex dual, robust grid search, doubt sweep, worst-case odds |
+| | `analytics/robust_bt.py` | Stationary block bootstrap, paired win rates, CSCV probability of backtest overfitting, rule family, plateau |
+| | `data/quality.py` | Bad-print, frozen-feed and gap screen; flags only |
 | v0.9 | `thinking.py` (frontier) | Marginal density by Woodbury, regime posterior, surprise and exact leave-one-out, counterfactuals, but-for shares, exact path attribution, loss stories |
 | | `discovery.py` | DirectLiNGAM (pairwise likelihood ratio) with seeded bootstrap; Kalman time-varying links with drift by maximum likelihood; sign changes |
 | v0.8 | `thinking.py` | The brain's reasoning: total effects within K links, ridge abduction of root shocks with posterior covariance, predictions with sd, residuals and misfit gradients per link, single-cause evidence by Sherman-Morrison, mutual information for the next observation, do-interventions, shared exposure |
@@ -306,6 +318,13 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.10: leave-one-out influence equals refitting to 1e-12; Huber resists planted bad prints and equals least squares
+  as c grows; Newey-West widens under autocorrelation; months-to-flip is verified by refit and one fewer does not
+  flip; the KL worst case matches a brute-force optimizer and is bounded and monotone (property-based); the robust
+  solver reduces to the nominal one at zero doubt and never raises nominal growth; PBO is near 50% among equal rules
+  and below 10% when one has a real edge; the price screen flags a bad print, a frozen feed and a gap but not a real
+  crash; channel sums, Gaussian densities and risk shares hold on random inputs (property-based); Python and the page
+  agree on all of it.
 - v0.9: the readings' density, surprise and leave-one-out z-scores match brute-force Gaussian conditioning to 1e-10;
   model comparison finds a planted world; channels and but-for shares add up exactly; the forward loss story is the
   minimum-norm one; counterfactuals leave non-descendants alone; DirectLiNGAM recovers a planted, shuffled five-variable

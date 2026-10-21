@@ -150,7 +150,7 @@ async def extreme_inputs(page, label: str) -> None:
         "making": [("#as-sig", 5), ("#as-g", 0.01), ("#as-k", 0.5), ("#as-A", 300), ("#as-g", 1), ("#gm-mu", 0), ("#gm-info", 100), ("#gm-s", 0.5), ("#gm-mu", 50),
                    ("#ex-q", 100), ("#ex-sig", 6), ("#ex-T", 1), ("#ex-l", 0), ("#ex-l", 20), ("#ex-Y", 1.5), ("#ex-q", 0.5), ("#ex-T", 10),
                    ("#fq-qb", 0), ("#fq-qa", 0), ("#fq-pf", 0), ("#fq-pf", 100), ("#fq-miss", 3), ("#fq-later", 100.05), ("#fq-cf", 0.5)],
-        "solve": [("#rz-loss", 5), ("#rz-prem", 0), ("#rz-eq", 1.5), ("#rz-h", 1), ("#rz-loss", 35), ("#rz-prem", 2), ("#rz-eq", 0), ("#rz-regime", "low_inflation"),
+        "solve": [("#rz-dro-rho", 0), ("#rz-dro-rho", 7), ("#rz-loss", 5), ("#rz-prem", 0), ("#rz-eq", 1.5), ("#rz-h", 1), ("#rz-loss", 35), ("#rz-prem", 2), ("#rz-eq", 0), ("#rz-regime", "low_inflation"),
                   ("#calc-in", "1/0"), ("#calc-in", "foo("), ("#calc-in", "2^1024"), ("#calc-in", "bsput(100, 95, 0.25, ($vix + 3)%)")],
         "games": [("#gt-p", 28), ("#gt-wacc", 13), ("#gt-orcl", 6), ("#gt-p", 70), ("#gt-wacc", 5), ("#gt-crowd", 1500), ("#gt-adv", 10), ("#gt-vol", 6), ("#gt-cost", 150),
                   ("#gt-edge", -2), ("#gt-sdpub", 0.1), ("#gt-sdpriv", 5), ("#gt-edge", 4), ("#gt-sdpub", 5), ("#gt-sdpriv", 0.1), ("#gt-sv", 25), ("#gt-su", 50), ("#gt-order", 2000),
@@ -217,7 +217,7 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
-                        ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
+                        ("rzd-title", "solve"), ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
                         ("nw-memory", "noteworthy"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
@@ -416,6 +416,8 @@ async def main() -> int:
     hostile["brain.json"]["series"] = {"cols": [], "dates": ["x"], "z": [[None]] * 6}
     hostile["brain.json"]["learned"] = {"dates": [1], "order": {"low_inflation": {"learned": ["<b>"]}}, "links": {"y10>eq": {"beta": "x"}}}
     hostile["report.json"]["summary"]["adjustments"] = ["<b>x</b>"]
+    hostile["report.json"]["robustness"] = {"bootstrap": {"variants": {"<b>x</b>": {"sharpe": "bad", "cagr": [1, None, 2]}, "y": None}, "draws": "many"}, "pbo": {"pbo": "x"}, "plateau": {"rank": None}}
+    hostile["report.json"]["data_quality"] = {"flagged": "lots"}
     hostile["brain.json"]["factor_cov"] = {"regimes": {"inflation": {"cov": "big", "months": None}, "low_inflation": {"cov": [[1e308]]}}}
     evil = '<img src=x onerror="window.__pwned=1">'
     hostile["feeds.json"]["items"] = [{"title": evil, "url": "javascript:window.__pwned=1", "source": evil, "platform": "<b>x</b>", "tier": "niche", "themes": ["memory"]}]

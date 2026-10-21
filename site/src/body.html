@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.9</span>
+      Buildout <span class="ver">v0.10</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -1130,6 +1130,18 @@
     </div>
   </section>
 
+  <section class="section" aria-labelledby="rzd-title">
+    <div class="section-head"><p class="eyebrow">Robust to being wrong about the odds</p><h2 id="rzd-title">What the solver chooses if its own probabilities might be off</h2><p class="prose" id="rz-dro-out" aria-live="polite">Solving under doubt…</p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">The choice at each level of doubt</span><div class="tablewrap"><table class="rz" id="rz-dro"></table></div>
+        <p class="hint">Doubt is a Kullback-Leibler radius around the posterior odds: the solver maximizes the worst expected log growth over every set of odds that close. Guaranteed growth is that worst case; the price is the nominal growth given up to get it.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">How far the odds may move at the chosen doubt</span><span class="ev ev-asm">Assumed</span></div>
+        <div class="field"><div class="field-top"><label for="rz-dro-rho">Doubt (KL radius)</label><output id="rz-dro-rho-o" for="rz-dro-rho"></output></div><input type="range" id="rz-dro-rho" min="0" max="7" step="1" value="4"></div>
+        <div class="svgbox" id="rz-dro-q"></div><p class="sentence" id="rz-dro-q-t"></p></figure>
+    </div>
+    <div class="math"><span class="mlabel">Distributionally robust choice</span>max<sub><var>x</var></sub> inf<sub>KL(<var>Q</var>&#8214;<var>P</var>) &le; &rho;</sub> E<sub><var>Q</var></sub>[ln(1 + <var>R</var><sub>x</sub>)] = max<sub><var>x</var></sub> sup<sub>&lambda; &gt; 0</sub> [&minus;&lambda;&rho; &minus; &lambda; ln E<sub><var>P</var></sub> e<sup>&minus;ln(1+<var>R</var><sub>x</sub>)/&lambda;</sup>], the convex dual, solved by golden section for each of the 18,414 portfolios under the loss limit. The worst odds are <var>Q</var>* &prop; <var>P</var> e<sup>&minus;u/&lambda;*</sup>.</div>
+  </section>
+
   <section class="section" aria-labelledby="rzn-title">
     <div class="section-head"><p class="eyebrow">Game theory</p><h2 id="rzn-title">Playing against Nature</h2><p class="prose" id="rz-nature"></p></div>
     <div class="math"><span class="mlabel">Zero-sum game</span>max<sub><var>x</var></sub> min<sub><var>s</var></sub> &Sigma;<sub>i</sub> <var>x</var><sub>i</sub> <var>R</var><sub>i,s</sub>, solved exactly as a linear program (simplex, Bland's rule); Nature's equilibrium mix is the dual.</div>
@@ -1379,6 +1391,9 @@
         <div class="svgbox" id="brl-chart"></div><p class="sentence" id="brl-t"></p>
         <p class="hint">Each link as a random walk, smoothed by a Kalman filter and the Rauch-Tung-Striebel smoother, with a 90% band; how fast it may drift is chosen by maximum likelihood, so the data decides whether the 2022 break was a step or a slide.</p></figure>
     </div>
+    <div class="panel"><span class="panel-title">How fragile is each measured link?</span><p class="sentence" id="brl-frag-t"></p>
+      <div class="tablewrap"><table class="rz" id="brl-frag"></table></div>
+      <p class="hint">Least squares against a Huber fit that lets big months count linearly, t-statistics with Newey-West errors that do not assume independent months, and the number of the most influential months that, dropped, would reverse the sign (each count checked by refitting; "over 10%" means it would not reverse). A link that flips on three months is a hypothesis, however large its t.</p></div>
   </section>
 
   <section class="section" aria-labelledby="brw-title">
@@ -1888,7 +1903,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">195 of 195 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">210 of 210 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1921,6 +1936,11 @@
           <tr><td>Causal discovery on a planted, shuffled five-variable chain</td><td class="r">order recovered</td></tr>
           <tr><td>Kalman links on a planted sign flip; a link that never moved</td><td class="r">flip found; smaller drift chosen</td></tr>
           <tr><td>Frontier and structure learning, Python and page, on the page's own data</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Leave-one-out influence against refitting; Huber on planted bad prints</td><td class="r">exact to 1e-12; outliers resisted</td></tr>
+          <tr><td>Months to flip, checked by refit; one fewer does not flip</td><td class="r">verified</td></tr>
+          <tr><td>Worst case over a KL ball against a brute-force optimizer</td><td class="r">agree to 1e-5; constraint binds</td></tr>
+          <tr><td>Overfitting test: thirty equal rules, then one with a real edge</td><td class="r">PBO near 50%; then below 10%</td></tr>
+          <tr><td>Price screen: a bad print, a frozen feed, a gap, a real crash</td><td class="r">three flagged; the crash is not</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>

@@ -259,7 +259,7 @@
   function scheduleSolve() {
     renderSolve(false);                                   // instant: posterior and choices
     clearTimeout(solveTimer);
-    solveTimer = setTimeout(() => { guard("Value of information", () => renderSolve(true), $("#rz-voi")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); }, 180);
+    solveTimer = setTimeout(() => { guard("Value of information", () => renderSolve(true), $("#rz-voi")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); guard("Robust solver", renderDRO, $("#rz-dro")); }, 180);
   }
   function buildSolve() {
     if (!$("#rz-ledger")) return;
@@ -299,4 +299,45 @@
     }
     renderSolve(true);
     guard("Decision boundary", renderBoundary, $("#rz-bnd"));
+    guard("Robust solver", renderDRO, $("#rz-dro"));
+  }
+
+  /* ---------- v0.10: robust to being wrong about the odds ---------- */
+  const DRO = { idx: 4, key: null, sweep: null, timer: null };
+  function renderDRO() {
+    const t = $("#rz-dro");
+    if (!t || !RZ_LAST) return;
+    const R = RZ_LAST, post = R.post.posterior, key = post.map((p) => p.toFixed(6)).join() + JSON.stringify(R.P);
+    if (DRO.key !== key) {
+      DRO.key = key; DRO.sweep = null;
+      $("#rz-dro-out").textContent = "Solving under doubt…";
+      clearTimeout(DRO.timer);
+      DRO.timer = setTimeout(() => { try { DRO.sweep = rzRobustSweep(post, RZ_SCENARIOS, R.P); } catch (e) { DRO.sweep = null; } guard("Robust solver", drawDRO, $("#rz-dro")); }, 60);
+      return;
+    }
+    drawDRO();
+  }
+  const portShort = (p) => `${xx(p[0])} equity${p[1] ? ` · TLT ${fx(p[1], 1)}x` : ""}${p[2] ? ` · puts ${fx(p[2] * 100, 2)}%` : ""}${p[3] ? ` · gold ${fx(p[3] * 100, 0)}%` : ""}`;
+  function drawDRO() {
+    const S = DRO.sweep, t = $("#rz-dro");
+    if (!S || !t) return;
+    fillTable(t, ["Doubt", "Choice", "Guaranteed growth", "Nominal growth", "Price"], S.rows.map((r) => [r.rho === 0 ? "none" : fx(r.rho, 2), portShort(r.port), sPct(r.worst_case_ce, 2), sPct(r.nominal_ce, 2), r.rho === 0 ? "" : `${fx(r.price_bp, 0)}bp`]), 2);
+    const post = RZ_LAST.post.posterior, crash = RZ_SCENARIOS.findIndex((s) => s.id === "crash"), r1 = S.rows.find((r) => r.rho === S.first_change_rho) || S.rows[1];
+    const p1 = (v) => (v < 0.1 ? fx(v * 100, 1) + "%" : pct0(v));
+    $("#rz-dro-out").textContent = S.first_change_rho == null
+      ? "The choice holds at every level of doubt tested: it does not depend on the odds being exactly right."
+      : `The choice changes at a doubt of ${fx(S.first_change_rho, 2)}, enough to let the liquidity-crash scenario's odds rise from ${p1(post[crash])} to ${p1(maxScenarioOdds(post[crash], S.first_change_rho))}. ${S.first_change_rho <= 0.02 ? "That is a small doubt: the nominal choice leans on the exact odds and is not robust." : "The nominal choice survives modest doubt about the odds."} At that level the robust choice is ${portShort(r1.port)}, giving up ${fx(r1.price_bp, 0)}bp of nominal growth.`;
+    const sl = $("#rz-dro-rho");
+    if (sl && !sl.dataset.wired) { sl.dataset.wired = "1"; sl.max = String(S.rows.length - 1); sl.addEventListener("input", () => { DRO.idx = Number(sl.value); drawDROq(); }); }
+    drawDROq();
+  }
+  function drawDROq() {
+    const S = DRO.sweep;
+    if (!S) return;
+    const r = S.rows[Math.min(DRO.idx, S.rows.length - 1)], post = RZ_LAST.post.posterior;
+    $("#rz-dro-rho-o").textContent = r.rho === 0 ? "none" : fx(r.rho, 2);
+    barsH($("#rz-dro-q"), RZ_SCENARIOS.map((s, i) => ({ label: s.name, v: (r.q_worst[i] - post[i]) * 100, lbl: `${pct0(post[i])} → ${pct0(r.q_worst[i])}`, color: r.q_worst[i] > post[i] ? "var(--s2)" : "var(--s1)" })),
+      { label: "Worst-case odds against the posterior, by scenario", fmt: (v) => sg(v, 0) + " pts", padR: 96 });
+    const up = RZ_SCENARIOS.map((s, i) => ({ n: s.name, d: r.q_worst[i] - post[i] })).sort((a, b) => b.d - a.d)[0];
+    $("#rz-dro-q-t").textContent = r.rho === 0 ? "No doubt: the posterior odds as they are." : `At this doubt the odds that hurt the robust choice most put ${up.n} up ${fx(up.d * 100, 0)} points. Its guaranteed growth is ${sPct(r.worst_case_ce, 2)} a quarter whatever odds within that distance turn out to be true.`;
   }

@@ -154,6 +154,112 @@ def evaluate(port: Sequence[float], post: Sequence[float], scen: Sequence[dict],
             "mean": float(np.dot(post, rets)), "feasible": _feasible(port, rets, P)}
 
 
+# ---------------------------------------------------------------- 3b. robust to being wrong about the odds (v0.10)
+"""Distributionally robust choice. The posterior over scenarios is itself an estimate. Instead of maximizing expected
+log growth under it, maximize the WORST expected log growth over every distribution Q within a Kullback-Leibler
+radius rho of it: inf_{KL(Q||P) <= rho} E_Q[u] = sup_{lam > 0} [-lam rho - lam log E_P exp(-u / lam)] (the convex dual).
+rho = 0 is the ordinary solver; as rho grows the answer slides toward the worst single scenario (maximin). The
+worst-case odds Q* are an exponential tilt of P toward the scenarios that hurt this portfolio most."""
+GOLD = (math.sqrt(5) - 1) / 2
+DRO_ITERS = 80
+DRO_T = (-12.0, 8.0)          # log lambda search bracket
+
+
+def _dro_g(t, U, p, umin, rho):
+    lam = np.exp(t)
+    s = np.sum(p * np.exp(-(U - umin[..., None]) / lam[..., None]), axis=-1)
+    return umin - lam * rho - lam * np.log(s)
+
+
+def kl_worst(u, p, rho: float) -> dict:
+    """Worst expected u over KL(Q||P) <= rho, for one vector u (or a matrix of rows, vectorized)."""
+    U = np.atleast_2d(np.asarray(u, float))
+    p = np.asarray(p, float)
+    if rho <= 0:
+        v = U @ p
+        return {"value": v if np.ndim(u) > 1 else float(v[0]), "lam": None, "q": p.tolist()}
+    sup = p > 0
+    umin = np.where(sup, U, np.inf).min(axis=1)
+    a = np.full(len(U), DRO_T[0])
+    b = np.full(len(U), DRO_T[1])
+    c = b - GOLD * (b - a)
+    d = a + GOLD * (b - a)
+    fc = _dro_g(c, U, p, umin, rho)
+    fd = _dro_g(d, U, p, umin, rho)
+    for _ in range(DRO_ITERS):
+        m = fc > fd
+        b = np.where(m, d, b)
+        a = np.where(m, a, c)
+        nc = np.where(m, c, d)
+        nf = np.where(m, fc, fd)
+        newpt = np.where(m, b - GOLD * (b - a), a + GOLD * (b - a))
+        fnew = _dro_g(newpt, U, p, umin, rho)
+        c, d = np.where(m, newpt, nc), np.where(m, nc, newpt)
+        fc, fd = np.where(m, fnew, nf), np.where(m, nf, fnew)
+    tm = (a + b) / 2
+    val = np.maximum(_dro_g(tm, U, p, umin, rho), umin)
+    lam = np.exp(tm)
+    if np.ndim(u) > 1:
+        return {"value": val, "lam": lam}
+    w = p * np.exp(-(U[0] - umin[0]) / lam[0])
+    return {"value": float(val[0]), "lam": float(lam[0]), "q": (w / w.sum()).tolist()}
+
+
+def _feasible_grid(scen, P):
+    cost = put_spread_cost(P["vix"], P["horizon"], skew_pts=P["skew_pts"])
+    ports, R = [], []
+    for port in _grid():
+        rets = scenario_returns(port, scen, P, cost)
+        if _feasible(port, rets, P):
+            ports.append(port)
+            R.append(rets)
+    return ports, np.array(R)
+
+
+def solve_robust(post, scen, P: dict, rho: float, _cache=None) -> dict | None:
+    ports, R = _cache or _feasible_grid(scen, P)
+    if not ports:
+        return None
+    U = np.log1p(np.maximum(R, -0.999999))
+    vals = kl_worst(U, post, rho)["value"] if rho > 0 else U @ np.asarray(post, float)
+    i = 0
+    for k in range(1, len(ports)):           # first strict improvement wins, as in the nominal solver
+        if vals[k] > vals[i] + 1e-12:
+            i = k
+    w = kl_worst(U[i], post, rho)
+    return {"port": list(ports[i]), "value": float(vals[i]), "ce": math.expm1(float(vals[i])), "nominal_elog": float(U[i] @ np.asarray(post, float)),
+            "rets": R[i].tolist(), "q_worst": w["q"], "rho": rho}
+
+
+def max_scenario_odds(p: float, rho: float) -> float:
+    """The highest probability one scenario can take within KL radius rho of its posterior probability p."""
+    if rho <= 0 or p >= 1:
+        return p
+    kl = lambda q: q * math.log(q / p) + (1 - q) * math.log((1 - q) / (1 - p))  # noqa: E731
+    lo, hi = p, 1 - 1e-12
+    if kl(hi) <= rho:
+        return hi
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if kl(mid) <= rho else (lo, mid)
+    return lo
+
+
+RHO_SWEEP = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+
+
+def robustness_sweep(post, scen, P: dict, rhos=RHO_SWEEP) -> dict:
+    cache = _feasible_grid(scen, P)
+    rows = []
+    nominal = solve_robust(post, scen, P, 0.0, cache)
+    for r in rhos:
+        sr = solve_robust(post, scen, P, r, cache)
+        rows.append({"rho": r, "port": sr["port"], "worst_case_ce": sr["ce"], "nominal_ce": math.expm1(sr["nominal_elog"]),
+                     "price_bp": (nominal["nominal_elog"] - sr["nominal_elog"]) * 1e4, "q_worst": sr["q_worst"]})
+    changes = [rows[i]["rho"] for i in range(1, len(rows)) if rows[i]["port"] != rows[i - 1]["port"]]
+    return {"rows": rows, "first_change_rho": changes[0] if changes else None}
+
+
 # ---------------------------------------------------------------- 4. alternatives
 def _r20(x: float) -> int:
     """Nearest grid step of 0.05, halves rounded up (the same in JavaScript's Math.round)."""

@@ -1300,7 +1300,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.9</span>
+      Buildout <span class="ver">v0.10</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -2421,6 +2421,18 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     </div>
   </section>
 
+  <section class="section" aria-labelledby="rzd-title">
+    <div class="section-head"><p class="eyebrow">Robust to being wrong about the odds</p><h2 id="rzd-title">What the solver chooses if its own probabilities might be off</h2><p class="prose" id="rz-dro-out" aria-live="polite">Solving under doubt…</p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">The choice at each level of doubt</span><div class="tablewrap"><table class="rz" id="rz-dro"></table></div>
+        <p class="hint">Doubt is a Kullback-Leibler radius around the posterior odds: the solver maximizes the worst expected log growth over every set of odds that close. Guaranteed growth is that worst case; the price is the nominal growth given up to get it.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">How far the odds may move at the chosen doubt</span><span class="ev ev-asm">Assumed</span></div>
+        <div class="field"><div class="field-top"><label for="rz-dro-rho">Doubt (KL radius)</label><output id="rz-dro-rho-o" for="rz-dro-rho"></output></div><input type="range" id="rz-dro-rho" min="0" max="7" step="1" value="4"></div>
+        <div class="svgbox" id="rz-dro-q"></div><p class="sentence" id="rz-dro-q-t"></p></figure>
+    </div>
+    <div class="math"><span class="mlabel">Distributionally robust choice</span>max<sub><var>x</var></sub> inf<sub>KL(<var>Q</var>&#8214;<var>P</var>) &le; &rho;</sub> E<sub><var>Q</var></sub>[ln(1 + <var>R</var><sub>x</sub>)] = max<sub><var>x</var></sub> sup<sub>&lambda; &gt; 0</sub> [&minus;&lambda;&rho; &minus; &lambda; ln E<sub><var>P</var></sub> e<sup>&minus;ln(1+<var>R</var><sub>x</sub>)/&lambda;</sup>], the convex dual, solved by golden section for each of the 18,414 portfolios under the loss limit. The worst odds are <var>Q</var>* &prop; <var>P</var> e<sup>&minus;u/&lambda;*</sup>.</div>
+  </section>
+
   <section class="section" aria-labelledby="rzn-title">
     <div class="section-head"><p class="eyebrow">Game theory</p><h2 id="rzn-title">Playing against Nature</h2><p class="prose" id="rz-nature"></p></div>
     <div class="math"><span class="mlabel">Zero-sum game</span>max<sub><var>x</var></sub> min<sub><var>s</var></sub> &Sigma;<sub>i</sub> <var>x</var><sub>i</sub> <var>R</var><sub>i,s</sub>, solved exactly as a linear program (simplex, Bland's rule); Nature's equilibrium mix is the dual.</div>
@@ -2670,6 +2682,9 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
         <div class="svgbox" id="brl-chart"></div><p class="sentence" id="brl-t"></p>
         <p class="hint">Each link as a random walk, smoothed by a Kalman filter and the Rauch-Tung-Striebel smoother, with a 90% band; how fast it may drift is chosen by maximum likelihood, so the data decides whether the 2022 break was a step or a slide.</p></figure>
     </div>
+    <div class="panel"><span class="panel-title">How fragile is each measured link?</span><p class="sentence" id="brl-frag-t"></p>
+      <div class="tablewrap"><table class="rz" id="brl-frag"></table></div>
+      <p class="hint">Least squares against a Huber fit that lets big months count linearly, t-statistics with Newey-West errors that do not assume independent months, and the number of the most influential months that, dropped, would reverse the sign (each count checked by refitting; "over 10%" means it would not reverse). A link that flips on three months is a hypothesis, however large its t.</p></div>
   </section>
 
   <section class="section" aria-labelledby="brw-title">
@@ -3179,7 +3194,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">195 of 195 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">210 of 210 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -3212,6 +3227,11 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
           <tr><td>Causal discovery on a planted, shuffled five-variable chain</td><td class="r">order recovered</td></tr>
           <tr><td>Kalman links on a planted sign flip; a link that never moved</td><td class="r">flip found; smaller drift chosen</td></tr>
           <tr><td>Frontier and structure learning, Python and page, on the page's own data</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Leave-one-out influence against refitting; Huber on planted bad prints</td><td class="r">exact to 1e-12; outliers resisted</td></tr>
+          <tr><td>Months to flip, checked by refit; one fewer does not flip</td><td class="r">verified</td></tr>
+          <tr><td>Worst case over a KL ball against a brute-force optimizer</td><td class="r">agree to 1e-5; constraint binds</td></tr>
+          <tr><td>Overfitting test: thirty equal rules, then one with a real edge</td><td class="r">PBO near 50%; then below 10%</td></tr>
+          <tr><td>Price screen: a bad print, a frozen feed, a gap, a real crash</td><td class="r">three flagged; the crash is not</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>
@@ -3941,6 +3961,61 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
       }
     }
     return best;
+  }
+  /* ---------- v0.10: robust to being wrong about the odds (mirrors reasoner.solve_robust) ---------- */
+  const DRO_GOLD = (Math.sqrt(5) - 1) / 2, DRO_ITERS = 80, DRO_T = [-12.0, 8.0];
+  function droG(t, u, p, umin, rho) {
+    const lam = Math.exp(t);
+    let s = 0;
+    for (let i = 0; i < u.length; i++) s += p[i] * Math.exp(-(u[i] - umin) / lam);
+    return umin - lam * rho - lam * Math.log(s);
+  }
+  function klWorst(u, p, rho) {
+    if (!(rho > 0)) return { value: u.reduce((a, v, i) => a + v * p[i], 0), lam: null, q: p.slice() };
+    let umin = Infinity;
+    for (let i = 0; i < u.length; i++) if (p[i] > 0 && u[i] < umin) umin = u[i];
+    let a = DRO_T[0], b = DRO_T[1], c = b - DRO_GOLD * (b - a), d = a + DRO_GOLD * (b - a), fc = droG(c, u, p, umin, rho), fd = droG(d, u, p, umin, rho);
+    for (let it = 0; it < DRO_ITERS; it++) {
+      if (fc > fd) { b = d; d = c; fd = fc; c = b - DRO_GOLD * (b - a); fc = droG(c, u, p, umin, rho); }
+      else { a = c; c = d; fc = fd; d = a + DRO_GOLD * (b - a); fd = droG(d, u, p, umin, rho); }
+    }
+    const tm = (a + b) / 2, val = Math.max(droG(tm, u, p, umin, rho), umin), lam = Math.exp(tm);
+    const w = u.map((v, i) => p[i] * Math.exp(-(v - umin) / lam)), z = w.reduce((x, y) => x + y, 0);
+    return { value: val, lam, q: w.map((v) => v / z) };
+  }
+  function rzFeasibleGrid(scen, P) {
+    const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), ports = [], R = [];
+    for (let i = 0; i < 31; i++) for (let j = 0; j < 11; j++) for (let k = 0; k < 9; k++) for (let l = 0; l < 6; l++) {
+      const port = [i / 20, j / 10, k / 400, l / 50], rets = rzReturns(port, scen, P, cost);
+      if (rzFeasible(port, rets, P)) { ports.push(port); R.push(rets); }
+    }
+    return { ports, R };
+  }
+  function rzSolveRobust(post, scen, P, rho, cache = null) {
+    const { ports, R } = cache || rzFeasibleGrid(scen, P);
+    if (!ports.length) return null;
+    const U = R.map((r) => r.map((x) => Math.log1p(Math.max(x, -0.999999))));
+    const vals = U.map((u) => (rho > 0 ? klWorst(u, post, rho).value : u.reduce((a, v, i) => a + v * post[i], 0)));
+    let i = 0;
+    for (let k = 1; k < ports.length; k++) if (vals[k] > vals[i] + 1e-12) i = k;
+    const w = klWorst(U[i], post, rho);
+    return { port: ports[i].slice(), value: vals[i], ce: Math.expm1(vals[i]), nominal_elog: U[i].reduce((a, v, j) => a + v * post[j], 0), rets: R[i].slice(), q_worst: w.q, rho };
+  }
+  function maxScenarioOdds(p, rho) {
+    if (!(rho > 0) || p >= 1) return p;
+    const kl = (q) => q * Math.log(q / p) + (1 - q) * Math.log((1 - q) / (1 - p));
+    let lo = p, hi = 1 - 1e-12;
+    if (kl(hi) <= rho) return hi;
+    for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (kl(mid) <= rho) lo = mid; else hi = mid; }
+    return lo;
+  }
+  const RHO_SWEEP = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0];
+  function rzRobustSweep(post, scen, P, rhos = RHO_SWEEP) {
+    const cache = rzFeasibleGrid(scen, P), nominal = rzSolveRobust(post, scen, P, 0, cache);
+    const rows = rhos.map((r) => { const sr = rzSolveRobust(post, scen, P, r, cache);
+      return { rho: r, port: sr.port, worst_case_ce: sr.ce, nominal_ce: Math.expm1(sr.nominal_elog), price_bp: (nominal.nominal_elog - sr.nominal_elog) * 1e4, q_worst: sr.q_worst }; });
+    const ch = rows.findIndex((r, i) => i > 0 && r.port.join() !== rows[i - 1].port.join());
+    return { rows, first_change_rho: ch > 0 ? rows[ch].rho : null };
   }
   function rzEvaluate(port, post, scen, P) {
     const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), rets = rzReturns(port, scen, P, cost), u = rzElog(rets, post);
@@ -4954,6 +5029,11 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     { id: "cash-eps", term: "Cash EPS", def: "Earnings per share after setting depreciation to economic life, counting stock pay as pay, expensing capitalized software and crediting deferred revenue.", at: "bsc-title" },
     { id: "moonbag", term: "Moonbag", def: "What is left of a winner after selling enough to recover the original cost: a free position on the right tail.", at: "bsz-title" },
     { id: "student-t", term: "Student-t", def: "A bell-shaped distribution with fat tails. Fitted to 155 years of monthly stocks, it has about 3.8 degrees of freedom.", at: "bst-title" },
+    { id: "dro", term: "Distributionally robust choice", alt: ["robust to the odds"], def: "Choosing the portfolio whose worst expected outcome is best across every set of scenario odds within a stated distance of your own. It protects against being wrong about the probabilities, not just about the outcome.", at: "rzd-title" },
+    { id: "huber", term: "Huber regression", alt: ["robust regression"], def: "A regression in which unusually large errors count linearly instead of quadratically, so a handful of extreme months cannot carry the estimate.", at: "brl-title" },
+    { id: "newey-west", term: "Newey-West", alt: ["HAC"], def: "Standard errors that allow neighbouring months to be correlated and volatility to change. Usually wider, and more honest, than the textbook ones.", at: "brl-title" },
+    { id: "pbo", term: "Probability of backtest overfitting", alt: ["PBO"], def: "How often the rule that looked best in one half of history lands in the bottom half of the other. Near 50% means the backtest winner was mostly luck.", at: "book-body" },
+    { id: "block-bootstrap", term: "Block bootstrap", def: "Re-running history many times by stitching together random blocks of real days, keeping calm and stormy stretches intact, to see how much a result depends on the exact path.", at: "book-body" },
     { id: "model-comparison", term: "Bayesian model comparison", alt: ["which world"], def: "Ranking versions of a model by how probable each makes the data actually seen. The brain uses it to ask whether today's readings look more like the 1990 to 2021 world or the 2022-on world.", at: "brf-title" },
     { id: "counterfactual", term: "Counterfactual", def: "What would have happened had one thing been different, keeping everything the evidence says about everything else. Pearl's third rung, above seeing and doing.", at: "brf-title" },
     { id: "shapley", term: "Shapley value", alt: ["but-for"], def: "A fair split of a total among its causes. In a linear model each cause's share is its own effect, and the shares add up exactly to the whole.", at: "brf-title" },
@@ -5043,6 +5123,9 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   ];
 
   const FAQ = [
+    { g: "v0.10", q: "How robust is the stock-bond flip the hedge rests on?", a: "Less than its average suggests. Since 2022 the 10-year-to-stocks link reads −0.24, but with Newey-West errors its t-statistic is −1.5, and dropping three months (September and October 2022, October 2023) reverses its sign. The pre-2022 positive link reverses on seven. The direction of the regime change is plausible; its size is not established. That is one more reason the hedge desk leans on the live correlation rule rather than on the link estimate." },
+    { g: "v0.10", q: "What does robust to the odds mean on the Solve desk?", a: "The scenario probabilities are estimates. The robust solver asks which portfolio has the best worst case across every set of odds within a stated Kullback-Leibler distance of the estimate, and shows what that protection costs in nominal growth. If the choice changes at a tiny distance, the nominal answer was leaning on the exact odds." },
+    { g: "v0.10", q: "Is the backtest overfit?", a: "Each run now measures it: 30 neighbouring hedge rules are backtested, the history is split 924 ways, and the probability of backtest overfitting is the share of splits in which the in-sample winner falls to the bottom half out of sample. Block-bootstrapped intervals show how wide each policy's Sharpe and drawdown could have been on another path." },
     { g: "v0.9", q: "Is the brain's map still right about bonds?", a: "The brain now checks itself. Bayesian model comparison says today's readings are more probable under the 1990 to 2021 links than the 2022-on ones, and the Kalman smoother shows the 10-year-to-stocks link went negative in mid-2021 and has drifted back near zero since early 2025, with a wide band. Neither is a verdict; both say the 2022 break may be fading, which is exactly what the hedge desk should watch." },
     { g: "v0.9", q: "Does Ask the brain make numbers up?", a: "It is told not to, and it cannot do the arithmetic itself: every figure comes from a function on the page (think, shock, counterfactual, loss story, channels, learned structure), each call is listed as it happens, and the functions are the same ones tested against Python. It uses your own Claude usage and asks permission first." },
     { g: "v0.9", q: "Did the data confirm the brain's causal order?", a: "Partly. On 1990 to 2021 monthly data, DirectLiNGAM orders 9 of 15 pairs the way the map assumes. Three orderings hold in at least 80% of resamples (oil before the 10-year, stocks before the 10-year, VIX before the 10-year); most others are close to a coin flip. The order stays an assumption, now with its evidence shown." },
@@ -5108,6 +5191,14 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     { g: "v0.6", q: "Why does the challenge simulator's pass rate jump around?", a: "Because the rules are discrete. Above a certain risk per trade, one day of losses breaches the daily limit, and the number of winning trades needed to reach the target falls one whole trade at a time. The risk that maximizes the pass rate sits just below such a step." },
     { g: "v0.6", q: "Is market making just collecting the spread?", a: "No. The spread pays for adverse selection and inventory risk. The simulator shows that skewing quotes for inventory gives up a little average profit for much less risk, and the adverse-selection tool shows why uninformed retail flow is worth paying for." },
   ];
+
+  METHODS.push({ group: "Robustness (v0.10)", items: [
+    { name: "Robust links", f: "Huber IRLS (c = 1.345, MAD scale); Newey-West with lags ⌊4(n/100)<sup>2/9</sup>⌋; Δβ<sub>(−i)</sub> = −(X′X)<sup>−1</sup>x<sub>i</sub>e<sub>i</sub>/(1 − h<sub>ii</sub>)", say: "Months ranked by influence toward zero, dropped one at a time and refitted until the sign reverses (at most 10% of the sample).", where: "robust.py · The brain" },
+    { name: "Robust to the odds", f: "max<sub>x</sub> sup<sub>λ&gt;0</sub>[−λρ − λ ln E<sub>P</sub>e<sup>−u<sub>x</sub>/λ</sup>]", say: "The dual of the worst case over a KL ball, by golden section on ln λ; ρ = 0 is the ordinary solver, large ρ the maximin.", where: "reasoner.py · Solve" },
+    { name: "Stationary bootstrap", f: "blocks of geometric length, mean 21 days, same draws for every policy", say: "Politis and Romano; 500 resampled histories give 5th to 95th percentile Sharpe, CAGR and drawdown, and paired win rates.", where: "analytics/robust_bt.py · Engine" },
+    { name: "CSCV overfitting", f: "PBO = P[logit(rank<sub>OOS</sub> of the IS winner) ≤ 0] over C(12, 6) = 924 splits", say: "Bailey, Borwein, López de Prado and Zhu, on 30 neighbouring hedge rules.", where: "analytics/robust_bt.py · Engine" },
+    { name: "Price screen", f: "|r<sub>t</sub>| &gt; 8 × 1.4826 MAD and reversed next day; 5+ unchanged closes while the market moved; gaps", say: "Flags, never edits; reported in the run status.", where: "data/quality.py · Status" },
+  ] });
 
   METHODS.push({ group: "The brain checks itself (v0.9)", items: [
     { name: "Which world", f: "p(b | y) ∝ N(y; 0, 0.5<sup>2</sup>I + A<sub>b</sub>A<sub>b</sub>′), b ∈ {0, ¼, ½, ¾, 1}", say: "The readings' density under the map with links blended from the 1990 to 2021 regime (0) to 2022 on (1); Woodbury keeps it to a 10 by 10 inverse.", where: "thinking.py · The brain" },
@@ -5350,6 +5441,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   ];
 
   const CHANGELOG = [
+    ["v0.10", "Oct 21, 2026", "Robustness across the engine. Every measured link is re-estimated with Huber regression and Newey-West errors, with the exact influence of each month and the number of the most influential months whose removal reverses its sign (the 2022-on 10-year-to-stocks link reverses on three). The solver gains a distributionally robust mode: the best worst case over every set of scenario odds within a KL radius, with the price of that protection and the point where the choice changes. Each book run adds block-bootstrapped intervals for every policy, the probability of backtest overfitting across 30 neighbouring hedge rules, a plateau check on the chosen thresholds, and a price screen for bad prints, frozen feeds and gaps. Property-based tests cover the new invariants. The MCP server reports the robust choice and each link's fragility."],
     ["v0.9", "Oct 21, 2026", "The brain checks itself and answers questions. Which world: Bayesian model comparison over regime blends (today's readings fit the 1990 to 2021 links about four times better than the 2022-on ones). How surprised: Mahalanobis distance and exact leave-one-out z-scores. Had it been otherwise: counterfactuals that keep today's evidence, and but-for shares that add up to the book's move. Which channels: every walk from cause to book, summing exactly. How it breaks: the most plausible root-shock story for a 1-in-N quarter, and the runner-up. From the data itself: DirectLiNGAM tests the assumed causal order (60% of pairs agree; three orderings are firm) and Kalman-smoothed links show the 10-year-to-stocks link went negative in mid-2021 and drifted back toward zero since 2025. Ask the brain: Claude answers in words using only numbers from the page's own functions, each call listed. The MCP server gains the frontier and the learned structure."],
     ["v0.8", "Oct 21, 2026", "Built from the fifth project review, and the brain thinks. The brain grew to 34 parts and about 110 links, down to every holding and the model book, and reasons in steps you can watch: observe, explain (abduction and competing single causes against noise only), infer, deduce, doubt (the reading it cannot explain and the link most to blame), apply to the book, look next (mutual information), and what would change its mind; doing and seeing are kept apart. A Field desk turns anecdotes into dated, sourced observations on three clocks, compares explanations with the evidence that separates them, registers ten unusual indicators before testing, and monitors expected events without reading silence as news; a note can become an observation in the brain. The solver gained a decision boundary across loss limits and tilts, an uncertainty breakdown and a leave-one-out test, and records its decision with a content hash. Today shows each headline's previous value and a quiet state. The logo marks every desk. The engine is now an MCP server with research and proposal tools and no way to trade, including one that reads your own holdings for a single call (for example from Robinhood's official MCP) without storing them. Without Databento's paid adjustment factors, the book run now falls back to a public split table and estimated bond-fund income, and says so."],
     ["v0.7", "Oct 21, 2026", "Built from the third project review. Correctness: one NAV and return convention (costs inside the first return, Sharpe over accrued cash, next-session fills, every variant on the same dates, a cash-only baseline); one versioned hedge policy (hedge.tlt.v2) shared by the recommendation, its text and the backtest; Kelly is a check, not a size input; a portfolio gross limit that includes the bond leg; effective risk contributors and effective independent bets reported separately; trims labelled as examples. Evidence: the hedge line is chosen on training data only, walked forward, bootstrapped and tested on an untouched decade, and can come back as no reliable threshold; the inflation gate adds no out-of-sample value over the correlation rule since 1901, and the page says so. Fundamentals: one effective dataset where newer filings replace snapshot fields and every dependent view redraws; descriptive coverage categories replace the Minsky labels. The engine: a solver (tempered Bayes, a constrained growth search over 18,414 portfolios, four alternatives with regret, a zero-sum game against Nature, value of information, reverse stress), game theory (capex race, crowded exit, Kyle, a Nash solver, a prediction-market ladder), a fill-quality lab, and an exact calculator in search. Today opens with the question, the answer and its evidence labels."],
@@ -6029,8 +6121,26 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     const two = h("div", "grid2");
     two.append(expFig, polFig);
     body.append(tiles, fig, statFig, two);
+    const rb = robustnessFigure(r.robustness, r.data_quality);
+    if (rb) body.append(rb);
     LIVE.btSeries = labels.map((l, i) => ({ name: l, color: colors[i], pts: seriesPts(r.backtest.curves[l]) }));
     drawBookCharts();
+  }
+  // v0.10: would the backtest survive another history, and is the hedge rule a peak or a plateau?
+  function robustnessFigure(R, dq) {
+    if (!R || typeof R !== "object" || !R.bootstrap || !R.bootstrap.variants || typeof R.bootstrap.variants !== "object") return null;
+    const fig = h("figure", "chart"), V = R.bootstrap.variants;
+    fig.append(h("span", "chart-title", `How robust is the backtest? ${fin(R.bootstrap.draws) ? R.bootstrap.draws : "n/a"} resampled histories (blocks of about ${fin(R.bootstrap.mean_block_days) ? Math.round(R.bootstrap.mean_block_days) : "n/a"} days)`));
+    const q = (a, f) => (Array.isArray(a) && a.length === 3 && a.every(fin) ? `${f(a[0])} to ${f(a[2])}` : "n/a");
+    fig.append(tableBlock(["Policy", "Sharpe, 90% range", "CAGR, 90% range", "Max drawdown, 90% range", "Beats unhedged"],
+      Object.entries(V).filter(([, v]) => v && typeof v === "object").map(([k, v]) => [k, q(v.sharpe, (x) => fx(x, 2)), q(v.cagr, (x) => pct(x, 1)), q(Array.isArray(v.max_drawdown) ? v.max_drawdown.slice().reverse() : v.max_drawdown, (x) => pctPlain(Math.abs(x), 1)), fin(v.p_beats_base) ? pct0(v.p_beats_base) : ""])));
+    const P = R.pbo || {}, L = R.plateau || {};
+    const lines = [];
+    if (fin(P.pbo)) lines.push(`Probability of backtest overfitting across ${P.rules} neighbouring hedge rules and ${P.splits} splits of the history: ${pct0(P.pbo)}. ${P.pbo >= 0.4 ? "Picking the best backtested rule is close to picking at random: the rule should be justified by economics, not by its backtest." : P.pbo <= 0.15 ? "The best rule in one half of history tends to stay good in the other." : "Selection explains part of the best rule's edge."}`);
+    if (fin(L.chosen_sharpe) && fin(L.rank)) lines.push(`The chosen rule (enter at −0.10, leave at 0) ranks ${L.rank} of ${L.of} on Sharpe (${fx(L.chosen_sharpe, 2)}; neighbours ${fx(L.neighbour_min, 2)} to ${fx(L.neighbour_max, 2)}). ${fin(L.spread) && L.spread < 0.15 ? "A plateau: nearby rules perform about the same." : "Performance varies across nearby rules: treat the exact thresholds as fragile."}`);
+    if (dq && fin(dq.flagged)) lines.push(dq.flagged ? `The price screen flagged ${dq.flagged} symbol${dq.flagged > 1 ? "s" : ""} (bad prints, frozen prices or gaps); see the run status.` : "The price screen found no bad prints, frozen prices or gaps.");
+    lines.forEach((t) => fig.append(h("p", "hint", t)));
+    return fig;
   }
   function drawBookCharts() {
     const box = $("#bt-chart");
@@ -10920,6 +11030,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
         sel.addEventListener("change", () => { BRF.link = sel.value; drawLink(); });
       }
       drawLink();
+      guard("Link fragility", renderFragility, $("#brl-frag"));
       $("#brl-sum").textContent = `The map's two core assumptions, tested on ${L.dates.length} months: the causal order agrees on ${pct0(lo.agreement.share)} of pairs, and ${linkLine(L, "y10>eq")}`;
     });
   }
@@ -11128,6 +11239,102 @@ The reader's question: ${q}`;
       ASK.maxTools = lim.tools.maxCount || 8;
       f.hidden = false; chips.hidden = false; $("#bra-note").hidden = true;
     }).catch(() => {});
+  }
+
+  /* ---------- v0.10: robust statistics for the measured links (mirrors buildout/robust.py) ---------- */
+  function rbOls(y, X) {
+    const n = y.length, Z = X.map((r) => [1].concat(r)), k = Z[0].length;
+    const ZtZ = Array.from({ length: k }, (_, a) => Array.from({ length: k }, (__, b) => { let s = 0; for (let t = 0; t < n; t++) s += Z[t][a] * Z[t][b]; return s; }));
+    const G = matInv(ZtZ), Zty = Array.from({ length: k }, (_, a) => { let s = 0; for (let t = 0; t < n; t++) s += Z[t][a] * y[t]; return s; });
+    const b = G.map((row) => row.reduce((acc, v, j) => acc + v * Zty[j], 0));
+    const e = y.map((v, t) => v - Z[t].reduce((acc, z, j) => acc + z * b[j], 0)), s2 = e.reduce((a, v) => a + v * v, 0) / Math.max(1, n - k);
+    const h = Z.map((z) => { let q = 0; for (let a = 0; a < k; a++) for (let c = 0; c < k; c++) q += z[a] * G[a][c] * z[c]; return q; });
+    return { beta: b.slice(1), se: G.map((r, i) => Math.sqrt(r[i] * s2)).slice(1), b, e, h, G, Z, n };
+  }
+  function rbHac(fit, lags = null) {
+    const { Z, e, G, n } = fit, k = Z[0].length, L = lags == null ? Math.floor(4 * Math.pow(n / 100, 2 / 9)) : lags;
+    const U = Z.map((z, t) => z.map((v) => v * e[t])), S = Array.from({ length: k }, () => new Array(k).fill(0));
+    for (let t = 0; t < n; t++) for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) S[a][b] += U[t][a] * U[t][b];
+    for (let l = 1; l <= L; l++) {
+      const w = 1 - l / (L + 1);
+      for (let t = l; t < n; t++) for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) S[a][b] += w * (U[t][a] * U[t - l][b] + U[t - l][a] * U[t][b]);
+    }
+    const GS = G.map((row) => S[0].map((_, j) => row.reduce((acc, v, m) => acc + v * S[m][j], 0)));
+    const V = GS.map((row) => G[0].map((_, j) => row.reduce((acc, v, m) => acc + v * G[m][j], 0)));
+    return V.map((r, i) => Math.sqrt(r[i])).slice(1);
+  }
+  const median = (x) => { const s = x.slice().sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  function rbHuber(y, X, c = 1.345, iters = 100, tol = 1e-10) {
+    const n = y.length, Z = X.map((r) => [1].concat(r)), k = Z[0].length;
+    const wls = (w) => {
+      const A = Array.from({ length: k }, (_, a) => Array.from({ length: k }, (__, b) => { let s = 0; for (let t = 0; t < n; t++) s += w[t] * Z[t][a] * Z[t][b]; return s; }));
+      const r = Array.from({ length: k }, (_, a) => { let s = 0; for (let t = 0; t < n; t++) s += w[t] * Z[t][a] * y[t]; return s; });
+      const Ai = matInv(A);
+      return Ai.map((row) => row.reduce((acc, v, j) => acc + v * r[j], 0));
+    };
+    let w = new Array(n).fill(1), b = wls(w);
+    for (let it = 0; it < iters; it++) {
+      const e = y.map((v, t) => v - Z[t].reduce((acc, z, j) => acc + z * b[j], 0)), me = median(e), s = median(e.map((v) => Math.abs(v - me))) / 0.6745;
+      if (!(s > 0)) break;
+      w = e.map((v) => { const u = Math.abs(v) / s; return u <= c ? 1 : c / Math.max(u, 1e-300); });
+      const nb = wls(w), d = Math.max(...nb.map((v, j) => Math.abs(v - b[j])));
+      b = nb;
+      if (d < tol) break;
+    }
+    return { beta: b.slice(1), downweighted: w.filter((v) => v < 1).length, weights: w };
+  }
+  function rbInfluence(fit) {
+    const { Z, e, h, G } = fit, k = Z[0].length;
+    return Z.map((z, t) => { const f = e[t] / Math.max(1 - h[t], 1e-12); return Array.from({ length: k }, (_, a) => -z.reduce((acc, v, m) => acc + v * G[m][a], 0) * f).slice(1); });
+  }
+  function rbMonthsToFlip(y, X, j, maxShare = 0.1) {
+    const fit = rbOls(y, X), b = fit.beta[j], D = rbInfluence(fit).map((r) => r[j]), n = y.length, sb = Math.sign(b);
+    const toward = D.map((d) => -sb * d), order = D.map((_, i) => i).sort((p, q) => toward[q] - toward[p]), kmax = Math.max(1, Math.floor(maxShare * n));
+    for (let k = 1; k <= kmax; k++) {
+      const drop = new Set(order.slice(0, k)), yy = [], XX = [];
+      for (let t = 0; t < n; t++) if (!drop.has(t)) { yy.push(y[t]); XX.push(X[t]); }
+      const bk = rbOls(yy, XX).beta[j];
+      if (Math.sign(bk) !== sb) return { k, share: k / n, dropped: order.slice(0, k), beta_after: bk };
+    }
+    return { k: null, share: null, dropped: order.slice(0, Math.min(5, n)), beta_after: null };
+  }
+  function linkRobustness(block = brSeries()) {
+    const cols = block.cols || BR_ORDER6, dates = block.dates, out = {};
+    Object.entries(BR_REGIMES6).forEach(([name, [a, b]]) => {
+      const rows = dates.map((d, i) => (d >= a && d <= b ? i : -1)).filter((i) => i >= 0);
+      Object.entries(BR_PARENTS6).forEach(([child, ps]) => {
+        const ci = cols.indexOf(child), pi = ps.map((p) => cols.indexOf(p)), y = rows.map((i) => block.z[ci][i]), X = rows.map((i) => pi.map((c) => block.z[c][i]));
+        const fit = rbOls(y, X), hac = rbHac(fit), hb = rbHuber(y, X), D = rbInfluence(fit);
+        ps.forEach((p, j) => {
+          const fl = rbMonthsToFlip(y, X, j), top = D.map((_, i) => i).sort((u, v) => Math.abs(D[v][j]) - Math.abs(D[u][j])).slice(0, 3);
+          (out[`${p}>${child}`] = out[`${p}>${child}`] || {})[name] = { n: rows.length, ols: fit.beta[j], se: fit.se[j], t: fit.beta[j] / fit.se[j], hac_t: fit.beta[j] / hac[j],
+            huber: hb.beta[j], downweighted: hb.downweighted, months_to_flip: fl.k, flip_share: fl.share, flip_months: fl.k ? fl.dropped.map((i) => dates[rows[i]]).slice(0, 8) : [],
+            most_influential: top.map((i) => ({ month: dates[rows[i]], delta: D[i][j] })) };
+        });
+      });
+    });
+    return out;
+  }
+
+  // fragility table, computed from the same series the learning pass uses
+  function renderFragility() {
+    const t = $("#brl-frag");
+    if (!t) return;
+    let R;
+    try { R = BRF.robust || (BRF.robust = linkRobustness(brSeries())); } catch (e) { return; }
+    const rows = [];
+    Object.entries(R).forEach(([k, regs]) => {
+      const [f, to] = k.split(">");
+      [["low_inflation", "1990 to 2021"], ["inflation", "2022 on"]].forEach(([name, lab]) => {
+        const v = regs[name];
+        if (!v) return;
+        rows.push([`${BR_NODES[BR_IDX[f]].s} → ${BR_NODES[BR_IDX[to]].s}`, lab, sg(v.ols, 2), sg(v.huber, 2), fx(v.t, 1), fx(v.hac_t, 1),
+          v.months_to_flip ? `${v.months_to_flip}${v.months_to_flip <= 3 ? " (fragile)" : ""}` : "over 10%"]);
+      });
+    });
+    fillTable(t, ["Link", "Regime", "Least squares", "Huber", "t", "t, Newey-West", "Months to flip"], rows, 2);
+    const k = R["y10>eq"], a = k && k.inflation, b = k && k.low_inflation;
+    $("#brl-frag-t").textContent = a && b ? `The link the TLT hedge rests on, 10-year to stocks, reads ${sg(a.ols, 2)} since 2022 (Huber ${sg(a.huber, 2)}, Newey-West t ${fx(a.hac_t, 1)})${a.months_to_flip ? ` and reverses if ${a.months_to_flip} months are dropped (${a.flip_months.slice(0, 3).join(", ")})` : ""}. Before 2022 it read ${sg(b.ols, 2)} (t ${fx(b.hac_t, 1)})${b.months_to_flip ? ` and reverses on ${b.months_to_flip} months` : ""}. ${a.months_to_flip && a.months_to_flip <= 5 ? "The inflation-era sign is real in the average but fragile in the detail: a hedge decision should not lean on it alone." : ""}` : "";
   }
 
   /* =====================================================================================
@@ -12233,7 +12440,7 @@ The reader's question: ${q}`;
   function scheduleSolve() {
     renderSolve(false);                                   // instant: posterior and choices
     clearTimeout(solveTimer);
-    solveTimer = setTimeout(() => { guard("Value of information", () => renderSolve(true), $("#rz-voi")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); }, 180);
+    solveTimer = setTimeout(() => { guard("Value of information", () => renderSolve(true), $("#rz-voi")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); guard("Robust solver", renderDRO, $("#rz-dro")); }, 180);
   }
   function buildSolve() {
     if (!$("#rz-ledger")) return;
@@ -12273,6 +12480,47 @@ The reader's question: ${q}`;
     }
     renderSolve(true);
     guard("Decision boundary", renderBoundary, $("#rz-bnd"));
+    guard("Robust solver", renderDRO, $("#rz-dro"));
+  }
+
+  /* ---------- v0.10: robust to being wrong about the odds ---------- */
+  const DRO = { idx: 4, key: null, sweep: null, timer: null };
+  function renderDRO() {
+    const t = $("#rz-dro");
+    if (!t || !RZ_LAST) return;
+    const R = RZ_LAST, post = R.post.posterior, key = post.map((p) => p.toFixed(6)).join() + JSON.stringify(R.P);
+    if (DRO.key !== key) {
+      DRO.key = key; DRO.sweep = null;
+      $("#rz-dro-out").textContent = "Solving under doubt…";
+      clearTimeout(DRO.timer);
+      DRO.timer = setTimeout(() => { try { DRO.sweep = rzRobustSweep(post, RZ_SCENARIOS, R.P); } catch (e) { DRO.sweep = null; } guard("Robust solver", drawDRO, $("#rz-dro")); }, 60);
+      return;
+    }
+    drawDRO();
+  }
+  const portShort = (p) => `${xx(p[0])} equity${p[1] ? ` · TLT ${fx(p[1], 1)}x` : ""}${p[2] ? ` · puts ${fx(p[2] * 100, 2)}%` : ""}${p[3] ? ` · gold ${fx(p[3] * 100, 0)}%` : ""}`;
+  function drawDRO() {
+    const S = DRO.sweep, t = $("#rz-dro");
+    if (!S || !t) return;
+    fillTable(t, ["Doubt", "Choice", "Guaranteed growth", "Nominal growth", "Price"], S.rows.map((r) => [r.rho === 0 ? "none" : fx(r.rho, 2), portShort(r.port), sPct(r.worst_case_ce, 2), sPct(r.nominal_ce, 2), r.rho === 0 ? "" : `${fx(r.price_bp, 0)}bp`]), 2);
+    const post = RZ_LAST.post.posterior, crash = RZ_SCENARIOS.findIndex((s) => s.id === "crash"), r1 = S.rows.find((r) => r.rho === S.first_change_rho) || S.rows[1];
+    const p1 = (v) => (v < 0.1 ? fx(v * 100, 1) + "%" : pct0(v));
+    $("#rz-dro-out").textContent = S.first_change_rho == null
+      ? "The choice holds at every level of doubt tested: it does not depend on the odds being exactly right."
+      : `The choice changes at a doubt of ${fx(S.first_change_rho, 2)}, enough to let the liquidity-crash scenario's odds rise from ${p1(post[crash])} to ${p1(maxScenarioOdds(post[crash], S.first_change_rho))}. ${S.first_change_rho <= 0.02 ? "That is a small doubt: the nominal choice leans on the exact odds and is not robust." : "The nominal choice survives modest doubt about the odds."} At that level the robust choice is ${portShort(r1.port)}, giving up ${fx(r1.price_bp, 0)}bp of nominal growth.`;
+    const sl = $("#rz-dro-rho");
+    if (sl && !sl.dataset.wired) { sl.dataset.wired = "1"; sl.max = String(S.rows.length - 1); sl.addEventListener("input", () => { DRO.idx = Number(sl.value); drawDROq(); }); }
+    drawDROq();
+  }
+  function drawDROq() {
+    const S = DRO.sweep;
+    if (!S) return;
+    const r = S.rows[Math.min(DRO.idx, S.rows.length - 1)], post = RZ_LAST.post.posterior;
+    $("#rz-dro-rho-o").textContent = r.rho === 0 ? "none" : fx(r.rho, 2);
+    barsH($("#rz-dro-q"), RZ_SCENARIOS.map((s, i) => ({ label: s.name, v: (r.q_worst[i] - post[i]) * 100, lbl: `${pct0(post[i])} → ${pct0(r.q_worst[i])}`, color: r.q_worst[i] > post[i] ? "var(--s2)" : "var(--s1)" })),
+      { label: "Worst-case odds against the posterior, by scenario", fmt: (v) => sg(v, 0) + " pts", padR: 96 });
+    const up = RZ_SCENARIOS.map((s, i) => ({ n: s.name, d: r.q_worst[i] - post[i] })).sort((a, b) => b.d - a.d)[0];
+    $("#rz-dro-q-t").textContent = r.rho === 0 ? "No doubt: the posterior odds as they are." : `At this doubt the odds that hurt the robust choice most put ${up.n} up ${fx(up.d * 100, 0)} points. Its guaranteed growth is ${sPct(r.worst_case_ce, 2)} a quarter whatever odds within that distance turn out to be true.`;
   }
 
   /* =====================================================================================

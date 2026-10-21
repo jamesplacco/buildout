@@ -347,6 +347,7 @@ def evaluate_trade(ctx: Context, args: dict) -> dict:
         P["vix"] = vix
     post = reasoner.posterior([s["prior"] for s in reasoner.SCENARIOS], reasoner.SIGNALS, obs)["posterior"]
     alts = reasoner.alternatives(post, reasoner.SCENARIOS, P, port)
+    rho = _req_num(args, "ambiguity", 0, 5, 0.0)
     mine = alts["keep"]
     best = alts.get("optimal")
     return {"portfolio": dict(zip(PORT_KEYS, port)), "signals": obs,
@@ -355,8 +356,23 @@ def evaluate_trade(ctx: Context, args: dict) -> dict:
                        "max_regret": mine.get("max_regret"), "by_scenario": {s["id"]: r for s, r in zip(reasoner.SCENARIOS, mine["rets"])}},
             "best_on_grid": {"portfolio": dict(zip(PORT_KEYS, best["port"])), "growth_ce_3m": best["ce"], "worst_3m": best["worst"]} if best else None,
             "minimax_regret_choice": alts["minimax_regret"],
+            "robust": _robust_eval(port, post, P, rho) if rho > 0 else None,
             "limits": {"max_loss_3m": P["max_loss"], "max_equity": P["max_equity"], "max_gross": P["max_gross"], "max_premium": P["max_premium"]},
             "evidence": {"scenarios": "Assumed", "likelihoods": "Hypothesis", "signals": "as given"}}
+
+
+def _robust_eval(port, post, P, rho) -> dict:
+    """The same portfolio under doubt about the odds: worst expected log growth within a KL radius, and the robust choice."""
+    cost = reasoner.put_spread_cost(P["vix"], P["horizon"], skew_pts=P["skew_pts"])
+    rets = reasoner.scenario_returns(port, reasoner.SCENARIOS, P, cost)
+    u = np.log1p(np.maximum(rets, -0.999999))
+    w = reasoner.kl_worst(u, post, rho)
+    best = reasoner.solve_robust(post, reasoner.SCENARIOS, P, rho)
+    crash = [s["id"] for s in reasoner.SCENARIOS].index("crash")
+    return {"ambiguity_kl": rho, "worst_case_growth_3m": math.expm1(w["value"]),
+            "worst_case_odds": {s["id"]: q for s, q in zip(reasoner.SCENARIOS, w["q"])},
+            "crash_odds_could_reach": reasoner.max_scenario_odds(post[crash], rho),
+            "robust_best": {"portfolio": dict(zip(PORT_KEYS, best["port"])), "worst_case_growth_3m": best["ce"]} if best else None}
 
 
 def create_order_proposal(ctx: Context, args: dict) -> dict:
@@ -546,6 +562,16 @@ def learned_structure(ctx: Context, args: dict) -> dict:
         links[k] = {"latest": x["beta"][-1], "band90": 1.645 * x["sd"][-1], "drift_q": x["q"], "sign_changes": x["sign_changes"][-4:],
                     "five_years_ago": x["beta"][max(0, n - 61)]}
     lo = L["order"]["low_inflation"]
+    live_rb = (ctx.load("brain") or {}).get("robust_links")
+    if not isinstance(live_rb, dict):
+        if getattr(ctx, "_robust", None) is None:
+            from .brain import PARENTS, REGIMES
+            from .robust import link_robustness
+            ctx._robust = link_robustness(ctx.graph["series"], PARENTS, REGIMES)
+        live_rb = ctx._robust
+    for k in keys:
+        rb = live_rb.get(k) or {}
+        links[k]["fragility"] = {reg: {f: v.get(f) for f in ("ols", "huber", "hac_t", "months_to_flip", "flip_months")} for reg, v in rb.items() if isinstance(v, dict)}
     return {"source": src, "months": len(L["dates"]), "through": L["dates"][-1],
             "order": {"assumed": ["oil", "cpi", "y10", "eq", "vix", "gold"], "learned_1990_2021": lo["learned"],
                       "agreement_share": lo["agreement"]["share"], "learned_2022_on": L["order"]["inflation"]["learned"],
@@ -596,7 +622,8 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                            {"readOnlyHint": True, "openWorldHint": False}),
     "evaluate_trade": (evaluate_trade, "Score a candidate portfolio (equity, TLT hedge, put spread, gold) on the reasoner's seven 3-month scenarios: "
                        "certainty-equivalent growth, worst case, the loss limit, regret against the alternatives, and the best portfolio on the grid.",
-                       _obj({"portfolio": PORT, "signals": SIGNALS, "vix": {**NUM, "description": "VIX level for put pricing"}}, ["portfolio"]),
+                       _obj({"portfolio": PORT, "signals": SIGNALS, "vix": {**NUM, "description": "VIX level for put pricing"},
+                             "ambiguity": {**NUM, "description": "doubt about the scenario odds as a KL radius (0 to 5); adds the worst-case growth and the robust choice"}}, ["portfolio"]),
                        {"readOnlyHint": True, "openWorldHint": False}),
     "create_order_proposal": (create_order_proposal, "Write a structured, hashed order PROPOSAL against the model book and check it against the limits. "
                               "Never executes: a person reviews it and acts elsewhere.",

@@ -315,8 +315,26 @@
     const two = h("div", "grid2");
     two.append(expFig, polFig);
     body.append(tiles, fig, statFig, two);
+    const rb = robustnessFigure(r.robustness, r.data_quality);
+    if (rb) body.append(rb);
     LIVE.btSeries = labels.map((l, i) => ({ name: l, color: colors[i], pts: seriesPts(r.backtest.curves[l]) }));
     drawBookCharts();
+  }
+  // v0.10: would the backtest survive another history, and is the hedge rule a peak or a plateau?
+  function robustnessFigure(R, dq) {
+    if (!R || typeof R !== "object" || !R.bootstrap || !R.bootstrap.variants || typeof R.bootstrap.variants !== "object") return null;
+    const fig = h("figure", "chart"), V = R.bootstrap.variants;
+    fig.append(h("span", "chart-title", `How robust is the backtest? ${fin(R.bootstrap.draws) ? R.bootstrap.draws : "n/a"} resampled histories (blocks of about ${fin(R.bootstrap.mean_block_days) ? Math.round(R.bootstrap.mean_block_days) : "n/a"} days)`));
+    const q = (a, f) => (Array.isArray(a) && a.length === 3 && a.every(fin) ? `${f(a[0])} to ${f(a[2])}` : "n/a");
+    fig.append(tableBlock(["Policy", "Sharpe, 90% range", "CAGR, 90% range", "Max drawdown, 90% range", "Beats unhedged"],
+      Object.entries(V).filter(([, v]) => v && typeof v === "object").map(([k, v]) => [k, q(v.sharpe, (x) => fx(x, 2)), q(v.cagr, (x) => pct(x, 1)), q(Array.isArray(v.max_drawdown) ? v.max_drawdown.slice().reverse() : v.max_drawdown, (x) => pctPlain(Math.abs(x), 1)), fin(v.p_beats_base) ? pct0(v.p_beats_base) : ""])));
+    const P = R.pbo || {}, L = R.plateau || {};
+    const lines = [];
+    if (fin(P.pbo)) lines.push(`Probability of backtest overfitting across ${P.rules} neighbouring hedge rules and ${P.splits} splits of the history: ${pct0(P.pbo)}. ${P.pbo >= 0.4 ? "Picking the best backtested rule is close to picking at random: the rule should be justified by economics, not by its backtest." : P.pbo <= 0.15 ? "The best rule in one half of history tends to stay good in the other." : "Selection explains part of the best rule's edge."}`);
+    if (fin(L.chosen_sharpe) && fin(L.rank)) lines.push(`The chosen rule (enter at −0.10, leave at 0) ranks ${L.rank} of ${L.of} on Sharpe (${fx(L.chosen_sharpe, 2)}; neighbours ${fx(L.neighbour_min, 2)} to ${fx(L.neighbour_max, 2)}). ${fin(L.spread) && L.spread < 0.15 ? "A plateau: nearby rules perform about the same." : "Performance varies across nearby rules: treat the exact thresholds as fragile."}`);
+    if (dq && fin(dq.flagged)) lines.push(dq.flagged ? `The price screen flagged ${dq.flagged} symbol${dq.flagged > 1 ? "s" : ""} (bad prints, frozen prices or gaps); see the run status.` : "The price screen found no bad prints, frozen prices or gaps.");
+    lines.forEach((t) => fig.append(h("p", "hint", t)));
+    return fig;
   }
   function drawBookCharts() {
     const box = $("#bt-chart");

@@ -433,6 +433,7 @@
         sel.addEventListener("change", () => { BRF.link = sel.value; drawLink(); });
       }
       drawLink();
+      guard("Link fragility", renderFragility, $("#brl-frag"));
       $("#brl-sum").textContent = `The map's two core assumptions, tested on ${L.dates.length} months: the causal order agrees on ${pct0(lo.agreement.share)} of pairs, and ${linkLine(L, "y10>eq")}`;
     });
   }
@@ -641,4 +642,100 @@ The reader's question: ${q}`;
       ASK.maxTools = lim.tools.maxCount || 8;
       f.hidden = false; chips.hidden = false; $("#bra-note").hidden = true;
     }).catch(() => {});
+  }
+
+  /* ---------- v0.10: robust statistics for the measured links (mirrors buildout/robust.py) ---------- */
+  function rbOls(y, X) {
+    const n = y.length, Z = X.map((r) => [1].concat(r)), k = Z[0].length;
+    const ZtZ = Array.from({ length: k }, (_, a) => Array.from({ length: k }, (__, b) => { let s = 0; for (let t = 0; t < n; t++) s += Z[t][a] * Z[t][b]; return s; }));
+    const G = matInv(ZtZ), Zty = Array.from({ length: k }, (_, a) => { let s = 0; for (let t = 0; t < n; t++) s += Z[t][a] * y[t]; return s; });
+    const b = G.map((row) => row.reduce((acc, v, j) => acc + v * Zty[j], 0));
+    const e = y.map((v, t) => v - Z[t].reduce((acc, z, j) => acc + z * b[j], 0)), s2 = e.reduce((a, v) => a + v * v, 0) / Math.max(1, n - k);
+    const h = Z.map((z) => { let q = 0; for (let a = 0; a < k; a++) for (let c = 0; c < k; c++) q += z[a] * G[a][c] * z[c]; return q; });
+    return { beta: b.slice(1), se: G.map((r, i) => Math.sqrt(r[i] * s2)).slice(1), b, e, h, G, Z, n };
+  }
+  function rbHac(fit, lags = null) {
+    const { Z, e, G, n } = fit, k = Z[0].length, L = lags == null ? Math.floor(4 * Math.pow(n / 100, 2 / 9)) : lags;
+    const U = Z.map((z, t) => z.map((v) => v * e[t])), S = Array.from({ length: k }, () => new Array(k).fill(0));
+    for (let t = 0; t < n; t++) for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) S[a][b] += U[t][a] * U[t][b];
+    for (let l = 1; l <= L; l++) {
+      const w = 1 - l / (L + 1);
+      for (let t = l; t < n; t++) for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) S[a][b] += w * (U[t][a] * U[t - l][b] + U[t - l][a] * U[t][b]);
+    }
+    const GS = G.map((row) => S[0].map((_, j) => row.reduce((acc, v, m) => acc + v * S[m][j], 0)));
+    const V = GS.map((row) => G[0].map((_, j) => row.reduce((acc, v, m) => acc + v * G[m][j], 0)));
+    return V.map((r, i) => Math.sqrt(r[i])).slice(1);
+  }
+  const median = (x) => { const s = x.slice().sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  function rbHuber(y, X, c = 1.345, iters = 100, tol = 1e-10) {
+    const n = y.length, Z = X.map((r) => [1].concat(r)), k = Z[0].length;
+    const wls = (w) => {
+      const A = Array.from({ length: k }, (_, a) => Array.from({ length: k }, (__, b) => { let s = 0; for (let t = 0; t < n; t++) s += w[t] * Z[t][a] * Z[t][b]; return s; }));
+      const r = Array.from({ length: k }, (_, a) => { let s = 0; for (let t = 0; t < n; t++) s += w[t] * Z[t][a] * y[t]; return s; });
+      const Ai = matInv(A);
+      return Ai.map((row) => row.reduce((acc, v, j) => acc + v * r[j], 0));
+    };
+    let w = new Array(n).fill(1), b = wls(w);
+    for (let it = 0; it < iters; it++) {
+      const e = y.map((v, t) => v - Z[t].reduce((acc, z, j) => acc + z * b[j], 0)), me = median(e), s = median(e.map((v) => Math.abs(v - me))) / 0.6745;
+      if (!(s > 0)) break;
+      w = e.map((v) => { const u = Math.abs(v) / s; return u <= c ? 1 : c / Math.max(u, 1e-300); });
+      const nb = wls(w), d = Math.max(...nb.map((v, j) => Math.abs(v - b[j])));
+      b = nb;
+      if (d < tol) break;
+    }
+    return { beta: b.slice(1), downweighted: w.filter((v) => v < 1).length, weights: w };
+  }
+  function rbInfluence(fit) {
+    const { Z, e, h, G } = fit, k = Z[0].length;
+    return Z.map((z, t) => { const f = e[t] / Math.max(1 - h[t], 1e-12); return Array.from({ length: k }, (_, a) => -z.reduce((acc, v, m) => acc + v * G[m][a], 0) * f).slice(1); });
+  }
+  function rbMonthsToFlip(y, X, j, maxShare = 0.1) {
+    const fit = rbOls(y, X), b = fit.beta[j], D = rbInfluence(fit).map((r) => r[j]), n = y.length, sb = Math.sign(b);
+    const toward = D.map((d) => -sb * d), order = D.map((_, i) => i).sort((p, q) => toward[q] - toward[p]), kmax = Math.max(1, Math.floor(maxShare * n));
+    for (let k = 1; k <= kmax; k++) {
+      const drop = new Set(order.slice(0, k)), yy = [], XX = [];
+      for (let t = 0; t < n; t++) if (!drop.has(t)) { yy.push(y[t]); XX.push(X[t]); }
+      const bk = rbOls(yy, XX).beta[j];
+      if (Math.sign(bk) !== sb) return { k, share: k / n, dropped: order.slice(0, k), beta_after: bk };
+    }
+    return { k: null, share: null, dropped: order.slice(0, Math.min(5, n)), beta_after: null };
+  }
+  function linkRobustness(block = brSeries()) {
+    const cols = block.cols || BR_ORDER6, dates = block.dates, out = {};
+    Object.entries(BR_REGIMES6).forEach(([name, [a, b]]) => {
+      const rows = dates.map((d, i) => (d >= a && d <= b ? i : -1)).filter((i) => i >= 0);
+      Object.entries(BR_PARENTS6).forEach(([child, ps]) => {
+        const ci = cols.indexOf(child), pi = ps.map((p) => cols.indexOf(p)), y = rows.map((i) => block.z[ci][i]), X = rows.map((i) => pi.map((c) => block.z[c][i]));
+        const fit = rbOls(y, X), hac = rbHac(fit), hb = rbHuber(y, X), D = rbInfluence(fit);
+        ps.forEach((p, j) => {
+          const fl = rbMonthsToFlip(y, X, j), top = D.map((_, i) => i).sort((u, v) => Math.abs(D[v][j]) - Math.abs(D[u][j])).slice(0, 3);
+          (out[`${p}>${child}`] = out[`${p}>${child}`] || {})[name] = { n: rows.length, ols: fit.beta[j], se: fit.se[j], t: fit.beta[j] / fit.se[j], hac_t: fit.beta[j] / hac[j],
+            huber: hb.beta[j], downweighted: hb.downweighted, months_to_flip: fl.k, flip_share: fl.share, flip_months: fl.k ? fl.dropped.map((i) => dates[rows[i]]).slice(0, 8) : [],
+            most_influential: top.map((i) => ({ month: dates[rows[i]], delta: D[i][j] })) };
+        });
+      });
+    });
+    return out;
+  }
+
+  // fragility table, computed from the same series the learning pass uses
+  function renderFragility() {
+    const t = $("#brl-frag");
+    if (!t) return;
+    let R;
+    try { R = BRF.robust || (BRF.robust = linkRobustness(brSeries())); } catch (e) { return; }
+    const rows = [];
+    Object.entries(R).forEach(([k, regs]) => {
+      const [f, to] = k.split(">");
+      [["low_inflation", "1990 to 2021"], ["inflation", "2022 on"]].forEach(([name, lab]) => {
+        const v = regs[name];
+        if (!v) return;
+        rows.push([`${BR_NODES[BR_IDX[f]].s} → ${BR_NODES[BR_IDX[to]].s}`, lab, sg(v.ols, 2), sg(v.huber, 2), fx(v.t, 1), fx(v.hac_t, 1),
+          v.months_to_flip ? `${v.months_to_flip}${v.months_to_flip <= 3 ? " (fragile)" : ""}` : "over 10%"]);
+      });
+    });
+    fillTable(t, ["Link", "Regime", "Least squares", "Huber", "t", "t, Newey-West", "Months to flip"], rows, 2);
+    const k = R["y10>eq"], a = k && k.inflation, b = k && k.low_inflation;
+    $("#brl-frag-t").textContent = a && b ? `The link the TLT hedge rests on, 10-year to stocks, reads ${sg(a.ols, 2)} since 2022 (Huber ${sg(a.huber, 2)}, Newey-West t ${fx(a.hac_t, 1)})${a.months_to_flip ? ` and reverses if ${a.months_to_flip} months are dropped (${a.flip_months.slice(0, 3).join(", ")})` : ""}. Before 2022 it read ${sg(b.ols, 2)} (t ${fx(b.hac_t, 1)})${b.months_to_flip ? ` and reverses on ${b.months_to_flip} months` : ""}. ${a.months_to_flip && a.months_to_flip <= 5 ? "The inflation-era sign is real in the average but fragile in the detail: a hedge decision should not lean on it alone." : ""}` : "";
   }

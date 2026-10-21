@@ -188,6 +188,61 @@
     }
     return best;
   }
+  /* ---------- v0.10: robust to being wrong about the odds (mirrors reasoner.solve_robust) ---------- */
+  const DRO_GOLD = (Math.sqrt(5) - 1) / 2, DRO_ITERS = 80, DRO_T = [-12.0, 8.0];
+  function droG(t, u, p, umin, rho) {
+    const lam = Math.exp(t);
+    let s = 0;
+    for (let i = 0; i < u.length; i++) s += p[i] * Math.exp(-(u[i] - umin) / lam);
+    return umin - lam * rho - lam * Math.log(s);
+  }
+  function klWorst(u, p, rho) {
+    if (!(rho > 0)) return { value: u.reduce((a, v, i) => a + v * p[i], 0), lam: null, q: p.slice() };
+    let umin = Infinity;
+    for (let i = 0; i < u.length; i++) if (p[i] > 0 && u[i] < umin) umin = u[i];
+    let a = DRO_T[0], b = DRO_T[1], c = b - DRO_GOLD * (b - a), d = a + DRO_GOLD * (b - a), fc = droG(c, u, p, umin, rho), fd = droG(d, u, p, umin, rho);
+    for (let it = 0; it < DRO_ITERS; it++) {
+      if (fc > fd) { b = d; d = c; fd = fc; c = b - DRO_GOLD * (b - a); fc = droG(c, u, p, umin, rho); }
+      else { a = c; c = d; fc = fd; d = a + DRO_GOLD * (b - a); fd = droG(d, u, p, umin, rho); }
+    }
+    const tm = (a + b) / 2, val = Math.max(droG(tm, u, p, umin, rho), umin), lam = Math.exp(tm);
+    const w = u.map((v, i) => p[i] * Math.exp(-(v - umin) / lam)), z = w.reduce((x, y) => x + y, 0);
+    return { value: val, lam, q: w.map((v) => v / z) };
+  }
+  function rzFeasibleGrid(scen, P) {
+    const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), ports = [], R = [];
+    for (let i = 0; i < 31; i++) for (let j = 0; j < 11; j++) for (let k = 0; k < 9; k++) for (let l = 0; l < 6; l++) {
+      const port = [i / 20, j / 10, k / 400, l / 50], rets = rzReturns(port, scen, P, cost);
+      if (rzFeasible(port, rets, P)) { ports.push(port); R.push(rets); }
+    }
+    return { ports, R };
+  }
+  function rzSolveRobust(post, scen, P, rho, cache = null) {
+    const { ports, R } = cache || rzFeasibleGrid(scen, P);
+    if (!ports.length) return null;
+    const U = R.map((r) => r.map((x) => Math.log1p(Math.max(x, -0.999999))));
+    const vals = U.map((u) => (rho > 0 ? klWorst(u, post, rho).value : u.reduce((a, v, i) => a + v * post[i], 0)));
+    let i = 0;
+    for (let k = 1; k < ports.length; k++) if (vals[k] > vals[i] + 1e-12) i = k;
+    const w = klWorst(U[i], post, rho);
+    return { port: ports[i].slice(), value: vals[i], ce: Math.expm1(vals[i]), nominal_elog: U[i].reduce((a, v, j) => a + v * post[j], 0), rets: R[i].slice(), q_worst: w.q, rho };
+  }
+  function maxScenarioOdds(p, rho) {
+    if (!(rho > 0) || p >= 1) return p;
+    const kl = (q) => q * Math.log(q / p) + (1 - q) * Math.log((1 - q) / (1 - p));
+    let lo = p, hi = 1 - 1e-12;
+    if (kl(hi) <= rho) return hi;
+    for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (kl(mid) <= rho) lo = mid; else hi = mid; }
+    return lo;
+  }
+  const RHO_SWEEP = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0];
+  function rzRobustSweep(post, scen, P, rhos = RHO_SWEEP) {
+    const cache = rzFeasibleGrid(scen, P), nominal = rzSolveRobust(post, scen, P, 0, cache);
+    const rows = rhos.map((r) => { const sr = rzSolveRobust(post, scen, P, r, cache);
+      return { rho: r, port: sr.port, worst_case_ce: sr.ce, nominal_ce: Math.expm1(sr.nominal_elog), price_bp: (nominal.nominal_elog - sr.nominal_elog) * 1e4, q_worst: sr.q_worst }; });
+    const ch = rows.findIndex((r, i) => i > 0 && r.port.join() !== rows[i - 1].port.join());
+    return { rows, first_change_rho: ch > 0 ? rows[ch].rho : null };
+  }
   function rzEvaluate(port, post, scen, P) {
     const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), rets = rzReturns(port, scen, P, cost), u = rzElog(rets, post);
     return { port: port.slice(), rets, elog: u, ce: Math.expm1(u), worst: Math.min(...rets), mean: rets.reduce((a, r, i) => a + post[i] * r, 0), feasible: rzFeasible(port, rets, P) };

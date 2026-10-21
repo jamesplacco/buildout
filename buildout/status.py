@@ -103,6 +103,10 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
         check("Recommended gross is within the gross limit", isinstance(g, (int, float)) and 0 <= g <= cap + 1e-9, f"{g} vs {cap}")
         v = s.get("var99_fhs")
         check("One-day VaR is positive and below 50%", isinstance(v, (int, float)) and 0 < v < 0.5, f"{v}")
+        dq = report.get("data_quality") or {}
+        if isinstance(dq.get("symbols"), dict):
+            bad = [k for k, v in dq["symbols"].items() if isinstance(v, dict) and not v.get("ok", True)]
+            check("No bad prints, frozen prices or gaps in the book's prices", not bad, ", ".join(bad))
         age = files["report.json"]["weekdays_old"]
         check(f"Book data is at most {FRESH_WEEKDAYS} weekdays old", age is not None and age <= FRESH_WEEKDAYS,
               f"as of {s.get('as_of')}, {age} weekdays")

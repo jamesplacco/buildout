@@ -119,6 +119,11 @@ def learn(block: dict) -> dict:
     return out
 
 
+def _robust(block: dict) -> dict:
+    from .robust import link_robustness
+    return link_robustness(block, PARENTS, REGIMES)
+
+
 def run(raw: dict) -> dict:
     from .research import tidy
     t = tidy(raw)
@@ -130,7 +135,7 @@ def run(raw: dict) -> dict:
     block = series_block(t)
     return {"schema": 1, "order": ORDER, "parents": PARENTS, "labels": LABELS, "sd": {k: float(v) for k, v in sd.items()},
             "regimes": regimes, "state": node_state(df), "y10_eq_corr": stock_bond_flip(dz), "factor_cov": factor_cov(raw),
-            "series": block, "learned": learn(block),
+            "series": block, "learned": learn(block), "robust_links": _robust(block),
             "method": "Recursive regression on standardized monthly changes, ordered oil, CPI, 10-year, stocks, VIX, gold"}
 
 

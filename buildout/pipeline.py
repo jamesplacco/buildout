@@ -214,6 +214,17 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
                                            n_trials=n_trials, sr_var=float(np.var(srs, ddof=1)) if len(srs) > 1 else 0.0)
     drift = final_navs["Book, unhedged"].weights.iloc[-1].drop(tlt, errors="ignore")
 
+    # 7a. Robustness: would the backtest survive another history, and is the chosen hedge rule a peak or a plateau?
+    from .analytics import robust_bt
+    from .data.quality import screen as quality_screen
+    ratio_fn = lambda en, ex: P.tlt_ratio_series(corr, mv, inp.infl36 if gate_ok else None, line if gate_ok else None,  # noqa: E731
+                                                  rp.max_hedge_ratio, enter=en, exit=ex)
+    family = robust_bt.rule_family(book, hedge_r, corr, mv, ratio_fn, rp.cost_bps, inp.rf)
+    robustness = robust_bt.robustness_block({k: v.returns for k, v in final_navs.items() if k != "Cash only"}, inp.rf, family,
+                                            "enter -0.10 exit +0.00 x1", base="Book, unhedged", draws=500)
+    robustness["family_rules"] = int(family.shape[1])
+    data_quality = quality_screen(prices)
+
     # 7b. The field manual's checks on the book itself: fat-tail shortfall, the hedge selector by regime, liquidity
     from . import buyside, microstructure
     tail = buyside.tail_risk(book)
@@ -264,6 +275,7 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
                                        "infl36": {"value": infl_now, "date": inp.infl36.dropna().index[-1].strftime("%Y-%m-%d") if infl_now is not None else None},
                                        "line": {"value": line, "status": line_status}, "data": inp.label}),
         "tail": tail, "hedge_selector": hedge_pick, "roll_spread_bps": liquidity,
+        "robustness": robustness, "data_quality": data_quality,
     })
 
 
