@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.8</span>
+      Buildout <span class="ver">v0.9</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -1289,6 +1289,21 @@
       </div>
     </div>
   </section>
+  <section class="section" id="br-ask-sec" aria-labelledby="bra-title">
+    <div class="section-head"><p class="eyebrow">Ask the brain</p><h2 id="bra-title">Ask in words. It answers with the math.</h2>
+      <p class="prose">Claude reads your question, runs the brain's exact functions on this page (think, shock, counterfactual, the loss story, the learned structure) and answers only with the numbers they return. Every call is listed as it happens. It uses your own Claude usage and asks first.</p></div>
+    <div class="panel bra">
+      <form id="bra-form" class="bra-form">
+        <label for="bra-q" class="sr-only">Your question for the brain</label>
+        <textarea id="bra-q" rows="2" maxlength="600" placeholder="What is driving the book right now, and what would change your mind?"></textarea>
+        <div class="fd-actions"><button class="btn" id="bra-go" type="submit">Ask</button><button class="pill" id="bra-stop" type="button" hidden>Stop</button><span class="hint" id="bra-status" aria-live="polite"></span></div>
+      </form>
+      <div class="bra-chips" id="bra-chips" role="group" aria-label="Suggested questions"></div>
+      <ol class="bra-tools" id="bra-tools" aria-label="Functions the brain called"></ol>
+      <div class="bra-answer" id="bra-answer" aria-live="polite"></div>
+      <p class="hint" id="bra-note">Asking needs the Claude app or claude.ai. Everything it would compute is on this page below.</p>
+    </div>
+  </section>
   <section class="section" id="br-think-sec" aria-labelledby="brt-title">
     <div class="section-head"><p class="eyebrow">The brain thinks</p><h2 id="brt-title">From what moved, to why, to what must also be true</h2><p class="prose" id="br-think-sum" aria-live="polite"></p></div>
     <div class="brain-think">
@@ -1317,6 +1332,53 @@
       <figure class="chart panel"><div class="chart-head"><span class="chart-title">Where the book is exposed</span></div><div class="svgbox" id="br-booksens"></div></figure>
     </div>
     <div class="math"><span class="mlabel">How it thinks</span><var>T</var> = &Sigma;<sub>k=0..K</sub>(<var>W</var>&#8868;)<sup>k</sup>. Causes: <var>s</var> = (<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup><var>A</var>&#8868;<var>y</var>, <var>A</var> = <var>T</var>[observed, roots], &lambda; = (0.5/1)<sup>2</sup>, posterior covariance 0.5<sup>2</sup>(<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup>. Explanations: log evidence of <var>y</var> ~ N(0, 0.5<sup>2</sup><var>I</var> + <var>a</var><var>a</var>&#8868;) for each single cause and for noise alone. Next observation: I(H; X<sub>u</sub>) = h(mixture) &minus; &Sigma;<sub>h</sub> p<sub>h</sub> h(X<sub>u</sub> | h). Doing: <var>T</var> with the node's incoming links removed.</div>
+  </section>
+
+  <section class="section" id="br-front-sec" aria-labelledby="brf-title">
+    <div class="section-head"><p class="eyebrow">Frontier reasoning</p><h2 id="brf-title">Which world, how surprised, what if, and how it breaks</h2>
+      <p class="prose" id="brf-sum" aria-live="polite"></p></div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Which world are we in?</span><span class="ev ev-est">Estimated</span></div>
+        <div class="svgbox" id="brf-regime"></div><p class="sentence" id="brf-regime-t"></p>
+        <div class="fd-actions"><button class="pill" type="button" id="brf-use">Use this world on the map</button></div>
+        <p class="hint">Bayesian model comparison: how probable today's readings are under the map with the 1990 to 2021 measured links, the 2022-on links, and three blends between, equal odds to start.</p></figure>
+      <div class="panel"><span class="panel-title">How surprised should the brain be?</span>
+        <p class="bignum num" id="brf-surp"></p><p class="sentence" id="brf-surp-t"></p><ol class="br-list" id="brf-loo"></ol>
+        <p class="hint">The readings' distance from what the map expects (Mahalanobis, against a chi-square), and each reading's z-score when the others predict it (exact leave-one-out). A surprising day means a cause the map does not have.</p></div>
+      <div class="panel"><span class="panel-title">But for each cause, where would the book be?</span>
+        <div class="tablewrap"><table class="rz" id="brf-butfor"></table></div>
+        <p class="hint">Each inferred cause's contribution to the book's implied move; removing it leaves the rest. In a linear map these are exact Shapley values and they add up to the whole.</p></div>
+      <div class="panel"><span class="panel-title">Which channels carry it</span><ol class="br-list" id="brf-paths"></ol><p class="hint" id="brf-paths-t"></p></div>
+      <div class="panel"><span class="panel-title">Had it been otherwise</span>
+        <div class="obs-add">
+          <div class="field"><label for="brf-cf-node">Had this node been</label><select id="brf-cf-node"></select></div>
+          <div class="field"><div class="field-top"><label for="brf-cf-v">at this reading, σ</label><output id="brf-cf-v-o" for="brf-cf-v"></output></div><input type="range" id="brf-cf-v" min="-3" max="3" step="0.1" value="0"></div>
+        </div>
+        <p class="sentence" id="brf-cf-t"></p>
+        <div class="tablewrap"><table class="rz" id="brf-cf"></table></div>
+        <p class="hint">A counterfactual, not a forecast: it keeps everything today's evidence says about the other causes, changes one thing, and re-runs the world (Pearl's abduction, action, prediction).</p></div>
+      <div class="panel"><span class="panel-title">How a bad quarter most plausibly happens</span>
+        <div class="field"><span class="flabel" id="brf-tail-l">How bad</span><div class="seg" role="group" aria-labelledby="brf-tail-l" id="brf-tail"></div></div>
+        <div class="field"><span class="flabel" id="brf-mode-l">Starting from</span><div class="seg" role="group" aria-labelledby="brf-mode-l" id="brf-mode"><button type="button" data-v="forward" aria-pressed="true">Next quarter's shocks</button><button type="button" data-v="now" aria-pressed="false">How wrong today's read could be</button></div></div>
+        <p class="sentence" id="brf-story-t"></p><ol class="br-list" id="brf-story"></ol><p class="sentence" id="brf-alt"></p>
+        <p class="hint">Reverse stress on the graph: the combination of root shocks closest to "nothing happens" that puts the book at that level. Probabilities are the map's, from its own units; the map covers the shared drivers, not single-stock news.</p></div>
+    </div>
+    <div class="math"><span class="mlabel">The arithmetic</span>Readings <var>y</var> ~ N(0, <var>S</var>), <var>S</var> = 0.5<sup>2</sup><var>I</var> + <var>A</var><var>A</var>&#8868;, by Woodbury. World: <var>p</var>(blend | <var>y</var>) &prop; N(<var>y</var>; 0, <var>S</var><sub>blend</sub>). Surprise: <var>y</var>&#8868;<var>S</var><sup>&minus;1</sup><var>y</var> against &chi;<sup>2</sup><sub>n</sub>; leave-one-out <var>z</var><sub>i</sub> = (<var>S</var><sup>&minus;1</sup><var>y</var>)<sub>i</sub>/&radic;(<var>S</var><sup>&minus;1</sup>)<sub>ii</sub>. Counterfactual: <var>x</var><sub>cf</sub> = <var>x</var><sub>f</sub> + <var>T</var><sub>cut</sub>[:, <var>j</var>](<var>v</var> &minus; <var>x</var><sub>f,j</sub>). Channels: every walk of at most <var>K</var> links, which sum exactly to <var>T</var><sub>book,r</sub><var>s</var><sub>r</sub>. Loss story: <var>s</var>* = <var>s&#770;</var> + <var>C</var><var>a</var>(<var>L</var> &minus; <var>a</var>&#8868;<var>s&#770;</var>)/(<var>a</var>&#8868;<var>C</var><var>a</var>).</div>
+  </section>
+
+  <section class="section" id="br-learn-sec" aria-labelledby="brl-title">
+    <div class="section-head"><p class="eyebrow">Learning from the data</p><h2 id="brl-title">Does the data agree with the map's own assumptions?</h2>
+      <p class="prose" id="brl-sum" aria-live="polite">Learning from 440 months of data…</p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">The causal order, assumed against learned</span>
+        <div id="brl-order" class="brl-order"></div><p class="sentence" id="brl-order-t"></p>
+        <details class="tableview"><summary>How often each pair keeps its order (200 resamples, 1990 to 2021)</summary><div class="tablewrap"><table class="rz heatmap" id="brl-boot"></table></div></details>
+        <p class="hint">DirectLiNGAM: with non-Gaussian shocks, a cause is the variable whose regression residuals look independent of it, which no Gaussian method can tell. It assumes linear links and no hidden common cause, so read disagreements as questions, not verdicts.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title" id="brl-chart-t">How a link has moved over time</span><span class="ev ev-est">Estimated</span></div>
+        <div class="field"><label for="brl-link">Measured link</label><select id="brl-link"></select></div>
+        <div class="svgbox" id="brl-chart"></div><p class="sentence" id="brl-t"></p>
+        <p class="hint">Each link as a random walk, smoothed by a Kalman filter and the Rauch-Tung-Striebel smoother, with a 90% band; how fast it may drift is chosen by maximum likelihood, so the data decides whether the 2022 break was a step or a slide.</p></figure>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="brw-title">
@@ -1826,7 +1888,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">184 of 184 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">195 of 195 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1851,9 +1913,14 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, nine tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, ten tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
+          <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
+          <tr><td>Channels sum to the total; but-for shares sum to the book</td><td class="r">exact to 1e-12</td></tr>
+          <tr><td>Causal discovery on a planted, shuffled five-variable chain</td><td class="r">order recovered</td></tr>
+          <tr><td>Kalman links on a planted sign flip; a link that never moved</td><td class="r">flip found; smaller drift chosen</td></tr>
+          <tr><td>Frontier and structure learning, Python and page, on the page's own data</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>

@@ -16,7 +16,9 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
   review_decision         process score for one decision, or the full scorecard for a journal
   compare_explanations    competing explanations of one observation, and the evidence that best separates them
   trace_exposure          the brain: what explains the readings, what follows for each holding, what to look at next,
-                          and the gap between seeing a value and setting it
+                          the gap between seeing a value and setting it, which world fits, how surprising the readings
+                          are, each cause's but-for share, the channels, how a bad quarter happens, and counterfactuals
+  learned_structure       the causal order learned from the data, and how each measured link has moved over time
 """
 from __future__ import annotations
 
@@ -150,7 +152,8 @@ def _think(ctx: Context, extra: dict | None = None, K: int | None = None, book_w
         edges = [e for e in edges if e[1] != b] + [(idx[k], b, float(w)) for k, w in book_weights.items() if w]
     th = thinking.think(len(ids), edges, int(K or g["K"]), {idx[k]: v for k, v in obs.items()}, [idx[r] for r in g["roots"]],
                         [idx[h] for h in g["holdings"]], g["obs_sd"], g["prior_sd"])
-    return th, {"ids": ids, "idx": idx, "edges": edges, "obs": obs, "K": int(K or g["K"])}
+    base = [(idx[e["from"]], idx[e["to"]]) for e in g["edges"]]
+    return th, {"ids": ids, "idx": idx, "edges": edges, "base_edges": base, "obs": obs, "K": int(K or g["K"])}
 
 
 def get_portfolio_risk(ctx: Context, args: dict) -> dict:
@@ -477,7 +480,78 @@ def trace_exposure(ctx: Context, args: dict) -> dict:
         seeing = seen_th["predict"]["mean"]
         out["do_vs_see"] = {"node": do["node"], "value": v, "book_if_set": float(doing[idx["book"]]), "book_if_seen": float(seeing[idx["book"]]),
                             "meaning": "setting a value moves only what lies downstream; seeing it also says something about its causes"}
+    # frontier: which world, how surprised, but-for, channels, a bad quarter, and an optional counterfactual
+    T = np.array(th["T"])
+    roots, book = ab["roots"], idx["book"]
+    obs_i = {idx[k]: v for k, v in m["obs"].items()}
+    by = g.get("edges_by_blend") or {}
+    if by:
+        Tby = {float(b): thinking.total_effect(len(ids), [(e[0], e[1], w) for e, w in zip(m["base_edges"], ws)], m["K"]) for b, ws in by.items()}
+        rp = thinking.regime_posterior(Tby, obs_i, roots, g["obs_sd"], g["prior_sd"])
+        world = {"posterior": {f"{b:g}": p for b, p in zip(rp["blends"], rp["p"])}, "mean_blend": rp["mean_blend"],
+                 "bayes_factor_2022_vs_1990": rp["bayes_factor_new_vs_old"], "blend_meaning": "0 = 1990-2021 measured links, 1 = 2022-on links"}
+    else:
+        world = None
+    su = thinking.surprise(T, obs_i, roots, g["obs_sd"], g["prior_sd"])
+    pa = thinking.path_attribution(len(ids), m["edges"], m["K"], ab, book)
+    tail = _req_num(args, "tail_probability", 0.001, 0.5, 0.05)
+    base = thinking.loss_story(T, roots, book, 0.0, prior_sd=g["prior_sd"])
+    story = None
+    if base["possible"]:
+        from scipy.stats import norm
+        L = base["mean"] + base["sd"] * float(norm.ppf(tail))
+        st = thinking.loss_story(T, roots, book, L, prior_sd=g["prior_sd"])
+        alt = thinking.loss_story(T, roots, book, L, prior_sd=g["prior_sd"], exclude=[st["drivers"][0]["root"]])
+        dr = lambda x: [{"cause": ids[d["root"]], "shock_sd": d["shift"]} for d in x["drivers"] if abs(d["shift"]) > 0.02][:5]  # noqa: E731
+        story = {"tail_probability": tail, "book_level_sd": L, "book_sd": st["sd"], "story": dr(st),
+                 "runner_up": {"story": dr(alt), "probability": alt["p_at_or_below"]} if alt["possible"] else None}
+    out["frontier"] = {
+        "which_world": world,
+        "surprise": {"p_value": su["p"], "mahalanobis2": su["maha2"], "readings": su["dof"],
+                     "leave_one_out": [{"node": ids[d["node"]], "z": d["z"]} for d in su["loo"][:4]]},
+        "but_for": [{"cause": ids[d["root"]], "contribution_sd": d["contribution"]} for d in thinking.but_for(T, ab, book)[:6]],
+        "channels": {"total_sd": pa["total"], "n": pa["n_paths"], "top": [{"path": [ids[k] for k in p["nodes"]], "sd": p["contribution"]} for p in pa["paths"][:6]]},
+        "bad_quarter": story,
+        "evidence": "which world Estimated; channels and stories Hypothesis (judged links)"}
+    cf = args.get("counterfactual")
+    if cf is not None:
+        if not isinstance(cf, dict) or cf.get("node") not in idx or cf.get("node") == "book":
+            raise ToolError("counterfactual needs {node, value} with a node other than book")
+        v = _req_num(cf, "value", -6, 6)
+        c = thinking.counterfactual(len(ids), m["edges"], m["K"], T, ab, idx[cf["node"]], v)
+        out["frontier"]["counterfactual"] = {"node": cf["node"], "factual_sd": c["factual"][idx[cf["node"]]], "set_to_sd": v,
+                                             "book": {"factual": c["factual"][book], "counterfactual": c["counterfactual"][book]},
+                                             "holdings_change": {h: c["change"][idx[h]] for h in g["holdings"]}}
     return out
+
+
+def learned_structure(ctx: Context, args: dict) -> dict:
+    """What the data says about the map's own assumptions: DirectLiNGAM order and Kalman time-varying links."""
+    from .brain import learn
+    live = (ctx.load("brain") or {}).get("learned")
+    if live and isinstance(live, dict) and live.get("links"):
+        L, src = live, "brain.json (latest daily run)"
+    else:
+        if getattr(ctx, "_learned", None) is None:
+            ctx._learned = learn(ctx.graph["series"])
+        L, src = ctx._learned, "snapshot series shipped with the page"
+    link = args.get("link")
+    if link is not None and link not in L["links"]:
+        raise ToolError(f"unknown link {link!r}; measured links: {', '.join(L['links'])}")
+    keys = [link] if link else list(L["links"])
+    links = {}
+    for k in keys:
+        x = L["links"][k]
+        n = len(x["beta"])
+        links[k] = {"latest": x["beta"][-1], "band90": 1.645 * x["sd"][-1], "drift_q": x["q"], "sign_changes": x["sign_changes"][-4:],
+                    "five_years_ago": x["beta"][max(0, n - 61)]}
+    lo = L["order"]["low_inflation"]
+    return {"source": src, "months": len(L["dates"]), "through": L["dates"][-1],
+            "order": {"assumed": ["oil", "cpi", "y10", "eq", "vix", "gold"], "learned_1990_2021": lo["learned"],
+                      "agreement_share": lo["agreement"]["share"], "learned_2022_on": L["order"]["inflation"]["learned"],
+                      "months_2022_on": L["order"]["inflation"]["months"]},
+            "links": links, "method": "DirectLiNGAM (pairwise likelihood ratio) and a random-walk Kalman smoother with drift by maximum likelihood",
+            "evidence": "Estimated; the order assumes linear links and no hidden common cause"}
 
 
 # ---------------------------------------------------------------- registry
@@ -542,12 +616,17 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                                    "evidence": {"type": "object", "additionalProperties": {"type": "array", "items": NUM}},
                                    "prior": {"type": "array", "items": NUM}, "seen": {"type": "object", "additionalProperties": {"type": ["boolean", "null"]}}}),
                              {"readOnlyHint": True, "openWorldHint": False}),
+    "learned_structure": (learned_structure, "What the data says about the brain's own assumptions: the causal order learned by DirectLiNGAM against the assumed "
+                          "order, and each measured link's path over time (Kalman smoother): latest value, 90% band, drift and sign changes.",
+                          _obj({"link": {"type": "string", "description": "optional, e.g. y10>eq"}}), {"readOnlyHint": True, "openWorldHint": False}),
     "trace_exposure": (trace_exposure, "Reason over the brain (34 nodes, about 110 links): which root causes explain the readings, what that implies for each "
                        "holding and the book, which link is most to blame for the misfit, what to observe next, and doing versus seeing a value.",
                        _obj({"readings": {"type": "object", "description": "node id to a reading in standard deviations (null removes a measured reading)",
                                           "additionalProperties": {"type": ["number", "null"]}},
                              "orders": {"type": "integer", "description": "orders of effect, 1 to 8 (default 6)"},
-                             "do": _obj({"node": {"type": "string"}, "value": NUM}, ["node", "value"])}),
+                             "do": _obj({"node": {"type": "string"}, "value": NUM}, ["node", "value"]),
+                             "counterfactual": _obj({"node": {"type": "string"}, "value": NUM}, ["node", "value"]),
+                             "tail_probability": {**NUM, "description": "how bad a quarter the loss story describes, e.g. 0.05 = 1 in 20"}}),
                        {"readOnlyHint": True, "openWorldHint": False}),
 }
 

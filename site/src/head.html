@@ -1266,4 +1266,27 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .ms .pill { justify-self: start; }
 .ms-note { font-size: var(--t-xs); color: var(--muted); }
 .ms.overdue .ms-st { color: var(--red); }
+
+/* v0.9 frontier brain */
+.bignum { font: 700 2.2rem/1.1 var(--f-display); color: var(--ink); margin: 6px 0 8px; font-variant-numeric: tabular-nums; }
+.brl-order { display: grid; gap: 10px; margin: 8px 0 12px; }
+.brl-row { display: grid; gap: 6px; }
+.brl-lab { font: 600 0.6875rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.brl-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: c; }
+.brl-chips li { counter-increment: c; font-size: var(--t-sm); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.brl-chips li::before { content: counter(c) ". "; color: var(--muted); font-family: var(--f-mono); font-size: var(--t-xs); }
+.brl-chips li.moved { border-color: var(--s4); background: color-mix(in srgb, var(--s4) 14%, var(--paper)); }
+.bra { display: grid; gap: 12px; }
+.bra-form { display: grid; gap: 10px; }
+.bra-form textarea { width: 100%; max-width: 100%; min-height: 64px; resize: vertical; font: 400 var(--t-md, 1rem)/1.45 var(--f-body); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.bra-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.bra-chips button { font: 500 var(--t-xs)/1.3 var(--f-body); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink-2); cursor: pointer; text-align: left; }
+.bra-chips button:hover { border-color: var(--accent); color: var(--ink); }
+.bra-tools { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font: 400 var(--t-xs)/1.4 var(--f-mono); color: var(--muted); }
+.bra-tools li::before { content: "ƒ "; color: var(--accent); }
+.bra-tools li.done::before { content: "✓ "; }
+.bra-answer { display: grid; gap: 8px; font-size: var(--t-sm); line-height: 1.6; color: var(--ink); max-width: 76ch; }
+.bra-answer:empty { display: none; }
+.bra-answer ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.bra-answer p { margin: 0; }
 </style>

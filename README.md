@@ -3,7 +3,16 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.8 answers the fifth project review and makes the brain think. The brain now reasons from what moved to
+Version 0.9 makes the brain check itself and answer questions. It asks which world the readings come from (Bayesian
+model comparison across the two regimes), how surprised it should be (Mahalanobis distance, exact leave-one-out),
+what would have happened otherwise (counterfactuals that keep today's evidence, and but-for shares that add up), which
+channels carry each cause to the book (every walk, summing exactly), and how a bad quarter most plausibly happens
+(reverse stress on the graph). It also learns from the data instead of assuming: DirectLiNGAM tests the causal order
+(`discovery.py`) and a Kalman smoother tracks every measured link month by month. On today's data both say the 2022
+stock-bond break may be fading. "Ask the brain" lets Claude answer questions in words using only numbers from the
+page's own functions, each call listed.
+
+Version 0.8 answered the fifth project review and made the brain think. The brain now reasons from what moved to
 why (`thinking.py`): abduction finds the root shocks that best explain every reading at once, single-cause
 explanations are ranked by exact Bayesian evidence against "noise only", predictions carry standard deviations,
 criticism names the reading the map cannot explain and the link most to blame, the next observation is the one with
@@ -12,7 +21,7 @@ the most mutual information, and doing (cut the node's causes) is kept apart fro
 observations on three clocks, compares competing explanations and ranks the evidence that separates them, registers
 ten unusual indicators before testing them, and watches expected events without reading silence as news. Today shows
 what each headline read before, and says so when nothing moved. The engine is also an MCP server
-(`mcp_server.py`): nine research and proposal tools for any assistant, none of which can place an order. Without
+(`mcp_server.py`): ten research and proposal tools for any assistant, none of which can place an order. Without
 Databento's paid adjustment factors, the book run falls back to a public split table and estimated bond-fund income.
 
 Version 0.7 answered the third project review. It fixes the accounting (one NAV and return convention, costs in
@@ -145,7 +154,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 184 tests, no data needed
+pytest                                    # 195 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -163,6 +172,7 @@ python -m buildout sources --out out      # every source the engine reads
 python -m buildout kalshi KXFED           # prediction-market Fed path (series names change; check Kalshi)
 python -m buildout mcp --data out         # MCP server on stdio (see below)
 python scripts/export_graph.py            # after editing the brain or field cases on the page (needs node)
+python scripts/snapshot_v09.py path/to/csvs  # refresh the page's monthly series for structure learning
 ```
 
 `config.toml` is the model book the page shows. Keep real positions in `config.private.toml` (git-ignored)
@@ -194,7 +204,8 @@ Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app doe
 | `create_order_proposal` | A hashed proposal checked against gross, single-name and universe limits. Never executed |
 | `review_decision` | Process score and luck quadrant for one decision, or the full journal scorecard |
 | `compare_explanations` | Bayes over competing explanations and the evidence worth checking next, in bits |
-| `trace_exposure` | The brain's reasoning: causes, implications for each holding, the link most to blame, what to observe next, doing vs seeing |
+| `trace_exposure` | The brain's reasoning: causes, implications for each holding, the link most to blame, what to observe next, doing vs seeing, which world fits, surprise, but-for shares, channels, a bad-quarter story, counterfactuals |
+| `learned_structure` | The causal order learned from the data against the assumed one, and each measured link's path over time |
 
 Every tool is read-only research or a proposal. The server refuses `config.private.toml`, never reads a brokerage
 account and has no order, routing or cancel tool; tests check all three. It reasons on `buildout/assets/brain_graph.json`,
@@ -230,9 +241,11 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.9 | `thinking.py` (frontier) | Marginal density by Woodbury, regime posterior, surprise and exact leave-one-out, counterfactuals, but-for shares, exact path attribution, loss stories |
+| | `discovery.py` | DirectLiNGAM (pairwise likelihood ratio) with seeded bootstrap; Kalman time-varying links with drift by maximum likelihood; sign changes |
 | v0.8 | `thinking.py` | The brain's reasoning: total effects within K links, ridge abduction of root shocks with posterior covariance, predictions with sd, residuals and misfit gradients per link, single-cause evidence by Sherman-Morrison, mutual information for the next observation, do-interventions, shared exposure |
 | | `field.py` | Discrete Bayes over competing explanations and expected information (bits) of each unchecked piece of evidence |
-| | `mcp_server.py` | MCP over stdio: nine research and proposal tools; never executes |
+| | `mcp_server.py` | MCP over stdio: ten research and proposal tools; never executes |
 | | `data/corporate_actions.py` | Free fallback for Databento's paid adjustment factors: public split table, bond-fund income from Treasury yields |
 | v0.7 | `policy.py` | hedge.tlt.v2, size.equity.v2, limits.portfolio.v1: one function each for recommendation, text and backtest; unavailable inputs block, never default; decision snapshot |
 | | `reasoner.py` | Tempered Bayes posterior, scenario returns (duration, convexity, Black-Scholes put spreads, financing), exact grid search with a loss limit, alternatives with regret, simplex game against Nature, EVPI and EVSI, reverse stress from measured covariances; `python -m buildout reason` writes reason.json |
@@ -293,6 +306,11 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.9: the readings' density, surprise and leave-one-out z-scores match brute-force Gaussian conditioning to 1e-10;
+  model comparison finds a planted world; channels and but-for shares add up exactly; the forward loss story is the
+  minimum-norm one; counterfactuals leave non-descendants alone; DirectLiNGAM recovers a planted, shuffled five-variable
+  order; the Kalman smoother finds a planted sign flip and chooses a smaller drift for a link that never moved; Python
+  and the page agree on all of it on the page's own graph and series, with shared seeded resamples.
 - The MCP server completes the handshake over stdio, answers every tool in agreement with the engine, rejects bad
   input as tool errors, has no execution tool, marks every proposal unexecuted and refuses the private config.
 - The feed scraper survives dead sources and a missing X token, finds a planted lead time, and its text cannot

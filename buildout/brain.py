@@ -86,6 +86,39 @@ def stock_bond_flip(dz: pd.DataFrame) -> dict:
     return out
 
 
+def series_block(t: dict) -> dict:
+    """The six standardized monthly changes, rounded, for the page's causal discovery and time-varying links."""
+    df = changes(t)
+    dz = (df - df.mean()) / df.std()
+    return {"cols": ORDER, "dates": [d.strftime("%Y-%m") for d in dz.index], "z": [[round(float(v), 4) for v in dz[c]] for c in ORDER]}
+
+
+def learn(block: dict) -> dict:
+    """Discovery on the series block: the learned causal order by regime with bootstrap stability, and each measured
+    link's time-varying path (Kalman smoother, drift chosen by likelihood)."""
+    from . import discovery as D
+    dates = block["dates"]
+    Z = np.array(block["z"]).T
+    out = {"order": {}, "links": {}}
+    for name, (a, b) in REGIMES.items():
+        a_, b_ = a[:7], (b or "9999-12")[:7]
+        rows = [i for i, d in enumerate(dates) if a_ <= d <= b_]
+        X = Z[rows]
+        o = D.lingam_order(X)
+        bs = D.bootstrap_order(X, D.resamples(len(rows), 200)) if len(rows) >= 120 else None
+        out["order"][name] = {"months": len(rows), "learned": [ORDER[i] for i in o], "agreement": D.order_agreement(o, list(range(6))),
+                              "p_before": bs["p_before"] if bs else None}
+    for child, parents in PARENTS.items():
+        ci, pi = ORDER.index(child), [ORDER.index(p) for p in parents]
+        k = D.kalman_mle(Z[:, ci], Z[:, pi])
+        for j, p in enumerate(parents):
+            path = [row[j] for row in k["beta"]]
+            out["links"][f"{p}>{child}"] = {"beta": [round(v, 4) for v in path], "sd": [round(row[j], 4) for row in k["sd"]], "q": k["q"],
+                                            "sign_changes": D.sign_changes(path, None, dates)}
+    out["dates"] = dates
+    return out
+
+
 def run(raw: dict) -> dict:
     from .research import tidy
     t = tidy(raw)
@@ -94,8 +127,10 @@ def run(raw: dict) -> dict:
     dz = (df - df.mean()) / sd
     regimes = {name: estimate(dz, a, b) for name, (a, b) in REGIMES.items()}
     from .reasoner import factor_cov
+    block = series_block(t)
     return {"schema": 1, "order": ORDER, "parents": PARENTS, "labels": LABELS, "sd": {k: float(v) for k, v in sd.items()},
             "regimes": regimes, "state": node_state(df), "y10_eq_corr": stock_bond_flip(dz), "factor_cov": factor_cov(raw),
+            "series": block, "learned": learn(block),
             "method": "Recursive regression on standardized monthly changes, ordered oil, CPI, 10-year, stocks, VIX, gold"}
 
 

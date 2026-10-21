@@ -175,3 +175,141 @@ def think(n: int, edges, K: int, observed: dict[int, float], roots: Sequence[int
     nx = next_observation(T, ex, cand, obs_sd)
     sh = shared_exposure(T, holdings, roots)
     return {"T": T.tolist(), "abduce": ab, "predict": pr, "criticize": cr, "explanations": ex, "next": nx, "shared": sh}
+
+
+# ---------------------------------------------------------------- v0.9: frontier reasoning
+"""
+  marginal          the readings' joint density under the whole map (every root at once):
+                    y ~ N(0, S), S = obs_sd^2 I + prior_sd^2 A A'; log density, S^-1 y and diag(S^-1) by Woodbury
+  regime_posterior  Bayesian model comparison: which version of the map (link weights blended between the 1990-2021
+                    and 2022-on regimes) makes today's readings most probable; posterior over a grid of blends
+  surprise          Mahalanobis distance of the readings under the map, its chi-square tail probability, and each
+                    reading's leave-one-out z-score, z_i = (S^-1 y)_i / sqrt((S^-1)_ii): exact, no refits
+  counterfactual    Pearl's third rung: abduce the factual state (readings where observed, posterior means elsewhere),
+                    act (cut the node's causes and set it), predict: x_cf = x_f + T_cut[:, j] (v - x_f[j])
+  but_for           for each root cause, the book had that cause not happened: -T[book, r] s_r (exact Shapley
+                    values in a linear model; they sum to the book's implied move)
+  path_attribution  the book's implied move split by channel: every walk of at most K links from a root to the book
+                    carries s_r x the product of its weights; the walks sum exactly to T[book, r] s_r
+  loss_story        the most plausible combination of root shocks that puts the book at a given level:
+                    s* = s_hat + C a (L - a's_hat) / (a'Ca), its probability Phi((L - a's_hat) / sqrt(a'Ca)), and the
+                    next most plausible story with the main driver held at its estimate
+"""
+
+
+def marginal(T: np.ndarray, observed: dict[int, float], roots, obs_sd: float = 0.5, prior_sd: float = 1.0) -> dict:
+    obs = sorted(observed)
+    y = np.array([observed[i] for i in obs], float)
+    A = T[np.ix_(obs, list(roots))]
+    n, m = A.shape
+    lam = (obs_sd / prior_sd) ** 2
+    M = lam * np.eye(m) + A.T @ A
+    Minv = np.linalg.inv(M)
+    s2 = obs_sd ** 2
+    Sinv_y = (y - A @ (Minv @ (A.T @ y))) / s2
+    diag = (1.0 - np.einsum("ij,jk,ik->i", A, Minv, A)) / s2
+    logdet = n * math.log(s2) + float(np.linalg.slogdet(np.eye(m) + A.T @ A / lam)[1])
+    q = float(y @ Sinv_y)
+    return {"obs": obs, "y": y.tolist(), "logpdf": -0.5 * (n * math.log(2 * math.pi) + logdet + q), "maha2": q,
+            "Sinv_y": Sinv_y.tolist(), "Sinv_diag": diag.tolist()}
+
+
+def regime_posterior(T_by_blend: dict[float, np.ndarray], observed, roots, obs_sd=0.5, prior_sd=1.0, prior=None) -> dict:
+    blends = sorted(T_by_blend)
+    lp = np.array([marginal(T_by_blend[b], observed, roots, obs_sd, prior_sd)["logpdf"] for b in blends])
+    pr = np.full(len(blends), 1 / len(blends)) if prior is None else np.asarray(prior, float) / np.sum(prior)
+    w = np.exp(lp - lp.max()) * pr
+    w = w / w.sum()
+    return {"blends": blends, "logpdf": lp.tolist(), "p": w.tolist(), "mean_blend": float(np.dot(w, blends)),
+            "bayes_factor_new_vs_old": float(math.exp(lp[-1] - lp[0]))}
+
+
+def chi2_sf(x: float, k: int) -> float:
+    from scipy.stats import chi2
+    return float(chi2.sf(x, k))
+
+
+def surprise(T, observed, roots, obs_sd=0.5, prior_sd=1.0) -> dict:
+    mg = marginal(T, observed, roots, obs_sd, prior_sd)
+    z = [a / math.sqrt(d) for a, d in zip(mg["Sinv_y"], mg["Sinv_diag"])]
+    return {"maha2": mg["maha2"], "dof": len(mg["obs"]), "p": chi2_sf(mg["maha2"], len(mg["obs"])),
+            "loo": [{"node": int(o), "z": float(v)} for o, v in sorted(zip(mg["obs"], z), key=lambda t: -abs(t[1]))]}
+
+
+def factual_state(T, ab: dict) -> np.ndarray:
+    """Readings where observed, the posterior mean elsewhere."""
+    x = T[:, ab["roots"]] @ np.array(ab["s"])
+    for o, v in zip(ab["obs"], ab["y"]):
+        x[o] = v
+    return x
+
+
+def counterfactual(n: int, edges, K: int, T, ab: dict, node: int, value: float) -> dict:
+    xf = factual_state(T, ab)
+    Tcut = total_effect(n, [(f, t, w) for f, t, w in edges if t != node], K)
+    xcf = xf + Tcut[:, node] * (value - xf[node])
+    return {"factual": xf.tolist(), "counterfactual": xcf.tolist(), "change": (xcf - xf).tolist()}
+
+
+def but_for(T, ab: dict, target: int) -> list[dict]:
+    rows = [{"root": int(r), "contribution": float(T[target, r] * s), "book_if_absent": float(-T[target, r] * s)}
+            for r, s in zip(ab["roots"], ab["s"])]
+    return sorted(rows, key=lambda d: -abs(d["contribution"]))
+
+
+def path_attribution(n: int, edges, K: int, ab: dict, target: int, top: int = 8) -> dict:
+    """Every walk of 1..K links from each root to the target; contributions sum exactly to T[target, r] s_r."""
+    out_edges = [[] for _ in range(n)]
+    for f, t, w in edges:
+        if w:
+            out_edges[f].append((t, w))
+    reach = [set([target])]                     # reach[d]: nodes that reach the target in exactly d links
+    for d in range(1, K + 1):
+        reach.append({f for f in range(n) for t, _ in out_edges[f] if t in reach[d - 1]})
+    can = [set().union(*reach[: d + 1]) for d in range(K + 1)]   # within d links
+    paths = []
+    total = 0.0
+    for r, s in zip(ab["roots"], ab["s"]):
+        if r == target:
+            continue
+        stack = [(r, 1.0, (r,))]
+        while stack:
+            node, prod, path = stack.pop()
+            left = K - (len(path) - 1)
+            for t, w in out_edges[node]:
+                if left - 1 < 0 or t not in can[left - 1]:
+                    continue
+                p2 = prod * w
+                np_ = path + (t,)
+                if t == target:
+                    paths.append((s * p2, np_))
+                    total += s * p2
+                if left - 1 > 0:
+                    stack.append((t, p2, np_))
+    paths.sort(key=lambda t: -abs(t[0]))
+    shown = paths[:top]
+    return {"paths": [{"nodes": list(p), "contribution": float(c)} for c, p in shown], "n_paths": len(paths), "total": float(total),
+            "other": float(total - sum(c for c, _ in shown))}
+
+
+def loss_story(T, roots, target: int, level: float, s_mean=None, cov=None, prior_sd: float = 1.0, exclude: Sequence[int] = ()) -> dict:
+    """forward (default): next quarter's root shocks ~ N(0, prior_sd^2 I), the reverse stress test on the graph.
+    now: pass s_mean and cov from abduce, for how wrong today's reading would have to be."""
+    roots = list(roots)
+    m = len(roots)
+    s = np.zeros(m) if s_mean is None else np.array(s_mean, float)
+    C = prior_sd ** 2 * np.eye(m) if cov is None else np.array(cov, float)
+    keep = np.array([r not in set(exclude) for r in roots], float)
+    C = C * np.outer(keep, keep)
+    a = T[target, roots]
+    var = float(a @ C @ a)
+    mean = float(a @ s)
+    if var <= 1e-14:
+        return {"possible": False, "mean": mean}
+    s_star = s + C @ a * (level - mean) / var
+    z = (level - mean) / math.sqrt(var)
+    from scipy.stats import norm
+    shift = s_star - s
+    return {"possible": True, "mean": mean, "sd": math.sqrt(var), "z": z, "p_at_or_below": float(norm.cdf(z)),
+            "s_star": s_star.tolist(), "shift": shift.tolist(), "state": (T[:, roots] @ s_star).tolist(),
+            "drivers": [{"root": int(r), "shift": float(d)} for r, d in sorted(zip(roots, shift), key=lambda t: -abs(t[1]))]}

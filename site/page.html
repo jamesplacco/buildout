@@ -1266,6 +1266,29 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .ms .pill { justify-self: start; }
 .ms-note { font-size: var(--t-xs); color: var(--muted); }
 .ms.overdue .ms-st { color: var(--red); }
+
+/* v0.9 frontier brain */
+.bignum { font: 700 2.2rem/1.1 var(--f-display); color: var(--ink); margin: 6px 0 8px; font-variant-numeric: tabular-nums; }
+.brl-order { display: grid; gap: 10px; margin: 8px 0 12px; }
+.brl-row { display: grid; gap: 6px; }
+.brl-lab { font: 600 0.6875rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.brl-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: c; }
+.brl-chips li { counter-increment: c; font-size: var(--t-sm); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.brl-chips li::before { content: counter(c) ". "; color: var(--muted); font-family: var(--f-mono); font-size: var(--t-xs); }
+.brl-chips li.moved { border-color: var(--s4); background: color-mix(in srgb, var(--s4) 14%, var(--paper)); }
+.bra { display: grid; gap: 12px; }
+.bra-form { display: grid; gap: 10px; }
+.bra-form textarea { width: 100%; max-width: 100%; min-height: 64px; resize: vertical; font: 400 var(--t-md, 1rem)/1.45 var(--f-body); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.bra-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.bra-chips button { font: 500 var(--t-xs)/1.3 var(--f-body); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink-2); cursor: pointer; text-align: left; }
+.bra-chips button:hover { border-color: var(--accent); color: var(--ink); }
+.bra-tools { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font: 400 var(--t-xs)/1.4 var(--f-mono); color: var(--muted); }
+.bra-tools li::before { content: "ƒ "; color: var(--accent); }
+.bra-tools li.done::before { content: "✓ "; }
+.bra-answer { display: grid; gap: 8px; font-size: var(--t-sm); line-height: 1.6; color: var(--ink); max-width: 76ch; }
+.bra-answer:empty { display: none; }
+.bra-answer ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.bra-answer p { margin: 0; }
 </style>
 <a class="skip" href="#main" id="skip">Skip to content</a>
 <header class="topbar">
@@ -1277,7 +1300,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.8</span>
+      Buildout <span class="ver">v0.9</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -2557,6 +2580,21 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
       </div>
     </div>
   </section>
+  <section class="section" id="br-ask-sec" aria-labelledby="bra-title">
+    <div class="section-head"><p class="eyebrow">Ask the brain</p><h2 id="bra-title">Ask in words. It answers with the math.</h2>
+      <p class="prose">Claude reads your question, runs the brain's exact functions on this page (think, shock, counterfactual, the loss story, the learned structure) and answers only with the numbers they return. Every call is listed as it happens. It uses your own Claude usage and asks first.</p></div>
+    <div class="panel bra">
+      <form id="bra-form" class="bra-form">
+        <label for="bra-q" class="sr-only">Your question for the brain</label>
+        <textarea id="bra-q" rows="2" maxlength="600" placeholder="What is driving the book right now, and what would change your mind?"></textarea>
+        <div class="fd-actions"><button class="btn" id="bra-go" type="submit">Ask</button><button class="pill" id="bra-stop" type="button" hidden>Stop</button><span class="hint" id="bra-status" aria-live="polite"></span></div>
+      </form>
+      <div class="bra-chips" id="bra-chips" role="group" aria-label="Suggested questions"></div>
+      <ol class="bra-tools" id="bra-tools" aria-label="Functions the brain called"></ol>
+      <div class="bra-answer" id="bra-answer" aria-live="polite"></div>
+      <p class="hint" id="bra-note">Asking needs the Claude app or claude.ai. Everything it would compute is on this page below.</p>
+    </div>
+  </section>
   <section class="section" id="br-think-sec" aria-labelledby="brt-title">
     <div class="section-head"><p class="eyebrow">The brain thinks</p><h2 id="brt-title">From what moved, to why, to what must also be true</h2><p class="prose" id="br-think-sum" aria-live="polite"></p></div>
     <div class="brain-think">
@@ -2585,6 +2623,53 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
       <figure class="chart panel"><div class="chart-head"><span class="chart-title">Where the book is exposed</span></div><div class="svgbox" id="br-booksens"></div></figure>
     </div>
     <div class="math"><span class="mlabel">How it thinks</span><var>T</var> = &Sigma;<sub>k=0..K</sub>(<var>W</var>&#8868;)<sup>k</sup>. Causes: <var>s</var> = (<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup><var>A</var>&#8868;<var>y</var>, <var>A</var> = <var>T</var>[observed, roots], &lambda; = (0.5/1)<sup>2</sup>, posterior covariance 0.5<sup>2</sup>(<var>A</var>&#8868;<var>A</var> + &lambda;<var>I</var>)<sup>&minus;1</sup>. Explanations: log evidence of <var>y</var> ~ N(0, 0.5<sup>2</sup><var>I</var> + <var>a</var><var>a</var>&#8868;) for each single cause and for noise alone. Next observation: I(H; X<sub>u</sub>) = h(mixture) &minus; &Sigma;<sub>h</sub> p<sub>h</sub> h(X<sub>u</sub> | h). Doing: <var>T</var> with the node's incoming links removed.</div>
+  </section>
+
+  <section class="section" id="br-front-sec" aria-labelledby="brf-title">
+    <div class="section-head"><p class="eyebrow">Frontier reasoning</p><h2 id="brf-title">Which world, how surprised, what if, and how it breaks</h2>
+      <p class="prose" id="brf-sum" aria-live="polite"></p></div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Which world are we in?</span><span class="ev ev-est">Estimated</span></div>
+        <div class="svgbox" id="brf-regime"></div><p class="sentence" id="brf-regime-t"></p>
+        <div class="fd-actions"><button class="pill" type="button" id="brf-use">Use this world on the map</button></div>
+        <p class="hint">Bayesian model comparison: how probable today's readings are under the map with the 1990 to 2021 measured links, the 2022-on links, and three blends between, equal odds to start.</p></figure>
+      <div class="panel"><span class="panel-title">How surprised should the brain be?</span>
+        <p class="bignum num" id="brf-surp"></p><p class="sentence" id="brf-surp-t"></p><ol class="br-list" id="brf-loo"></ol>
+        <p class="hint">The readings' distance from what the map expects (Mahalanobis, against a chi-square), and each reading's z-score when the others predict it (exact leave-one-out). A surprising day means a cause the map does not have.</p></div>
+      <div class="panel"><span class="panel-title">But for each cause, where would the book be?</span>
+        <div class="tablewrap"><table class="rz" id="brf-butfor"></table></div>
+        <p class="hint">Each inferred cause's contribution to the book's implied move; removing it leaves the rest. In a linear map these are exact Shapley values and they add up to the whole.</p></div>
+      <div class="panel"><span class="panel-title">Which channels carry it</span><ol class="br-list" id="brf-paths"></ol><p class="hint" id="brf-paths-t"></p></div>
+      <div class="panel"><span class="panel-title">Had it been otherwise</span>
+        <div class="obs-add">
+          <div class="field"><label for="brf-cf-node">Had this node been</label><select id="brf-cf-node"></select></div>
+          <div class="field"><div class="field-top"><label for="brf-cf-v">at this reading, σ</label><output id="brf-cf-v-o" for="brf-cf-v"></output></div><input type="range" id="brf-cf-v" min="-3" max="3" step="0.1" value="0"></div>
+        </div>
+        <p class="sentence" id="brf-cf-t"></p>
+        <div class="tablewrap"><table class="rz" id="brf-cf"></table></div>
+        <p class="hint">A counterfactual, not a forecast: it keeps everything today's evidence says about the other causes, changes one thing, and re-runs the world (Pearl's abduction, action, prediction).</p></div>
+      <div class="panel"><span class="panel-title">How a bad quarter most plausibly happens</span>
+        <div class="field"><span class="flabel" id="brf-tail-l">How bad</span><div class="seg" role="group" aria-labelledby="brf-tail-l" id="brf-tail"></div></div>
+        <div class="field"><span class="flabel" id="brf-mode-l">Starting from</span><div class="seg" role="group" aria-labelledby="brf-mode-l" id="brf-mode"><button type="button" data-v="forward" aria-pressed="true">Next quarter's shocks</button><button type="button" data-v="now" aria-pressed="false">How wrong today's read could be</button></div></div>
+        <p class="sentence" id="brf-story-t"></p><ol class="br-list" id="brf-story"></ol><p class="sentence" id="brf-alt"></p>
+        <p class="hint">Reverse stress on the graph: the combination of root shocks closest to "nothing happens" that puts the book at that level. Probabilities are the map's, from its own units; the map covers the shared drivers, not single-stock news.</p></div>
+    </div>
+    <div class="math"><span class="mlabel">The arithmetic</span>Readings <var>y</var> ~ N(0, <var>S</var>), <var>S</var> = 0.5<sup>2</sup><var>I</var> + <var>A</var><var>A</var>&#8868;, by Woodbury. World: <var>p</var>(blend | <var>y</var>) &prop; N(<var>y</var>; 0, <var>S</var><sub>blend</sub>). Surprise: <var>y</var>&#8868;<var>S</var><sup>&minus;1</sup><var>y</var> against &chi;<sup>2</sup><sub>n</sub>; leave-one-out <var>z</var><sub>i</sub> = (<var>S</var><sup>&minus;1</sup><var>y</var>)<sub>i</sub>/&radic;(<var>S</var><sup>&minus;1</sup>)<sub>ii</sub>. Counterfactual: <var>x</var><sub>cf</sub> = <var>x</var><sub>f</sub> + <var>T</var><sub>cut</sub>[:, <var>j</var>](<var>v</var> &minus; <var>x</var><sub>f,j</sub>). Channels: every walk of at most <var>K</var> links, which sum exactly to <var>T</var><sub>book,r</sub><var>s</var><sub>r</sub>. Loss story: <var>s</var>* = <var>s&#770;</var> + <var>C</var><var>a</var>(<var>L</var> &minus; <var>a</var>&#8868;<var>s&#770;</var>)/(<var>a</var>&#8868;<var>C</var><var>a</var>).</div>
+  </section>
+
+  <section class="section" id="br-learn-sec" aria-labelledby="brl-title">
+    <div class="section-head"><p class="eyebrow">Learning from the data</p><h2 id="brl-title">Does the data agree with the map's own assumptions?</h2>
+      <p class="prose" id="brl-sum" aria-live="polite">Learning from 440 months of data…</p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">The causal order, assumed against learned</span>
+        <div id="brl-order" class="brl-order"></div><p class="sentence" id="brl-order-t"></p>
+        <details class="tableview"><summary>How often each pair keeps its order (200 resamples, 1990 to 2021)</summary><div class="tablewrap"><table class="rz heatmap" id="brl-boot"></table></div></details>
+        <p class="hint">DirectLiNGAM: with non-Gaussian shocks, a cause is the variable whose regression residuals look independent of it, which no Gaussian method can tell. It assumes linear links and no hidden common cause, so read disagreements as questions, not verdicts.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title" id="brl-chart-t">How a link has moved over time</span><span class="ev ev-est">Estimated</span></div>
+        <div class="field"><label for="brl-link">Measured link</label><select id="brl-link"></select></div>
+        <div class="svgbox" id="brl-chart"></div><p class="sentence" id="brl-t"></p>
+        <p class="hint">Each link as a random walk, smoothed by a Kalman filter and the Rauch-Tung-Striebel smoother, with a 90% band; how fast it may drift is chosen by maximum likelihood, so the data decides whether the 2022 break was a step or a slide.</p></figure>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="brw-title">
@@ -3094,7 +3179,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">184 of 184 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">195 of 195 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -3119,9 +3204,14 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, nine tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, ten tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
+          <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
+          <tr><td>Channels sum to the total; but-for shares sum to the book</td><td class="r">exact to 1e-12</td></tr>
+          <tr><td>Causal discovery on a planted, shuffled five-variable chain</td><td class="r">order recovered</td></tr>
+          <tr><td>Kalman links on a planted sign flip; a link that never moved</td><td class="r">flip found; smaller drift chosen</td></tr>
+          <tr><td>Frontier and structure learning, Python and page, on the page's own data</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>
@@ -4349,7 +4439,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     if (!series.length) return;
     const xs = series.flatMap((s) => s.pts.map((p) => p[0]));
     const x0 = cfg.xDomain ? cfg.xDomain[0] : Math.min(...xs), x1 = cfg.xDomain ? cfg.xDomain[1] : Math.max(...xs);
-    let ys = series.flatMap((s) => s.pts.map((p) => p[1])).filter(fin);
+    let ys = series.flatMap((s) => s.pts.map((p) => p[1])).filter(fin).concat((cfg.bands || []).flatMap((b) => b.pts.flatMap((p) => [p[1], p[2]])).filter(fin));
     ys = ys.concat((cfg.hlines || []).map((l) => l.y));
     let lo = Math.min(...ys), hi = Math.max(...ys);
     if (cfg.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
@@ -4374,6 +4464,13 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     (cfg.hlines || []).forEach((l) => {
       svg("line", { x1: padL, x2: W - padR, y1: sy(l.y), y2: sy(l.y), stroke: l.color || "var(--bad)", "stroke-width": 1.5 }, s);
       if (l.label) text(s, W - padR, sy(l.y) - 6, l.label, "lbl-strong", "end");
+    });
+    (cfg.bands || []).forEach((b) => {                          // shaded intervals: pts are [x, lo, hi]
+      const ok = b.pts.filter((p) => fin(p[1]) && fin(p[2]));
+      if (ok.length < 2) return;
+      const d = ok.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + "," + sy(p[2]).toFixed(1)).join("") +
+        ok.slice().reverse().map((p) => "L" + sx(p[0]).toFixed(1) + "," + sy(p[1]).toFixed(1)).join("") + "Z";
+      svg("path", { d, fill: b.color, opacity: b.opacity || 0.16, stroke: "none" }, s);
     });
     series.forEach((ser) => {
       let d = "", pen = false;
@@ -4857,6 +4954,12 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     { id: "cash-eps", term: "Cash EPS", def: "Earnings per share after setting depreciation to economic life, counting stock pay as pay, expensing capitalized software and crediting deferred revenue.", at: "bsc-title" },
     { id: "moonbag", term: "Moonbag", def: "What is left of a winner after selling enough to recover the original cost: a free position on the right tail.", at: "bsz-title" },
     { id: "student-t", term: "Student-t", def: "A bell-shaped distribution with fat tails. Fitted to 155 years of monthly stocks, it has about 3.8 degrees of freedom.", at: "bst-title" },
+    { id: "model-comparison", term: "Bayesian model comparison", alt: ["which world"], def: "Ranking versions of a model by how probable each makes the data actually seen. The brain uses it to ask whether today's readings look more like the 1990 to 2021 world or the 2022-on world.", at: "brf-title" },
+    { id: "counterfactual", term: "Counterfactual", def: "What would have happened had one thing been different, keeping everything the evidence says about everything else. Pearl's third rung, above seeing and doing.", at: "brf-title" },
+    { id: "shapley", term: "Shapley value", alt: ["but-for"], def: "A fair split of a total among its causes. In a linear model each cause's share is its own effect, and the shares add up exactly to the whole.", at: "brf-title" },
+    { id: "lingam", term: "DirectLiNGAM", alt: ["causal discovery"], def: "A method that learns which variable causes which from data alone, using the fact that real shocks are not bell-shaped. It assumes linear links and no hidden common cause.", at: "brl-title" },
+    { id: "kalman", term: "Kalman filter", alt: ["Kalman smoother"], def: "A way to track a quantity that drifts over time from noisy data, month by month, with an honest band around it. The brain uses it to watch each measured link move.", at: "brl-title" },
+    { id: "mahalanobis", term: "Mahalanobis distance", alt: ["surprise"], def: "How far a set of readings sits from what a model expects, allowing for how the readings move together. Large means the model is missing something.", at: "brf-title" },
     { id: "abduction", term: "Abduction", alt: ["inference to the best explanation"], def: "Reasoning from effects back to causes: which root shocks, taken together, best explain every reading at once. The brain solves it exactly as a ridge regression of the readings on the root causes.", at: "brt-title" },
     { id: "mutual-information", term: "Mutual information", alt: ["information gain"], def: "How much learning one thing is expected to reduce doubt about another, in bits or nats. The brain and the Field desk use it to pick what to look at next.", at: "brt-title" },
     { id: "do-intervention", term: "Doing vs seeing", alt: ["intervention"], def: "Setting a value cuts its causes, so only what lies downstream moves; seeing the same value also tells you something about its causes. The gap is what the observation signals.", at: "brt-title" },
@@ -4940,6 +5043,9 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   ];
 
   const FAQ = [
+    { g: "v0.9", q: "Is the brain's map still right about bonds?", a: "The brain now checks itself. Bayesian model comparison says today's readings are more probable under the 1990 to 2021 links than the 2022-on ones, and the Kalman smoother shows the 10-year-to-stocks link went negative in mid-2021 and has drifted back near zero since early 2025, with a wide band. Neither is a verdict; both say the 2022 break may be fading, which is exactly what the hedge desk should watch." },
+    { g: "v0.9", q: "Does Ask the brain make numbers up?", a: "It is told not to, and it cannot do the arithmetic itself: every figure comes from a function on the page (think, shock, counterfactual, loss story, channels, learned structure), each call is listed as it happens, and the functions are the same ones tested against Python. It uses your own Claude usage and asks permission first." },
+    { g: "v0.9", q: "Did the data confirm the brain's causal order?", a: "Partly. On 1990 to 2021 monthly data, DirectLiNGAM orders 9 of 15 pairs the way the map assumes. Three orderings hold in at least 80% of resamples (oil before the 10-year, stocks before the 10-year, VIX before the 10-year); most others are close to a coin flip. The order stays an assumption, now with its evidence shown." },
     { g: "v0.8", q: "Does the brain actually think?", a: "It reasons in four exact steps. It explains (which root shocks fit every reading at once, and which single cause is most likely against \"nothing happened\"), deduces (what must then be true of each holding and the book, with uncertainty), doubts (which reading it cannot explain and which link is most to blame), and asks (which unobserved node would best separate the explanations it cannot tell apart). Every step is linear algebra on a published graph, checked against Python." },
     { g: "v0.8", q: "Why is an anecdote not a signal?", a: "Because it has no date, no denominator, no baseline and no competing explanation until someone writes them down. The Field desk forces those fields, compares the explanations by Bayes' rule, and registers each unusual indicator with its target and horizon before it is tested, so a lucky story cannot quietly become a rule." },
     { g: "v0.8", q: "Can the MCP server trade?", a: "No. It has nine tools and none places, routes or cancels an order. analyze_positions reads holdings you pass in for that one call and stores nothing. create_order_proposal returns a hashed proposal marked unexecuted for a person to review. The server refuses the private config with real positions; tests check both." },
@@ -5002,6 +5108,16 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     { g: "v0.6", q: "Why does the challenge simulator's pass rate jump around?", a: "Because the rules are discrete. Above a certain risk per trade, one day of losses breaches the daily limit, and the number of winning trades needed to reach the target falls one whole trade at a time. The risk that maximizes the pass rate sits just below such a step." },
     { g: "v0.6", q: "Is market making just collecting the spread?", a: "No. The spread pays for adverse selection and inventory risk. The simulator shows that skewing quotes for inventory gives up a little average profit for much less risk, and the adverse-selection tool shows why uninformed retail flow is worth paying for." },
   ];
+
+  METHODS.push({ group: "The brain checks itself (v0.9)", items: [
+    { name: "Which world", f: "p(b | y) ∝ N(y; 0, 0.5<sup>2</sup>I + A<sub>b</sub>A<sub>b</sub>′), b ∈ {0, ¼, ½, ¾, 1}", say: "The readings' density under the map with links blended from the 1990 to 2021 regime (0) to 2022 on (1); Woodbury keeps it to a 10 by 10 inverse.", where: "thinking.py · The brain" },
+    { name: "Surprise and leave-one-out", f: "d<sup>2</sup> = y′S<sup>−1</sup>y ~ χ<sup>2</sup><sub>n</sub>; z<sub>i</sub> = (S<sup>−1</sup>y)<sub>i</sub>/√(S<sup>−1</sup>)<sub>ii</sub>", say: "Exact conditional z-scores with no refitting; the page's incomplete-gamma tail agrees with SciPy.", where: "thinking.py · The brain" },
+    { name: "Counterfactual and but-for", f: "x<sub>cf</sub> = x<sub>f</sub> + T<sub>cut</sub>[:, j](v − x<sub>f,j</sub>); share<sub>r</sub> = T<sub>book,r</sub>s<sub>r</sub>", say: "Abduction, action, prediction; in a linear map the but-for shares are Shapley values that add to the whole.", where: "thinking.py · The brain" },
+    { name: "Channels", f: "Σ<sub>walks r→book, ≤K links</sub> s<sub>r</sub>Πw = T<sub>book,r</sub>s<sub>r</sub>", say: "Every walk enumerated with reachability pruning; the identity is tested to 1e-12.", where: "thinking.py · The brain" },
+    { name: "How a bad quarter happens", f: "s* = s̄ + Ca(L − a′s̄)/(a′Ca), L = a′s̄ + √(a′Ca) Φ<sup>−1</sup>(p)", say: "The most probable root-shock combination reaching the loss; the runner-up holds the main driver still.", where: "thinking.py · The brain" },
+    { name: "DirectLiNGAM", f: "pick argmin<sub>i</sub> Σ<sub>j</sub> min(0, Ĥ(x<sub>j</sub>) + Ĥ(r<sub>i|j</sub>) − Ĥ(x<sub>i</sub>) − Ĥ(r<sub>j|i</sub>))<sup>2</sup>, residualize, repeat", say: "Hyvärinen's maximum-entropy approximation for Ĥ; 200 seeded resamples for stability, shared between Python and the page.", where: "discovery.py · The brain" },
+    { name: "Time-varying links", f: "y<sub>t</sub> = x<sub>t</sub>′β<sub>t</sub> + ε, β<sub>t</sub> = β<sub>t−1</sub> + η, η ~ N(0, qI); q by maximum likelihood", say: "Kalman filter and Rauch-Tung-Striebel smoother on standardized monthly changes since 1990.", where: "discovery.py · The brain" },
+  ] });
 
   METHODS.push({ group: "The brain thinks, and the Field desk (v0.8)", items: [
     { name: "Abduction", f: "ŝ = (A′A + λI)<sup>−1</sup>A′y, A = T[observed, roots], λ = σ<sub>obs</sub>²/σ<sub>prior</sub>², Cov = σ<sub>obs</sub>²(A′A + λI)<sup>−1</sup>", say: "T = Σ<sub>k≤K</sub>(W′)<sup>k</sup>. The root shocks that best explain every reading at once, with their uncertainty and the share of the readings they explain.", where: "thinking.py · The brain" },
@@ -5234,6 +5350,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   ];
 
   const CHANGELOG = [
+    ["v0.9", "Oct 21, 2026", "The brain checks itself and answers questions. Which world: Bayesian model comparison over regime blends (today's readings fit the 1990 to 2021 links about four times better than the 2022-on ones). How surprised: Mahalanobis distance and exact leave-one-out z-scores. Had it been otherwise: counterfactuals that keep today's evidence, and but-for shares that add up to the book's move. Which channels: every walk from cause to book, summing exactly. How it breaks: the most plausible root-shock story for a 1-in-N quarter, and the runner-up. From the data itself: DirectLiNGAM tests the assumed causal order (60% of pairs agree; three orderings are firm) and Kalman-smoothed links show the 10-year-to-stocks link went negative in mid-2021 and drifted back toward zero since 2025. Ask the brain: Claude answers in words using only numbers from the page's own functions, each call listed. The MCP server gains the frontier and the learned structure."],
     ["v0.8", "Oct 21, 2026", "Built from the fifth project review, and the brain thinks. The brain grew to 34 parts and about 110 links, down to every holding and the model book, and reasons in steps you can watch: observe, explain (abduction and competing single causes against noise only), infer, deduce, doubt (the reading it cannot explain and the link most to blame), apply to the book, look next (mutual information), and what would change its mind; doing and seeing are kept apart. A Field desk turns anecdotes into dated, sourced observations on three clocks, compares explanations with the evidence that separates them, registers ten unusual indicators before testing, and monitors expected events without reading silence as news; a note can become an observation in the brain. The solver gained a decision boundary across loss limits and tilts, an uncertainty breakdown and a leave-one-out test, and records its decision with a content hash. Today shows each headline's previous value and a quiet state. The logo marks every desk. The engine is now an MCP server with research and proposal tools and no way to trade, including one that reads your own holdings for a single call (for example from Robinhood's official MCP) without storing them. Without Databento's paid adjustment factors, the book run now falls back to a public split table and estimated bond-fund income, and says so."],
     ["v0.7", "Oct 21, 2026", "Built from the third project review. Correctness: one NAV and return convention (costs inside the first return, Sharpe over accrued cash, next-session fills, every variant on the same dates, a cash-only baseline); one versioned hedge policy (hedge.tlt.v2) shared by the recommendation, its text and the backtest; Kelly is a check, not a size input; a portfolio gross limit that includes the bond leg; effective risk contributors and effective independent bets reported separately; trims labelled as examples. Evidence: the hedge line is chosen on training data only, walked forward, bootstrapped and tested on an untouched decade, and can come back as no reliable threshold; the inflation gate adds no out-of-sample value over the correlation rule since 1901, and the page says so. Fundamentals: one effective dataset where newer filings replace snapshot fields and every dependent view redraws; descriptive coverage categories replace the Minsky labels. The engine: a solver (tempered Bayes, a constrained growth search over 18,414 portfolios, four alternatives with regret, a zero-sum game against Nature, value of information, reverse stress), game theory (capex race, crowded exit, Kyle, a Nash solver, a prediction-market ladder), a fill-quality lab, and an exact calculator in search. Today opens with the question, the answer and its evidence labels."],
     ["v0.6", "Oct 21, 2026", "The brain: twenty-one parts of the system and forty-eight signed links, eleven measured in two regimes, with propagation by order, loops, the links the answer rests on, Monte Carlo robustness, the inverse problem and PM or quant modes. Noteworthy: ten trends on the curve from niche to consensus, each with a bottom line, numbers and a watch list, linked to X, Substack and Telegram, plus a feed scraper that scores heat, niche skew and lead time. Trading: prop (edge, challenge simulator, pod economics) and market making (Avellaneda-Stoikov, adverse selection, square-root impact and Almgren-Chriss). Buyside 2026: the field manual as engine modules (regime and gross, hedge selector, Student-t shortfall, replays, red flags, credit stress, reverse DCF) and a reconciliation with the data. Today: risk rings, what changed since your last visit, a morning check-in. 91 data sources."],
@@ -9585,6 +9702,9 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   /* generated by scripts/snapshot_v07.py: measured 3-month factor covariances by regime (market, ai, dy, oil, gold) */
   const REASON_SNAP = {"factors":["market","ai","dy","oil","gold"],"horizon_months":3,"regimes":{"low_inflation":{"months":383,"cov":[[0.003937971,0.0,3.74153e-05,0.0023211804,-0.0003489643],[0.0,0.015625,0.0,0.0,0.0],[3.74153e-05,0.0,1.37818e-05,0.0001918413,-3.55751e-05],[0.0023211804,0.0,0.0001918413,0.0313852431,0.0012938507],[-0.0003489643,0.0,-3.55751e-05,0.0012938507,0.0036305936]]},"inflation":{"months":57,"cov":[[0.003650743,0.0,-7.67286e-05,-0.0017287668,0.0005839656],[0.0,0.015625,0.0,0.0,0.0],[-7.67286e-05,0.0,1.51523e-05,0.0001681856,-8.1238e-05],[-0.0017287668,0.0,0.0001681856,0.0288959964,0.0004679302],[0.0005839656,0.0,-8.1238e-05,0.0004679302,0.0047653242]]}}};
 
+  /* generated by scripts/snapshot_v09.py: standardized monthly changes (derived from public datasets) */
+  const BRAIN_SERIES = {"cols":["oil","cpi","y10","eq","vix","gold"],"dates":["1990-02","1990-03","1990-04","1990-05","1990-06","1990-07","1990-08","1990-09","1990-10","1990-11","1990-12","1991-01","1991-02","1991-03","1991-04","1991-05","1991-06","1991-07","1991-08","1991-09","1991-10","1991-11","1991-12","1992-01","1992-02","1992-03","1992-04","1992-05","1992-06","1992-07","1992-08","1992-09","1992-10","1992-11","1992-12","1993-01","1993-02","1993-03","1993-04","1993-05","1993-06","1993-07","1993-08","1993-09","1993-10","1993-11","1993-12","1994-01","1994-02","1994-03","1994-04","1994-05","1994-06","1994-07","1994-08","1994-09","1994-10","1994-11","1994-12","1995-01","1995-02","1995-03","1995-04","1995-05","1995-06","1995-07","1995-08","1995-09","1995-10","1995-11","1995-12","1996-01","1996-02","1996-03","1996-04","1996-05","1996-06","1996-07","1996-08","1996-09","1996-10","1996-11","1996-12","1997-01","1997-02","1997-03","1997-04","1997-05","1997-06","1997-07","1997-08","1997-09","1997-10","1997-11","1997-12","1998-01","1998-02","1998-03","1998-04","1998-05","1998-06","1998-07","1998-08","1998-09","1998-10","1998-11","1998-12","1999-01","1999-02","1999-03","1999-04","1999-05","1999-06","1999-07","1999-08","1999-09","1999-10","1999-11","1999-12","2000-01","2000-02","2000-03","2000-04","2000-05","2000-06","2000-07","2000-08","2000-09","2000-10","2000-11","2000-12","2001-01","2001-02","2001-03","2001-04","2001-05","2001-06","2001-07","2001-08","2001-09","2001-10","2001-11","2001-12","2002-01","2002-02","2002-03","2002-04","2002-05","2002-06","2002-07","2002-08","2002-09","2002-10","2002-11","2002-12","2003-01","2003-02","2003-03","2003-04","2003-05","2003-06","2003-07","2003-08","2003-09","2003-10","2003-11","2003-12","2004-01","2004-02","2004-03","2004-04","2004-05","2004-06","2004-07","2004-08","2004-09","2004-10","2004-11","2004-12","2005-01","2005-02","2005-03","2005-04","2005-05","2005-06","2005-07","2005-08","2005-09","2005-10","2005-11","2005-12","2006-01","2006-02","2006-03","2006-04","2006-05","2006-06","2006-07","2006-08","2006-09","2006-10","2006-11","2006-12","2007-01","2007-02","2007-03","2007-04","2007-05","2007-06","2007-07","2007-08","2007-09","2007-10","2007-11","2007-12","2008-01","2008-02","2008-03","2008-04","2008-05","2008-06","2008-07","2008-08","2008-09","2008-10","2008-11","2008-12","2009-01","2009-02","2009-03","2009-04","2009-05","2009-06","2009-07","2009-08","2009-09","2009-10","2009-11","2009-12","2010-01","2010-02","2010-03","2010-04","2010-05","2010-06","2010-07","2010-08","2010-09","2010-10","2010-11","2010-12","2011-01","2011-02","2011-03","2011-04","2011-05","2011-06","2011-07","2011-08","2011-09","2011-10","2011-11","2011-12","2012-01","2012-02","2012-03","2012-04","2012-05","2012-06","2012-07","2012-08","2012-09","2012-10","2012-11","2012-12","2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12","2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],"z":[[-0.7314,-0.7724,-1.0363,-0.1927,-0.8182,1.2226,4.4767,2.426,0.2741,-0.8796,-1.5782,-1.8289,-1.8826,-0.2686,0.0126,-0.0341,-0.5746,0.6019,0.1623,0.3182,0.7351,-0.5295,-1.4209,-0.132,-0.0978,-0.2799,0.6797,0.4349,0.576,-0.4755,-0.283,0.2211,-0.0483,-0.5501,-0.6038,-0.4607,0.5612,0.1309,-0.0903,-0.1311,-0.5029,-0.5558,-0.056,-0.5114,0.4191,-1.0129,-1.017,0.3839,-0.4696,0.1249,1.0306,0.3946,0.2679,0.5519,-0.4371,-0.7282,0.3978,0.3187,-0.8157,0.4512,0.2377,0.1083,0.6093,-0.1539,-0.3993,-1.1318,0.0828,0.3705,-0.4348,0.4813,0.5998,-0.05,-0.0857,0.9943,0.4388,-0.9193,-0.3924,0.592,0.2788,1.0091,0.6886,-0.6874,0.3855,-0.1569,-1.2283,-0.9191,-0.8189,0.7398,-0.75,0.3703,-0.0296,-0.1712,0.8434,-0.3835,-1.0794,-1.3245,-0.6564,-0.9131,0.4319,0.4766,-1.8099,-0.0013,-0.2686,1.2767,-0.6517,-1.4268,-1.1433,1.114,-0.7526,2.0872,1.6972,0.1004,0.3034,1.7916,0.4091,1.2297,-0.4507,1.0825,0.3393,-0.0949,0.8283,-0.001,-2.0754,1.9096,0.7095,-0.2472,0.2393,0.9877,-0.7731,0.5423,-2.3606,-0.1887,0.6446,-1.226,0.5803,0.8867,-0.2118,-1.249,0.3493,-0.5774,-1.7044,-0.8856,-0.0709,0.453,0.1597,1.6402,0.7868,-0.1865,-0.6267,0.6402,0.2691,0.6164,-0.2337,-1.209,1.2487,0.9898,0.4114,-0.6274,-1.9591,0.2549,0.5188,0.1998,0.5171,-0.9301,0.7688,-0.3199,0.3021,0.4826,-0.1434,0.7226,-0.0765,1.0973,-0.6636,0.7701,1.0765,0.1715,1.2378,-1.4519,-0.865,1.0778,0.2337,1.5191,-0.2451,-0.7922,1.0912,0.5044,1.0222,-0.1796,-0.7731,-0.6159,0.2564,0.9946,-0.5259,0.1627,1.4588,-0.2972,-0.1776,0.6707,-0.097,-1.6818,-0.7196,0.1233,0.5648,-1.5294,0.6351,0.7321,0.7713,-0.0775,0.5081,0.7452,-0.8598,0.8157,0.5999,1.0979,-0.1972,0.0969,0.2577,0.8197,0.4653,1.1284,0.6973,-0.0082,-1.5986,-1.5368,-3.0505,-3.0962,-2.7168,0.787,-0.0636,0.6667,0.7035,1.2677,1.7339,-0.655,1.1236,-0.7204,0.6806,0.475,-0.3247,0.1859,-0.3546,0.6171,0.6829,-1.1244,-0.1922,0.0696,0.1506,0.0642,0.5539,0.2682,0.6498,0.4939,0.6694,0.9478,0.6752,-0.7208,-0.137,0.2301,-0.6226,0.193,-0.3281,0.0712,-0.2983,0.2159,0.7019,0.4543,-0.5217,-0.8157,-1.4939,0.7052,0.9414,-0.0804,-0.1386,-0.2739,0.0016,0.269,0.2279,-0.7017,-0.619,-0.0078,-0.003,0.4303,0.2629,-0.0097,-0.2623,-0.1541,0.2293,-0.2748,0.0334,-0.1666,-0.0125,0.1239,0.163,-0.4902,-0.5249,-0.4849,-1.0637,-0.9855,-2.4226,-2.6576,1.8896,-0.4191,0.5829,0.6871,-0.4446,-0.8575,-1.9612,0.194,0.1277,-0.9216,-1.538,-2.1376,0.4262,1.6516,0.7945,1.1129,0.2741,-0.7335,0.1555,0.1167,0.5676,-1.0379,1.6874,0.1937,0.0151,-0.644,0.0985,-0.4174,-0.8434,0.4003,0.5961,0.7743,0.197,0.815,0.2194,0.6561,-0.5881,0.0672,0.8303,0.6052,-0.3717,-0.0575,-0.2689,0.7896,0.2259,-2.2444,-1.229,0.3074,0.6885,0.2918,0.6924,-0.0259,-1.0687,-0.0838,-0.8184,0.5736,-0.5376,0.5226,0.5668,-0.5747,-1.3569,-5.4786,-5.4962,4.5769,3.0635,0.6637,0.2965,-0.9172,-0.2122,0.5567,1.5154,0.8607,1.2252,0.4453,-0.1288,0.5126,0.6055,0.228,-0.6336,0.4694,1.0903,-0.335,-0.9101,1.4757,1.1019,1.814,-1.1625,0.7539,0.7441,-0.9425,-1.1021,-1.1436,0.3458,-0.2417,-1.2367,0.1523,-0.0276,-0.5448,0.7113,-1.1659,-0.1196,0.6317,0.6774,0.7914,-0.3713,-0.9061,-0.6883,0.2734,0.3658,0.1873,0.4708,-0.977,0.0224,0.3041,-0.6081,-0.8459,0.1749,-0.2065,-0.1021,0.6579,-0.525,-0.3968,-0.68,-0.584,0.9755,-0.0933,-0.4868,-0.0209,-0.5487,-0.152,-0.2327,0.5808,0.5757,3.6508,1.2274,-0.9278,-2.2686,-0.2284,0.7863,2.1846],[0.7356,0.9589,-0.1944,0.0338,0.944,0.4823,2.0547,1.8074,1.1235,0.0101,-0.6535,1.1089,-0.2145,-0.2152,-0.2158,0.2199,0.2173,-0.219,0.2135,0.6423,-0.2228,0.2059,-0.439,-0.225,0.415,0.8359,-0.2293,-0.2299,0.4028,-0.0215,0.187,0.1846,0.3908,-0.2368,-0.8618,0.8014,0.3813,0.3777,0.1689,-0.2432,-0.2437,-0.6535,0.1643,-0.0416,0.5665,-0.4506,-0.6535,0.1565,0.3559,0.3524,-0.2521,-0.453,0.347,0.1445,0.5394,0.1391,-0.4557,-0.2582,-0.6535,0.5291,0.5244,0.3245,0.3213,-0.0702,-0.0713,-0.6535,0.121,-0.074,0.3098,-0.8459,-0.846,1.0749,0.3024,0.8695,0.4836,-0.0866,-0.4648,-0.088,-0.0891,0.2848,0.2818,-0.0937,-0.6535,0.2771,0.2742,0.0865,-0.2842,-0.8381,-0.2844,-0.2849,-0.1014,0.081,0.0792,-0.8365,-1.0198,-0.1041,-0.1052,-0.1062,-0.1072,-0.1082,-0.2905,-0.291,-0.2914,-0.2918,0.0685,-0.6535,-0.8338,0.0672,-0.2938,0.2438,1.4889,-0.6535,-0.6535,0.2346,0.0551,0.7585,-0.1257,-0.4778,-0.6535,0.2235,1.0928,1.7741,-0.4809,-0.3085,0.8939,0.0317,-0.6535,0.8823,-0.1433,-0.4836,-0.8234,1.2096,0.5261,0.0184,0.5187,0.6805,-0.1548,-1.4851,-0.6535,0.676,-1.6501,-1.153,-1.8224,0.015,0.5128,1.0046,0.9954,-0.6535,-0.4891,-0.325,0.3298,-0.1631,-0.1639,-0.6535,-1.3065,0.6511,1.6157,1.1173,-1.2962,-1.1364,-0.3314,-0.3318,0.4697,0.3059,-0.9729,-1.4536,-0.9742,0.7867,0.9386,1.2457,0.2916,1.0713,0.2831,-1.1214,-0.4974,-0.0301,0.8993,-0.4987,-1.739,-0.0327,1.047,1.6497,1.3282,-0.9575,-0.5015,0.7114,0.8557,2.9374,-0.0592,-3.0377,-1.8529,1.5914,-0.0577,0.9787,1.8514,0.8101,-0.0701,0.2195,-0.0729,-2.107,-2.2607,-1.0933,-0.2137,0.2476,0.9241,2.0264,1.2609,1.1476,-0.0811,-0.7287,-1.1962,0.1602,-0.0217,1.0973,-0.8519,0.8124,0.2039,1.8982,1.1341,1.8257,2.3108,0.8949,-1.8359,-1.0627,-3.6551,-6.3709,-3.7271,0.6305,0.8131,0.0646,0.0836,0.1993,1.8752,-1.1226,0.0089,-0.4686,-0.3689,-0.4443,-1.1746,0.3551,-0.5798,0.558,-0.1404,-0.4244,-0.9423,-0.5911,-0.2456,-0.4816,-0.2856,-0.5292,-0.1459,0.7514,0.8009,2.2154,1.2442,0.734,-0.9703,-0.3917,0.1607,-0.2049,-1.2639,-0.903,-1.3836,0.6446,0.6454,1.5833,0.2383,-1.0006,-1.0873,-1.1357,0.9873,0.6628,-0.7685,-2.0576,-1.4508,0.2195,1.758,0.1185,-0.961,-0.1276,0.0551,-0.537,-0.2981,-0.3099,-1.4158,-1.2579,-0.6789,0.4443,0.4378,1.2444,0.3196,0.3773,-0.1035,-0.7689,-1.1478,-0.4311,-1.3972,-2.2541,-2.3346,-2.0481,0.6277,1.1009,-0.0531,0.8497,0.3803,-0.6337,-1.0725,-1.1141,-0.7865,-1.2782,-1.6655,-0.1652,-0.4103,0.6168,0.7449,0.5402,0.3159,-1.1323,-0.3821,0.0564,-0.2851,-1.1137,-0.5567,1.0644,0.2752,-0.4133,0.222,-0.4009,-0.3854,-0.8575,0.2305,0.9078,-0.8404,-0.6463,-0.8273,0.9527,0.6841,0.0142,0.5194,0.5735,-0.1826,-0.6335,-0.4893,-0.3101,-0.1316,-1.6454,-1.5993,-0.0904,0.5936,1.0097,0.9078,-0.0248,-0.5946,-0.1599,-0.6685,-0.422,0.0216,-0.8121,-0.9226,0.4913,0.1557,-1.2977,-2.6371,-0.6477,0.9599,0.8382,0.2773,-0.242,-0.5308,-0.8341,-0.3753,0.6015,0.9606,1.4333,1.7665,1.7073,2.0806,0.7653,-0.0433,0.1484,1.7926,0.7956,0.2535,1.8238,2.0347,3.2677,0.9924,2.5877,3.3799,-0.6884,-0.7583,-0.0183,0.5434,-0.9523,-1.5625,1.7009,0.9922,0.3237,0.8384,0.0901,0.2996,-0.0901,0.6348,0.0803,-0.7669,-1.2499,-0.9473,0.9527,1.1708,1.2515,0.4953,-0.1626,-0.5537,-0.3102,-0.413,-0.1796,-0.3133,-0.8137,-0.5486,1.2755,0.6568,0.0101,0.2659,-0.0367,0.3528,-0.2075,0.1946,0.0975,-0.9624,-0.9624,-0.7155,0.4375,0.7367,2.4317,1.849,1.2076,-1.6884,-0.6836,0.2853,1.0713],[1.2314,0.5865,0.955,-0.1045,-1.2561,-0.0124,1.3235,0.6786,-0.7494,-1.4864,-1.3943,0.0798,-1.0718,1.2314,-0.2887,0.1719,1.001,-0.0124,-1.6706,-1.1179,-0.5191,-0.473,-1.4864,-0.2427,1.4617,0.955,-0.2427,-0.3809,-0.5651,-1.901,-1.1179,-0.7494,0.8168,1.3235,-0.4269,-0.7494,-1.5324,-1.2561,-0.0124,0.3562,-0.3348,-0.6572,-0.5651,-1.4403,-0.1045,1.8302,0.264,-0.0584,1.0471,2.3829,2.2908,1.001,-0.3348,0.955,-0.2427,1.0471,1.3235,1.0471,-0.6572,-0.1045,-1.3943,-1.21,-0.6112,-1.947,-2.0852,0.5404,1.001,-1.3021,-0.7033,-0.473,-0.9797,-0.2427,0.7707,2.1526,1.1392,1.0932,0.8168,-0.1505,-1.0257,0.9089,-1.3482,-1.4864,0.4943,1.3235,-0.7033,1.2774,0.955,-0.7954,-0.9797,-1.21,0.4022,-0.3809,-0.7954,-0.6572,-0.2887,-1.21,0.1719,0.4022,-0.0124,0.0798,-0.6572,-0.1505,-0.5191,-2.4076,-1.2561,1.4156,-0.7954,0.3562,1.3235,1.0932,-0.1966,1.692,1.692,-0.473,0.7247,-0.0584,0.9089,-0.3348,1.1853,1.7841,-0.6112,-1.1639,-1.21,2.1066,-1.5324,-0.1966,-0.9797,-0.1045,-0.2427,-0.0584,-2.1773,-0.3348,-0.2427,-0.9336,1.1853,1.1853,-0.473,-0.1505,-1.21,-1.0718,-0.7033,0.4022,2.0605,-0.1966,-0.5651,1.7381,-0.2887,-0.1966,-1.0257,-1.2561,-1.7628,-1.7628,0.3562,0.5404,-0.0584,0.1258,-0.6572,-0.3809,0.7247,-1.7628,-1.0718,3.0278,2.1987,-0.7954,0.1258,0.0798,-0.1045,-0.5191,-0.2887,-1.1179,2.429,1.7381,0.0798,-1.0257,-0.9797,-0.6572,-0.1045,0.4483,0.218,-0.0124,-0.1966,1.5538,-0.7033,-0.8876,-0.6112,0.8629,0.4022,-0.2427,1.2314,0.4022,-0.2887,-0.1966,0.7247,0.7247,1.2774,0.5865,0.0337,-0.0584,-0.9336,-0.7033,0.0798,-0.5651,-0.1505,0.955,-0.1505,-0.7033,0.6325,0.3101,1.6459,-0.4269,-1.4864,-0.6572,0.0798,-1.7167,-0.1966,-1.6246,0.0337,-1.0257,0.8168,0.955,1.0471,-0.3809,-0.5191,-0.8876,0.5865,-1.2561,-5.0793,0.4943,1.6459,-0.1966,0.5404,1.692,2.0144,-0.7033,0.1719,-0.8415,-0.0124,0.0798,0.9089,0.6786,-0.1505,0.218,0.5865,-1.947,-0.9797,-0.8415,-1.3943,-0.1966,-0.473,1.0471,2.4751,0.4943,0.9089,-0.7494,0.264,-1.3021,-0.7494,0.0337,-3.1907,-1.4403,0.8168,-0.6112,-0.1045,-0.0124,0.0337,0.955,-0.5191,-1.1179,-0.7954,-0.3809,0.7247,0.218,0.1719,-0.4269,0.3562,0.9089,0.3562,-0.0584,-0.8876,0.8168,1.7381,1.3235,0.7707,0.3562,-0.8415,0.4943,0.8629,-0.1505,-0.6572,0.0798,-0.0124,-0.6572,0.218,-0.2427,-0.5191,0.5404,-1.0257,0.1719,-0.5191,-1.4864,0.4943,0.3101,-0.4269,1.2314,0.7707,-0.1505,-0.6572,0.0337,-0.4269,0.9089,-0.0584,-0.6572,-1.3943,0.5404,-0.3348,0.0337,-0.7494,-0.6112,0.3101,0.3562,0.6325,1.7841,1.6459,-0.2427,-0.0124,0.3101,-0.7954,0.0337,-0.473,0.6325,-0.473,-0.0124,0.7707,-0.0124,0.264,0.8629,1.3235,-0.0584,0.1719,0.5404,-0.2887,-0.0584,0.0337,0.5404,0.7247,-0.1045,-1.3021,-0.5191,-0.1045,-0.473,-0.1505,-0.5651,-1.4864,-0.0124,-1.947,0.3562,0.0798,0.4943,0.264,-0.4269,-1.1639,-2.8683,-0.9336,0.0798,0.3101,-0.473,0.1719,0.1719,0.5404,0.4022,0.3101,0.7247,0.8629,1.6459,0.1719,-0.0584,-0.4269,-0.8876,-0.1505,0.4483,1.001,-0.0584,-0.3809,1.3695,0.8168,0.955,2.8896,0.7247,1.1392,-1.0718,0.0337,2.8896,2.1526,-0.3809,-1.21,-0.3809,1.0471,-0.3809,-0.8876,0.5404,0.8629,0.7247,1.2774,1.001,1.9684,-1.3482,-2.1773,0.218,0.7247,0.0337,1.5538,-0.2427,-0.7494,-0.2427,-1.7167,-0.6572,1.7841,1.2314,0.1719,1.1392,-0.7954,-0.7494,0.0337,0.6786,-0.1505,0.0798,-0.5651,-0.6112,-0.2427,0.1719,0.264,0.3562,-0.3348,0.5865,0.3562,0.7707,-0.0124,0.6325,0.4022,1.4617],[-0.985,0.4682,-0.2196,0.7769,0.5956,-0.2243,-2.5512,-1.5148,-0.9359,0.5322,0.9638,-0.4732,2.7744,0.5608,0.3498,-0.3204,-0.1746,-0.0546,0.4649,-0.3539,-0.2195,-0.2656,-0.0109,1.7065,-0.4324,-0.5487,-0.1932,0.3031,-0.6377,0.2606,-0.0046,-0.1601,-0.5961,0.4906,0.6312,-0.2227,0.213,0.33,-0.6366,-0.061,-0.022,-0.2443,0.2247,0.114,0.0837,-0.2571,-0.0137,0.2197,-0.2795,-0.6578,-1.207,0.0303,0.0443,-0.4067,0.582,-0.0344,-0.3845,-0.3647,-0.5492,0.4102,0.7806,0.4428,0.622,0.6591,0.6149,0.7157,-0.1101,0.7627,0.0017,0.3975,0.677,-0.2034,1.3464,-0.3023,-0.1923,0.4,0.1069,-1.23,0.5941,0.3098,0.8757,1.1252,0.088,0.6483,0.945,-0.414,-1.2039,2.2091,1.2067,1.3137,-0.1381,0.0947,0.2192,-0.5561,0.4882,-0.168,1.4908,1.2068,0.7005,-0.2911,-0.1973,0.9848,-2.2368,-1.6272,0.1233,2.6612,0.8884,1.1403,-0.2453,0.5738,0.9303,-0.2526,-0.3957,1.0036,-1.2933,-0.3922,-0.5817,1.6813,0.5453,-0.2567,-0.9209,0.8495,0.1696,-1.0233,0.6415,0.0122,0.0372,-0.5238,-1.7103,-0.4393,-1.1621,-0.0987,-0.8246,-2.8702,-0.1033,1.6213,-0.8971,-0.9751,-0.8012,-3.5434,0.6397,1.1396,0.1756,-0.3113,-1.1763,1.1117,-1.2224,-1.0246,-1.9271,-3.3972,0.0773,-1.592,-0.6214,1.5438,-0.5265,-0.2999,-2.0814,0.12,1.1911,1.2001,1.3054,-0.0693,-0.2809,0.63,0.3237,0.1003,0.6045,1.105,0.0678,-0.6711,0.0341,-0.9558,0.548,-0.864,-0.6243,0.526,-0.2078,1.0598,0.5131,-0.6117,0.2282,-0.3062,-0.9136,0.1316,0.3624,0.2612,-0.1505,-0.1592,-0.9764,0.8413,0.3521,0.1674,-0.2418,0.1725,-0.0163,-0.457,-1.0008,-0.0404,0.3899,0.4554,0.7485,0.313,0.3532,-0.0453,0.2028,-0.9335,0.8999,0.6899,-0.1406,-0.0773,-1.43,0.6028,0.5811,-1.6069,0.1021,-2.1488,-0.6818,-0.9848,0.9094,0.4589,-1.4504,-1.9901,0.3313,-1.6306,-6.5267,-2.7694,-0.3694,-0.5781,-2.2027,-1.9063,2.9546,1.5247,0.5233,0.0926,1.9134,0.7445,0.4108,0.329,0.3668,0.1315,-1.0602,1.3616,0.8733,-1.9245,-1.245,-0.288,-0.005,0.6779,1.0017,0.443,0.7735,0.7072,0.6244,-0.5482,0.3725,-0.0552,-1.2755,0.6089,-3.293,-0.4656,0.5808,0.2414,0.1833,1.0532,0.8898,0.5476,-0.2528,-1.1158,-0.5672,0.5545,0.6809,0.5829,-0.3045,-1.0456,0.3509,0.915,0.3954,0.5016,0.1568,0.9992,-0.5556,0.6463,-0.1731,0.0859,0.3388,0.8099,0.1781,0.0264,-0.2777,0.5045,-0.1856,0.1807,0.6328,0.1718,-0.3598,0.2484,-0.987,1.2998,-0.0652,-0.5514,0.5331,-0.2261,0.0012,0.0288,-0.3634,-0.2648,-0.9254,-1.527,0.9281,0.5582,-0.5529,-2.0906,-0.4025,1.4657,0.5295,-0.3305,0.0488,0.6561,0.0868,-0.3667,-0.386,0.0865,0.8309,0.1532,0.464,0.2397,-0.2848,0.2242,0.2476,0.0318,-0.1726,0.2142,0.5088,0.198,0.5503,1.0807,-1.0518,-0.2211,-0.7059,0.2996,0.3413,0.1966,0.4339,0.2245,-1.3295,-0.8238,-1.8332,0.2334,1.3306,0.294,0.7744,-0.6699,0.1461,0.8027,-1.1256,0.6028,-0.2383,0.9648,0.4384,0.676,-0.2041,-6.0691,0.9272,1.3441,1.5092,0.709,1.3525,-0.4118,0.2386,0.8417,0.9249,0.5332,0.452,-0.0037,1.3943,-0.0184,0.2699,0.6116,0.3732,-0.2506,-0.1021,1.0606,-0.1527,-0.8026,-1.046,-0.4778,-0.1964,-2.5086,-1.1855,-0.1057,1.5019,-2.3329,-1.1087,1.1941,-0.2328,0.1438,0.6253,-0.9632,0.8528,-0.0307,1.106,0.8238,-0.5106,0.1648,-1.7539,1.0161,1.1695,0.5022,0.9769,0.6682,-0.5102,0.462,0.7413,0.4262,-0.4979,0.5189,0.6355,0.4551,0.18,-0.3419,0.0767,-1.8769,-1.7765,1.9964,0.8305,1.0041,0.2948,0.5515,0.4356,-0.1752,0.2614,0.1099,-0.3384,-1.1776,1.0378,1.564,-0.0566,-0.0802,0.6439,-0.3479],[-0.0169,-0.9048,0.4035,-1.0264,-0.444,0.5544,2.6284,0.2056,0.114,-1.0668,-0.3829,0.9923,-1.4644,-1.2034,-0.1247,-0.1525,0.0787,0.0623,-0.5966,0.4863,-0.2133,0.5136,0.201,-0.2214,-0.0665,0.0206,-0.3402,-0.5726,0.0567,-0.6791,0.3655,-0.3119,1.5605,-1.2311,-1.029,0.1143,0.6238,-0.0465,-0.3505,0.3614,-0.5041,-0.519,0.2303,0.5019,-0.5186,1.0545,-1.3184,-0.0303,1.17,0.679,0.4899,-1.0396,-0.2146,-0.4337,-0.2951,0.6642,0.8759,0.4484,-0.8843,-0.8809,-0.4114,0.368,0.1435,-0.0825,-0.1825,0.3165,0.1436,-0.3615,1.0794,-0.8618,-0.3606,0.8481,0.679,1.0315,-0.42,-0.1558,0.0994,0.5726,-0.8044,0.3165,-0.0678,-0.1407,1.1474,0.0729,0.2123,0.0148,-0.1513,0.087,0.0881,0.1066,0.7271,0.1963,0.0205,1.8474,-1.246,-0.5862,-1.0819,0.0544,0.551,-0.3257,0.2336,-0.5073,2.838,1.1751,-0.2571,-2.0465,-0.1715,0.5934,0.1758,-0.7939,-0.4564,0.681,-0.6315,-0.7049,0.8947,0.0603,-0.1263,-0.5862,0.068,0.3212,0.1089,-0.2276,1.1047,-0.1763,-1.2396,-0.4838,-0.5793,0.5264,1.5237,0.2876,0.0398,-0.3801,-0.3782,1.2144,-0.0734,-1.2487,-0.5565,0.3968,-0.1211,2.9113,-0.4201,-1.2612,-0.7065,-0.3872,0.1753,-1.1411,0.2951,0.0631,1.4172,1.8392,-0.0502,0.6789,-0.4005,-1.3712,0.0132,-0.1684,0.9963,-0.3046,-1.4977,-1.0406,0.0427,-0.3684,0.0416,0.0873,-0.489,-0.2107,-0.2011,-0.2656,-0.0339,0.6227,-0.7282,0.7452,-0.8753,0.0691,0.4573,-1.0378,0.3836,-0.5965,-0.5231,0.4704,-0.8416,0.7082,0.6002,-0.2072,-0.9961,-0.4347,0.9825,-0.15,1.0384,-1.2661,-0.4612,0.4153,0.2238,-0.3903,0.0856,1.2288,0.9735,-0.6026,-0.8427,-0.5572,-0.4546,-0.2663,0.0884,0.0491,0.0679,1.8931,-0.9728,0.1765,0.7248,0.8949,2.2857,-0.7318,-0.9142,1.7976,-1.0207,1.0876,-0.081,0.3911,-1.4011,-1.0025,1.1677,0.5917,-0.9875,2.3376,4.3393,0.1536,-1.0946,-0.975,0.1264,-0.1001,-0.9961,-1.066,-0.566,-0.6575,-0.1918,-0.095,-0.1632,-0.1132,-0.6917,-0.1697,0.5461,-1.4579,-0.1145,3.7304,-0.3951,-0.9612,-0.1949,-0.5749,-0.61,-0.0789,-0.8208,-0.0841,0.046,1.0699,-1.4924,0.2531,0.771,0.0293,3.6946,0.2635,-0.6515,-0.163,-1.4899,-1.3089,-0.5702,-0.797,0.6051,1.0148,0.0432,-1.1312,-0.6891,-0.1553,0.392,0.1642,0.2243,-1.52,0.2586,-0.4673,0.432,-0.2067,1.5236,-1.2973,0.1082,0.2106,0.298,-1.0757,0.5812,0.0265,0.5146,-0.2516,-0.2651,-0.7902,-0.4731,0.3951,0.5761,-0.0061,1.81,-1.8236,1.2014,0.9896,-1.127,-0.4318,-0.5677,-0.0662,0.4505,0.0111,1.8676,1.4011,-2.2879,-0.2106,0.6583,1.6934,-0.3141,-2.1543,-0.6269,0.2385,1.1099,-1.8439,-0.3599,0.8478,0.1616,0.274,-1.2256,-0.436,-0.036,0.1983,0.6145,-1.1636,-0.1952,-0.142,0.9537,-0.8397,-0.1815,0.2525,-0.1577,0.4659,4.3623,-1.0171,-0.244,-1.5765,-0.1921,-0.2378,-0.2821,0.1811,2.4948,0.0172,1.5571,-1.4883,-1.5354,-0.3048,-0.684,1.578,-0.3293,-1.0652,2.1896,-1.2166,-0.0312,-1.2927,0.5831,0.0873,2.1099,6.6409,-2.0322,-1.8022,0.0496,-0.9043,-0.9739,1.167,0.3915,-1.0008,-0.6759,0.6658,-0.4477,-0.3494,-1.3875,0.7821,-0.9356,0.2356,-0.0403,0.7822,-0.6325,0.2182,0.8878,0.5102,0.6515,0.2902,-0.6168,1.1405,-0.2255,-0.7437,-0.7324,1.2951,0.5772,-1.5504,-0.408,-0.4684,-0.0094,0.4545,-1.191,-0.0576,-1.4132,-0.0257,0.8001,-0.2644,1.3522,-1.8279,-0.5933,0.3213,0.2715,-0.08,0.9735,-1.2966,-0.1818,0.7829,1.8218,-0.5435,0.7575,-1.349,-0.0521,0.3438,0.08,1.5583,2.3479,-2.7381,-0.6468,-0.7104,-0.2363,0.0207,0.841,0.5527,-1.4718,0.2501,1.0606,1.7718,-1.5701,-0.8508,0.2399,-0.2814,-0.7037,0.2338],[0.3248,-1.8129,-1.5401,-0.5276,-1.4731,0.7131,2.2197,-0.5795,-0.733,-0.0766,-0.5197,0.3659,-1.6505,-0.2273,-0.5392,-0.2286,0.6248,-0.0738,-1.0801,-0.7072,0.6423,-0.0721,0.0053,-0.777,-0.1501,-0.9539,-0.5608,-0.3161,0.1809,0.82,-0.9562,0.013,-0.2315,-0.8938,-0.1501,-0.6571,-0.1501,-0.065,0.8518,1.8289,0.2295,1.3188,-1.0961,-1.9851,0.5522,0.6101,0.5169,0.1413,-0.5149,-0.0036,-0.6662,0.1459,0.2156,-0.2229,-0.5168,0.722,-0.2936,-0.585,-0.5178,-0.1501,-0.2985,0.2195,0.5031,-0.5839,0.0676,-0.2951,-0.2958,-0.2233,-0.1501,-0.004,-0.0048,0.7065,0.2686,-0.7805,-0.3634,-0.2216,-0.6555,-0.2962,0.1413,-0.4415,-0.297,-0.3719,-0.8261,-1.2351,-0.7895,0.2512,-0.795,-0.1501,-0.3958,-1.5846,-0.1501,-0.2368,0.023,-1.8399,-1.7534,-0.1501,0.6158,-0.2447,0.9646,-0.982,-0.8146,-0.0542,-1.0252,0.3394,0.5212,-0.3403,-0.3416,-0.6346,-0.1501,-0.248,-0.4459,-0.8527,-1.7176,-0.6927,-0.0408,0.7097,4.3398,-1.8225,-1.1242,-0.0512,1.3873,-1.4907,-0.7448,-0.6555,0.9501,-0.5452,-0.9093,-0.1982,-0.5626,-0.5688,0.3723,-0.7781,-0.4695,-0.0433,-0.4719,1.1155,-0.3571,-0.3587,0.2655,0.962,-0.1501,-0.8527,-0.1501,0.4532,1.209,-0.3403,0.6957,0.8502,0.4684,-0.858,-0.4203,0.6527,-0.3265,0.0263,0.9703,1.8864,0.0066,-1.593,-1.2404,2.1477,-0.1501,-0.5469,0.5601,1.2926,-0.1501,0.6524,1.0467,0.3282,-0.7666,-0.0119,-0.4272,-1.5048,0.4283,0.276,0.0605,0.1283,0.87,1.091,0.0409,-1.3164,-0.2163,0.57,-0.4752,-0.6116,0.4418,-0.6094,0.7611,0.9796,0.6981,0.2646,1.7263,1.9679,0.1037,-0.0492,2.4455,2.6442,-3.6416,1.5837,-0.1944,-1.7456,-0.7187,1.7916,-0.0609,-0.1056,1.322,-0.5751,0.8593,-0.6503,-0.6166,0.2321,-0.1501,1.8049,1.4554,1.6834,-0.2547,2.7354,0.8407,1.2156,-1.8833,-0.805,-0.1501,1.4146,-3.3386,-0.4526,-0.9384,-1.7964,1.8073,1.2904,2.4669,-0.7211,-1.2017,1.0529,0.3586,-0.5082,0.2968,1.234,1.1151,2.0226,0.0483,-0.5734,-0.7332,0.3072,0.7428,1.1848,0.4942,-1.0752,0.3855,1.0908,1.3746,0.4291,0.2766,-0.7823,0.1576,0.8124,0.9705,0.4495,0.145,0.6457,2.9848,0.0564,-1.8804,1.0528,-1.7943,0.0883,1.3522,-1.2818,-0.6057,-1.1898,0.0259,-0.238,0.4764,1.7622,-0.118,-0.5544,-0.7594,-0.3674,-0.8982,-0.7597,-2.0628,-1.581,-1.5952,-1.3666,1.2538,-0.2124,-0.8235,-1.0372,-1.3631,0.3504,1.085,0.6161,-0.9595,-0.3453,-0.3686,0.5431,-0.4946,-1.4354,-0.4923,-1.2503,0.4638,0.994,-0.6935,-1.2695,0.3217,-0.1501,-0.5507,-1.4618,-0.3999,0.025,0.6851,-1.975,-0.4096,0.4176,2.3417,0.8825,-0.2178,0.2758,0.1816,1.1598,-0.0872,-0.4236,-1.448,-0.7996,-2.0482,0.6859,0.8212,-0.2184,0.6585,-0.6189,0.1633,-0.6669,0.8741,0.5196,-0.8855,-0.1063,-0.5467,1.2987,-0.1501,-0.2768,0.0608,-0.8307,-0.6059,-1.1298,-0.9779,-0.2436,0.2451,-0.0119,0.5083,0.7769,0.4513,-0.5568,-0.4754,-0.1938,1.4423,0.9429,1.5259,0.0548,-0.4487,-0.6041,0.002,1.3635,0.4894,-0.2381,1.4091,0.3946,0.1102,1.6531,1.6441,-0.8278,-0.473,-0.6566,-0.2706,-0.0146,-1.0509,-1.5824,0.5274,1.2488,-0.3785,-0.5659,-0.5092,-0.3077,-0.1185,0.5514,-0.6471,0.2544,0.461,1.207,-0.309,-1.4543,-0.3328,-1.7849,0.3631,-1.5179,-0.4352,0.8598,1.0125,1.3682,-0.7929,0.7135,1.0974,-0.2625,-0.8487,-0.0349,-0.614,-0.194,-0.1501,0.8282,0.4375,-0.0396,-0.3022,1.662,2.013,0.0895,-0.45,0.705,0.6797,0.9741,1.1191,-0.5598,-0.1819,0.4991,1.7023,0.6898,1.977,0.6321,0.2204,-0.2591,0.0841,2.2434,2.6842,0.0496,1.3336,2.6008,1.383,-1.0818,-0.941,-0.9578,-2.4362,-1.1978,2.0861,-0.7413]]};
+
   /* =====================================================================================
      brain.js (v0.6, v0.8): the system as a signed, weighted graph, and (v0.8) a reasoner over it. Shocks propagate order by order
      (x_k = W' x_k-1), so the desk can show what arrives first, second, third and fourth.
@@ -10025,6 +10145,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     const ob = brObserved();
     if (Object.keys(ob.values).length < 1) { BR.thought = null; return null; }
     try { BR.thought = brThink(W, BR.K, ob.values); BR.thought.src = ob.src; BR.thought.steps = brTrace(BR.thought, ob, W); } catch (e) { BR.thought = null; }
+    if (BR.thought) try { brTraceFrontier(BR.thought, W); } catch (e) { /* the core trace stands on its own */ }
     return BR.thought;
   }
   function renderThink(W) {
@@ -10097,7 +10218,8 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     let seeing = NaN;
     try { const T = th.T, roots = BR_ROOTS.map((id) => BR_IDX[id]); const ab = brAbduce(T, { [sIdx]: size }, roots); seeing = brPredict(T, ab).mean[t]; } catch (e) { seeing = NaN; }
     $("#br-sd").textContent = `Doing: if ${BR_NODES[sIdx].n} is set to ${sg(size, 1)}σ from outside (its own causes cut), ${BR_NODES[t].n} moves ${sg(doing, 2)}σ. Seeing: if ${BR_NODES[sIdx].n} is merely observed at ${sg(size, 1)}σ, the brain first asks what caused it, and that inference implies ${sg(seeing, 2)}σ. ${fin(seeing) && Math.abs(seeing - doing) > 0.1 ? "The gap is what the observation signals about its causes: a move you cause and a move you see are not the same news." : "Here the two agree: the move carries little news about its causes."}`;
-    $("#br-think-sum").textContent = th.steps[1] ? th.steps[1].t : "";
+    const ex = th.steps.find((x) => x.h === "Explain");
+    $("#br-think-sum").textContent = ex ? ex.t : "";
   }
   function renderThinkFocus() {
     document.querySelectorAll("#br-steps .br-step").forEach((li, i) => li.classList.toggle("active", i === BR.step));
@@ -10262,6 +10384,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     brRunThink(W);
     Object.assign(BR, { lastW: W, lastRes: res, lastS: sIdx, lastT: t, lastSize: size });
     guard("The brain's reasoning", () => renderThink(W), $("#br-steps"));
+    guard("Frontier reasoning", () => { wireFrontier(); renderFrontier(W); }, $("#brf-regime"));
     syncViewButtons();
     drawBrain(W, res, sIdx, t, size);
     syncEdgeEditor();
@@ -10360,6 +10483,651 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     }), 1);
     const c = D.corr || D.y10_eq_corr || {};
     $("#br-meas-note").textContent = `Standardized monthly changes, ${A.months} and ${B.months} months. The monthly correlation of 10-year yield changes with stock returns went from ${sg(c.low_inflation)} to ${sg(c.inflation)}: rising yields used to mean good growth news; now they mean inflation, and stocks fall. The second regime is short, so its standard errors are about three times wider.`;
+  }
+
+  /* =====================================================================================
+     brainx.js (v0.9): the brain's frontier reasoning, mirroring buildout/thinking.py and discovery.py.
+     Which world are we in (Bayesian model comparison over regimes), how surprised should we be (Mahalanobis and
+     leave-one-out), what would have happened otherwise (counterfactuals and but-for attribution), which channels
+     carry the effect (exact path attribution), how a bad quarter most plausibly happens (reverse stress on the
+     graph), and, from the data itself, whether the assumed causal order holds (DirectLiNGAM) and how fast the links
+     move (Kalman time-varying links).
+     ===================================================================================== */
+  function logdetSPD(M) {                                      // Cholesky; M symmetric positive definite
+    const n = M.length, L = Array.from({ length: n }, () => new Float64Array(n));
+    let ld = 0;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j <= i; j++) {
+        let s = M[i][j];
+        for (let k = 0; k < j; k++) s -= L[i][k] * L[j][k];
+        if (i === j) { if (!(s > 0)) throw new Error("not positive definite"); L[i][i] = Math.sqrt(s); ld += 2 * Math.log(L[i][i]); }
+        else L[i][j] = s / L[j][j];
+      }
+    }
+    return ld;
+  }
+  // the readings' joint density under the whole map, by Woodbury (only an m x m inverse, m = number of roots)
+  function brMarginal(T, observed, roots, obsSd = 0.5, priorSd = 1.0) {
+    const obs = Object.keys(observed).map(Number).sort((a, b) => a - b), y = obs.map((i) => observed[i]);
+    const A = obs.map((i) => roots.map((r) => T[i][r])), n = obs.length, m = roots.length, lam = (obsSd / priorSd) ** 2, s2 = obsSd * obsSd;
+    const AtA = Array.from({ length: m }, (_, a) => Array.from({ length: m }, (__, b) => A.reduce((acc, row) => acc + row[a] * row[b], 0)));
+    const Minv = matInv(AtA.map((r, a) => r.map((v, b) => v + (a === b ? lam : 0))));
+    const Aty = roots.map((_, a) => A.reduce((acc, row, i) => acc + row[a] * y[i], 0));
+    const MA = Minv.map((r) => r.reduce((acc, v, b) => acc + v * Aty[b], 0));
+    const SinvY = y.map((v, i) => (v - A[i].reduce((acc, x, a) => acc + x * MA[a], 0)) / s2);
+    const diag = A.map((row) => { let q = 0; for (let a = 0; a < m; a++) for (let b = 0; b < m; b++) q += row[a] * Minv[a][b] * row[b]; return (1 - q) / s2; });
+    const logdet = n * Math.log(s2) + logdetSPD(AtA.map((r, a) => r.map((v, b) => v / lam + (a === b ? 1 : 0))));
+    const q = y.reduce((acc, v, i) => acc + v * SinvY[i], 0);
+    return { obs, y, logpdf: -0.5 * (n * Math.log(2 * Math.PI) + logdet + q), maha2: q, Sinv_y: SinvY, Sinv_diag: diag };
+  }
+  // which version of the map makes today's readings most probable: posterior over regime blends, equal priors
+  function brRegimePosterior(Tby, observed, roots, obsSd = 0.5, priorSd = 1.0) {
+    const blends = Object.keys(Tby).map(Number).sort((a, b) => a - b);
+    const lp = blends.map((b) => brMarginal(Tby[b], observed, roots, obsSd, priorSd).logpdf), mx = Math.max(...lp);
+    const w = lp.map((v) => Math.exp(v - mx)), z = w.reduce((a, v) => a + v, 0), p = w.map((v) => v / z);
+    return { blends, logpdf: lp, p, mean_blend: p.reduce((a, v, i) => a + v * blends[i], 0), bayes_factor_new_vs_old: Math.exp(lp[lp.length - 1] - lp[0]) };
+  }
+  // regularized upper incomplete gamma Q(a, x) (series below a+1, Lentz continued fraction above)
+  function lgammaFn(x) {
+    const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    let y = x, t = x + 5.5; t -= (x + 0.5) * Math.log(t);
+    let s = 1.000000000190015;
+    for (const k of c) s += k / ++y;
+    return -t + Math.log(2.5066282746310005 * s / x);
+  }
+  function gammaQ(a, x) {
+    if (!(x > 0)) return 1;
+    const gln = lgammaFn(a);
+    if (x < a + 1) {
+      let ap = a, sum = 1 / a, del = sum;
+      for (let i = 0; i < 1000; i++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-16) break; }
+      return 1 - sum * Math.exp(-x + a * Math.log(x) - gln);
+    }
+    let b = x + 1 - a, c = 1 / 1e-300, d = 1 / b, hh = d;
+    for (let i = 1; i < 1000; i++) {
+      const an = -i * (i - a); b += 2;
+      d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1 / d; const del = d * c; hh *= del;
+      if (Math.abs(del - 1) < 1e-16) break;
+    }
+    return Math.exp(-x + a * Math.log(x) - gln) * hh;
+  }
+  const chi2sf = (x, k) => gammaQ(k / 2, x / 2);
+  // how unusual today's readings are for this map, and which reading the others predict worst (exact leave-one-out)
+  function brSurprise(T, observed, roots, obsSd = 0.5, priorSd = 1.0) {
+    const mg = brMarginal(T, observed, roots, obsSd, priorSd);
+    const loo = mg.obs.map((o, i) => ({ node: o, z: mg.Sinv_y[i] / Math.sqrt(mg.Sinv_diag[i]) })).sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+    return { maha2: mg.maha2, dof: mg.obs.length, p: chi2sf(mg.maha2, mg.obs.length), loo };
+  }
+  function brFactual(T, ab) {
+    const x = T.map((row) => ab.roots.reduce((acc, r, j) => acc + row[r] * ab.s[j], 0));
+    ab.obs.forEach((o, i) => { x[o] = ab.y[i]; });
+    return x;
+  }
+  // Pearl's third rung: keep everything the evidence says about the other causes, change one thing, re-run
+  function brCounterfactual(W, K, T, ab, node, v) {
+    const xf = brFactual(T, ab), Tc = brTotal(W.filter((e) => e.to !== node), K), d = v - xf[node];
+    const xcf = xf.map((x, i) => x + Tc[i][node] * d);
+    return { factual: xf, counterfactual: xcf, change: xcf.map((x, i) => x - xf[i]) };
+  }
+  function brButFor(T, ab, target) {
+    return ab.roots.map((r, j) => ({ root: r, contribution: T[target][r] * ab.s[j], book_if_absent: -T[target][r] * ab.s[j] }))
+      .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+  }
+  // every walk of 1..K links from a root to the target; the walks sum exactly to T[target][r] * s_r
+  function brPathAttribution(W, K, ab, target, top = 8) {
+    const n = BR_NODES.length, out = BR_NODES.map(() => []);
+    W.forEach((e) => { if (e.w) out[e.from].push([e.to, e.w]); });
+    const reach = [new Set([target])];
+    for (let d = 1; d <= K; d++) { const s = new Set(); for (let f = 0; f < n; f++) if (out[f].some(([t]) => reach[d - 1].has(t))) s.add(f); reach.push(s); }
+    const can = []; for (let d = 0; d <= K; d++) { const s = new Set(); for (let j = 0; j <= d; j++) reach[j].forEach((v) => s.add(v)); can.push(s); }
+    const paths = []; let total = 0;
+    ab.roots.forEach((r, j) => {
+      if (r === target) return;
+      const sr = ab.s[j], stack = [[r, 1, [r]]];
+      while (stack.length) {
+        const [node, prod, path] = stack.pop(), left = K - (path.length - 1);
+        for (const [t, w] of out[node]) {
+          if (left - 1 < 0 || !can[left - 1].has(t)) continue;
+          const p2 = prod * w, np = path.concat(t);
+          if (t === target) { paths.push([sr * p2, np]); total += sr * p2; }
+          if (left - 1 > 0) stack.push([t, p2, np]);
+        }
+      }
+    });
+    paths.sort((a, b) => Math.abs(b[0]) - Math.abs(a[0]));
+    const shown = paths.slice(0, top);
+    return { paths: shown.map(([c, p]) => ({ nodes: p, contribution: c })), n_paths: paths.length, total, other: total - shown.reduce((a, [c]) => a + c, 0) };
+  }
+  // the most plausible root shocks that put the target at a level: forward (next quarter's shocks) or now (posterior)
+  function brLossStory(T, roots, target, level, sMean = null, cov = null, priorSd = 1.0, exclude = []) {
+    const m = roots.length, s = sMean ? sMean.slice() : new Array(m).fill(0), ex = new Set(exclude);
+    const C0 = cov || Array.from({ length: m }, (_, a) => Array.from({ length: m }, (__, b) => (a === b ? priorSd * priorSd : 0)));
+    const keep = roots.map((r) => (ex.has(r) ? 0 : 1)), C = C0.map((row, a) => row.map((v, b) => v * keep[a] * keep[b]));
+    const a = roots.map((r) => T[target][r]), Ca = C.map((row) => row.reduce((acc, v, b) => acc + v * a[b], 0));
+    const varr = a.reduce((acc, v, i) => acc + v * Ca[i], 0), mean = a.reduce((acc, v, i) => acc + v * s[i], 0);
+    if (!(varr > 1e-14)) return { possible: false, mean };
+    const k = (level - mean) / varr, sStar = s.map((v, i) => v + Ca[i] * k), z = (level - mean) / Math.sqrt(varr);
+    const shift = sStar.map((v, i) => v - s[i]);
+    return { possible: true, mean, sd: Math.sqrt(varr), z, p_at_or_below: ncdf(z), s_star: sStar, shift,
+      state: T.map((row) => roots.reduce((acc, r, j) => acc + row[r] * sStar[j], 0)),
+      drivers: roots.map((r, j) => ({ root: r, shift: shift[j] })).sort((x, y) => Math.abs(y.shift) - Math.abs(x.shift)) };
+  }
+
+  /* ---------- learning the structure from the data (mirrors buildout/discovery.py) ---------- */
+  const LG = { K1: 79.047, K2: 7.4129, G: 0.37457 };
+  const vmean = (x) => x.reduce((a, v) => a + v, 0) / x.length;
+  const vstd = (x) => { const m = vmean(x); return Math.sqrt(x.reduce((a, v) => a + (v - m) ** 2, 0) / x.length); };
+  function lgEntropy(u) {
+    let a = 0, b = 0;
+    for (const v of u) { a += Math.log(Math.cosh(v)); b += v * Math.exp(-v * v / 2); }
+    a /= u.length; b /= u.length;
+    return (1 + Math.log(2 * Math.PI)) / 2 - LG.K1 * (a - LG.G) ** 2 - LG.K2 * b * b;
+  }
+  function lgResidual(xi, xj) {
+    const n = xi.length, mi = vmean(xi), mj = vmean(xj);
+    let c = 0, vj = 0;
+    for (let t = 0; t < n; t++) { c += (xi[t] - mi) * (xj[t] - mj); vj += (xj[t] - mj) ** 2; }
+    const k = (c / (n - 1)) / (vj / n);                        // numpy: cov with ddof 1 over var with ddof 0
+    return xi.map((v, t) => v - k * xj[t]);
+  }
+  const lgStd = (x) => { const m = vmean(x), s = vstd(x); return x.map((v) => (v - m) / s); };
+  function lgDiffMI(xi, xj, rij, rji) {
+    const si = vstd(rij), sj = vstd(rji);
+    return (lgEntropy(xj) + lgEntropy(rij.map((v) => v / si))) - (lgEntropy(xi) + lgEntropy(rji.map((v) => v / sj)));
+  }
+  // DirectLiNGAM with the pairwise likelihood-ratio measure: most exogenous variable first. cols: array of columns
+  function lingamOrder(cols) {
+    const X = cols.map((c) => Float64Array.from(c)), U = X.map((_, i) => i), order = [];
+    while (U.length) {
+      if (U.length === 1) { order.push(U[0]); break; }
+      let best = null, bestM = null;
+      for (const i of U) {
+        let M = 0;
+        const xi = lgStd(Array.from(X[i]));
+        for (const j of U) {
+          if (i === j) continue;
+          const xj = lgStd(Array.from(X[j]));
+          M += Math.min(0, lgDiffMI(xi, xj, lgResidual(xi, xj), lgResidual(xj, xi))) ** 2;
+        }
+        if (bestM == null || -M > bestM + 1e-15) { best = i; bestM = -M; }
+      }
+      for (const i of U) if (i !== best) X[i] = Float64Array.from(lgResidual(Array.from(X[i]), Array.from(X[best])));
+      order.push(best);
+      U.splice(U.indexOf(best), 1);
+    }
+    return order;
+  }
+  function orderAgreement(learned, assumed) {
+    const pl = {}; learned.forEach((v, k) => { pl[v] = k; });
+    const pairs = [];
+    assumed.forEach((a, i) => assumed.slice(i + 1).forEach((b) => pairs.push([a, b])));
+    const agree = pairs.filter(([a, b]) => pl[a] < pl[b]);
+    return { agree: agree.length, pairs: pairs.length, share: agree.length / pairs.length, reversed: pairs.filter(([a, b]) => pl[a] > pl[b]).map(([a, b]) => [b, a]) };
+  }
+  function lgResamples(n, draws, seed = 7) {
+    const rnd = mulberry32(seed), out = [];
+    for (let d = 0; d < draws; d++) { const idx = new Array(n); for (let i = 0; i < n; i++) idx[i] = Math.floor(rnd() * n); out.push(idx); }
+    return out;
+  }
+  function bootstrapOrder(cols, samples) {
+    const p = cols.length, before = Array.from({ length: p }, () => new Array(p).fill(0));
+    for (const idx of samples) {
+      const o = lingamOrder(cols.map((c) => idx.map((t) => c[t]))), pos = {};
+      o.forEach((v, k) => { pos[v] = k; });
+      for (let i = 0; i < p; i++) for (let j = 0; j < p; j++) if (i !== j && pos[i] < pos[j]) before[i][j] += 1;
+    }
+    return { p_before: before.map((r) => r.map((v) => v / Math.max(1, samples.length))), n: samples.length };
+  }
+  // random-walk coefficients: forward Kalman filter, Rauch-Tung-Striebel smoother; X rows are the parents at t
+  function kalmanLinks(y, X, q, r = null, p0 = 1) {
+    const n = y.length, k = X[0].length;
+    if (r == null) {
+      const XtX = Array.from({ length: k }, (_, a) => Array.from({ length: k }, (__, b) => X.reduce((acc, row) => acc + row[a] * row[b], 0)));
+      const Xty = Array.from({ length: k }, (_, a) => X.reduce((acc, row, t) => acc + row[a] * y[t], 0));
+      const inv = matInv(XtX), b = inv.map((row) => row.reduce((acc, v, j) => acc + v * Xty[j], 0));
+      const e2 = y.reduce((acc, v, t) => acc + (v - X[t].reduce((s2, x, j) => s2 + x * b[j], 0)) ** 2, 0);
+      r = e2 / Math.max(1, n - k);
+    }
+    const I = (c) => Array.from({ length: k }, (_, a) => Array.from({ length: k }, (__, b) => (a === b ? c : 0)));
+    const add = (A, B) => A.map((row, a) => row.map((v, b) => v + B[a][b]));
+    const mul = (A, B) => A.map((row) => B[0].map((_, j) => row.reduce((acc, v, m) => acc + v * B[m][j], 0)));
+    const tr = (A) => A[0].map((_, j) => A.map((row) => row[j]));
+    let b = new Array(k).fill(0), P = I(p0), ll = 0;
+    const bf = [], Pf = [], bp = [], Pp = [];
+    for (let t = 0; t < n; t++) {
+      const Pp_ = add(P, I(q)), x = X[t], Px = Pp_.map((row) => row.reduce((acc, v, j) => acc + v * x[j], 0));
+      const f = x.reduce((acc, v, i) => acc + v * Px[i], 0) + r, v = y[t] - x.reduce((acc, xi, i) => acc + xi * b[i], 0);
+      ll += -0.5 * (Math.log(2 * Math.PI * f) + (v * v) / f);
+      const Kg = Px.map((z) => z / f), xP = x.map((_, j) => x.reduce((acc, xi, i) => acc + xi * Pp_[i][j], 0));
+      bp.push(b.slice()); Pp.push(Pp_);
+      b = b.map((bi, i) => bi + Kg[i] * v);
+      P = Pp_.map((row, i) => row.map((val, j) => val - Kg[i] * xP[j]));
+      bf.push(b.slice()); Pf.push(P);
+    }
+    const bs = new Array(n), Ps = new Array(n);
+    bs[n - 1] = bf[n - 1]; Ps[n - 1] = Pf[n - 1];
+    for (let t = n - 2; t >= 0; t--) {
+      const J = mul(Pf[t], matInv(Pp[t + 1])), d = bs[t + 1].map((v, i) => v - bp[t + 1][i]);
+      bs[t] = bf[t].map((v, i) => v + J[i].reduce((acc, z, j) => acc + z * d[j], 0));
+      const D = Ps[t + 1].map((row, i) => row.map((v, j) => v - Pp[t + 1][i][j]));
+      Ps[t] = add(Pf[t], mul(mul(J, D), tr(J)));
+    }
+    return { beta: bs, sd: Ps.map((M) => M.map((row, i) => Math.sqrt(Math.max(row[i], 0)))), loglik: ll, r, q };
+  }
+  const Q_GRID = [1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2];
+  function kalmanMle(y, X, grid = Q_GRID) {
+    const fits = grid.map((q) => kalmanLinks(y, X, q));
+    let best = 0;
+    fits.forEach((f, i) => { if (f.loglik > fits[best].loglik) best = i; });
+    return Object.assign(fits[best], { grid: grid.slice(), loglik_grid: fits.map((f) => f.loglik) });
+  }
+  function signChanges(path, dates) {
+    const out = [];
+    for (let t = 1; t < path.length; t++) if (path[t - 1] * path[t] < 0) out.push({ date: dates[t], to: path[t] < 0 ? "negative" : "positive" });
+    return out;
+  }
+  const BR_ORDER6 = ["oil", "cpi", "y10", "eq", "vix", "gold"];
+  const BR_PARENTS6 = { cpi: ["oil"], y10: ["oil", "cpi"], eq: ["oil", "cpi", "y10"], vix: ["eq", "y10"], gold: ["oil", "y10", "eq"] };
+  const BR_REGIMES6 = { low_inflation: ["1990-02", "2021-12"], inflation: ["2022-01", "9999-12"] };
+  function brSeries() {
+    const L = LIVE.brain && LIVE.brain.series;
+    const ok = L && Array.isArray(L.dates) && L.dates.length >= 120 && L.dates.every((d) => typeof d === "string" && /^\d{4}-\d{2}$/.test(d)) &&
+      Array.isArray(L.z) && L.z.length === 6 && L.z.every((c) => Array.isArray(c) && c.length === L.dates.length && c.every(fin));
+    return ok ? L : BRAIN_SERIES;
+  }
+  // a learned block from the engine is used only if every field the page reads is well formed
+  function validLearned(L) {
+    if (!L || typeof L !== "object" || !Array.isArray(L.dates) || !L.order || !L.links || typeof L.links !== "object") return false;
+    const n = L.dates.length, okOrder = (o) => o && Array.isArray(o.learned) && o.learned.length === 6 && o.learned.every((id) => BR_ORDER6.includes(id)) && o.agreement && fin(o.agreement.share) && fin(o.months);
+    if (!okOrder(L.order.low_inflation) || !okOrder(L.order.inflation)) return false;
+    const P = L.order.low_inflation.p_before;
+    if (P != null && !(Array.isArray(P) && P.length === 6 && P.every((r) => Array.isArray(r) && r.length === 6 && r.every(fin)))) return false;
+    const keys = Object.keys(L.links);
+    return keys.length > 0 && keys.every((k) => { const x = L.links[k], [f, t] = k.split(">"); return BR_IDX[f] != null && BR_IDX[t] != null && x && Array.isArray(x.beta) && Array.isArray(x.sd) && x.beta.length === n && x.sd.length === n && x.beta.every(fin) && x.sd.every(fin) && fin(x.q) && Array.isArray(x.sign_changes); });
+  }
+  // the page's own learning pass on the series (the engine writes the same into brain.json as "learned")
+  function brLearn(block = brSeries(), draws = 200) {
+    const dates = block.dates, out = { order: {}, links: {}, dates };
+    Object.entries(BR_REGIMES6).forEach(([name, [a, b]]) => {
+      const rows = dates.map((d, i) => (d >= a && d <= b ? i : -1)).filter((i) => i >= 0), cols = block.z.map((c) => rows.map((i) => c[i]));
+      const o = lingamOrder(cols);
+      out.order[name] = { months: rows.length, learned: o.map((i) => BR_ORDER6[i]), agreement: orderAgreement(o, [0, 1, 2, 3, 4, 5]),
+        p_before: rows.length >= 120 && draws ? bootstrapOrder(cols, lgResamples(rows.length, draws)).p_before : null };
+    });
+    Object.entries(BR_PARENTS6).forEach(([child, parents]) => {
+      const ci = BR_ORDER6.indexOf(child), pi = parents.map((p) => BR_ORDER6.indexOf(p));
+      const y = block.z[ci], X = y.map((_, t) => pi.map((j) => block.z[j][t])), k = kalmanMle(y, X);
+      parents.forEach((p, j) => {
+        const path = k.beta.map((row) => row[j]);
+        out.links[`${p}>${child}`] = { beta: path, sd: k.sd.map((row) => row[j]), q: k.q, sign_changes: signChanges(path, dates) };
+      });
+    });
+    return out;
+  }
+
+  /* ---------- the frontier steps in the brain's own trace ---------- */
+  function brTraceFrontier(th, W) {
+    const F = brFrontier(W, th), steps = th.steps, y10 = BR_IDX.y10, eq = BR_IDX.eq;
+    const pm = Math.max(...F.regime.p), bi = F.regime.p.indexOf(pm), su = F.surprise, w0 = su.loo[0];
+    steps.splice(1, 0, { k: "est", h: "Which world", nodes: [y10, eq],
+      t: `Before explaining anything, which version of the map fits? Today's readings are most probable under the ${blendName(F.regime.blends[bi])} (${pct0(pm)}), ${Math.round(F.regime.mean_blend * 100)}% of the way to the 2022-on world on average. ${su.p < 0.05 ? `They are surprising for the map (p = ${fx(su.p, 3)}): something it does not model may be moving.` : `They are not surprising for it (p = ${fx(su.p, 2)}).`}${w0 && Math.abs(w0.z) >= 1.5 ? ` The reading the others predict worst: ${BR_NODES[w0.node].n} (${sg(w0.z, 1)} z).` : ""}` });
+    const di = steps.findIndex((x) => x.h === "Look next"), st = F.story;
+    if (st && st.possible) {
+      const d = st.drivers.filter((x) => Math.abs(x.shift) > 0.02).slice(0, 3);
+      steps.splice(di >= 0 ? di : steps.length, 0, { k: "hyp", h: "Stress it", nodes: d.map((x) => x.root).concat([BR_IDX.book]),
+        t: `How a 1-in-20 quarter most plausibly happens for this book: ${d.map((x) => `${BR_NODES[x.root].n} ${sg(x.shift, 1)}σ`).join(", ")}, taking the book to ${sg(st.level, 2)}σ. ${F.alt && F.alt.possible ? `If ${BR_NODES[st.drivers[0].root].n} holds still, the same loss needs a rarer story (1 in ${fx(1 / Math.max(F.alt.p_at_or_below, 1e-9), 0)}).` : ""}` });
+    }
+    th.frontier = F; th.frontierKey = frontierKey();
+  }
+  const frontierKey = () => `${BRF.cf.node}|${BRF.cf.v}|${BRF.tail}|${BRF.mode}`;
+
+  /* ---------- the frontier panels ---------- */
+  const BRF = { cf: { node: "oil", v: 0 }, tail: 0.05, mode: "forward", learned: null, learning: false, link: "y10>eq", wired: false, last: null };
+  const BRF_BLENDS = [0, 0.25, 0.5, 0.75, 1];
+  const brNm = (i) => BR_NODES[i].n;
+  const blendName = (b) => (b <= 0.001 ? "1990 to 2021 links" : b >= 0.999 ? "2022-on links" : `${Math.round(b * 100)}% toward 2022 on`);
+  function brFrontier(W, th) {
+    const roots = BR_ROOTS.map((id) => BR_IDX[id]), book = BR_IDX.book, ob = brObserved().values;
+    const Tby = {}; BRF_BLENDS.forEach((b) => { Tby[b] = brTotal(brWeights(b), BR.K); });
+    const regime = brRegimePosterior(Tby, ob, roots), surprise = brSurprise(th.T, ob, roots);
+    const butfor = brButFor(th.T, th.abduce, book), paths = brPathAttribution(W, BR.K, th.abduce, book);
+    const cfNode = BR_IDX[BRF.cf.node] != null ? BR_IDX[BRF.cf.node] : BR_IDX.oil;
+    const cf = brCounterfactual(W, BR.K, th.T, th.abduce, cfNode, BRF.cf.v);
+    const lvl = (st) => st.mean + st.sd * ninv(BRF.tail);
+    const now = BRF.mode === "now", base = brLossStory(th.T, roots, book, 0, now ? th.abduce.s : null, now ? th.abduce.cov : null);
+    let story = null, alt = null;
+    if (base.possible) {
+      const L = lvl(base);
+      story = brLossStory(th.T, roots, book, L, now ? th.abduce.s : null, now ? th.abduce.cov : null);
+      if (story.possible && story.drivers[0]) alt = brLossStory(th.T, roots, book, L, now ? th.abduce.s : null, now ? th.abduce.cov : null, 1, [story.drivers[0].root]);
+      story.level = L;
+    }
+    return { roots, book, regime, surprise, butfor, paths, cf, cfNode, story, alt };
+  }
+  function renderFrontier(W) {
+    const th = BR.thought, box = $("#brf-regime");
+    if (!box) return;
+    if (!th) { $("#brf-sum").textContent = "Add at least one observation for the brain to reason about."; return; }
+    const F = th.frontier && th.frontierKey === frontierKey() ? th.frontier : brFrontier(W, th);
+    th.frontier = F; th.frontierKey = frontierKey();
+    BRF.last = F;
+    // which world
+    const pmax = Math.max(...F.regime.p), bi = F.regime.p.indexOf(pmax);
+    barsH(box, F.regime.blends.map((b, i) => ({ label: blendName(b), v: F.regime.p[i] * 100, lbl: pct0(F.regime.p[i]), color: i === bi ? "var(--s1)" : "var(--s2)",
+      tip: () => [[pct0(F.regime.p[i]), "posterior"], [fx(F.regime.logpdf[i], 2), "log density of today's readings"]] })),
+      { label: "Posterior probability of each version of the map", fmt: (v) => fx(v, 0) + "%" });
+    const bf = F.regime.bayes_factor_new_vs_old;
+    $("#brf-regime-t").textContent = `Today's readings are most probable under the ${blendName(F.regime.blends[bi])} (${pct0(pmax)}); the weighted reading is ${Math.round(F.regime.mean_blend * 100)}% of the way to the 2022-on world. ` +
+      (bf < 1 ? `The old world explains today ${fx(1 / bf, 1)} times better than the new one: the 2022 break may be fading.` : `The new world explains today ${fx(bf, 1)} times better than the old one.`) + ` The map is currently set to ${blendName(BR.blend)}.`;
+    // surprise
+    const su = F.surprise;
+    $("#brf-surp").textContent = su.p < 0.001 ? "< 0.1%" : pct0(su.p).replace("%", "") === "0" ? fx(su.p * 100, 1) + "%" : pct0(su.p);
+    $("#brf-surp-t").textContent = `Chance of readings at least this unusual if the map is right: ${su.p < 0.001 ? "below 0.1%" : fx(su.p * 100, 1) + "%"} (distance ${fx(su.maha2, 1)} on ${su.dof} readings). ${su.p < 0.05 ? "That is surprising: something the map does not model is moving." : su.p > 0.95 ? "Unusually quiet for this map." : "Within what the map expects."}`;
+    const ll = $("#brf-loo");
+    ll.replaceChildren();
+    su.loo.slice(0, 4).forEach((r) => { const li = h("li"); li.append(h("span", null, `${brNm(r.node)} given the others`), h("b", "num", `${sg(r.z, 2)} z`)); ll.append(li); });
+    // but for
+    const tot = F.butfor.reduce((a, r) => a + r.contribution, 0);
+    fillTable($("#brf-butfor"), ["Cause", "Contribution, σ", "Book had it not happened, σ"],
+      F.butfor.slice(0, 7).map((r) => [brNm(r.root), sg(r.contribution, 3), sg(tot - r.contribution, 3)]), 1);
+    // channels
+    const pl = $("#brf-paths");
+    pl.replaceChildren();
+    const P = F.paths, denom = P.paths.reduce((a, p) => a + Math.abs(p.contribution), 0) + Math.abs(P.other) || 1;
+    P.paths.slice(0, 6).forEach((p) => { const li = h("li"); li.append(h("span", null, p.nodes.map(brName).join(" → ")), h("b", "num", `${sg(p.contribution, 3)}σ`)); pl.append(li); });
+    $("#brf-paths-t").textContent = `${P.n_paths.toLocaleString("en-US")} channels of up to ${BR.K} links carry the inferred causes to the book; together they add to exactly ${sg(P.total, 3)}σ, the book's implied move. The six shown carry ${pct0(P.paths.slice(0, 6).reduce((a, p) => a + Math.abs(p.contribution), 0) / denom)} of the gross flow.`;
+    // counterfactual
+    $("#brf-cf-v-o").textContent = sg(BRF.cf.v, 1) + "σ";
+    const ids = [BR_IDX.book].concat(BR_HOLD.map((id) => BR_IDX[id]));
+    fillTable($("#brf-cf"), ["", "As it is, σ", "Had it been, σ", "Difference"], ids.map((i) => [brNm(i), sg(F.cf.factual[i], 2), sg(F.cf.counterfactual[i], 2), sg(F.cf.change[i], 2)]), 1);
+    const dB = F.cf.change[F.book];
+    $("#brf-cf-t").textContent = `${brNm(F.cfNode)} reads ${sg(F.cf.factual[F.cfNode], 2)}σ. Had it been ${sg(BRF.cf.v, 1)}σ, with everything else the evidence says left as it is, the book would be ${sg(F.cf.counterfactual[F.book], 2)}σ instead of ${sg(F.cf.factual[F.book], 2)}σ (${sg(dB, 2)}σ).`;
+    // loss story
+    const st = F.story, sl = $("#brf-story");
+    sl.replaceChildren();
+    if (!st || !st.possible) { $("#brf-story-t").textContent = "The map has no route to the book from the root causes at these settings."; $("#brf-alt").textContent = ""; }
+    else {
+      st.drivers.filter((d) => Math.abs(d.shift) > 0.02).slice(0, 5).forEach((d) => { const li = h("li"); li.append(h("span", null, brNm(d.root)), h("b", "num", `${sg(d.shift, 2)}σ`)); sl.append(li); });
+      $("#brf-story-t").textContent = `A 1-in-${Math.round(1 / BRF.tail)} ${BRF.mode === "now" ? "error in today's read" : "quarter"} for the map puts the book at ${sg(st.level, 2)}σ (its central view is ${sg(st.mean, 2)}σ, ±${fx(st.sd, 2)}). The most plausible way there:`;
+      $("#brf-alt").textContent = F.alt && F.alt.possible ? `If ${brNm(st.drivers[0].root)} holds still, the next most plausible story leans on ${F.alt.drivers.filter((d) => Math.abs(d.shift) > 0.02).slice(0, 3).map((d) => `${brNm(d.root)} ${sg(d.shift, 1)}σ`).join(", ")}, and the same loss becomes 1 in ${fx(1 / Math.max(F.alt.p_at_or_below, 1e-9), 0)}.` : "";
+    }
+    $("#brf-sum").textContent = `${(F.regime.p[0] > F.regime.p[F.regime.p.length - 1]) ? "The readings fit the pre-2022 map better than the inflation-era one." : "The readings fit the inflation-era map."} ${su.p < 0.05 ? "They are surprising for it." : "They are not surprising for it."} The biggest single contributor to the book is ${F.butfor[0] ? brNm(F.butfor[0].root) : "none"}.`;
+  }
+  // the structure learned from the series: computed once, in small slices that pause while the brain is not on screen
+  function brLearnAsync(done) {
+    if (BRF.learned) { done(BRF.learned); return; }
+    const L = LIVE.brain && LIVE.brain.learned;
+    if (validLearned(L)) { BRF.learned = L; done(L); return; }
+    BRF.waiters = (BRF.waiters || []).concat([done]);
+    if (BRF.learning) { if (BRF.resume) BRF.resume(); return; }
+    BRF.learning = true;
+    const block = brSeries(), dates = block.dates, out = { order: {}, links: {}, dates }, tasks = [];
+    Object.entries(BR_REGIMES6).forEach(([name, [a, b]]) => tasks.push(() => {
+      const rows = dates.map((d, i) => (d >= a && d <= b ? i : -1)).filter((i) => i >= 0), cols = block.z.map((c) => rows.map((i) => c[i])), o = lingamOrder(cols);
+      out.order[name] = { months: rows.length, learned: o.map((i) => BR_ORDER6[i]), agreement: orderAgreement(o, [0, 1, 2, 3, 4, 5]), p_before: null };
+    }));
+    Object.entries(BR_PARENTS6).forEach(([child, parents]) => tasks.push(() => {
+      const ci = BR_ORDER6.indexOf(child), pi = parents.map((p) => BR_ORDER6.indexOf(p)), y = block.z[ci], X = y.map((_, t) => pi.map((j) => block.z[j][t])), k = kalmanMle(y, X);
+      parents.forEach((p, j) => { const path = k.beta.map((row) => row[j]); out.links[`${p}>${child}`] = { beta: path, sd: k.sd.map((row) => row[j]), q: k.q, sign_changes: signChanges(path, dates) }; });
+    }));
+    const [a, b] = BR_REGIMES6.low_inflation, rows = dates.map((d, i) => (d >= a && d <= b ? i : -1)).filter((i) => i >= 0);
+    const cols = block.z.map((c) => rows.map((i) => c[i])), samples = lgResamples(rows.length, 200), acc = Array.from({ length: 6 }, () => new Array(6).fill(0));
+    for (let k = 0; k < samples.length; k += 4) tasks.push(() => { const part = bootstrapOrder(cols, samples.slice(k, k + 4)); part.p_before.forEach((r, i) => r.forEach((v, j) => { acc[i][j] += v * part.n; })); });
+    tasks.push(() => { out.order.low_inflation.p_before = acc.map((r) => r.map((v) => v / samples.length)); });
+    let i = 0, timer = null;
+    const visible = () => { const v = $("#view-brain"); return v && !v.hidden; };
+    const tick = () => {
+      timer = null;
+      if (!visible()) return;                                   // paused; resumes when the brain is shown again
+      const t0 = performance.now();
+      try { while (i < tasks.length && performance.now() - t0 < 30) tasks[i++](); } catch (e) { BRF.learning = false; return; }
+      if (i < tasks.length) { timer = setTimeout(tick, 16); return; }
+      BRF.learned = out; BRF.learning = false; BRF.resume = null;
+      const ws = BRF.waiters; BRF.waiters = [];
+      ws.forEach((f) => f(out));
+    };
+    BRF.resume = () => { if (!timer && BRF.learning) timer = setTimeout(tick, 16); };
+    timer = setTimeout(tick, 60);
+  }
+  function renderLearned() {
+    const box = $("#brl-order");
+    if (!box) return;
+    brLearnAsync((L) => {
+      box.replaceChildren();
+      const row = (label, list, ref) => {
+        const r = h("div", "brl-row");
+        r.append(h("span", "brl-lab", label));
+        const ol = h("ol", "brl-chips");
+        list.forEach((id, i) => { const li = h("li", ref && ref[i] !== id ? "moved" : null, BR_NODES[BR_IDX[id]] ? BR_NODES[BR_IDX[id]].s : id); ol.append(li); });
+        r.append(ol);
+        box.append(r);
+      };
+      row("Assumed", BR_ORDER6, null);
+      row("Learned, 1990 to 2021", L.order.low_inflation.learned, BR_ORDER6);
+      row("Learned, 2022 on", L.order.inflation.learned, BR_ORDER6);
+      const lo = L.order.low_inflation, P = lo.p_before;
+      const firm = [];
+      if (P) BR_ORDER6.forEach((a, i) => BR_ORDER6.forEach((c, j) => { if (i !== j && P[i][j] >= 0.8) firm.push(`${BR_NODES[BR_IDX[a]].s} before ${BR_NODES[BR_IDX[c]].s} (${pct0(P[i][j])})`); }));
+      $("#brl-order-t").textContent = `In 1990 to 2021 the data orders ${lo.agreement.agree} of ${lo.agreement.pairs} pairs the way the map assumes (${pct0(lo.agreement.share)}). Orderings that hold in at least 80% of resamples: ${firm.length ? firm.join("; ") : "none"}. Most others are close to a coin flip, so the ordering is an assumption the data neither confirms nor rejects. Since 2022 there are only ${L.order.inflation.months} months, too few to learn an order with confidence.`;
+      const bt = $("#brl-boot");
+      if (P) fillTable(bt, ["Before →"].concat(BR_ORDER6.map((id) => BR_NODES[BR_IDX[id]].s)), BR_ORDER6.map((a, i) => [BR_NODES[BR_IDX[a]].s].concat(P[i].map((v, j) => (i === j ? "" : pct0(v))))), 1);
+      const sel = $("#brl-link");
+      if (!sel.options.length) {
+        Object.keys(L.links).forEach((k) => { const [f, t] = k.split(">"); sel.append(new Option(`${BR_NODES[BR_IDX[f]].n} → ${BR_NODES[BR_IDX[t]].n}`, k)); });
+        sel.value = BRF.link;
+        sel.addEventListener("change", () => { BRF.link = sel.value; drawLink(); });
+      }
+      drawLink();
+      $("#brl-sum").textContent = `The map's two core assumptions, tested on ${L.dates.length} months: the causal order agrees on ${pct0(lo.agreement.share)} of pairs, and ${linkLine(L, "y10>eq")}`;
+    });
+  }
+  function linkLine(L, key) {
+    const k = L.links[key];
+    if (!k) return "";
+    const n = k.beta.length, last = k.sign_changes[k.sign_changes.length - 1], [f, t] = key.split(">");
+    return `${BR_NODES[BR_IDX[f]].n} → ${BR_NODES[BR_IDX[t]].n} reads ${sg(k.beta[n - 1], 2)} (±${fx(1.645 * k.sd[n - 1], 2)} at 90%) in ${L.dates[n - 1]}${last ? `, last crossing zero in ${last.date} (to ${last.to})` : ", never crossing zero"}.`;
+  }
+  function drawLink() {
+    const L = BRF.learned, k = L && L.links[BRF.link];
+    if (!k) return;
+    const yr = (d) => Number(d.slice(0, 4)) + (Number(d.slice(5, 7)) - 1) / 12, dates = L.dates;
+    const pts = k.beta.map((v, i) => [yr(dates[i]), v]), band = k.beta.map((v, i) => [yr(dates[i]), v - 1.645 * k.sd[i], v + 1.645 * k.sd[i]]);
+    const meas = brainData().regimes, [f, t] = BRF.link.split(">");
+    const hl = [];
+    if (meas.low_inflation.edges[BRF.link]) hl.push({ y: meas.low_inflation.edges[BRF.link].w, color: "var(--s2)", label: "1990 to 2021 average" });
+    if (meas.inflation.edges[BRF.link]) hl.push({ y: meas.inflation.edges[BRF.link].w, color: "var(--s3)", label: "2022-on average" });
+    xyChart($("#brl-chart"), { height: 240, zero: true, series: [{ name: `${BR_NODES[BR_IDX[f]].s} → ${BR_NODES[BR_IDX[t]].s}`, pts, color: "var(--s1)" }],
+      bands: [{ pts: band, color: "var(--s1)" }], hlines: hl, vmarks: [{ x: 2022, label: "2022" }],
+      xticks: [1990, 2000, 2010, 2020].map((y) => [y, String(y)]).concat([[2026, "2026"]]), yfmt: (v) => sg(v, 2), xfmt: (v) => { const y = Math.floor(v + 1e-6); return `${y}-${String(Math.round((v - y) * 12) + 1).padStart(2, "0")}`; },
+      label: `Smoothed weight of ${BR_NODES[BR_IDX[f]].n} on ${BR_NODES[BR_IDX[t]].n}, monthly, with a 90% band` });
+    $("#brl-chart-t").textContent = `${BR_NODES[BR_IDX[f]].n} → ${BR_NODES[BR_IDX[t]].n}, month by month`;
+    $("#brl-t").textContent = `${linkLine(L, BRF.link)} The data chose a drift of ${k.q} per month (variance), ${k.q >= 1e-3 ? "fast enough that the link genuinely moves" : "slow: the link has been close to stable"}.`;
+  }
+  function wireFrontier() {
+    if (BRF.wired || !$("#brf-cf-node")) return;
+    BRF.wired = true;
+    const cn = $("#brf-cf-node");
+    BR_NODES.forEach((n) => { if (n.id !== "book") cn.append(new Option(n.n, n.id)); });
+    cn.value = BRF.cf.node;
+    cn.addEventListener("change", () => { BRF.cf.node = cn.value; renderFrontier(BR.lastW); });
+    $("#brf-cf-v").addEventListener("input", () => { BRF.cf.v = Number($("#brf-cf-v").value); renderFrontier(BR.lastW); });
+    const tail = $("#brf-tail");
+    [[0.1, "1 in 10"], [0.05, "1 in 20"], [0.02, "1 in 50"], [0.01, "1 in 100"]].forEach(([p, lab]) => {
+      const b = h("button", null, lab); b.type = "button"; b.dataset.p = p;
+      b.setAttribute("aria-pressed", p === BRF.tail ? "true" : "false");
+      b.addEventListener("click", () => { BRF.tail = p; tail.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", Number(x.dataset.p) === p ? "true" : "false")); renderFrontier(BR.lastW); });
+      tail.append(b);
+    });
+    $("#brf-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      BRF.mode = b.dataset.v; $("#brf-mode").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false")); renderFrontier(BR.lastW);
+    }));
+    $("#brf-use").addEventListener("click", () => {
+      if (!BRF.last) return;
+      BR.blend = Math.round(BRF.last.regime.mean_blend * 20) / 20;
+      $("#br-blend").value = Math.round(BR.blend * 100);
+      updateBrain();
+    });
+  }
+
+  /* ---------- ask the brain: Claude reasons in words, the page's exact functions do the arithmetic ---------- */
+  const ASK = { sample: null, ctl: null, wired: false, busy: false };
+  const r3 = (v) => (fin(v) ? Math.round(v * 1000) / 1000 : null);
+  const nodeId = (x) => { const s = String(x || "").trim(); if (BR_IDX[s] != null) return s; const hit = BR_NODES.find((n) => n.n.toLowerCase() === s.toLowerCase() || n.s.toLowerCase() === s.toLowerCase()); return hit ? hit.id : null; };
+  const needNode = (x) => { const id = nodeId(x); if (!id) throw new Error(`unknown node ${JSON.stringify(x)}; use an id from the catalog`); return id; };
+  const zNum = (x, lo = -4, hi = 4) => { const v = Number(x); if (!fin(v)) throw new Error("a reading must be a number of standard deviations"); return clamp(v, lo, hi); };
+  function askThink(overrides) {
+    const ob = brObserved().values;
+    Object.entries(overrides || {}).forEach(([k, v]) => { const id = needNode(k); if (v == null) delete ob[BR_IDX[id]]; else ob[BR_IDX[id]] = zNum(v); });
+    if (!Object.keys(ob).length) throw new Error("no readings left to reason about");
+    const W = brWeights(), th = brThink(W, BR.K, ob);
+    return { W, th, ob };
+  }
+  function askSummary(W, th, ob) {
+    const roots = BR_ROOTS.map((id) => BR_IDX[id]), book = BR_IDX.book, F = brFrontier(W, th);
+    return {
+      readings: Object.fromEntries(Object.entries(ob).map(([i, v]) => [BR_NODES[i].id, r3(v)])),
+      single_cause_explanations: th.explanations.slice(0, 5).map((r) => ({ cause: r.root == null ? "noise only" : BR_NODES[r.root].id, p: r3(r.p), size_sd: r3(r.s) })),
+      joint_inference: th.abduce.roots.map((r, j) => ({ cause: BR_NODES[r].id, sd: r3(th.abduce.s[j]), err: r3(th.abduce.sd[j]) })).filter((x) => Math.abs(x.sd) >= 0.1).sort((a, b) => Math.abs(b.sd) - Math.abs(a.sd)).slice(0, 5),
+      share_of_readings_explained: r3(th.abduce.explained),
+      book_implied_sd: r3(th.predict.mean[book]), book_sd: r3(th.predict.sd[book]),
+      holdings_implied_sd: Object.fromEntries(BR_HOLD.map((id) => [id, r3(th.predict.mean[BR_IDX[id]])])),
+      look_next: th.next.slice(0, 3).map((r) => ({ node: BR_NODES[r.node].id, info_nats: r3(r.info) })),
+      which_world: Object.fromEntries(F.regime.blends.map((b, i) => [blendName(b), r3(F.regime.p[i])])),
+      surprise: { p_value: r3(F.surprise.p), worst_predicted: F.surprise.loo.slice(0, 3).map((r) => ({ node: BR_NODES[r.node].id, z: r3(r.z) })) },
+      but_for: F.butfor.slice(0, 5).map((r) => ({ cause: BR_NODES[r.root].id, contribution_sd: r3(r.contribution) })),
+      settings: { regime_blend: blendName(BR.blend), orders: BR.K, mode: BR.dataOnly ? "measured links only" : "measured and judged links" },
+      units: "standard deviations of a 3-month change; the book is the model book, not personal positions",
+    };
+  }
+  function askTools(log) {
+    const wrap = (name, label, fn) => ({ name, description: label.d, inputSchema: label.s, execute: async (input) => {
+      const li = h("li", null, `${name}(${Object.keys(input || {}).length ? JSON.stringify(input).slice(0, 120) : ""})`);
+      log.append(li);
+      try { const out = fn(input || {}); li.classList.add("done"); return out; } catch (e) { li.textContent += ` · ${e.message}`; throw e; }
+    } });
+    const obj = (props, req) => ({ type: "object", properties: props, required: req || [] });
+    return [
+      wrap("read_state", { d: "The brain's current reasoning on today's readings: competing explanations with probabilities, the joint inference of causes, the book's and each holding's implied move, what to observe next, which regime fits, how surprising the readings are, and each cause's contribution to the book. Call this first.", s: obj({}) },
+        () => { const { W, th, ob } = askThink(); return askSummary(W, th, ob); }),
+      wrap("think_with", { d: "Re-run the full reasoning as if some readings were different (hypothetical; the page is not changed). readings maps node id to a 3-month change in standard deviations, or null to drop it. Returns the same summary as read_state.", s: obj({ readings: { type: "object", additionalProperties: { type: ["number", "null"] } } }, ["readings"]) },
+        (i) => { const { W, th, ob } = askThink(i.readings); return askSummary(W, th, ob); }),
+      wrap("shock", { d: "Propagate a shock from one node through every link (forward, within the current number of orders) and return the effect on the target (default the book), the most affected nodes, the main channel, and the share of 400 uncertain worlds where the sign holds.", s: obj({ node: { type: "string" }, size_sd: { type: "number" }, target: { type: "string" } }, ["node", "size_sd"]) },
+        (i) => {
+          const id = needNode(i.node), size = zNum(i.size_sd), tgt = i.target ? needNode(i.target) : "book", W = brWeights(), res = brPropagate(W, { [id]: size }, BR.K), t = BR_IDX[tgt];
+          const mc = brMonteCarlo(W, { [id]: size }, tgt, BR.K, 200), tot = res.total[t] + (id === tgt ? size : 0), paths = id === tgt ? [] : brPaths(W, BR_IDX[id], t);
+          return { node: id, size_sd: size, target: tgt, effect_sd: r3(tot), sign_holds_share: r3(tot < 0 ? mc.neg : 1 - mc.neg), band_p10_p90: [r3(mc.p10), r3(mc.p90)],
+            main_channel: paths[0] ? { path: paths[0].nodes.map((k) => BR_NODES[k].id), effect_sd: r3(paths[0].gain * size) } : null,
+            most_affected: BR_NODES.map((n, k) => ({ node: n.id, sd: r3(res.total[k]) })).filter((x) => x.node !== id).sort((a, b) => Math.abs(b.sd) - Math.abs(a.sd)).slice(0, 6) };
+        }),
+      wrap("counterfactual", { d: "Had one node been at a different reading, keeping everything today's evidence says about the other causes: the book's and each holding's factual and counterfactual values.", s: obj({ node: { type: "string" }, value_sd: { type: "number" } }, ["node", "value_sd"]) },
+        (i) => {
+          const id = needNode(i.node), v = zNum(i.value_sd), { W, th } = askThink(), cf = brCounterfactual(W, BR.K, th.T, th.abduce, BR_IDX[id], v);
+          const ids = ["book"].concat(BR_HOLD);
+          return { node: id, factual_sd: r3(cf.factual[BR_IDX[id]]), set_to_sd: v, effects: Object.fromEntries(ids.map((k) => [k, { factual: r3(cf.factual[BR_IDX[k]]), counterfactual: r3(cf.counterfactual[BR_IDX[k]]) }])) };
+        }),
+      wrap("loss_story", { d: "The most plausible combination of root-cause shocks that produces a bad outcome for the book at a given tail probability (e.g. 0.05 for 1 in 20), with the runner-up story if the main driver holds still. mode: forward (next quarter's shocks) or now (how wrong today's read could be).", s: obj({ tail_probability: { type: "number" }, mode: { type: "string", enum: ["forward", "now"] } }, ["tail_probability"]) },
+        (i) => {
+          const p = clamp(Number(i.tail_probability) || 0.05, 0.001, 0.5), now = i.mode === "now", { th } = askThink(), roots = BR_ROOTS.map((id) => BR_IDX[id]), book = BR_IDX.book;
+          const base = brLossStory(th.T, roots, book, 0, now ? th.abduce.s : null, now ? th.abduce.cov : null);
+          if (!base.possible) return { possible: false };
+          const L = base.mean + base.sd * ninv(p), st = brLossStory(th.T, roots, book, L, now ? th.abduce.s : null, now ? th.abduce.cov : null);
+          const alt = brLossStory(th.T, roots, book, L, now ? th.abduce.s : null, now ? th.abduce.cov : null, 1, [st.drivers[0].root]);
+          const dr = (x) => x.drivers.filter((d) => Math.abs(d.shift) > 0.02).slice(0, 5).map((d) => ({ cause: BR_NODES[d.root].id, shock_sd: r3(d.shift) }));
+          return { tail_probability: p, mode: now ? "now" : "forward", book_level_sd: r3(L), book_central_sd: r3(st.mean), book_sd: r3(st.sd), story: dr(st),
+            runner_up: alt.possible ? { story: dr(alt), probability: r3(alt.p_at_or_below) } : null };
+        }),
+      wrap("channels", { d: "The book's implied move split by channel: the strongest walks from each inferred cause to the book, with the total they add up to.", s: obj({}) },
+        () => { const { W, th } = askThink(), P = brPathAttribution(W, BR.K, th.abduce, BR_IDX.book, 8);
+          return { total_sd: r3(P.total), n_channels: P.n_paths, top: P.paths.map((p) => ({ path: p.nodes.map((k) => BR_NODES[k].id), sd: r3(p.contribution) })), rest_sd: r3(P.other) }; }),
+      wrap("learned_structure", { d: "What the data says about the map's assumptions: the causal order learned by DirectLiNGAM against the assumed order, and how each measured link has moved over time (Kalman smoother): latest value, 90% band and last sign change.", s: obj({ link: { type: "string", description: "optional, e.g. y10>eq" } }) },
+        (i) => new Promise((resolve) => brLearnAsync((L) => {
+          const keys = i.link && L.links[i.link] ? [i.link] : Object.keys(L.links);
+          resolve({ assumed_order: BR_ORDER6, learned_1990_2021: L.order.low_inflation.learned, agreement_share: r3(L.order.low_inflation.agreement.share),
+            learned_2022_on: L.order.inflation.learned, months_2022_on: L.order.inflation.months,
+            links: Object.fromEntries(keys.map((k) => { const x = L.links[k], n = x.beta.length; return [k, { latest: r3(x.beta[n - 1]), band90: r3(1.645 * x.sd[n - 1]), last_sign_change: x.sign_changes[x.sign_changes.length - 1] || null }]; })) });
+        }))),
+      wrap("show_on_map", { d: "Highlight nodes on the page's map so the reader can see what you are talking about. Returns the nodes shown.", s: obj({ nodes: { type: "array", items: { type: "string" } } }, ["nodes"]) },
+        (i) => { const ids = (Array.isArray(i.nodes) ? i.nodes : []).map(nodeId).filter(Boolean).slice(0, 8); BR.view = "think"; BR.focus = ids.map((k) => BR_IDX[k]); BR.step = -1; syncViewButtons(); renderThinkFocus(); return { shown: ids }; }),
+    ];
+  }
+  function askPrompt(q) {
+    const cat = BR_NODES.map((n) => `${n.id}: ${n.n}${n.ring === 0 ? " (root cause)" : n.ring === 3 ? " (holding)" : n.id === "book" ? " (the model book)" : ""}`).join("\n");
+    return `You are the reasoning voice of Buildout's brain, a signed causal graph of the financial system for a model AI-infrastructure equity book (not personal positions). Answer the reader's question by calling the page's functions; they do exact arithmetic on the graph.
+
+Rules:
+- Every number you state must come from a function result in this conversation. Never estimate or invent one. If a function cannot answer, say so.
+- Start with read_state unless the question is only about one function. Use think_with, shock, counterfactual, loss_story, channels and learned_structure as the question needs. Call show_on_map once with the nodes your answer is about.
+- Units: standard deviations (σ) of a 3-month change. Say "σ", and say plainly when a figure is a hypothesis of the map rather than a measurement.
+- Bottom line first, in one or two sentences, then at most five short bullet points starting with "- ", then one line on what would change the answer. Under 220 words. No headings, no tables, no em dashes.
+- This is research on a model book, not advice. Do not tell the reader to buy or sell anything.
+
+Node catalog (id: name):
+${cat}
+
+The reader's question: ${q}`;
+  }
+  function renderAnswer(el, text) {
+    el.replaceChildren();
+    let ul = null;
+    String(text).split(/\n+/).forEach((line) => {
+      const t = line.trim();
+      if (!t) return;
+      if (/^[-*•]\s+/.test(t)) { if (!ul) { ul = h("ul"); el.append(ul); } ul.append(h("li", null, t.replace(/^[-*•]\s+/, "").replace(/\*\*/g, ""))); }
+      else { ul = null; el.append(h("p", null, t.replace(/\*\*/g, "").replace(/^#+\s*/, ""))); }
+    });
+  }
+  const ASK_CHIPS = ["What is driving the book right now, and what would change your mind?", "Has the stock-bond link really flipped, or is it fading?",
+    "How does a 1-in-20 bad quarter most plausibly happen?", "Had oil not spiked, where would the book be?", "Which holdings are secretly the same bet?", "What should I watch this week to tell the top explanations apart?"];
+  async function askRun(q) {
+    if (!ASK.sample || ASK.busy) return;
+    q = String(q || "").trim().slice(0, 600);
+    if (!q) { $("#bra-status").textContent = "Type a question first."; return; }
+    ASK.busy = true;
+    const go = $("#bra-go"), stop = $("#bra-stop"), st = $("#bra-status"), ans = $("#bra-answer"), log = $("#bra-tools");
+    go.disabled = true; stop.hidden = false; st.textContent = "Thinking…"; ans.replaceChildren(); log.replaceChildren();
+    ASK.ctl = new AbortController();
+    try {
+      const r = await ASK.sample(askPrompt(q), { tools: askTools(log).slice(0, ASK.maxTools || 8), signal: ASK.ctl.signal, onText: ({ text }) => { st.textContent = ""; renderAnswer(ans, text); } });
+      renderAnswer(ans, r.text);
+      st.textContent = r.truncated ? "Cut short: ask for less at a time." : `${log.children.length} function call${log.children.length === 1 ? "" : "s"}; every number above came from one of them.`;
+    } catch (e) {
+      const code = e && e.code;
+      if (e && e.text) renderAnswer(ans, e.text);
+      if (code === "cancelled") st.textContent = "Stopped.";
+      else if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed", "tools_unavailable"].includes(code)) { st.textContent = ""; askUnavailable(code === "not_granted" ? "Asking was not allowed in this view. Everything it would compute is on this page below." : null); }
+      else if (code === "rate_limited") st.textContent = "Too many questions for now. Try again in a little while.";
+      else if (code === "refused") { ans.replaceChildren(); st.textContent = "Claude declined that question. Try asking it another way."; }
+      else if (code === "session_expired") st.textContent = "Sign in to Claude again, then ask.";
+      else st.textContent = "Something interrupted the answer. Ask again.";
+    } finally { ASK.busy = false; go.disabled = false; stop.hidden = true; ASK.ctl = null; }
+  }
+  function askUnavailable(msg) {
+    const f = $("#bra-form"), c = $("#bra-chips"), n = $("#bra-note");
+    if (f) f.hidden = true;
+    if (c) c.hidden = true;
+    if (n) { n.hidden = false; if (msg) n.textContent = msg; }
+  }
+  function wireAsk() {
+    if (ASK.wired || !$("#bra-form")) return;
+    ASK.wired = true;
+    const f = $("#bra-form"), chips = $("#bra-chips");
+    askUnavailable();
+    f.addEventListener("submit", (e) => { e.preventDefault(); askRun($("#bra-q").value); });
+    $("#bra-stop").addEventListener("click", () => { if (ASK.ctl) ASK.ctl.abort(); });
+    ASK_CHIPS.forEach((q) => { const b = h("button", null, q); b.type = "button"; b.addEventListener("click", () => { $("#bra-q").value = q; askRun(q); }); chips.append(b); });
+    const c = typeof window !== "undefined" && window.claude && typeof window.claude.use === "function" ? window.claude : null;
+    if (!c) return;
+    c.use("sample").then(async (sample) => {
+      if (!sample) return;
+      let lim = null;
+      try { lim = await sample.limits(); } catch (e) { lim = null; }
+      if (!lim || !lim.tools) return;
+      ASK.sample = sample;
+      ASK.maxTools = lim.tools.maxCount || 8;
+      f.hidden = false; chips.hidden = false; $("#bra-note").hidden = true;
+    }).catch(() => {});
   }
 
   /* =====================================================================================
@@ -12079,7 +12847,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
     noteworthy: () => {}, buyside: drawBuyside, solve: () => guard("The solver", () => renderSolve(false), $("#rz-ledger")), games: drawGames,
-    brain: () => guard("The brain", updateBrain, $("#br-svg-box")),
+    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); },
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
     making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },

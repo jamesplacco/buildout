@@ -29,7 +29,7 @@
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
     noteworthy: () => {}, buyside: drawBuyside, solve: () => guard("The solver", () => renderSolve(false), $("#rz-ledger")), games: drawGames,
-    brain: () => guard("The brain", updateBrain, $("#br-svg-box")),
+    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); },
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
     making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },

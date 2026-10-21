@@ -3,8 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const rd = (f) => fs.readFileSync(path.join(__dirname, "..", "src", f), "utf8");
 const stub = 'const LS = { get: (k, d) => d, set() {} }; const LIVE = {}; const $ = () => null; const h = () => null;\n';
-const src = [rd("math.js"), rd("engine7.js"), rd("snap6.js"), stub, rd("brain.js"), rd("field.js")].join("\n");
-const M = new Function(`"use strict";\n${src}\nreturn { brWeights, BR_NODES, BR_ROOTS, BR_HOLD, BRAIN_SNAP, FIELD_CASES, FIELD_INDICATORS, FIELD_MILESTONES };`)();
+const src = [rd("math.js"), rd("engine7.js"), rd("snap6.js"), rd("snap9.js"), stub, rd("brain.js"), rd("field.js")].join("\n");
+const M = new Function(`"use strict";\n${src}\nreturn { brWeights, BR_NODES, BR_ROOTS, BR_HOLD, BRAIN_SNAP, BRAIN_SERIES, FIELD_CASES, FIELD_INDICATORS, FIELD_MILESTONES };`)();
 const W = M.brWeights(1, false);
 const observed = {};
 M.BR_NODES.forEach((n) => { if (n.m && M.BRAIN_SNAP.state[n.m]) observed[n.id] = M.BRAIN_SNAP.state[n.m].z3m; });
@@ -16,7 +16,9 @@ const out = {
     edges: W.map((e) => ({ from: id(e.from), to: id(e.to), w: Math.round(e.w * 1e6) / 1e6, measured: !!e.measured })),
     roots: M.BR_ROOTS, holdings: M.BR_HOLD,
     observed: Object.fromEntries(Object.entries(observed).map(([k, v]) => [k, Math.round(v * 1e6) / 1e6])),
-    observed_month: (M.BRAIN_SNAP.state.oil || {}).month || null },
+    observed_month: (M.BRAIN_SNAP.state.oil || {}).month || null,
+    edges_by_blend: Object.fromEntries([0, 0.25, 0.5, 0.75, 1].map((b) => [String(b), M.brWeights(b, false).map((e) => Math.round(e.w * 1e6) / 1e6)])) },
+  series: M.BRAIN_SERIES,
   field: { cases: M.FIELD_CASES, indicators: M.FIELD_INDICATORS.map((r) => ({ observation: r[0], mechanism: r[1], competing: r[2], clock: r[3], target: r[4], node: r[5] })), milestones: M.FIELD_MILESTONES },
 };
 process.stdout.write(JSON.stringify(out, null, 1) + "\n");

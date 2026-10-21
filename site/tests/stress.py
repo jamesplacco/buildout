@@ -95,9 +95,11 @@ async def check_page(page, label: str, views=VIEWS) -> None:
             fail(f"{label} #{v}: opened {res['view']}")
 
 
-async def scenario(browser, label: str, folder: Path, expect_errors: int = 0, width: int = 1280, extra=None) -> None:
+async def scenario(browser, label: str, folder: Path, expect_errors: int = 0, width: int = 1280, extra=None, init: str | None = None) -> None:
     httpd, url = serve(folder)
     ctx = await browser.new_context(viewport={"width": width, "height": 900})
+    if init:
+        await ctx.add_init_script(init)
     page = await ctx.new_page()
     errs: list[str] = []
     page.on("pageerror", lambda e: errs.append(str(e)))
@@ -140,7 +142,8 @@ async def extreme_inputs(page, label: str) -> None:
                 ("#lab-bayes-prior", 0.02), ("#lab-bayes-fpr", 0.5), ("#lab-bayes-sens", 0.99), ("#lab-luck-sr", 0.1), ("#lab-luck-z", 3), ("#lab-div-n", 1), ("#lab-div-rho", 0.95), ("#lab-div-n", 50)],
         "decide": [("#as-a-oil", 0.05), ("#as-a-line", 0.99), ("#as-a-capex", 0.05)],
         "brain": [("#br-size", -3), ("#br-blend", 0), ("#br-K", 1), ("#br-shock", "corr"), ("#br-target", "corr"), ("#br-K", 8), ("#br-blend", 55),
-                  ("#br-edge", "y10>eq"), ("#br-w", 1), ("#br-w", -1), ("#br-shock", "pods"), ("#br-target", "hormuz"), ("#br-size", 3)],
+                  ("#br-edge", "y10>eq"), ("#br-w", 1), ("#br-w", -1), ("#br-shock", "pods"), ("#br-target", "hormuz"), ("#br-size", 3),
+                  ("#brf-cf-node", "tlt"), ("#brf-cf-v", 3), ("#brf-cf-node", "hormuz"), ("#brf-cf-v", -3), ("#brl-link", "eq>vix"), ("#brl-link", "y10>gold"), ("#br-K", 1)],
         "prop": [("#pe-p", 20), ("#pe-b", 0.3), ("#pe-c", 0.3), ("#pe-r", 20), ("#pe-n", 50), ("#pe-p", 80), ("#pe-b", 5), ("#pe-c", 0),
                  ("#pc-p", 30), ("#pc-b", 0.5), ("#pc-r", 3), ("#pc-days", 10), ("#pc-t", 20), ("#pc-dl", 1), ("#pc-p", 70), ("#pc-b", 3),
                  ("#pp-g", 0), ("#pp-pt", 12), ("#pp-mg", 3), ("#pp-pf", 40), ("#pp-vol", 1)],
@@ -214,6 +217,7 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
+                        ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
                         ("nw-memory", "noteworthy"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
@@ -409,6 +413,8 @@ async def main() -> int:
     hostile["macro.json"]["macro_state"] = {"inflation": {"avg36": "hot", "yoy": None, "date": 5}, "nfci": {"value": "loose"}, "sahm": None}
     hostile["brain.json"]["regimes"]["inflation"]["edges"]["y10>eq"]["w"] = 50
     hostile["buyside.json"]["tail"] = "fat"
+    hostile["brain.json"]["series"] = {"cols": [], "dates": ["x"], "z": [[None]] * 6}
+    hostile["brain.json"]["learned"] = {"dates": [1], "order": {"low_inflation": {"learned": ["<b>"]}}, "links": {"y10>eq": {"beta": "x"}}}
     hostile["report.json"]["summary"]["adjustments"] = ["<b>x</b>"]
     hostile["brain.json"]["factor_cov"] = {"regimes": {"inflation": {"cov": "big", "months": None}, "low_inflation": {"cov": [[1e308]]}}}
     evil = '<img src=x onerror="window.__pwned=1">'
@@ -424,6 +430,7 @@ async def main() -> int:
         await scenario(browser, "good data", site_with(good), extra=extreme_inputs)
         await scenario(browser, "good data, journal", site_with(good), extra=journal_flow)
         await scenario(browser, "good data, the brain thinks and the field desk", site_with(good), extra=think_and_field)
+        await scenario(browser, "ask the brain (mocked Claude calling every tool)", site_with(good), extra=ask_flow, init=ASK_MOCK)
         await scenario(browser, "good data, live research", site_with(good), extra=live_research)
         newer = copy.deepcopy(good)
         newer["capex.json"]["ttm"]["ORCL"] = {"quarter_end": "2026-11-30", "ocf": 90.0, "capex": 70.0, "cash": 50.0, "capex_to_ocf": 70 / 90}
@@ -443,6 +450,68 @@ async def main() -> int:
         await browser.close()
     print(f"\n{len(FAILURES)} failures")
     return 1 if FAILURES else 0
+
+
+ASK_MOCK = """
+window.claude = { use: async (name) => {
+  if (name !== "sample") return null;
+  const sig = () => ({ signal: new AbortController().signal });
+  const sample = async (input, opts) => {
+    window.__askPrompt = input;
+    const T = Object.fromEntries(opts.tools.map((t) => [t.name, t]));
+    const out = {};
+    out.state = await T.read_state.execute({}, sig());
+    out.what = await T.think_with.execute({ readings: { oil: 0, power: -2, nope: null } }, sig()).catch((e) => ({ error: e.message }));
+    out.what2 = await T.think_with.execute({ readings: { power: -2 } }, sig());
+    out.shock = await T.shock.execute({ node: "oil", size_sd: 2 }, sig());
+    out.cf = await T.counterfactual.execute({ node: "Oil, physical", value_sd: 0 }, sig());
+    out.loss = await T.loss_story.execute({ tail_probability: 0.05, mode: "now" }, sig());
+    out.ch = await T.channels.execute({}, sig());
+    out.learn = await T.learned_structure.execute({ link: "y10>eq" }, sig());
+    out.show = await T.show_on_map.execute({ nodes: ["oil", "book", "nope"] }, sig());
+    window.__askOut = out;
+    const text = "The book reads " + out.state.book_implied_sd + " sigma.\\n- An oil shock moves it " + out.shock.effect_sd + ".\\n- <img src=x onerror=\\"window.__pwned=9\\">";
+    if (opts.onText) opts.onText({ text, delta: text });
+    return { text, truncated: false, modelTierApplied: "default" };
+  };
+  sample.limits = async () => ({ maxPromptBytes: 262144, tools: { maxCount: 16 } });
+  sample.json = async () => ({});
+  return sample;
+} };
+"""
+
+
+async def ask_flow(page, label: str) -> None:
+    await page.evaluate("location.hash = 'brain'")
+    await page.wait_for_timeout(1500)
+    if await page.evaluate("document.querySelector('#bra-form').hidden"):
+        fail(f"{label}: the ask form stayed hidden with Claude available")
+        return
+    await page.click("#bra-chips button")
+    await page.wait_for_timeout(4000)
+    out = await page.evaluate("window.__askOut || null")
+    if not out:
+        fail(f"{label}: the mocked agent never ran the tools")
+        return
+    import math as _m
+    nums = [out["state"]["book_implied_sd"], out["shock"]["effect_sd"], out["cf"]["effects"]["book"]["counterfactual"], out["loss"]["book_level_sd"], out["ch"]["total_sd"],
+            out["learn"]["links"]["y10>eq"]["latest"], out["what2"]["book_implied_sd"]]
+    if not all(isinstance(v, (int, float)) and _m.isfinite(v) for v in nums):
+        fail(f"{label}: tool results not finite: {nums}")
+    if "error" not in out["what"] or out["show"]["shown"] != ["oil", "book"]:
+        fail(f"{label}: tool input checks failed: {out['what']}, {out['show']}")
+    if out["state"]["which_world"] is None or len(out["state"]["which_world"]) != 5:
+        fail(f"{label}: read_state lacks the world comparison")
+    prompt = await page.evaluate("window.__askPrompt")
+    if "hormuz: Hormuz disruption" not in prompt or "Never estimate or invent" not in prompt:
+        fail(f"{label}: the prompt lacks the catalog or the grounding rule")
+    if await page.evaluate("window.__pwned"):
+        fail(f"{label}: the answer executed markup")
+    done = await page.evaluate("document.querySelectorAll('#bra-tools li.done').length")
+    if done < 8:
+        fail(f"{label}: only {done} tool calls logged as done")
+    if "<img" not in await page.inner_text("#bra-answer"):
+        fail(f"{label}: the answer was not rendered as text")
 
 
 async def think_and_field(page, label: str) -> None:

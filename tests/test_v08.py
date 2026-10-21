@@ -194,10 +194,10 @@ def test_mcp_handshake_and_tool_list_over_stdio():
                     {"jsonrpc": "2.0", "method": "notifications/initialized"},
                     {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}, "not json", {"jsonrpc": "2.0", "id": 3, "method": "nope"}])
     assert [o.get("id") for o in out] == [1, 2, None, 3]              # the notification gets no reply
-    assert out[0]["result"]["protocolVersion"] == "2024-11-05" and out[0]["result"]["serverInfo"]["version"] == "0.8.0"
+    assert out[0]["result"]["protocolVersion"] == "2024-11-05" and out[0]["result"]["serverInfo"]["version"] == __import__("buildout").__version__
     names = [t["name"] for t in out[1]["result"]["tools"]]
     assert names == ["get_research_snapshot", "get_portfolio_risk", "analyze_positions", "run_hedge_scenario", "evaluate_trade", "create_order_proposal",
-                     "review_decision", "compare_explanations", "trace_exposure"]
+                     "review_decision", "compare_explanations", "learned_structure", "trace_exposure"]
     assert all(t["annotations"]["readOnlyHint"] for t in out[1]["result"]["tools"])
     assert out[2]["error"]["code"] == -32700 and out[3]["error"]["code"] == -32601
 

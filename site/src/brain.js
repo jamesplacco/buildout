@@ -438,6 +438,7 @@
     const ob = brObserved();
     if (Object.keys(ob.values).length < 1) { BR.thought = null; return null; }
     try { BR.thought = brThink(W, BR.K, ob.values); BR.thought.src = ob.src; BR.thought.steps = brTrace(BR.thought, ob, W); } catch (e) { BR.thought = null; }
+    if (BR.thought) try { brTraceFrontier(BR.thought, W); } catch (e) { /* the core trace stands on its own */ }
     return BR.thought;
   }
   function renderThink(W) {
@@ -510,7 +511,8 @@
     let seeing = NaN;
     try { const T = th.T, roots = BR_ROOTS.map((id) => BR_IDX[id]); const ab = brAbduce(T, { [sIdx]: size }, roots); seeing = brPredict(T, ab).mean[t]; } catch (e) { seeing = NaN; }
     $("#br-sd").textContent = `Doing: if ${BR_NODES[sIdx].n} is set to ${sg(size, 1)}σ from outside (its own causes cut), ${BR_NODES[t].n} moves ${sg(doing, 2)}σ. Seeing: if ${BR_NODES[sIdx].n} is merely observed at ${sg(size, 1)}σ, the brain first asks what caused it, and that inference implies ${sg(seeing, 2)}σ. ${fin(seeing) && Math.abs(seeing - doing) > 0.1 ? "The gap is what the observation signals about its causes: a move you cause and a move you see are not the same news." : "Here the two agree: the move carries little news about its causes."}`;
-    $("#br-think-sum").textContent = th.steps[1] ? th.steps[1].t : "";
+    const ex = th.steps.find((x) => x.h === "Explain");
+    $("#br-think-sum").textContent = ex ? ex.t : "";
   }
   function renderThinkFocus() {
     document.querySelectorAll("#br-steps .br-step").forEach((li, i) => li.classList.toggle("active", i === BR.step));
@@ -675,6 +677,7 @@
     brRunThink(W);
     Object.assign(BR, { lastW: W, lastRes: res, lastS: sIdx, lastT: t, lastSize: size });
     guard("The brain's reasoning", () => renderThink(W), $("#br-steps"));
+    guard("Frontier reasoning", () => { wireFrontier(); renderFrontier(W); }, $("#brf-regime"));
     syncViewButtons();
     drawBrain(W, res, sIdx, t, size);
     syncEdgeEditor();

@@ -110,7 +110,7 @@
     if (!series.length) return;
     const xs = series.flatMap((s) => s.pts.map((p) => p[0]));
     const x0 = cfg.xDomain ? cfg.xDomain[0] : Math.min(...xs), x1 = cfg.xDomain ? cfg.xDomain[1] : Math.max(...xs);
-    let ys = series.flatMap((s) => s.pts.map((p) => p[1])).filter(fin);
+    let ys = series.flatMap((s) => s.pts.map((p) => p[1])).filter(fin).concat((cfg.bands || []).flatMap((b) => b.pts.flatMap((p) => [p[1], p[2]])).filter(fin));
     ys = ys.concat((cfg.hlines || []).map((l) => l.y));
     let lo = Math.min(...ys), hi = Math.max(...ys);
     if (cfg.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
@@ -135,6 +135,13 @@
     (cfg.hlines || []).forEach((l) => {
       svg("line", { x1: padL, x2: W - padR, y1: sy(l.y), y2: sy(l.y), stroke: l.color || "var(--bad)", "stroke-width": 1.5 }, s);
       if (l.label) text(s, W - padR, sy(l.y) - 6, l.label, "lbl-strong", "end");
+    });
+    (cfg.bands || []).forEach((b) => {                          // shaded intervals: pts are [x, lo, hi]
+      const ok = b.pts.filter((p) => fin(p[1]) && fin(p[2]));
+      if (ok.length < 2) return;
+      const d = ok.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + "," + sy(p[2]).toFixed(1)).join("") +
+        ok.slice().reverse().map((p) => "L" + sx(p[0]).toFixed(1) + "," + sy(p[1]).toFixed(1)).join("") + "Z";
+      svg("path", { d, fill: b.color, opacity: b.opacity || 0.16, stroke: "none" }, s);
     });
     series.forEach((ser) => {
       let d = "", pen = false;
