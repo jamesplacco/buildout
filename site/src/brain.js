@@ -649,7 +649,7 @@
     c.append(reg);
     if (sens[0]) {
       const s0 = sens[0], p = h("p");
-      p.append(h("strong", null, "Load-bearing assumption: "), document.createTextNode(`${BR_NODES[s0.e.from].n} → ${BR_NODES[s0.e.to].n} at ${sg(s0.e.w)} (${s0.e.measured ? "measured" : s0.e.edited ? "your override" : "judged"}). Two standard deviations of doubt on it move the answer by ${sg(s0.swing)}σ${s0.flips ? ", enough to flip its sign" : ""}.`));
+      p.append(h("strong", null, "The assumption the answer rests on: "), document.createTextNode(`${BR_NODES[s0.e.from].n} → ${BR_NODES[s0.e.to].n} at ${sg(s0.e.w)} (${s0.e.measured ? "measured" : s0.e.edited ? "your override" : "judged"}). Two standard deviations of doubt on it move the answer by ${sg(s0.swing)}σ${s0.flips ? ", enough to flip its sign" : ""}.`));
       c.append(p);
     }
     // lists

@@ -21,6 +21,7 @@ class Inputs:
     rf: pd.Series                   # annualized cash rate, decimal
     label: str                      # "synthetic" or the data vendor
     infl36: pd.Series | None = None # 36-month annualized CPI inflation, indexed by the day it was PUBLISHED
+    adjustments: dict | None = None # how corporate actions were handled (vendor factors, or the public fallback)
 
 
 def load_inputs(cfg: Config) -> Inputs:
@@ -35,17 +36,23 @@ def load_inputs(cfg: Config) -> Inputs:
         from .data.databento_source import DatabentoSource
         src = DatabentoSource(equities_dataset=d.equities_dataset, futures_dataset=d.futures_dataset, cache=cache)
         guard_cost(src, u.equities, d)
-        prices = src.adjusted_closes(u.equities, d.start, d.end)
+        prices = src.adjusted_closes(u.equities, d.start, d.end, adjustments=d.adjustments)
+        adj = {"source": src.adjustments_used, "vendor_error": src.adjustments_error}
     elif d.source == "csv":
         from .data.csv_source import load_prices
         prices = load_prices(d.csv_path).loc[d.start:d.end]
+        adj = {"source": "as supplied (csv)", "vendor_error": None}
     else:
         raise ValueError(f"unknown data.source {d.source!r}")
     yields, rf = None, pd.Series(0.04, index=prices.index)
     if d.use_fred:
         from .data.fred_source import FredSource
-        fred = FredSource(cache).series(["DGS10", "DGS30", d.risk_free_series], d.start, d.end)
+        fred = FredSource(cache).series(["DGS10", "DGS30", "DGS7", "DGS20", d.risk_free_series], d.start, d.end)
         yields = fred[["DGS10", "DGS30"]]
+        if adj["source"] == "public":
+            from .data.corporate_actions import PRICE_ONLY_NOTE, add_bond_income
+            prices, income = add_bond_income(prices, fred)
+            adj.update({"note": PRICE_ONLY_NOTE, "bond_income": income, "evidence": "Estimated"})
         rf = (fred[d.risk_free_series] / 100).reindex(prices.index).ffill()
         infl36 = None
         try:
@@ -53,8 +60,10 @@ def load_inputs(cfg: Config) -> Inputs:
             infl36 = published_infl36(cpi)
         except Exception:                  # the inflation gate is then reported unavailable, never assumed
             infl36 = None
-        return Inputs(prices, yields, rf, d.source, infl36)
-    return Inputs(prices, yields, rf, d.source)
+        return Inputs(prices, yields, rf, d.source, infl36, adj)
+    if adj["source"] == "public":
+        adj.update({"note": "public split table; no FRED, so bond-fund income is missing and the hedge leg is price only", "evidence": "Estimated"})
+    return Inputs(prices, yields, rf, d.source, adjustments=adj)
 
 
 def guard_cost(src, symbols, d) -> None:
@@ -220,7 +229,7 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
     sig_eval = signals.evaluate(p, label)
 
     summary = {
-        "as_of": book.index[-1].strftime("%Y-%m-%d"), "data": inp.label,
+        "as_of": book.index[-1].strftime("%Y-%m-%d"), "data": inp.label, "adjustments": inp.adjustments,
         "regime_now": reg.dropna().iloc[-1] if reg.notna().any() else None,
         "stock_bond_corr_now": float(corr.dropna().iloc[-1]),
         "hedge_ratio_now": h_now, "book_vol_ewma": book_vol, "book_vol_garch_next": g["next_day_vol"],

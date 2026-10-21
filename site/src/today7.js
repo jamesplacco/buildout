@@ -129,15 +129,22 @@
     const tr = $("#t7-trust");
     tr.replaceChildren();
     const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "snapshot Oct 20"], ["Research", `${readF().panel.end}, line ${HL.status.replace(/_/g, " ")}`],
-      ["Filings", FUND.note || FUND.as_of], ["Book", LIVE.report && LIVE.report.summary ? `engine run ${isoNice(LIVE.report.summary.as_of)}` : "model book from the snapshot"]];
+      ["Filings", FUND.note || FUND.as_of], ["Book", LIVE.report && LIVE.report.summary ? `engine run ${isoNice(LIVE.report.summary.as_of)}${adjTxt(LIVE.report.summary.adjustments)}` : "model book from the snapshot"]];
     fresh.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); tr.append(li); });
   }
 
+  // how corporate actions were handled: the vendor's factors, or the free public table with estimated bond income
+  function adjTxt(a) {
+    if (!a || typeof a !== "object" || typeof a.source !== "string") return "";
+    if (a.source === "databento") return "; splits and dividends from Databento";
+    if (a.source === "public") return "; splits from the public table, stock dividends left out, bond-fund income estimated";
+    return "";
+  }
   function renderPolicyLive() {
     const box = $("#pol-live");
     if (!box) return;
     const r = LIVE.report, d = r && r.decision, S = r && r.summary;
     if (!d || !S) { box.replaceChildren(h("p", null, "The engine's decision record (inputs with dates, policy outputs, binding constraints and anything blocked) appears here after a book run. The model book needs the Databento key; until then the page applies the same policies to its snapshot.")); return; }
     const hd = d.hedge || {}, sz = d.size || {}, lim = d.limits || {};
-    box.replaceChildren(h("p", null, `Engine run of ${isoNice(d.as_of)} (${S.data}): TLT ${hd.status !== "ok" ? "unavailable" : hd.on ? `on at ${fx(hd.ratio, 2)}x` : "off"}, stock-bond state ${(hd.gates && hd.gates.state && hd.gates.state.value) || "n/a"}; equity scale ${xx(sz.scale)} with ${(sz.binding || "n/a").replace(/_/g, " ")} binding; total gross ${xx(lim.total_gross)}${(lim.binding || []).length ? ` (capped by ${lim.binding.join(", ").replace(/_/g, " ")})` : ""}. Effective risk contributors ${fx(S.effective_risk_contributors, 1)}; effective independent bets ${fx(S.effective_independent_bets, 2)}. ${d.blocked && d.blocked.length ? "Blocked: " + d.blocked.join("; ") + "." : "Nothing blocked."} Trials counted for the deflated Sharpe: ${S.trials_counted || "n/a"}.`));
+    box.replaceChildren(h("p", null, `Engine run of ${isoNice(d.as_of)} (${S.data}): TLT ${hd.status !== "ok" ? "unavailable" : hd.on ? `on at ${fx(hd.ratio, 2)}x` : "off"}, stock-bond state ${(hd.gates && hd.gates.state && hd.gates.state.value) || "n/a"}; equity scale ${xx(sz.scale)} with ${(sz.binding || "n/a").replace(/_/g, " ")} binding; total gross ${xx(lim.total_gross)}${(lim.binding || []).length ? ` (capped by ${lim.binding.join(", ").replace(/_/g, " ")})` : ""}. Effective risk contributors ${fx(S.effective_risk_contributors, 1)}; effective independent bets ${fx(S.effective_independent_bets, 2)}. ${d.blocked && d.blocked.length ? "Blocked: " + d.blocked.join("; ") + "." : "Nothing blocked."} Trials counted for the deflated Sharpe: ${S.trials_counted || "n/a"}.${adjTxt(S.adjustments) ? ` Prices: ${adjTxt(S.adjustments).slice(2)}.` : ""}`));
   }

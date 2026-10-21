@@ -196,7 +196,7 @@ def test_mcp_handshake_and_tool_list_over_stdio():
     assert [o.get("id") for o in out] == [1, 2, None, 3]              # the notification gets no reply
     assert out[0]["result"]["protocolVersion"] == "2024-11-05" and out[0]["result"]["serverInfo"]["version"] == "0.8.0"
     names = [t["name"] for t in out[1]["result"]["tools"]]
-    assert names == ["get_research_snapshot", "get_portfolio_risk", "run_hedge_scenario", "evaluate_trade", "create_order_proposal",
+    assert names == ["get_research_snapshot", "get_portfolio_risk", "analyze_positions", "run_hedge_scenario", "evaluate_trade", "create_order_proposal",
                      "review_decision", "compare_explanations", "trace_exposure"]
     assert all(t["annotations"]["readOnlyHint"] for t in out[1]["result"]["tools"])
     assert out[2]["error"]["code"] == -32700 and out[3]["error"]["code"] == -32601
@@ -254,3 +254,91 @@ def test_exported_graph_is_in_sync_with_the_page():
     fresh = mod.generate()
     shipped = json.loads((ROOT / "buildout" / "assets" / "brain_graph.json").read_text())
     assert fresh == shipped, "run python scripts/export_graph.py"
+
+
+
+def test_mcp_analyze_positions_is_exact_and_stores_nothing(tmp_path):
+    ctx = MS.Context(data_dir=str(tmp_path))
+    call = lambda args: MS.handle(ctx, _call(1, "analyze_positions", args))["result"]  # noqa: E731
+    r = call({"positions": [{"symbol": "NVDA", "quantity": 10, "price": 100}, {"symbol": "goog", "market_value": 500},
+                            {"symbol": "TLT", "market_value": 300}, {"symbol": "ZZZZ", "market_value": 100}], "cash": 100})["structuredContent"]
+    assert r["weights"] == {"NVDA": 0.5, "GOOGL": 0.25, "TLT": 0.15, "ZZZZ": 0.05} and r["cash_weight"] == pytest.approx(0.05)
+    assert r["brain"]["unmapped"] == ["ZZZZ"] and r["brain"]["mapped"]["GOOGL"] == "GOOGL"
+    assert r["as_portfolio_vector"]["equity"] == pytest.approx(0.8) and r["as_portfolio_vector"]["hedge_ratio"] == pytest.approx(0.15 / 0.8, abs=1e-4)
+    assert not next(c for c in r["checks"] if "single name" in c["check"])["pass"]
+    # the same weights as the model book reproduce the model book's sensitivities exactly
+    book = dict(ctx.config.universe.book)
+    mine = call({"positions": [{"symbol": k, "weight": v} for k, v in book.items()]})["structuredContent"]["brain"]["sensitivity_to_root_causes"]
+    model = MS.handle(ctx, _call(2, "get_portfolio_risk", {}))["result"]["structuredContent"]["book_sensitivity_to_root_causes"]
+    assert mine == pytest.approx(model, abs=1e-9)
+    assert list(tmp_path.iterdir()) == []                                # nothing written
+    for bad in [{"positions": []}, {"positions": [{"symbol": "NVDA"}]}, {"positions": [{"symbol": "NVDA", "weight": 0.5}, {"symbol": "AMZN", "market_value": 9}]},
+                {"positions": [{"symbol": "<script>", "weight": 0.1}]}, {"positions": [{"symbol": "NVDA", "market_value": -5}]}]:
+        assert call(bad)["isError"] is True, bad
+
+
+# ---------- free corporate-actions fallback ----------
+import pandas as pd  # noqa: E402
+
+from buildout.data import corporate_actions as CA  # noqa: E402
+from buildout.data.databento_source import DatabentoSource  # noqa: E402
+
+
+def _fake_source(closes_long, factors_ok):
+    src = DatabentoSource.__new__(DatabentoSource)
+    src.raw_daily_bars = lambda symbols, start, end=None: closes_long
+    def factors(symbols, start, end=None):
+        if not factors_ok:
+            raise PermissionError("403: reference data not in plan")
+        return CA.split_factors(symbols)
+    src.adjustment_factors = factors
+    return src
+
+
+def _bars():
+    d = pd.bdate_range("2024-06-03", "2024-06-14")
+    nv = [1100.0] * 5 + [110.0] * 5                                     # NVDA's 10-for-1 on 2024-06-10
+    ms = [420.0] * 10
+    rows = [{"date": t, "symbol": s, "open": p, "high": p, "low": p, "close": p, "volume": 1} for t, a, b in zip(d, nv, ms) for s, p in (("NVDA", a), ("MSFT", b))]
+    return pd.DataFrame(rows)
+
+
+def test_public_split_table_replaces_missing_vendor_factors():
+    src = _fake_source(_bars(), factors_ok=False)
+    c = src.adjusted_closes(["NVDA", "MSFT"], "2024-06-01", adjustments="auto")
+    assert src.adjustments_used == "public" and "403" in src.adjustments_error
+    assert c["NVDA"].pct_change().abs().max() < 1e-12 and c["NVDA"].iloc[0] == pytest.approx(110.0)
+    with pytest.raises(RuntimeError, match="public"):
+        _fake_source(_bars(), factors_ok=False).adjusted_closes(["NVDA"], "2024-06-01", adjustments="databento")
+    ok = _fake_source(_bars(), factors_ok=True)
+    ok.adjusted_closes(["NVDA", "MSFT"], "2024-06-01")
+    assert ok.adjustments_used == "databento"
+
+
+def test_a_split_missing_from_the_table_stops_the_run_by_name():
+    b = _bars()
+    b.loc[(b.symbol == "MSFT") & (b.date >= "2024-06-10"), "close"] = 210.0
+    with pytest.raises(ValueError, match="MSFT.*corporate_actions.py"):
+        _fake_source(b, factors_ok=False).adjusted_closes(["NVDA", "MSFT"], "2024-06-01")
+
+
+def test_split_table_is_well_formed_and_covers_the_universe():
+    from buildout.config import load_config
+    u = load_config(ROOT / "config.toml").universe
+    covered = set(CA.SPLITS) | set(CA.NO_SPLITS)
+    assert set(u.equities) <= covered, set(u.equities) - covered
+    assert not set(CA.SPLITS) & set(CA.NO_SPLITS)
+    for s, evs in CA.SPLITS.items():
+        dates = [d for d, _ in evs]
+        assert dates == sorted(dates) and len(set(dates)) == len(dates)
+        assert all(r > 1 and pd.Timestamp(d) >= pd.Timestamp("2018-05-01") for d, r in evs)
+
+
+def test_bond_income_accrues_the_yield_less_fees():
+    d = pd.bdate_range("2025-01-01", periods=253)
+    closes = pd.DataFrame({"TLT": 90.0, "NVDA": 100.0}, index=d)
+    y = pd.DataFrame({"DGS20": 4.15, "DGS7": 3.9}, index=d)
+    out, used = CA.add_bond_income(closes, y)
+    assert out["TLT"].iloc[-1] / out["TLT"].iloc[0] == pytest.approx((1 + 0.04 / 252) ** 252)
+    assert (out["NVDA"] == 100.0).all() and out["TLT"].iloc[0] == 90.0
+    assert used["TLT"]["avg_income_ann"] == pytest.approx(0.04)

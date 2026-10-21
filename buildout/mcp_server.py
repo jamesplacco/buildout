@@ -9,6 +9,7 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
 
   get_research_snapshot   what the engine's latest files say (hedge line, regime, data checks), with dates
   get_portfolio_risk      the model book: weights, the engine's risk summary, and which names are the same bet
+  analyze_positions       your real holdings, passed in for one call (e.g. from Robinhood's MCP), through the same lens
   run_hedge_scenario      the TLT hedge policy (hedge.tlt.v2) on any correlation path and inflation reading
   evaluate_trade          a candidate portfolio against the reasoner's scenarios: growth, worst case, loss limit, regret
   create_order_proposal   a structured, hashed proposal checked against the limits; never executed
@@ -126,7 +127,8 @@ def _book(ctx: Context) -> dict[str, float]:
     return dict(ctx.config.universe.book)
 
 
-def _think(ctx: Context, extra: dict | None = None, K: int | None = None) -> tuple[dict, dict]:
+def _think(ctx: Context, extra: dict | None = None, K: int | None = None, book_weights: dict | None = None) -> tuple[dict, dict]:
+    """book_weights (node id -> weight) replaces the links into the book node: the same graph, your holdings."""
     g = ctx.graph["graph"]
     ids = [n["id"] for n in g["nodes"]]
     idx = {k: i for i, k in enumerate(ids)}
@@ -143,6 +145,9 @@ def _think(ctx: Context, extra: dict | None = None, K: int | None = None) -> tup
     if not obs:
         raise ToolError("at least one reading is needed")
     edges = [(idx[e["from"]], idx[e["to"]], e["w"]) for e in g["edges"]]
+    if book_weights is not None:
+        b = idx["book"]
+        edges = [e for e in edges if e[1] != b] + [(idx[k], b, float(w)) for k, w in book_weights.items() if w]
     th = thinking.think(len(ids), edges, int(K or g["K"]), {idx[k]: v for k, v in obs.items()}, [idx[r] for r in g["roots"]],
                         [idx[h] for h in g["holdings"]], g["obs_sd"], g["prior_sd"])
     return th, {"ids": ids, "idx": idx, "edges": edges, "obs": obs, "K": int(K or g["K"])}
@@ -174,6 +179,107 @@ def get_portfolio_risk(ctx: Context, args: dict) -> dict:
         out["engine_summary"] = None
         out["note"] = "No report.json in the data folder: the engine's measured risk summary needs a book run."
     return out
+
+
+# symbols outside the AI book that still have a node: broad equity funds, bond funds (scaled to TLT's duration), gold
+ALIASES = {"GOOG": "GOOGL", "FB": "META"}
+PROXY_NODES = {"QQQ": ("eq", 1.0), "SPY": ("eq", 1.0), "VOO": ("eq", 1.0), "IVV": ("eq", 1.0), "VTI": ("eq", 1.0), "QQQM": ("eq", 1.0),
+               "TLT": ("tlt", 1.0), "VGLT": ("tlt", 0.9), "EDV": ("tlt", 1.4), "IEF": ("tlt", 0.45), "GOVT": ("tlt", 0.35),
+               "GLD": ("gold", 1.0), "IAU": ("gold", 1.0), "GLDM": ("gold", 1.0)}
+BOND_FUNDS = {"TLT": 1.0, "VGLT": 0.9, "EDV": 1.4, "IEF": 0.45, "GOVT": 0.35}
+GOLD_FUNDS = ("GLD", "IAU", "GLDM")
+
+
+def analyze_positions(ctx: Context, args: dict) -> dict:
+    """Your real holdings, passed in for one call (for example from Robinhood's MCP), run through the same risk
+    lens as the model book. Nothing is stored, logged or written; the server still cannot trade."""
+    pos = args.get("positions")
+    if not isinstance(pos, list) or not 1 <= len(pos) <= 200:
+        raise ToolError("positions must be a list of 1 to 200 holdings: {symbol, and weight, or market_value, or quantity and price}")
+    nav = _req_num(args, "nav", 1e-6, 1e12)
+    cash = _req_num(args, "cash", -1e12, 1e12, 0.0)
+    rows, by_weight = {}, None
+    for p in pos:
+        if not isinstance(p, dict):
+            raise ToolError("each position must be an object")
+        sym = str(p.get("symbol", "")).strip().upper()
+        if not sym or len(sym) > 12 or not sym.replace(".", "").replace("-", "").isalnum():
+            raise ToolError(f"bad symbol {p.get('symbol')!r}")
+        sym = ALIASES.get(sym, sym)
+        if "weight" in p:
+            w = _req_num(p, "weight", -2.0, 2.0)
+            kind = True
+        else:
+            mv = _req_num(p, "market_value", -1e12, 1e12)
+            if mv is None:
+                q, px = _req_num(p, "quantity", -1e12, 1e12), _req_num(p, "price", 0, 1e9)
+                if q is None or px is None:
+                    raise ToolError(f"{sym}: give weight, market_value, or quantity and price")
+                mv = q * px
+            w = mv
+            kind = False
+        if by_weight is None:
+            by_weight = kind
+        elif by_weight != kind:
+            raise ToolError("use weights for every position or values for every position, not a mix")
+        rows[sym] = rows.get(sym, 0.0) + w
+    if not by_weight:
+        total = sum(rows.values()) + (cash or 0.0)
+        base = nav or total
+        if base <= 0:
+            raise ToolError("the account value must be positive: pass nav, or cash plus positive positions")
+        weights = {k: v / base for k, v in rows.items()}
+        cash_w = (cash or 0.0) / base
+    else:
+        weights = dict(rows)
+        cash_w = 1.0 - sum(weights.values())
+    hold_ids = set(ctx.graph["graph"]["holdings"])
+    nodes, mapped, unmapped = {}, {}, []
+    for sym, w in weights.items():
+        if sym in hold_ids:
+            nodes[sym] = nodes.get(sym, 0.0) + w
+            mapped[sym] = sym
+        elif sym in PROXY_NODES:
+            node, scale = PROXY_NODES[sym]
+            nodes[node] = nodes.get(node, 0.0) + w * scale
+            mapped[sym] = f"{node} (x{scale:g})"
+        else:
+            unmapped.append(sym)
+    gross = sum(abs(w) for w in weights.values())
+    covered = sum(abs(weights[s]) for s in mapped) / gross if gross else 0.0
+    eq_w = sum(w for s, w in weights.items() if s not in BOND_FUNDS and s not in GOLD_FUNDS)
+    tlt_eq = sum(w * BOND_FUNDS[s] for s, w in weights.items() if s in BOND_FUNDS)
+    gold_w = sum(w for s, w in weights.items() if s in GOLD_FUNDS)
+    th, m = _think(ctx, book_weights=nodes)
+    T = np.array(th["T"])
+    bi = m["idx"]["book"]
+    g = ctx.graph["graph"]
+    sens = {r: float(T[bi, m["idx"][r]]) for r in g["roots"]}
+    held = [h for h in g["holdings"] if nodes.get(h)]
+    cos = np.array(th["shared"]["cos"])
+    hix = {h: i for i, h in enumerate(g["holdings"])}
+    pairs = sorted(((cos[hix[a], hix[b]], a, b) for i, a in enumerate(held) for b in held[i + 1:]), reverse=True)
+    model = _book(ctx)
+    diffs = sorted(((weights.get(k, 0.0) - model.get(k, 0.0), k) for k in set(weights) | set(model)), key=lambda t: -abs(t[0]))
+    w_arr = np.array([abs(w) for w in weights.values()])
+    lim = ctx.config.risk
+    checks = [{"check": "gross within max_gross", "value": round(gross, 4), "limit": lim.max_gross, "pass": gross <= lim.max_gross + 1e-9},
+              {"check": "largest single name at most 25% of the account", "value": round(max(weights.values(), key=abs), 4),
+               "name": max(weights, key=lambda k: abs(weights[k])), "pass": max(abs(w) for w in weights.values()) <= 0.25 + 1e-9},
+              {"check": "no short positions", "pass": all(w >= 0 for w in weights.values())}]
+    return {"privacy": "Analysed for this call only: nothing is stored, logged or committed. This server cannot place orders.",
+            "weights": {k: round(v, 4) for k, v in sorted(weights.items(), key=lambda kv: -abs(kv[1]))}, "cash_weight": round(cash_w, 4),
+            "gross": gross, "effective_names": float(1 / np.sum((w_arr / w_arr.sum()) ** 2)) if w_arr.sum() else None,
+            "checks": checks,
+            "brain": {"mapped": mapped, "unmapped": unmapped, "share_of_gross_mapped": covered,
+                      "book_now_sd": {"implied": th["predict"]["mean"][bi], "sd": th["predict"]["sd"][bi]},
+                      "sensitivity_to_root_causes": {k: round(v, 4) for k, v in sorted(sens.items(), key=lambda kv: -abs(kv[1]))},
+                      "same_bet_pairs": [{"a": a, "b": b, "cosine": round(float(c), 3)} for c, a, b in pairs[:5]]},
+            "vs_model_book": [{"symbol": k, "yours_minus_model": round(d, 4)} for d, k in diffs[:8] if abs(d) > 1e-9],
+            "as_portfolio_vector": {"equity": round(eq_w, 4), "hedge_ratio": round(tlt_eq / eq_w, 4) if eq_w > 0 else 0.0, "put_premium": 0.0,
+                                    "gold": round(gold_w, 4), "use": "pass to evaluate_trade to score these holdings on the seven scenarios"},
+            "evidence": {"weights": "Observed (as supplied)", "brain": "Hypothesis (judged links) plus Estimated (measured links)",
+                         "proxies": "Assumed: broad funds map to stocks, bond funds to TLT scaled by duration, gold funds to gold"}}
 
 
 def run_hedge_scenario(ctx: Context, args: dict) -> dict:
@@ -397,6 +503,14 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "get_portfolio_risk": (get_portfolio_risk, "The MODEL book (not personal positions): weights, limits, the engine's risk summary when a book run exists, "
                            "which holdings are the same bet, and the book's sensitivity to each root cause in the brain.",
                            _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
+    "analyze_positions": (analyze_positions, "Run YOUR holdings (for example from Robinhood's MCP) through the same lens as the model book: weights, "
+                          "limit checks, concentration, which names are the same bet, sensitivity to each root cause, the gap to the model book, "
+                          "and the portfolio vector to score with evaluate_trade. For this call only: nothing is stored; cannot trade.",
+                          _obj({"positions": {"type": "array", "maxItems": 200, "items": _obj({"symbol": {"type": "string"}, "weight": NUM, "market_value": NUM,
+                                                                                                "quantity": NUM, "price": NUM}, ["symbol"])},
+                                "nav": {**NUM, "description": "total account value including cash; default positions plus cash"},
+                                "cash": {**NUM, "description": "cash balance, same units as market_value"}}, ["positions"]),
+                          {"readOnlyHint": True, "openWorldHint": False}),
     "run_hedge_scenario": (run_hedge_scenario, "Run the TLT hedge policy hedge.tlt.v2 on a stock-bond correlation path and a 36-month inflation reading.",
                            _obj({"correlation": {**NUM, "description": "one 63-day stock-bond correlation"},
                                  "correlations": {"type": "array", "items": NUM, "description": "a path of correlations, oldest first"},

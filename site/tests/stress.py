@@ -389,6 +389,7 @@ async def main() -> int:
     base = make_fixtures(Path(tempfile.mkdtemp(prefix="buildout-fixtures-")))
     good = {n: json.loads((base / n).read_text()) for n in ["macro.json", "report.json", "capex.json", "status.json", "research.json",
                                                              "brain.json", "buyside.json", "feeds.json", "sources.json"]}
+    good["report.json"]["summary"]["adjustments"] = {"source": "public", "note": "public split table", "evidence": "Estimated"}
     snapshot_only = {k: v for k, v in good.items() if k != "research.json"}
     stale = copy.deepcopy(good)
     stale["macro.json"]["latest"]["as_of"] = "2026-09-01"
@@ -408,6 +409,7 @@ async def main() -> int:
     hostile["macro.json"]["macro_state"] = {"inflation": {"avg36": "hot", "yoy": None, "date": 5}, "nfci": {"value": "loose"}, "sahm": None}
     hostile["brain.json"]["regimes"]["inflation"]["edges"]["y10>eq"]["w"] = 50
     hostile["buyside.json"]["tail"] = "fat"
+    hostile["report.json"]["summary"]["adjustments"] = ["<b>x</b>"]
     hostile["brain.json"]["factor_cov"] = {"regimes": {"inflation": {"cov": "big", "months": None}, "low_inflation": {"cov": [[1e308]]}}}
     evil = '<img src=x onerror="window.__pwned=1">'
     hostile["feeds.json"]["items"] = [{"title": evil, "url": "javascript:window.__pwned=1", "source": evil, "platform": "<b>x</b>", "tier": "niche", "themes": ["memory"]}]

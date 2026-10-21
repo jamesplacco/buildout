@@ -167,19 +167,36 @@ class DatabentoSource:
         return out
 
     def adjusted_closes(self, symbols: list[str], start: str, end: str | None = None,
-                        allow_unadjusted: bool = False) -> pd.DataFrame:
+                        allow_unadjusted: bool = False, adjustments: str = "auto") -> pd.DataFrame:
+        """adjustments: "databento" (paid reference factors, strict), "public" (the free split table in
+        corporate_actions.py), or "auto" (Databento's factors when the account has them, else the public table).
+        self.adjustments_used records which one applied; bond-fund income is added later, where FRED is loaded."""
+        from .corporate_actions import PENDING, split_factors
+        if adjustments not in ("auto", "databento", "public"):
+            raise ValueError(f"data.adjustments must be auto, databento or public, not {adjustments!r}")
         bars = self.raw_daily_bars(symbols, start, end)
         closes = bars.pivot_table(index="date", columns="symbol", values="close", aggfunc="last").sort_index()
-        try:
-            closes = apply_factors(closes, self.adjustment_factors(symbols, start, end))
-        except Exception as exc:
-            if not allow_unadjusted:
-                raise RuntimeError("Adjustment factors failed; unadjusted splits would corrupt returns. "
-                                   "Pass allow_unadjusted=True only for a quick look.") from exc
+        self.adjustments_used = "none"
+        self.adjustments_error = None
+        done = False
+        if adjustments in ("auto", "databento"):
+            try:
+                closes = apply_factors(closes, self.adjustment_factors(symbols, start, end))
+                self.adjustments_used, done = "databento", True
+            except Exception as exc:
+                self.adjustments_error = f"{type(exc).__name__}: {exc}"[:300]
+                if adjustments == "databento" and not allow_unadjusted:
+                    raise RuntimeError("Adjustment factors failed; unadjusted splits would corrupt returns. "
+                                       "Set data.adjustments = \"public\" (or \"auto\") to use the free split table.") from exc
+        if not done and adjustments in ("auto", "public"):
+            closes = apply_factors(closes, split_factors(symbols))
+            self.adjustments_used = "public"
         jumps = closes.pct_change(fill_method=None).abs() > 0.45
         if jumps.any().any():
             bad = {c: list(closes.index[jumps[c]].strftime("%Y-%m-%d")) for c in closes if jumps[c].any()}
-            raise ValueError(f"Daily moves above 45% look like unadjusted corporate actions: {bad}")
+            hint = "; ".join(f"{k}: {v}" for k, v in PENDING.items() if k in bad)
+            raise ValueError(f"Daily moves above 45% look like unadjusted corporate actions: {bad}. "
+                             f"Add the split to SPLITS in buildout/data/corporate_actions.py.{(' Pending: ' + hint) if hint else ''}")
         return closes
 
     # ---- Treasury futures ------------------------------------------------------------------------

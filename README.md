@@ -12,7 +12,8 @@ the most mutual information, and doing (cut the node's causes) is kept apart fro
 observations on three clocks, compares competing explanations and ranks the evidence that separates them, registers
 ten unusual indicators before testing them, and watches expected events without reading silence as news. Today shows
 what each headline read before, and says so when nothing moved. The engine is also an MCP server
-(`mcp_server.py`): eight research and proposal tools for any assistant, none of which can place an order.
+(`mcp_server.py`): nine research and proposal tools for any assistant, none of which can place an order. Without
+Databento's paid adjustment factors, the book run falls back to a public split table and estimated bond-fund income.
 
 Version 0.7 answered the third project review. It fixes the accounting (one NAV and return convention, costs in
 the first return, Sharpe over accrued cash, next-session fills, every variant on the same dates beside a cash-only
@@ -61,7 +62,13 @@ by `github-actions[bot]`. Only derived analytics are committed; raw market data 
 ### One-time setup
 
 1. **Databento key.** Settings > Secrets and variables > Actions > New repository secret:
-   name `DATABENTO_API_KEY`, value `db-...`. The next run prices the pull (`buildout cost`) and then runs the book.
+   name `DATABENTO_API_KEY`, value `db-...`. The next run prices the pull (`buildout cost`), refuses it above
+   `max_cost_usd` in `config.toml` ($5 by default), and then runs the book. Split and dividend adjustment factors
+   are Databento reference data, sold as a separate plan. With `adjustments = "auto"` (the default) the run uses
+   them when the account has them and otherwise falls back to the public split table in
+   `buildout/data/corporate_actions.py`, with TLT and IEF income estimated from Treasury yields and stock dividends
+   left out. The report and the page say which applied. A split missing from the table stops the run by name:
+   add the row on the ex-date (Meta announced a 2-for-1 through Class C shares on Oct 21, 2026; dates pending).
 2. **X (optional).** Secret `X_BEARER_TOKEN` (X API v2) adds the X accounts in `feeds.toml` to Noteworthy.
    Without it they are skipped with a note; X is never scraped.
 3. **SEC contact (optional).** Same page, Variables tab: `SEC_USER_AGENT` = `Your Name you@example.com`.
@@ -82,7 +89,7 @@ formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked
 |---|---|
 | Today | Risk rings, what changed since your last visit, a morning check-in with a streak, early trends, a three-line brief (do, risk, watch), twelve signals each with a rule and an action, the system map (nine parts of the financial system and the channels between them, red where stress is flowing), what moved, key levels, regime map, engine readout, calendar |
 | Noteworthy | Ten trends placed on the curve from niche to consensus, each with a bottom line, sourced numbers, a watch list and live links to X, Substack and Telegram; the feed's latest items; heat, niche skew and lead time per theme |
-| The brain | Twenty-one parts of the system and forty-eight signed links (eleven measured by regime, the rest judged and editable): propagation by order, strongest channels, feedback loops, load-bearing links, Monte Carlo robustness, the spectral radius, the inverse problem, PM and quant modes |
+| The brain | Thirty-four parts and about 110 signed links (eleven measured by regime, the rest judged and editable): propagation by order, strongest channels, feedback loops, the links the answer rests on, Monte Carlo robustness, the spectral radius, the inverse problem, PM and quant modes |
 | Prop | Industry economics (Jane Street, Citadel Securities, Virtu, retail challenges), the edge calculator and Kelly hill, a funded-challenge simulator, pod-shop economics from gross to net |
 | Market making | Market structure in 2026, an Avellaneda-Stoikov simulator, Glosten-Milgrom adverse selection, square-root impact with Almgren-Chriss schedules and the execution frontier, the book's own liquidity |
 | Buyside 2026 | The field manual as tools: regime and gross, the hedge selector, Student-t shortfall, five replays, server-life depreciation, cash earnings, reverse DCF, red flags, private credit stress, position tiers and the moonbag rule, the manual's ten signals, and where the manual and the data disagree |
@@ -138,7 +145,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 179 tests, no data needed
+pytest                                    # 184 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -181,6 +188,7 @@ Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app doe
 |---|---|
 | `get_research_snapshot` | The out-of-sample hedge line and band, the stock-bond regime, data checks, scenario probabilities, brain readings, with dates |
 | `get_portfolio_risk` | The model book, its limits, the engine's risk summary, which holdings are the same bet, the book's sensitivity to each root cause |
+| `analyze_positions` | YOUR holdings, passed in for one call (for example from Robinhood's MCP): weights, limit checks, same-bet pairs, root-cause sensitivity, gap to the model book. Nothing stored |
 | `run_hedge_scenario` | hedge.tlt.v2 on any correlation path and inflation reading, every gate visible |
 | `evaluate_trade` | A portfolio on the seven scenarios: growth, worst case, loss limit, regret, the best portfolio on the grid |
 | `create_order_proposal` | A hashed proposal checked against gross, single-name and universe limits. Never executed |
@@ -192,11 +200,16 @@ Every tool is read-only research or a proposal. The server refuses `config.priva
 account and has no order, routing or cancel tool; tests check all three. It reasons on `buildout/assets/brain_graph.json`,
 exported from the page by `scripts/export_graph.py`; a test fails if the export and the page drift apart.
 
+**With Robinhood.** Add Robinhood's official MCP (`https://agent.robinhood.com/mcp/trading`) to the same Claude
+client. Claude reads your holdings there, passes them to `analyze_positions` and `evaluate_trade` here, and drafts a
+proposal; any order goes through Robinhood's dedicated Agentic account with trade approvals on. Buildout never sees
+credentials, and the holdings it is shown are not stored.
+
 ## Data
 
 | Source | What | Cost |
 |---|---|---|
-| Databento | Daily (and minute) bars for equities and ETFs, split and dividend adjustment factors, CME Treasury futures (ZN, UB) | Pay-as-you-go historical; new accounts get $125 credit |
+| Databento | Daily (and minute) bars for equities and ETFs, CME Treasury futures (ZN, UB); split and dividend adjustment factors if the plan includes reference data (else the free fallback) | Pay-as-you-go historical; reference data is a separate plan |
 | FRED | Nasdaq-100, the Treasury curve from 1 month to 30 years, TIPS real yields, breakevens, term premium, IG, HY and CCC spreads, VIX and VXN, broad dollar, Brent and WTI, the Fed's balance sheet and repo rates, CPI, unemployment, Sahm, NFCI, claims | Free |
 | SEC EDGAR | Revenue, operating cash flow, capex, leases, depreciation, operating and non-operating income, interest, debt, cash and backlog from XBRL filings | Free (contact required) |
 | GitHub datasets | Shiller's S&P 500 since 1871, BLS CPI-U, the 10-year Treasury, EIA Brent, CBOE VIX, monthly gold | Free |
@@ -219,7 +232,8 @@ exported from the page by `scripts/export_graph.py`; a test fails if the export 
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
 | v0.8 | `thinking.py` | The brain's reasoning: total effects within K links, ridge abduction of root shocks with posterior covariance, predictions with sd, residuals and misfit gradients per link, single-cause evidence by Sherman-Morrison, mutual information for the next observation, do-interventions, shared exposure |
 | | `field.py` | Discrete Bayes over competing explanations and expected information (bits) of each unchecked piece of evidence |
-| | `mcp_server.py` | MCP over stdio: eight research and proposal tools; never executes |
+| | `mcp_server.py` | MCP over stdio: nine research and proposal tools; never executes |
+| | `data/corporate_actions.py` | Free fallback for Databento's paid adjustment factors: public split table, bond-fund income from Treasury yields |
 | v0.7 | `policy.py` | hedge.tlt.v2, size.equity.v2, limits.portfolio.v1: one function each for recommendation, text and backtest; unavailable inputs block, never default; decision snapshot |
 | | `reasoner.py` | Tempered Bayes posterior, scenario returns (duration, convexity, Black-Scholes put spreads, financing), exact grid search with a loss limit, alternatives with regret, simplex game against Nature, EVPI and EVSI, reverse stress from measured covariances; `python -m buildout reason` writes reason.json |
 | | `games.py` | Nash equilibria (pure and support enumeration), asymmetric Cournot calibrated to filings, the capex dilemma, Morris-Shin crowded exit, Kyle, prediction-ladder coherence and fee-aware arbitrage |

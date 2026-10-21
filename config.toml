@@ -38,5 +38,7 @@ start = "2018-05-01"               # XNAS.ITCH history begins 2018-05-01
 equities_dataset = "auto"
 futures_dataset = "GLBX.MDP3"
 futures_roots = ["ZN", "UB"]       # 10y note and ultra bond futures for DV01 hedging
+adjustments = "auto"               # auto: Databento's split/dividend factors if the plan has them, else the free public split table
+max_cost_usd = 5.0                 # refuse an unattended Databento pull priced above this
 cache_dir = ".cache"
 use_fred = true

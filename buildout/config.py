@@ -52,6 +52,7 @@ class DataParams:
     sec_user_agent: str = "Your Name your@email.com"  # SEC requires a real contact
     risk_free_series: str = "DGS3MO"
     max_cost_usd: float = 5.0           # refuse an unattended paid pull whose Databento estimate exceeds this
+    adjustments: str = "auto"           # auto | databento | public: corporate actions source (see data/corporate_actions.py)
 
 
 @dataclass
