@@ -3,6 +3,28 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.17 does two things. First, bonds broken down to what they are: `bondlab.py` reprices every Treasury ETF
+(SHY, IEI, IEF, TLH, TLT, EDV, ZROZ) bond by bond at any 10-year and 30-year yield on today's Treasury par curve. Each
+fund is an equal-face ladder centred on the issuer's reported average maturity, with one coupon calibrated so the
+ladder's duration equals the reported duration; the curve moves so the 10-year and 30-year land exactly where you set
+them and today's hump is kept. If both go to 4%, TLT goes from $80.24 to about $99 (+23.5%); at 6%, about $73
+(-8.8%); the duration rule alone would miss about 3 points of convexity. It reports the 12-month return with coupons
+and roll, the break-even yield rise, a heatmap of every pair of yields, today's tape against the model (TLT +1.53%
+predicted for the midday move, +1.73% reported), and how stocks have moved per point of yield by inflation band since
+1871: in the middle band, where inflation now sits, stocks fall about 2.7% per point of yield rise (t -2.4).
+`python -m buildout bonds --y10 4 --y30 4`, the MCP tool `bond_scenario`, and the mind all answer "if the 10-year and
+30-year go to 4%, what is TLT?". Second, why the complex models backtested better and forecast worse, measured by
+`complexity.py`: in-sample R squared rises toward 100% with complexity in every family while out-of-sample skill
+falls; 1,710 overlapping months hold about 142 independent observations; all eight predictors explain
+10.5% in sample while ordinary least squares with eight predictors costs about 5.6% out of
+sample; a regression fitted before 1950 put a weight of -20.8 on a 10-year yield that later tripled; the CAPE slope
+drifts; Stambaugh's bias moves its p-value from 0.03 to 0.12; and on planted data complexity pays only when the signal
+is strong and genuinely nonlinear. The mind grows to 8,592 nodes and about 34,700 links: 4,295 concepts (eight writer
+agents, a ninth fact-checking 958 entries), every month since 1871 with its eight nearest analogs and what followed
+(`chronicle.py`), 25 named episodes, the Treasury ETFs, the desks, and similarity links between concepts; it answers
+history questions ("what happened in 1974", "months like now") directly. `python -m buildout history "black monday"`
+and the MCP tool `market_history` do the same.
+
 Version 0.16 makes data the focus. `datahub.py` reads Databento (split-adjusted daily OHLCV and futures), Yahoo's
 chart API, Stooq, the SEC's XBRL company facts, the Treasury's par curve, the CFTC's traders-in-financial-futures and
 FRED behind one interface, tried in priority order per ticker with the answering source recorded, plus a connection
@@ -353,6 +375,9 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 156 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.17 | `bondlab.py` | Treasury ETFs as calibrated ladders; the curve moved to any 10-year and 30-year yield; price, 12-month return with roll, break-even, grid; stocks per point of yield by inflation band; reading yield questions |
+| | `complexity.py` | Complexity sweep, effective sample, cost of estimation, extrapolation, drift, Stambaugh bias, planted-signal experiment, written conclusions |
+| | `chronicle.py` | Every month since 1871, years and named episodes, analogs on six standardized features, the spiral layout |
 | v0.16 | `datahub.py` | Databento, Yahoo, Stooq, SEC company facts, Treasury curve, CFTC positioning, FRED; per-ticker fallbacks; connection check; broker CSV import; the market run |
 | | `technicals.py` | Indicator library, signals, chart structure, event study with Newey-West and BH, evidence-weighted composite judged out of sample |
 | | `statements.py` | Annual statements from XBRL company facts; ratios; Piotroski F, Altman Z'', Beneish M; valuation multiples with a price |
@@ -442,6 +467,12 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.17: a zero-coupon ladder's duration equals its price-weighted maturity over one plus half the yield; the
+  calibrated ladders hit the reported duration and centre on the reported maturity; the curve move lands exactly on
+  the 10-year and 30-year and keeps the hump; par bonds on a flat curve lose what duration and convexity say and gain
+  more on a fall than they lose on a rise; unchanged yields earn the yield; Python and the page agree on every fund,
+  scenario, grid and parsed question to 1e-12; the complexity study's overlap, persistence and drift recover planted
+  values and linear regression wins at a low planted signal.
 - v0.16: indicators match their definitions (SMA, true range, Wilder ATR, OBV, WMA, Fibonacci) and stay in range;
   signals never change when only the future changes; the event study finds planted momentum and noise earns little
   weight; a planted company passes all nine Piotroski tests and its Altman Z'' and ratios match by hand; Beneish is

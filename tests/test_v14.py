@@ -198,7 +198,7 @@ def test_chains_reach_the_book_over_atlas_links(M, snap):
 
 
 def test_unknown_question_is_handled(M):
-    r = M.think("zzqx nonsense")
+    r = M.think("zzqx qqwv")
     assert r["found"] is False
 
 
@@ -382,5 +382,5 @@ def test_page_states_the_mind_counts_it_ships():
     snap = json.loads(MIND_JSON.read_text())
     n = len(snap["nodes"])
     concepts = sum(1 for x in snap["nodes"] if x["k"] == "concept")
-    assert f"{n:,} nodes" in page and f"{concepts} concepts" in page
-    assert abs(len(snap["edges"]) - 5800) < 300 and "5,800 typed links" in page
+    assert f"{n:,} nodes" in page and f"{concepts:,} concepts" in page
+    assert abs(len(snap["edges"]) - 34700) < 1500 and "34,700 typed links" in page

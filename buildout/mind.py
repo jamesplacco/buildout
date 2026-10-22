@@ -59,7 +59,7 @@ SEEDS = 12
 SEED_FLOOR = 0.3      # seeds keep at least this share of the best seed score
 W_BM, W_ALIAS = 0.6, 1.0
 DOC_W = (3, 2, 1)     # name, aliases, text repeats in a node's document
-KIND_RECALL = {"quote": 0.55, "signal": 0.8, "investor": 0.8, "country": 0.7, "company": 0.85, "industry": 0.85}   # long documents match everything; damp them as seeds
+KIND_RECALL = {"month": 0.4, "year": 0.7, "finding": 0.8, "quote": 0.55, "signal": 0.8, "investor": 0.8, "country": 0.7, "company": 0.85, "industry": 0.85}   # long documents match everything; damp them as seeds
 QSTOP = ["useful", "work", "works", "working", "good", "now", "keep", "still", "go", "away", "think", "thing", "make", "use", "need", "right",
          "time", "best", "way", "say", "tell", "explain", "mean", "meaning", "happen", "happens", "happened", "change", "changes"]
 AXIS_TOPIC_BOOST = 1.5
@@ -68,14 +68,14 @@ EXPLAIN_RATIO = 0.12  # below this share of the top activation, the mind explain
 EDGE_W = {"is_a": 0.9, "part_of": 0.8, "measures": 0.8, "implemented_by": 0.6, "uses": 0.7, "related": 0.6, "opposes": 0.6,
           "causes+": 0.8, "causes-": 0.8, "example_of": 0.7, "hedges": 0.7, "priced_by": 0.6, "member": 0.35, "about": 0.6,
           "said_by": 0.8, "evidence": 0.7, "currency": 0.8, "exports": 0.6, "imports": 0.5, "code": 0.5, "method_of": 0.8,
-          "tool": 0.7, "signal": 0.9, "cites": 0.6, "topic_of": 0.7}
+          "tool": 0.7, "signal": 0.9, "cites": 0.6, "topic_of": 0.7, "analog": 0.5, "holds": 0.7, "routes": 0.6, "similar": 0.35}
 TYPES = list(EDGE_W) + ["learned", "judged"]
 
-GROUP_NAMES = {**{k: v for k, v in ontology.CLUSTERS.items()}, "markets": "Markets (atlas series)", "core": "Core drivers and the book",
+GROUP_NAMES = {**{k: v for k, v in ontology.CLUSTERS.items()}, "markets": "Markets (atlas series)", "chronicle": "Market history, month by month", "core": "Core drivers and the book",
                "voices": "Investor voices", "engine": "The engine room", "world": "The world economy", "evidence": "Signals",
                "companies": "S&P 500 companies"}
 
-FACT_CLUSTER = {"distribution": "ai", "edge_sources": "edge", "model_risk": "reality", "ml_finance": "ml", "private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
+FACT_CLUSTER = {"bonds": "rates", "tape": "macro", "distribution": "ai", "edge_sources": "edge", "model_risk": "reality", "ml_finance": "ml", "private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
                 "games_negotiation_stats": "games", "trading_structure": "structure"}
 
 # ---------------------------------------------------------------- axes: the claims the mind can weigh
@@ -208,6 +208,11 @@ WHATIF_DOWN = ["fall", "falls", "drop", "drops", "crash", "crashes", "slow", "sl
 WHATIF_SPLIT = [",", " then ", " what ", " how ", " does ", " do ", " will ", " should ", " is ", " are ", " would "]
 RX_WHATIF = r"^\s*(?:what\s+if|if|suppose|assume|assuming|imagine)\s+(.+)$"
 RX_BOOK = r"\b(?:the|my|our|this)\s+(?:model\s+)?(?:book|portfolio|positions?|holdings)\b"
+RX_MONTH = r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(18[7-9]\d|19\d\d|20[0-2]\d)\b"
+RX_YEAR = r"\b(18[7-9]\d|19\d\d|20[0-2]\d)\b"
+RX_NOW = r"\b(?:months? like (?:now|today)|like today|historical analogs?|analog months?|now in history|history rhymes?)\b"
+RX_HIST = r"\b(?:what happened|happened in|in history|history of|remember|back in|like in|episode|crash of|panic of)\b"
+MON3 = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 RX_EXPLAIN = r"^\s*(?:what\s+is|what's|whats|what\s+are|define|explain|meaning\s+of|tell\s+me\s+about)\b"
 ENGINE_ALIAS = {"book": "pipeline", "brain-robust": "brain_robust", "causal": "causal_stats", "robust-bt": "analytics.robust_bt",
                 "options": "analytics.options", "trading": "microstructure", "reason": "reasoner"}
@@ -657,6 +662,143 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
     return S
 
 
+ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
+DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("bonds", "Bonds, simply", "Set the 10-year and 30-year yields and see every Treasury ETF repriced bond by bond: price, 12-month return, break-even and what it means for stocks.", ["c:duration", "c:convexity", "c:tlt", "c:bond-etf", "c:yield-curve"]),
+    ("rates", "Rates and curves", "The Treasury curve through 2026, spreads, the forward curve and liquidity.", ["c:yield-curve", "c:term-premium", "c:bear-steepening"]),
+    ("ml", "The machine-learning lab", "Purged walk-forward forecasts, the combination forecast, CPCV and the overfitting probability, and why complex models backtest better than they forecast.", ["c:machine-learning", "c:overfitting", "c:data-snooping"]),
+    ("mind", "The mind", "Ask anything: recall, spreading activation, weighing and the belief network.", []),
+    ("labs", "The labs", "The trend lab, valuation lab and the long-history tests on 155 years.", ["c:cape", "c:ma10m"]),
+    ("analysis", "Technicals and fundamentals", "Every chart signal judged on its own asset, every ratio read from the filing.", ["c:technical-analysis"]),
+    ("hedges", "The hedge lab", "Scenario losses for the model book with and without each hedge.", ["c:tlt", "c:hedging"]),
+]
+EPISODE_TERMS = {"crash-1929": ["1929", "great-depression"], "dotcom": ["dot-com", "dotcom", "2000-bubble"], "gfc": ["2008", "financial-crisis", "lehman", "subprime"],
+                 "volcker": ["volcker"], "great-inflation": ["great-inflation", "stagflation"], "bear-1973": ["1973", "nifty"], "crash-1987": ["1987", "portfolio-insurance"],
+                 "ltcm-1998": ["ltcm", "1998"], "taper-2013": ["taper"], "covid": ["covid", "2020"], "inflation-2022": ["2022"], "ai-buildout": ["ai-capex", "hyperscaler", "ai-bubble"],
+                 "panic-1907": ["1907"], "bond-1994": ["1994"], "euro-2011": ["euro-crisis", "2011"], "ww2": ["world-war"], "roaring-twenties": ["roaring", "1920s"],
+                 "bull-1982": ["1982"], "panic-1873": ["1873"], "panic-1893": ["1893"]}
+
+
+def similar_concepts(concepts: list[dict], k: int = 4, floor: float = 0.22) -> list[tuple[str, str, float]]:
+    """v0.17: each concept linked to the few whose definitions read most alike (TF-IDF cosine on name, aliases and
+    definition), so thinking about one idea also recalls its neighbours even where no writer typed the relation."""
+    try:
+        import numpy as np
+        from sklearn.feature_extraction.text import TfidfVectorizer
+    except ImportError:
+        return []
+    docs = [f"{c['name']} {c['name']} {' '.join(c['aliases'])} {c['text']}" for c in concepts]
+    X = TfidfVectorizer(sublinear_tf=True, stop_words="english", min_df=2, ngram_range=(1, 2), max_features=60000).fit_transform(docs)
+    out = []
+    for s0 in range(0, X.shape[0], 1000):
+        S = (X[s0:s0 + 1000] @ X.T).toarray()
+        for r in range(S.shape[0]):
+            i = s0 + r
+            S[r, i] = 0.0
+            top = np.argsort(-S[r], kind="stable")[:k]
+            for j in top:
+                if S[r, j] >= floor:
+                    out.append((concepts[i]["id"], concepts[int(j)]["id"], round(0.2 + 0.4 * float(S[r, j]), 4)))
+    return out
+
+
+def v17_nodes(node, edge, nodes, idx, chron, bonds, cx) -> None:
+    """v0.17: the chronicle (every month since 1871, years, episodes, analogs), the Treasury ETFs with their measured
+    facts and repricing, the complexity study's findings, and the site's desks as routing nodes."""
+    concept_ids = [n["id"] for n in nodes if n["k"] == "concept"]
+    if chron:
+        for n in chron["nodes"]:
+            extra = {k: n[k] for k in ("ret_next", "start", "end", "dd", "yr", "mo") if n.get(k) is not None}
+            node(n["id"], n["k"], n["n"], n["g"], n["t"], n["a"], **extra)
+        for a, b, typ, w in chron["edges"]:
+            edge(a, b, typ, w)
+        for eid, terms in EPISODE_TERMS.items():
+            for cid in concept_ids:
+                if any(t in cid for t in terms):
+                    edge("h:" + eid, cid, "related", 0.6)
+        edge("m:now", "c:cape", "related", 0.5)
+        edge("m:now", "x:history", "related", 0.5)
+        for eid in EPISODE_TERMS:
+            edge("h:" + eid, "x:history", "part_of", 0.4)
+    if bonds:
+        for t, f in bonds["funds"].items():
+            c = bonds["cases"]
+            fa = bonds.get("facts", {}).get(t, {})
+            txt = (f"{f['name']}: a {f['lo']:g} to {f['hi']:g}-year Treasury ladder" + (" of zero-coupon STRIPS" if f["zero"] else "") +
+                   (f", reported duration {fa['duration']:.2f} years ({fa.get('duration_as_of')})" if fa.get("duration") else f", modelled duration {f['duration']:.1f} years") +
+                   (f", yield to maturity {fa['ytm']:.2%}" if fa.get("ytm") else "") + (f", price ${fa['price']:.2f} ({fa.get('as_of')})" if fa.get("price") else "") +
+                   f". If the 10-year and 30-year both go to 4%, it moves {c['both_4']['funds'][t]['change']:+.1%}; both to 6%, {c['both_6']['funds'][t]['change']:+.1%}; "
+                   f"yields can rise {bonds['breakeven'][t] * 1e4:.0f}bp in a year before its income is gone.")
+            node("etf:" + t.lower(), "etf", t, "rates", txt, [t.lower(), f["name"].lower()], duration=round(f["duration"], 3))
+            for cid in ETF_LINKS:
+                edge("etf:" + t.lower(), cid, "related", 0.7)
+            edge("etf:" + t.lower(), "e:bondlab", "implemented_by", 0.7)
+        edge("etf:tlt", "a:tlt", "measures", 0.9)
+        for a, b in (("shy", "iei"), ("iei", "ief"), ("ief", "tlh"), ("tlh", "tlt"), ("tlt", "edv"), ("edv", "zroz")):
+            edge("etf:" + a, "etf:" + b, "related", 0.5)
+    if cx:
+        for i, c in enumerate(cx["conclusions"]):
+            node(f"cx:{i}", "finding", c["title"], "ml", c["text"], [])
+            edge(f"cx:{i}", "e:complexity", "implemented_by", 0.7)
+            for cid in ("c:overfitting", "c:machine-learning", "c:data-snooping", "c:effective-sample-size", "c:stambaugh-bias", "c:extrapolation", "c:curse-of-dimensionality"):
+                edge(f"cx:{i}", cid, "related", 0.6)
+    for d, title, text, links in DESKS:
+        node("d:" + d, "desk", title, "core", f"On the site: {title}. {text}", [title.lower(), d + " desk"], desk=d)
+        for cid in links:
+            edge("d:" + d, cid, "routes", 0.6)
+    if bonds:
+        for t in bonds["funds"]:
+            edge("d:bonds", "etf:" + t.lower(), "routes", 0.6)
+    if cx:
+        for i in range(len(cx["conclusions"])):
+            edge("d:ml", f"cx:{i}", "routes", 0.6)
+
+
+def v17_signals(K: dict, bonds: dict | None, cx: dict | None) -> list[dict]:
+    """v0.17: what the bond repricing, the stock read-through, today's tape and the complexity study say."""
+    S = []
+
+    def add(sid, axis, sign, s, rel, group, text, refs, flip, targets=()):
+        refs = [r for r in refs if not r.startswith("k:") or r[2:] in K]
+        S.append({"id": "s:" + sid, "axis": axis, "sign": sign, "s": s, "rel": rel, "group": group, "text": text, "refs": refs, "flip": flip, "targets": list(targets)})
+    if bonds:
+        c, be = bonds["cases"], bonds["breakeven"]["TLT"]
+        dn, up = c["down_100"]["funds"]["TLT"]["change"], c["up_100"]["funds"]["TLT"]["change"]
+        add("bonds-convexity", "bonds_rates", 1, 0.3, 0.6, "bonds",
+            f"Repriced bond by bond, TLT gains {dn:+.1%} if yields fall 1 point and loses {up:+.1%} if they rise 1 point, and its income covers a {be * 1e4:.0f}bp rise in a year: at these yields the long bond's payoff is skewed toward the holder.",
+            ["e:bondlab", "c:convexity", "etf:tlt"], "Yields rising more than the break-even in a year.", ["c:convexity"])
+        eq = bonds.get("equity") or {}
+        now = eq.get("now")
+        if now and now["regime"] in eq:
+            r = eq[now["regime"]]
+            band = {"low_inflation": "below 2.75%", "middle_inflation": "between 2.75% and 4.25%", "high_inflation": "above 4.25%"}[now["regime"]]
+            add("bonds-regime", "bonds_rates", 1 if r["per_point"] > 0 else -1, round(min(0.4, 0.1 * abs(r["t"])), 6), 0.5, "bonds",
+                f"With inflation {band} (now {now['infl36']:.1%} a year over three years), the S&P 500 has moved {r['per_point']:+.1%} per point of rise in the 10-year since 1871 (t {r['t']:.1f}): "
+                + ("stocks and bonds have tended to fall together, so long bonds hedge less." if r["per_point"] < 0 else "yields have risen with stocks, so long bonds have hedged."),
+                ["e:bondlab", "c:stock-bond-correlation"], "Inflation crossing into another band.", ["c:stock-bond-correlation"])
+        tl, qq = K.get("tp-tlt-1022"), K.get("tp-qqq-1022")
+        if tl and qq and tl.get("value") is not None and qq.get("value") is not None:
+            add("bonds-tape", "bonds_rates", 1 if tl["value"] > 0 > qq["value"] else -1, 0.2, 0.4, "bonds",
+                f"On Oct 22, 2026, TLT was {tl['value']:+.2f}% while QQQ was {qq['value']:+.2f}% as AI stocks sold off on earnings and debt worries: the hedge worked on the day.",
+                ["k:tp-tlt-1022", "k:tp-qqq-1022", "etf:tlt"], "Stocks and long bonds falling on the same day.", [])
+    if cx:
+        sw = cx["sweep"]
+        worst = min(r["out_of_sample"] for rows in sw.values() for r in rows[-1:])
+        add("cx-complexity", "edge:ml", -1, 0.5, 0.8, "complexity",
+            f"On 155 years of data, every model family fits the training years better as it grows more complex and forecasts the years after worse, down to {'below -100%' if worst < -1 else format(worst, '+.0%')} out of sample; about {cx['information']['n_eff']:.0f} independent 12-month observations cannot pay for flexible models.",
+            ["e:complexity", "c:overfitting"], "A flexible model beating the historical mean out of sample.", ["c:overfitting"])
+        st = cx["stambaugh"]
+        add("cx-stambaugh", "market_valuation", -1, 0.25, 0.5, "complexity",
+            f"Corrected for Stambaugh's small-sample bias, the CAPE slope shrinks from {st['slope']:+.3f} to {st['slope_corrected']:+.3f} a year per log point, and its p-value rises from {st['p_naive']:.2f} to {st['p_bias_aware']:.2f}: valuation still points down, more weakly.",
+            ["e:complexity", "c:stambaugh-bias", "c:cape"], "The bias-corrected slope losing its sign.", ["c:cape"])
+    return S
+
+
+def bonds_compact(b: dict) -> dict:
+    keep = ("name", "lo", "hi", "a", "b", "zero", "coupon", "duration", "convexity", "ytm", "price", "price_as_of", "reported_duration", "wam", "ytm_reported")
+    return {"curve": b["curve"], "funds": {t: {k: f[k] for k in keep if f.get(k) is not None} for t, f in b["funds"].items()}, "equity": b.get("equity")}
+
+
 def more_signals(K: dict, mlo: dict | None, aso: dict | None, positions: dict | None) -> list[dict]:
     """v0.15: evidence from the machine-learning engine, the reality check (assumptions), each holding's reverse DCF and
     the model-risk and machine-learning literature."""
@@ -842,7 +984,8 @@ def propagate(net: dict, fixed: dict | None = None) -> list[float]:
 # ---------------------------------------------------------------- the graph
 def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
           research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
-          positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None) -> dict:
+          positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None,
+          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -871,6 +1014,8 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
         node("x:" + cl, "cluster", title, cl, f"Everything the mind knows about {title.lower()}.", [title])
     for c in concepts:
         node(c["id"], "concept", c["name"], c["cluster"], c["text"], c["aliases"], f=c["formula"])
+    for a, b, w in similar_concepts(concepts):
+        edge(a, b, "similar", w)
     # atlas
     an = {n["id"]: n for n in atlas["nodes"]}
     for n in atlas["nodes"]:
@@ -1052,12 +1197,13 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
             edge(f"as:{i}", "c:assumption-testing", "is_a", 0.7)
             for mod in re.findall(r"([a-z_/]+)\.py", m["where"]):
                 edge(f"as:{i}", "e:" + mod.replace("/", "."), "related", 0.6)
+    v17_nodes(node, edge, nodes, idx, chron, bonds, cx)
     # signals
     K = {it["id"]: it for it in know}
     cape_pct = None
     if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
         cape_pct = labs_L["valuation"]["cape"]["percentile"]
-    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech)
+    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx)
     for s in sigs:
         ax = s["axis"]
         title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]
@@ -1069,6 +1215,8 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     E = sorted(edges.values(), key=lambda e: (e[0], e[1]))
     G = {"nodes": nodes, "edges": E, "causal": causal, "signals": sigs, "axes": axes_meta(), "types": TYPES,
          "groups": GROUP_NAMES, "params": params(), "net": network(atlas, sigs)}
+    if bonds:
+        G["bonds"] = bonds_compact(bonds)
     if layout:
         place(G)
     return G
@@ -1084,7 +1232,8 @@ def axes_meta() -> dict:
 def params() -> dict:
     return {"alpha": ALPHA, "steps": STEPS, "seeds": SEEDS, "seed_floor": SEED_FLOOR, "w_bm": W_BM, "w_alias": W_ALIAS, "doc_w": list(DOC_W), "kind_recall": KIND_RECALL, "qstop": QSTOP,
             "axis_topic_boost": AXIS_TOPIC_BOOST, "explain_ratio": EXPLAIN_RATIO, "hedges": HEDGE_NAMES, "whatif_up": WHATIF_UP, "whatif_down": WHATIF_DOWN,
-            "whatif_split": WHATIF_SPLIT, "rx_whatif": RX_WHATIF, "rx_explain": RX_EXPLAIN, "rx_book": RX_BOOK, "net_cap": NET_CAP}
+            "whatif_split": WHATIF_SPLIT, "rx_whatif": RX_WHATIF, "rx_explain": RX_EXPLAIN, "rx_book": RX_BOOK, "net_cap": NET_CAP,
+            "rx_month": RX_MONTH, "rx_year": RX_YEAR, "rx_now": RX_NOW, "rx_hist": RX_HIST}
 
 
 def place(G: dict) -> None:
@@ -1108,11 +1257,15 @@ def place(G: dict) -> None:
     ei, ej = E[:, 0].astype(int), E[:, 1].astype(int)
     for g in gs:
         idx = members[g]
+        if g == "chronicle":
+            from .chronicle import spiral
+            pos[g] = spiral([nodes[i] for i in idx])
+            continue
         A = np.zeros((len(idx), len(idx)))
         m = (gid[ei] == gi[g]) & (gid[ej] == gi[g])                # edges inside this group, without a Python scan per group
         A[local[ei[m]], local[ej[m]]] = E[m, 2]
         A[local[ej[m]], local[ei[m]]] = E[m, 2]
-        pos[g] = fr_layout(A, [0] * len(idx), seed=11 + gi[g], iters=300, spread=True) if len(idx) > 1 else np.zeros((1, 2))
+        pos[g] = fr_layout(A, [0] * len(idx), seed=11 + gi[g], iters=300 if len(idx) < 800 else 150, spread=True) if len(idx) > 1 else np.zeros((1, 2))
     Gn = len(gs)
     Cw = np.zeros((Gn, Gn))
     for i, j, w, _ in G["edges"]:
@@ -1167,7 +1320,7 @@ class Mind:
         self.index = voices.Index(docs)
         self.alias = []
         for i, n in enumerate(self.nodes):
-            if n["k"] in ("concept", "series", "driver", "holding", "topic", "country", "investor", "cluster", "tool"):
+            if n["k"] in ("concept", "series", "driver", "holding", "topic", "country", "investor", "cluster", "tool", "month", "year", "episode", "etf", "desk"):
                 for a in [n["n"], *n["a"]]:
                     s = norm(a)
                     if len(s.strip()) >= 2:
@@ -1351,6 +1504,12 @@ class Mind:
         up = sum(1 for w in words if w in WHATIF_UP)
         down = sum(1 for w in words if w in WHATIF_DOWN)
         d = 1 if up >= down else -1
+        B = self.G.get("bonds")
+        if B:                                                   # "the 10-year goes to 4.5%": the direction is the target against today
+            from . import bondlab
+            q = bondlab.parse(cond, B["curve"])
+            if q and abs(q["y10"] - B["curve"]["10y"]) > 1e-9:
+                d = 1 if q["y10"] > B["curve"]["10y"] else -1
         bull = d * net["reps"][axis][1] > 0
         pf = 0.9 if bull else 0.1
         after = propagate(net, {axis: pf})
@@ -1387,7 +1546,78 @@ class Mind:
         return {"cond": cond, "found": True, "axis": axis, "title": axes[axis]["title"], "side": side, "claim": axes[axis][side], "p_fixed": pf,
                 "effects": eff[:8], "target": tgt}
 
+    def bonds(self, text: str) -> dict | None:
+        """A yield question ("if the 10-year and 30-year both go to 4%, what is TLT?") answered by repricing every
+        Treasury ETF on today's curve (buildout/bondlab.py), with the stock read-through for today's inflation band."""
+        from . import bondlab
+        B = self.G.get("bonds")
+        if not B:
+            return None
+        q = bondlab.parse(text, B["curve"])
+        if not q:
+            return None
+        funds = {t: {**f, "mats": bondlab.ladder(f)} for t, f in B["funds"].items()}
+        sc = bondlab.scenario(B["curve"], funds, q["y10"], q["y30"])
+        rows = [{"t": t, "duration": round(f["duration"], 4), "change": round(sc[t]["change"], 6), "total": round(sc[t]["total"], 6),
+                 "price0": f.get("price"), "price": None if sc[t]["price"] is None else round(sc[t]["price"], 4)} for t, f in funds.items()]
+        out = {"y10": q["y10"], "y30": q["y30"], "d10": round(q["y10"] - B["curve"]["10y"], 6), "d30": round(q["y30"] - B["curve"]["30y"], 6), "rows": rows}
+        eq = B.get("equity") or {}
+        now = eq.get("now")
+        if now and now["regime"] in eq:
+            r = eq[now["regime"]]
+            out["stocks"] = {"regime": now["regime"], "infl36": now["infl36"], "per_point": r["per_point"], "t": r["t"], "move": round(r["per_point"] * out["d10"] * 100, 6)}
+        return out
+
+    def history(self, text: str) -> dict | None:
+        """A question about a month, a year, an episode or 'months like now': the chronicle node and what it links to
+        (the episodes a year sits in, a month's analogs and what followed them)."""
+        t = text.lower()
+        nid = None
+        m = re.search(RX_MONTH, t)
+        if m and f"m:{m.group(2)}-{MON3.index(m.group(1)) + 1:02d}" in self.idx:
+            nid = f"m:{m.group(2)}-{MON3.index(m.group(1)) + 1:02d}"
+        if nid is None and re.search(RX_NOW, t) and "m:now" in self.idx:
+            nid = "m:now"
+        if nid is None:
+            nt = norm(text)
+            best = None
+            for a, i, _w in self.alias:
+                n = self.nodes[i]
+                if n["k"] == "episode" and a in nt and (best is None or len(a) > best[0]):
+                    best = (len(a), n["id"])
+            if best:
+                nid = best[1]
+        if nid is None:
+            y = re.search(RX_YEAR, t)
+            if y and f"y:{y.group(1)}" in self.idx and (re.search(RX_HIST, t) or len(t.split()) <= 4):
+                nid = f"y:{y.group(1)}"
+        if nid is None:
+            return None
+        i = self.idx[nid]
+        if not hasattr(self, "_adj"):
+            self._adj = [[] for _ in range(self.N)]
+            for a, b, w, ty in self.edges:
+                self._adj[a].append((b, w, ty))
+                self._adj[b].append((a, w, ty))
+        kinds = {"month": 0, "year": 1, "episode": 2}
+        nb = sorted(((self.nodes[j], w, self.G["types"][ty]) for j, w, ty in self._adj[i] if self.nodes[j]["k"] in kinds),
+                    key=lambda x: (kinds[x[0]["k"]] if self.nodes[i]["k"] != "year" else -kinds[x[0]["k"]], -x[1], x[0]["id"]))
+        rel = [{"id": n["id"], "name": n["n"], "kind": n["k"], "type": typ, "text": n["t"], "ret_next": n.get("ret_next")} for n, w, typ in nb[:12]]
+        n = self.nodes[i]
+        return {"id": nid, "name": n["n"], "kind": n["k"], "text": n["t"], "related": rel}
+
     def think(self, text: str) -> dict:
+        h = None if re.match(RX_WHATIF, text.strip(), re.I) else self.history(text)
+        if h:
+            res = {"query": text, "found": False, "mode": "history", "history": h, "note": ""}
+        else:
+            res = self._think_all(text)
+        b = self.bonds(text)
+        if b:
+            res["bonds"] = b
+        return res
+
+    def _think_all(self, text: str) -> dict:
         t = text.strip()
         m = re.match(RX_WHATIF, t, re.I)
         if m:
@@ -1489,7 +1719,7 @@ def stats(G: dict) -> dict:
 def compact(G: dict) -> dict:
     """The page's copy: short keys, no layout precision beyond 4 decimals."""
     keep = ("f", "st", "value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked", "lines", "axis", "sign", "gdp",
-            "feed_url", "edge", "biases", "cadence", "cost", "speaker", "verdict")
+            "feed_url", "edge", "biases", "cadence", "cost", "speaker", "verdict", "ret_next", "start", "end", "dd", "desk", "duration")
     nodes = []
     for n in G["nodes"]:
         d = {"id": n["id"], "k": n["k"], "n": n["n"], "g": n["g"], "t": n["t"], "a": n["a"], "x": n.get("x", 0), "y": n.get("y", 0)}
@@ -1498,7 +1728,7 @@ def compact(G: dict) -> dict:
                 d[k] = n[k]
         nodes.append(d)
     return {"nodes": nodes, "edges": G["edges"], "causal": G["causal"], "signals": G["signals"], "axes": G["axes"], "types": G["types"],
-            "groups": G["groups"], "params": G["params"], "net": G["net"]}
+            "groups": G["groups"], "params": G["params"], "net": G["net"], **({"bonds": G["bonds"]} if G.get("bonds") else {})}
 
 
 def build_from_dir(out: Path | str) -> dict:

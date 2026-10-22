@@ -30,7 +30,7 @@
   function h(tag, cls, txt) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
-    if (txt != null) e.textContent = txt;
+    if (txt != null) { if (typeof txt === "object" && txt.nodeType) e.append(txt); else e.textContent = txt; }   // a node (a link, a coloured figure) is appended, not stringified
     return e;
   }
   function svg(tag, attrs, parent) {

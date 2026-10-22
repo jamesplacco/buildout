@@ -101,6 +101,10 @@ jobs:
         continue-on-error: true
         run: python -m buildout rl --out site/data
 
+      - name: Bonds, simply (every Treasury ETF repriced on today's Treasury curve)
+        continue-on-error: true
+        run: python -m buildout bonds --live --out site/data
+
       - name: Machine-learning lab (purged walk-forward, CPCV, conformal intervals, analogs)
         continue-on-error: true
         run: python -m buildout ml --out site/data

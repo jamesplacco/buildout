@@ -679,9 +679,19 @@ GENERIC = {"market", "limit", "stop", "spread", "equity", "risk", "growth", "yie
            "power", "selling", "range", "position", "variance", "skew", "luck", "skill", "anchor", "fair", "speed", "cycle", "variance", "tell"}
 
 
-def concepts() -> list[dict]:
+def _extra() -> list[tuple]:
+    """v0.17: the concept writers' batches, merged by scripts/merge_concepts.py into assets/concepts17.json."""
+    import json
+    from pathlib import Path
+    p = Path(__file__).resolve().parent / "assets" / "concepts17.json"
+    if not p.exists():
+        return []
+    return [(c["id"], c["name"], c["cluster"], c["def"], c["rel"], c.get("formula"), c.get("aliases")) for c in json.loads(p.read_text())["concepts"]]
+
+
+def concepts(extra: bool = True) -> list[dict]:
     out = []
-    for row in RAW:
+    for row in RAW + (_extra() if extra else []):
         cid, name, cluster, text, rels, formula, aka = row
         rel = []
         for part in (rels or "").split(";"):

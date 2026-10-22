@@ -1,5 +1,5 @@
   /* =====================================================================================
-     mind.js (v0.15): the brain and the engine as one graph, and the reasoning loop that runs on it.
+     mind.js (v0.17): the brain and the engine as one graph, and the reasoning loop that runs on it.
      The arithmetic mirrors buildout/mind.py exactly (tests/test_v14.py holds them equal): recall by BM25 and alias
      hits, spreading activation by personalized PageRank, the claim framed from the evidence that lit up, signals
      weighed in log-odds with a dependence discount, leave-one-family-out ranges, causal chains to the book over the
@@ -20,7 +20,7 @@
   }
   const mNorm = (t) => " " + String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " ";
   const mRep = (a, k) => { let o = []; for (let i = 0; i < k; i++) o = o.concat(a); return o; };
-  const ALIAS_KINDS = new Set(["concept", "series", "driver", "holding", "topic", "country", "investor", "cluster", "tool"]);
+  const ALIAS_KINDS = new Set(["concept", "series", "driver", "holding", "topic", "country", "investor", "cluster", "tool", "month", "year", "episode", "etf", "desk"]);
   function mindInit(snap = MD) {
     if (MIND && MIND.snap === snap) return MIND;
     const nodes = snap.nodes, N = nodes.length, idx = {}, deg = new Float64Array(N);
@@ -190,7 +190,10 @@
     if (!cand.length) return { cond, found: false };
     const axis = cand[0], words = vRaw(cond);
     const up = words.filter((w) => MP.whatif_up.includes(w)).length, down = words.filter((w) => MP.whatif_down.includes(w)).length;
-    const d = up >= down ? 1 : -1, bull = d * net.reps[axis][1] > 0, pf = bull ? 0.9 : 0.1;
+    let d = up >= down ? 1 : -1;
+    const qb = MD.bonds && typeof blParse === "function" ? blParse(cond, MD.bonds.curve) : null;
+    if (qb && Math.abs(qb.y10 - MD.bonds.curve["10y"]) > 1e-9) d = qb.y10 > MD.bonds.curve["10y"] ? 1 : -1;   // a yield target: its direction against today
+    const bull = d * net.reps[axis][1] > 0, pf = bull ? 0.9 : 0.1;
     const after = mindPropagate(net, { [axis]: pf }), axes = MD.axes;
     const eff = [];
     net.axes.forEach((a, k) => { if (a !== axis) eff.push({ axis: a, title: axes[a].title, p0: mr6(net.p[k]), p1: mr6(after[k]), d: mr6(after[k] - net.p[k]) }); });
@@ -213,7 +216,54 @@
     const side = bull ? "bull" : "bear";
     return { cond, found: true, axis, title: axes[axis].title, side, claim: axes[axis][side], p_fixed: pf, effects: eff.slice(0, 8), target: tgt };
   }
+  /* a yield question answered by the bond lab (mind.Mind.bonds) */
+  function mindBonds(text) {
+    const B = MD.bonds;
+    if (!B || typeof blParse !== "function") return null;
+    const q = blParse(text, B.curve);
+    if (!q) return null;
+    const funds = {};
+    Object.entries(B.funds).forEach(([t, f]) => { funds[t] = Object.assign({}, f, { mats: blLadder(f) }); });
+    const sc = blScenario(B.curve, funds, q.y10, q.y30), r6 = (x) => Math.round(x * 1e6) / 1e6;
+    const rows = Object.entries(funds).map(([t, f]) => ({ t, duration: Math.round(f.duration * 1e4) / 1e4, change: r6(sc[t].change), total: r6(sc[t].total),
+      price0: f.price == null ? null : f.price, price: sc[t].price == null ? null : Math.round(sc[t].price * 1e4) / 1e4 }));
+    const out = { y10: q.y10, y30: q.y30, d10: r6(q.y10 - B.curve["10y"]), d30: r6(q.y30 - B.curve["30y"]), rows };
+    const eq = B.equity || {}, now = eq.now;
+    if (now && eq[now.regime]) { const r = eq[now.regime]; out.stocks = { regime: now.regime, infl36: now.infl36, per_point: r.per_point, t: r.t, move: r6(r.per_point * out.d10 * 100) }; }
+    return out;
+  }
+  /* a question about a month, a year, an episode or "months like now" (mind.Mind.history) */
+  const MON3 = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  function mindHistory(text) {
+    const M = mindInit(), t = String(text).toLowerCase();
+    let nid = null;
+    const m = t.match(new RegExp(MP.rx_month));
+    if (m) { const k = `m:${m[2]}-${String(MON3.indexOf(m[1]) + 1).padStart(2, "0")}`; if (M.idx[k] != null) nid = k; }
+    if (nid == null && new RegExp(MP.rx_now).test(t) && M.idx["m:now"] != null) nid = "m:now";
+    if (nid == null) {
+      const nt = mNorm(text);
+      let best = null;
+      for (const [a, i] of M.alias) { const n = M.nodes[i]; if (n.k === "episode" && nt.includes(a) && (best == null || a.length > best[0])) best = [a.length, n.id]; }
+      if (best) nid = best[1];
+    }
+    if (nid == null) {
+      const y = t.match(new RegExp(MP.rx_year));
+      if (y && M.idx["y:" + y[1]] != null && (new RegExp(MP.rx_hist).test(t) || t.split(/\s+/).filter(Boolean).length <= 4)) nid = "y:" + y[1];
+    }
+    if (nid == null) return null;
+    const i = M.idx[nid], me = M.nodes[i], kinds = { month: 0, year: 1, episode: 2 };
+    const nb = M.adj[i].filter(([j]) => kinds[M.nodes[j].k] != null).map(([j, w, ty]) => [M.nodes[j], w, M.snap.types[ty]]);
+    nb.sort((a, b) => (me.k !== "year" ? kinds[a[0].k] - kinds[b[0].k] : kinds[b[0].k] - kinds[a[0].k]) || b[1] - a[1] || (a[0].id < b[0].id ? -1 : a[0].id > b[0].id ? 1 : 0));
+    const rel = nb.slice(0, 12).map(([n, w, typ]) => ({ id: n.id, name: n.n, kind: n.k, type: typ, text: n.t, ret_next: n.ret_next == null ? null : n.ret_next }));
+    return { id: nid, name: me.n, kind: me.k, text: me.t, related: rel };
+  }
   function mindThink(text, opts = {}) {
+    const hh = new RegExp(MP.rx_whatif, "i").test(String(text).trim()) ? null : mindHistory(text);
+    const res = hh ? { query: text, found: false, mode: "history", history: hh, note: "" } : mindThinkAll(text, opts), b = mindBonds(text);
+    if (b) res.bonds = b;
+    return res;
+  }
+  function mindThinkAll(text, opts = {}) {
     const t = String(text).trim(), m = t.match(new RegExp(MP.rx_whatif, "i"));
     if (m) {
       const body = m[1], low = body.toLowerCase();
@@ -284,11 +334,11 @@
   const MG_COL = { valuation: "#f2c14e", accounting: "#d9b38c", technical: "#7aa2ff", macro: "#ff9e5e", rates: "#6fd0e8", derivatives: "#b9a3ff", commodities: "#e0a458",
     structure: "#8fb3ff", risk: "#f07f7f", stats: "#5fd3a5", behavior: "#e58bd0", games: "#a6d86e", negotiation: "#c7e36b", private: "#ffb38a", assetmgmt: "#ffd59a",
     ai: "#9ad0ff", crypto: "#f6a6ff", history: "#c9c2a5", ml: "#c3f584", reality: "#ff7a90", edge: "#ffc078", markets: "#7ad3ff", core: "#ffd166", voices: "#ff8fb1", engine: "#4fe0c0",
-    world: "#8ee08e", companies: "#a9b8ff", evidence: "#ffe08a" };
+    world: "#8ee08e", companies: "#a9b8ff", evidence: "#ffe08a", chronicle: "#d7c9a0" };
   const MK_R = { cluster: 6.5, concept: 2.4, series: 2.6, driver: 3.4, holding: 3.6, topic: 4.2, investor: 2.4, quote: 1.4, engine: 2.6, method: 2.6, tool: 2.6, fact: 1.8, paper: 1.8, country: 2.4, signal: 1.8, source: 3.0, sector: 3.4, industry: 2.2, company: 1.5, model: 2.8, assumption: 2.8 };
   const MK_NAME = { cluster: "cluster", concept: "concept", series: "measured series", driver: "judged driver", holding: "holding", topic: "voices topic", investor: "investor", quote: "verified quote",
     engine: "engine module", method: "engine method", tool: "MCP tool", fact: "sourced fact", paper: "paper", country: "economy", signal: "signal", source: "information source",
-    sector: "sector", industry: "industry", company: "S&P 500 company", model: "ML model", assumption: "tested assumption" };
+    sector: "sector", industry: "industry", company: "S&P 500 company", model: "ML model", assumption: "tested assumption", month: "month in history", year: "year", episode: "market episode", etf: "Treasury ETF", finding: "measured finding", desk: "desk on this site" };
   const MS = {};
   function mStage(id) { return MS[id] || (MS[id] = { id, zoom: { s: 1, tx: 0, ty: 0 }, hover: -1, sel: null, res: null, t0: 0, raf: 0, wired: false, drag: null, base: null, baseKey: "", auto: true, demo: 0, L: null }); }
   function mLayout(S) {
@@ -491,14 +541,15 @@
   }
   function mRun(S, text) {
     const res = mindThink(text, { keep: true });
+    if (res.history) { const M = mindInit(); S.sel = M.idx[res.history.id]; S.auto = false; }
     if (!res.found) return res;
     S.res = res; S.t0 = performance.now(); S.sel = null;
     return res;
   }
 
   /* ---------- the argument map ---------- */
-  const MM_EX = ["Is the stock market overvalued?", "What if oil spikes, what happens to bonds?", "If AI capex slows, what happens to the book?", "Can I trust quant models?", "Does machine learning predict returns?", "What is BowTied Bull?", "Does the 200-day moving average work?", "Is AI a bubble?", "Will oil keep rising?", "Is RSI useful?", "Should I use leverage?",
-    "Are private credit marks too generous?", "Do active managers beat the index?", "Is gold a good hedge now?", "Sell in May and go away?", "Should I buy long bonds?",
+  const MM_EX = ["Is the stock market overvalued?", "If the 10-year and 30-year both go to 4%, what is TLT?", "What if oil spikes, what happens to bonds?", "If AI capex slows, what happens to the book?", "Can I trust quant models?", "Does machine learning predict returns?", "What is BowTied Bull?", "Does the 200-day moving average work?", "Is AI a bubble?", "Will oil keep rising?", "Is RSI useful?", "Should I use leverage?",
+    "Are private credit marks too generous?", "Do active managers beat the index?", "Is gold a good hedge now?", "Sell in May and go away?", "Should I buy long bonds?", "What if the 10-year goes to 6%?", "What happened in 1974?", "Months like now",
     "Should I make the first offer when haggling?", "Is Kelly betting too aggressive?", "Will inflation come back?"];
   const pctMind = (p) => `${Math.round(p * 100)}%`;
   function mNode(id) { const M = mindInit(); return M.nodes[M.idx[id]]; }
@@ -510,9 +561,47 @@
     }
     return h("span", "m-ref", n.n);
   }
+  const BL_REGIME = { low_inflation: "below 2.75%", middle_inflation: "between 2.75% and 4.25%", high_inflation: "above 4.25%" };
+  function mBondsBlock(b) {
+    const d = h("div", "m-bonds");
+    const bp = (x) => `${x >= 0 ? "+" : MINUS}${Math.abs(Math.round(x * 1e4))}bp`, pc = (x) => `${x >= 0 ? "+" : MINUS}${Math.abs(x * 100).toFixed(1)}%`;
+    d.append(h("span", "panel-title", `Bonds at a 10-year of ${(b.y10 * 100).toFixed(2)}% and a 30-year of ${(b.y30 * 100).toFixed(2)}% (${bp(b.d10)} and ${bp(b.d30)} from today's curve)`));
+    const tb = h("table", "m-bonds-t"), hd = h("tr");
+    ["Fund", "Duration", "Price now", "At these yields", "Change", "12 months with income"].forEach((x) => hd.append(h("th", null, x)));
+    tb.append(hd);
+    b.rows.forEach((r) => {
+      const tr = h("tr");
+      tr.append(h("td", null, r.t), h("td", null, r.duration.toFixed(1)), h("td", null, r.price0 == null ? "" : "$" + r.price0.toFixed(2)), h("td", null, r.price == null ? "" : "$" + r.price.toFixed(2)),
+        h("td", r.change >= 0 ? "pos" : "neg", pc(r.change)), h("td", r.total >= 0 ? "pos" : "neg", pc(r.total)));
+      tb.append(tr);
+    });
+    const w = h("div", "tablewrap"); w.append(tb); d.append(w);
+    if (b.stocks) d.append(h("p", "hint", `Stocks, the rate channel alone: with inflation ${BL_REGIME[b.stocks.regime]} (now ${(b.stocks.infl36 * 100).toFixed(1)}% a year), the S&P 500 has moved ${pc(b.stocks.per_point)} per point of 10-year rise since 1871 (t ${b.stocks.t.toFixed(1)}), so this move alone implies about ${pc(b.stocks.move)}. Earnings matter far more: the fit explains a few percent of monthly moves.`));
+    const a = h("a", null, "Open the bond lab"); a.href = "#bonds"; d.append(h("p", "hint", a));
+    return d;
+  }
+  function mHistoryBlock(x) {
+    const d = h("div", "m-bonds");
+    d.append(h("span", "panel-title", `${x.name} · ${MK_NAME[x.kind] || x.kind}`), h("p", null, x.text));
+    const an = x.related.filter((r) => r.type === "analog"), rest = x.related.filter((r) => r.type !== "analog");
+    if (an.length) {
+      const ul = h("ul", "br-list");
+      an.forEach((r) => ul.append(h("li", null, `${r.name}: ${r.ret_next == null ? "the next 12 months are not yet known" : "the next 12 months returned " + (r.ret_next >= 0 ? "+" : MINUS) + Math.abs(r.ret_next * 100).toFixed(0) + "% after inflation"}`)));
+      d.append(h("span", "panel-title", "The months most like it (valuation, rates, inflation, trend, volatility, drawdown)"), ul);
+    }
+    if (rest.length) {
+      const ul = h("ul", "br-list");
+      rest.slice(0, 6).forEach((r) => ul.append(h("li", null, r.kind === "month" ? r.text : `${r.name}. ${r.text.split(". ").slice(1, 3).join(". ")}`)));
+      d.append(ul);
+    }
+    return d;
+  }
   function mVerdictBlock(res, compact) {
     const box = h("div", "m-verdict");
-    if (!res.found) { box.append(h("p", "hint", res.note)); return box; }
+    if (res.history) box.append(mHistoryBlock(res.history));
+    if (res.bonds) box.append(mBondsBlock(res.bonds));
+    if (res.history && !res.found) return box;
+    if (!res.found) { if (!res.bonds) box.append(h("p", "hint", res.note)); return box; }
     const head = h("div", "m-claim");
     head.append(h("span", "eyebrow", `${res.axis_title} · ${{ weigh: "weighed", explain: "explained", whatif: "what-if" }[res.mode] || res.mode}`), h("p", "m-claim-t", `“${res.claim}”`));
     if (res.define) {
@@ -697,7 +786,7 @@
       MM_EX.forEach((q) => { const b = h("button", "pill", q); b.type = "button"; b.addEventListener("click", () => think(q)); ex.append(b); });
       const st = SNAP14.stats, tiles = $("#md-tiles");
       [[st.nodes.toLocaleString(), "Nodes", "one graph: brain, engine, evidence, voices, world"], [st.edges.toLocaleString(), "Typed links", `${MD.types.length} kinds: is_a, causes, measures, cites, said_by…`],
-        [String(st.kinds.concept), "Concepts", `${Object.keys(st.groups).length} galaxies`], [String((st.kinds.fact || 0) + (st.kinds.paper || 0)), "Sourced items", "each checked twice on its page"],
+        [st.kinds.concept.toLocaleString(), "Concepts", `${Object.keys(st.groups).length} galaxies`], [(st.kinds.month || 0).toLocaleString(), "Months of history", "every month since 1871, each linked to its analogs"], [String((st.kinds.fact || 0) + (st.kinds.paper || 0)), "Sourced items", "each checked twice on its page"],
         [String(st.signals), "Signals", "evidence with a direction and a reliability"], [String(st.causal), "Causal links", "learned and judged, from the atlas"],
         [String(st.kinds.engine + st.kinds.method + st.kinds.tool), "Engine parts", "modules, methods, MCP tools"]].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
       $("#md-zoomin").addEventListener("click", () => { S.zoom.s = clamp(S.zoom.s * 1.4, 0.8, 8); });

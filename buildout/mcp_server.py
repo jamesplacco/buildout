@@ -962,6 +962,36 @@ def rl_policy(ctx: Context, args: dict) -> dict:
     return {k: o.get(k) for k in ("findings", "best", "now", "configs", "hold", "trend", "deflated_excess", "policy")}
 
 
+def bond_scenario(ctx: Context, args: dict) -> dict:
+    from . import bondlab
+    try:
+        y10 = float(args["y10"]) / 100
+        y30 = float(args.get("y30")) / 100 if args.get("y30") is not None else None
+    except (KeyError, TypeError, ValueError):
+        raise ToolError("y10 (percent) is required, e.g. 4")
+    front = args.get("front", "parallel")
+    if front not in ("parallel", "anchored") or not (0 <= y10 <= 0.2) or (y30 is not None and not (0 <= y30 <= 0.2)):
+        raise ToolError("yields are percents between 0 and 20; front is parallel or anchored")
+    from . import mind
+    curve, facts, meta = bondlab.from_knowledge(mind.load_knowledge())
+    if y30 is None:
+        y30 = curve["30y"] + (y10 - curve["10y"])
+    out = bondlab.answer(y10, y30, front, curve, facts)
+    out["curve_as_of"] = meta.get("as_of")
+    out["note"] = "Each ETF repriced bond by bond on the Treasury par curve; durations and prices from the issuers' pages. Research only; no orders."
+    return out
+
+
+def market_history(ctx: Context, args: dict) -> dict:
+    from . import mind
+    q = str(args.get("query", "")).strip()
+    if not q:
+        raise ToolError("query is required, e.g. 'March 2009', '1974', 'black monday' or 'months like now'")
+    G = json.loads((mind.ASSETS / "mind.json").read_text())
+    h = mind.Mind(G).history(q)
+    return h or {"found": False, "note": "Name a month, a year, an episode or 'months like now'."}
+
+
 def data_connections(ctx: Context, args: dict) -> dict:
     o = ctx.load("connections")
     if o:
@@ -1040,6 +1070,13 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "rl_policy": (rl_policy, "The reinforcement-learning sizing agent (fitted Q iteration over trend, volatility, valuation and drawdown states): its out-of-sample "
                   "record against holding and the trend rule, the deflated chance its edge is real, and today's exposure. Research only.",
                   _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
+    "bond_scenario": (bond_scenario, "Every Treasury ETF (SHY, IEI, IEF, TLH, TLT, EDV, ZROZ) repriced bond by bond at a 10-year and 30-year yield you set, on today's Treasury "
+                      "par curve: price, instant change, 12-month total return with income and roll, and the break-even yield rise. Research only.",
+                      _obj({"y10": {**NUM, "description": "10-year yield in percent, e.g. 4"}, "y30": {**NUM, "description": "30-year yield in percent; omit to move it with the 10-year"},
+                            "front": {"type": "string", "enum": ["parallel", "anchored"]}}, ["y10"]), {"readOnlyHint": True, "openWorldHint": False}),
+    "market_history": (market_history, "The chronicle: any month since 1871, any year, a named episode or 'months like now', with valuation, rates, inflation, drawdown, "
+                       "what the next 12 months returned and the most similar months in history.",
+                       _obj({"query": {"type": "string"}}, ["query"]), {"readOnlyHint": True, "openWorldHint": False}),
     "data_connections": (data_connections, "Which data sources (Databento, Yahoo, Stooq, SEC, Treasury, CFTC, FRED, GitHub mirrors) and credentials the engine can reach.",
                          _obj({"live": {"type": "boolean"}}), {"readOnlyHint": True, "openWorldHint": True}),
     "investor_voices": (investor_voices, "What legendary and current investors actually said about a question or claim, arranged from extreme bear (-2) "

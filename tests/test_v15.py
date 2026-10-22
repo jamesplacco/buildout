@@ -351,4 +351,4 @@ def test_page_ships_v15_desks_keys_and_no_banned_text():
     assert "DATABENTO_API_KEY=" not in page
     snap = json.loads(MIND_JSON.read_text())
     assert f"{len(snap['nodes']):,} nodes" in page
-    assert f"{sum(1 for x in snap['nodes'] if x['k'] == 'concept')} concepts" in page
+    assert f"{sum(1 for x in snap['nodes'] if x['k'] == 'concept'):,} concepts" in page

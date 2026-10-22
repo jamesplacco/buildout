@@ -126,6 +126,8 @@ REGISTRY: list[Engine] = [
     Engine("market", "Technicals and fundamentals", [], ["technicals.json", "statements.json"], "technicals.py", False,
            "Daily OHLCV from the best available source: every indicator, signals, levels and an event study per ticker; SEC statements, ratios and scores"),
     Engine("rl", "Reinforcement-learning sizing", [], ["rl.json"], "rl.py", False, "Fitted Q iteration over trend, volatility, valuation and drawdown states, walk-forward from 1940"),
+    Engine("bonds", "Bonds, simply", [], ["bonds.json"], "bondlab.py", False,
+           "Every Treasury ETF repriced bond by bond on today's curve at any 10-year and 30-year yield; convexity, income, roll, break-evens; stocks per point of yield by inflation band"),
     Engine("feeds", "Noteworthy", [], ["feeds.json"], "feeds.py", False, "Feeds, heat, niche skew, lead time"),
     Engine("reason", "Solver and games", ["macro.json", "research.json", "brain.json", "capex.json", "report.json"], ["reason.json"], "reasoner.py", True,
            "Tempered Bayes, the constrained choice, the game against Nature, value of information, games", _reason),

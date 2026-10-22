@@ -122,6 +122,14 @@ def main(argv: list[str] | None = None) -> None:
     for name in ("ta", "fa"):
         q = sub.add_parser(name)
         q.add_argument("ticker")
+    bd = sub.add_parser("bonds", help="every Treasury ETF repriced at the 10-year and 30-year yields you set")
+    bd.add_argument("--y10", type=float, default=None, help="10-year yield in percent, e.g. 4")
+    bd.add_argument("--y30", type=float, default=None, help="30-year yield in percent; default moves with the 10-year")
+    bd.add_argument("--front", choices=["parallel", "anchored"], default="parallel")
+    bd.add_argument("--live", action="store_true", help="today's curve from Treasury instead of the checked snapshot")
+    bd.add_argument("--out", default=None, help="also write bonds.json (the full lab) here")
+    hs = sub.add_parser("history", help="a month, a year, an episode or 'now' from the chronicle")
+    hs.add_argument("query")
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
     ps = sub.add_parser("positions")
@@ -201,8 +209,21 @@ def main(argv: list[str] | None = None) -> None:
         if a.json:
             print(json.dumps(r, indent=1, default=str))
             return
+        if r.get("bonds"):
+            b = r["bonds"]
+            print(f"bonds at a 10-year of {b['y10']:.2%} and a 30-year of {b['y30']:.2%}:")
+            for x in b["rows"]:
+                print(f"  {x['t']:5s} {x['change']:+7.1%} now  {x['total']:+7.1%} over 12 months" + (f"  ${x['price0']:.2f} -> ${x['price']:.2f}" if x.get("price") else ""))
+            if b.get("stocks"):
+                print(f"  stocks, the rate channel alone: about {b['stocks']['move']:+.1%}")
+        if r.get("history"):
+            hh = r["history"]
+            print(f"{hh['name']}: {hh['text']}")
+            for x in hh["related"][:8]:
+                print(f"  [{x['type']}] {x['name']}" + (f": next 12 months {x['ret_next']:+.0%}" if x.get("ret_next") is not None else ""))
         if not r["found"]:
-            print(r["note"])
+            if not (r.get("bonds") or r.get("history")):
+                print(r["note"])
             return
         if r.get("define"):
             d = r["define"]
@@ -297,6 +318,48 @@ def main(argv: list[str] | None = None) -> None:
                 print(f"  {k:20s} {last[k]:+.3f}")
         for line in r["flags"]:
             print(" ", line)
+        return
+    if a.cmd == "bonds":
+        from . import bondlab, mind as mnd
+        curve, facts, meta = bondlab.from_knowledge(mnd.load_knowledge())
+        if a.live:
+            from . import datahub
+            try:
+                d = datahub.treasury_curve()
+                curve, meta = {**curve, **bondlab.from_treasury(d)}, {"as_of": d.get("date"), "source": "US Treasury (live)"}
+            except Exception as e:  # noqa: BLE001
+                print("live curve unavailable:", e)
+        if a.y10 is None and a.y30 is None:
+            cases = [("both 4%", 0.04, 0.04), ("both 5%", 0.05, 0.05), ("both 6%", 0.06, 0.06)]
+        else:
+            y10 = a.y10 / 100 if a.y10 is not None else curve["10y"] + (a.y30 / 100 - curve["30y"])
+            y30 = a.y30 / 100 if a.y30 is not None else curve["30y"] + (y10 - curve["10y"])
+            cases = [(f"10-year {y10:.2%}, 30-year {y30:.2%}", y10, y30)]
+        print(f"curve {meta.get('as_of')} ({meta.get('source')}): 10-year {curve['10y']:.2%}, 30-year {curve['30y']:.2%}")
+        for lab, y10, y30 in cases:
+            r = bondlab.answer(y10, y30, a.front, curve, facts)
+            print(f"\n{lab}")
+            for t, f in r["funds"].items():
+                px = f"${f['price_now']:.2f} -> ${f['price_at']:.2f}" if f.get("price_now") else ""
+                print(f"  {t:5s} dur {f['duration']:5.2f}  {f['change']:+7.1%} now  {f['total']:+7.1%} 12m with income  {px}")
+        if a.out:
+            from . import labs
+            from .jsonout import write
+            o = bondlab.build(curve, facts, labs.shiller(labs.download()))
+            o["facts"], o["curve_meta"] = facts, meta
+            print("wrote", write(o, a.out, "bonds.json"))
+        return
+    if a.cmd == "history":
+        import json as _json
+        from . import mind as mnd
+        G = _json.loads((mnd.ASSETS / "mind.json").read_text())
+        h = mnd.Mind(G).history(a.query)
+        if not h:
+            print("nothing in the chronicle matches; name a month (March 2009), a year (1974), an episode (black monday) or 'months like now'")
+            return
+        print(h["name"], "\n ", h["text"])
+        for r in h["related"]:
+            print(f"  [{r['type']}] {r['name']}" + (f": next 12 months {r['ret_next']:+.0%}" if r.get("ret_next") is not None else ""))
         return
     if a.cmd == "rl":
         from . import labs, rl
