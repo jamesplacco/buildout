@@ -63,7 +63,7 @@ RUNTIME_IDS = r"(t\d|g-[\w-]+|faq-[\w-]+|pb-[\w-]+|ep-[\w-]+|sec-[\w-]+|lens-[\w
 
 def test_hash_targets_resolve():
     body = (SRC / "body.html").read_text()
-    defined = set(re.findall(r'\bid="([\w-]+)"', body))
+    defined = set(re.findall(r'\bid="([\w-]+)"', body + (SRC / "logo.html").read_text()))   # the lotus symbols live in logo.html
     views = set(re.findall(r'id="view-([\w-]+)"', body)) | GROUPS
     for target in re.findall(r'href="#([\w-]+)"', body):
         assert target in views or target in defined or re.fullmatch(RUNTIME_IDS, target), target

@@ -683,12 +683,12 @@
     syncEdgeEditor();
   }
 
-  // the Buildout mark: a rounded square, a rising curve and a dot (the same paths as the header logo)
+  // the Buildout mark: the lotus (the same symbol as the header logo)
   function logoMark(parent, x, y, size, attrs = {}) {
-    const g = svg("g", Object.assign({ transform: `translate(${(x - size / 2).toFixed(1)},${(y - size / 2).toFixed(1)}) scale(${(size / 28).toFixed(4)})`, class: "logo-mark" }, attrs), parent);
-    svg("rect", { x: 1, y: 1, width: 26, height: 26, rx: 6, fill: "var(--accent)" }, g);
-    svg("path", { d: "M6 20 C10 19, 12 15, 14 13 S19 8, 22 8", fill: "none", stroke: "var(--surface)", "stroke-width": 2.2, "stroke-linecap": "round", class: "logo-curve" }, g);
-    svg("circle", { cx: 22, cy: 8, r: 2, fill: "var(--surface)" }, g);
+    const g = svg("g", Object.assign({ transform: `translate(${(x - size / 2).toFixed(1)},${(y - size / 2).toFixed(1)})`, class: "logo-mark" }, attrs), parent);
+    svg("circle", { cx: size / 2, cy: size / 2, r: size / 2, fill: "var(--surface)" }, g);
+    const u = svg("use", { href: "#lotus-md", width: size, height: size }, g);
+    u.style.color = "var(--accent)";
     return g;
   }
   function drawBrain(W, res, sIdx, t, size) {

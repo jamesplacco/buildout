@@ -4,15 +4,23 @@
   const NS = "http://www.w3.org/2000/svg";
   const $ = (s, r = document) => r.querySelector(s);
 
-  /* ---------- the Buildout mark (v0.8): one definition, used in the header, every desk, empty states and the brain ---------- */
+  /* ---------- the Buildout mark (v0.18): the guilloche lotus of the Today desk's rosette, one set of symbols
+     (site/src/logo.html, from scripts/make_logo.py) used in the header, every desk, empty states and the brain.
+     The small cut reads at 16 to 32 pixels, the middle cut at 40 to 100, the full rosette above. ---------- */
+  function lotusSvg(cut, cls) {
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("viewBox", "0 0 100 100");
+    s.setAttribute("class", cls || "lotus");
+    const u = document.createElementNS(NS, "use");
+    u.setAttribute("href", "#lotus" + (cut ? "-" + cut : ""));
+    s.append(u);
+    return s;
+  }
   function markEl(cls) {
     const wrap = document.createElement("span");
     wrap.className = cls || "vmark";
     wrap.setAttribute("aria-hidden", "true");
-    const s = document.createElementNS(NS, "svg");
-    s.setAttribute("viewBox", "0 0 28 28");
-    s.innerHTML = '<rect x="1" y="1" width="26" height="26" rx="6" fill="var(--accent)"></rect><path class="logo-curve" d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path><circle class="logo-dot" cx="22" cy="8" r="2" fill="var(--surface)"></circle>';
-    wrap.append(s);
+    wrap.append(lotusSvg(cls === "brand-mark" ? "md" : "sm"));
     return wrap;
   }
   function placeMarks() {

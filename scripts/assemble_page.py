@@ -28,6 +28,11 @@ def assemble(src: Path = SRC) -> str:
     if (src / "fonts.css").exists():                     # the typeface, inlined (site/src/fonts.css, SIL OFL)
         head = head.replace("/*FONTS*/", (src / "fonts.css").read_text().rstrip(), 1)
     body = (src / "body.html").read_text().strip()
+    if (src / "logo.html").exists():                     # the lotus symbols (scripts/make_logo.py)
+        body = body.replace("<!--LOGO-->", (src / "logo.html").read_text().strip(), 1)
+    if (src / "favicon.svg").exists():
+        from urllib.parse import quote
+        head = head.replace("</title>", '</title>\n<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,' + quote((src / "favicon.svg").read_text().strip(), safe=" =:/,") + '">', 1)
     js = "\n\n".join((src / name).read_text().rstrip() for name in SCRIPTS)
     return f'{head}\n{body}\n<script>\n(() => {{\n  "use strict";\n{js}\n}})();\n</script>\n'
 
