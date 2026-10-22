@@ -19,6 +19,12 @@
   python -m buildout labs --out site/data       the labs: trend rules, oscillators, valuation, regimes, GARCH, spreads, calendar
   python -m buildout mind --out site/data       the mind: one graph of the brain and the engine
   python -m buildout think "Is AI a bubble?"    ask the mind; prints the claim, the verdict, the evidence and the decision
+  python -m buildout think "If oil spikes, what happens to the book?"   a what-if over the belief network
+  python -m buildout ml --out site/data         machine learning, judged honestly: purged walk-forward, CPCV, conformal, analogs
+  python -m buildout reality --out site/data    test every model's assumptions: tails, breakpoints, kappa, fragility, worlds
+  python -m buildout triage 1.2 8 40 --published --cost-bps 5 --turns 24   a quant's backtest Sharpe after costs, decay and luck
+  python -m buildout erp --cash-yield 0.035 --growth 0.06 --rf 0.0513     Damodaran's implied equity risk premium
+  python -m buildout dcf --revenue 100 --growth 0.25 --margin 0.30 --target 0.35   Damodaran's narrative-to-numbers DCF
 """
 from __future__ import annotations
 
@@ -97,6 +103,40 @@ def main(argv: list[str] | None = None) -> None:
     th = sub.add_parser("think")
     th.add_argument("question")
     th.add_argument("--data", default=None, help="folder with mind.json (default: the shipped snapshot)")
+    th.add_argument("--json", action="store_true", help="print the whole result as JSON (for editors and scripts)")
+    for name in ("ml", "reality"):
+        q = sub.add_parser(name)
+        q.add_argument("--out", default="out")
+    tr = sub.add_parser("triage")
+    tr.add_argument("sharpe", type=float)
+    tr.add_argument("years", type=float)
+    tr.add_argument("trials", type=int, nargs="?", default=1)
+    tr.add_argument("--published", action="store_true")
+    tr.add_argument("--cost-bps", type=float, default=0.0)
+    tr.add_argument("--turns", type=float, default=0.0)
+    tr.add_argument("--vol", type=float, default=0.15)
+    tr.add_argument("--skew", type=float, default=0.0)
+    tr.add_argument("--kurt", type=float, default=3.0)
+    tr.add_argument("--periods", type=int, default=12)
+    er = sub.add_parser("erp")
+    er.add_argument("--level", type=float, default=100.0)
+    er.add_argument("--cash-yield", type=float, required=True)
+    er.add_argument("--growth", type=float, required=True)
+    er.add_argument("--rf", type=float, default=0.0513)
+    dc = sub.add_parser("dcf")
+    dc.add_argument("--revenue", type=float, required=True)
+    dc.add_argument("--growth", type=float, required=True)
+    dc.add_argument("--margin", type=float, required=True)
+    dc.add_argument("--target", type=float, required=True)
+    dc.add_argument("--years-to-target", type=int, default=5)
+    dc.add_argument("--sales-to-capital", type=float, default=1.5)
+    dc.add_argument("--wacc", type=float, default=0.10)
+    dc.add_argument("--wacc-mature", type=float, default=0.085)
+    dc.add_argument("--rf", type=float, default=0.0513)
+    dc.add_argument("--p-fail", type=float, default=0.0)
+    dc.add_argument("--shares", type=float, default=1.0)
+    dc.add_argument("--debt", type=float, default=0.0)
+    dc.add_argument("--cash", type=float, default=0.0)
     mc = sub.add_parser("mcp")
     mc.add_argument("--data", default=None, help="folder with the engine's JSON outputs")
     mc.add_argument("--config", default=None, help="model config; config.private.toml is refused")
@@ -138,9 +178,27 @@ def main(argv: list[str] | None = None) -> None:
         from . import mind, voices
         p = Path(a.data) / "mind.json" if a.data else mind.ASSETS / "mind.json"
         r = mind.Mind(json.loads(p.read_text()), voices.Library(voices.load())).think(a.question)
+        if a.json:
+            print(json.dumps(r, indent=1, default=str))
+            return
         if not r["found"]:
             print(r["note"])
             return
+        if r.get("define"):
+            d = r["define"]
+            print(f"{d['name']}: {d['text']}" + (f"  [{d['formula']}]" if d.get("formula") else ""))
+        w = r.get("whatif")
+        if w and w.get("found"):
+            print(f"what-if: \"{w['claim']}\" set to {w['p_fixed']:.0%}")
+            t = w.get("target")
+            if t and t["axis"] == "book":
+                print(f"  the model book's average lean: {t['lean0']:+.2f} -> {t['lean1']:+.2f}")
+                for x in t["rows"]:
+                    print(f"    {x['title']}: {x['d'] * 100:+.1f} points for the book")
+            elif t:
+                print(f"  {t['title']}: bull case {t['p0']:.0%} -> {t['p1']:.0%}")
+            for x in w["effects"][:5]:
+                print(f"  {x['title']}: {x['p0']:.0%} -> {x['p1']:.0%}")
         print(f"{r['axis_title']}: \"{r['claim']}\" {r['p']:.0%} (range {r['range'][0]:.0%} to {r['range'][1]:.0%}, {r['n_signals']} signals)")
         for x in r["pros"]:
             print(f"  + {x['c']:+.3f}  {x['text']}")
@@ -151,6 +209,48 @@ def main(argv: list[str] | None = None) -> None:
         for c in r["chains"]:
             print("  chain:", " -> ".join(c["names"]))
         print("  decision:", r["decision"]["text"])
+        return
+    if a.cmd in ("ml", "reality"):
+        from pathlib import Path
+        from . import assumptions, labs, ml, mind
+        from .jsonout import write
+        K = {k["id"]: k for k in mind.load_knowledge()}
+        cape = (K.get("val-cape-2026-10-20") or {}).get("value")
+        dl = labs.download()
+        mlo = ml.build(dl, cape_now=cape, y10_now=5.13)
+        mlo["findings"] = ml.summary(mlo)
+        if a.cmd == "ml":
+            print("wrote", write(mlo, a.out, "ml.json"))
+            for f in mlo["findings"]:
+                print(" ", f)
+            return
+        lp = Path(a.out) / "labs.json"
+        L = json.loads(lp.read_text()) if lp.exists() else None
+        o = assumptions.build(dl, L, mlo, None, None)
+        o["findings"] = assumptions.summary(o)
+        print("wrote", write(o, a.out, "reality.json"))
+        for f in o["findings"]:
+            print(" ", f)
+        return
+    if a.cmd == "triage":
+        from .assumptions import triage
+        t = triage(a.sharpe, a.years, a.trials, a.periods, a.skew, a.kurt, a.published, a.cost_bps, a.turns, a.vol)
+        print(f"claimed Sharpe {t['sharpe']:.2f}; after costs {t['net']:.2f}; after {t['decay']:.0%} expected decay {t['live']:.2f}")
+        print(f"chance the true Sharpe beats zero {t['psr']:.0%}; beats the best of {a.trials} lucky tries ({t['emax_annual']:.2f}) {t['dsr']:.0%}")
+        print(f"minimum backtest for {a.trials} tries: {t['minbtl_years']:.1f} years ({'enough' if t['enough_data'] else 'not enough'} at {a.years:g}); verdict: {t['verdict']}")
+        return
+    if a.cmd == "erp":
+        from .damodaran import implied_erp
+        e = implied_erp(a.level, a.cash_yield, a.growth, a.rf)
+        print("no solution for these inputs" if e["r"] is None else f"expected return {e['r']:.2%}; implied equity risk premium {e['erp']:.2%} over {a.rf:.2%}")
+        return
+    if a.cmd == "dcf":
+        from .damodaran import narrative_dcf
+        d = narrative_dcf(a.revenue, a.growth, a.margin, a.target, a.years_to_target, a.sales_to_capital, wacc_start=a.wacc, wacc_mature=a.wacc_mature, rf=a.rf,
+                          p_fail=a.p_fail, debt=a.debt, cash=a.cash, shares=a.shares)
+        for r in d["rows"]:
+            print(f"  year {r['year']:2d}  growth {r['growth']:6.1%}  revenue {r['revenue']:10.1f}  margin {r['margin']:5.1%}  FCFF {r['fcff']:9.1f}  WACC {r['wacc']:5.2%}")
+        print(f"value of operations {d['ev']:.1f} ({d['terminal_share']:.0%} from the terminal value, terminal growth {d['g_terminal']:.2%}); equity per share {d['per_share']:.2f}")
         return
     if a.cmd == "atlas":
         from . import atlas

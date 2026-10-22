@@ -5,7 +5,7 @@
     today: { name: "Today", views: ["desk", "mind", "atlas", "ooda", "noteworthy"] },
     decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "cardroom", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
-    research: { name: "Research", views: ["labs", "fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
+    research: { name: "Research", views: ["labs", "ml", "reality", "edge", "fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
     reference: { name: "Methods", views: ["engine", "engines", "code", "agents", "appendix"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
@@ -21,6 +21,9 @@
     atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
     mind: () => guard("The mind", renderMindDesk, $("#md-tiles")),
     labs: () => guard("The labs", renderLabsDesk, $("#lb-tiles")),
+    ml: () => guard("The machine-learning lab", renderMlDesk, $("#ml-tiles")),
+    reality: () => guard("The reality check", renderRealityDesk, $("#rt-tiles")),
+    edge: () => guard("The information edge", renderEdgeDesk, $("#ed-tiles")),
     cardroom: () => { guard("The labs", renderLabsDesk, $("#lb-tiles")); guard("The card room", drawYale, $("#cr-yale")); },
     code: () => guard("Under the hood", renderCodeDesk, $("#cd-list")),
     agents: () => {},
@@ -160,7 +163,7 @@
    ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
    ["Solver", buildSolve, "#rz-ledger"], ["Policy record", renderPolicyLive, "#pol-live"], ["Games", buildGames, "#gt-matrix"], ["Field", buildField, "#fd-ev"], ["Today", renderToday7, "#today7"],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
-   ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
+   ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Vim and Emacs keys", wireKeys], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
 
   ["#bc-cpn", "#bc-yld", "#bc-mat", "#bc-face", "#bc-shock"].forEach((id) => $(id).addEventListener("input", () => guard("Bond calculator", updateBond)));
   ["#ct-dv01", "#ct-d2", "#ct-d10"].forEach((id) => $(id).addEventListener("input", () => guard("Curve trade", updateCurveTrade)));

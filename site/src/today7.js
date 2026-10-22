@@ -48,7 +48,7 @@
       v: `correlation ${sgn2(I.corr.v)}`, d: I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d), live: I.corr.live,
       why: `TLT hedge: ${TD.status !== "ok" ? "unavailable" : TD.on ? "on" : "off"} under policy hedge.tlt.v2. It returns at −0.10 (${fx(Math.max(0, I.corr.v + 0.1), 2)} away).`, href: "#d-duration" });
     const inBand = HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1];
-    out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 155 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
+    out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 156 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
       v: `${pctPts(I.infl.avg36)} over 36 months${HL.band ? `; band ${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""}`, d: monthNice(I.infl.d), live: I.infl.live,
       why: `Inflation sleeve: ${I.infl.avg36 >= I.lineAt ? "8%, half gold, half energy" : "2%"}. TLT inflation gate ${TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`, href: "#fi-hedge" });
     let third = null;

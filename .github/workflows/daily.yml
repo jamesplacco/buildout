@@ -83,6 +83,14 @@ jobs:
         continue-on-error: true
         run: python -m buildout labs --out site/data
 
+      - name: Machine-learning lab (purged walk-forward, CPCV, conformal intervals, analogs)
+        continue-on-error: true
+        run: python -m buildout ml --out site/data
+
+      - name: Reality check (every model's assumptions, breakpoints, kappa, fragility, stressed worlds)
+        continue-on-error: true
+        run: python -m buildout reality --out site/data
+
       - name: Reasoner and games (reads the files above; no network)
         continue-on-error: true
         run: python -m buildout reason --out site/data

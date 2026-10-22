@@ -3,6 +3,23 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.15 asks how far to trust any model, including its own. `ml.py` scores six machine-learning models (CAPE
+regression, ridge, random forest, gradient boosting, nearest analogs, an ensemble) on forecasting 12-month real returns
+and 15% falls every month since 1940 with purged walk-forward refits, against the historical mean with Diebold-Mariano
+tests, plus combinatorial purged cross-validation and the probability of backtest overfitting, conformal intervals with
+measured coverage, calibration, permutation importance, analogs and novelty. None beats the mean; the page says so.
+`assumptions.py` answers a PM's complaint that quants' assumptions break in the real world: it registers what each
+engine model assumes, tests it on the data (fat tails, dependence, structural breaks, the stock-bond correlation by
+inflation regime, crisis correlations), finds the breakpoint at which each conclusion flips (the TLT hedge's
+correlation line, the trend rule's cost and delay, Kelly across windows), measures Taleb's kappa and the Taleb-Douady
+fragility of each hedge structure, reruns decisions in 400 block-bootstrapped worlds, and triages any backtest Sharpe
+for costs, published-anomaly decay, the variants tried (deflated Sharpe) and the minimum backtest length.
+`damodaran.py` holds the implied equity risk premium and the narrative-to-numbers DCF. The mind grows to 2,614 nodes
+and about 5,600 links (606 concepts, 418 checked items including 23 profiled information sources, 213 economies, the
+S&P 500 companies, ML models and tested assumptions) and gains a belief network over thirteen claims for what-if
+questions. The page adds the ML lab, Reality check and Edge desks, Vim and Emacs key modes with a command line;
+`editors/buildout.vim` and `editors/buildout.el` ask the engine from either editor.
+
 Version 0.14 makes the brain and the engine one mind, an order of magnitude larger, and gives it a reasoning loop.
 `mind.py` joins, in one typed graph of about 1,500 nodes and 3,800 links: 547 concepts with definitions, formulas and
 relations (`ontology.py`), the atlas's 100 market nodes and their learned causal links, 268 facts and papers checked
@@ -29,7 +46,7 @@ nodes in the snapshot (72 series), about 130 in the daily run. The landing page 
 the Atlas desk explores it.
 
 Version 0.12 put the brain on the landing page and made it check itself. The landing desk animates a shock
-travelling the 35-node graph one order at a time, x_k = W'x_(k-1), with the arithmetic beside it: the largest flows of
+travelling the 34-node graph one order at a time, x_k = W'x_(k-1), with the arithmetic beside it: the largest flows of
 each step, the running sum converging on the Leontief limit at the rate of the spectral radius, and 300 Monte Carlo
 worlds. `brain_robust.py` scores five rival world models for every measured equation out of sample from 2000, stacks
 them (Yao, Vehtari, Simpson and Gelman 2018), puts adaptive conformal error bars on the result (Gibbs and Candes 2021),
@@ -150,6 +167,10 @@ formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked
 | Desk | What it holds |
 |---|---|
 | Today | Risk rings, what changed since your last visit, a morning check-in with a streak, early trends, a three-line brief (do, risk, watch), twelve signals each with a rule and an action, the system map (nine parts of the financial system and the channels between them, red where stress is flowing), what moved, key levels, regime map, engine readout, calendar |
+| ML lab | Six models scored out of sample since 1940 against the historical mean; overfitting odds by CPCV; calibration; conformal intervals; importance; analogs and novelty |
+| Reality check | Every model's assumptions with a live test and a verdict; the PM's triage of a quant backtest and seven questions for any pitch; breakpoints; kappa; fragility; stressed worlds; the literature on what backtests lose |
+| Edge | 23 information sources with their edge, biases, cadence, cost and feeds; Damodaran's implied ERP and narrative DCF; the Taleb and Damodaran lenses, sourced |
+| Keys | Press ? for Default, Vim (j k, gg G, ]] [[, gt gT, yy) or Emacs (C-n C-p, C-v M-v, C-s, M-x, C-x o) and a command line (: or M-x) taking think, whatif, go, triage, erp, set keys |
 | Noteworthy | Ten trends placed on the curve from niche to consensus, each with a bottom line, sourced numbers, a watch list and live links to X, Substack and Telegram; the feed's latest items; heat, niche skew and lead time per theme |
 | The brain | Thirty-four parts and about 110 signed links (eleven measured by regime, the rest judged and editable): propagation by order, strongest channels, feedback loops, the links the answer rests on, Monte Carlo robustness, the spectral radius, the inverse problem, PM and quant modes |
 | Prop | Industry economics (Jane Street, Citadel Securities, Virtu, retail challenges), the edge calculator and Kelly hill, a funded-challenge simulator, pod-shop economics from gross to net |
@@ -313,7 +334,11 @@ credentials, and the holdings it is shown are not stored.
 | | `status.py` | Run status: files present, valid and fresh; sanity checks on correlations, hedge ratios, yields, gross and VaR |
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
-| Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| Research | `research.py`, `fundamentals.py` | 156 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
+| | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |
+| | `damodaran.py` | Implied equity risk premium; narrative-to-numbers DCF with fading growth, target margin, sales-to-capital reinvestment and failure odds |
+| | `editors/` | `buildout.vim` and `buildout.el`: think, what-if, triage, ERP and DCF from inside Vim or Emacs |
 | v0.14 | `mind.py` | One graph of the brain and the engine; recall (BM25, aliases), spreading activation (personalized PageRank), claim framing, log-odds weighing with a family discount, leave-one-family-out range, hinge, causal chains, decision |
 | | `ontology.py` | 547 concepts in 18 clusters with definitions, formulas, aliases and typed relations to concepts, series, engine modules and voices topics |
 | | `labs.py` | Indicators (SMA, EMA, RSI, MACD, Bollinger), the trend lab, oscillator tests, valuation out of sample, Markov switching, GARCH, Hill tails, Engle-Granger, variance ratios, calendar, Holm and BH |
@@ -395,6 +420,13 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.15: walk-forward finds a planted predictor (skill above 0.3, DM t above 2) and not a fake one, and never trains
+  on an outcome that overlaps the forecast; CPCV gives low overfitting odds to a real linear signal and high odds to a
+  memorizing model; conformal intervals cover 80% of iid errors; kappa reads 0 for a bell curve and positive for
+  Student-t(3); sup-F finds a planted break; the hedge breakpoint is where the sleeve stops reducing variance; short
+  puts read fragile and the collar does not; the triage reproduces Bailey's 45 tries in five years; the implied ERP
+  reduces to Gordon and the DCF to a perpetuity; belief propagation returns each claim's own evidence without links;
+  the page's what-if, explain, network, triage and Damodaran code equal Python's.
 - v0.14: forty steps of spreading activation sit within 2 x 0.75^40 of the closed-form personalized PageRank; the
   page's mind equals Python's on fifteen questions (seeds, claim, side, probability, range, pros and cons, hinge,
   chains and decision); each family's k-th reading counts 1/sqrt(k); every typed reference in the ontology resolves;

@@ -1,5 +1,5 @@
   /* =====================================================================================
-     mind.js (v0.14): the brain and the engine as one graph, and the reasoning loop that runs on it.
+     mind.js (v0.15): the brain and the engine as one graph, and the reasoning loop that runs on it.
      The arithmetic mirrors buildout/mind.py exactly (tests/test_v14.py holds them equal): recall by BM25 and alias
      hits, spreading activation by personalized PageRank, the claim framed from the evidence that lit up, signals
      weighed in log-odds with a dependence discount, leave-one-family-out ranges, causal chains to the book over the
@@ -105,6 +105,48 @@
     return out;
   }
   const mSig = (x) => 1 / (1 + Math.exp(-x));
+  const mr6 = (v) => Math.round(v * 1e6) / 1e6;
+  const mById = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+  /* the weighing rule shared by every verdict (mind.combine) */
+  function mindCombine(rows) {
+    const groups = new Map();
+    rows.forEach((x) => { const s = x.sig; x.raw = s.sign * s.s * s.rel * x.relevance; if (!groups.has(s.group)) groups.set(s.group, []); groups.get(s.group).push(x); });
+    groups.forEach((g) => { g.sort((a, b) => Math.abs(b.raw) - Math.abs(a.raw) || mById(a.sig.id, b.sig.id)); g.forEach((x, k) => { x.dep = 1 / Math.sqrt(k + 1); x.c = x.raw * x.dep; }); });
+    let L = 0;
+    rows.forEach((x) => { L += x.c; });
+    const p = mSig(L), ps = [];
+    [...groups.keys()].sort(mById).forEach((g) => { let sum = 0; rows.forEach((x) => { if (x.sig.group === g) sum += x.c; }); ps.push(mSig(L - sum)); });
+    let hinge = rows.length ? rows[0] : null;
+    rows.forEach((x) => { if (Math.abs(x.c) > Math.abs(hinge.c) || (Math.abs(x.c) === Math.abs(hinge.c) && x.sig.id > hinge.sig.id)) hinge = x; });
+    return { L, p, lo: Math.min(...ps, p), hi: Math.max(...ps, p), hinge, groups: groups.size };
+  }
+  /* mean-field belief propagation over the claim network (mind.propagate) */
+  function mindPropagate(net, fixed = {}) {
+    const n = net.axes.length;
+    let m = net.axes.map((a, i) => (a in fixed ? 2 * fixed[a] - 1 : 2 * mSig(net.base[i]) - 1));
+    for (let it = 0; it < net.iters; it++) {
+      const pull = new Array(n).fill(0);
+      for (const [i, j, w] of net.links) pull[j] += w * m[i];
+      m = net.axes.map((a, k) => (a in fixed ? m[k] : 0.5 * m[k] + 0.5 * (2 * mSig(net.base[k] + net.gamma * pull[k]) - 1)));
+    }
+    return m.map((x) => (x + 1) / 2);
+  }
+  function mindNetPull(axis) {
+    const net = MD.net;
+    if (!net || !net.axes.includes(axis)) return [0, []];
+    const k = net.axes.indexOf(axis);
+    let pull = 0;
+    const parents = [];
+    for (const [i, j, w] of net.links) {
+      if (j !== k) continue;
+      const m = 2 * net.p[i] - 1;
+      pull += net.gamma * w * m;
+      parents.push({ axis: net.axes[i], w, p: net.p[i], contrib: net.gamma * w * m });
+    }
+    parents.sort((a, b) => Math.abs(b.contrib) - Math.abs(a.contrib) || mById(a.axis, b.axis));
+    return [pull, parents];
+  }
+  const mSgn2 = (v) => (v >= 0 ? "+" : "-") + Math.abs(v).toFixed(2);
   function mindWeigh(M, axis, r, text) {
     const rows = [];
     M.sigs.forEach((s, si) => { if (s.axis === axis) rows.push({ sig: s, act: r[M.sigNode[si]] }); });
@@ -112,43 +154,95 @@
       const res = vSearch(text, axis);
       if (res.lean != null) {
         const lean = res.lean, nq = Object.values(res.counts).reduce((a, b) => a + b, 0);
-        rows.push({ sig: { id: "s:voices:" + axis, axis, sign: lean > 0 ? 1 : lean < 0 ? -1 : 0, s: Math.round(0.3 * Math.abs(lean) * 1e6) / 1e6, rel: 0.3, group: "opinion",
-          text: `Investor opinion in the library leans ${lean >= 0 ? "+" : "-"}${Math.abs(lean).toFixed(2)} on a -2 to +2 scale across ${nq} quotes.`, refs: ["t:" + axis], flip: "Opinion swinging the other way.", targets: [] }, act: r[M.idx["t:" + axis]] });
+        rows.push({ sig: { id: "s:voices:" + axis, axis, sign: lean > 0 ? 1 : lean < 0 ? -1 : 0, s: mr6(0.3 * Math.abs(lean)), rel: 0.3, group: "opinion",
+          text: `Investor opinion in the library leans ${mSgn2(lean)} on a -2 to +2 scale across ${nq} quotes.`, refs: ["t:" + axis], flip: "Opinion swinging the other way.", targets: [] }, act: r[M.idx["t:" + axis]] });
       }
     }
-    if (!rows.length) return { axis, logodds: 0, p_bull: 0.5, rows: [], lo: 0.5, hi: 0.5, hinge: null };
-    const amax = Math.max(...rows.map((x) => x.act)) || 1;
-    const groups = new Map();
-    rows.forEach((x) => {
-      const s = x.sig;
-      x.relevance = amax > 0 ? 0.5 + 0.5 * Math.sqrt(x.act / amax) : 0.5;
-      x.raw = s.sign * s.s * s.rel * x.relevance;
-      if (!groups.has(s.group)) groups.set(s.group, []);
-      groups.get(s.group).push(x);
-    });
-    const byId = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
-    groups.forEach((g) => { g.sort((a, b) => Math.abs(b.raw) - Math.abs(a.raw) || byId(a.sig.id, b.sig.id)); g.forEach((x, k) => { x.dep = 1 / Math.sqrt(k + 1); x.c = x.raw * x.dep; }); });
-    let L = 0;
-    rows.forEach((x) => { L += x.c; });
-    const p = mSig(L), ps = [];
-    [...groups.keys()].sort(byId).forEach((g) => { let sum = 0; rows.forEach((x) => { if (x.sig.group === g) sum += x.c; }); ps.push(mSig(L - sum)); });
-    let hinge = rows[0];
-    rows.forEach((x) => { if (Math.abs(x.c) > Math.abs(hinge.c) || (Math.abs(x.c) === Math.abs(hinge.c) && x.sig.id > hinge.sig.id)) hinge = x; });
-    const pwo = mSig(L - hinge.c);
-    rows.sort((a, b) => Math.abs(b.c) - Math.abs(a.c) || byId(a.sig.id, b.sig.id));
-    return { axis, logodds: L, p_bull: p, lo: Math.min(...ps, p), hi: Math.max(...ps, p), rows, hinge: { id: hinge.sig.id, text: hinge.sig.text, p_without: pwo } };
+    const [pull, parents] = mindNetPull(axis);
+    if (Math.abs(pull) > 1e-9) {
+      const axes = MD.axes;
+      const txt = parents.slice(0, 2).map((x) => `${axes[x.axis].title} (bull case ${Math.round(x.p * 100)}%) ${x.contrib > 0 ? "supports" : "weighs against"} it through a ${mSgn2(x.w)} link the atlas learned`).join("; ");
+      rows.push({ sig: { id: "s:network:" + axis, axis, sign: pull > 0 ? 1 : -1, s: mr6(Math.min(Math.abs(pull), MP.net_cap)), rel: 1.0, group: "network", text: `Connected claims: ${txt}.`,
+        refs: parents.slice(0, 3).map((x) => axes[x.axis].node), flip: "The connected claims turning.", targets: [] }, act: null });
+    }
+    if (!rows.length) return { axis, logodds: 0, p_bull: 0.5, rows: [], lo: 0.5, hi: 0.5, hinge: null, groups: 0 };
+    const acts = rows.filter((x) => x.act != null).map((x) => x.act);
+    const amax = (acts.length ? Math.max(...acts) : 1) || 1;
+    rows.forEach((x) => { x.relevance = x.act == null ? 1 : 0.5 + 0.5 * Math.sqrt(x.act / amax); });
+    const C = mindCombine(rows), hinge = C.hinge;
+    const pwo = mSig(C.L - hinge.c);
+    rows.sort((a, b) => Math.abs(b.c) - Math.abs(a.c) || mById(a.sig.id, b.sig.id));
+    return { axis, logodds: C.L, p_bull: C.p, lo: C.lo, hi: C.hi, rows, groups: C.groups, hinge: { id: hinge.sig.id, text: hinge.sig.text, p_without: pwo } };
   }
-  const mr6 = (v) => Math.round(v * 1e6) / 1e6;
+  function mindFrame(M, r, topic) {
+    const axes = MD.axes, score = {};
+    M.sigs.forEach((s, si) => { const v = r[M.sigNode[si]]; if (v > (score[s.axis] || 0)) score[s.axis] = v; });
+    Object.keys(score).forEach((a) => { const na = r[M.idx[axes[a].node]]; score[a] = (0.5 * score[a] + na) * (a === topic ? MP.axis_topic_boost : 1); });
+    return [Object.keys(score).sort((a, b) => score[b] - score[a] || mById(a, b)), score];
+  }
+  /* intervene on the belief network (mind.Mind.whatif) */
+  function mindWhatif(cond, target) {
+    const M = mindInit(), net = MD.net, seeds = mindRecall(M, cond);
+    if (!net || !seeds.length) return { cond, found: false };
+    const r = mindSpread(M, seeds), topic = vSearch(cond).topic;
+    const [ranked] = mindFrame(M, r, topic);
+    const cand = ranked.filter((a) => net.axes.includes(a));
+    if (!cand.length) return { cond, found: false };
+    const axis = cand[0], words = vRaw(cond);
+    const up = words.filter((w) => MP.whatif_up.includes(w)).length, down = words.filter((w) => MP.whatif_down.includes(w)).length;
+    const d = up >= down ? 1 : -1, bull = d * net.reps[axis][1] > 0, pf = bull ? 0.9 : 0.1;
+    const after = mindPropagate(net, { [axis]: pf }), axes = MD.axes;
+    const eff = [];
+    net.axes.forEach((a, k) => { if (a !== axis) eff.push({ axis: a, title: axes[a].title, p0: mr6(net.p[k]), p1: mr6(after[k]), d: mr6(after[k] - net.p[k]) }); });
+    eff.sort((a, b) => Math.abs(b.d) - Math.abs(a.d) || mById(a.axis, b.axis));
+    let tgt = null, ta = null;
+    if (target === "book") {
+      const rows = [];
+      let l0 = 0, l1 = 0;
+      net.axes.forEach((a, k) => { const b = axes[a].book; if (b) { l0 += b * (2 * net.p[k] - 1); l1 += b * (2 * after[k] - 1); rows.push({ axis: a, title: axes[a].title, sign: b, d: mr6(b * (after[k] - net.p[k])) }); } });
+      const nb = Math.max(1, rows.length);
+      rows.sort((a, b) => Math.abs(b.d) - Math.abs(a.d) || mById(a.axis, b.axis));
+      tgt = { axis: "book", title: "The model book", lean0: mr6(l0 / nb), lean1: mr6(l1 / nb), rows: rows.slice(0, 6) };
+    } else if (target && target.found) {
+      const reps = {};
+      Object.entries(net.reps).forEach(([a, v]) => { reps["a:" + v[0]] = a; });
+      const hit = target.seeds.find((s) => reps[s.id] != null && reps[s.id] !== axis);
+      ta = hit ? reps[hit.id] : target.axis;
+      if (net.axes.includes(ta)) { const k = net.axes.indexOf(ta); tgt = { axis: ta, title: axes[ta].title, p0: mr6(net.p[k]), p1: mr6(after[k]) }; }
+    }
+    const side = bull ? "bull" : "bear";
+    return { cond, found: true, axis, title: axes[axis].title, side, claim: axes[axis][side], p_fixed: pf, effects: eff.slice(0, 8), target: tgt };
+  }
   function mindThink(text, opts = {}) {
+    const t = String(text).trim(), m = t.match(new RegExp(MP.rx_whatif, "i"));
+    if (m) {
+      const body = m[1], low = body.toLowerCase();
+      const cuts = MP.whatif_split.map((sp) => low.indexOf(sp)).filter((i) => i > 0);
+      const cut = cuts.length ? Math.min(...cuts) : -1;
+      const cond = cut > 0 ? body.slice(0, cut) : body;
+      const rest = cut > 0 ? body.slice(cut).replace(/^[\s,]*(?:then\s+)?/i, "").trim() : "";
+      const toBook = !!rest && new RegExp(MP.rx_book, "i").test(rest);
+      const res = mindThink0(rest && !toBook ? rest : cond, opts);
+      res.whatif = mindWhatif(cond, toBook ? "book" : rest ? res : null);
+      if (res.found) res.mode = "whatif";
+      return res;
+    }
+    const res = mindThink0(t, opts);
+    if (res.found && new RegExp(MP.rx_explain, "i").test(t)) {
+      res.mode = "explain";
+      const pk = res.seeds.find((s) => !["fact", "paper", "signal", "quote"].includes(s.kind)) || res.seeds[0];
+      const n = MIND.nodes[MIND.idx[pk.id]];
+      res.define = { id: n.id, name: n.n, text: n.t, formula: n.f == null ? null : n.f, kind: n.k };
+    }
+    return res;
+  }
+  function mindThink0(text, opts = {}) {
     const M = mindInit(), seeds = mindRecall(M, text);
     if (!seeds.length) return { query: text, found: false, note: "Nothing in the mind matches. Name an asset, an indicator, a market or an idea." };
     const sp = mindSpread(M, seeds, !!opts.keep), r = opts.keep ? sp.r : sp;
     const rmax = Math.max(...r);
     const vs = vSearch(text), topic = vs.topic, pol = vs.polarity;
-    const axes = MD.axes, score = {};
-    M.sigs.forEach((s, si) => { const v = r[M.sigNode[si]]; if (v > (score[s.axis] || 0)) score[s.axis] = v; });
-    Object.keys(score).forEach((a) => { const na = r[M.idx[axes[a].node]]; score[a] = (0.5 * score[a] + na) * (a === topic ? MP.axis_topic_boost : 1); });
-    const ranked = Object.keys(score).sort((a, b) => score[b] - score[a] || (a < b ? -1 : a > b ? 1 : 0));
+    const axes = MD.axes, [ranked, score] = mindFrame(M, r, topic);
     if (!ranked.length) return { query: text, found: false, note: "The question lit up nodes with no evidence attached." };
     const main = ranked[0], mode = score[main] >= MP.explain_ratio * rmax ? "weigh" : "explain";
     const verdicts = ranked.slice(0, 3).map((a) => mindWeigh(M, a, r, text)), V = verdicts[0];
@@ -178,10 +272,10 @@
     const prefer = [];
     V.rows.forEach((x) => x.sig.refs.concat(x.sig.targets).forEach((c) => { if (c.startsWith("a:") && M.idx[c] != null) prefer.push(M.idx[c]); }));
     const out = { query: text, found: true, mode, axis_score: mr6(score[main] / rmax), seeds: seeds.map(([i]) => nd(i)), polarity: pol, topic, axis: main, axis_title: axes[main].title, side, claim,
-      p: mr6(pc), range: [mr6(lo), mr6(hi)], logodds: mr6(V.logodds), pros: pros.slice(0, 6).map(row), cons: cons.slice(0, 6).map(row), n_signals: V.rows.length, hinge: V.hinge,
+      p: mr6(pc), range: [mr6(lo), mr6(hi)], logodds: mr6(V.logodds), pros: pros.slice(0, 6).map(row), cons: cons.slice(0, 6).map(row), n_signals: V.rows.length, groups: V.groups, hinge: V.hinge,
       flip: pros.slice(0, 3).map((x) => x.sig.flip), others: verdicts.slice(1).map((v) => ({ axis: v.axis, title: axes[v.axis].title, p_bull: mr6(v.p_bull), n: v.rows.length })),
       concepts: concepts.map(nd), facts: facts.map(nd), engines: engines.map(nd), countries: countries.map(nd), unknowns: unknown, chains: mindChains(M, r, 3, prefer.slice(0, 3)),
-      decision: act, used: V.rows.map((x) => x.sig.id).sort(), groups: [...new Set(V.rows.map((x) => x.sig.group))].length };
+      decision: act, used: V.rows.map((x) => x.sig.id).sort() };
     if (opts.keep) { out._r = r; out._hist = sp.hist; out._seeds = seeds.map(([i]) => i); }
     return out;
   }
@@ -189,10 +283,12 @@
   /* ---------- drawing the mind ---------- */
   const MG_COL = { valuation: "#f2c14e", accounting: "#d9b38c", technical: "#7aa2ff", macro: "#ff9e5e", rates: "#6fd0e8", derivatives: "#b9a3ff", commodities: "#e0a458",
     structure: "#8fb3ff", risk: "#f07f7f", stats: "#5fd3a5", behavior: "#e58bd0", games: "#a6d86e", negotiation: "#c7e36b", private: "#ffb38a", assetmgmt: "#ffd59a",
-    ai: "#9ad0ff", crypto: "#f6a6ff", history: "#c9c2a5", markets: "#7ad3ff", core: "#ffd166", voices: "#ff8fb1", engine: "#4fe0c0", world: "#8ee08e", evidence: "#ffe08a" };
-  const MK_R = { cluster: 6.5, concept: 2.4, series: 2.6, driver: 3.4, holding: 3.6, topic: 4.2, investor: 2.4, quote: 1.4, engine: 2.6, method: 2.6, tool: 2.6, fact: 1.8, paper: 1.8, country: 2.4, signal: 1.8 };
+    ai: "#9ad0ff", crypto: "#f6a6ff", history: "#c9c2a5", ml: "#c3f584", reality: "#ff7a90", edge: "#ffc078", markets: "#7ad3ff", core: "#ffd166", voices: "#ff8fb1", engine: "#4fe0c0",
+    world: "#8ee08e", companies: "#a9b8ff", evidence: "#ffe08a" };
+  const MK_R = { cluster: 6.5, concept: 2.4, series: 2.6, driver: 3.4, holding: 3.6, topic: 4.2, investor: 2.4, quote: 1.4, engine: 2.6, method: 2.6, tool: 2.6, fact: 1.8, paper: 1.8, country: 2.4, signal: 1.8, source: 3.0, sector: 3.4, industry: 2.2, company: 1.5, model: 2.8, assumption: 2.8 };
   const MK_NAME = { cluster: "cluster", concept: "concept", series: "measured series", driver: "judged driver", holding: "holding", topic: "voices topic", investor: "investor", quote: "verified quote",
-    engine: "engine module", method: "engine method", tool: "MCP tool", fact: "sourced fact", paper: "paper", country: "economy", signal: "signal" };
+    engine: "engine module", method: "engine method", tool: "MCP tool", fact: "sourced fact", paper: "paper", country: "economy", signal: "signal", source: "information source",
+    sector: "sector", industry: "industry", company: "S&P 500 company", model: "ML model", assumption: "tested assumption" };
   const MS = {};
   function mStage(id) { return MS[id] || (MS[id] = { id, zoom: { s: 1, tx: 0, ty: 0 }, hover: -1, sel: null, res: null, t0: 0, raf: 0, wired: false, drag: null, base: null, baseKey: "", auto: true, demo: 0, L: null }); }
   function mLayout(S) {
@@ -401,7 +497,7 @@
   }
 
   /* ---------- the argument map ---------- */
-  const MM_EX = ["Is the stock market overvalued?", "Does the 200-day moving average work?", "Is AI a bubble?", "Will oil keep rising?", "Is RSI useful?", "Should I use leverage?",
+  const MM_EX = ["Is the stock market overvalued?", "What if oil spikes, what happens to bonds?", "If AI capex slows, what happens to the book?", "Can I trust quant models?", "Does machine learning predict returns?", "What is BowTied Bull?", "Does the 200-day moving average work?", "Is AI a bubble?", "Will oil keep rising?", "Is RSI useful?", "Should I use leverage?",
     "Are private credit marks too generous?", "Do active managers beat the index?", "Is gold a good hedge now?", "Sell in May and go away?", "Should I buy long bonds?",
     "Should I make the first offer when haggling?", "Is Kelly betting too aggressive?", "Will inflation come back?"];
   const pctMind = (p) => `${Math.round(p * 100)}%`;
@@ -418,7 +514,14 @@
     const box = h("div", "m-verdict");
     if (!res.found) { box.append(h("p", "hint", res.note)); return box; }
     const head = h("div", "m-claim");
-    head.append(h("span", "eyebrow", `${res.axis_title} · ${res.mode === "weigh" ? "weighed" : "explained"}`), h("p", "m-claim-t", `“${res.claim}”`));
+    head.append(h("span", "eyebrow", `${res.axis_title} · ${{ weigh: "weighed", explain: "explained", whatif: "what-if" }[res.mode] || res.mode}`), h("p", "m-claim-t", `“${res.claim}”`));
+    if (res.define) {
+      const d = h("div", "m-define");
+      d.append(h("span", "panel-title", `${res.define.name} · ${MK_NAME[res.define.kind] || res.define.kind}`), h("p", null, res.define.text || ""));
+      if (res.define.formula) d.append(h("p", null, h("code", "m-f", res.define.formula)));
+      box.append(d);
+    }
+    if (res.whatif) box.append(mWhatifBlock(res.whatif, compact));
     const meter = h("div", "m-meter");
     const bar = h("div", "m-meter-bar"), fill = h("span", "m-meter-fill"), band = h("span", "m-meter-band");
     fill.style.width = (res.p * 100).toFixed(1) + "%"; band.style.left = (res.range[0] * 100).toFixed(1) + "%"; band.style.width = Math.max(0.6, (res.range[1] - res.range[0]) * 100).toFixed(1) + "%";
@@ -464,6 +567,62 @@
     if (res.decision.mcp && !compact) dec.append(Object.assign(h("pre", "m-mcp", res.decision.mcp.map((c) => `${c.tool}(${JSON.stringify(c.args)})`).join("\n") + "\n// a proposal for a person to approve; the engine never places an order"), { tabIndex: 0 }));
     box.append(dec);
     return box;
+  }
+  function mWhatifBlock(w, compact) {
+    const d = h("div", "m-whatif");
+    if (!w.found) { d.append(h("p", "hint", `The condition “${w.cond.trim()}” did not land on a claim the network links; the verdict below is on the question alone.`)); return d; }
+    d.append(h("span", "panel-title", `What-if: “${w.claim}” set to ${pctMind(w.p_fixed)}`));
+    const t = w.target;
+    if (t && t.axis === "book") {
+      const dl = t.lean1 - t.lean0;
+      d.append(h("p", "m-wi-t", `The model book's average lean across the claims it is exposed to moves from ${mSgn2(t.lean0)} to ${mSgn2(t.lean1)} (${dl >= 0 ? "toward" : "against"} the book).`));
+      const u = h("ul", "m-wi-l");
+      t.rows.slice(0, compact ? 3 : 6).forEach((x) => u.append(h("li", null, `${x.title}: ${x.d >= 0 ? "+" : "−"}${Math.abs(x.d * 100).toFixed(1)} points for the book`)));
+      d.append(u);
+    } else if (t) d.append(h("p", "m-wi-t", `${t.title}: the bull case moves from ${pctMind(t.p0)} to ${pctMind(t.p1)}.`));
+    if (!compact) {
+      const u = h("ul", "m-wi-l");
+      w.effects.slice(0, 5).forEach((x) => u.append(h("li", null, `${x.title}: ${pctMind(x.p0)} → ${pctMind(x.p1)}`)));
+      d.append(h("span", "panel-title", "What else re-settles"), u, h("p", "hint", "Belief propagation over the claim network: links are the atlas's 12-month responses between each claim's own market series; a connected claim informs a verdict but is capped so it never decides one."));
+    }
+    return d;
+  }
+  /* ---------- the belief network: claims that move together ---------- */
+  const MNET = { fixed: {} };
+  const MNET_SHORT = { oil_energy: "Oil", inflation_fed: "Inflation & the Fed", bonds_rates: "Bonds & rates", market_valuation: "Valuation", timing_crashes: "Timing & crashes",
+    speculation_manias: "Speculation", recession_economy: "Recession", ai_boom: "AI boom", semis_nvidia: "Nvidia & chips", megacap_concentration: "Mega-cap concentration",
+    gold: "Gold", dollar_debt: "Dollar & debt", private_credit: "Private credit" };
+  function mNetBlock() {
+    const box = $("#md-net"), net = MD.net;
+    if (!box || !net) return;
+    const after = mindPropagate(net, MNET.fixed), n = net.axes.length, W = 640, H = 420, cx = W / 2, cy = H / 2 + 4, R = 160;
+    const pos = net.axes.map((a, i) => [cx + R * 1.45 * Math.cos(-Math.PI / 2 + (2 * Math.PI * i) / n), cy + R * Math.sin(-Math.PI / 2 + (2 * Math.PI * i) / n)]);
+    const NS = "http://www.w3.org/2000/svg", sv = (t, a) => { const e = document.createElementNS(NS, t); Object.entries(a).forEach(([k, v]) => e.setAttribute(k, v)); return e; };
+    const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, class: "m-net-svg", role: "img", "aria-label": "Belief network of the engine's claims" });
+    const defs = sv("defs", {});
+    [["pos", "var(--good)"], ["neg", "var(--bad)"]].forEach(([id, c]) => { const m = sv("marker", { id: "mn-" + id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 5, markerHeight: 5, orient: "auto-start-reverse" }); m.append(sv("path", { d: "M0,0L10,5L0,10z", fill: c })); defs.append(m); });
+    svg.append(defs);
+    net.links.forEach(([i, j, w]) => {
+      const [x1, y1] = pos[i], [x2, y2] = pos[j], dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+      svg.append(sv("line", { x1: x1 + ux * 22, y1: y1 + uy * 22, x2: x2 - ux * 24, y2: y2 - uy * 24, stroke: w > 0 ? "var(--good)" : "var(--bad)", "stroke-width": (0.6 + 2.6 * Math.abs(w)).toFixed(2), "stroke-opacity": (0.25 + 0.55 * Math.abs(w)).toFixed(2), "marker-end": `url(#mn-${w > 0 ? "pos" : "neg"})` }));
+    });
+    net.axes.forEach((a, k) => {
+      const [x, y] = pos[k], p = after[k], fx0 = a in MNET.fixed, d = p - net.p[k];
+      const g = sv("g", { class: "m-net-n" + (fx0 ? " fixed" : ""), tabindex: 0, role: "button", "aria-label": `${MD.axes[a].title}: bull case ${pctMind(p)}. Click to set it.` });
+      g.append(sv("circle", { cx: x, cy: y, r: 20, fill: `color-mix(in oklab, var(--good) ${Math.round(p * 100)}%, var(--bad))`, stroke: fx0 ? "var(--ink)" : "var(--rule)", "stroke-width": fx0 ? 2.5 : 1 }));
+      const tx = sv("text", { x, y: y + 4, "text-anchor": "middle", class: "m-net-p" }); tx.textContent = pctMind(p); g.append(tx);
+      const lb = sv("text", { x, y: y + (y < cy ? -27 : 36), "text-anchor": "middle", class: "m-net-l" }); lb.textContent = MNET_SHORT[a] || MD.axes[a].title; g.append(lb);
+      if (Math.abs(d) >= 0.005 && !fx0) { const dt = sv("text", { x, y: y + (y < cy ? -40 : 49), "text-anchor": "middle", class: "m-net-d" }); dt.textContent = `${d > 0 ? "+" : "−"}${Math.abs(d * 100).toFixed(1)}`; g.append(dt); }
+      const cyc = () => { const v = MNET.fixed[a]; if (v == null) MNET.fixed[a] = 0.9; else if (v === 0.9) MNET.fixed[a] = 0.1; else delete MNET.fixed[a]; mNetBlock(); };
+      g.addEventListener("click", cyc);
+      g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); cyc(); } });
+      svg.append(g);
+    });
+    const wrap = h("div", "m-net-wrap"); wrap.append(svg);
+    const fx = Object.keys(MNET.fixed);
+    const note = h("p", "m-net-note", fx.length ? `Fixed: ${fx.map((a) => `${MD.axes[a].title} at ${pctMind(MNET.fixed[a])}`).join("; ")}. Numbers under the others show how far each moved, in points.` : "Click a claim to set its bull case to 90%, again for 10%, a third time to free it. The others re-settle by belief propagation.");
+    const rs = h("button", "pill", "Free all"); rs.type = "button"; rs.addEventListener("click", () => { MNET.fixed = {}; mNetBlock(); });
+    const row = h("div", "m-ex"); row.append(rs); box.replaceChildren(wrap, note, row);
   }
   function mLearnBlock(res) {
     const box = h("div", "m-learn");
@@ -547,6 +706,7 @@
       const ns = $("#md-node");
       ns.addEventListener("input", () => mFind(ns.value));
       mLegend();
+      mNetBlock();
       mConceptLib();
       mEvidenceLib();
       think(MDK.pending || MM_EX[0]);

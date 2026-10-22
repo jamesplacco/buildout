@@ -305,7 +305,7 @@
     const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), s.dsr.toFixed(2)]; });
     const statFig = h("figure", "chart");
     statFig.append(tableBlock(["Policy", "CAGR", "Volatility", "Sharpe", "Max drawdown", "Deflated Sharpe"], stats),
-      h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of these four variants would show by luck. Above 0.95 is the bar."));
+      h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of every variant, policy and hedge tried would show by luck. Above 0.95 is the bar."));
     const exp = (r.exposures || []).map((e) => [e.index, fx(e.market, 2), fx(e.ai, 2), fx(e.rates, 2), String(Math.round(e.n_obs))]);
     const expFig = h("figure", "chart");
     expFig.append(h("span", "chart-title", "Factor betas (market = QQQ, AI = basket minus QQQ, rates = TLT)"), tableBlock(["Ticker", "Market", "AI", "Rates", "Days of history"], exp));
@@ -1116,7 +1116,7 @@
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
-    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
+    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", ml: "ML lab", reality: "Reality check", edge: "Edge", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
     "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {

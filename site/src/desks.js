@@ -1,6 +1,6 @@
   /* =====================================================================================
      desks.js (v0.5): Fundamentals (10-K and 10-Q analysis), Physics (watts, not dollars)
-     and Findings (original research on 155 years of public data)
+     and Findings (original research on 156 years of public data)
      ===================================================================================== */
   const B$ = (v, d = 1) => (fin(v) ? (v < 0 ? MINUS : "") + "$" + fx(Math.abs(v), d) + "B" : "n/a");
   const pct0 = (v) => (fin(v) ? Math.round(v * 100) + "%" : "n/a");

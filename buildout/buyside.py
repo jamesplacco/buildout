@@ -19,7 +19,7 @@ import math
 import numpy as np
 import pandas as pd
 
-LINE = 0.0275          # the research step's inflation line (36-month average CPI), where bonds stop hedging
+LINE = 0.0275          # the low edge of the research step's 2.75% to 4.25% inflation band (36-month average CPI); the validated line is 4.25%
 
 
 def gross_scaler(fed: int, real10: float) -> tuple[float, float, str]:

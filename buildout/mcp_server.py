@@ -16,6 +16,10 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
   reason                  the mind: recall, spreading activation, the weighed claim, chains to the book, a proposed action
   labs_lookup             the labs' tested trading claims
   game_math               poker, bargaining, private-fund and storage math
+  ml_forecast             machine learning judged honestly: purged walk-forward skill, CPCV overfitting odds, intervals, analogs
+  reality_check           every model's assumptions tested: tails, dependence, stability, breakpoints, kappa, fragility, worlds
+  triage_backtest         a quant's backtest Sharpe after costs, decay, luck across the variants tried and too little data
+  damodaran_value         Damodaran's implied equity risk premium and narrative-to-numbers DCF
   review_decision         process score for one decision, or the full scorecard for a journal
   compare_explanations    competing explanations of one observation, and the evidence that best separates them
   trace_exposure          the brain: what explains the readings, what follows for each holding, what to look at next,
@@ -843,6 +847,70 @@ PORT = _obj({"equity": {"type": "number", "description": "equity exposure, multi
 SIGNALS = {"type": "object", "description": "signal id to true, false or null (unknown): " + ", ".join(s["id"] for s in reasoner.SIGNALS),
            "additionalProperties": {"type": ["boolean", "null"]}}
 
+def _snap15(part: str):
+    p = Path(__file__).resolve().parents[1] / "site" / "src" / "snap15.js"
+    txt = p.read_text() if p.exists() else ""
+    i = txt.find("const SNAP15 = ")
+    if i < 0:
+        raise ToolError("no v0.15 snapshot: run python scripts/snapshot_v15.py")
+    return json.loads(txt[i + len("const SNAP15 = "):txt.index(";\n", i)].replace("<\\/", "</"))[part]
+
+
+def ml_forecast(ctx: Context, args: dict) -> dict:
+    """The machine-learning lab from the daily run's ml.json or the shipped snapshot."""
+    o = ctx.load("ml") or _snap15("ml")
+    part = args.get("part")
+    parts = ["return", "crash", "analogs", "shift", "today", "findings"]
+    if part is None:
+        return {"findings": o.get("findings"), "parts": parts, "note": "Skill is out of sample against the historical mean; negative means worse than the mean."}
+    if part not in parts:
+        raise ToolError(f"part must be one of: {', '.join(parts)}")
+    out = o.get(part)
+    if isinstance(out, dict):
+        out = {k: v for k, v in out.items() if k != "series"}
+    return {"part": part, "result": out}
+
+
+def reality_check(ctx: Context, args: dict) -> dict:
+    """Every model's assumptions against the data (the daily run's reality.json or the shipped snapshot)."""
+    o = ctx.load("reality") or _snap15("reality")
+    part = args.get("part")
+    checks = sorted(o.get("checks", {}))
+    if part is None:
+        return {"findings": o.get("findings"), "map": o.get("map"), "checks": checks}
+    if part not in checks:
+        raise ToolError(f"part must be one of: {', '.join(checks)}")
+    return {"part": part, "result": o["checks"][part]}
+
+
+def triage_backtest(ctx: Context, args: dict) -> dict:
+    from .assumptions import triage
+    try:
+        sr, yrs = float(args["sharpe"]), float(args["years"])
+    except (KeyError, TypeError, ValueError):
+        raise ToolError("sharpe and years are required numbers")
+    if not (0 < yrs <= 200) or not (-5 < sr < 10):
+        raise ToolError("years must be in (0, 200] and sharpe in (-5, 10)")
+    tr = int(min(100000, max(1, args.get("trials", 1))))
+    return triage(sr, yrs, tr, int(args.get("periods", 12)), float(args.get("skew", 0.0)), float(args.get("kurt", 3.0)), bool(args.get("published", False)),
+                  float(args.get("cost_bps", 0.0)), float(args.get("turns", 0.0)), float(args.get("vol", 0.15)))
+
+
+def damodaran_value(ctx: Context, args: dict) -> dict:
+    from . import damodaran as D
+    kind, a = args.get("kind"), args.get("args") or {}
+    try:
+        if kind == "erp":
+            return D.implied_erp(float(a.get("level", 100.0)), float(a["cash_yield"]), float(a["growth"]), float(a.get("rf", 0.0513)), int(a.get("years", 5)))
+        if kind == "dcf":
+            keys = ("years_to_target", "sales_to_capital", "tax", "wacc_start", "wacc_mature", "rf", "g_terminal", "p_fail", "distress_share", "debt", "cash", "shares")
+            kw = {k: float(a[k]) if k != "years_to_target" else int(a[k]) for k in keys if k in a}
+            return D.narrative_dcf(float(a["revenue"]), float(a["growth_high"]), float(a["margin_now"]), float(a["margin_target"]), **kw)
+    except (KeyError, TypeError, ValueError) as e:
+        raise ToolError(f"missing or bad argument: {e}")
+    raise ToolError("kind must be erp or dcf")
+
+
 TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "get_research_snapshot": (get_research_snapshot, "The engine's latest research: the out-of-sample TLT hedge line and its band, the stock-bond regime, "
                               "data checks, the reasoner's scenario probabilities and the brain's readings, each with its date and evidence label.",
@@ -868,10 +936,11 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                    "at chosen sizes: the book in every scenario, growth, worst case, cost, and the advisor's sets.",
                    _obj({"on": {"type": "array", "items": {"type": "string"}}, "sizes": {"type": "object", "additionalProperties": NUM},
                          "equity": {**NUM, "description": "equity exposure, x NAV"}, "signals": SIGNALS}), {"readOnlyHint": True, "openWorldHint": False}),
-    "reason": (reason, "Ask the mind (one graph of about 1,500 nodes joining the brain, the engine, 268 checked facts and papers, 267 verified quotes "
-               "and 48 economies) a question or claim. Returns what it recalled, the claim it weighed, the probability with a leave-one-family-out "
-               "range, the evidence for and against with weights and sources, the hinge, the causal chains to the book and a proposed action. "
-               "Research only; nothing is executed.", _obj({"question": {"type": "string", "description": "e.g. 'Does the 200-day moving average work?'"}}, ["question"]),
+    "reason": (reason, "Ask the mind (one graph of about 2,600 nodes joining the brain, the engine, about 400 checked facts and papers, 267 verified "
+               "quotes, 213 economies, the S&P 500 companies, the ML models and the tested assumptions) a question or claim. Returns what it recalled, "
+               "the claim it weighed, the probability with a leave-one-family-out range, the evidence for and against with weights and sources (one row "
+               "is the pull of connected claims through the belief network), the hinge, the causal chains to the book and a proposed action. Ask "
+               "'What if X, what happens to Y?' for a what-if over the network, or 'What is X?' for a definition. Research only; nothing is executed.", _obj({"question": {"type": "string", "description": "e.g. 'Does the 200-day moving average work?'"}}, ["question"]),
                {"readOnlyHint": True, "openWorldHint": False}),
     "labs_lookup": (labs_lookup, "The labs' tested trading claims on the longest data the engine reads: the 10-month trend rule with a bootstrap, max test "
                     "and deflated Sharpe; RSI, MACD, Bollinger and golden-cross tests; CAPE and P/E against future returns out of sample; Markov regimes; "
@@ -884,6 +953,21 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                   _obj({"kind": {"type": "string", "enum": ["equity", "kelly", "ruin", "rubinstein", "nash", "offer", "irr", "multiples", "pme", "jcurve", "carry"]},
                         "args": {"type": "object", "description": "e.g. {'hand': ['As','Kd'], 'board': [], 'opponents': 2} or {'p': 0.55, 'b': 1}"}}, ["kind"]),
                   {"readOnlyHint": True, "openWorldHint": False}),
+    "ml_forecast": (ml_forecast, "Machine learning on 155 years of data, judged the honest way: purged walk-forward skill against the historical mean "
+                    "(with a Diebold-Mariano test), the chance that picking the in-sample winner misleads (CPCV), conformal intervals with their realized "
+                    "coverage, permutation importance, calibration, today's forecasts, the nearest historical analogs and how unfamiliar today is.",
+                    _obj({"part": {"type": "string", "enum": ["return", "crash", "analogs", "shift", "today", "findings"]}}), {"readOnlyHint": True, "openWorldHint": False}),
+    "reality_check": (reality_check, "Where the engine's models meet the real world: each model's assumptions with a live test (fat tails, dependence, "
+                      "structural breaks, the stock-bond correlation by regime, crisis correlation), the breakpoint at which each conclusion flips (trend "
+                      "costs and delay, Kelly across windows, the TLT hedge's correlation limit), Taleb's kappa, the fragility heuristic and 400 resampled worlds.",
+                      _obj({"part": {"type": "string", "description": "one check, e.g. tails_month, hedge, kelly, kappa, fragility, worlds"}}), {"readOnlyHint": True, "openWorldHint": False}),
+    "triage_backtest": (triage_backtest, "What a quant's backtested Sharpe is worth live: after trading costs, the out-of-sample or post-publication decay "
+                        "McLean and Pontiff measured, the deflated Sharpe ratio for the number of variants tried, and the minimum backtest length.",
+                        _obj({"sharpe": NUM, "years": NUM, "trials": NUM, "periods": NUM, "skew": NUM, "kurt": NUM, "published": {"type": "boolean"},
+                              "cost_bps": NUM, "turns": NUM, "vol": NUM}, ["sharpe", "years"]), {"readOnlyHint": True, "openWorldHint": False}),
+    "damodaran_value": (damodaran_value, "Damodaran's two tools: the implied equity risk premium (kind erp: level, cash_yield, growth, rf) and the "
+                        "narrative-to-numbers DCF (kind dcf: revenue, growth_high, margin_now, margin_target, sales_to_capital, wacc_start, wacc_mature, rf, p_fail...).",
+                        _obj({"kind": {"type": "string", "enum": ["erp", "dcf"]}, "args": {"type": "object"}}, ["kind"]), {"readOnlyHint": True, "openWorldHint": False}),
     "investor_voices": (investor_voices, "What legendary and current investors actually said about a question or claim, arranged from extreme bear (-2) "
                         "to extreme bull (+2): verbatim quotes with speaker, date and source link from a verified library. Never generates a quote.",
                         _obj({"query": {"type": "string", "description": "a question or statement, e.g. 'Is bitcoin digital gold?'"},

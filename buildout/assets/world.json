@@ -1,289 +1,1501 @@
 {
- "schema": 1,
+ "schema": 2,
  "source": "World Bank via the datahub GitHub mirrors (datasets/gdp, datasets/population). Inflation is left out: the mirror's consumer-price file matches the GDP deflator, so it is not used.",
  "countries": {
-  "USA": {
-   "gdp": 27360935000000.0,
-   "gdp_year": 2023,
-   "pop": 341784857.0,
+  "ABW": {
+   "name": "Aruba",
+   "gdp": 3544707788.0566425,
+   "gdp_year": 2022,
+   "pop": 108785.0,
    "pop_year": 2025
   },
-  "CHN": {
-   "gdp": 17794781986104.457,
-   "gdp_year": 2023,
-   "pop": 1406585000.0,
+  "AFG": {
+   "name": "Afghanistan",
+   "gdp": 14502158192.090397,
+   "gdp_year": 2022,
+   "pop": 43844111.0,
    "pop_year": 2025
   },
-  "JPN": {
-   "gdp": 4212945159781.403,
+  "AGO": {
+   "name": "Angola",
+   "gdp": 84722957642.37566,
    "gdp_year": 2023,
-   "pop": 123366734.0,
+   "pop": 39040039.0,
    "pop_year": 2025
   },
-  "DEU": {
-   "gdp": 4456081016705.961,
+  "ALB": {
+   "name": "Albania",
+   "gdp": 22977677860.79785,
    "gdp_year": 2023,
-   "pop": 83491249.0,
+   "pop": 2349580.0,
    "pop_year": 2025
   },
-  "IND": {
-   "gdp": 3549918918777.532,
+  "AND": {
+   "name": "Andorra",
+   "gdp": 3727673593.019216,
    "gdp_year": 2023,
-   "pop": 1463865525.0,
-   "pop_year": 2025
-  },
-  "GBR": {
-   "gdp": 3340032380668.036,
-   "gdp_year": 2023,
-   "pop": 69487000.0,
-   "pop_year": 2025
-  },
-  "FRA": {
-   "gdp": 3030904089607.8965,
-   "gdp_year": 2023,
-   "pop": 68720337.0,
-   "pop_year": 2025
-  },
-  "ITA": {
-   "gdp": 2254851212731.8047,
-   "gdp_year": 2023,
-   "pop": 58915656.0,
-   "pop_year": 2025
-  },
-  "CAN": {
-   "gdp": 2140085567791.4517,
-   "gdp_year": 2023,
-   "pop": 41651653.0,
-   "pop_year": 2025
-  },
-  "BRA": {
-   "gdp": 2173665655937.2737,
-   "gdp_year": 2023,
-   "pop": 212812405.0,
-   "pop_year": 2025
-  },
-  "RUS": {
-   "gdp": 2021421476035.417,
-   "gdp_year": 2023,
-   "pop": 143513328.0,
-   "pop_year": 2025
-  },
-  "KOR": {
-   "gdp": 1712792854202.369,
-   "gdp_year": 2023,
-   "pop": 51684564.0,
-   "pop_year": 2025
-  },
-  "AUS": {
-   "gdp": 1723827215334.7063,
-   "gdp_year": 2023,
-   "pop": 27614411.0,
-   "pop_year": 2025
-  },
-  "MEX": {
-   "gdp": 1788886821046.8132,
-   "gdp_year": 2023,
-   "pop": 131946900.0,
-   "pop_year": 2025
-  },
-  "ESP": {
-   "gdp": 1580694712515.714,
-   "gdp_year": 2023,
-   "pop": 49355143.0,
-   "pop_year": 2025
-  },
-  "IDN": {
-   "gdp": 1371171152331.155,
-   "gdp_year": 2023,
-   "pop": 285721236.0,
-   "pop_year": 2025
-  },
-  "NLD": {
-   "gdp": 1118124749886.2942,
-   "gdp_year": 2023,
-   "pop": 18087633.0,
-   "pop_year": 2025
-  },
-  "SAU": {
-   "gdp": 1067582933333.3334,
-   "gdp_year": 2023,
-   "pop": 36973555.0,
-   "pop_year": 2025
-  },
-  "TUR": {
-   "gdp": 1108022373259.511,
-   "gdp_year": 2023,
-   "pop": 85878556.0,
-   "pop_year": 2025
-  },
-  "CHE": {
-   "gdp": 884940402230.4088,
-   "gdp_year": 2023,
-   "pop": 9092436.0,
-   "pop_year": 2025
-  },
-  "TWN": {},
-  "POL": {
-   "gdp": 811229100687.5663,
-   "gdp_year": 2023,
-   "pop": 36435861.0,
-   "pop_year": 2025
-  },
-  "ARG": {
-   "gdp": 640591410663.8834,
-   "gdp_year": 2023,
-   "pop": 45851378.0,
-   "pop_year": 2025
-  },
-  "SWE": {
-   "gdp": 593267701033.4082,
-   "gdp_year": 2023,
-   "pop": 10596620.0,
-   "pop_year": 2025
-  },
-  "NOR": {
-   "gdp": 485513316503.6304,
-   "gdp_year": 2023,
-   "pop": 5610870.0,
-   "pop_year": 2025
-  },
-  "BEL": {
-   "gdp": 632216577075.1093,
-   "gdp_year": 2023,
-   "pop": 11941781.0,
-   "pop_year": 2025
-  },
-  "IRN": {
-   "gdp": 401504514718.7182,
-   "gdp_year": 2023,
-   "pop": 92417681.0,
+   "pop": 82904.0,
    "pop_year": 2025
   },
   "ARE": {
+   "name": "United Arab Emirates",
    "gdp": 504173451327.43365,
    "gdp_year": 2023,
    "pop": 11513149.0,
    "pop_year": 2025
   },
-  "ISR": {
-   "gdp": 509901495702.1033,
+  "ARG": {
+   "name": "Argentina",
+   "gdp": 640591410663.8834,
    "gdp_year": 2023,
-   "pop": 10122800.0,
+   "pop": 45851378.0,
    "pop_year": 2025
   },
-  "THA": {
-   "gdp": 514944993833.5776,
+  "ARM": {
+   "name": "Armenia",
+   "gdp": 24212134631.064003,
    "gdp_year": 2023,
-   "pop": 71619863.0,
+   "pop": 3086700.0,
    "pop_year": 2025
   },
-  "SGP": {
-   "gdp": 501427500080.0585,
-   "gdp_year": 2023,
-   "pop": 6111175.0,
+  "ASM": {
+   "name": "American Samoa",
+   "gdp": 871000000.0,
+   "gdp_year": 2022,
+   "pop": 46029.0,
    "pop_year": 2025
   },
-  "MYS": {
-   "gdp": 399648828546.5043,
+  "ATG": {
+   "name": "Antigua and Barbuda",
+   "gdp": 2033085185.185185,
    "gdp_year": 2023,
-   "pop": 35977838.0,
+   "pop": 94209.0,
    "pop_year": 2025
   },
-  "ZAF": {
-   "gdp": 377781600985.8731,
+  "AUS": {
+   "name": "Australia",
+   "gdp": 1723827215334.7063,
    "gdp_year": 2023,
-   "pop": 64747319.0,
+   "pop": 27614411.0,
    "pop_year": 2025
   },
-  "NGA": {
-   "gdp": 362814951696.0728,
+  "AUT": {
+   "name": "Austria",
+   "gdp": 516034144115.9503,
    "gdp_year": 2023,
-   "pop": 237527782.0,
+   "pop": 9208163.0,
    "pop_year": 2025
   },
-  "EGY": {
-   "gdp": 395926075163.0058,
+  "AZE": {
+   "name": "Azerbaijan",
+   "gdp": 72356176470.58824,
    "gdp_year": 2023,
-   "pop": 118365995.0,
+   "pop": 10246996.0,
    "pop_year": 2025
   },
-  "PHL": {
-   "gdp": 437146372729.9424,
+  "BDI": {
+   "name": "Burundi",
+   "gdp": 2642161668.9275384,
    "gdp_year": 2023,
-   "pop": 116786962.0,
+   "pop": 14390003.0,
    "pop_year": 2025
   },
-  "VNM": {
-   "gdp": 429716969049.5928,
+  "BEL": {
+   "name": "Belgium",
+   "gdp": 632216577075.1093,
    "gdp_year": 2023,
-   "pop": 101598527.0,
+   "pop": 11941781.0,
+   "pop_year": 2025
+  },
+  "BEN": {
+   "name": "Benin",
+   "gdp": 19673284686.00226,
+   "gdp_year": 2023,
+   "pop": 14814460.0,
+   "pop_year": 2025
+  },
+  "BFA": {
+   "name": "Burkina Faso",
+   "gdp": 20324617838.967648,
+   "gdp_year": 2023,
+   "pop": 24074580.0,
+   "pop_year": 2025
+  },
+  "BGD": {
+   "name": "Bangladesh",
+   "gdp": 437415331040.9943,
+   "gdp_year": 2023,
+   "pop": 175686899.0,
+   "pop_year": 2025
+  },
+  "BGR": {
+   "name": "Bulgaria",
+   "gdp": 101584384672.78587,
+   "gdp_year": 2023,
+   "pop": 6433302.0,
+   "pop_year": 2025
+  },
+  "BHR": {
+   "name": "Bahrain",
+   "gdp": 43205000000.0,
+   "gdp_year": 2023,
+   "pop": 1600366.0,
+   "pop_year": 2025
+  },
+  "BHS": {
+   "name": "Bahamas, The",
+   "gdp": 14338500000.0,
+   "gdp_year": 2023,
+   "pop": 403033.0,
+   "pop_year": 2025
+  },
+  "BIH": {
+   "name": "Bosnia and Herzegovina",
+   "gdp": 27054889362.885204,
+   "gdp_year": 2023,
+   "pop": 3140095.0,
+   "pop_year": 2025
+  },
+  "BLR": {
+   "name": "Belarus",
+   "gdp": 71857382745.6066,
+   "gdp_year": 2023,
+   "pop": 9085991.0,
+   "pop_year": 2025
+  },
+  "BLZ": {
+   "name": "Belize",
+   "gdp": 3281500000.0,
+   "gdp_year": 2023,
+   "pop": 422924.0,
+   "pop_year": 2025
+  },
+  "BMU": {
+   "name": "Bermuda",
+   "gdp": 7827980000.0,
+   "gdp_year": 2022,
+   "pop": 64555.0,
+   "pop_year": 2025
+  },
+  "BOL": {
+   "name": "Bolivia",
+   "gdp": 45849832906.413895,
+   "gdp_year": 2023,
+   "pop": 12581843.0,
+   "pop_year": 2025
+  },
+  "BRA": {
+   "name": "Brazil",
+   "gdp": 2173665655937.2737,
+   "gdp_year": 2023,
+   "pop": 212812405.0,
+   "pop_year": 2025
+  },
+  "BRB": {
+   "name": "Barbados",
+   "gdp": 6393564189.61345,
+   "gdp_year": 2023,
+   "pop": 282623.0,
+   "pop_year": 2025
+  },
+  "BRN": {
+   "name": "Brunei Darussalam",
+   "gdp": 15128292953.509842,
+   "gdp_year": 2023,
+   "pop": 466330.0,
+   "pop_year": 2025
+  },
+  "BTN": {
+   "name": "Bhutan",
+   "gdp": 2898227713.223154,
+   "gdp_year": 2022,
+   "pop": 796682.0,
+   "pop_year": 2025
+  },
+  "BWA": {
+   "name": "Botswana",
+   "gdp": 19395765126.312748,
+   "gdp_year": 2023,
+   "pop": 2562122.0,
+   "pop_year": 2025
+  },
+  "CAF": {
+   "name": "Central African Republic",
+   "gdp": 2555492085.2483063,
+   "gdp_year": 2023,
+   "pop": 5513282.0,
+   "pop_year": 2025
+  },
+  "CAN": {
+   "name": "Canada",
+   "gdp": 2140085567791.4517,
+   "gdp_year": 2023,
+   "pop": 41651653.0,
+   "pop_year": 2025
+  },
+  "CHE": {
+   "name": "Switzerland",
+   "gdp": 884940402230.4088,
+   "gdp_year": 2023,
+   "pop": 9092436.0,
+   "pop_year": 2025
+  },
+  "CHI": {
+   "name": "Channel Islands",
+   "gdp": 11228317318.765242,
+   "gdp_year": 2022,
+   "pop": 168466.0,
    "pop_year": 2025
   },
   "CHL": {
+   "name": "Chile",
    "gdp": 335533331669.2191,
    "gdp_year": 2023,
    "pop": 19859921.0,
    "pop_year": 2025
   },
-  "PER": {
-   "gdp": 267603248655.2527,
+  "CHN": {
+   "name": "China",
+   "gdp": 17794781986104.457,
    "gdp_year": 2023,
-   "pop": 34576665.0,
-   "pop_year": 2025
-  },
-  "COL": {
-   "gdp": 363540156234.8684,
-   "gdp_year": 2023,
-   "pop": 53425635.0,
-   "pop_year": 2025
-  },
-  "NZL": {
-   "gdp": 253465703232.14597,
-   "gdp_year": 2023,
-   "pop": 5324700.0,
-   "pop_year": 2025
-  },
-  "QAT": {
-   "gdp": 235770403734.9,
-   "gdp_year": 2022,
-   "pop": 2972215.0,
-   "pop_year": 2025
-  },
-  "KWT": {
-   "gdp": 161772221950.94162,
-   "gdp_year": 2023,
-   "pop": 4865298.0,
-   "pop_year": 2025
-  },
-  "IRQ": {
-   "gdp": 250842782139.46417,
-   "gdp_year": 2023,
-   "pop": 47020774.0,
+   "pop": 1406585000.0,
    "pop_year": 2025
   },
   "CIV": {
+   "name": "Cote d'Ivoire",
    "gdp": 78788828906.86345,
    "gdp_year": 2023,
    "pop": 32711547.0,
    "pop_year": 2025
   },
+  "CMR": {
+   "name": "Cameroon",
+   "gdp": 47945510090.05286,
+   "gdp_year": 2023,
+   "pop": 29879337.0,
+   "pop_year": 2025
+  },
+  "COD": {
+   "name": "Congo, Dem. Rep.",
+   "gdp": 66383287002.996895,
+   "gdp_year": 2023,
+   "pop": 112832473.0,
+   "pop_year": 2025
+  },
+  "COG": {
+   "name": "Congo, Rep.",
+   "gdp": 15321055818.326311,
+   "gdp_year": 2023,
+   "pop": 6484437.0,
+   "pop_year": 2025
+  },
+  "COL": {
+   "name": "Colombia",
+   "gdp": 363540156234.8684,
+   "gdp_year": 2023,
+   "pop": 53425635.0,
+   "pop_year": 2025
+  },
+  "COM": {
+   "name": "Comoros",
+   "gdp": 1352380972.1566217,
+   "gdp_year": 2023,
+   "pop": 882847.0,
+   "pop_year": 2025
+  },
+  "CPV": {
+   "name": "Cabo Verde",
+   "gdp": 2587252076.305599,
+   "gdp_year": 2023,
+   "pop": 527326.0,
+   "pop_year": 2025
+  },
+  "CRI": {
+   "name": "Costa Rica",
+   "gdp": 86497941439.01744,
+   "gdp_year": 2023,
+   "pop": 5152950.0,
+   "pop_year": 2025
+  },
+  "CUB": {
+   "name": "Cuba",
+   "gdp": 107351800000.0,
+   "gdp_year": 2020,
+   "pop": 10937203.0,
+   "pop_year": 2025
+  },
+  "CUW": {
+   "name": "Curacao",
+   "gdp": 3073840325.4328494,
+   "gdp_year": 2022,
+   "pop": 156263.0,
+   "pop_year": 2025
+  },
+  "CYM": {
+   "name": "Cayman Islands",
+   "gdp": 6600844001.537206,
+   "gdp_year": 2022,
+   "pop": 75844.0,
+   "pop_year": 2025
+  },
+  "CYP": {
+   "name": "Cyprus",
+   "gdp": 32229622669.195114,
+   "gdp_year": 2023,
+   "pop": 1370754.0,
+   "pop_year": 2025
+  },
+  "CZE": {
+   "name": "Czechia",
+   "gdp": 330858339871.6861,
+   "gdp_year": 2023,
+   "pop": 10886878.0,
+   "pop_year": 2025
+  },
+  "DEU": {
+   "name": "Germany",
+   "gdp": 4456081016705.961,
+   "gdp_year": 2023,
+   "pop": 83491249.0,
+   "pop_year": 2025
+  },
+  "DJI": {
+   "name": "Djibouti",
+   "gdp": 4098530513.557768,
+   "gdp_year": 2023,
+   "pop": 1184076.0,
+   "pop_year": 2025
+  },
+  "DMA": {
+   "name": "Dominica",
+   "gdp": 653992592.5925926,
+   "gdp_year": 2023,
+   "pop": 65871.0,
+   "pop_year": 2025
+  },
+  "DNK": {
+   "name": "Denmark",
+   "gdp": 404198757537.9742,
+   "gdp_year": 2023,
+   "pop": 6009169.0,
+   "pop_year": 2025
+  },
+  "DOM": {
+   "name": "Dominican Republic",
+   "gdp": 121444279313.9308,
+   "gdp_year": 2023,
+   "pop": 11520487.0,
+   "pop_year": 2025
+  },
+  "DZA": {
+   "name": "Algeria",
+   "gdp": 239899491127.7424,
+   "gdp_year": 2023,
+   "pop": 47435312.0,
+   "pop_year": 2025
+  },
+  "ECU": {
+   "name": "Ecuador",
+   "gdp": 118844826000.0,
+   "gdp_year": 2023,
+   "pop": 18289896.0,
+   "pop_year": 2025
+  },
+  "EGY": {
+   "name": "Egypt, Arab Rep.",
+   "gdp": 395926075163.0058,
+   "gdp_year": 2023,
+   "pop": 118365995.0,
+   "pop_year": 2025
+  },
+  "ERI": {
+   "name": "Eritrea",
+   "pop": 3607003.0,
+   "pop_year": 2025
+  },
+  "ESP": {
+   "name": "Spain",
+   "gdp": 1580694712515.714,
+   "gdp_year": 2023,
+   "pop": 49355143.0,
+   "pop_year": 2025
+  },
+  "EST": {
+   "name": "Estonia",
+   "gdp": 40744848827.95366,
+   "gdp_year": 2023,
+   "pop": 1366475.0,
+   "pop_year": 2025
+  },
+  "ETH": {
+   "name": "Ethiopia",
+   "gdp": 163697927593.98236,
+   "gdp_year": 2023,
+   "pop": 135472051.0,
+   "pop_year": 2025
+  },
+  "FIN": {
+   "name": "Finland",
+   "gdp": 300187202696.08374,
+   "gdp_year": 2023,
+   "pop": 5646436.0,
+   "pop_year": 2025
+  },
+  "FJI": {
+   "name": "Fiji",
+   "gdp": 5494797540.733647,
+   "gdp_year": 2023,
+   "pop": 933154.0,
+   "pop_year": 2025
+  },
+  "FRA": {
+   "name": "France",
+   "gdp": 3030904089607.8965,
+   "gdp_year": 2023,
+   "pop": 68720337.0,
+   "pop_year": 2025
+  },
+  "FRO": {
+   "name": "Faroe Islands",
+   "gdp": 3555929833.050505,
+   "gdp_year": 2022,
+   "pop": 54900.0,
+   "pop_year": 2025
+  },
+  "FSM": {
+   "name": "Micronesia, Fed. Sts.",
+   "gdp": 460000000.0,
+   "gdp_year": 2023,
+   "pop": 113683.0,
+   "pop_year": 2025
+  },
+  "GAB": {
+   "name": "Gabon",
+   "gdp": 20516134388.66078,
+   "gdp_year": 2023,
+   "pop": 2593130.0,
+   "pop_year": 2025
+  },
+  "GBR": {
+   "name": "United Kingdom",
+   "gdp": 3340032380668.036,
+   "gdp_year": 2023,
+   "pop": 69487000.0,
+   "pop_year": 2025
+  },
+  "GEO": {
+   "name": "Georgia",
+   "gdp": 30535530479.022663,
+   "gdp_year": 2023,
+   "pop": 3935766.0,
+   "pop_year": 2025
+  },
   "GHA": {
+   "name": "Ghana",
    "gdp": 76370394412.41626,
    "gdp_year": 2023,
    "pop": 35064272.0,
    "pop_year": 2025
   },
+  "GIN": {
+   "name": "Guinea",
+   "gdp": 23612295818.096096,
+   "gdp_year": 2023,
+   "pop": 15099727.0,
+   "pop_year": 2025
+  },
+  "GMB": {
+   "name": "Gambia, The",
+   "gdp": 2339904156.792144,
+   "gdp_year": 2023,
+   "pop": 2822093.0,
+   "pop_year": 2025
+  },
+  "GNB": {
+   "name": "Guinea-Bissau",
+   "gdp": 1966461400.3583264,
+   "gdp_year": 2023,
+   "pop": 2249515.0,
+   "pop_year": 2025
+  },
+  "GNQ": {
+   "name": "Equatorial Guinea",
+   "gdp": 12116922539.411173,
+   "gdp_year": 2023,
+   "pop": 1938431.0,
+   "pop_year": 2025
+  },
+  "GRC": {
+   "name": "Greece",
+   "gdp": 238206312632.5277,
+   "gdp_year": 2023,
+   "pop": 10413962.0,
+   "pop_year": 2025
+  },
+  "GRD": {
+   "name": "Grenada",
+   "gdp": 1320334235.588974,
+   "gdp_year": 2023,
+   "pop": 117303.0,
+   "pop_year": 2025
+  },
+  "GRL": {
+   "name": "Greenland",
+   "gdp": 3235809504.298714,
+   "gdp_year": 2021,
+   "pop": 56831.0,
+   "pop_year": 2025
+  },
+  "GTM": {
+   "name": "Guatemala",
+   "gdp": 102050473863.63635,
+   "gdp_year": 2023,
+   "pop": 18687881.0,
+   "pop_year": 2025
+  },
+  "GUM": {
+   "name": "Guam",
+   "gdp": 6910000000.0,
+   "gdp_year": 2022,
+   "pop": 168999.0,
+   "pop_year": 2025
+  },
+  "GUY": {
+   "name": "Guyana",
+   "gdp": 16786302158.273382,
+   "gdp_year": 2023,
+   "pop": 835986.0,
+   "pop_year": 2025
+  },
+  "HKG": {
+   "name": "Hong Kong SAR, China",
+   "gdp": 382054574298.52905,
+   "gdp_year": 2023,
+   "pop": 7498900.0,
+   "pop_year": 2025
+  },
+  "HND": {
+   "name": "Honduras",
+   "gdp": 34400509852.04365,
+   "gdp_year": 2023,
+   "pop": 11005850.0,
+   "pop_year": 2025
+  },
+  "HRV": {
+   "name": "Croatia",
+   "gdp": 82688842717.3926,
+   "gdp_year": 2023,
+   "pop": 3876200.0,
+   "pop_year": 2025
+  },
+  "HTI": {
+   "name": "Haiti",
+   "gdp": 19850829757.747147,
+   "gdp_year": 2023,
+   "pop": 11906095.0,
+   "pop_year": 2025
+  },
+  "HUN": {
+   "name": "Hungary",
+   "gdp": 212388906458.72397,
+   "gdp_year": 2023,
+   "pop": 9514251.0,
+   "pop_year": 2025
+  },
+  "IDN": {
+   "name": "Indonesia",
+   "gdp": 1371171152331.155,
+   "gdp_year": 2023,
+   "pop": 285721236.0,
+   "pop_year": 2025
+  },
+  "IMN": {
+   "name": "Isle of Man",
+   "gdp": 7931193222.064053,
+   "gdp_year": 2021,
+   "pop": 84118.0,
+   "pop_year": 2025
+  },
+  "IND": {
+   "name": "India",
+   "gdp": 3549918918777.532,
+   "gdp_year": 2023,
+   "pop": 1463865525.0,
+   "pop_year": 2025
+  },
+  "IRL": {
+   "name": "Ireland",
+   "gdp": 545629450403.7351,
+   "gdp_year": 2023,
+   "pop": 5484367.0,
+   "pop_year": 2025
+  },
+  "IRN": {
+   "name": "Iran, Islamic Rep.",
+   "gdp": 401504514718.7182,
+   "gdp_year": 2023,
+   "pop": 92417681.0,
+   "pop_year": 2025
+  },
+  "IRQ": {
+   "name": "Iraq",
+   "gdp": 250842782139.46417,
+   "gdp_year": 2023,
+   "pop": 47020774.0,
+   "pop_year": 2025
+  },
+  "ISL": {
+   "name": "Iceland",
+   "gdp": 31020032583.197216,
+   "gdp_year": 2023,
+   "pop": 392404.0,
+   "pop_year": 2025
+  },
+  "ISR": {
+   "name": "Israel",
+   "gdp": 509901495702.1033,
+   "gdp_year": 2023,
+   "pop": 10122800.0,
+   "pop_year": 2025
+  },
+  "ITA": {
+   "name": "Italy",
+   "gdp": 2254851212731.8047,
+   "gdp_year": 2023,
+   "pop": 58915656.0,
+   "pop_year": 2025
+  },
+  "JAM": {
+   "name": "Jamaica",
+   "gdp": 19423355367.23718,
+   "gdp_year": 2023,
+   "pop": 2837077.0,
+   "pop_year": 2025
+  },
+  "JOR": {
+   "name": "Jordan",
+   "gdp": 50813642348.67464,
+   "gdp_year": 2023,
+   "pop": 11520684.0,
+   "pop_year": 2025
+  },
+  "JPN": {
+   "name": "Japan",
+   "gdp": 4212945159781.403,
+   "gdp_year": 2023,
+   "pop": 123366734.0,
+   "pop_year": 2025
+  },
   "KAZ": {
+   "name": "Kazakhstan",
    "gdp": 261421121085.57208,
    "gdp_year": 2023,
    "pop": 20843754.0,
    "pop_year": 2025
   },
+  "KEN": {
+   "name": "Kenya",
+   "gdp": 107440575838.04752,
+   "gdp_year": 2023,
+   "pop": 57532493.0,
+   "pop_year": 2025
+  },
+  "KGZ": {
+   "name": "Kyrgyz Republic",
+   "gdp": 13987627908.83814,
+   "gdp_year": 2023,
+   "pop": 7343064.0,
+   "pop_year": 2025
+  },
+  "KHM": {
+   "name": "Cambodia",
+   "gdp": 31772759998.85713,
+   "gdp_year": 2023,
+   "pop": 17847982.0,
+   "pop_year": 2025
+  },
+  "KIR": {
+   "name": "Kiribati",
+   "gdp": 279034355.10842144,
+   "gdp_year": 2023,
+   "pop": 136488.0,
+   "pop_year": 2025
+  },
+  "KNA": {
+   "name": "St. Kitts and Nevis",
+   "gdp": 1077033111.111111,
+   "gdp_year": 2023,
+   "pop": 46922.0,
+   "pop_year": 2025
+  },
+  "KOR": {
+   "name": "Korea, Rep.",
+   "gdp": 1712792854202.369,
+   "gdp_year": 2023,
+   "pop": 51684564.0,
+   "pop_year": 2025
+  },
+  "KWT": {
+   "name": "Kuwait",
+   "gdp": 161772221950.94162,
+   "gdp_year": 2023,
+   "pop": 4865298.0,
+   "pop_year": 2025
+  },
+  "LAO": {
+   "name": "Lao PDR",
+   "gdp": 15843155731.25518,
+   "gdp_year": 2023,
+   "pop": 7873046.0,
+   "pop_year": 2025
+  },
+  "LBN": {
+   "name": "Lebanon",
+   "gdp": 20992421948.808086,
+   "gdp_year": 2022,
+   "pop": 5849421.0,
+   "pop_year": 2025
+  },
+  "LBR": {
+   "name": "Liberia",
+   "gdp": 4332000000.0,
+   "gdp_year": 2023,
+   "pop": 5731206.0,
+   "pop_year": 2025
+  },
+  "LBY": {
+   "name": "Libya",
+   "gdp": 50491722445.7773,
+   "gdp_year": 2023,
+   "pop": 7458555.0,
+   "pop_year": 2025
+  },
+  "LCA": {
+   "name": "St. Lucia",
+   "gdp": 2519925938.5244665,
+   "gdp_year": 2023,
+   "pop": 180149.0,
+   "pop_year": 2025
+  },
+  "LIE": {
+   "name": "Liechtenstein",
+   "gdp": 7364654515.139836,
+   "gdp_year": 2022,
+   "pop": 41024.0,
+   "pop_year": 2025
+  },
+  "LKA": {
+   "name": "Sri Lanka",
+   "gdp": 84356860421.12996,
+   "gdp_year": 2023,
+   "pop": 21756000.0,
+   "pop_year": 2025
+  },
+  "LSO": {
+   "name": "Lesotho",
+   "gdp": 2046039024.45854,
+   "gdp_year": 2023,
+   "pop": 2363325.0,
+   "pop_year": 2025
+  },
+  "LTU": {
+   "name": "Lithuania",
+   "gdp": 77836396962.77196,
+   "gdp_year": 2023,
+   "pop": 2888774.0,
+   "pop_year": 2025
+  },
+  "LUX": {
+   "name": "Luxembourg",
+   "gdp": 85755006123.5976,
+   "gdp_year": 2023,
+   "pop": 686970.0,
+   "pop_year": 2025
+  },
+  "LVA": {
+   "name": "Latvia",
+   "gdp": 43627078481.28705,
+   "gdp_year": 2023,
+   "pop": 1847785.0,
+   "pop_year": 2025
+  },
+  "MAC": {
+   "name": "Macao SAR, China",
+   "gdp": 47061843715.85648,
+   "gdp_year": 2023,
+   "pop": 685900.0,
+   "pop_year": 2025
+  },
+  "MAF": {
+   "name": "St. Martin (French part)",
+   "gdp": 649206262.8475188,
+   "gdp_year": 2021,
+   "pop": 24941.0,
+   "pop_year": 2025
+  },
+  "MAR": {
+   "name": "Morocco",
+   "gdp": 141109373209.41437,
+   "gdp_year": 2023,
+   "pop": 38430770.0,
+   "pop_year": 2025
+  },
+  "MCO": {
+   "name": "Monaco",
+   "gdp": 8784002931.686646,
+   "gdp_year": 2022,
+   "pop": 38341.0,
+   "pop_year": 2025
+  },
+  "MDA": {
+   "name": "Moldova",
+   "gdp": 16539436547.294971,
+   "gdp_year": 2023,
+   "pop": 2360527.0,
+   "pop_year": 2025
+  },
+  "MDG": {
+   "name": "Madagascar",
+   "gdp": 16031702914.91953,
+   "gdp_year": 2023,
+   "pop": 32740678.0,
+   "pop_year": 2025
+  },
+  "MDV": {
+   "name": "Maldives",
+   "gdp": 6600000000.0,
+   "gdp_year": 2023,
+   "pop": 529676.0,
+   "pop_year": 2025
+  },
+  "MEX": {
+   "name": "Mexico",
+   "gdp": 1788886821046.8132,
+   "gdp_year": 2023,
+   "pop": 131946900.0,
+   "pop_year": 2025
+  },
+  "MHL": {
+   "name": "Marshall Islands",
+   "gdp": 284000000.0,
+   "gdp_year": 2023,
+   "pop": 36282.0,
+   "pop_year": 2025
+  },
+  "MKD": {
+   "name": "North Macedonia",
+   "gdp": 14761237042.205698,
+   "gdp_year": 2023,
+   "pop": 1820909.0,
+   "pop_year": 2025
+  },
+  "MLI": {
+   "name": "Mali",
+   "gdp": 20904898296.250145,
+   "gdp_year": 2023,
+   "pop": 25198821.0,
+   "pop_year": 2025
+  },
+  "MLT": {
+   "name": "Malta",
+   "gdp": 20956999452.431664,
+   "gdp_year": 2023,
+   "pop": 579704.0,
+   "pop_year": 2025
+  },
+  "MMR": {
+   "name": "Myanmar",
+   "gdp": 64815031669.095245,
+   "gdp_year": 2023,
+   "pop": 54850648.0,
+   "pop_year": 2025
+  },
+  "MNE": {
+   "name": "Montenegro",
+   "gdp": 7404541964.507791,
+   "gdp_year": 2023,
+   "pop": 623129.0,
+   "pop_year": 2025
+  },
+  "MNG": {
+   "name": "Mongolia",
+   "gdp": 19872180369.6275,
+   "gdp_year": 2023,
+   "pop": 3568978.0,
+   "pop_year": 2025
+  },
+  "MNP": {
+   "name": "Northern Mariana Islands",
+   "gdp": 858000000.0,
+   "gdp_year": 2020,
+   "pop": 43541.0,
+   "pop_year": 2025
+  },
+  "MOZ": {
+   "name": "Mozambique",
+   "gdp": 20624597846.549507,
+   "gdp_year": 2023,
+   "pop": 35631653.0,
+   "pop_year": 2025
+  },
+  "MRT": {
+   "name": "Mauritania",
+   "gdp": 10452577062.75806,
+   "gdp_year": 2023,
+   "pop": 5315065.0,
+   "pop_year": 2025
+  },
+  "MUS": {
+   "name": "Mauritius",
+   "gdp": 14397127281.382942,
+   "gdp_year": 2023,
+   "pop": 1243741.0,
+   "pop_year": 2025
+  },
+  "MWI": {
+   "name": "Malawi",
+   "gdp": 14084341062.367504,
+   "gdp_year": 2023,
+   "pop": 22216120.0,
+   "pop_year": 2025
+  },
+  "MYS": {
+   "name": "Malaysia",
+   "gdp": 399648828546.5043,
+   "gdp_year": 2023,
+   "pop": 35977838.0,
+   "pop_year": 2025
+  },
+  "NAM": {
+   "name": "Namibia",
+   "gdp": 12351024843.746696,
+   "gdp_year": 2023,
+   "pop": 3092816.0,
+   "pop_year": 2025
+  },
+  "NCL": {
+   "name": "New Caledonia",
+   "gdp": 9623318718.314594,
+   "gdp_year": 2022,
+   "pop": 295333.0,
+   "pop_year": 2025
+  },
+  "NER": {
+   "name": "Niger",
+   "gdp": 16819170420.565315,
+   "gdp_year": 2023,
+   "pop": 27917831.0,
+   "pop_year": 2025
+  },
+  "NGA": {
+   "name": "Nigeria",
+   "gdp": 362814951696.0728,
+   "gdp_year": 2023,
+   "pop": 237527782.0,
+   "pop_year": 2025
+  },
+  "NIC": {
+   "name": "Nicaragua",
+   "gdp": 17829215283.799656,
+   "gdp_year": 2023,
+   "pop": 7007502.0,
+   "pop_year": 2025
+  },
+  "NLD": {
+   "name": "Netherlands",
+   "gdp": 1118124749886.2942,
+   "gdp_year": 2023,
+   "pop": 18087633.0,
+   "pop_year": 2025
+  },
+  "NOR": {
+   "name": "Norway",
+   "gdp": 485513316503.6304,
+   "gdp_year": 2023,
+   "pop": 5610870.0,
+   "pop_year": 2025
+  },
+  "NPL": {
+   "name": "Nepal",
+   "gdp": 40908073366.84552,
+   "gdp_year": 2023,
+   "pop": 29618118.0,
+   "pop_year": 2025
+  },
+  "NRU": {
+   "name": "Nauru",
+   "gdp": 154127798.19354144,
+   "gdp_year": 2023,
+   "pop": 12025.0,
+   "pop_year": 2025
+  },
+  "NZL": {
+   "name": "New Zealand",
+   "gdp": 253465703232.14597,
+   "gdp_year": 2023,
+   "pop": 5324700.0,
+   "pop_year": 2025
+  },
+  "OMN": {
+   "name": "Oman",
+   "gdp": 108192457737.3212,
+   "gdp_year": 2023,
+   "pop": 5494691.0,
+   "pop_year": 2025
+  },
+  "PAK": {
+   "name": "Pakistan",
+   "gdp": 338368455317.8758,
+   "gdp_year": 2023,
+   "pop": 255219554.0,
+   "pop_year": 2025
+  },
+  "PAN": {
+   "name": "Panama",
+   "gdp": 83382400000.0,
+   "gdp_year": 2023,
+   "pop": 4571189.0,
+   "pop_year": 2025
+  },
+  "PER": {
+   "name": "Peru",
+   "gdp": 267603248655.2527,
+   "gdp_year": 2023,
+   "pop": 34576665.0,
+   "pop_year": 2025
+  },
+  "PHL": {
+   "name": "Philippines",
+   "gdp": 437146372729.9424,
+   "gdp_year": 2023,
+   "pop": 116786962.0,
+   "pop_year": 2025
+  },
+  "PLW": {
+   "name": "Palau",
+   "gdp": 263020733.717011,
+   "gdp_year": 2023,
+   "pop": 17663.0,
+   "pop_year": 2025
+  },
+  "PNG": {
+   "name": "Papua New Guinea",
+   "gdp": 30932496249.791653,
+   "gdp_year": 2023,
+   "pop": 10762817.0,
+   "pop_year": 2025
+  },
+  "POL": {
+   "name": "Poland",
+   "gdp": 811229100687.5663,
+   "gdp_year": 2023,
+   "pop": 36435861.0,
+   "pop_year": 2025
+  },
+  "PRI": {
+   "name": "Puerto Rico",
+   "gdp": 117902300000.0,
+   "gdp_year": 2023,
+   "pop": 3184835.0,
+   "pop_year": 2025
+  },
+  "PRT": {
+   "name": "Portugal",
+   "gdp": 287080013574.4972,
+   "gdp_year": 2023,
+   "pop": 10804871.0,
+   "pop_year": 2025
+  },
+  "PRY": {
+   "name": "Paraguay",
+   "gdp": 42956263543.948166,
+   "gdp_year": 2023,
+   "pop": 7013078.0,
+   "pop_year": 2025
+  },
+  "PSE": {
+   "name": "West Bank and Gaza",
+   "gdp": 17396300000.0,
+   "gdp_year": 2023,
+   "pop": 5413596.0,
+   "pop_year": 2025
+  },
+  "PYF": {
+   "name": "French Polynesia",
+   "gdp": 5814661208.905444,
+   "gdp_year": 2022,
+   "pop": 282465.0,
+   "pop_year": 2025
+  },
+  "QAT": {
+   "name": "Qatar",
+   "gdp": 235770403734.9,
+   "gdp_year": 2022,
+   "pop": 2972215.0,
+   "pop_year": 2025
+  },
+  "ROU": {
+   "name": "Romania",
+   "gdp": 351002579629.6701,
+   "gdp_year": 2023,
+   "pop": 19020271.0,
+   "pop_year": 2025
+  },
+  "RUS": {
+   "name": "Russian Federation",
+   "gdp": 2021421476035.417,
+   "gdp_year": 2023,
+   "pop": 143513328.0,
+   "pop_year": 2025
+  },
+  "RWA": {
+   "name": "Rwanda",
+   "gdp": 14097768647.66952,
+   "gdp_year": 2023,
+   "pop": 14569341.0,
+   "pop_year": 2025
+  },
+  "SAU": {
+   "name": "Saudi Arabia",
+   "gdp": 1067582933333.3334,
+   "gdp_year": 2023,
+   "pop": 36973555.0,
+   "pop_year": 2025
+  },
+  "SDN": {
+   "name": "Sudan",
+   "gdp": 109327023588.7324,
+   "gdp_year": 2023,
+   "pop": 51662147.0,
+   "pop_year": 2025
+  },
+  "SEN": {
+   "name": "Senegal",
+   "gdp": 31013986429.186054,
+   "gdp_year": 2023,
+   "pop": 18931966.0,
+   "pop_year": 2025
+  },
+  "SGP": {
+   "name": "Singapore",
+   "gdp": 501427500080.0585,
+   "gdp_year": 2023,
+   "pop": 6111175.0,
+   "pop_year": 2025
+  },
+  "SLB": {
+   "name": "Solomon Islands",
+   "gdp": 1631286701.1151562,
+   "gdp_year": 2023,
+   "pop": 838645.0,
+   "pop_year": 2025
+  },
+  "SLE": {
+   "name": "Sierra Leone",
+   "gdp": 3809832236.959593,
+   "gdp_year": 2023,
+   "pop": 8819794.0,
+   "pop_year": 2025
+  },
+  "SLV": {
+   "name": "El Salvador",
+   "gdp": 34015620000.000004,
+   "gdp_year": 2023,
+   "pop": 6365503.0,
+   "pop_year": 2025
+  },
+  "SMR": {
+   "name": "San Marino",
+   "gdp": 1855382833.1164992,
+   "gdp_year": 2021,
+   "pop": 34109.0,
+   "pop_year": 2025
+  },
+  "SOM": {
+   "name": "Somalia",
+   "gdp": 11679800110.152267,
+   "gdp_year": 2023,
+   "pop": 19654739.0,
+   "pop_year": 2025
+  },
+  "SRB": {
+   "name": "Serbia",
+   "gdp": 75187125426.73755,
+   "gdp_year": 2023,
+   "pop": 6549143.0,
+   "pop_year": 2025
+  },
+  "SSD": {
+   "name": "South Sudan",
+   "gdp": 11997800760.224182,
+   "gdp_year": 2015,
+   "pop": 12188788.0,
+   "pop_year": 2025
+  },
+  "STP": {
+   "name": "Sao Tome and Principe",
+   "gdp": 603240748.9542067,
+   "gdp_year": 2023,
+   "pop": 240254.0,
+   "pop_year": 2025
+  },
+  "SUR": {
+   "name": "Suriname",
+   "gdp": 3782437296.0432286,
+   "gdp_year": 2023,
+   "pop": 639850.0,
+   "pop_year": 2025
+  },
+  "SVK": {
+   "name": "Slovak Republic",
+   "gdp": 132793622283.07095,
+   "gdp_year": 2023,
+   "pop": 5413813.0,
+   "pop_year": 2025
+  },
+  "SVN": {
+   "name": "Slovenia",
+   "gdp": 68216781410.52277,
+   "gdp_year": 2023,
+   "pop": 2130986.0,
+   "pop_year": 2025
+  },
+  "SWE": {
+   "name": "Sweden",
+   "gdp": 593267701033.4082,
+   "gdp_year": 2023,
+   "pop": 10596620.0,
+   "pop_year": 2025
+  },
+  "SWZ": {
+   "name": "Eswatini",
+   "gdp": 4597855845.042758,
+   "gdp_year": 2023,
+   "pop": 1256174.0,
+   "pop_year": 2025
+  },
+  "SXM": {
+   "name": "Sint Maarten (Dutch part)",
+   "gdp": 1623165683.1284916,
+   "gdp_year": 2023,
+   "pop": 43923.0,
+   "pop_year": 2025
+  },
+  "SYC": {
+   "name": "Seychelles",
+   "gdp": 2141450171.139321,
+   "gdp_year": 2023,
+   "pop": 122730.0,
+   "pop_year": 2025
+  },
+  "SYR": {
+   "name": "Syrian Arab Republic",
+   "gdp": 8980060818.721447,
+   "gdp_year": 2021,
+   "pop": 25620427.0,
+   "pop_year": 2025
+  },
+  "TCA": {
+   "name": "Turks and Caicos Islands",
+   "gdp": 1402054390.94734,
+   "gdp_year": 2023,
+   "pop": 46855.0,
+   "pop_year": 2025
+  },
+  "TCD": {
+   "name": "Chad",
+   "gdp": 13149325358.73826,
+   "gdp_year": 2023,
+   "pop": 21003705.0,
+   "pop_year": 2025
+  },
+  "TGO": {
+   "name": "Togo",
+   "gdp": 9171261835.06264,
+   "gdp_year": 2023,
+   "pop": 8591626.0,
+   "pop_year": 2025
+  },
+  "THA": {
+   "name": "Thailand",
+   "gdp": 514944993833.5776,
+   "gdp_year": 2023,
+   "pop": 71619863.0,
+   "pop_year": 2025
+  },
+  "TJK": {
+   "name": "Tajikistan",
+   "gdp": 12060602008.847782,
+   "gdp_year": 2023,
+   "pop": 10786734.0,
+   "pop_year": 2025
+  },
+  "TKM": {
+   "name": "Turkmenistan",
+   "gdp": 59887334844.06514,
+   "gdp_year": 2023,
+   "pop": 7618847.0,
+   "pop_year": 2025
+  },
+  "TLS": {
+   "name": "Timor-Leste",
+   "gdp": 2243142908.4616103,
+   "gdp_year": 2023,
+   "pop": 1418517.0,
+   "pop_year": 2025
+  },
+  "TON": {
+   "name": "Tonga",
+   "gdp": 500274898.0852215,
+   "gdp_year": 2022,
+   "pop": 103742.0,
+   "pop_year": 2025
+  },
+  "TTO": {
+   "name": "Trinidad and Tobago",
+   "gdp": 28139944790.291103,
+   "gdp_year": 2023,
+   "pop": 1367764.0,
+   "pop_year": 2025
+  },
+  "TUN": {
+   "name": "Tunisia",
+   "gdp": 48529595416.65326,
+   "gdp_year": 2023,
+   "pop": 12348573.0,
+   "pop_year": 2025
+  },
+  "TUR": {
+   "name": "Turkiye",
+   "gdp": 1108022373259.511,
+   "gdp_year": 2023,
+   "pop": 85878556.0,
+   "pop_year": 2025
+  },
+  "TUV": {
+   "name": "Tuvalu",
+   "gdp": 62280311.58521716,
+   "gdp_year": 2023,
+   "pop": 9492.0,
+   "pop_year": 2025
+  },
+  "TZA": {
+   "name": "Tanzania",
+   "gdp": 79158286333.52399,
+   "gdp_year": 2023,
+   "pop": 70545865.0,
+   "pop_year": 2025
+  },
+  "UGA": {
+   "name": "Uganda",
+   "gdp": 49272882213.623,
+   "gdp_year": 2023,
+   "pop": 51384894.0,
+   "pop_year": 2025
+  },
   "UKR": {
+   "name": "Ukraine",
    "gdp": 178757021386.80896,
    "gdp_year": 2023,
    "pop": 38980376.0,
    "pop_year": 2025
-  }
+  },
+  "URY": {
+   "name": "Uruguay",
+   "gdp": 77240831587.16696,
+   "gdp_year": 2023,
+   "pop": 3384688.0,
+   "pop_year": 2025
+  },
+  "USA": {
+   "name": "United States",
+   "gdp": 27360935000000.0,
+   "gdp_year": 2023,
+   "pop": 341784857.0,
+   "pop_year": 2025
+  },
+  "UZB": {
+   "name": "Uzbekistan",
+   "gdp": 90889149306.73126,
+   "gdp_year": 2023,
+   "pop": 37053428.0,
+   "pop_year": 2025
+  },
+  "VCT": {
+   "name": "St. Vincent and the Grenadines",
+   "gdp": 1065962962.9629627,
+   "gdp_year": 2023,
+   "pop": 99924.0,
+   "pop_year": 2025
+  },
+  "VEN": {
+   "name": "Venezuela, RB",
+   "pop": 28516896.0,
+   "pop_year": 2025
+  },
+  "VIR": {
+   "name": "Virgin Islands (U.S.)",
+   "gdp": 4444000000.0,
+   "gdp_year": 2021,
+   "pop": 103792.0,
+   "pop_year": 2025
+  },
+  "VNM": {
+   "name": "Viet Nam",
+   "gdp": 429716969049.5928,
+   "gdp_year": 2023,
+   "pop": 101598527.0,
+   "pop_year": 2025
+  },
+  "VUT": {
+   "name": "Vanuatu",
+   "gdp": 1126313359.2192256,
+   "gdp_year": 2023,
+   "pop": 335169.0,
+   "pop_year": 2025
+  },
+  "WSM": {
+   "name": "Samoa",
+   "gdp": 934100336.2756538,
+   "gdp_year": 2023,
+   "pop": 219306.0,
+   "pop_year": 2025
+  },
+  "XKX": {
+   "name": "Kosovo",
+   "gdp": 10438351483.167696,
+   "gdp_year": 2023,
+   "pop": 1576876.0,
+   "pop_year": 2025
+  },
+  "YEM": {
+   "name": "Yemen, Rep.",
+   "gdp": 21606160663.03177,
+   "gdp_year": 2018,
+   "pop": 41773878.0,
+   "pop_year": 2025
+  },
+  "ZAF": {
+   "name": "South Africa",
+   "gdp": 377781600985.8731,
+   "gdp_year": 2023,
+   "pop": 64747319.0,
+   "pop_year": 2025
+  },
+  "ZMB": {
+   "name": "Zambia",
+   "gdp": 28162630953.9285,
+   "gdp_year": 2023,
+   "pop": 21913874.0,
+   "pop_year": 2025
+  },
+  "ZWE": {
+   "name": "Zimbabwe",
+   "gdp": 26538273498.84614,
+   "gdp_year": 2023,
+   "pop": 16950795.0,
+   "pop_year": 2025
+  },
+  "TWN": {}
  }
 }

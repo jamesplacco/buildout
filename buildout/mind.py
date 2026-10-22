@@ -1,33 +1,43 @@
 """The mind: the brain and the engine as one graph, and a reasoning loop that runs on it.
 
 One graph holds everything the engine knows and everything it does:
-  concepts    about 535 ideas an investor needs (assets/ontology.py), each with a plain definition, a formula where there
-              is one, and typed relations (is_a, part_of, measures, causes+, causes-, uses, opposes, hedges, ...)
-  markets     the atlas's 100 nodes: 72 measured monthly series, the judged core and the book, with the links the atlas
-              learned from data (graphical lasso, LiNGAM, structural VAR) as directed, signed causal edges
-  evidence    about 270 sourced facts and papers (assets/knowledge.json, each checked on its page by a second agent) and
-              the signals the engine derives from them and from its own tests (labs, atlas, research)
-  voices      18 topics, 64 investors and 267 verified quotes
-  engine      every Python module (its imports are edges), the labs' methods and the MCP tools
-  world       48 economies with their currencies and what they export
+  concepts    about 600 ideas an investor needs (ontology.py), each with a plain definition, a formula where there is
+              one, and typed relations (is_a, part_of, measures, causes+, causes-, uses, opposes, hedges, ...)
+  markets     the atlas's 100 nodes: 72 measured monthly series and 28 judged drivers and holdings, with the links the
+              atlas learned from data (graphical lasso, LiNGAM, structural VAR) as directed, signed causal edges
+  evidence    about 400 sourced facts and papers (assets/knowledge.json, each checked on its page by a second agent) and
+              the signals the engine derives from them and from its own tests (labs, atlas, research, ML, assumptions)
+  voices      18 topics, 60 investors and 267 verified quotes
+  engine      every Python module (its imports are edges), the methods, the MCP tools, the ML models and the tested
+              assumptions, each linked to the concepts it implements
+  sources     the information sources the engine profiles (newsletters, Taleb, Damodaran, primary data), linked to the
+              concepts they inform
+  world       213 economies, the S&P 500 companies with their sectors and industries, and the model book's positions
 Clusters are hub nodes so a question about "commodities" can reach every commodity idea.
 
-The reasoning loop (think) is the same in Python and on the page (site/src/mind.js; tests/test_v14.py holds them equal):
+The reasoning loop (think) is the same in Python and on the page (site/src/mind.js; tests/test_v15.py holds them equal):
   1 read      the question is normalized and tokenized exactly as the voices library does (stems, synonyms, phrases)
-  2 recall    BM25 over every node's name, aliases and text, plus exact alias hits, picks up to 12 seed nodes
+  2 recall    BM25 over every node's name, aliases and text (damped for long kinds such as quotes), plus exact alias
+              hits, picks up to 12 seed nodes scoring at least 30% of the best
   3 spread    personalized PageRank (spreading activation) from the seeds over the weighted, typed graph: 40 steps,
               continue probability 0.75, so what is two or three links away lights up in proportion to how connected it
               is to what was asked
   4 frame     the claim is the axis (an investor-voices topic, or "does this method give an edge?") whose evidence lit up
               most, framed bull or bear by the question's own wording
   5 weigh     each signal on that axis adds sign x strength x reliability x relevance to the log-odds of the bull case;
-              signals from the same source family share a 1/sqrt(n) discount so ten readings of one fact count as about
-              three; investor opinion is one more, low-reliability signal
+              within a source family the k-th strongest reading counts 1/sqrt(k), so ten readings of one fact count about
+              five times one reading, not ten; investor opinion is one more, low-reliability signal; the belief network
+              adds one capped row, the pull of connected claims
   6 test      leave-one-family-out gives the range of the verdict; the single signal whose removal moves it most is the
               hinge; each counting signal states what reading would flip it
   7 trace     the strongest causal chains from what lit up to the book run over the atlas's own learned links
   8 decide    the verdict meets the book: hold, or review a named hedge in the hedge book, written as an MCP proposal for
               a person to approve; nothing here executes
+
+The belief network: thirteen claims are linked by the atlas's 12-month responses between each claim's representative
+series; each claim's own evidence sets its base log-odds and mean-field propagation lets connected claims pull on one
+another. "What if X, what happens to Y?" fixes X's claim at 90% (or 10%) and reads how Y, and the model book, re-settle.
+"What is X?" returns X's definition beside the weighing.
 """
 from __future__ import annotations
 
@@ -49,9 +59,9 @@ SEEDS = 12
 SEED_FLOOR = 0.3      # seeds keep at least this share of the best seed score
 W_BM, W_ALIAS = 0.6, 1.0
 DOC_W = (3, 2, 1)     # name, aliases, text repeats in a node's document
-KIND_RECALL = {"quote": 0.55, "signal": 0.8, "investor": 0.8}   # long documents match everything; damp them as seeds
+KIND_RECALL = {"quote": 0.55, "signal": 0.8, "investor": 0.8, "country": 0.7, "company": 0.85, "industry": 0.85}   # long documents match everything; damp them as seeds
 QSTOP = ["useful", "work", "works", "working", "good", "now", "keep", "still", "go", "away", "think", "thing", "make", "use", "need", "right",
-         "time", "best", "way", "say", "tell", "explain", "mean", "meaning"]
+         "time", "best", "way", "say", "tell", "explain", "mean", "meaning", "happen", "happens", "happened", "change", "changes"]
 AXIS_TOPIC_BOOST = 1.5
 EXPLAIN_RATIO = 0.12  # below this share of the top activation, the mind explains instead of weighing a claim
 
@@ -62,9 +72,10 @@ EDGE_W = {"is_a": 0.9, "part_of": 0.8, "measures": 0.8, "implemented_by": 0.6, "
 TYPES = list(EDGE_W) + ["learned", "judged"]
 
 GROUP_NAMES = {**{k: v for k, v in ontology.CLUSTERS.items()}, "markets": "Markets (atlas series)", "core": "Core drivers and the book",
-               "voices": "Investor voices", "engine": "The engine room", "world": "The world economy", "evidence": "Signals"}
+               "voices": "Investor voices", "engine": "The engine room", "world": "The world economy", "evidence": "Signals",
+               "companies": "S&P 500 companies"}
 
-FACT_CLUSTER = {"private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
+FACT_CLUSTER = {"edge_sources": "edge", "model_risk": "reality", "ml_finance": "ml", "private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
                 "games_negotiation_stats": "games", "trading_structure": "structure"}
 
 # ---------------------------------------------------------------- axes: the claims the mind can weigh
@@ -81,6 +92,10 @@ EDGE_AXES = {
                          "node": "c:seasonality", "terms": ["c:multiple-testing", "c:data-snooping"]},
     "edge:first_offer": {"title": "Haggling: who should open", "bull": "Make the first offer, and make it bold", "bear": "Let the other side open first",
                          "node": "c:first-offer", "terms": ["c:anchoring", "c:haggling", "c:negotiation-anchor", "c:zopa", "c:batna", "c:reservation-price"]},
+    "edge:models": {"title": "Quant models in the real world", "bull": "The quant models hold up in the real world", "bear": "Their assumptions break; haircut every model",
+                    "node": "c:model-risk", "terms": ["c:assumption-testing", "c:breakpoint", "c:fat-tails", "c:publication-decay", "c:sharpe-haircut", "c:backtest-live-gap"]},
+    "edge:ml": {"title": "Machine learning for returns", "bull": "Machine learning predicts market returns", "bear": "Out of sample it mostly fits noise",
+                "node": "c:machine-learning", "terms": ["c:random-forest", "c:gradient-boosting", "c:purged-cv", "c:cpcv", "c:covariate-shift"]},
     "edge:sizing": {"title": "Bet sizing and leverage", "bull": "Bet big and lever up when you have an edge", "bear": "Size small: ruin is permanent",
                     "node": "c:kelly", "terms": ["c:risk-of-ruin", "c:bankroll", "c:position-sizing", "c:leverage"]},
 }
@@ -143,7 +158,51 @@ METHODS = {"labs-trend": ("Trend lab", "The 10-month and 22 other moving-average
            "labs-spreads": ("Spread lab", "Engle-Granger cointegration of Brent and WTI with simulated p-values, the spread's half-life and z-score; gold/oil."),
            "labs-randomness": ("Randomness lab", "Lo-MacKinlay variance ratios against a random walk and against Working's averaging null."),
            "labs-calendar": ("Calendar lab", "Sell in May since 1871 and since 1950, and natural gas seasonality."),
-           "labs": ("Multiple testing", "Every p-value from the labs in one table with Holm and Benjamini-Hochberg corrections.")}
+           "labs": ("Multiple testing", "Every p-value from the labs in one table with Holm and Benjamini-Hochberg corrections."),
+           "ml-walkforward": ("Purged walk-forward", "Expanding-window refits that only train on rows whose 12-month outcome had ended, plus an embargo.", "ml"),
+           "ml-cpcv": ("Combinatorial purged CV", "28 purged splits of 8 time blocks and the probability that the in-sample winner misleads.", "ml"),
+           "ml-conformal": ("Conformal intervals", "Forecast intervals from the models' own past errors, with their realised coverage.", "ml"),
+           "ml-analogs": ("Historical analogs", "The months most like today and what followed.", "ml"),
+           "ml-novelty": ("Novelty detection", "How far today sits from its nearest historical neighbours.", "ml"),
+           "as-tests": ("Assumption tests", "Fat tails, dependence, stability and correlation, each tested on the data.", "assumptions"),
+           "as-breakpoints": ("Breakpoints", "The cost, delay, edge error or correlation at which each model's conclusion flips.", "assumptions"),
+           "as-worlds": ("Stressed worlds", "400 block-bootstrapped histories in which each decision is re-run.", "assumptions"),
+           "as-kappa": ("Taleb's kappa", "Fat-tailedness in sample-size terms, for stocks, oil, gas and the VIX.", "assumptions"),
+           "as-fragility": ("Fragility heuristic", "Whether the book's losses accelerate in the tail, with and without each hedge.", "assumptions"),
+           "dm-erp": ("Implied equity risk premium", "The discount rate that equates the index with its expected cash flows.", "damodaran"),
+           "dm-dcf": ("Narrative-to-numbers DCF", "A story turned into growth, margin, reinvestment, cost of capital and failure risk.", "damodaran")}
+INDUSTRY_CONCEPTS = {"Semiconductors": ["c:gpu", "c:semis-cycle", "c:custom-silicon"], "Semiconductor Materials & Equipment": ["c:semis-cycle", "c:capex"],
+                     "Systems Software": ["c:cloud", "c:hyperscaler"], "Application Software": ["c:cloud", "c:ai-revenue"], "Interactive Media & Services": ["c:hyperscaler", "c:ai-capex"],
+                     "Broadline Retail": ["c:cloud"], "Internet Services & Infrastructure": ["c:data-center", "c:neocloud"], "Data Center REITs": ["c:data-center", "c:leases"],
+                     "Electric Utilities": ["c:power-demand"], "Independent Power Producers & Energy Traders": ["c:power-demand", "c:spark-spread"], "Multi-Utilities": ["c:power-demand"],
+                     "Heavy Electrical Equipment": ["c:power-demand", "c:energy-transition"], "Electrical Components & Equipment": ["c:power-demand", "c:data-center"],
+                     "Technology Hardware, Storage & Peripherals": ["c:hbm", "c:data-center"], "Communications Equipment": ["c:data-center"], "Electronic Components": ["c:data-center"],
+                     "Integrated Oil & Gas": ["c:brent", "c:oil-shock"], "Oil & Gas Exploration & Production": ["c:wti", "c:brent"], "Oil & Gas Refining & Marketing": ["c:crack-spread"],
+                     "Oil & Gas Storage & Transportation": ["c:natural-gas", "c:lng"], "Oil & Gas Equipment & Services": ["c:capex", "c:brent"], "Gold": ["c:gold"], "Copper": ["c:copper"],
+                     "Steel": ["c:iron-ore"], "Fertilizers & Agricultural Chemicals": ["c:grains"], "Agricultural Products & Services": ["c:grains", "c:softs"],
+                     "Asset Management & Custody Banks": ["c:aum", "c:private-credit", "c:private-equity"], "Investment Banking & Brokerage": ["c:market-maker", "c:ipo"],
+                     "Financial Exchanges & Data": ["c:market-liquidity", "c:zero-dte"], "Diversified Banks": ["c:credit-spread", "c:reserves"], "Regional Banks": ["c:svb-2023", "c:duration"],
+                     "Consumer Finance": ["c:credit-spread"], "Transaction & Payment Processing Services": ["c:stablecoin"], "Automobile Manufacturers": ["c:tariffs"],
+                     "Homebuilding": ["c:ten-year-yield"], "Passenger Airlines": ["c:oil-shock"], "Multi-Sector Holdings": ["c:value-investing"]}
+SECTOR_CONCEPTS = {"Information Technology": "x:ai", "Communication Services": "x:ai", "Energy": "x:commodities", "Materials": "x:commodities", "Financials": "x:assetmgmt",
+                   "Utilities": "c:power-demand", "Real Estate": "c:ten-year-yield", "Consumer Discretionary": "c:gdp", "Consumer Staples": "c:inflation",
+                   "Health Care": "c:gdp", "Industrials": "c:capex"}
+# Each axis's representative node in the atlas, and the sign that links the axis's bull statement to that node rising.
+AXIS_REP = {"oil_energy": ("brent", 1), "inflation_fed": ("cpi", -1), "bonds_rates": ("y10", -1), "market_valuation": ("sp500", 1), "timing_crashes": ("vix", -1),
+            "speculation_manias": ("liq", 1), "recession_economy": ("consumer", 1), "ai_boom": ("aidemand", 1), "semis_nvidia": ("NVDA", 1), "megacap_concentration": ("book", 1),
+            "gold": ("gold", 1), "dollar_debt": ("dollar", 1), "private_credit": ("pcredit", -1), "china_em": ("cny", 1)}
+NET_GAMMA = 0.6      # one unit of a certain parent belief moves a child's log-odds by gamma x the link weight
+NET_CAP = 0.3        # the network row in a verdict is capped: connected claims inform a claim, they never decide it
+NET_MIN = 0.15       # links weaker than this share of the strongest are dropped
+NET_ITERS = 60
+WHATIF_UP = ["rise", "rises", "rising", "up", "higher", "surge", "surges", "spike", "spikes", "jump", "jumps", "soar", "soars", "double", "doubles", "climb",
+             "climbs", "rally", "rallies", "boom", "booms", "accelerate", "accelerates", "goes", "hits", "reaches", "stays", "strengthens", "hike", "hikes", "widen", "widens"]
+WHATIF_DOWN = ["fall", "falls", "drop", "drops", "crash", "crashes", "slow", "slows", "slump", "slumps", "plunge", "plunges", "collapse", "collapses", "lower",
+               "down", "cut", "cuts", "decline", "declines", "halve", "halves", "weaken", "weakens", "ease", "eases", "narrow", "narrows", "fades", "fade"]
+WHATIF_SPLIT = [",", " then ", " what ", " how ", " does ", " do ", " will ", " should ", " is ", " are ", " would "]
+RX_WHATIF = r"^\s*(?:what\s+if|if|suppose|assume|assuming|imagine)\s+(.+)$"
+RX_BOOK = r"\b(?:the|my|our|this)\s+(?:model\s+)?(?:book|portfolio|positions?|holdings)\b"
+RX_EXPLAIN = r"^\s*(?:what\s+is|what's|whats|what\s+are|define|explain|meaning\s+of|tell\s+me\s+about)\b"
 ENGINE_ALIAS = {"book": "pipeline", "brain-robust": "brain_robust", "causal": "causal_stats", "robust-bt": "analytics.robust_bt",
                 "options": "analytics.options", "trading": "microstructure", "reason": "reasoner"}
 
@@ -204,6 +263,26 @@ def load_knowledge(path: Path | None = None) -> list[dict]:
         return []
     d = json.loads(p.read_text())
     return d["items"] if isinstance(d, dict) else d
+
+
+def load_companies(path: Path | None = None) -> list[dict]:
+    p = path or (ASSETS / "companies.json")
+    return json.loads(p.read_text())["companies"] if p.exists() else []
+
+
+def load_positions(snap11: Path | None = None) -> dict:
+    """Each holding's reverse-DCF read from the decision loop's snapshot (site/src/snap11.js) or a daily ooda.json."""
+    p = snap11 or (ROOT.parent / "site" / "src" / "snap11.js")
+    try:
+        if p.suffix == ".json":
+            o = json.loads(p.read_text())
+        else:
+            s = p.read_text()
+            i = s.index("const OODA_SNAP = ") + len("const OODA_SNAP = ")
+            o, _ = json.JSONDecoder().raw_decode(s[i:])
+        return o["orient"]["positions"]
+    except (OSError, ValueError, KeyError):
+        return {}
 
 
 def load_countries(path: Path | None = None) -> dict:
@@ -370,7 +449,7 @@ def signals(K: dict, L: dict | None, research_latest: dict | None, cape_pct: flo
             ["k:oil-iea-omr-brent-dated-oct2026", "c:backwardation"], "The curve flattening into contango.", ["c:backwardation", "c:convenience-yield"])
     hz = v("oil-iea-omr-hormuz-flows-sep2026")
     if hz is not None:
-        add("oil_hormuz", "oil_energy", -1, 0.6, 0.6, "oil_supply", f"Oil through the Strait of Hormuz recovered to {hz:.1f} mb/d in September (IEA): supply is coming back.",
+        add("oil_hormuz", "oil_energy", -1, 0.6, 0.6, "oil_supply", f"Oil through the Strait of Hormuz recovered to {hz:.1f} mb/d in September (IEA monthly estimate; daily tanker counts in early October were still far below pre-war): supply is coming back.",
             ["k:oil-iea-omr-hormuz-flows-sep2026", "c:hormuz-strait", "a:hormuz"], "Flows falling again.", ["c:hormuz-strait", "c:oil-shock"])
     dem = v("oil-iea-omr-demand-2026")
     if dem is not None:
@@ -542,9 +621,187 @@ def signals(K: dict, L: dict | None, research_latest: dict | None, cape_pct: flo
     return S
 
 
+def more_signals(K: dict, mlo: dict | None, aso: dict | None, positions: dict | None) -> list[dict]:
+    """v0.15: evidence from the machine-learning engine, the reality check (assumptions), each holding's reverse DCF and
+    the model-risk and machine-learning literature."""
+    S = []
+
+    def v(kid):
+        it = K.get(kid)
+        return None if it is None else it.get("value")
+
+    def add(sid, axis, sign, s, rel, group, text, refs, flip, targets=()):
+        refs = [r for r in refs if not r.startswith("k:") or r[2:] in K]
+        S.append({"id": "s:" + sid, "axis": axis, "sign": sign, "s": s, "rel": rel, "group": group, "text": text, "refs": refs, "flip": flip, "targets": list(targets)})
+    if mlo:
+        r, c = mlo["return"], mlo["crash"]
+        sk, pbo = r["scores"]["ensemble"]["skill"], r["cpcv"]["pbo"]
+        ens, mean = math.expm1(r["now"]["ensemble"]), math.expm1(r["now"]["benchmark"])
+        rel_r = max(0.03, min(0.5, sk * 5))                       # reliability follows out-of-sample skill; negative skill earns almost none
+        add("ml-forecast", "market_valuation", 1 if ens > mean else -1, 0.5, rel_r, "ml", f"The machine-learning ensemble expects {ens:+.1%} real over the next year against a historical {mean:+.1%}; its out-of-sample skill is {sk:+.1%}, so it counts for little.",
+            ["e:ml", "m:ml-walkforward", "c:machine-learning"], "Out-of-sample skill turning positive.", ["c:machine-learning"])
+        cp, cb = c["now"]["ensemble"], c["now"]["benchmark"]
+        csk = c["scores"]["ensemble"]["skill"]
+        add("ml-crash", "timing_crashes", 1 if cp < cb else -1, 0.4, max(0.03, min(0.5, csk * 5)), "ml", f"Models put a 15% fall within a year at {cp:.0%} against a base rate of {cb:.0%}; their Brier skill out of sample is {csk:+.1%}.",
+            ["e:ml", "c:brier-score"], "Skill turning positive with the probability still above base.", ["c:crash"])
+        add("ml-skill", "edge:ml", 1 if sk > 0 else -1, 0.8, 0.75, "ml_test", f"Purged walk-forward since {mlo['start_oos']}: the ensemble's skill at forecasting 12-month returns is {sk:+.1%} against the historical mean; the best single model, CAPE alone, is {r['scores']['cape_ols']['skill']:+.1%}.",
+            ["e:ml", "m:ml-walkforward", "c:purged-cv"], "Positive skill on the next decade of data.", ["c:machine-learning", "c:walk-forward"])
+        add("ml-pbo", "edge:ml", -1 if pbo > 0.5 else 1, 0.6, 0.7, "ml_test", f"Across {r['cpcv']['splits']} combinatorial purged splits, the configuration that looked best in sample landed below the median out of sample {pbo:.0%} of the time.",
+            ["e:ml", "m:ml-cpcv", "c:pbo"], "A probability of overfitting below 20%.", ["c:cpcv", "c:pbo"])
+        add("ml-pbo2", "edge:models", -1 if pbo > 0.5 else 1, 0.4, 0.7, "ml_test", f"Picking the in-sample winner misleads {pbo:.0%} of the time on this data.",
+            ["e:ml", "m:ml-cpcv"], "Lower overfitting probability.", ["c:pbo"])
+        nov = mlo["shift"]["novelty_pct"]
+        add("ml-novelty", "edge:models", -1 if nov > 0.9 else 1, 0.3, 0.6, "ml_novelty", f"Today's market sits further from its nearest historical months than {nov:.0%} of months do: " + ("the models are extrapolating." if nov > 0.9 else "the models have seen conditions like these before."),
+            ["e:ml", "m:ml-novelty", "c:covariate-shift"], "Novelty above the 90th percentile.", ["c:novelty-detection"])
+        an = [a for a in mlo["analogs"] if a["next12"] is not None]
+        if an:
+            down = sum(1 for a in an if a["next12"] < 0)
+            add("ml-analogs", "market_valuation", -1 if down > len(an) / 2 else 1, 0.3, 0.3, "ml_analogs", f"Of the {len(an)} months most like today ({', '.join(a['date'][:4] for a in an[:4])}…), {down} were followed by a real loss over the next year.",
+                ["e:ml", "m:ml-analogs", "c:knn-analogs"], "Analogs dominated by gains.", ["c:knn-analogs"])
+    for pid, sign, s_, rel, txt in (("mr-mclean-pontiff-postpub-decay", -1, 0.6, 0.8, "Published anomalies earn about 58% less after publication and 26% less out of sample (McLean and Pontiff 2016)."),
+                                   ("mr-wiecki-r2", -1, 0.6, 0.7, "Across 888 algorithms, backtest Sharpe ratios explained under 2.5% of live performance (Wiecki et al. 2016)."),
+                                   ("mr-hxz-65pct-fail", -1, 0.4, 0.6, "65% of 452 published anomalies fail a t of 1.96 when replicated (Hou, Xue and Zhang 2020)."),
+                                   ("mr-jkp-replication-counterpoint", 1, 0.3, 0.6, "Counterpoint: Jensen, Kelly and Pedersen find most factors do replicate across 93 countries."),
+                                   ("mr-novy-marx-velikov-high-turnover", -1, 0.4, 0.7, "None of the six high-turnover anomalies Novy-Marx and Velikov studied survives trading costs in basic form."),
+                                   ("mr-khandani-lo-daily-losses", -1, 0.3, 0.6, "In August 2007 a standard quant strategy lost 6.85% in three days unlevered, about a quarter of capital at 8 to 1 (Khandani and Lo).")):
+        if pid in K:
+            add("p-" + pid, "edge:models", sign, s_, rel, "literature", txt, ["k:" + pid, "c:model-risk"], "New evidence on live performance.", [])
+    for pid, sign, s_, rel, txt in (("mr-ldp-10-reasons-2018", -1, 0.3, 0.6, "Lopez de Prado (2018): most machine-learning funds fail through leakage, overfitting and non-stationary data, not weak algorithms."),
+                                   ("mr-bailey-7-trials", -1, 0.4, 0.8, "On two years of data, seven tries are enough for a strategy with no edge to show an in-sample Sharpe of 1 (Bailey et al.)."),):
+        if pid in K:
+            add("p-" + pid, "edge:ml", sign, s_, rel, "literature_ml", txt, ["k:" + pid, "c:overfitting"], "New evidence.", [])
+    if aso:
+        c = aso["checks"]
+        t = c["tails_month"]
+        add("as-tails", "edge:models", -1, 0.6, 0.85, "assumptions", f"Monthly stocks had {t['observed_beyond']} moves beyond 3 standard deviations where a bell curve expects {t['gaussian_expects']:.0f}; a normal 1-in-100 month understates the real one by {abs(t['var_understatement']):.0%}.",
+            ["e:assumptions", "m:as-tests", "c:fat-tails"], "None: 155 years of data.", ["c:fat-tails", "c:var"])
+        add("as-tails2", "risk_leverage_hedging", -1, 0.3, 0.8, "assumptions", f"A normal model understates the worst month in a hundred by {abs(t['var_understatement']):.0%}; size for the fat tail.",
+            ["e:assumptions", "c:var"], "None.", ["c:var"])
+        ks = c["kappa"]["series"]
+        if "Henry Hub gas, daily" in ks:
+            add("as-kappa", "risk_leverage_hedging", -1, 0.3, 0.7, "kappa", f"Taleb's kappa: {ks['S&P 500, monthly']['kappa']:.2f} for monthly stocks and {ks['Henry Hub gas, daily']['kappa']:.2f} for daily gas; gas needs about {ks['Henry Hub gas, daily']['n_equivalent_30']:.0f} observations to learn what 30 Gaussian ones would.",
+                ["e:assumptions", "m:as-kappa", "c:kappa-metric"], "None.", ["c:kappa-metric"])
+        h = c["hedge"]
+        if h.get("now") is not None:
+            add("as-tlt", "bonds_rates", -1 if h["now"] > h["rho_star"] else 1, 0.7, 0.7, "hedge_break", f"A {h['weight']:.0%} TLT sleeve only lowers the book's risk while the stock-bond correlation is below {h['rho_star']:+.2f}; the latest 36-month reading is {h['now']:+.2f}.",
+                ["e:assumptions", "m:as-breakpoints", "c:stock-bond-correlation", "a:tlt"], f"The correlation falling below {h['rho_star']:+.2f}.", ["c:tlt", "c:breakpoint"])
+            add("as-tlt2", "edge:models", -1 if h["now"] > h["rho_star"] else 1, 0.4, 0.7, "hedge_break", "The classic bond hedge assumes a negative stock-bond correlation; the data now break that assumption.",
+                ["e:assumptions", "m:as-breakpoints"], "A negative correlation for a year.", [])
+        w = c["worlds"]
+        if "inflation" in w:
+            add("as-worlds", "bonds_rates", -1, 0.5, 0.6, "worlds", f"In histories resampled from inflationary months a 60/40 mix beat all stocks on Sharpe in {w['inflation']['mix_sharpe']:.0%} of worlds, against {w['all']['mix_sharpe']:.0%} in all months.",
+                ["e:assumptions", "m:as-worlds", "c:stressed-worlds", "c:sixty-forty"], "Inflation falling below 2.75% for a year.", ["c:stressed-worlds"])
+            add("as-worlds2", "edge:trend", 1, 0.3, 0.6, "worlds", f"The trend rule cut the worst drawdown in {w['all']['trend_dd']:.0%} of resampled histories, but beat holding on Sharpe in only {w['all']['trend_sharpe']:.0%}.",
+                ["e:assumptions", "m:as-worlds"], "Worlds where it fails to cut drawdowns.", [])
+        tr = c["trend"]
+        add("as-trend-cost", "edge:trend", 1 if tr["breakeven_cost"] > 0.002 else -1, 0.3, 0.7, "breakpoints", f"The trend rule's Sharpe gain survives costs up to {tr['breakeven_cost'] * 1e4:.0f} basis points a switch (about {tr['switches_per_year']:.1f} switches a year) but not a four-month delay.",
+            ["e:assumptions", "m:as-breakpoints", "c:transaction-cost"], "Costs above the breakeven.", ["c:breakpoint"])
+        k = c["kelly"]
+        add("as-kelly", "edge:sizing", -1, 0.6, 0.8, "breakpoints", f"From any 30-year backtest, the Kelly fraction for stocks ranged from {k['min']:.1f} to {k['max']:.1f} times capital: the edge is too uncertain for full Kelly.",
+            ["e:assumptions", "c:kelly", "c:position-sizing"], "None.", ["c:kelly"])
+        fr = c["fragility"]["structures"]
+        if "put_spread" in fr:
+            add("as-frag", "risk_leverage_hedging", -1, 0.3, 0.6, "fragility", f"The 95/85 put spread helps until the index is down about {float(fr['put_spread']['at']) * 100:.0f}% and then stops: losses accelerate again below it (Taleb-Douady test). Selling puts is fragile throughout.",
+                ["e:assumptions", "m:as-fragility", "c:fragility-heuristic", "c:put-spread"], "None.", ["c:fragility-heuristic"])
+        broken = [m for m in aso["map"] if m["verdict"] == "broken"]
+        add("as-map", "edge:models", -1 if len(broken) >= 3 else 1, 0.5, 0.75, "assumptions", f"Of {len(aso['map'])} engine models, {len(broken)} rest on an assumption the data break today: {', '.join(m['model'].lower() for m in broken[:4])}.",
+            ["e:assumptions", "c:assumption-testing"], "Fewer broken assumptions.", ["c:assumption-testing"])
+    if positions:
+        for tk, p in sorted(positions.items()):
+            if not isinstance(p, dict) or p.get("p_achieve") is None or p.get("implied_growth") is None:
+                continue
+            axis = "semis_nvidia" if tk in ("NVDA", "AVGO") else ("ai_boom" if tk in ("MSFT", "GOOGL", "AMZN", "META", "ORCL") else "megacap_concentration")
+            pa = p["p_achieve"]
+            add(f"rdcf-{tk}", axis, -1 if pa < 0.05 else 1, 0.35, 0.45, "reverse_dcf", f"{tk}'s price needs about {p['implied_growth']:.0%} a year of revenue growth for ten years; {pa:.1%} of companies that size ever managed it.",
+                ["e:valuation", "c:reverse-dcf", "c:base-rates", "a:" + tk], "Faster growth or a lower price.", ["c:implied-growth"])
+    return S
+
+
+# ---------------------------------------------------------------- the belief network: claims that move together
+def combine(rows: list[dict]) -> dict:
+    """The weighing rule shared by every verdict: each row has sig and relevance; within a family the k-th strongest
+    reading counts 1/sqrt(k); returns the log-odds, the leave-one-family-out range and the hinge."""
+    groups: dict[str, list] = {}
+    for x in rows:
+        s = x["sig"]
+        x["raw"] = s["sign"] * s["s"] * s["rel"] * x["relevance"]
+        groups.setdefault(s["group"], []).append(x)
+    for g in groups.values():
+        g.sort(key=lambda x: (-abs(x["raw"]), x["sig"]["id"]))
+        for k, x in enumerate(g):
+            x["dep"] = 1 / math.sqrt(k + 1)
+            x["c"] = x["raw"] * x["dep"]
+    L = 0.0
+    for x in rows:
+        L += x["c"]
+    p = 1 / (1 + math.exp(-L))
+    ps = []
+    for g in sorted(groups):
+        Lg = L - sum(x["c"] for x in rows if x["sig"]["group"] == g)
+        ps.append(1 / (1 + math.exp(-Lg)))
+    hinge = max(rows, key=lambda x: (abs(x["c"]), x["sig"]["id"])) if rows else None
+    return {"L": L, "p": p, "lo": min(ps + [p]), "hi": max(ps + [p]), "hinge": hinge, "groups": len(groups)}
+
+
+def network(atlas: dict, sigs: list[dict]) -> dict:
+    """Links between claims, learned by the atlas: shock each axis's representative series by one standard deviation
+    and read the cumulative 12-month response of every other axis's series (sign-adjusted so 'bull' means bull on
+    both). Weights are scaled so the strongest is 1; weak ones are dropped. Each axis also gets its base log-odds from
+    all of its evidence at full relevance."""
+    import numpy as np
+    from . import atlas as AT
+    axes = [a for a in AXIS_REP if any(s["axis"] == a for s in sigs)]
+    M = AT.matrices(atlas)
+    raw = {}
+    for a in axes:
+        node_a, sa = AXIS_REP[a]
+        if node_a not in M["ix"]:
+            continue
+        R = AT.respond(atlas, {node_a: 1.0}, 12, M).sum(axis=0)
+        for b in axes:
+            node_b, sb = AXIS_REP[b]
+            if b == a or node_b not in M["ix"]:
+                continue
+            raw[(a, b)] = sa * sb * float(R[M["ix"][node_b]])
+    mx = max((abs(v) for v in raw.values()), default=1.0) or 1.0
+    links = [[axes.index(a), axes.index(b), round(v / mx, 4)] for (a, b), v in sorted(raw.items()) if abs(v / mx) >= NET_MIN]
+    base = []
+    for a in axes:
+        rows = [{"sig": s, "relevance": 1.0} for s in sigs if s["axis"] == a]
+        base.append(round(combine(rows)["L"], 6))
+    out = {"axes": axes, "links": links, "base": base, "gamma": NET_GAMMA, "iters": NET_ITERS, "reps": {a: AXIS_REP[a] for a in axes}}
+    out["p"] = [round(x, 6) for x in propagate(out)]
+    return out
+
+
+def propagate(net: dict, fixed: dict | None = None) -> list[float]:
+    """Mean-field belief propagation: m = 2p - 1; each step, every free axis's log-odds is its own evidence plus gamma
+    times the weighted beliefs of the axes that drive it; half-step damping; fixed axes (interventions) keep their
+    value and ignore their parents."""
+    fixed = fixed or {}
+    n = len(net["axes"])
+    m = []
+    for i, a in enumerate(net["axes"]):
+        m.append(2 * fixed[a] - 1 if a in fixed else 2 / (1 + math.exp(-net["base"][i])) - 1)
+    for _ in range(net["iters"]):
+        pull = [0.0] * n
+        for i, j, w in net["links"]:
+            pull[j] += w * m[i]
+        new = []
+        for k, a in enumerate(net["axes"]):
+            if a in fixed:
+                new.append(m[k])
+            else:
+                L = net["base"][k] + net["gamma"] * pull[k]
+                new.append(0.5 * m[k] + 0.5 * (2 / (1 + math.exp(-L)) - 1))
+        m = new
+    return [(x + 1) / 2 for x in m]
+
+
 # ---------------------------------------------------------------- the graph
 def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
-          research_latest: dict | None = None, layout: bool = True) -> dict:
+          research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
+          positions: dict | None = None, companies: list[dict] | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -610,9 +867,9 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     for m in mods:
         for i in m["imports"]:
             edge("e:" + m["module"], "e:" + i, "code")
-    for mid, (name, text) in METHODS.items():
-        node("m:" + mid, "method", name, "engine", text, [])
-        edge("m:" + mid, "e:labs", "method_of")
+    for mid, spec in METHODS.items():
+        node("m:" + mid, "method", spec[0], "engine", spec[1], [])
+        edge("m:" + mid, "e:" + (spec[2] if len(spec) > 2 else "labs"), "method_of")
     try:
         from . import mcp_server
         tools = {n: d for n, (_, d, _, _) in mcp_server.TOOLS.items()}
@@ -682,7 +939,12 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     for it in know:
         grp = FACT_CLUSTER.get(it.get("cluster"), "valuation")
         fid = "k:" + it["id"]
-        node(fid, "fact" if it["kind"] != "paper" else "paper", it["title"], grp, it["text"], [], **{k2: it.get(k2) for k2 in ("value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked")})
+        kind = {"paper": "paper", "source": "source", "quote": "fact"}.get(it["kind"], "fact")
+        node(fid, kind, it["title"], grp, it["text"], [it["title"]] if kind == "source" else [],
+             **{k2: it.get(k2) for k2 in ("value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked",
+                                           "feed_url", "edge", "biases", "cadence", "cost", "speaker")})
+        if kind == "source":
+            edge(fid, "c:information-edge", "related")
         edge(fid, "x:" + grp, "member", 0.3)
         for c in it.get("concepts") or []:
             for m in match(c):
@@ -703,12 +965,58 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
             edge("g:" + iso, cur if ":" in cur else "c:" + cur, "currency")
         for ex in exports:
             edge("g:" + iso, ex, "exports")
+    curated = {c[0] for c in COUNTRIES}
+    for iso, w in sorted(world.items()):
+        if iso in curated or not w.get("gdp") or not w.get("name"):
+            continue
+        bits = [f"GDP ${w['gdp'] / 1e9:,.0f} billion ({w['gdp_year']}, World Bank)"]
+        if w.get("pop"):
+            bits.append(f"population {w['pop'] / 1e6:,.1f} million")
+        node("g:" + iso, "country", w["name"], "world", "; ".join(bits) + ".", [w["name"]], gdp=w["gdp"])
+        if w.get("region") and "g:" + w["region"] in idx:
+            edge("g:" + iso, "g:" + w["region"], "related", 0.3)
+    big = sorted([n for n in nodes if n["k"] == "country" and n.get("gdp")], key=lambda n: -n["gdp"])
+    for n in big:                                                   # every economy hangs off the world-economy concept
+        edge(n["id"], "c:gdp", "related", 0.25 + 0.35 * min(1.0, (n["gdp"] / big[0]["gdp"]) ** 0.5))
+    # S&P 500 companies, sub-industries and sectors
+    for co in companies or []:
+        sec, ind = "sec:" + slug(co["sector"]), "ind:" + slug(co["industry"])
+        node(sec, "sector", co["sector"], "companies", f"GICS sector: {co['sector']}.", [co["sector"]])
+        node(ind, "industry", co["industry"], "companies", f"GICS sub-industry in {co['sector']}.", [co["industry"]])
+        edge(ind, sec, "part_of")
+        node("co:" + co["symbol"], "company", co["name"], "companies", f"{co['symbol']}: {co['industry']} ({co['sector']}); headquarters {co.get('hq', '')}; in the S&P 500 since {co.get('added', '')}.",
+             [co["symbol"], co["name"]])
+        edge("co:" + co["symbol"], ind, "part_of", 0.6)
+        if "a:" + co["symbol"] in idx:
+            edge("co:" + co["symbol"], "a:" + co["symbol"], "is_a", 0.95)
+    for ind_name, cids in INDUSTRY_CONCEPTS.items():
+        for cid in cids:
+            edge("ind:" + slug(ind_name), cid, "related", 0.6)
+    for sec_name, cid in SECTOR_CONCEPTS.items():
+        edge("sec:" + slug(sec_name), cid, "related", 0.5)
+    # machine-learning models and the assumption map, as nodes the mind can reach
+    if mlo:
+        for task in ("return", "crash"):
+            for k, lab in mlo[task]["labels"].items():
+                sk = mlo[task]["scores"][k]["skill"]
+                node(f"ml:{task}:{k}", "model", f"{lab} ({'12-month return' if task == 'return' else '15% fall within a year'})", "ml",
+                     f"Out-of-sample skill against the {'historical mean' if task == 'return' else 'base rate'} since {mlo['start_oos']}: {sk:+.1%}. Today's forecast: "
+                     + (f"{math.expm1(mlo[task]['now'][k]):+.1%} real." if task == "return" else f"{mlo[task]['now'][k]:.0%} chance."), [lab])
+                edge(f"ml:{task}:{k}", "e:ml", "uses", 0.6)
+                edge(f"ml:{task}:{k}", "c:machine-learning", "is_a", 0.7)
+    if aso:
+        for i, m in enumerate(aso["map"]):
+            node(f"as:{i}", "assumption", m["model"], "reality", f"Assumes {', '.join(m['assumes'])}. Verdict on the data: {m['verdict']}. {m['consequence']}", [], verdict=m["verdict"])
+            edge(f"as:{i}", "e:assumptions", "uses", 0.6)
+            edge(f"as:{i}", "c:assumption-testing", "is_a", 0.7)
+            for mod in re.findall(r"([a-z_/]+)\.py", m["where"]):
+                edge(f"as:{i}", "e:" + mod.replace("/", "."), "related", 0.6)
     # signals
     K = {it["id"]: it for it in know}
     cape_pct = None
     if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
         cape_pct = labs_L["valuation"]["cape"]["percentile"]
-    sigs = signals(K, labs_L, research_latest, cape_pct)
+    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions)
     for s in sigs:
         ax = s["axis"]
         title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]
@@ -719,7 +1027,7 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
         del title
     E = sorted(edges.values(), key=lambda e: (e[0], e[1]))
     G = {"nodes": nodes, "edges": E, "causal": causal, "signals": sigs, "axes": axes_meta(), "types": TYPES,
-         "groups": GROUP_NAMES, "params": params()}
+         "groups": GROUP_NAMES, "params": params(), "net": network(atlas, sigs)}
     if layout:
         place(G)
     return G
@@ -734,7 +1042,8 @@ def axes_meta() -> dict:
 
 def params() -> dict:
     return {"alpha": ALPHA, "steps": STEPS, "seeds": SEEDS, "seed_floor": SEED_FLOOR, "w_bm": W_BM, "w_alias": W_ALIAS, "doc_w": list(DOC_W), "kind_recall": KIND_RECALL, "qstop": QSTOP,
-            "axis_topic_boost": AXIS_TOPIC_BOOST, "explain_ratio": EXPLAIN_RATIO, "hedges": HEDGE_NAMES}
+            "axis_topic_boost": AXIS_TOPIC_BOOST, "explain_ratio": EXPLAIN_RATIO, "hedges": HEDGE_NAMES, "whatif_up": WHATIF_UP, "whatif_down": WHATIF_DOWN,
+            "whatif_split": WHATIF_SPLIT, "rx_whatif": RX_WHATIF, "rx_explain": RX_EXPLAIN, "rx_book": RX_BOOK, "net_cap": NET_CAP}
 
 
 def place(G: dict) -> None:
@@ -917,6 +1226,22 @@ class Mind:
                         "sign": signs, "strength": round(math.exp(-dist[book]), 6)})
         return out
 
+    def net_pull(self, axis: str) -> tuple[float, list[dict]]:
+        """What the connected claims, at their network beliefs, add to this axis's log-odds."""
+        net = self.G.get("net")
+        if not net or axis not in net["axes"]:
+            return 0.0, []
+        k = net["axes"].index(axis)
+        pull, parents = 0.0, []
+        for i, j, w in net["links"]:
+            if j != k:
+                continue
+            m = 2 * net["p"][i] - 1
+            pull += net["gamma"] * w * m
+            parents.append({"axis": net["axes"][i], "w": w, "p": net["p"][i], "contrib": net["gamma"] * w * m})
+        parents.sort(key=lambda x: (-abs(x["contrib"]), x["axis"]))
+        return pull, parents
+
     def weigh(self, axis: str, r: list[float], text: str) -> dict:
         rows = []
         for si, s in enumerate(self.sigs):
@@ -932,35 +1257,119 @@ class Mind:
                                      "group": "opinion", "text": f"Investor opinion in the library leans {lean:+.2f} on a -2 to +2 scale across {n_q} quotes.", "refs": ["t:" + axis],
                                      "flip": "Opinion swinging the other way.", "targets": []},
                              "act": r[self.idx["t:" + axis]]})
+        pull, parents = self.net_pull(axis)
+        if abs(pull) > 1e-9:
+            axes = self.G["axes"]
+            txt = "; ".join(f"{axes[x['axis']]['title']} (bull case {x['p']:.0%}) {'supports' if x['contrib'] > 0 else 'weighs against'} it through a {x['w']:+.2f} link the atlas learned"
+                            for x in parents[:2])
+            rows.append({"sig": {"id": "s:network:" + axis, "axis": axis, "sign": 1 if pull > 0 else -1, "s": round(min(abs(pull), NET_CAP), 6), "rel": 1.0, "group": "network",
+                                 "text": f"Connected claims: {txt}.", "refs": [axes[x["axis"]]["node"] for x in parents[:3]], "flip": "The connected claims turning.", "targets": []},
+                         "act": None})
         if not rows:
-            return {"axis": axis, "logodds": 0.0, "p_bull": 0.5, "rows": [], "lo": 0.5, "hi": 0.5, "hinge": None}
-        amax = max(x["act"] for x in rows) or 1.0
-        groups: dict[str, list] = {}
+            return {"axis": axis, "logodds": 0.0, "p_bull": 0.5, "rows": [], "lo": 0.5, "hi": 0.5, "hinge": None, "groups": 0}
+        acts = [x["act"] for x in rows if x["act"] is not None]
+        amax = (max(acts) if acts else 1.0) or 1.0
         for x in rows:
-            s = x["sig"]
-            x["relevance"] = 0.5 + 0.5 * math.sqrt(x["act"] / amax) if amax > 0 else 0.5
-            x["raw"] = s["sign"] * s["s"] * s["rel"] * x["relevance"]
-            groups.setdefault(s["group"], []).append(x)
-        L = 0.0
-        for g in groups.values():                    # within a family the k-th strongest reading counts 1/sqrt(k)
-            g.sort(key=lambda x: (-abs(x["raw"]), x["sig"]["id"]))
-            for k, x in enumerate(g):
-                x["dep"] = 1 / math.sqrt(k + 1)
-                x["c"] = x["raw"] * x["dep"]
-        for x in rows:
-            L += x["c"]
-        p = 1 / (1 + math.exp(-L))
-        ps = []
-        for g in sorted(groups):
-            Lg = L - sum(x["c"] for x in rows if x["sig"]["group"] == g)
-            ps.append(1 / (1 + math.exp(-Lg)))
-        hinge = max(rows, key=lambda x: (abs(x["c"]), x["sig"]["id"]))
-        p_wo = 1 / (1 + math.exp(-(L - hinge["c"])))
+            x["relevance"] = 1.0 if x["act"] is None else 0.5 + 0.5 * math.sqrt(x["act"] / amax)
+        C = combine(rows)
+        hinge = C["hinge"]
+        p_wo = 1 / (1 + math.exp(-(C["L"] - hinge["c"])))
         rows.sort(key=lambda x: (-abs(x["c"]), x["sig"]["id"]))
-        return {"axis": axis, "logodds": L, "p_bull": p, "lo": min(ps + [p]), "hi": max(ps + [p]), "rows": rows,
+        return {"axis": axis, "logodds": C["L"], "p_bull": C["p"], "lo": C["lo"], "hi": C["hi"], "rows": rows, "groups": C["groups"],
                 "hinge": {"id": hinge["sig"]["id"], "text": hinge["sig"]["text"], "p_without": p_wo}}
 
+    def frame(self, r: list[float], topic: str | None) -> tuple[list[str], dict]:
+        axes = self.G["axes"]
+        score = {}
+        for si, s in enumerate(self.sigs):
+            a = s["axis"]
+            v = r[self.sig_node[si]]
+            if v > score.get(a, 0.0):
+                score[a] = v
+        for a in list(score):
+            node_act = r[self.idx[axes[a]["node"]]]
+            score[a] = (0.5 * score[a] + node_act) * (AXIS_TOPIC_BOOST if a == topic else 1.0)
+        return sorted(score, key=lambda a: (-score[a], a)), score
+
+    def whatif(self, cond: str, target: dict | None) -> dict:
+        """Intervene on the belief network: the condition's claim is set to 90% (or 10%) and every connected claim
+        re-settles. Direction from the condition's own verbs (rise, cut, slow...) and the claim's link to its series."""
+        net = self.G.get("net")
+        seeds = self.recall(cond)
+        if not net or not seeds:
+            return {"cond": cond, "found": False}
+        r = self.spread(seeds)
+        topic = self.lib.search(cond).get("topic") if self.lib is not None else None
+        ranked, _ = self.frame(r, topic)
+        cand = [a for a in ranked if a in net["axes"]]
+        if not cand:
+            return {"cond": cond, "found": False}
+        axis = cand[0]
+        words = voices.raw_tokens(cond)
+        up = sum(1 for w in words if w in WHATIF_UP)
+        down = sum(1 for w in words if w in WHATIF_DOWN)
+        d = 1 if up >= down else -1
+        bull = d * net["reps"][axis][1] > 0
+        pf = 0.9 if bull else 0.1
+        after = propagate(net, {axis: pf})
+        axes = self.G["axes"]
+        eff = []
+        for k, a in enumerate(net["axes"]):
+            if a == axis:
+                continue
+            eff.append({"axis": a, "title": axes[a]["title"], "p0": round(net["p"][k], 6), "p1": round(after[k], 6), "d": round(after[k] - net["p"][k], 6)})
+        eff.sort(key=lambda x: (-abs(x["d"]), x["axis"]))
+        tgt = None
+        if target == "book":
+            rows, l0, l1 = [], 0.0, 0.0
+            for k, a in enumerate(net["axes"]):
+                b = axes[a]["book"]
+                if b:
+                    l0 += b * (2 * net["p"][k] - 1)
+                    l1 += b * (2 * after[k] - 1)
+                    rows.append({"axis": a, "title": axes[a]["title"], "sign": b, "d": round(b * (after[k] - net["p"][k]), 6)})
+            nb = max(1, len(rows))
+            rows.sort(key=lambda x: (-abs(x["d"]), x["axis"]))
+            tgt = {"axis": "book", "title": "The model book", "lean0": round(l0 / nb, 6), "lean1": round(l1 / nb, 6), "rows": rows[:6]}
+            target = None
+        if target and target.get("found"):
+            reps = {"a:" + v[0]: a for a, v in net["reps"].items()}
+            hit = next((reps[s["id"]] for s in target["seeds"] if s["id"] in reps and reps[s["id"]] != axis), None)
+            ta = hit or target.get("axis")
+        else:
+            ta = None
+        if ta in net["axes"]:
+            k = net["axes"].index(ta)
+            tgt = {"axis": ta, "title": axes[ta]["title"], "p0": round(net["p"][k], 6), "p1": round(after[k], 6)}
+        side = "bull" if bull else "bear"
+        return {"cond": cond, "found": True, "axis": axis, "title": axes[axis]["title"], "side": side, "claim": axes[axis][side], "p_fixed": pf,
+                "effects": eff[:8], "target": tgt}
+
     def think(self, text: str) -> dict:
+        t = text.strip()
+        m = re.match(RX_WHATIF, t, re.I)
+        if m:
+            body = m.group(1)
+            low = body.lower()
+            cuts = [low.find(sp) for sp in WHATIF_SPLIT if low.find(sp) > 0]
+            cut = min(cuts) if cuts else -1
+            cond = body[:cut] if cut > 0 else body
+            rest = re.sub(r"^[\s,]*(?:then\s+)?", "", body[cut:], flags=re.I).strip() if cut > 0 else ""
+            to_book = bool(rest) and re.search(RX_BOOK, rest, re.I) is not None
+            res = self._think(rest if rest and not to_book else cond)
+            res["whatif"] = self.whatif(cond, "book" if to_book else (res if rest else None))
+            if res.get("found"):
+                res["mode"] = "whatif"
+            return res
+        res = self._think(t)
+        if res.get("found") and re.match(RX_EXPLAIN, t, re.I):
+            res["mode"] = "explain"
+            pick = next((s for s in res["seeds"] if s["kind"] not in ("fact", "paper", "signal", "quote")), res["seeds"][0])
+            n = self.nodes[self.idx[pick["id"]]]
+            res["define"] = {"id": n["id"], "name": n["n"], "text": n["t"], "formula": n.get("f"), "kind": n["k"]}
+        return res
+
+    def _think(self, text: str) -> dict:
         seeds = self.recall(text)
         if not seeds:
             return {"query": text, "found": False, "note": "Nothing in the mind matches. Name an asset, an indicator, a market or an idea."}
@@ -973,16 +1382,7 @@ class Mind:
             topic = vs.get("topic")
             pol = vs["polarity"]
         axes = self.G["axes"]
-        score = {}
-        for si, s in enumerate(self.sigs):
-            a = s["axis"]
-            v = r[self.sig_node[si]]
-            if v > score.get(a, 0.0):
-                score[a] = v
-        for a in list(score):
-            node_act = r[self.idx[axes[a]["node"]]]
-            score[a] = (0.5 * score[a] + node_act) * (AXIS_TOPIC_BOOST if a == topic else 1.0)
-        ranked = sorted(score, key=lambda a: (-score[a], a))
+        ranked, score = self.frame(r, topic)
         if not ranked:
             return {"query": text, "found": False, "note": "The question lit up nodes with no evidence attached."}
         main = ranked[0]
@@ -1027,7 +1427,7 @@ class Mind:
                     "refs": s["refs"], "flip": s["flip"]}
         return {"query": text, "found": True, "mode": mode, "axis_score": round(score[main] / rmax, 6), "seeds": [nd(i) for i, _ in seeds], "polarity": pol, "topic": topic,
                 "axis": main, "axis_title": axes[main]["title"], "side": side, "claim": claim, "p": round(p_claim, 6), "range": [round(lo, 6), round(hi, 6)],
-                "logodds": round(V["logodds"], 6), "pros": [row(x) for x in pros[:6]], "cons": [row(x) for x in cons[:6]], "n_signals": len(V["rows"]),
+                "logodds": round(V["logodds"], 6), "pros": [row(x) for x in pros[:6]], "cons": [row(x) for x in cons[:6]], "n_signals": len(V["rows"]), "groups": V["groups"],
                 "hinge": V["hinge"], "flip": [x["sig"]["flip"] for x in (pros[:3])], "others": [{"axis": v["axis"], "title": axes[v["axis"]]["title"], "p_bull": round(v["p_bull"], 6),
                                                                                                  "n": len(v["rows"])} for v in verdicts[1:]],
                 "concepts": [nd(i) for i in concepts], "facts": [nd(i) for i in facts], "engines": [nd(i) for i in engines], "countries": [nd(i) for i in countries],
@@ -1046,7 +1446,8 @@ def stats(G: dict) -> dict:
 
 def compact(G: dict) -> dict:
     """The page's copy: short keys, no layout precision beyond 4 decimals."""
-    keep = ("f", "st", "value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked", "lines", "axis", "sign", "gdp")
+    keep = ("f", "st", "value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked", "lines", "axis", "sign", "gdp",
+            "feed_url", "edge", "biases", "cadence", "cost", "speaker", "verdict")
     nodes = []
     for n in G["nodes"]:
         d = {"id": n["id"], "k": n["k"], "n": n["n"], "g": n["g"], "t": n["t"], "a": n["a"], "x": n.get("x", 0), "y": n.get("y", 0)}
@@ -1055,7 +1456,7 @@ def compact(G: dict) -> dict:
                 d[k] = n[k]
         nodes.append(d)
     return {"nodes": nodes, "edges": G["edges"], "causal": G["causal"], "signals": G["signals"], "axes": G["axes"], "types": G["types"],
-            "groups": G["groups"], "params": G["params"]}
+            "groups": G["groups"], "params": G["params"], "net": G["net"]}
 
 
 def build_from_dir(out: Path | str) -> dict:
@@ -1070,5 +1471,7 @@ def build_from_dir(out: Path | str) -> dict:
             rl = json.loads((out / "research.json").read_text()).get("hedge", {}).get("latest")
         except (ValueError, AttributeError):
             rl = None
-    G = build(atlas, voices.load(), load_knowledge(), load_countries(), L, rl)
+    rd = lambda n: json.loads((out / n).read_text()) if (out / n).exists() else None
+    G = build(atlas, voices.load(), load_knowledge(), load_countries(), L, rl, mlo=rd("ml.json"), aso=rd("reality.json"), positions=load_positions(),
+              companies=load_companies())
     return compact(G)

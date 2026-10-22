@@ -4,7 +4,7 @@
 
 Six steps, each a pure function the page runs too (site/src/engine7.js; tests/test_v07.py checks they agree):
 
-  1. posterior        prior over six 3-month scenarios x the likelihood of what is observed now. Signals that share a
+  1. posterior        prior over seven 3-month scenarios x the likelihood of what is observed now. Signals that share a
                       driver are grouped; inside a group the log-likelihoods are averaged, not added, so two readings
                       of one cause count once (tempered naive Bayes). Every number here is labelled Assumed.
   2. scenario_returns the 3-month return of a portfolio vector (equity, TLT hedge ratio, put-spread premium, gold)
@@ -12,7 +12,7 @@ Six steps, each a pure function the page runs too (site/src/engine7.js; tests/te
                       bought at VIX + 3, financing on borrowed money.
   3. solve            the feasible portfolio with the highest expected log growth, subject to a worst-scenario loss
                       limit, max equity, max total gross and a premium budget (exhaustive grid: exact on the grid,
-                      18,414 portfolios x 6 scenarios).
+                      18,414 portfolios x 7 scenarios).
   4. alternatives     keep / reduce / hedge / optimal on the same scenarios, with regret and minimax regret.
   5. robust           the zero-sum game against Nature: mix the alternatives to maximize the worst expected return;
                       Nature's equilibrium mix is the scenario blend the book is most exposed to (linear program).

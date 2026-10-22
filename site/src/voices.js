@@ -277,7 +277,7 @@ Quotes: ${JSON.stringify(cands)}`;
       else if (e.key === "ArrowRight") { e.preventDefault(); vMove(1); }
       else if (e.key === "n" || e.key === "N") { e.preventDefault(); vNext(1); }
     });
-    $("#vo-count").textContent = `${VQ.length} verified quotes from ${new Set(VQ.map((q) => q.speaker)).size} investors across ${new Set(VQ.map((q) => q.topic)).size} topics; ${VQ.filter((q) => q.kind === "current").length} said in 2024 to 2026.`;
+    $("#vo-count").textContent = `${VQ.length} verified quotes from ${new Set(VQ.map((q) => q.speaker.replace(/\s*\(.*?\)/g, "").replace("Jerome H. Powell", "Jerome Powell"))).size} investors across ${new Set(VQ.map((q) => q.topic)).size} topics; ${VQ.filter((q) => q.kind === "current").length} said in 2024 to 2026.`;
     inp.value = VS.last || V_EXAMPLES[0];
     vRun(inp.value);
     const c = typeof window !== "undefined" && window.claude && typeof window.claude.use === "function" ? window.claude : null;

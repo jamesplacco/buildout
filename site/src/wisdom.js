@@ -26,7 +26,7 @@
     const F = readF(), T = F.tails, six = T.rows.find((r) => r.k === 6), tiles = $("#sw-tail-tiles");
     if (tiles) tiles.replaceChildren(
       tile("Six-sigma down months", String(six.obs), `A normal model expects one every ${fx(six.every / 1e6, 1)} million years.`),
-      tile("Tail index (Hill)", fx(T.alpha, 2), "Moments of order α and above do not exist: at 2.15 the variance barely does, kurtosis does not. A normal curve has no limit."),
+      tile("Tail index (Hill)", fx(T.alpha, 2), "Hill estimate on the largest 5% of all months. Moments of order α and above do not exist: at 2.15 the variance barely does. The labs use the largest 5% of losses only and get about 3.8; both say kurtosis is unreliable. A normal curve has no limit."),
       tile("Monthly volatility", fx(T.sigma * 100, 2) + "%", `${T.months.toLocaleString("en-US")} months since 1871.`));
     const w = $("#sw-worst");
     if (w) {
