@@ -75,6 +75,10 @@ jobs:
           fi
           python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
 
+      - name: The atlas (every monthly series, FRED and GitHub mirrors; learned structure)
+        continue-on-error: true
+        run: python -m buildout atlas --out site/data
+
       - name: Reasoner and games (reads the files above; no network)
         continue-on-error: true
         run: python -m buildout reason --out site/data

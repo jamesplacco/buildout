@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.12</span>
+      Buildout <span class="ver">v0.13</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -42,7 +42,40 @@
     </div>
     <section class="hero-brain" id="hero" aria-labelledby="hero-title">
       <div class="hero-head"><p class="eyebrow">The brain · live</p><h2 id="hero-title">Watch a shock travel the system</h2>
-        <p class="prose">Thirty-five parts of the system, linked by signed weights: eleven measured from 440 months of data, the rest judged and labelled. A shock enters one node and moves one link per order, x<sub>k</sub> = W′x<sub>k−1</sub>; the glow is each node's running total, and the panel does the arithmetic in the open.</p></div>
+        <p class="prose">The whole brain: every monthly series the engine can read, its links learned from the data and checked for stability, joined with the judged concepts, the holdings and the book. A shock spreads the same month through x₀ = (I − W)⁻¹e, then carries forward month by month; the panel does the arithmetic in the open. The core map is the original 35-node model, order by order.</p>
+        <div class="seg hero-which" id="hero-which" role="group" aria-label="Which brain"><button type="button" data-w="full" aria-pressed="true">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 35 nodes</button></div></div>
+      <div id="hero-full">
+        <div class="hero-grid">
+          <div class="hero-stage">
+            <div class="hero-presets" id="ah-presets" role="group" aria-label="Scenarios"></div>
+            <canvas id="at-hero-cv" role="img" aria-label="The whole brain"></canvas>
+            <div class="hero-ctl">
+              <button class="pill" type="button" id="ah-prev" aria-label="Previous month">←</button>
+              <button class="pill" type="button" id="ah-play" aria-pressed="true">Pause</button>
+              <button class="pill" type="button" id="ah-next" aria-label="Next month">→</button>
+              <span class="hero-k" id="ah-k">h = 0</span>
+              <span class="hint">Hover a node to name it; click to shock it (shift-click for a fall).</span>
+            </div>
+            <div class="hero-own"><label for="ah-node">Shock</label><select id="ah-node"></select><label for="ah-size">by σ</label><input type="number" id="ah-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="ah-go">Run it</button><label for="ah-target">Watch</label><select id="ah-target"></select></div>
+          </div>
+          <aside class="hero-math" aria-labelledby="ah-math-t">
+            <span class="panel-title" id="ah-math-t">The math, live</span>
+            <p class="hero-scn" id="ah-scn"></p>
+            <p class="hero-eq">y<sub>t</sub> = W y<sub>t</sub> + A y<sub>t−1</sub> + e<sub>t</sub> &nbsp;·&nbsp; x<sub>0</sub> = (I − W)<sup>−1</sup>e &nbsp;·&nbsp; x<sub>h</sub> = (I − W)<sup>−1</sup>A x<sub>h−1</sub></p>
+            <p class="hint" id="ah-count"></p>
+            <p class="hero-steph" id="ah-step"></p>
+            <ol class="br-list" id="ah-flows"></ol>
+            <p class="sentence" id="ah-arrive"></p>
+            <span class="panel-title">Cumulative response, with the doubt</span>
+            <div class="svgbox" id="ah-fan"></div>
+            <p class="hint" id="ah-mc"></p>
+            <span class="panel-title">How it was learned</span>
+            <ul class="br-list" id="ah-trust"></ul>
+            <a class="more-link" href="#atlas">Explore the atlas: every node, link and test →</a>
+          </aside>
+        </div>
+      </div>
+      <div id="hero-core" hidden>
       <div class="hero-grid">
         <div class="hero-stage">
           <div class="hero-presets" id="hero-presets" role="group" aria-label="Scenarios"></div>
@@ -76,6 +109,7 @@
           <p class="sr-only" id="hero-live" aria-live="polite"></p>
         </aside>
       </div>
+      </div>
     </section>
 
     <section class="voices" id="voices" aria-labelledby="vo-title">
@@ -103,7 +137,7 @@
     </div>
     <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
     <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 244 of 244 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 253 of 253 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
@@ -1488,6 +1522,51 @@
 </section>
 
 <!-- ======================= OODA ======================= -->
+<section class="view" id="view-atlas" aria-labelledby="atv-title" hidden>
+  <div class="vhead"><p class="eyebrow">The atlas · the whole brain, learned</p><h1 id="atv-title">Every series, every link the data supports</h1>
+    <p class="lede">The engine reads every monthly series it can reach, learns which pairs are linked once all the others are held fixed, keeps only links that survive half-sample after half-sample, orients them by the non-Gaussian signature of cause and effect, and fits a structural model through which any shock can be traced month by month.</p>
+    <p class="sentence" id="atv-sum"></p></div>
+  <div class="at-tiles" id="atv-tiles"></div>
+  <section class="section" aria-labelledby="atv-map-title">
+    <div class="section-head"><p class="eyebrow">Explore</p><h2 id="atv-map-title">The map</h2><p class="prose">Colours are learned communities; hollow rings are judged concepts and holdings. Solid lines are same-month links (brighter when established), dashed lines carry last month forward, dotted lines are judged. Ctrl or ⌘ and scroll to zoom, drag to pan, double-click to reset.</p></div>
+    <div class="hero-grid">
+      <div class="hero-stage"><canvas id="atv-cv" role="img" aria-label="The atlas"></canvas>
+        <div class="hero-ctl"><button class="pill" type="button" id="atv-play">Pause</button><span class="hero-k" id="atv-k">h = 0</span><span class="hint">Click any node to shock it and read its links.</span></div></div>
+      <aside class="hero-math" aria-labelledby="atv-name">
+        <div class="field"><label for="atv-node">Node</label><select id="atv-node"></select></div>
+        <h3 class="h3" id="atv-name"></h3><p class="hint" id="atv-meta"></p>
+        <span class="panel-title">Links in</span><div class="tablewrap"><table class="rz" id="atv-in"></table></div>
+        <span class="panel-title">Links out</span><div class="tablewrap"><table class="rz" id="atv-out"></table></div>
+        <p class="sentence" id="atv-more"></p>
+        <span class="panel-title">What the investors said</span><div class="at-voices" id="atv-voices"></div>
+        <span class="panel-title">A 1σ shock to it: the book's cumulative response</span><div class="svgbox" id="atv-fan"></div>
+        <p class="hint">★ established: selected in 90% of half-samples at the stricter penalty. Stability: the share of 60 half-samples that selected the link.</p>
+      </aside>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="atv-sys-title">
+    <div class="section-head"><p class="eyebrow">Structure</p><h2 id="atv-sys-title">What holds the system together</h2></div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title" id="atv-roll-title">How connected the system is, through time</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="atv-roll"></div><p class="sentence" id="atv-roll-t"></p>
+        <p class="hint">Diebold and Yilmaz (2012): the share of each series' 12-month forecast-error variance that comes from shocks to the others, averaged, from a ridge VAR on each five-year window and the generalized decomposition (Pesaran and Shin 1998), which does not depend on an ordering. Each value uses only the five years ending that month.</p></figure>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">The most systemic series</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="atv-sys"></div>
+        <p class="hint">Summed absolute same-month total effect on every other series, from (I − B)⁻¹ − I. Currencies rank high because the dollar runs through all of them.</p></figure>
+    </div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Learned communities (modularity, Newman's leading eigenvector)</span><ul class="at-comms" id="atv-comms"></ul></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Choosing how sparse: links against the penalty</span></div><div class="svgbox" id="atv-ebic"></div>
+        <p class="hint">The graphical lasso trades fit for sparsity; the extended BIC (Foygel and Drton 2010) picks the penalty, favouring sparse graphs when series are many against months. Stability selection then keeps only links that survive half-samples.</p></figure>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="atv-rob-title">
+    <div class="section-head"><p class="eyebrow">Robustness</p><h2 id="atv-rob-title">What changed in 2022, and what forecasts</h2></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Links that changed in the inflation regime</span><div class="tablewrap"><table class="rz" id="atv-flips"></table></div><p class="hint">Each same-month link refitted before and after January 2022 with its co-parents; listed when the sign flips with |t| ≥ 2 on both sides, or significance appears or disappears.</p></div>
+      <div class="panel"><span class="panel-title">Do the lagged links forecast? Out of sample, 2005 on</span><div class="tablewrap"><table class="rz" id="atv-oos"></table></div><p class="sentence" id="atv-oos-t"></p></div>
+    </div>
+  </section>
+</section>
+
 <section class="view" id="view-ooda" hidden aria-labelledby="oo-title">
   <div class="vhead">
     <p class="eyebrow">Decision loop · Observe, orient, decide, act</p>
@@ -2063,7 +2142,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">244 of 244 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">253 of 253 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2088,7 +2167,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, fifteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, sixteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2111,6 +2190,12 @@
           <tr><td>Adaptive conformal intervals on Gaussian and fat-tailed data; no look-ahead</td><td class="r">coverage near 90%; none</td></tr>
           <tr><td>Landing brain: Leontief limit against the series summed to convergence</td><td class="r">equal to 1e-9</td></tr>
           <tr><td>Voices retrieval, Python and page, 22 queries; every quote sourced</td><td class="r">identical; all https</td></tr>
+          <tr><td>Atlas on a planted graph with missing spans: causal links found, marriages pruned, directions</td><td class="r">all found; ≥ 80% precise; ≥ 75% right way</td></tr>
+          <tr><td>Pairwise-complete correlations against pandas; structural VAR responses against matrix powers</td><td class="r">equal to 1e-10</td></tr>
+          <tr><td>Connectedness rows sum to one, what is given is taken; rolling index has no look-ahead</td><td class="r">exact; none</td></tr>
+          <tr><td>Communities on a planted two-block network; layout deterministic</td><td class="r">recovered; identical</td></tr>
+          <tr><td>Atlas responses, page against Python, four shocks over 12 months</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Data plumbing: a three-month hole is not a move; a weaker currency reads negative</td><td class="r">as stated</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>

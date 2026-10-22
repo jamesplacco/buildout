@@ -109,6 +109,8 @@ REGISTRY: list[Engine] = [
     Engine("brain", "Brain links", [], ["brain.json"], "brain.py", False, "Measured links by regime, the series, structure learning, robust links, self-checks (conformal, stacking, robustness values)"),
     Engine("book", "Book run", ["research.json"], ["report.json"], "pipeline.py", False, "Databento: exposures, regime, hedge, sizing, VaR, stress, backtest, robustness"),
     Engine("capex", "Fundamentals", [], ["capex.json"], "fundamentals.py", False, "SEC XBRL: TTM cash flows, capex, debt, depreciation paths"),
+    Engine("atlas", "The atlas", [], ["atlas.json"], "atlas.py", False,
+           "Every monthly series: graphical lasso with stability selection, LiNGAM orientation, structural VAR, connectedness"),
     Engine("feeds", "Noteworthy", [], ["feeds.json"], "feeds.py", False, "Feeds, heat, niche skew, lead time"),
     Engine("reason", "Solver and games", ["macro.json", "research.json", "brain.json", "capex.json", "report.json"], ["reason.json"], "reasoner.py", True,
            "Tempered Bayes, the constrained choice, the game against Nature, value of information, games", _reason),

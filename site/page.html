@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Buildout Risk Engine</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="A decision desk for a concentrated AI-buildout book: data to rule to action, a reasoning brain that carries assumptions to fourth-order conclusions, a noteworthy feed from X, Telegram and Substack, prop trading and market making tools, the 2026 buyside field manual as engine modules, and a decision journal.">
@@ -1335,7 +1336,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .hero-head .prose { margin: 0; max-width: 78ch; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 @media (max-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1fr); } }
-.hero-stage { background: #05050d; border-radius: 16px; padding: 10px; display: grid; gap: 10px; color: #d9d5ff; min-width: 0; }
+.hero-stage { background: #05050d; border-radius: 16px; padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; color: #d9d5ff; min-width: 0; }
 #hero-cv { width: 100%; display: block; border-radius: 12px; cursor: crosshair; touch-action: manipulation; }
 .hero-presets { display: flex; flex-wrap: wrap; gap: 6px; }
 .hero-presets button, .hero-stage .pill, .hero-stage .seg button { font: 500 0.72rem/1.2 var(--f-body); padding: 6px 10px; border-radius: 999px; border: 1px solid #3b3670; background: #151233; color: #d9d5ff; cursor: pointer; }
@@ -1347,7 +1348,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .hero-own label { color: #bdb7ff; }
 .hero-own select, .hero-own input { background: #151233; color: #e9e6ff; border: 1px solid #3b3670; border-radius: 8px; padding: 5px 8px; font: 500 0.75rem/1.2 var(--f-body); max-width: 100%; color-scheme: dark; }
 .hero-own input { width: 6ch; }
-.hero-own .hint { color: #9e98d6; }
+.hero-stage .hint { color: #a9a3e0; }
 .hero-math { border: 1px solid var(--rule); border-radius: 14px; padding: 16px; background: var(--surface); display: grid; gap: 8px; align-content: start; min-width: 0; }
 .hero-scn { margin: 0; font: 700 var(--t-lg)/1.25 var(--f-body); }
 .hero-eq { margin: 0; font: 500 0.78rem/1.6 var(--f-mono); background: var(--paper); border: 1px solid var(--rule); padding: 8px 10px; border-radius: 8px; overflow-x: auto; }
@@ -1401,6 +1402,25 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .vo-nav .pill:disabled { opacity: 0.45; cursor: default; }
 .vo-all { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; }
 .vo-all > li > ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--t-sm); color: var(--ink-2); }
+
+/* ---------- v0.13: the atlas ---------- */
+.at-voices { display: grid; gap: 8px; }
+.at-voice { margin: 0; font-size: var(--t-sm); color: var(--ink-2); }
+.at-voice b { color: var(--ink); font-weight: 600; }
+.at-voice .vo-badge { margin-right: 6px; }
+.hero-which { margin-top: 6px; }
+.at-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 10px; margin-block: 18px; }
+.at-kpi { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 12px; display: grid; gap: 2px; min-width: 0; }
+.at-kpi b { font: 700 var(--t-xl)/1.1 var(--f-display); color: var(--ink); }
+.at-kpi span { font-size: var(--t-sm); color: var(--ink); font-weight: 600; }
+.at-kpi small { font-size: var(--t-xs); color: var(--muted); }
+#at-hero-cv, #atv-cv { width: 100%; display: block; border-radius: 12px; cursor: grab; touch-action: pan-y; }
+.at-comms { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: var(--t-sm); }
+.at-comms li { display: grid; grid-template-columns: 12px minmax(0, auto) minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.at-comms li span { color: var(--ink-2); font-size: var(--t-xs); }
+.at-sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+@media (max-width: 640px) { .at-comms li { grid-template-columns: 12px minmax(0, 1fr); } .at-comms li span { grid-column: 2; } }
+@media print { #at-hero-cv, #atv-cv { display: none; } }
 </style>
 <a class="skip" href="#main" id="skip">Skip to content</a>
 <header class="topbar">
@@ -1412,7 +1432,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.12</span>
+      Buildout <span class="ver">v0.13</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -1445,7 +1465,40 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     </div>
     <section class="hero-brain" id="hero" aria-labelledby="hero-title">
       <div class="hero-head"><p class="eyebrow">The brain · live</p><h2 id="hero-title">Watch a shock travel the system</h2>
-        <p class="prose">Thirty-five parts of the system, linked by signed weights: eleven measured from 440 months of data, the rest judged and labelled. A shock enters one node and moves one link per order, x<sub>k</sub> = W′x<sub>k−1</sub>; the glow is each node's running total, and the panel does the arithmetic in the open.</p></div>
+        <p class="prose">The whole brain: every monthly series the engine can read, its links learned from the data and checked for stability, joined with the judged concepts, the holdings and the book. A shock spreads the same month through x₀ = (I − W)⁻¹e, then carries forward month by month; the panel does the arithmetic in the open. The core map is the original 35-node model, order by order.</p>
+        <div class="seg hero-which" id="hero-which" role="group" aria-label="Which brain"><button type="button" data-w="full" aria-pressed="true">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 35 nodes</button></div></div>
+      <div id="hero-full">
+        <div class="hero-grid">
+          <div class="hero-stage">
+            <div class="hero-presets" id="ah-presets" role="group" aria-label="Scenarios"></div>
+            <canvas id="at-hero-cv" role="img" aria-label="The whole brain"></canvas>
+            <div class="hero-ctl">
+              <button class="pill" type="button" id="ah-prev" aria-label="Previous month">←</button>
+              <button class="pill" type="button" id="ah-play" aria-pressed="true">Pause</button>
+              <button class="pill" type="button" id="ah-next" aria-label="Next month">→</button>
+              <span class="hero-k" id="ah-k">h = 0</span>
+              <span class="hint">Hover a node to name it; click to shock it (shift-click for a fall).</span>
+            </div>
+            <div class="hero-own"><label for="ah-node">Shock</label><select id="ah-node"></select><label for="ah-size">by σ</label><input type="number" id="ah-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="ah-go">Run it</button><label for="ah-target">Watch</label><select id="ah-target"></select></div>
+          </div>
+          <aside class="hero-math" aria-labelledby="ah-math-t">
+            <span class="panel-title" id="ah-math-t">The math, live</span>
+            <p class="hero-scn" id="ah-scn"></p>
+            <p class="hero-eq">y<sub>t</sub> = W y<sub>t</sub> + A y<sub>t−1</sub> + e<sub>t</sub> &nbsp;·&nbsp; x<sub>0</sub> = (I − W)<sup>−1</sup>e &nbsp;·&nbsp; x<sub>h</sub> = (I − W)<sup>−1</sup>A x<sub>h−1</sub></p>
+            <p class="hint" id="ah-count"></p>
+            <p class="hero-steph" id="ah-step"></p>
+            <ol class="br-list" id="ah-flows"></ol>
+            <p class="sentence" id="ah-arrive"></p>
+            <span class="panel-title">Cumulative response, with the doubt</span>
+            <div class="svgbox" id="ah-fan"></div>
+            <p class="hint" id="ah-mc"></p>
+            <span class="panel-title">How it was learned</span>
+            <ul class="br-list" id="ah-trust"></ul>
+            <a class="more-link" href="#atlas">Explore the atlas: every node, link and test →</a>
+          </aside>
+        </div>
+      </div>
+      <div id="hero-core" hidden>
       <div class="hero-grid">
         <div class="hero-stage">
           <div class="hero-presets" id="hero-presets" role="group" aria-label="Scenarios"></div>
@@ -1479,6 +1532,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
           <p class="sr-only" id="hero-live" aria-live="polite"></p>
         </aside>
       </div>
+      </div>
     </section>
 
     <section class="voices" id="voices" aria-labelledby="vo-title">
@@ -1506,7 +1560,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     </div>
     <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
     <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 244 of 244 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 253 of 253 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
@@ -2891,6 +2945,51 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 </section>
 
 <!-- ======================= OODA ======================= -->
+<section class="view" id="view-atlas" aria-labelledby="atv-title" hidden>
+  <div class="vhead"><p class="eyebrow">The atlas · the whole brain, learned</p><h1 id="atv-title">Every series, every link the data supports</h1>
+    <p class="lede">The engine reads every monthly series it can reach, learns which pairs are linked once all the others are held fixed, keeps only links that survive half-sample after half-sample, orients them by the non-Gaussian signature of cause and effect, and fits a structural model through which any shock can be traced month by month.</p>
+    <p class="sentence" id="atv-sum"></p></div>
+  <div class="at-tiles" id="atv-tiles"></div>
+  <section class="section" aria-labelledby="atv-map-title">
+    <div class="section-head"><p class="eyebrow">Explore</p><h2 id="atv-map-title">The map</h2><p class="prose">Colours are learned communities; hollow rings are judged concepts and holdings. Solid lines are same-month links (brighter when established), dashed lines carry last month forward, dotted lines are judged. Ctrl or ⌘ and scroll to zoom, drag to pan, double-click to reset.</p></div>
+    <div class="hero-grid">
+      <div class="hero-stage"><canvas id="atv-cv" role="img" aria-label="The atlas"></canvas>
+        <div class="hero-ctl"><button class="pill" type="button" id="atv-play">Pause</button><span class="hero-k" id="atv-k">h = 0</span><span class="hint">Click any node to shock it and read its links.</span></div></div>
+      <aside class="hero-math" aria-labelledby="atv-name">
+        <div class="field"><label for="atv-node">Node</label><select id="atv-node"></select></div>
+        <h3 class="h3" id="atv-name"></h3><p class="hint" id="atv-meta"></p>
+        <span class="panel-title">Links in</span><div class="tablewrap"><table class="rz" id="atv-in"></table></div>
+        <span class="panel-title">Links out</span><div class="tablewrap"><table class="rz" id="atv-out"></table></div>
+        <p class="sentence" id="atv-more"></p>
+        <span class="panel-title">What the investors said</span><div class="at-voices" id="atv-voices"></div>
+        <span class="panel-title">A 1σ shock to it: the book's cumulative response</span><div class="svgbox" id="atv-fan"></div>
+        <p class="hint">★ established: selected in 90% of half-samples at the stricter penalty. Stability: the share of 60 half-samples that selected the link.</p>
+      </aside>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="atv-sys-title">
+    <div class="section-head"><p class="eyebrow">Structure</p><h2 id="atv-sys-title">What holds the system together</h2></div>
+    <div class="grid2">
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title" id="atv-roll-title">How connected the system is, through time</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="atv-roll"></div><p class="sentence" id="atv-roll-t"></p>
+        <p class="hint">Diebold and Yilmaz (2012): the share of each series' 12-month forecast-error variance that comes from shocks to the others, averaged, from a ridge VAR on each five-year window and the generalized decomposition (Pesaran and Shin 1998), which does not depend on an ordering. Each value uses only the five years ending that month.</p></figure>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">The most systemic series</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="atv-sys"></div>
+        <p class="hint">Summed absolute same-month total effect on every other series, from (I − B)⁻¹ − I. Currencies rank high because the dollar runs through all of them.</p></figure>
+    </div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Learned communities (modularity, Newman's leading eigenvector)</span><ul class="at-comms" id="atv-comms"></ul></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Choosing how sparse: links against the penalty</span></div><div class="svgbox" id="atv-ebic"></div>
+        <p class="hint">The graphical lasso trades fit for sparsity; the extended BIC (Foygel and Drton 2010) picks the penalty, favouring sparse graphs when series are many against months. Stability selection then keeps only links that survive half-samples.</p></figure>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="atv-rob-title">
+    <div class="section-head"><p class="eyebrow">Robustness</p><h2 id="atv-rob-title">What changed in 2022, and what forecasts</h2></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Links that changed in the inflation regime</span><div class="tablewrap"><table class="rz" id="atv-flips"></table></div><p class="hint">Each same-month link refitted before and after January 2022 with its co-parents; listed when the sign flips with |t| ≥ 2 on both sides, or significance appears or disappears.</p></div>
+      <div class="panel"><span class="panel-title">Do the lagged links forecast? Out of sample, 2005 on</span><div class="tablewrap"><table class="rz" id="atv-oos"></table></div><p class="sentence" id="atv-oos-t"></p></div>
+    </div>
+  </section>
+</section>
+
 <section class="view" id="view-ooda" hidden aria-labelledby="oo-title">
   <div class="vhead">
     <p class="eyebrow">Decision loop · Observe, orient, decide, act</p>
@@ -3466,7 +3565,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">244 of 244 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">253 of 253 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -3491,7 +3590,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, fifteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, sixteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -3514,6 +3613,12 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
           <tr><td>Adaptive conformal intervals on Gaussian and fat-tailed data; no look-ahead</td><td class="r">coverage near 90%; none</td></tr>
           <tr><td>Landing brain: Leontief limit against the series summed to convergence</td><td class="r">equal to 1e-9</td></tr>
           <tr><td>Voices retrieval, Python and page, 22 queries; every quote sourced</td><td class="r">identical; all https</td></tr>
+          <tr><td>Atlas on a planted graph with missing spans: causal links found, marriages pruned, directions</td><td class="r">all found; ≥ 80% precise; ≥ 75% right way</td></tr>
+          <tr><td>Pairwise-complete correlations against pandas; structural VAR responses against matrix powers</td><td class="r">equal to 1e-10</td></tr>
+          <tr><td>Connectedness rows sum to one, what is given is taken; rolling index has no look-ahead</td><td class="r">exact; none</td></tr>
+          <tr><td>Communities on a planted two-block network; layout deterministic</td><td class="r">recovered; identical</td></tr>
+          <tr><td>Atlas responses, page against Python, four shocks over 12 months</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Data plumbing: a three-month hole is not a move; a weaker currency reads negative</td><td class="r">as stated</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>
@@ -5317,6 +5422,11 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     { id: "owner-earnings", term: "Steady-state free cash flow", alt: ["owner earnings"], def: "Operating cash flow less maintenance capex (taken as D&A) less stock pay: what the business would throw off if it stopped growing.", at: "ps-title" },
     { id: "accruals", term: "Accruals", def: "Earnings not yet backed by cash: net income minus operating cash flow, scaled by assets. High accruals have historically preceded weaker earnings (Sloan, 1996).", at: "ps-title" },
     { id: "granger", term: "Granger causality", def: "One series' past improving the forecast of another beyond its own past. Predictive precedence, not proof of cause.", at: "brl-title" },
+    { id: "graphical-lasso", term: "Graphical lasso", def: "Estimating which pairs of series are linked once all the others are held fixed, with a penalty that sets most links to exactly zero; the penalty is chosen by the extended BIC.", at: "atv-title" },
+    { id: "stability-selection", term: "Stability selection", def: "Refitting on many half-samples of the data and keeping only what is selected in most of them; it comes with a bound on the expected number of false links.", at: "atv-title" },
+    { id: "var-lingam", term: "VAR-LiNGAM", def: "A structural vector autoregression whose same-month causal order is learned from the non-Gaussian shape of the shocks instead of assumed.", at: "atv-title" },
+    { id: "connectedness", term: "Connectedness index", def: "Diebold and Yilmaz: the share of each series' forecast-error variance caused by shocks to the other series, averaged; it rises when markets move as one.", at: "atv-roll-title" },
+    { id: "modularity", term: "Modularity", def: "How much more densely a network's communities are linked inside than chance would give; communities here are found by Newman's leading eigenvector.", at: "atv-sys-title" },
     { id: "conformal", term: "Conformal interval", def: "An error bar whose width comes from the model's own past errors rather than an assumed distribution; the adaptive version adjusts its target after every miss, so long-run coverage holds even when the world shifts.", at: "brr-title" },
     { id: "stacking", term: "Stacking", def: "Combining rival models with the weights that maximize their out-of-sample predictive score: the data votes on which world model to trust, month by month.", at: "brr-title" },
     { id: "robustness-value", term: "Robustness value", def: "The share of the residual variance of both cause and effect that an unseen common cause would have to explain to erase an estimated link (Cinelli and Hazlett, 2020).", at: "brr-title" },
@@ -5416,6 +5526,9 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   ];
 
   const FAQ = [
+    { g: "v0.13", q: "How big is the brain now, and how much of it is measured?", a: "100 nodes in the snapshot: 72 monthly series (equities, rates, inflation, energy, metals, grains, oilseeds, softs, livestock, 19 currencies) and 28 judged concepts and holdings. Its measured part went from 6 series and 11 links to 72 series and 189 learned links (116 same-month, 21 from one series to another next month, 52 own-momentum), against 106 judged. The daily run adds about 30 FRED series (credit, the curve, jobs, activity, money, housing, bitcoin) and current commodity prices, so it grows to roughly 130 nodes." },
+    { g: "v0.13", q: "Why trust learned links?", a: "Each one has passed four filters: the graphical lasso at the penalty the extended BIC picks, selection in at least 70% of 60 half-samples, a direction from its non-Gaussian signature, and |t| of at least 2 (Newey-West) once its child is regressed on all its parents. On a planted graph the pipeline recovers every causal link, at least 80% of what it keeps is real, and at least three quarters point the right way. The established links carry a bound of under six expected false. The Monte Carlo then drops each link with its own chance of being spurious." },
+    { g: "v0.13", q: "Why are currencies the most systemic series?", a: "Because the dollar runs through all of them: a move in the euro or the Australian dollar comes with moves in most of the others the same month, so in the total-effect matrix they reach the most series. Read it as the dollar factor, which the free data do not give as its own series; in the daily run FRED's broad dollar index joins as a node." },
     { g: "v0.12", q: "Where do the investor quotes come from, and can they be made up?", a: "From a curated library: every quote was found on its source page, is verbatim (punctuation aside), dated, and linked. Retrieval only ranks the library. The optional Claude step can reorder quotes and summarize a side in its own words, labelled as Claude's; any quote id it returns that is not in the library is dropped, so it cannot add a quote." },
     { g: "v0.12", q: "How far can the brain be trusted?", a: "It now checks itself out of sample from 2000. Its 90% error bars on stocks covered 90% of months with adaptive conformal intervals and 88% with textbook ones. Since 2022 the stacked ensemble puts most weight on the model with no same-month link to stocks at all, and an unseen common cause would need to explain about a fifth of both variances to erase the 10-year-to-stocks link. Direction is better supported than size." },
     { g: "v0.11", q: "Is the market being irrational about the AI names?", a: "The engine reads each price as a requirement, not a forecast. On October 20 prices and the latest filings, Nvidia, Amazon, Broadcom and Tesla need revenue growth that fewer than 1 in 100 companies of their size have ever achieved for a decade; Microsoft, Alphabet, Meta and Oracle need growth fewer than 1 in 20 achieved (Meta and Oracle once cash flow lifted by prepayments and deferred taxes is taken out). That is not proof of irrationality: Nvidia and Broadcom are already growing far faster than their prices require. The Positions desk shows both sides, each in points of required growth." },
@@ -5489,6 +5602,15 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
     { g: "v0.6", q: "Why does the challenge simulator's pass rate jump around?", a: "Because the rules are discrete. Above a certain risk per trade, one day of losses breaches the daily limit, and the number of winning trades needed to reach the target falls one whole trade at a time. The risk that maximizes the pass rate sits just below such a step." },
     { g: "v0.6", q: "Is market making just collecting the spread?", a: "No. The spread pays for adverse selection and inventory risk. The simulator shows that skewing quotes for inventory gives up a little average profit for much less risk, and the adverse-selection tool shows why uninformed retail flow is worth paying for." },
   ];
+
+  METHODS.push({ group: "The atlas (v0.13)", items: [
+    { name: "Skeleton", f: "Θ̂ = argmax log det Θ − tr(SΘ) − λ‖Θ‖<sub>1,off</sub>; EBIC = −2ℓ + E log n + 4Eγ log p, γ = 0.5", say: "S is the pairwise-complete correlation matrix (series have different spans), projected to the nearest positive definite matrix and shrunk 5% to the identity.", where: "atlas.py · Atlas" },
+    { name: "Stability selection", f: "Π̂<sub>ij</sub> = share of 60 half-samples selecting i–j; E[V] ≤ q²/((2π − 1)P)", say: "Kept at Π̂ ≥ 0.7; established at Π̂ ≥ 0.9 under the loosest penalty whose bound is at most 10% of what it keeps.", where: "atlas.py · Atlas" },
+    { name: "Direction", f: "R<sub>i→j</sub> = H(x<sub>j</sub>) + H(r<sub>i|j</sub>) − H(x<sub>i</sub>) − H(r<sub>j|i</sub>)", say: "Hyvärinen and Smith's pairwise likelihood ratio with maximum-entropy approximations; one global order chosen greedily from net evidence, so the same-month graph is acyclic.", where: "atlas.py · Atlas" },
+    { name: "Structural VAR", f: "y<sub>t</sub> = B y<sub>t</sub> + A y<sub>t−1</sub> + e<sub>t</sub>; Φ<sub>0</sub> = (I − B)<sup>−1</sup>, Φ<sub>h</sub> = (Φ<sub>0</sub>A)<sup>h</sup>Φ<sub>0</sub>", say: "Parents pruned by backward elimination at |t| < 2 (Newey-West); lagged links kept at |t| ≥ 2.5; the companion matrix is shrunk if explosive.", where: "atlas.py · Atlas" },
+    { name: "Connectedness", f: "θ<sub>ij</sub> = Σ<sub>h</sub>(Φ<sub>h</sub>)<sub>ij</sub>²σ<sub>j</sub>² / Σ<sub>h</sub>Σ<sub>k</sub>(Φ<sub>h</sub>)<sub>ik</sub>²σ<sub>k</sub>², total = 100 Σ<sub>i≠j</sub>θ<sub>ij</sub>/p", say: "Structural shocks are orthogonal, so the decomposition is exact. The index through time uses a ridge VAR per five-year window and the generalized decomposition.", where: "atlas.py · Atlas" },
+    { name: "Communities and layout", f: "Q = (1/2m) Σ<sub>ij</sub>(A<sub>ij</sub> − k<sub>i</sub>k<sub>j</sub>/2m)δ(c<sub>i</sub>, c<sub>j</sub>)", say: "Newman's leading eigenvector, split while Q rises; each community laid out on its own and the discs placed by a force layout of the communities.", where: "atlas.py · Atlas" },
+  ] });
 
   METHODS.push({ group: "The brain checks itself (v0.12)", items: [
     { name: "Order-by-order propagation", f: "x<sub>k</sub> = W′x<sub>k−1</sub>, S<sub>K</sub> = Σ<sub>k≤K</sub> x<sub>k</sub> → ((I − W′)<sup>−1</sup> − I)x<sub>0</sub> when ρ(W) &lt; 1", say: "The landing brain animates each order; the error after K orders shrinks like ρ<sup>K</sup>. 300 Monte Carlo worlds draw every link from its uncertainty.", where: "hero.js · Desk" },
@@ -5756,6 +5878,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   ];
 
   const CHANGELOG = [
+    ["v0.13", "Oct 21, 2026", "The brain grows by an order of magnitude in what it measures: from 6 series and 11 measured links to 72 monthly series and 189 learned links, joined with the 28 judged concepts and holdings into one 100-node brain (about 130 in the daily run, with FRED). Its structure is learned, not drawn: graphical lasso with the extended BIC, stability selection with a bound on false links, directions from non-Gaussian shocks, a structural VAR pruned by its own t-statistics, then connectedness, communities, PageRank and total effects. On a planted graph it finds every causal link. The landing page shows the whole brain, with a shock travelling month by month and its doubt drawn from both the weights and the chance that each link is spurious; a new Atlas desk explores every node, link, community, regime change and out-of-sample test. The MCP server adds atlas_trace."],
     ["v0.12", "Oct 21, 2026", "The brain moves onto the landing page: a live animation of a shock travelling the 35-node graph order by order, with the arithmetic beside it (the largest flows of each step, the running sum converging on the Leontief limit at the rate of the spectral radius, and 300 Monte Carlo worlds falling into a histogram). The brain checks itself out of sample: adaptive conformal error bars, a stacked ensemble of five rival world models, and robustness values for every measured link against an unseen common cause. Voices: type a question or claim and move from extreme bear to extreme bull through verbatim, dated, sourced quotes from legendary and current investors; an optional Claude step ranks them for your exact question without adding any. The MCP server adds investor_voices and brain_selfcheck."],
     ["v0.11", "Oct 21, 2026", "The engine decides, and the page becomes its harness. A Decision loop desk runs Observe, Orient, Decide, Act end to end: what moved and which world it fits, the explanations and what each asset did in stocks' worst months, the solver with and without doubt, a hedge book of nine prebuilt hedges you can switch on and off with an advisor that finds the cheapest set inside the loss limit, an action for every position through the decision frameworks (outside view, inside view, pre-mortem, margin of safety, reversibility, kill criteria), and proposals with a date to look again. A Positions desk reads each price as a requirement: accounting quality (cash conversion, accruals, stock pay, steady-state free cash flow, depreciation catch-up), the 10-year growth a reverse DCF needs, how often companies that size ever did it (the Base Rate Book), and the case the price is right and wrong, in points of required growth. The brain gains Granger tests, partial correlations, tail dependence and crisis behaviour by regime. An engine registry runs the offline engines with input and output hashes into engines.json, shown in a new Engine room; the MCP server adds decision_loop, position_valuation and hedge_book."],
     ["v0.10", "Oct 21, 2026", "Robustness across the engine. Every measured link is re-estimated with Huber regression and Newey-West errors, with the exact influence of each month and the number of the most influential months whose removal reverses its sign (the 2022-on 10-year-to-stocks link reverses on three). The solver gains a distributionally robust mode: the best worst case over every set of scenario odds within a KL radius, with the price of that protection and the point where the choice changes. Each book run adds block-bootstrapped intervals for every policy, the probability of backtest overfitting across 30 neighbouring hedge rules, a plateau check on the chosen thresholds, and a price screen for bad prints, frozen feeds and gaps. Property-based tests cover the new invariants. The MCP server reports the robust choice and each link's fragility."],
@@ -7239,7 +7362,7 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
-    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", positions: "Positions", engines: "Engine room" };
+    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", positions: "Positions", engines: "Engine room", atlas: "Atlas" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
     "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {
@@ -14465,6 +14588,572 @@ Quotes: ${JSON.stringify(cands)}`;
     if (c) c.use("sample").then((s) => { if (s) { VS.sample = s; renderVoices(); } }).catch(() => {});
   }
 
+  /* snap13.js (v0.13, generated by scripts/snapshot_v13.py; do not edit): the atlas, learned from every monthly series
+     reachable when it was built. Derived results only. */
+  const ATLAS_SNAP = {"schema":1,"as_of":"2026-09","months":441,"series":72,"sources":["GitHub datasets/bond-yields-us-10y","GitHub datasets/commodity-prices","GitHub datasets/cpi-us","GitHub datasets/exchange-rates","GitHub datasets/finance-vix","GitHub datasets/gold-prices","GitHub datasets/natural-gas","GitHub datasets/oil-prices","GitHub datasets/s-and-p-500"],"failed":{"CPIAUCSL":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL","GS10":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=GS10","POILBREUSDM":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=POILBREUSDM","MCOILWTICO":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=MCOILWTICO","MHHNGSP":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=MHHNGSP","VIXCLS":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=VIXCLS","PALUMUSDM":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=PALUMUSDM","PCOPPUSDM":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=PCOPPUSDM","PNICKUSDM":"GET failed after 1 tries: https://fred.stlouisfed.org/graph/fredgraph.csv?id=PNICKUSDM"},"nodes":[{"id":"sp500","name":"S&P 500 (Shiller)","short":"S&P 500","family":"Equities","source":"GitHub datasets/s-and-p-500","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.2775,"y":-0.3073,"pagerank":0.00333,"systemic":2.76974,"vulnerable":0.41259,"gives":92.26807,"takes":19.32921,"net":72.93886,"clipped":2,"sigma":0.8651,"core":"eq"},{"id":"sp_eps","name":"S&P 500 earnings (Shiller)","short":"Earnings","family":"Equities","source":"GitHub datasets/s-and-p-500","tf":"dlog","from":"1990-01","to":"2023-06","measured":true,"community":4,"x":-0.0841,"y":-0.6878,"pagerank":0.00619,"systemic":0.33321,"vulnerable":0.0,"gives":14.5532,"takes":0.0,"net":14.5532,"clipped":12,"sigma":0.19104,"core":null},{"id":"sp_div","name":"S&P 500 dividends (Shiller)","short":"Dividends","family":"Equities","source":"GitHub datasets/s-and-p-500","tf":"dlog","from":"1990-01","to":"2023-06","measured":true,"community":0,"x":0.6973,"y":-0.5387,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.12687,"core":null},{"id":"cpi","name":"Consumer prices (CPI-U)","short":"CPI","family":"Inflation","source":"GitHub datasets/cpi-us","tf":"dlog","from":"1990-01","to":"2026-08","measured":true,"community":5,"x":-0.0675,"y":-0.7211,"pagerank":0.05531,"systemic":0.0,"vulnerable":1.31891,"gives":0.0,"takes":25.48999,"net":-25.48999,"clipped":1,"sigma":0.48961,"core":"cpi"},{"id":"y10","name":"10-year Treasury yield","short":"10-year","family":"Rates","source":"GitHub datasets/bond-yields-us-10y","tf":"diff","from":"1990-01","to":"2026-08","measured":true,"community":6,"x":0.1623,"y":0.3139,"pagerank":0.05403,"systemic":0.0,"vulnerable":1.4788,"gives":0.0,"takes":19.00241,"net":-19.00241,"clipped":0,"sigma":0.78431,"core":"y10"},{"id":"brent","name":"Brent crude","short":"Brent","family":"Energy","source":"GitHub datasets/oil-prices","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":6,"x":-0.0143,"y":0.2429,"pagerank":0.00744,"systemic":0.57824,"vulnerable":1.77498,"gives":2.91536,"takes":87.63991,"net":-84.72455,"clipped":2,"sigma":0.09615,"core":"oil"},{"id":"wti","name":"WTI crude","short":"WTI","family":"Energy","source":"GitHub datasets/oil-prices","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":6,"x":0.0479,"y":0.2612,"pagerank":0.00535,"systemic":1.94791,"vulnerable":0.8744,"gives":95.71209,"takes":16.9262,"net":78.78589,"clipped":3,"sigma":0.62828,"core":null},{"id":"natgas","name":"Henry Hub natural gas","short":"US gas","family":"Energy","source":"GitHub datasets/natural-gas","tf":"dlog","from":"1997-02","to":"2026-09","measured":true,"community":0,"x":0.1675,"y":-0.7682,"pagerank":0.00236,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":1,"sigma":0.9796,"core":null},{"id":"gold","name":"Gold","short":"Gold","family":"Metals","source":"GitHub datasets/gold-prices","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":2,"x":-0.3331,"y":0.5444,"pagerank":0.00468,"systemic":0.0,"vulnerable":1.45101,"gives":0.0,"takes":26.40343,"net":-26.40343,"clipped":0,"sigma":0.84064,"core":"gold"},{"id":"vix","name":"VIX","short":"VIX","family":"Volatility","source":"GitHub datasets/finance-vix","tf":"dlog","from":"1990-02","to":"2026-09","measured":true,"community":0,"x":0.3023,"y":-0.2115,"pagerank":0.00314,"systemic":0.0,"vulnerable":1.10632,"gives":0.0,"takes":60.55604,"net":-60.55604,"clipped":1,"sigma":0.42307,"core":"vix"},{"id":"aud","name":"Australian dollar (per US dollar, inverted)","short":"AUD","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.3149,"y":-0.3904,"pagerank":0.00745,"systemic":9.49222,"vulnerable":0.0,"gives":453.64519,"takes":2.03089,"net":451.6143,"clipped":1,"sigma":1.17216,"core":null},{"id":"brl","name":"Brazilian real (per US dollar, inverted)","short":"BRL","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1995-02","to":"2026-09","measured":true,"community":0,"x":0.166,"y":-0.315,"pagerank":0.01878,"systemic":0.0,"vulnerable":1.22021,"gives":10.75225,"takes":26.07861,"net":-15.32637,"clipped":3,"sigma":0.64898,"core":null},{"id":"cad","name":"Canadian dollar (per US dollar, inverted)","short":"CAD","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.1845,"y":-0.4424,"pagerank":0.00736,"systemic":1.3561,"vulnerable":0.78895,"gives":15.85082,"takes":50.08853,"net":-34.23771,"clipped":1,"sigma":0.58997,"core":null},{"id":"cny","name":"Chinese yuan (per US dollar, inverted)","short":"CNY","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":1,"x":0.0094,"y":0.5542,"pagerank":0.02148,"systemic":0.0,"vulnerable":0.78768,"gives":0.0,"takes":23.48763,"net":-23.48763,"clipped":24,"sigma":0.5892,"core":null},{"id":"eur","name":"Euro (per US dollar, inverted)","short":"EUR","family":"European FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1999-02","to":"2026-09","measured":true,"community":2,"x":-0.3352,"y":0.338,"pagerank":0.00453,"systemic":4.58962,"vulnerable":0.89562,"gives":113.67779,"takes":42.54089,"net":71.1369,"clipped":0,"sigma":0.54397,"core":null},{"id":"inr","name":"Indian rupee (per US dollar, inverted)","short":"INR","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.0909,"y":-0.5159,"pagerank":0.00236,"systemic":1.99483,"vulnerable":0.0,"gives":60.39932,"takes":0.0,"net":60.39932,"clipped":7,"sigma":1.04256,"core":null},{"id":"jpy","name":"Japanese yen (per US dollar, inverted)","short":"JPY","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":1,"x":-0.0523,"y":0.7611,"pagerank":0.00528,"systemic":0.94422,"vulnerable":1.15287,"gives":20.85637,"takes":22.26115,"net":-1.40478,"clipped":0,"sigma":0.71547,"core":null},{"id":"myr","name":"Malaysian ringgit (per US dollar, inverted)","short":"MYR","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":1,"x":0.0217,"y":0.6118,"pagerank":0.00365,"systemic":1.98563,"vulnerable":0.37614,"gives":83.28308,"takes":17.33055,"net":65.95253,"clipped":11,"sigma":0.70363,"core":null},{"id":"mxn","name":"Mexican peso (per US dollar, inverted)","short":"MXN","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1993-12","to":"2026-09","measured":true,"community":0,"x":0.0849,"y":-0.3769,"pagerank":0.00523,"systemic":0.20681,"vulnerable":0.90443,"gives":3.78234,"takes":23.41249,"net":-19.63016,"clipped":6,"sigma":0.67887,"core":null},{"id":"nzd","name":"New Zealand dollar (per US dollar, inverted)","short":"NZD","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.4507,"y":-0.4001,"pagerank":0.00507,"systemic":0.74632,"vulnerable":1.00783,"gives":6.513,"takes":63.19612,"net":-56.68312,"clipped":0,"sigma":0.44318,"core":null},{"id":"nok","name":"Norwegian krone (per US dollar, inverted)","short":"NOK","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":2,"x":-0.4435,"y":0.288,"pagerank":0.00547,"systemic":2.07544,"vulnerable":1.47431,"gives":18.32905,"takes":61.74511,"net":-43.41606,"clipped":0,"sigma":0.29137,"core":null},{"id":"sgd","name":"Singapore dollar (per US dollar, inverted)","short":"SGD","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":1,"x":0.0047,"y":0.7508,"pagerank":0.01935,"systemic":0.54343,"vulnerable":2.45886,"gives":4.86968,"takes":74.75751,"net":-69.88783,"clipped":0,"sigma":0.20617,"core":null},{"id":"zar","name":"South African rand (per US dollar, inverted)","short":"ZAR","family":"Commodity FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.1834,"y":-0.603,"pagerank":0.00841,"systemic":0.0,"vulnerable":1.24234,"gives":1.2994,"takes":26.87626,"net":-25.57687,"clipped":2,"sigma":0.70741,"core":null},{"id":"krw","name":"Korean won (per US dollar, inverted)","short":"KRW","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":0,"x":0.3057,"y":-0.5165,"pagerank":0.00623,"systemic":0.9362,"vulnerable":0.97331,"gives":22.72103,"takes":36.62002,"net":-13.89899,"clipped":5,"sigma":0.57465,"core":null},{"id":"sek","name":"Swedish krona (per US dollar, inverted)","short":"SEK","family":"European FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":2,"x":-0.3785,"y":0.1331,"pagerank":0.00461,"systemic":0.27417,"vulnerable":1.75215,"gives":5.82683,"takes":75.91869,"net":-70.09186,"clipped":0,"sigma":0.1999,"core":null},{"id":"chf","name":"Swiss franc (per US dollar, inverted)","short":"CHF","family":"European FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":2,"x":-0.313,"y":0.4693,"pagerank":0.00416,"systemic":1.50235,"vulnerable":1.48278,"gives":16.39107,"takes":66.53675,"net":-50.14569,"clipped":0,"sigma":0.29736,"core":null},{"id":"twd","name":"Taiwan dollar (per US dollar, inverted)","short":"TWD","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":1,"x":0.0183,"y":0.8231,"pagerank":0.08078,"systemic":0.0,"vulnerable":2.15202,"gives":0.0,"takes":44.70587,"net":-44.70587,"clipped":2,"sigma":0.44421,"core":null},{"id":"thb","name":"Thai baht (per US dollar, inverted)","short":"THB","family":"Asian FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":1,"x":0.151,"y":0.5742,"pagerank":0.0109,"systemic":0.3039,"vulnerable":1.36798,"gives":3.5091,"takes":40.87029,"net":-37.3612,"clipped":7,"sigma":0.52268,"core":null},{"id":"gbp","name":"British pound (per US dollar, inverted)","short":"GBP","family":"European FX","source":"GitHub datasets/exchange-rates","tf":"dlog","from":"1990-01","to":"2026-09","measured":true,"community":2,"x":-0.2342,"y":0.2147,"pagerank":0.00499,"systemic":4.4279,"vulnerable":0.0,"gives":128.67423,"takes":8.2946,"net":120.37963,"clipped":0,"sigma":0.79812,"core":null},{"id":"aluminum","name":"Aluminum (IMF)","short":"Aluminum","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":4,"x":-0.2708,"y":-0.524,"pagerank":0.00762,"systemic":0.36424,"vulnerable":1.77611,"gives":2.95286,"takes":48.20811,"net":-45.25526,"clipped":0,"sigma":0.40528,"core":null},{"id":"copper","name":"Copper (IMF)","short":"Copper","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":4,"x":-0.261,"y":-0.4465,"pagerank":0.01084,"systemic":0.78559,"vulnerable":1.58433,"gives":21.50036,"takes":49.89839,"net":-28.39804,"clipped":1,"sigma":0.46022,"core":null},{"id":"nickel","name":"Nickel (IMF)","short":"Nickel","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":0,"x":0.5601,"y":-0.403,"pagerank":0.09609,"systemic":0.0,"vulnerable":2.02706,"gives":0.0,"takes":43.688,"net":-43.688,"clipped":0,"sigma":0.49733,"core":null},{"id":"zinc","name":"Zinc (IMF)","short":"Zinc","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":4,"x":-0.1878,"y":-0.4843,"pagerank":0.00514,"systemic":1.7775,"vulnerable":0.38624,"gives":88.71383,"takes":15.86242,"net":72.85141,"clipped":0,"sigma":0.8092,"core":null},{"id":"lead","name":"Lead (IMF)","short":"Lead","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":0,"x":0.5817,"y":-0.2749,"pagerank":0.01035,"systemic":0.38936,"vulnerable":1.3436,"gives":5.01067,"takes":45.91452,"net":-40.90385,"clipped":0,"sigma":0.54846,"core":null},{"id":"tin","name":"Tin (IMF)","short":"Tin","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":0,"x":0.4632,"y":-0.2733,"pagerank":0.00569,"systemic":0.76007,"vulnerable":0.9268,"gives":12.40159,"takes":23.1036,"net":-10.70201,"clipped":0,"sigma":0.71382,"core":null},{"id":"ironore","name":"Iron ore (IMF)","short":"Iron ore","family":"Metals","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":5,"x":0.0482,"y":-0.8475,"pagerank":0.00394,"systemic":0.18522,"vulnerable":0.0,"gives":2.93451,"takes":0.0,"net":2.93451,"clipped":2,"sigma":0.96133,"core":null},{"id":"uranium","name":"Uranium (IMF)","short":"Uranium","family":"Energy","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":0,"x":0.6057,"y":-0.6942,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":3,"sigma":0.85163,"core":null},{"id":"coal","name":"Coal (IMF)","short":"Coal","family":"Energy","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":5,"x":-0.1577,"y":-0.8089,"pagerank":0.00559,"systemic":0.48983,"vulnerable":0.0,"gives":8.08915,"takes":1.74484,"net":6.34432,"clipped":5,"sigma":0.87769,"core":null},{"id":"gas_eu","name":"EU gas (IMF)","short":"EU gas","family":"Energy","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":6,"x":0.1372,"y":0.0729,"pagerank":0.00236,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":115,"sigma":0.99151,"core":null},{"id":"lng_jp","name":"Japan LNG (IMF)","short":"Japan LNG","family":"Energy","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1992-02","to":"2017-06","measured":true,"community":0,"x":0.3301,"y":-0.7805,"pagerank":0.00236,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":1,"sigma":0.96778,"core":null},{"id":"wheat","name":"Wheat (IMF)","short":"Wheat","family":"Grains","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.6476,"y":-0.4649,"pagerank":0.00301,"systemic":1.79363,"vulnerable":0.0,"gives":103.93723,"takes":0.0,"net":103.93723,"clipped":0,"sigma":0.93904,"core":null},{"id":"maize","name":"Corn (IMF)","short":"Corn","family":"Grains","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.5345,"y":-0.4107,"pagerank":0.00446,"systemic":1.75082,"vulnerable":0.52748,"gives":69.99961,"takes":33.1087,"net":36.89091,"clipped":0,"sigma":0.65736,"core":null},{"id":"barley","name":"Barley (IMF)","short":"Barley","family":"Grains","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.5387,"y":-0.4967,"pagerank":0.02775,"systemic":0.0,"vulnerable":1.19982,"gives":0.0,"takes":35.34422,"net":-35.34422,"clipped":1,"sigma":0.62253,"core":null},{"id":"rice","name":"Rice (IMF)","short":"Rice","family":"Grains","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.2495,"y":0.9232,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":4,"sigma":0.88979,"core":null},{"id":"soybeans","name":"Soybeans (IMF)","short":"Soybeans","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.5889,"y":-0.3098,"pagerank":0.00584,"systemic":1.18448,"vulnerable":1.69811,"gives":37.82431,"takes":62.32392,"net":-24.4996,"clipped":0,"sigma":0.33637,"core":null},{"id":"soymeal","name":"Soy meal (IMF)","short":"Soy meal","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.7187,"y":-0.3262,"pagerank":0.03418,"systemic":0.0,"vulnerable":2.42187,"gives":0.0,"takes":86.02222,"net":-86.02222,"clipped":0,"sigma":0.18399,"core":null},{"id":"soyoil","name":"Soy oil (IMF)","short":"Soy oil","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.4613,"y":-0.2429,"pagerank":0.00609,"systemic":2.70401,"vulnerable":1.11402,"gives":40.58386,"takes":65.01983,"net":-24.43597,"clipped":0,"sigma":0.29546,"core":null},{"id":"palmoil","name":"Palm oil (IMF)","short":"Palm oil","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.5252,"y":-0.1367,"pagerank":0.00348,"systemic":2.41302,"vulnerable":0.0,"gives":103.94343,"takes":0.0,"net":103.94343,"clipped":0,"sigma":0.92002,"core":null},{"id":"rapeseed","name":"Rapeseed oil (IMF)","short":"Rapeseed oil","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.3733,"y":-0.3026,"pagerank":0.00648,"systemic":0.0,"vulnerable":1.26619,"gives":0.0,"takes":37.20584,"net":-37.20584,"clipped":1,"sigma":0.56696,"core":null},{"id":"sunflower","name":"Sunflower oil (IMF)","short":"Sunflower oil","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.3591,"y":-0.207,"pagerank":0.00763,"systemic":0.22568,"vulnerable":1.0932,"gives":4.23374,"takes":30.82964,"net":-26.5959,"clipped":5,"sigma":0.65079,"core":null},{"id":"olive","name":"Olive oil (IMF)","short":"Olive oil","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":2,"x":-0.4644,"y":0.4048,"pagerank":0.02541,"systemic":0.0,"vulnerable":0.82472,"gives":0.0,"takes":18.24138,"net":-18.24138,"clipped":3,"sigma":0.74211,"core":null},{"id":"peanuts","name":"Peanuts (IMF)","short":"Peanuts","family":"Oilseeds","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":0,"x":0.4731,"y":-0.779,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":6,"sigma":0.91336,"core":null},{"id":"sugar","name":"Sugar (IMF)","short":"Sugar","family":"Softs","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.3683,"y":0.7141,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.94613,"core":null},{"id":"arabica","name":"Arabica (IMF)","short":"Arabica","family":"Softs","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.7251,"y":-0.0559,"pagerank":0.00309,"systemic":0.70309,"vulnerable":0.0,"gives":55.82823,"takes":0.0,"net":55.82823,"clipped":1,"sigma":0.9632,"core":null},{"id":"robusta","name":"Robusta (IMF)","short":"Robusta","family":"Softs","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.7937,"y":-0.1155,"pagerank":0.02843,"systemic":0.0,"vulnerable":0.70309,"gives":0.0,"takes":55.82823,"net":-55.82823,"clipped":1,"sigma":0.46639,"core":null},{"id":"cocoa","name":"Cocoa (IMF)","short":"Cocoa","family":"Softs","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":2,"x":-0.1855,"y":0.4146,"pagerank":0.02024,"systemic":0.0,"vulnerable":0.66363,"gives":0.0,"takes":6.31016,"net":-6.31016,"clipped":0,"sigma":0.90462,"core":null},{"id":"tea","name":"Tea (IMF)","short":"Tea","family":"Softs","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":2,"x":-0.4785,"y":0.0405,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.97686,"core":null},{"id":"cotton","name":"Cotton (IMF)","short":"Cotton","family":"Raw materials","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":3,"x":-0.4221,"y":-0.0509,"pagerank":0.00809,"systemic":0.15346,"vulnerable":0.50636,"gives":1.7674,"takes":8.04785,"net":-6.28045,"clipped":2,"sigma":0.72391,"core":null},{"id":"rubber","name":"Rubber (IMF)","short":"Rubber","family":"Raw materials","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":5,"x":0.0424,"y":-0.9209,"pagerank":0.00884,"systemic":0.15498,"vulnerable":1.19596,"gives":2.14869,"takes":20.88962,"net":-18.74094,"clipped":1,"sigma":0.70047,"core":null},{"id":"wool","name":"Wool (IMF)","short":"Wool","family":"Raw materials","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":0,"x":0.4798,"y":-0.5654,"pagerank":0.00647,"systemic":0.06884,"vulnerable":0.2604,"gives":0.52032,"takes":8.68461,"net":-8.16429,"clipped":1,"sigma":0.86861,"core":null},{"id":"hides","name":"Hides (IMF)","short":"Hides","family":"Raw materials","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":4,"x":-0.0372,"y":-0.6093,"pagerank":0.02533,"systemic":0.0,"vulnerable":0.33321,"gives":0.0,"takes":14.5532,"net":-14.5532,"clipped":6,"sigma":0.84538,"core":null},{"id":"logs","name":"Logs (IMF)","short":"Logs","family":"Raw materials","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.3338,"y":0.8249,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.80756,"core":null},{"id":"sawnwood","name":"Sawnwood (IMF)","short":"Sawnwood","family":"Raw materials","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.1507,"y":0.7277,"pagerank":0.00695,"systemic":0.18307,"vulnerable":0.61611,"gives":1.73048,"takes":24.05175,"net":-22.32127,"clipped":5,"sigma":0.73181,"core":null},{"id":"beef","name":"Beef (IMF)","short":"Beef","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":-0.1764,"y":0.5985,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.9379,"core":null},{"id":"pork","name":"Pork (IMF)","short":"Pork","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.0492,"y":0.375,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":1,"sigma":0.98144,"core":null},{"id":"poultry","name":"Poultry (IMF)","short":"Poultry","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.3477,"y":0.6067,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.68804,"core":null},{"id":"lamb","name":"Lamb (IMF)","short":"Lamb","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":2,"x":-0.2088,"y":0.1045,"pagerank":0.01867,"systemic":0.0,"vulnerable":0.98881,"gives":1.97288,"takes":22.61052,"net":-20.63765,"clipped":0,"sigma":0.61105,"core":null},{"id":"salmon","name":"Salmon (IMF)","short":"Salmon","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":2,"x":-0.5946,"y":0.2752,"pagerank":0.02132,"systemic":0.0,"vulnerable":0.8221,"gives":0.0,"takes":10.66804,"net":-10.66804,"clipped":0,"sigma":0.80702,"core":null},{"id":"shrimp","name":"Shrimp (IMF)","short":"Shrimp","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.321,"y":0.4859,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":23,"sigma":0.93332,"core":null},{"id":"fishmeal","name":"Fishmeal (IMF)","short":"Fishmeal","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":2,"x":-0.1154,"y":0.2194,"pagerank":0.01885,"systemic":0.0,"vulnerable":0.36137,"gives":0.0,"takes":11.6636,"net":-11.6636,"clipped":2,"sigma":0.7796,"core":null},{"id":"bananas","name":"Bananas (IMF)","short":"Bananas","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.1094,"y":0.97,"pagerank":0.00236,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":2,"sigma":0.97484,"core":null},{"id":"oranges","name":"Oranges (IMF)","short":"Oranges","family":"Livestock and food","source":"GitHub datasets/commodity-prices","tf":"dlog","from":"1990-01","to":"2017-06","measured":true,"community":1,"x":0.2121,"y":0.3955,"pagerank":0.01576,"systemic":0.0,"vulnerable":0.0,"gives":0.0,"takes":0.0,"net":0.0,"clipped":0,"sigma":0.97553,"core":null},{"id":"hormuz","name":"Hormuz disruption","short":"Hormuz","family":"Judged","measured":false,"ring":0,"community":7,"x":0.8128,"y":0.1378},{"id":"fed","name":"Fed policy path","short":"Fed","family":"Judged","measured":false,"ring":0,"community":7,"x":0.3771,"y":0.3131},{"id":"fiscal","name":"Treasury and tech bond supply","short":"Bond supply","family":"Judged","measured":false,"ring":0,"community":7,"x":0.531,"y":-0.1418},{"id":"capex","name":"AI capex","short":"AI capex","family":"Judged","measured":false,"ring":0,"community":7,"x":0.3918,"y":-0.0671},{"id":"memory","name":"Memory prices","short":"Memory","family":"Judged","measured":false,"ring":0,"community":7,"x":0.3776,"y":-0.1427},{"id":"power","name":"Grid power prices","short":"Power","family":"Judged","measured":false,"ring":0,"community":7,"x":0.3124,"y":-0.0334},{"id":"aidemand","name":"AI end demand","short":"AI demand","family":"Judged","measured":false,"ring":0,"community":7,"x":0.3982,"y":0.0739},{"id":"tp","name":"Term premium","short":"Term premium","family":"Judged","measured":false,"ring":1,"community":7,"x":0.6554,"y":-0.16},{"id":"dep","name":"Depreciation catch-up","short":"Depreciation","family":"Judged","measured":false,"ring":1,"community":7,"x":0.5212,"y":-0.0335},{"id":"pods","name":"Pod crowding and de-grossing","short":"Pods","family":"Judged","measured":false,"ring":1,"community":7,"x":0.1664,"y":0.1129},{"id":"liq","name":"Funding liquidity","short":"Liquidity","family":"Judged","measured":false,"ring":1,"community":7,"x":0.472,"y":0.3672},{"id":"credit","name":"Credit spreads (HY and CCC)","short":"Credit","family":"Judged","measured":false,"ring":1,"community":7,"x":0.4776,"y":0.2435},{"id":"pcredit","name":"Private credit stress","short":"Private credit","family":"Judged","measured":false,"ring":1,"community":7,"x":0.5861,"y":0.2792},{"id":"consumer","name":"Consumer spending","short":"Consumer","family":"Judged","measured":false,"ring":1,"community":7,"x":0.663,"y":0.1353},{"id":"dollar","name":"The dollar","short":"Dollar","family":"Judged","measured":false,"ring":1,"community":7,"x":0.2695,"y":0.2695},{"id":"earn","name":"AI earnings revisions","short":"Earnings rev.","family":"Judged","measured":false,"ring":1,"community":7,"x":0.4806,"y":0.0372},{"id":"tlt","name":"Long bonds (TLT)","short":"TLT","family":"Judged","measured":false,"ring":2,"community":7,"x":0.7807,"y":-0.0289},{"id":"corr","name":"Stock-bond correlation","short":"Stock-bond corr.","family":"Judged","measured":false,"ring":2,"community":7,"x":0.7464,"y":0.3227},{"id":"NVDA","name":"Nvidia","short":"Nvidia","family":"Book","measured":false,"ring":3,"community":8,"x":0.122,"y":-0.1553},{"id":"AVGO","name":"Broadcom","short":"Broadcom","family":"Book","measured":false,"ring":3,"community":8,"x":0.1696,"y":-0.3247},{"id":"MSFT","name":"Microsoft","short":"Microsoft","family":"Book","measured":false,"ring":3,"community":8,"x":0.0081,"y":-0.2447},{"id":"GOOGL","name":"Alphabet","short":"Alphabet","family":"Book","measured":false,"ring":3,"community":8,"x":0.0336,"y":0.0216},{"id":"AMZN","name":"Amazon","short":"Amazon","family":"Book","measured":false,"ring":3,"community":8,"x":0.147,"y":-0.0328},{"id":"META","name":"Meta","short":"Meta","family":"Book","measured":false,"ring":3,"community":8,"x":-0.0997,"y":0.0388},{"id":"ORCL","name":"Oracle","short":"Oracle","family":"Book","measured":false,"ring":3,"community":8,"x":-0.2309,"y":-0.2216},{"id":"TSLA","name":"Tesla","short":"Tesla","family":"Book","measured":false,"ring":3,"community":8,"x":-0.147,"y":-0.0886},{"id":"SPCX","name":"SpaceX","short":"SpaceX","family":"Book","measured":false,"ring":3,"community":8,"x":-0.1123,"y":-0.3419},{"id":"book","name":"Your model book","short":"Book","family":"Book","measured":false,"ring":4,"community":8,"x":0.0248,"y":-0.0978}],"links":[{"from":"sp500","to":"sp500","w":0.21933,"se":0.0855,"t":2.56525,"lag":1,"self":true},{"from":"aud","to":"sp500","w":0.41259,"se":0.06228,"t":6.62466,"lag":0,"stability":0.73333,"established":false,"agree":false,"evidence":-0.04389,"rv":0.33148,"partial":0.02298,"coparents":[]},{"from":"sp_eps","to":"sp_eps","w":0.88704,"se":0.0421,"t":21.07123,"lag":1,"self":true},{"from":"sp_div","to":"sp_div","w":0.93465,"se":0.03322,"t":28.13132,"lag":1,"self":true},{"from":"cpi","to":"cpi","w":0.31614,"se":0.03638,"t":8.69034,"lag":1,"self":true},{"from":"brent","to":"cpi","w":0.43532,"se":0.05435,"t":8.00961,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02512,"rv":0.35557,"partial":0.11356,"coparents":["coal"]},{"from":"coal","to":"cpi","w":0.11091,"se":0.05021,"t":2.20884,"lag":0,"stability":0.7,"established":false,"agree":false,"evidence":-0.00933,"rv":0.11492,"partial":0.02888,"coparents":["brent"]},{"from":"y10","to":"y10","w":0.20275,"se":0.04893,"t":4.14383,"lag":1,"self":true},{"from":"wti","to":"y10","w":0.19033,"se":0.0571,"t":3.33302,"lag":0,"stability":0.83333,"established":false,"agree":true,"evidence":0.04837,"rv":0.16811,"partial":0.03878,"coparents":["jpy","aluminum"]},{"from":"jpy","to":"y10","w":-0.32015,"se":0.05125,"t":-6.24738,"lag":0,"stability":1.0,"established":false,"agree":false,"evidence":-0.00022,"rv":0.29092,"partial":-0.13916,"coparents":["wti","aluminum"]},{"from":"aluminum","to":"y10","w":0.21407,"se":0.05007,"t":4.27571,"lag":0,"stability":0.76667,"established":false,"agree":true,"evidence":0.02379,"rv":0.21014,"partial":0.03908,"coparents":["wti","jpy"]},{"from":"wti","to":"brent","w":0.94696,"se":0.02945,"t":32.15395,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.0023,"rv":0.79798,"partial":0.64207,"coparents":[]},{"from":"rubber","to":"brent","w":0.04626,"se":0.01819,"t":2.54291,"lag":1,"self":false},{"from":"cad","to":"wti","w":0.22463,"se":0.04287,"t":5.23919,"lag":0,"stability":0.98333,"established":false,"agree":true,"evidence":0.00178,"rv":0.25045,"partial":0.04926,"coparents":["nok"]},{"from":"nok","to":"wti","w":0.19098,"se":0.06187,"t":3.08662,"lag":0,"stability":0.95,"established":false,"agree":false,"evidence":-0.04526,"rv":0.15652,"partial":0.03591,"coparents":["cad"]},{"from":"aud","to":"gold","w":0.21888,"se":0.06943,"t":3.15276,"lag":0,"stability":0.93333,"established":false,"agree":true,"evidence":0.00617,"rv":0.15937,"partial":0.0414,"coparents":["jpy","chf"]},{"from":"jpy","to":"gold","w":0.22499,"se":0.07262,"t":3.09815,"lag":0,"stability":0.85,"established":false,"agree":false,"evidence":-0.02124,"rv":0.15684,"partial":0.03578,"coparents":["aud","chf"]},{"from":"chf","to":"gold","w":0.30117,"se":0.09312,"t":3.23417,"lag":0,"stability":0.85,"established":false,"agree":false,"evidence":-0.01706,"rv":0.16312,"partial":0.03992,"coparents":["aud","jpy"]},{"from":"sp500","to":"vix","w":-0.71225,"se":0.05264,"t":-13.53153,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.01072,"rv":0.47086,"partial":-0.42128,"coparents":["aud"]},{"from":"sp500","to":"vix","w":0.32647,"se":0.05356,"t":6.09549,"lag":1,"self":false},{"from":"aud","to":"vix","w":-0.1002,"se":0.03437,"t":-2.91533,"lag":0,"stability":0.93333,"established":false,"agree":false,"evidence":-0.04958,"rv":0.13007,"partial":-0.04555,"coparents":["sp500"]},{"from":"brl","to":"aud","w":0.16174,"se":0.06106,"t":2.64886,"lag":1,"self":false},{"from":"sp500","to":"brl","w":0.16071,"se":0.06381,"t":2.51858,"lag":0,"stability":0.88333,"established":false,"agree":true,"evidence":0.01932,"rv":0.14296,"partial":0.04919,"coparents":["aud","inr","mxn","soyoil"]},{"from":"aud","to":"brl","w":0.14007,"se":0.06378,"t":2.19612,"lag":0,"stability":1.0,"established":false,"agree":true,"evidence":0.10507,"rv":0.12589,"partial":0.08884,"coparents":["sp500","inr","mxn","soyoil"]},{"from":"brl","to":"brl","w":0.34625,"se":0.08164,"t":4.24134,"lag":1,"self":true},{"from":"inr","to":"brl","w":0.12629,"se":0.03958,"t":3.19068,"lag":0,"stability":0.96667,"established":false,"agree":true,"evidence":0.06941,"rv":0.17743,"partial":0.06465,"coparents":["sp500","aud","mxn","soyoil"]},{"from":"mxn","to":"brl","w":0.20681,"se":0.06378,"t":3.24239,"lag":0,"stability":1.0,"established":false,"agree":true,"evidence":0.00948,"rv":0.18002,"partial":0.14956,"coparents":["sp500","aud","inr","soyoil"]},{"from":"soyoil","to":"brl","w":0.15751,"se":0.06946,"t":2.26764,"lag":0,"stability":0.83333,"established":false,"agree":false,"evidence":-0.06039,"rv":0.12971,"partial":0.04622,"coparents":["sp500","aud","inr","mxn"]},{"from":"sp500","to":"cad","w":0.14425,"se":0.04194,"t":3.43945,"lag":0,"stability":1.0,"established":false,"agree":true,"evidence":0.04058,"rv":0.1895,"partial":0.07204,"coparents":["aud"]},{"from":"aud","to":"cad","w":0.58518,"se":0.0545,"t":10.73641,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.0138,"rv":0.47575,"partial":0.20837,"coparents":["sp500"]},{"from":"zar","to":"cad","w":0.1244,"se":0.04407,"t":2.82306,"lag":1,"self":false},{"from":"copper","to":"cad","w":0.17532,"se":0.05628,"t":3.11532,"lag":1,"self":false},{"from":"cny","to":"cny","w":0.46646,"se":0.04826,"t":9.66522,"lag":1,"self":true},{"from":"myr","to":"cny","w":0.34627,"se":0.07558,"t":4.5818,"lag":0,"stability":1.0,"established":false,"agree":false,"evidence":-0.10686,"rv":0.19627,"partial":0.15771,"coparents":["nok"]},{"from":"nok","to":"cny","w":0.12576,"se":0.04293,"t":2.92912,"lag":0,"stability":0.71667,"established":false,"agree":false,"evidence":-0.0512,"rv":0.13051,"partial":0.02287,"coparents":["myr"]},{"from":"aud","to":"eur","w":0.34351,"se":0.06027,"t":5.6991,"lag":0,"stability":0.95,"established":true,"agree":false,"evidence":-0.00318,"rv":0.31803,"partial":0.06203,"coparents":["gbp"]},{"from":"gbp","to":"eur","w":0.5521,"se":0.07208,"t":7.65926,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.04645,"rv":0.40068,"partial":0.12443,"coparents":["aud"]},{"from":"jpy","to":"jpy","w":0.30658,"se":0.06572,"t":4.66506,"lag":1,"self":true},{"from":"chf","to":"jpy","w":0.46434,"se":0.0594,"t":7.81788,"lag":0,"stability":1.0,"established":false,"agree":false,"evidence":-0.00425,"rv":0.31024,"partial":0.12145,"coparents":[]},{"from":"inr","to":"myr","w":0.37614,"se":0.06225,"t":6.0424,"lag":0,"stability":0.98333,"established":false,"agree":true,"evidence":0.10327,"rv":0.28259,"partial":0.08253,"coparents":[]},{"from":"myr","to":"myr","w":0.36263,"se":0.07556,"t":4.79945,"lag":1,"self":true},{"from":"sp500","to":"mxn","w":0.2542,"se":0.0467,"t":5.443,"lag":0,"stability":1.0,"established":false,"agree":true,"evidence":0.04859,"rv":0.24378,"partial":0.09442,"coparents":["cad","inr"]},{"from":"cad","to":"mxn","w":0.18158,"se":0.04872,"t":3.72693,"lag":0,"stability":1.0,"established":false,"agree":false,"evidence":-0.05178,"rv":0.17441,"partial":0.08348,"coparents":["sp500","inr"]},{"from":"inr","to":"mxn","w":0.22051,"se":0.04753,"t":4.63938,"lag":0,"stability":0.93333,"established":false,"agree":true,"evidence":0.0562,"rv":0.21209,"partial":0.07433,"coparents":["sp500","cad"]},{"from":"aud","to":"nzd","w":0.72104,"se":0.05268,"t":13.686,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.01241,"rv":0.59126,"partial":0.3689,"coparents":["eur"]},{"from":"eur","to":"nzd","w":0.1513,"se":0.05214,"t":2.90164,"lag":0,"stability":0.93333,"established":true,"agree":false,"evidence":-0.01619,"rv":0.17779,"partial":0.04468,"coparents":["aud"]},{"from":"nzd","to":"nzd","w":0.21947,"se":0.06901,"t":3.18023,"lag":1,"self":true},{"from":"aud","to":"nok","w":0.13535,"se":0.05018,"t":2.69707,"lag":0,"stability":0.85,"established":true,"agree":false,"evidence":-0.00249,"rv":0.1664,"partial":0.02235,"coparents":["cad","eur"]},{"from":"cad","to":"nok","w":0.15438,"se":0.04462,"t":3.45988,"lag":0,"stability":0.98333,"established":true,"agree":true,"evidence":0.02457,"rv":0.20806,"partial":0.08266,"coparents":["aud","eur"]},{"from":"eur","to":"nok","w":0.56066,"se":0.0522,"t":10.74153,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.063,"rv":0.50874,"partial":0.09383,"coparents":["aud","cad"]},{"from":"eur","to":"nok","w":-0.2457,"se":0.07685,"t":-3.19716,"lag":1,"self":false},{"from":"nok","to":"nok","w":0.21574,"se":0.06634,"t":3.2521,"lag":1,"self":true},{"from":"aud","to":"sgd","w":0.14246,"se":0.04088,"t":3.48489,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.06274,"rv":0.20981,"partial":0.04623,"coparents":["jpy","myr","krw","chf","thb","sawnwood"]},{"from":"jpy","to":"sgd","w":0.2018,"se":0.03352,"t":6.02072,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.10002,"rv":0.33302,"partial":0.13889,"coparents":["aud","myr","krw","chf","thb","sawnwood"]},{"from":"myr","to":"sgd","w":0.34163,"se":0.04243,"t":8.05243,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.10006,"rv":0.41657,"partial":0.24311,"coparents":["aud","jpy","krw","chf","thb","sawnwood"]},{"from":"sgd","to":"sgd","w":0.16834,"se":0.06308,"t":2.66884,"lag":1,"self":true},{"from":"krw","to":"sgd","w":0.13879,"se":0.03261,"t":4.25594,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.01083,"rv":0.24968,"partial":0.09701,"coparents":["aud","jpy","myr","chf","thb","sawnwood"]},{"from":"chf","to":"sgd","w":0.19333,"se":0.04083,"t":4.73508,"lag":0,"stability":0.98333,"established":true,"agree":true,"evidence":0.07904,"rv":0.27337,"partial":0.03768,"coparents":["aud","jpy","myr","krw","thb","sawnwood"]},{"from":"thb","to":"sgd","w":0.1969,"se":0.04573,"t":4.30578,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.09587,"rv":0.25219,"partial":0.21063,"coparents":["aud","jpy","myr","krw","chf","sawnwood"]},{"from":"sawnwood","to":"sgd","w":0.11861,"se":0.03807,"t":3.11551,"lag":0,"stability":0.8,"established":false,"agree":true,"evidence":0.06023,"rv":0.18992,"partial":0.04634,"coparents":["aud","jpy","myr","krw","chf","thb"]},{"from":"lamb","to":"sgd","w":-0.12995,"se":0.04261,"t":-3.04986,"lag":1,"self":false},{"from":"aud","to":"zar","w":0.22288,"se":0.05908,"t":3.7727,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.06325,"rv":0.17634,"partial":0.06507,"coparents":["inr","myr","nok"]},{"from":"inr","to":"zar","w":0.16394,"se":0.04816,"t":3.40421,"lag":0,"stability":0.98333,"established":false,"agree":true,"evidence":0.02093,"rv":0.16063,"partial":0.08232,"coparents":["aud","myr","nok"]},{"from":"myr","to":"zar","w":0.1471,"se":0.05605,"t":2.62466,"lag":0,"stability":0.86667,"established":false,"agree":true,"evidence":0.01989,"rv":0.12635,"partial":0.04423,"coparents":["aud","inr","nok"]},{"from":"nok","to":"zar","w":0.26395,"se":0.05529,"t":4.77342,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02189,"rv":0.21747,"partial":0.11141,"coparents":["aud","inr","myr"]},{"from":"zar","to":"zar","w":0.21262,"se":0.05362,"t":3.9654,"lag":1,"self":true},{"from":"sp500","to":"krw","w":0.20676,"se":0.05864,"t":3.52601,"lag":0,"stability":0.98333,"established":false,"agree":false,"evidence":-0.02334,"rv":0.15488,"partial":0.08803,"coparents":["aud","inr","nzd"]},{"from":"aud","to":"krw","w":0.21467,"se":0.0569,"t":3.77281,"lag":0,"stability":0.96667,"established":false,"agree":false,"evidence":-0.01124,"rv":0.16475,"partial":0.06833,"coparents":["sp500","inr","nzd"]},{"from":"inr","to":"krw","w":0.16293,"se":0.04142,"t":3.93363,"lag":0,"stability":0.95,"established":false,"agree":true,"evidence":0.00092,"rv":0.17112,"partial":0.07035,"coparents":["sp500","aud","nzd"]},{"from":"nzd","to":"krw","w":0.15123,"se":0.06617,"t":2.28567,"lag":0,"stability":0.83333,"established":false,"agree":true,"evidence":0.03428,"rv":0.10341,"partial":0.03496,"coparents":["sp500","aud","inr"]},{"from":"krw","to":"krw","w":0.33506,"se":0.05087,"t":6.5862,"lag":1,"self":true},{"from":"aud","to":"sek","w":0.20754,"se":0.04118,"t":5.03947,"lag":0,"stability":0.9,"established":true,"agree":true,"evidence":0.0085,"rv":0.28745,"partial":0.02004,"coparents":["eur","nok"]},{"from":"eur","to":"sek","w":0.49473,"se":0.06463,"t":7.65543,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.00928,"rv":0.40053,"partial":0.28811,"coparents":["aud","nok"]},{"from":"nok","to":"sek","w":0.24523,"se":0.07058,"t":3.47432,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.00281,"rv":0.20883,"partial":0.25768,"coparents":["aud","eur"]},{"from":"gbp","to":"sek","w":0.10805,"se":0.0424,"t":2.54827,"lag":1,"self":false},{"from":"eur","to":"chf","w":0.72509,"se":0.05826,"t":12.44489,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.10871,"rv":0.55867,"partial":0.30217,"coparents":["gbp"]},{"from":"gbp","to":"chf","w":0.10829,"se":0.04989,"t":2.17081,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.01948,"rv":0.13632,"partial":0.09194,"coparents":["eur"]},{"from":"jpy","to":"twd","w":0.08761,"se":0.04375,"t":2.00227,"lag":0,"stability":0.88333,"established":false,"agree":false,"evidence":-0.01031,"rv":0.10461,"partial":0.04745,"coparents":["sgd","krw"]},{"from":"sgd","to":"twd","w":0.37432,"se":0.04861,"t":7.70106,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.0069,"rv":0.34432,"partial":0.20301,"coparents":["jpy","krw"]},{"from":"krw","to":"twd","w":0.33887,"se":0.0534,"t":6.3461,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.04582,"rv":0.29435,"partial":0.22473,"coparents":["jpy","sgd"]},{"from":"krw","to":"twd","w":-0.21095,"se":0.05295,"t":-3.98368,"lag":1,"self":false},{"from":"twd","to":"twd","w":0.30132,"se":0.05983,"t":5.03595,"lag":1,"self":true},{"from":"myr","to":"thb","w":0.33385,"se":0.07857,"t":4.24931,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.0203,"rv":0.18347,"partial":0.15947,"coparents":["nzd","krw"]},{"from":"nzd","to":"thb","w":0.16374,"se":0.06786,"t":2.41288,"lag":0,"stability":0.95,"established":false,"agree":true,"evidence":0.01489,"rv":0.10884,"partial":0.04824,"coparents":["myr","krw"]},{"from":"krw","to":"thb","w":0.29382,"se":0.07685,"t":3.82323,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.0321,"rv":0.16676,"partial":0.13931,"coparents":["myr","nzd"]},{"from":"thb","to":"thb","w":0.26056,"se":0.0571,"t":4.56283,"lag":1,"self":true},{"from":"sek","to":"gbp","w":0.31653,"se":0.11882,"t":2.66392,"lag":1,"self":false},{"from":"brent","to":"aluminum","w":0.10476,"se":0.04845,"t":2.16253,"lag":0,"stability":0.96667,"established":false,"agree":true,"evidence":0.02806,"rv":0.12409,"partial":0.04969,"coparents":["aud","copper","zinc","tin"]},{"from":"aud","to":"aluminum","w":0.10859,"se":0.0498,"t":2.18039,"lag":0,"stability":0.88333,"established":false,"agree":true,"evidence":0.01974,"rv":0.12505,"partial":0.05365,"coparents":["brent","copper","zinc","tin"]},{"from":"copper","to":"aluminum","w":0.3117,"se":0.06743,"t":4.62232,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.00067,"rv":0.24608,"partial":0.23114,"coparents":["brent","aud","zinc","tin"]},{"from":"zinc","to":"aluminum","w":0.20307,"se":0.06478,"t":3.13458,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.03169,"rv":0.17461,"partial":0.11542,"coparents":["brent","aud","copper","tin"]},{"from":"tin","to":"aluminum","w":0.15039,"se":0.0469,"t":3.20658,"lag":0,"stability":0.98333,"established":true,"agree":true,"evidence":0.01954,"rv":0.17823,"partial":0.11642,"coparents":["brent","aud","copper","zinc"]},{"from":"wti","to":"copper","w":0.14732,"se":0.04378,"t":3.36513,"lag":0,"stability":0.78333,"established":false,"agree":false,"evidence":-0.01019,"rv":0.16958,"partial":0.03328,"coparents":["aud","zinc","lead","tin"]},{"from":"aud","to":"copper","w":0.1415,"se":0.03892,"t":3.63532,"lag":0,"stability":0.95,"established":false,"agree":false,"evidence":-0.00029,"rv":0.18184,"partial":0.04005,"coparents":["wti","zinc","lead","tin"]},{"from":"copper","to":"copper","w":0.23592,"se":0.06202,"t":3.80378,"lag":1,"self":true},{"from":"zinc","to":"copper","w":0.33021,"se":0.07497,"t":4.40443,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.02938,"rv":0.2157,"partial":0.18018,"coparents":["wti","aud","lead","tin"]},{"from":"lead","to":"copper","w":0.21806,"se":0.05291,"t":4.1216,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02785,"rv":0.20343,"partial":0.13105,"coparents":["wti","aud","zinc","tin"]},{"from":"tin","to":"copper","w":0.10272,"se":0.03795,"t":2.70632,"lag":0,"stability":0.98333,"established":false,"agree":true,"evidence":0.03598,"rv":0.13888,"partial":0.06861,"coparents":["wti","aud","zinc","lead"]},{"from":"sp500","to":"nickel","w":0.09038,"se":0.03956,"t":2.28473,"lag":0,"stability":0.7,"established":false,"agree":true,"evidence":0.04672,"rv":0.11862,"partial":0.02444,"coparents":["aluminum","copper","zinc","tin","rubber","wool"]},{"from":"aluminum","to":"nickel","w":0.15016,"se":0.05756,"t":2.6087,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.0077,"rv":0.13423,"partial":0.11425,"coparents":["sp500","copper","zinc","tin","rubber","wool"]},{"from":"copper","to":"nickel","w":0.1787,"se":0.05022,"t":3.55826,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02498,"rv":0.17836,"partial":0.11971,"coparents":["sp500","aluminum","zinc","tin","rubber","wool"]},{"from":"copper","to":"nickel","w":-0.1759,"se":0.06843,"t":-2.5705,"lag":1,"self":false},{"from":"nickel","to":"nickel","w":0.30763,"se":0.05549,"t":5.54355,"lag":1,"self":true},{"from":"zinc","to":"nickel","w":0.22916,"se":0.05849,"t":3.91781,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.01812,"rv":0.19445,"partial":0.14741,"coparents":["sp500","aluminum","copper","tin","rubber","wool"]},{"from":"tin","to":"nickel","w":0.1432,"se":0.05398,"t":2.65296,"lag":0,"stability":0.98333,"established":false,"agree":true,"evidence":0.05621,"rv":0.13634,"partial":0.11467,"coparents":["sp500","aluminum","copper","zinc","rubber","wool"]},{"from":"rubber","to":"nickel","w":0.15498,"se":0.04601,"t":3.36858,"lag":0,"stability":0.75,"established":false,"agree":true,"evidence":0.02878,"rv":0.16974,"partial":0.05694,"coparents":["sp500","aluminum","copper","zinc","tin","wool"]},{"from":"wool","to":"nickel","w":0.06884,"se":0.03357,"t":2.05091,"lag":0,"stability":0.75,"established":false,"agree":true,"evidence":0.00762,"rv":0.10717,"partial":0.04021,"coparents":["sp500","aluminum","copper","zinc","tin","rubber"]},{"from":"sp500","to":"zinc","w":0.27343,"se":0.06583,"t":4.15351,"lag":0,"stability":0.78333,"established":false,"agree":true,"evidence":0.02959,"rv":0.20482,"partial":0.03129,"coparents":[]},{"from":"copper","to":"zinc","w":0.20877,"se":0.07641,"t":2.73246,"lag":1,"self":false},{"from":"zinc","to":"zinc","w":0.29293,"se":0.07298,"t":4.01407,"lag":1,"self":true},{"from":"nzd","to":"lead","w":0.17274,"se":0.0466,"t":3.70696,"lag":0,"stability":0.98333,"established":false,"agree":false,"evidence":-0.01198,"rv":0.18506,"partial":0.07707,"coparents":["zinc","tin"]},{"from":"zinc","to":"lead","w":0.49065,"se":0.07104,"t":6.90622,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02578,"rv":0.31589,"partial":0.22897,"coparents":["nzd","tin"]},{"from":"lead","to":"lead","w":0.21831,"se":0.08318,"t":2.62443,"lag":1,"self":true},{"from":"tin","to":"lead","w":0.16432,"se":0.06303,"t":2.60689,"lag":0,"stability":0.83333,"established":false,"agree":true,"evidence":0.00121,"rv":0.13414,"partial":0.0642,"coparents":["nzd","zinc"]},{"from":"aud","to":"tin","w":0.2828,"se":0.06403,"t":4.41704,"lag":0,"stability":0.85,"established":false,"agree":true,"evidence":0.00937,"rv":0.21625,"partial":0.04252,"coparents":["sek","coal"]},{"from":"sek","to":"tin","w":0.15577,"se":0.05251,"t":2.96674,"lag":0,"stability":0.76667,"established":false,"agree":false,"evidence":-0.00382,"rv":0.15115,"partial":0.03144,"coparents":["aud","coal"]},{"from":"coal","to":"tin","w":0.21528,"se":0.06938,"t":3.10288,"lag":0,"stability":0.95,"established":false,"agree":true,"evidence":0.04522,"rv":0.1575,"partial":0.10661,"coparents":["aud","sek"]},{"from":"ironore","to":"ironore","w":0.14295,"se":0.05229,"t":2.73377,"lag":1,"self":true},{"from":"uranium","to":"uranium","w":0.39325,"se":0.06674,"t":5.8926,"lag":1,"self":true},{"from":"tin","to":"coal","w":0.13214,"se":0.05205,"t":2.53843,"lag":1,"self":false},{"from":"coal","to":"coal","w":0.30737,"se":0.0699,"t":4.3972,"lag":1,"self":true},{"from":"wheat","to":"wheat","w":0.27578,"se":0.06149,"t":4.485,"lag":1,"self":true},{"from":"wheat","to":"maize","w":0.52748,"se":0.05658,"t":9.32247,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02835,"rv":0.3995,"partial":0.21734,"coparents":[]},{"from":"maize","to":"maize","w":0.25392,"se":0.07906,"t":3.21198,"lag":1,"self":true},{"from":"wheat","to":"barley","w":0.12695,"se":0.06112,"t":2.07725,"lag":0,"stability":0.85,"established":false,"agree":false,"evidence":-0.00259,"rv":0.10846,"partial":0.05626,"coparents":["maize","soybeans"]},{"from":"maize","to":"barley","w":0.19567,"se":0.0564,"t":3.46937,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.02597,"rv":0.17433,"partial":0.14692,"coparents":["wheat","soybeans"]},{"from":"barley","to":"barley","w":0.17561,"se":0.04868,"t":3.60763,"lag":1,"self":true},{"from":"soybeans","to":"barley","w":0.28686,"se":0.06052,"t":4.73992,"lag":0,"stability":0.98333,"established":true,"agree":false,"evidence":-0.00089,"rv":0.23001,"partial":0.12135,"coparents":["wheat","maize"]},{"from":"rice","to":"rice","w":0.34134,"se":0.06838,"t":4.99171,"lag":1,"self":true},{"from":"wheat","to":"soybeans","w":0.09873,"se":0.03695,"t":2.67223,"lag":0,"stability":1.0,"established":false,"agree":true,"evidence":0.00253,"rv":0.13726,"partial":0.0523,"coparents":["maize","soyoil"]},{"from":"maize","to":"soybeans","w":0.27589,"se":0.05898,"t":4.67765,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.0149,"rv":0.22737,"partial":0.1667,"coparents":["wheat","soyoil"]},{"from":"soybeans","to":"soybeans","w":0.51214,"se":0.16897,"t":3.03089,"lag":1,"self":true},{"from":"soyoil","to":"soybeans","w":0.55722,"se":0.0532,"t":10.47354,"lag":0,"stability":1.0,"established":true,"agree":false,"evidence":-0.04674,"rv":0.43526,"partial":0.29674,"coparents":["wheat","maize"]},{"from":"soyoil","to":"soybeans","w":-0.2236,"se":0.08362,"t":-2.67394,"lag":1,"self":false},{"from":"wheat","to":"soymeal","w":-0.05887,"se":0.02153,"t":-2.73487,"lag":1,"self":false},{"from":"soybeans","to":"soymeal","w":0.89761,"se":0.02761,"t":32.51086,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.04355,"rv":0.80134,"partial":0.54225,"coparents":[]},{"from":"soymeal","to":"soymeal","w":0.16775,"se":0.05265,"t":3.18595,"lag":1,"self":true},{"from":"aud","to":"soyoil","w":0.06977,"se":0.03298,"t":2.11518,"lag":0,"stability":0.75,"established":false,"agree":true,"evidence":0.00915,"rv":0.12155,"partial":0.042,"coparents":["maize","palmoil"]},{"from":"maize","to":"soyoil","w":0.25715,"se":0.03604,"t":7.13446,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.04011,"rv":0.35211,"partial":0.10713,"coparents":["aud","palmoil"]},{"from":"maize","to":"soyoil","w":0.1414,"se":0.04313,"t":3.27879,"lag":1,"self":false},{"from":"soyoil","to":"soyoil","w":0.17972,"se":0.06842,"t":2.62678,"lag":1,"self":true},{"from":"palmoil","to":"soyoil","w":0.65146,"se":0.03591,"t":18.13981,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.04179,"rv":0.65412,"partial":0.37945,"coparents":["aud","maize"]},{"from":"palmoil","to":"soyoil","w":-0.16059,"se":0.04553,"t":-3.52678,"lag":1,"self":false},{"from":"palmoil","to":"palmoil","w":0.29698,"se":0.08381,"t":3.54335,"lag":1,"self":true},{"from":"eur","to":"rapeseed","w":0.21266,"se":0.04613,"t":4.6096,"lag":0,"stability":0.73333,"established":false,"agree":true,"evidence":0.06052,"rv":0.26725,"partial":0.07155,"coparents":["soyoil","sunflower"]},{"from":"soyoil","to":"rapeseed","w":0.1848,"se":0.07602,"t":2.43086,"lag":0,"stability":0.95,"established":false,"agree":true,"evidence":0.02474,"rv":0.15164,"partial":0.08376,"coparents":["eur","sunflower"]},{"from":"soyoil","to":"rapeseed","w":0.3104,"se":0.08111,"t":3.82702,"lag":1,"self":false},{"from":"sunflower","to":"rapeseed","w":0.22568,"se":0.0749,"t":3.01305,"lag":0,"stability":0.95,"established":false,"agree":true,"evidence":0.04104,"rv":0.18431,"partial":0.10851,"coparents":["eur","soyoil"]},{"from":"soyoil","to":"sunflower","w":0.51712,"se":0.05922,"t":8.73172,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.20798,"rv":0.38016,"partial":0.17336,"coparents":[]},{"from":"sunflower","to":"sunflower","w":0.36456,"se":0.05051,"t":7.21695,"lag":1,"self":true},{"from":"nok","to":"olive","w":0.20981,"se":0.07103,"t":2.95367,"lag":0,"stability":0.93333,"established":false,"agree":true,"evidence":0.09296,"rv":0.15054,"partial":0.06217,"coparents":["gbp"]},{"from":"gbp","to":"olive","w":0.3056,"se":0.06127,"t":4.98759,"lag":0,"stability":0.98333,"established":false,"agree":true,"evidence":0.32804,"rv":0.24039,"partial":0.10507,"coparents":["nok"]},{"from":"olive","to":"olive","w":0.24694,"se":0.06776,"t":3.64409,"lag":1,"self":true},{"from":"peanuts","to":"peanuts","w":0.30138,"se":0.08007,"t":3.76396,"lag":1,"self":true},{"from":"sugar","to":"sugar","w":0.24191,"se":0.05464,"t":4.42765,"lag":1,"self":true},{"from":"arabica","to":"arabica","w":0.26957,"se":0.09067,"t":2.97323,"lag":1,"self":true},{"from":"arabica","to":"robusta","w":0.70309,"se":0.05171,"t":13.59706,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.00533,"rv":0.52061,"partial":0.44998,"coparents":[]},{"from":"robusta","to":"robusta","w":0.25563,"se":0.04962,"t":5.15141,"lag":1,"self":true},{"from":"nok","to":"cocoa","w":0.26821,"se":0.05115,"t":5.24391,"lag":0,"stability":0.7,"established":false,"agree":true,"evidence":0.00909,"rv":0.25097,"partial":0.02367,"coparents":[]},{"from":"cocoa","to":"cocoa","w":0.16809,"se":0.05212,"t":3.22482,"lag":1,"self":true},{"from":"tea","to":"tea","w":0.17048,"se":0.04197,"t":4.06157,"lag":1,"self":true},{"from":"soyoil","to":"cotton","w":0.23953,"se":0.04881,"t":4.90761,"lag":0,"stability":0.8,"established":false,"agree":false,"evidence":-0.01696,"rv":0.23705,"partial":0.03916,"coparents":[]},{"from":"cotton","to":"cotton","w":0.39434,"se":0.05784,"t":6.8176,"lag":1,"self":true},{"from":"copper","to":"rubber","w":0.15729,"se":0.05651,"t":2.78342,"lag":0,"stability":0.9,"established":false,"agree":true,"evidence":0.00359,"rv":0.14253,"partial":0.06359,"coparents":["ironore","soyoil","cotton"]},{"from":"copper","to":"rubber","w":0.18669,"se":0.07141,"t":2.61422,"lag":1,"self":false},{"from":"ironore","to":"rubber","w":0.16037,"se":0.05282,"t":3.03598,"lag":0,"stability":0.7,"established":false,"agree":true,"evidence":0.07023,"rv":0.15439,"partial":0.02979,"coparents":["copper","soyoil","cotton"]},{"from":"soyoil","to":"rubber","w":0.20292,"se":0.06428,"t":3.15664,"lag":0,"stability":0.9,"established":false,"agree":false,"evidence":-0.01905,"rv":0.15999,"partial":0.04842,"coparents":["copper","ironore","cotton"]},{"from":"cotton","to":"rubber","w":0.13287,"se":0.04914,"t":2.70405,"lag":0,"stability":0.95,"established":false,"agree":true,"evidence":0.04875,"rv":0.13877,"partial":0.07258,"coparents":["copper","ironore","soyoil"]},{"from":"aud","to":"wool","w":0.2604,"se":0.05137,"t":5.06872,"lag":0,"stability":0.83333,"established":false,"agree":true,"evidence":0.05227,"rv":0.24376,"partial":0.05384,"coparents":[]},{"from":"wool","to":"wool","w":0.1445,"se":0.04328,"t":3.33864,"lag":1,"self":true},{"from":"sp_eps","to":"hides","w":0.33321,"se":0.1407,"t":2.36832,"lag":0,"stability":0.88333,"established":false,"agree":true,"evidence":0.01369,"rv":0.12267,"partial":0.10157,"coparents":[]},{"from":"hides","to":"hides","w":0.23414,"se":0.08136,"t":2.87773,"lag":1,"self":true},{"from":"logs","to":"logs","w":-0.44332,"se":0.0509,"t":-8.70875,"lag":1,"self":true},{"from":"myr","to":"sawnwood","w":0.44771,"se":0.11152,"t":4.01469,"lag":0,"stability":1.0,"established":false,"agree":true,"evidence":0.07309,"rv":0.19873,"partial":0.18073,"coparents":[]},{"from":"sawnwood","to":"sawnwood","w":0.22748,"se":0.05425,"t":4.19293,"lag":1,"self":true},{"from":"beef","to":"beef","w":0.25642,"se":0.05605,"t":4.57468,"lag":1,"self":true},{"from":"pork","to":"pork","w":0.1367,"se":0.04562,"t":2.99637,"lag":1,"self":true},{"from":"poultry","to":"poultry","w":0.56794,"se":0.05596,"t":10.14909,"lag":1,"self":true},{"from":"sgd","to":"lamb","w":0.16911,"se":0.04796,"t":3.52605,"lag":0,"stability":0.73333,"established":false,"agree":true,"evidence":0.01437,"rv":0.1769,"partial":0.02278,"coparents":["gbp"]},{"from":"gbp","to":"lamb","w":0.40389,"se":0.0528,"t":7.64935,"lag":0,"stability":1.0,"established":true,"agree":true,"evidence":0.10202,"rv":0.3429,"partial":0.17627,"coparents":["sgd"]},{"from":"gbp","to":"lamb","w":-0.22375,"se":0.05449,"t":-4.10608,"lag":1,"self":false},{"from":"lamb","to":"lamb","w":0.3835,"se":0.07157,"t":5.35825,"lag":1,"self":true},{"from":"nok","to":"salmon","w":0.33225,"se":0.06138,"t":5.41267,"lag":0,"stability":0.93333,"established":false,"agree":true,"evidence":0.00278,"rv":0.25786,"partial":0.06836,"coparents":[]},{"from":"salmon","to":"salmon","w":0.28031,"se":0.04603,"t":6.08963,"lag":1,"self":true},{"from":"shrimp","to":"shrimp","w":0.22649,"se":0.07454,"t":3.03838,"lag":1,"self":true},{"from":"gbp","to":"fishmeal","w":0.36137,"se":0.0581,"t":6.22008,"lag":0,"stability":0.93333,"established":false,"agree":true,"evidence":0.06687,"rv":0.28986,"partial":0.09263,"coparents":[]},{"from":"gbp","to":"fishmeal","w":-0.20757,"se":0.05432,"t":-3.82118,"lag":1,"self":false},{"from":"fishmeal","to":"fishmeal","w":0.33651,"se":0.05649,"t":5.95749,"lag":1,"self":true},{"from":"oranges","to":"oranges","w":0.17381,"se":0.05334,"t":3.25828,"lag":1,"self":true}],"judged":[{"from":"hormuz","to":"brent","w":0.6,"judged":true},{"from":"cpi","to":"fed","w":0.4,"judged":true},{"from":"fed","to":"y10","w":0.25,"judged":true},{"from":"fed","to":"sp500","w":-0.15,"judged":true},{"from":"fed","to":"credit","w":0.15,"judged":true},{"from":"fed","to":"liq","w":-0.3,"judged":true},{"from":"fiscal","to":"tp","w":0.35,"judged":true},{"from":"tp","to":"y10","w":0.5,"judged":true},{"from":"capex","to":"fiscal","w":0.25,"judged":true},{"from":"capex","to":"power","w":0.4,"judged":true},{"from":"capex","to":"memory","w":0.5,"judged":true},{"from":"capex","to":"sp500","w":0.25,"judged":true},{"from":"capex","to":"dep","w":0.5,"judged":true},{"from":"capex","to":"credit","w":0.1,"judged":true},{"from":"sp500","to":"capex","w":0.3,"judged":true},{"from":"power","to":"capex","w":-0.2,"judged":true},{"from":"memory","to":"capex","w":-0.1,"judged":true},{"from":"power","to":"cpi","w":0.15,"judged":true},{"from":"memory","to":"cpi","w":0.05,"judged":true},{"from":"dep","to":"sp500","w":-0.3,"judged":true},{"from":"credit","to":"sp500","w":-0.35,"judged":true},{"from":"sp500","to":"credit","w":-0.3,"judged":true},{"from":"pcredit","to":"credit","w":0.3,"judged":true},{"from":"credit","to":"pcredit","w":0.3,"judged":true},{"from":"y10","to":"pcredit","w":0.2,"judged":true},{"from":"pcredit","to":"consumer","w":-0.1,"judged":true},{"from":"liq","to":"sp500","w":0.2,"judged":true},{"from":"liq","to":"credit","w":-0.2,"judged":true},{"from":"vix","to":"liq","w":-0.2,"judged":true},{"from":"vix","to":"pods","w":0.5,"judged":true},{"from":"pods","to":"sp500","w":-0.3,"judged":true},{"from":"consumer","to":"sp500","w":0.2,"judged":true},{"from":"consumer","to":"cpi","w":0.15,"judged":true},{"from":"y10","to":"consumer","w":-0.2,"judged":true},{"from":"brent","to":"consumer","w":-0.25,"judged":true},{"from":"cpi","to":"corr","w":0.5,"judged":true},{"from":"y10","to":"tlt","w":-0.95,"judged":true},{"from":"aidemand","to":"capex","w":0.45,"judged":true},{"from":"aidemand","to":"earn","w":0.45,"judged":true},{"from":"aidemand","to":"sp500","w":0.15,"judged":true},{"from":"capex","to":"earn","w":0.25,"judged":true},{"from":"dep","to":"earn","w":-0.35,"judged":true},{"from":"consumer","to":"earn","w":0.15,"judged":true},{"from":"fed","to":"dollar","w":0.35,"judged":true},{"from":"dollar","to":"gold","w":-0.3,"judged":true},{"from":"dollar","to":"sp500","w":-0.1,"judged":true},{"from":"sp500","to":"NVDA","w":0.55,"judged":true},{"from":"sp500","to":"AVGO","w":0.55,"judged":true},{"from":"sp500","to":"MSFT","w":0.6,"judged":true},{"from":"sp500","to":"GOOGL","w":0.6,"judged":true},{"from":"sp500","to":"AMZN","w":0.6,"judged":true},{"from":"sp500","to":"META","w":0.55,"judged":true},{"from":"sp500","to":"ORCL","w":0.45,"judged":true},{"from":"sp500","to":"TSLA","w":0.45,"judged":true},{"from":"sp500","to":"SPCX","w":0.35,"judged":true},{"from":"earn","to":"NVDA","w":0.35,"judged":true},{"from":"earn","to":"AVGO","w":0.3,"judged":true},{"from":"earn","to":"MSFT","w":0.25,"judged":true},{"from":"earn","to":"GOOGL","w":0.25,"judged":true},{"from":"earn","to":"AMZN","w":0.2,"judged":true},{"from":"earn","to":"META","w":0.25,"judged":true},{"from":"earn","to":"ORCL","w":0.2,"judged":true},{"from":"earn","to":"TSLA","w":0.1,"judged":true},{"from":"capex","to":"NVDA","w":0.35,"judged":true},{"from":"capex","to":"AVGO","w":0.3,"judged":true},{"from":"capex","to":"ORCL","w":0.15,"judged":true},{"from":"dep","to":"MSFT","w":-0.12,"judged":true},{"from":"dep","to":"GOOGL","w":-0.12,"judged":true},{"from":"dep","to":"AMZN","w":-0.12,"judged":true},{"from":"dep","to":"META","w":-0.15,"judged":true},{"from":"dep","to":"ORCL","w":-0.15,"judged":true},{"from":"power","to":"ORCL","w":-0.12,"judged":true},{"from":"power","to":"MSFT","w":-0.05,"judged":true},{"from":"power","to":"AMZN","w":-0.05,"judged":true},{"from":"memory","to":"NVDA","w":-0.08,"judged":true},{"from":"memory","to":"META","w":-0.05,"judged":true},{"from":"credit","to":"ORCL","w":-0.25,"judged":true},{"from":"credit","to":"TSLA","w":-0.08,"judged":true},{"from":"credit","to":"SPCX","w":-0.15,"judged":true},{"from":"y10","to":"TSLA","w":-0.15,"judged":true},{"from":"y10","to":"SPCX","w":-0.12,"judged":true},{"from":"y10","to":"NVDA","w":-0.05,"judged":true},{"from":"consumer","to":"TSLA","w":0.2,"judged":true},{"from":"consumer","to":"AMZN","w":0.12,"judged":true},{"from":"consumer","to":"META","w":0.1,"judged":true},{"from":"liq","to":"SPCX","w":0.2,"judged":true},{"from":"pods","to":"NVDA","w":-0.15,"judged":true},{"from":"pods","to":"META","w":-0.1,"judged":true},{"from":"NVDA","to":"book","w":0.14,"judged":true},{"from":"AVGO","to":"book","w":0.08,"judged":true},{"from":"MSFT","to":"book","w":0.14,"judged":true},{"from":"GOOGL","to":"book","w":0.14,"judged":true},{"from":"AMZN","to":"book","w":0.14,"judged":true},{"from":"META","to":"book","w":0.12,"judged":true},{"from":"ORCL","to":"book","w":0.06,"judged":true},{"from":"TSLA","to":"book","w":0.1,"judged":true},{"from":"SPCX","to":"book","w":0.08,"judged":true},{"from":"tlt","to":"book","w":0.0,"judged":true},{"from":"dollar","to":"eur","w":-0.6,"judged":true,"why":"The euro is the dollar's mirror: a stronger dollar is a weaker euro","bridge":true},{"from":"dollar","to":"jpy","w":-0.4,"judged":true,"why":"The yen weakens as the dollar strengthens","bridge":true},{"from":"capex","to":"copper","w":0.15,"judged":true,"why":"Data centres and grids are built of copper","bridge":true},{"from":"power","to":"natgas","w":0.2,"judged":true,"why":"Gas sets the marginal price of power","bridge":true},{"from":"hormuz","to":"lng_jp","w":0.3,"judged":true,"why":"Qatar's LNG leaves through the strait","bridge":true},{"from":"hormuz","to":"gas_eu","w":0.25,"judged":true,"why":"Lost LNG cargoes tighten Europe","bridge":true},{"from":"aidemand","to":"twd","w":0.1,"judged":true,"why":"Taiwan's exports are the chips","bridge":true},{"from":"aidemand","to":"krw","w":0.08,"judged":true,"why":"Korea's exports are the memory","bridge":true}],"skeleton":{"alpha":0.22,"ebic_path":[{"alpha":0.02,"ebic":35513.02385,"edges":1539},{"alpha":0.03,"ebic":31613.2349,"edges":1236},{"alpha":0.045,"ebic":27437.69785,"edges":907},{"alpha":0.06,"ebic":25109.25101,"edges":715},{"alpha":0.08,"ebic":23297.97393,"edges":559},{"alpha":0.1,"ebic":22322.02351,"edges":469},{"alpha":0.13,"ebic":21655.19687,"edges":392},{"alpha":0.17,"ebic":21340.01966,"edges":329},{"alpha":0.22,"ebic":21062.80683,"edges":257},{"alpha":0.28,"ebic":21130.12926,"edges":191}],"n_eff":330.0,"edges_full":257,"edges_stable":165,"pi_thr":0.7,"subsamples":60,"q":277.75,"established":{"alpha":0.385,"pi":0.9,"kept":60,"pfer_bound":5.82457,"q":109.13333}},"direction":{"agree":0.68966,"agree_selected":0.72121,"order":["gbp","inr","aud","eur","chf","palmoil","myr","sp500","cad","nok","sp_eps","nzd","sek","krw","thb","wheat","maize","soyoil","coal","tin","ironore","jpy","sawnwood","wti","cotton","zinc","soybeans","lead","copper","sunflower","rubber","brent","gold","aluminum","zar","mxn","wool","sgd","arabica","soymeal","sp_div","cpi","y10","natgas","vix","brl","cny","twd","nickel","uranium","gas_eu","lng_jp","barley","rice","rapeseed","olive","peanuts","sugar","robusta","cocoa","tea","hides","logs","beef","pork","poultry","lamb","salmon","shrimp","fishmeal","bananas","oranges"]},"pruned":49,"dynamics":{"radius_before":0.93465,"shrink":1.0,"horizon":12,"lag_t":2.5,"lagged_links":73,"self_lags":52},"connectedness":{"total":24.19337,"rolling":{"dates":["2004-01","2004-02","2004-03","2004-04","2004-05","2004-06","2004-07","2004-08","2004-09","2004-10","2004-11","2004-12","2005-01","2005-02","2005-03","2005-04","2005-05","2005-06","2005-07","2005-08","2005-09","2005-10","2005-11","2005-12","2006-01","2006-02","2006-03","2006-04","2006-05","2006-06","2006-07","2006-08","2006-09","2006-10","2006-11","2006-12","2007-01","2007-02","2007-03","2007-04","2007-05","2007-06","2007-07","2007-08","2007-09","2007-10","2007-11","2007-12","2008-01","2008-02","2008-03","2008-04","2008-05","2008-06","2008-07","2008-08","2008-09","2008-10","2008-11","2008-12","2009-01","2009-02","2009-03","2009-04","2009-05","2009-06","2009-07","2009-08","2009-09","2009-10","2009-11","2009-12","2010-01","2010-02","2010-03","2010-04","2010-05","2010-06","2010-07","2010-08","2010-09","2010-10","2010-11","2010-12","2011-01","2011-02","2011-03","2011-04","2011-05","2011-06","2011-07","2011-08","2011-09","2011-10","2011-11","2011-12","2012-01","2012-02","2012-03","2012-04","2012-05","2012-06","2012-07","2012-08","2012-09","2012-10","2012-11","2012-12","2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12","2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"total":[74.627,75.189,75.625,75.694,76.089,75.73,75.687,75.779,75.956,76.951,77.318,77.313,78.062,77.89,78.44,78.644,77.707,77.392,76.893,77.275,77.345,77.698,77.945,78.424,78.408,77.371,76.712,77.007,76.915,77.695,76.722,76.672,76.524,76.707,78.202,77.887,78.137,78.33,77.807,76.085,76.625,76.442,76.682,78.017,78.378,78.562,79.396,78.225,78.256,77.425,78.293,77.154,78.134,76.189,75.99,77.197,78.187,84.816,81.878,84.66,82.273,83.531,83.423,82.6,84.331,84.314,83.461,83.934,83.263,84.094,84.313,84.245,84.24,84.459,84.759,84.726,84.537,84.342,84.972,84.914,85.256,85.71,85.571,85.496,85.48,85.496,85.37,86.173,86.083,86.087,86.181,86.331,86.139,85.858,85.839,85.972,85.95,86.238,85.835,86.184,86.228,85.433,85.414,85.806,84.943,85.407,85.562,85.412,85.739,85.898,85.881,86.022,85.743,85.921,84.799,84.061,81.269,81.299,80.192,80.636,80.173,79.905,78.791,78.864,79.179,79.329,80.084,80.115,81.169,81.236,81.228,81.255,80.784,80.511,80.746,79.214,79.278,79.424,79.836,80.03,79.343,78.895,79.352,79.015,80.359,78.82,79.614,79.369,80.564,80.706,80.492,79.697,80.688,80.432,82.259,80.273,79.002,79.704,79.401,78.592,78.297,79.034,79.137,79.315,79.519,80.374,80.151,80.017,81.821,81.873,81.436,81.409,82.553,82.987,83.139,83.179,82.948,82.72,82.812,82.842,82.341,82.431,82.333,82.489,82.292,82.269,82.124,82.309,82.301,81.665,81.901,81.957,81.495,81.684,82.36,84.176,84.652,83.795,83.018,83.361,83.399,83.114,83.82,83.42,83.416,82.137,82.156,82.1,82.266,82.976,83.067,82.919,82.868,83.288,83.04,81.784,81.414,81.551,81.457,82.195,81.576,81.444,81.411,81.784,83.117,82.598,83.122,82.34,82.911,83.817,84.109,83.309,82.976,82.792,82.954,82.955,82.967,83.193,83.596,83.895,84.406,84.423,84.231,84.032,84.073,83.48,83.619,83.0,83.745,83.638,83.432,83.206,83.149,82.098,80.823,81.057,80.36,80.056,79.879,80.307,80.5,80.703,80.643,81.341,81.158,81.044,81.03,81.471,81.049,81.266,80.971,80.964],"series":[26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26],"window":60}},"communities":[{"id":0,"name":"Commodity FX with equities","members":["sp500","sp_div","natgas","vix","aud","brl","cad","inr","mxn","nzd","zar","krw","nickel","lead","tin","uranium","lng_jp","peanuts","wool"],"size":19,"lead":["AUD","S&P 500"]},{"id":1,"name":"Asian FX and Livestock and food","members":["cny","jpy","myr","sgd","twd","thb","rice","sugar","logs","sawnwood","beef","pork","poultry","shrimp","bananas","oranges"],"size":16,"lead":["MYR","JPY"]},{"id":2,"name":"European FX","members":["gold","eur","nok","sek","chf","gbp","olive","cocoa","tea","lamb","salmon","fishmeal"],"size":12,"lead":["EUR","GBP"]},{"id":3,"name":"Oilseeds","members":["wheat","maize","barley","soybeans","soymeal","soyoil","palmoil","rapeseed","sunflower","arabica","robusta","cotton"],"size":12,"lead":["Soy oil","Palm oil"]},{"id":4,"name":"Metals with equities","members":["sp_eps","aluminum","copper","zinc","hides"],"size":5,"lead":["Zinc","Copper"]},{"id":5,"name":"Energy: Coal, Iron ore","members":["cpi","ironore","coal","rubber"],"size":4,"lead":["Coal","Iron ore"]},{"id":6,"name":"Energy: WTI, Brent","members":["y10","brent","wti","gas_eu"],"size":4,"lead":["WTI","Brent"]},{"id":7,"name":"Judged concepts","members":["hormuz","fed","fiscal","capex","memory","power","aidemand","tp","dep","pods","liq","credit","pcredit","consumer","dollar","earn","tlt","corr"],"size":18,"judged":true},{"id":8,"name":"Holdings and the book","members":["NVDA","AVGO","MSFT","GOOGL","AMZN","META","ORCL","TSLA","SPCX","book"],"size":10,"judged":true}],"modularity":0.53217,"regime_flips":[{"from":"sgd","to":"twd","before":{"w":0.39701,"t":6.96557,"n":384},"after":{"w":0.85466,"t":1.8752,"n":57},"flip":false},{"from":"nzd","to":"krw","before":{"w":0.09214,"t":1.20024,"n":384},"after":{"w":0.5005,"t":2.20637,"n":57},"flip":false},{"from":"nok","to":"wti","before":{"w":0.29991,"t":3.85171,"n":384},"after":{"w":-0.00256,"t":-0.02036,"n":57},"flip":false},{"from":"aud","to":"eur","before":{"w":0.32479,"t":5.63372,"n":275},"after":{"w":0.03264,"t":0.39263,"n":57},"flip":false},{"from":"aud","to":"sek","before":{"w":0.20283,"t":5.38011,"n":275},"after":{"w":-0.01658,"t":-0.14191,"n":57},"flip":false},{"from":"sp500","to":"cad","before":{"w":0.1971,"t":4.96599,"n":384},"after":{"w":-0.00618,"t":-0.06331,"n":57},"flip":false},{"from":"sp500","to":"krw","before":{"w":0.22188,"t":2.88684,"n":384},"after":{"w":0.04236,"t":0.42582,"n":57},"flip":false},{"from":"cad","to":"wti","before":{"w":0.25509,"t":5.90363,"n":384},"after":{"w":0.1003,"t":0.63344,"n":57},"flip":false},{"from":"cad","to":"nok","before":{"w":0.1797,"t":3.66576,"n":275},"after":{"w":0.03855,"t":0.26398,"n":57},"flip":false},{"from":"aud","to":"krw","before":{"w":0.22063,"t":3.46356,"n":384},"after":{"w":0.35934,"t":1.36967,"n":57},"flip":false},{"from":"sp500","to":"mxn","before":{"w":0.26147,"t":4.9553,"n":337},"after":{"w":0.12348,"t":1.34433,"n":57},"flip":false},{"from":"krw","to":"twd","before":{"w":0.33585,"t":5.16561,"n":384},"after":{"w":0.20389,"t":1.18119,"n":57},"flip":false},{"from":"nok","to":"zar","before":{"w":0.26816,"t":5.48957,"n":384},"after":{"w":0.19494,"t":1.78509,"n":57},"flip":false},{"from":"inr","to":"zar","before":{"w":0.17117,"t":3.93577,"n":384},"after":{"w":0.24302,"t":1.76854,"n":57},"flip":false},{"from":"jpy","to":"gold","before":{"w":0.19416,"t":3.49479,"n":384},"after":{"w":0.12512,"t":0.89207,"n":57},"flip":false},{"from":"chf","to":"gold","before":{"w":0.1943,"t":3.27082,"n":384},"after":{"w":0.13889,"t":0.52295,"n":57},"flip":false},{"from":"nok","to":"cny","before":{"w":0.14276,"t":2.73476,"n":384},"after":{"w":0.19472,"t":1.49437,"n":57},"flip":false},{"from":"krw","to":"thb","before":{"w":0.29302,"t":3.13481,"n":384},"after":{"w":0.25588,"t":1.735,"n":57},"flip":false},{"from":"aud","to":"vix","before":{"w":-0.10657,"t":-2.81995,"n":383},"after":{"w":-0.07336,"t":-0.60361,"n":57},"flip":false},{"from":"inr","to":"mxn","before":{"w":0.2107,"t":4.10582,"n":337},"after":{"w":0.199,"t":1.69582,"n":57},"flip":false},{"from":"inr","to":"myr","before":{"w":0.40794,"t":7.54107,"n":384},"after":{"w":0.41323,"t":1.76072,"n":57},"flip":false},{"from":"inr","to":"krw","before":{"w":0.20715,"t":3.97269,"n":384},"after":{"w":0.20701,"t":1.33967,"n":57},"flip":false}],"oos":{"brent":{"months":151,"oos_r2_vs_own":0.0203},"vix":{"months":261,"oos_r2_vs_own":0.03897},"aud":{"months":261,"oos_r2_vs_own":-0.00551},"cad":{"months":151,"oos_r2_vs_own":0.04162},"nok":{"months":261,"oos_r2_vs_own":-0.01762},"sgd":{"months":151,"oos_r2_vs_own":0.00164},"sek":{"months":261,"oos_r2_vs_own":-0.00753},"twd":{"months":261,"oos_r2_vs_own":-0.02179},"gbp":{"months":261,"oos_r2_vs_own":0.03624},"nickel":{"months":150,"oos_r2_vs_own":-0.01003},"zinc":{"months":150,"oos_r2_vs_own":-0.00102},"coal":{"months":150,"oos_r2_vs_own":0.01153},"soybeans":{"months":150,"oos_r2_vs_own":0.00978},"soymeal":{"months":150,"oos_r2_vs_own":-0.00787},"soyoil":{"months":150,"oos_r2_vs_own":-0.00437},"rapeseed":{"months":150,"oos_r2_vs_own":0.07659},"rubber":{"months":150,"oos_r2_vs_own":0.08074},"lamb":{"months":150,"oos_r2_vs_own":-6e-05},"fishmeal":{"months":150,"oos_r2_vs_own":0.00331}},"method":"Graphical lasso (EBIC) with stability selection, pairwise LiNGAM orientation, structural VAR(1), Diebold-Yilmaz connectedness","findings":["72 monthly series and 28 judged concepts; 165 same-month links are selected in at least 70% of 60 half-samples. 60 are established (selected in 90% at a stricter penalty), with at most 5.8 expected false among them (Meinshausen-Buhlmann bound). Regressing each series on its parents keeps 116 with |t| >= 2 (49 removed), 48 of them established.","68% of them point the way their own pairwise evidence says; 21 links from one series to another next month pass |t| >= 2.5, and 52 series carry their own momentum.","System connectedness is 24%: the share of a typical series' 12-month forecast error that comes from other series' shocks.","Most systemic: AUD, EUR, GBP.","Rolling 5-year connectedness peaked at 86% in 2011-08 and reads 81% now."]};
+
+  /* =====================================================================================
+     atlas.js (v0.13): the whole brain. Every monthly series the engine can read, its structure learned from the data
+     (buildout/atlas.py: graphical lasso with stability selection, pairwise LiNGAM orientation, a structural VAR),
+     joined with the core map's judged concepts, the holdings and the book. Shocks travel month by month:
+       x_0 = (I - W)^-1 e,   x_h = (I - W)^-1 A x_h-1
+     solved here by fixed-point iteration on the sparse links (exact to 1e-13 while the spectral radius is below 1;
+     tests/test_v13.py holds it equal to Python's matrix inverse). The doubt is structural as well as numerical:
+     each Monte Carlo world keeps every learned link with its stability probability and draws its weight.
+     ===================================================================================== */
+  const AT_H = 12;
+  const AT_COLS = ["#7aa2ff", "#ff9e5e", "#5fd3a5", "#f2c14e", "#e58bd0", "#6fd0e8", "#b9a3ff", "#f07f7f", "#a6d86e", "#d9b38c"];
+  const AT_JUDGED = "#c9c3ff", AT_BOOK = "#ffd166";
+  function atlasOk(a) {
+    try {
+      if (!a || a.schema !== 1 || !Array.isArray(a.nodes) || !Array.isArray(a.links) || !Array.isArray(a.judged) || a.nodes.length < 10) return false;
+      const ids = new Set(a.nodes.map((n) => n && n.id));
+      if (ids.size !== a.nodes.length || !ids.has("book") || !ids.has("hormuz") || !fin(a.series) || !a.skeleton || !a.skeleton.established || !fin(a.skeleton.established.pfer_bound)
+        || !a.direction || !fin(a.direction.agree) || !a.connectedness || !fin(a.connectedness.total) || !Array.isArray(a.communities) || !a.dynamics) return false;
+      if (!a.nodes.every((n) => typeof n.short === "string" && typeof n.name === "string" && Number.isInteger(n.community) && (!n.measured || (fin(n.systemic) && typeof n.from === "string" && typeof n.to === "string")))) return false;
+      return a.nodes.every((n) => n && typeof n.id === "string" && fin(n.x) && fin(n.y) && Math.abs(n.x) <= 1.5 && Math.abs(n.y) <= 1.5)
+        && a.links.every((l) => l && ids.has(l.from) && ids.has(l.to) && fin(l.w) && Math.abs(l.w) < 5 && fin(l.se) && (l.lag === 0 || l.lag === 1) && (l.lag === 1 || (fin(l.stability) && l.stability >= 0 && l.stability <= 1)))
+        && a.judged.every((l) => l && ids.has(l.from) && ids.has(l.to) && fin(l.w) && Math.abs(l.w) < 5);
+    } catch (e) { return false; }
+  }
+  function atlasData() { return LIVE.atlas && atlasOk(LIVE.atlas) ? LIVE.atlas : ATLAS_SNAP; }
+  let AT_M = null, AT_M_SRC = null;
+  // mirrors atlas.matrices(): same-month links (learned and judged) and lagged links, as sparse lists
+  function atMatrices() {
+    const a = atlasData();
+    if (AT_M && AT_M_SRC === a) return AT_M;
+    const ids = a.nodes.map((n) => n.id), ix = Object.fromEntries(ids.map((k, i) => [k, i]));
+    const key = (f, t) => f + ">" + t, cm = new Map(), le = [];
+    a.links.forEach((l) => {
+      const f = ix[l.from], t = ix[l.to];
+      if (l.lag) le.push({ f, t, w: l.w, se: l.se, self: f === t });
+      else cm.set(key(f, t), { f, t, w: l.w, se: l.se, p: l.stability, est: !!l.established, judged: false, agree: !!l.agree, rv: l.rv });
+    });
+    a.judged.forEach((l) => {
+      const f = ix[l.from], t = ix[l.to], k = key(f, t), prev = cm.get(k);
+      if (prev) { prev.w += l.w; prev.se = Math.abs(l.w) * 0.5; prev.judged = true; }
+      else cm.set(k, { f, t, w: l.w, se: Math.abs(l.w) * 0.5, p: 1, est: false, judged: true, bridge: !!l.bridge, why: l.why || "" });
+    });
+    const ce = [...cm.values()];
+    const nodes = a.nodes.map((n, i) => Object.assign({ i }, n));
+    AT_M = { a, ids, ix, nodes, ce, le, n: ids.length };
+    AT_M_SRC = a;
+    return AT_M;
+  }
+  // x = rhs + W x, by Jacobi iteration on the sparse links; null if it does not converge (radius >= 1)
+  function atSolve(ce, rhs, n) {
+    let x = Float64Array.from(rhs);
+    for (let it = 0; it < 3000; it++) {
+      const nx = Float64Array.from(rhs);
+      for (const e of ce) nx[e.t] += e.w * x[e.f];
+      let d = 0, m = 0;
+      for (let i = 0; i < n; i++) { d = Math.max(d, Math.abs(nx[i] - x[i])); m = Math.max(m, Math.abs(nx[i])); }
+      x = nx;
+      if (!(m < 1e6)) return null;
+      if (d <= 1e-14 * (1 + m)) return x;
+    }
+    return null;
+  }
+  function atRespond(M, shock, h = AT_H, ce = M.ce, le = M.le) {
+    const n = M.n, e = new Float64Array(n);
+    Object.entries(shock).forEach(([k, v]) => { if (M.ix[k] != null) e[M.ix[k]] = v; });
+    const x0 = atSolve(ce, e, n);
+    if (!x0) return null;
+    const out = [x0];
+    for (let k = 1; k <= h; k++) {
+      const r = new Float64Array(n), prev = out[k - 1];
+      for (const l of le) r[l.t] += l.w * prev[l.f];
+      const xk = atSolve(ce, r, n);
+      if (!xk) return null;
+      out.push(xk);
+    }
+    return out;
+  }
+  const atCum = (R) => { const c = []; let s = null; R.forEach((x) => { s = s ? s.map((v, i) => v + x[i]) : Array.from(x); c.push(s); }); return c; };
+  // structural and numerical doubt: each world keeps a learned link with its stability probability and draws its weight
+  function atMCStart(M, shock, target, h = AT_H, draws = 200, seed = 21) { return { M, shock, t: M.ix[target], h, draws, rnd: mulberry32(seed), paths: [], dropped: 0, d: 0 }; }
+  function atMCStep(st, n) {
+    const M = st.M;
+    for (let k = 0; k < n && st.d < st.draws; k++, st.d++) {
+      const ce = [];
+      for (const e of M.ce) { if (!e.judged && st.rnd() > e.p) continue; ce.push({ f: e.f, t: e.t, w: e.w + e.se * brNormal(st.rnd) }); }
+      const le = M.le.map((l) => ({ f: l.f, t: l.t, w: l.w + l.se * brNormal(st.rnd) }));
+      const R = atRespond(M, st.shock, st.h, ce, le);
+      if (!R) { st.dropped++; continue; }
+      let c = 0;
+      st.paths.push(R.map((x) => (c += x[st.t])));
+    }
+    return st.d >= st.draws;
+  }
+  function atMCFinish(st) {
+    const q = (arr, p) => { const s = arr.slice().sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.max(0, Math.round(p * (s.length - 1))))]; };
+    const band = [];
+    for (let k = 0; k <= st.h; k++) { const col = st.paths.map((p) => p[k]); band.push(col.length ? [q(col, 0.1), q(col, 0.5), q(col, 0.9)] : [NaN, NaN, NaN]); }
+    const last = st.paths.map((p) => p[st.h]);
+    return { band, neg: last.length ? last.filter((v) => v < 0).length / last.length : NaN, kept: st.paths.length, dropped: st.dropped };
+  }
+  // structural and numerical doubt: each world keeps a learned link with its stability probability and draws its weight
+  function atMC(M, shock, target, h = AT_H, draws = 200, seed = 21) { const st = atMCStart(M, shock, target, h, draws, seed); atMCStep(st, draws); return atMCFinish(st); }
+  // the same draws in slices of about 25 ms, so the page never stalls; the newest request wins
+  function atMCAsync(S, done) {
+    const tok = (S.mcTok = (S.mcTok || 0) + 1), st = atMCStart(S.sc.M, S.shock, S.target);
+    const run = () => {
+      if (tok !== S.mcTok) return;
+      const t0 = performance.now();
+      while (performance.now() - t0 < 25) { if (atMCStep(st, 4)) { if (tok === S.mcTok) { S.sc.mc = atMCFinish(st); done(S); } return; } }
+      setTimeout(run, 0);
+    };
+    setTimeout(run, 0);
+  }
+
+  /* ---------- the stage: one renderer, two canvases (the desk's hero and the atlas desk) ---------- */
+  const AT_STAGES = {};
+  const AT_STEP = 1100, AT_HOLD = 4200, AT_FLY = 820;
+  function atNodeColor(n) { return !n.measured ? (n.family === "Book" ? AT_BOOK : AT_JUDGED) : AT_COLS[n.community % AT_COLS.length]; }
+  function atStage(id) {
+    if (!AT_STAGES[id]) AT_STAGES[id] = { id, shock: { hormuz: 1.5 }, preset: "hormuz", target: "book", playing: true, auto: true, t0: 0, paused: 0, raf: 0, visible: false,
+      sc: null, parts: [], step: -1, zoom: { s: 1, tx: 0, ty: 0 }, hover: -1, sel: null, wired: false, dpr: 1, L: null, onStep: null, drag: null };
+    return AT_STAGES[id];
+  }
+  function atLayout(S) {
+    const cv = $("#" + S.id);
+    const Wd = cv.clientWidth || 600, narrow = Wd < 520, Hd = Math.round(narrow ? Wd * 1.1 : Math.min(700, Math.max(440, Wd * 0.8)));
+    const R = Math.min(Wd, Hd) / 2 - (narrow ? 16 : 28);
+    S.L = { Wd, Hd, R, narrow, cx: Wd / 2, cy: Hd / 2 };
+    S.dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.style.height = Hd + "px";
+    cv.width = Math.round(Wd * S.dpr);
+    cv.height = Math.round(Hd * S.dpr);
+  }
+  const atXY = (S, n) => [S.L.cx + (n.x * S.L.R) * S.zoom.s + S.zoom.tx, S.L.cy + (n.y * S.L.R) * S.zoom.s + S.zoom.ty];
+  const atRad = (n, mx) => (n.measured ? 2.6 + 7 * Math.sqrt((n.systemic || 0) / (mx || 1)) : n.family === "Book" ? (n.id === "book" ? 10 : 4.2) : 4.4);
+  function atScenario(S) {
+    const M = atMatrices(), R = atRespond(M, S.shock);
+    if (!R) return null;
+    const C = atCum(R);
+    const flows = R.map((x, k) => {
+      const f = [];
+      M.ce.forEach((e, j) => { const v = e.w * x[e.f]; if (Math.abs(v) > 1e-4) f.push({ j, lag: false, v }); });
+      if (k > 0) M.le.forEach((l, j) => { if (l.self) return; const v = l.w * R[k - 1][l.f]; if (Math.abs(v) > 1e-4) f.push({ j, lag: true, v }); });
+      return f.sort((a, b) => Math.abs(b.v) - Math.abs(a.v));
+    });
+    return { M, R, C, flows, mc: null, src: Object.keys(S.shock).map((k) => M.ix[k]).filter((i) => i != null) };
+  }
+  function atStart(S, shock, preset) {
+    S.shock = shock; S.preset = preset || null; S.sc = atScenario(S); S.parts = []; S.step = -1; S.t0 = performance.now(); S.paused = 0;
+    if (!S.sc) return;
+    atMCAsync(S, (st) => { if (st.onStep) st.onStep(st); });
+    if (S.onStart) S.onStart(S);
+    if (heroCalm()) { S.playing = false; atJump(S, AT_H); } else { S.playing = true; atTick(S); }
+  }
+  const atEl = (S, now) => Math.max(0, (S.playing ? now : S.paused || now) - S.t0);
+  function atJump(S, k) {
+    S.t0 = performance.now() - (clamp(k, 0, AT_H) * AT_STEP + (k >= AT_H ? AT_STEP : 1));
+    S.parts = [];
+    if (!S.playing) S.paused = performance.now();
+    atFrame(S, performance.now(), true);
+  }
+  function atOnScreen(S) { const cv = $("#" + S.id); if (!cv) return false; const r = cv.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < (window.innerHeight || 800); }
+  function atTick(S) {
+    cancelAnimationFrame(S.raf);
+    if (document.hidden) return;
+    if (!atOnScreen(S)) { S.visible = false; return; }
+    S.visible = true;
+    S.raf = requestAnimationFrame((now) => { atFrame(S, now, false); if (S.playing) atTick(S); });
+  }
+  function atSpawn(S, k) {
+    const fl = S.sc.flows[k], M = S.sc.M;
+    if (!fl || !fl.length) return;
+    const mx = Math.abs(fl[0].v), budget = S.L.narrow ? 140 : 260, base = S.t0 + k * AT_STEP;
+    let used = 0;
+    for (const r of fl) {
+      if (Math.abs(r.v) < 0.03 * mx || used >= budget) break;
+      const m = Math.round(1 + 9 * Math.abs(r.v) / mx), e = r.lag ? M.le[r.j] : M.ce[r.j];
+      for (let i = 0; i < m && used < budget; i++, used++) S.parts.push({ f: e.f, t: e.t, lag: r.lag, born: base + Math.random() * 380, dur: AT_FLY * (0.8 + 0.5 * Math.random()), warm: r.v > 0, sz: 0.55 + 0.9 * Math.abs(r.v) / mx });
+    }
+  }
+  function atFrame(S, now, force) {
+    const cv = $("#" + S.id);
+    if (!cv || !S.sc || !S.L) return;
+    const el = atEl(S, now), total = (AT_H + 1) * AT_STEP + AT_HOLD;
+    if (S.playing && el > total) {
+      if (S.auto) { const i = HERO_PRESETS.indexOf(S.preset), nx = HERO_PRESETS[(i + 1) % HERO_PRESETS.length], p = BR_PRESETS.find((x) => x.id === nx); atStart(S, Object.assign({}, p.shock), nx); return; }
+      S.playing = false; S.paused = now; if (S.onStep) S.onStep(S);
+    }
+    const k = Math.min(AT_H, Math.floor(el / AT_STEP)), within = el - k * AT_STEP;
+    if (k !== S.step) {
+      if (!force && k === S.step + 1) atSpawn(S, k);
+      if (force) atSpawn(S, k);
+      S.step = k;
+      if (S.onStep) S.onStep(S);
+    }
+    const f = ease((within - 120) / (AT_FLY + 60));
+    const prev = k > 0 ? S.sc.C[k - 1] : null, cur = S.sc.C[k];
+    const vals = cur.map((v, i) => (prev ? prev[i] + (v - prev[i]) * f : v * f));
+    atDraw(S, cv, vals, k, now);
+  }
+  function atDraw(S, cv, vals, k, now) {
+    const g = cv.getContext("2d"), L = S.L, sc = S.sc, M = sc.M;
+    if (!g) return;
+    g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
+    const bg = g.createRadialGradient(L.cx, L.cy, 0, L.cx, L.cy, Math.max(L.Wd, L.Hd) * 0.7);
+    bg.addColorStop(0, "#14123a"); bg.addColorStop(0.6, "#0a0920"); bg.addColorStop(1, "#04040b");
+    g.fillStyle = bg; g.fillRect(0, 0, L.Wd, L.Hd);
+    const P = M.nodes.map((n) => atXY(S, n)), mxs = Math.max(...M.nodes.map((n) => n.systemic || 0));
+    // community nebulae
+    const comms = {};
+    M.nodes.forEach((n, i) => { (comms[n.community] = comms[n.community] || []).push(i); });
+    Object.entries(comms).forEach(([c, mem]) => {
+      if (mem.length < 3) return;
+      const cx = mem.reduce((a, i) => a + P[i][0], 0) / mem.length, cy = mem.reduce((a, i) => a + P[i][1], 0) / mem.length;
+      const r = Math.max(30, Math.sqrt(mem.reduce((a, i) => a + (P[i][0] - cx) ** 2 + (P[i][1] - cy) ** 2, 0) / mem.length) * 1.7);
+      const col = atNodeColor(M.nodes[mem[0]]), gr = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+      gr.addColorStop(0, col + "26"); gr.addColorStop(1, col + "00");
+      g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, r, 0, 2 * Math.PI); g.fill();
+    });
+    // links: faint by kind, bright when they carry this month's flow
+    const act = new Map(), fl = k >= 0 ? sc.flows[k] : [];
+    if (fl && fl.length) { const m = Math.abs(fl[0].v); fl.forEach((r) => act.set((r.lag ? "l" : "c") + r.j, r.v / m)); }
+    const curve = (p0, p1, bend) => { const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2, dx = p1[0] - p0[0], dy = p1[1] - p0[1]; return [mx - dy * bend, my + dx * bend]; };
+    const sel = S.sel != null ? S.sel : S.hover >= 0 ? S.hover : null;
+    g.lineCap = "round";
+    const drawEdge = (e, j, lag) => {
+      const a = act.get((lag ? "l" : "c") + j), p0 = P[e.f], p1 = P[e.t], c = curve(p0, p1, lag ? -0.18 : 0.12);
+      const touch = sel != null && (e.f === sel || e.t === sel);
+      let al = lag ? 0.07 : e.judged ? 0.06 : e.est ? 0.2 : 0.1;
+      if (a != null) al = 0.2 + 0.65 * Math.abs(a);
+      if (sel != null) al = touch ? Math.max(al, 0.55) : al * 0.35;
+      g.globalAlpha = al;
+      g.strokeStyle = e.w > 0 ? WARM : COOL;
+      g.lineWidth = (0.4 + 2.2 * Math.min(1, Math.abs(e.w))) * (a != null ? 1.4 : 1) * (S.zoom.s > 1.5 ? 1.2 : 1);
+      g.setLineDash(lag ? [3, 4] : e.judged ? [1.5, 3] : []);
+      g.beginPath(); g.moveTo(p0[0], p0[1]); g.quadraticCurveTo(c[0], c[1], p1[0], p1[1]); g.stroke();
+    };
+    M.ce.forEach((e, j) => drawEdge(e, j, false));
+    M.le.forEach((e, j) => { if (!e.self) drawEdge(e, j, true); });
+    g.setLineDash([]); g.globalAlpha = 1;
+    // particles
+    if (!HR.sprite) HR.sprite = { w: heroSprite(WARM), c: heroSprite(COOL) };
+    const tNow = S.playing ? now : S.paused || now;
+    S.parts = S.parts.filter((p) => tNow - p.born < p.dur);
+    g.globalCompositeOperation = "lighter";
+    for (const p of S.parts) {
+      const u = (tNow - p.born) / p.dur;
+      if (u < 0) continue;
+      const p0 = P[p.f], p1 = P[p.t], c = curve(p0, p1, p.lag ? -0.18 : 0.12), pt = qbez(p0, c, p1, ease(u)), s = (L.narrow ? 8 : 11) * p.sz;
+      g.globalAlpha = Math.min(1, 1.6 * Math.sin(Math.PI * u) + 0.1);
+      g.drawImage(p.warm ? HR.sprite.w : HR.sprite.c, pt[0] - s / 2, pt[1] - s / 2, s, s);
+    }
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
+    // nodes
+    const maxV = Math.max(0.05, ...vals.map(Math.abs)), src = new Set(sc.src);
+    M.nodes.forEach((n, i) => {
+      const [x, y] = P[i], v = vals[i], m = Math.min(1, Math.abs(v) / maxV), r = atRad(n, mxs) * Math.min(1.6, Math.sqrt(S.zoom.s));
+      if (m > 0.03) {
+        const gr = g.createRadialGradient(x, y, 0, x, y, r + 22 * m);
+        gr.addColorStop(0, v > 0 ? WARM : COOL); gr.addColorStop(1, "rgba(0,0,0,0)");
+        g.globalAlpha = 0.2 + 0.6 * m; g.fillStyle = gr; g.beginPath(); g.arc(x, y, r + 22 * m, 0, 2 * Math.PI); g.fill(); g.globalAlpha = 1;
+      }
+      const col = atNodeColor(n);
+      g.globalAlpha = sel != null && sel !== i && !M.ce.some((e) => (e.f === sel && e.t === i) || (e.t === sel && e.f === i)) ? 0.35 : 1;
+      if (n.measured) { g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, 2 * Math.PI); g.fill(); g.strokeStyle = "#05050d"; g.lineWidth = 1; g.stroke(); }
+      else { g.fillStyle = "#151233"; g.strokeStyle = col; g.lineWidth = n.id === "book" ? 2.4 : 1.5; g.beginPath(); g.arc(x, y, r, 0, 2 * Math.PI); g.fill(); g.stroke(); }
+      if (src.has(i) || i === sel) { g.strokeStyle = "#ffd166"; g.lineWidth = 2; g.beginPath(); g.arc(x, y, r + 3.5, 0, 2 * Math.PI); g.stroke(); }
+      g.globalAlpha = 1;
+    });
+    // labels: the shocked, the selected, the biggest movers, the book, then the most systemic, without overlaps
+    const pri = M.nodes.map((n, i) => [i, (src.has(i) || i === sel ? 1e9 : 0) + (n.id === "book" ? 1e8 : 0) + Math.abs(vals[i]) * 1e3 + (n.systemic || 0) * (n.measured ? 10 : 0) + (S.zoom.s > 1.8 ? 1 : 0)]).sort((a, b) => b[1] - a[1]);
+    const cap = L.narrow ? 12 : Math.round(22 * Math.min(3, S.zoom.s)), placed = [];
+    g.textBaseline = "alphabetic";
+    let shown = 0;
+    for (const [i] of pri) {
+      if (shown >= cap) break;
+      const n = M.nodes[i], [x, y] = P[i], r = atRad(n, mxs), fs = L.narrow ? 9.5 : 11, lab = n.short || n.id, val = Math.abs(vals[i]) > 0.02 ? ` ${sg(vals[i])}σ` : "";
+      g.font = `${src.has(i) || i === sel ? 700 : 500} ${fs}px system-ui, sans-serif`;
+      const w = g.measureText(lab + val).width + 4, bx = clamp(x - w / 2, 2, L.Wd - w - 2), by = y + r + 3;
+      const box = [bx, by, w, fs + 3];
+      if (box[1] + box[3] > L.Hd || placed.some((q) => box[0] < q[0] + q[2] && box[0] + box[2] > q[0] && box[1] < q[1] + q[3] && box[1] + box[3] > q[1])) continue;
+      placed.push(box);
+      g.fillStyle = "rgba(5,5,13,0.55)"; g.fillRect(bx - 1, by - 1, w + 2, fs + 5);
+      g.textAlign = "left"; g.fillStyle = "#e4e0ff"; g.fillText(lab, bx + 2, by + fs);
+      if (val) { const lw = g.measureText(lab).width; g.fillStyle = vals[i] > 0 ? "#ffb98c" : "#8fd9ff"; g.fillText(val, bx + 2 + lw, by + fs); }
+      shown++;
+    }
+    g.textAlign = "left"; g.fillStyle = "#bdb7ff"; g.font = `600 ${L.narrow ? 10 : 11.5}px ui-monospace, Menlo, monospace`;
+    g.fillText(`month h = ${k} of ${AT_H}`, 12, 20);
+  }
+  function atHit(S, ev) {
+    const cv = $("#" + S.id), r = cv.getBoundingClientRect(), x = (ev.clientX - r.left) * (S.L.Wd / r.width), y = (ev.clientY - r.top) * (S.L.Hd / r.height);
+    const M = atMatrices();
+    let best = -1, bd = 14 * 14;
+    M.nodes.forEach((n, i) => { const [px, py] = atXY(S, n), d = (px - x) ** 2 + (py - y) ** 2; if (d < bd) { bd = d; best = i; } });
+    return best;
+  }
+  function atWire(S, opts) {
+    if (S.wired) return;
+    S.wired = true;
+    const cv = $("#" + S.id);
+    atLayout(S);
+    cv.addEventListener("mousemove", (ev) => {
+      if (S.drag) { S.zoom.tx = S.drag.tx + (ev.clientX - S.drag.x); S.zoom.ty = S.drag.ty + (ev.clientY - S.drag.y); S.drag.moved = true; if (!S.playing) atFrame(S, performance.now(), true); return; }
+      const i = atHit(S, ev);
+      if (i !== S.hover) { S.hover = i; cv.style.cursor = i >= 0 ? "pointer" : "grab"; if (!S.playing) atFrame(S, performance.now(), true); }
+      if (i >= 0) {
+        const n = atMatrices().nodes[i], v = S.sc ? S.sc.C[Math.max(0, S.step)][i] : 0;
+        showTip([[`${sg(v)}σ`, `${n.name}${n.measured ? ` · ${n.family} · ${n.from} to ${n.to}` : n.family === "Book" ? " · holding" : " · judged concept"}. Click to shock it.`]], ev.clientX, ev.clientY);
+      } else hideTip();
+    });
+    cv.addEventListener("mouseleave", () => { S.hover = -1; hideTip(); S.drag = null; });
+    cv.addEventListener("mousedown", (ev) => { S.drag = { x: ev.clientX, y: ev.clientY, tx: S.zoom.tx, ty: S.zoom.ty, moved: false }; });
+    window.addEventListener("mouseup", () => { setTimeout(() => { S.drag = null; }, 0); });
+    cv.addEventListener("click", (ev) => {
+      if (S.drag && S.drag.moved) return;
+      const i = atHit(S, ev);
+      if (i < 0) return;
+      const n = atMatrices().nodes[i];
+      S.auto = false; S.sel = i;
+      if (opts && opts.onSelect) opts.onSelect(n);
+      atStart(S, { [n.id]: ev.shiftKey ? -1 : 1 }, null);
+    });
+    cv.addEventListener("wheel", (ev) => {
+      if (!ev.ctrlKey && !ev.metaKey && !(opts && opts.wheel)) return;
+      ev.preventDefault();
+      const r = cv.getBoundingClientRect(), mx = (ev.clientX - r.left) * (S.L.Wd / r.width), my = (ev.clientY - r.top) * (S.L.Hd / r.height);
+      const f = Math.exp(-ev.deltaY * 0.0015), s1 = clamp(S.zoom.s * f, 0.8, 6), k = s1 / S.zoom.s;
+      S.zoom.tx = mx - S.L.cx - (mx - S.L.cx - S.zoom.tx) * k; S.zoom.ty = my - S.L.cy - (my - S.L.cy - S.zoom.ty) * k; S.zoom.s = s1;
+      if (!S.playing) atFrame(S, performance.now(), true);
+    }, { passive: false });
+    cv.addEventListener("dblclick", () => { S.zoom = { s: 1, tx: 0, ty: 0 }; S.sel = null; if (!S.playing) atFrame(S, performance.now(), true); });
+    if (typeof ResizeObserver === "function") { let rq = 0; new ResizeObserver(() => { cancelAnimationFrame(rq); rq = requestAnimationFrame(() => { atLayout(S); atFrame(S, performance.now(), true); }); }).observe(cv); }
+    const wake = () => { if (!S.visible && atOnScreen(S) && S.playing) atTick(S); };
+    window.addEventListener("scroll", wake, { passive: true });
+    window.addEventListener("hashchange", () => setTimeout(wake, 60));
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) wake(); });
+  }
+  function atPlayToggle(S) {
+    if (S.playing) { S.playing = false; S.paused = performance.now(); S.auto = false; }
+    else { const now = performance.now(); S.t0 += now - (S.paused || now); S.paused = 0; S.playing = true; if (atEl(S, now) > (AT_H + 1) * AT_STEP + AT_HOLD) atStart(S, S.shock, S.preset); else atTick(S); }
+  }
+  function atScenarioName(S) {
+    const M = atMatrices();
+    return S.preset ? (BR_PRESETS.find((p) => p.id === S.preset) || {}).n : Object.entries(S.shock).map(([k, v]) => `${(M.nodes[M.ix[k]] || {}).name || k} ${sg(v)}σ`).join(", ");
+  }
+  function atFan(box, S, label) {
+    if (!box || !S.sc) return;
+    const mc = S.sc.mc, t = S.sc.M.ix[S.target], k = Math.max(0, S.step);
+    const pts = S.sc.C.slice(0, k + 1).map((c, h) => [h, c[t]]);
+    const ser = [{ name: "Response", color: "var(--ink)", pts, width: 2.2, dots: pts.length <= 13 }];
+    if (mc) ser.push({ name: "Median world", color: "var(--s1)", pts: mc.band.map((b, h) => [h, b[1]]), width: 1.4 });
+    else ser.push({ name: "Full path", color: "var(--muted)", pts: S.sc.C.map((c, h) => [h, c[t]]), width: 1 });
+    xyChart(box, { series: ser, bands: mc ? [{ pts: mc.band.map((b, h) => [h, b[0], b[2]]), color: "var(--s1)", opacity: 0.16 }] : [], height: 170, zero: true, xDomain: [0, AT_H],
+      xticks: [0, 3, 6, 9, 12].map((h) => [h, h ? `${h}m` : "now"]), yfmt: (v) => sg(v, 2), xfmt: (h) => `${h} months`, label: label || "Cumulative response by month with the 10 to 90% band" });
+  }
+
+  /* ---------- the desk's hero: full brain or core map ---------- */
+  const AH = { mode: LS.get("bo-hero-brain", "full") === "core" ? "core" : "full" };
+  function heroAtlasStep(S) {
+    const sc = S.sc, M = sc.M, k = Math.max(0, S.step), x = sc.R[k], C = sc.C[k], t = M.ix[S.target];
+    $("#ah-scn").textContent = atScenarioName(S) || "Your shock";
+    $("#ah-k").textContent = `h = ${k}`;
+    const ol = $("#ah-flows");
+    ol.replaceChildren();
+    const fl = sc.flows[k].filter((r) => Math.abs(r.v) >= 0.005).slice(0, 4);
+    $("#ah-step").textContent = k === 0 ? "Month 0: x₀ = (I − W)⁻¹e, the shock and everything it moves the same month. Largest flows:" : `Month ${k}: x${sub(k)} = (I − W)⁻¹A x${sub(k - 1)}, last month's moves carried forward. Largest flows:`;
+    fl.forEach((r) => {
+      const e = r.lag ? M.le[r.j] : M.ce[r.j], li = h("li"), from = r.lag ? sc.R[k - 1][e.f] : x[e.f];
+      li.append(h("span", null, `${M.nodes[e.f].short} → ${M.nodes[e.t].short}${r.lag ? " (lag)" : ""}`), h("b", "num", `${sg(e.w)} × ${sg(from)} = ${sg(r.v)}`));
+      ol.append(li);
+    });
+    if (!fl.length) ol.append(h("li", "none", k ? "Nothing large carries over this month: the shock has spread and is fading." : "No link carries this shock."));
+    const top = Array.from(C).map((v, i) => [i, v]).filter(([i]) => !sc.src.includes(i)).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 4);
+    $("#ah-arrive").textContent = `Moved most so far: ${top.map(([i, v]) => `${M.nodes[i].short} ${sg(v)}σ`).join(", ")}. ${M.nodes[t].short}: ${sg(C[t])}σ after ${k} month${k === 1 ? "" : "s"}.`;
+    atFan($("#ah-fan"), S, `${M.nodes[t].name}: cumulative response by month${sc.mc ? `, with the 10 to 90% band across ${sc.mc.kept} worlds` : ""}`);
+    if (!sc.mc) $("#ah-mc").textContent = "Drawing 200 worlds of doubt…";
+    else $("#ah-mc").textContent = `Across ${sc.mc.kept} worlds that redraw every link's weight and drop each learned link with its own probability of being spurious, ${M.nodes[t].short} ends lower in ${Math.round(sc.mc.neg * 100)}%.${sc.mc.dropped ? ` ${sc.mc.dropped} worlds had runaway loops and were set aside.` : ""}`;
+    const pb = $("#ah-play");
+    if (pb) { pb.textContent = S.playing ? "Pause" : "Play"; pb.setAttribute("aria-pressed", S.playing ? "true" : "false"); }
+    document.querySelectorAll("#ah-presets button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.p === S.preset ? "true" : "false"));
+    $("#at-hero-cv").setAttribute("aria-label", `The whole brain, ${M.n} nodes: ${atScenarioName(S)}. Month ${k} of ${AT_H}; ${M.nodes[t].name} ${sg(C[t])} sigma so far.`);
+  }
+  function heroAtlasStatic() {
+    const a = atlasData(), sk = a.skeleton, M = atMatrices();
+    const learned = a.links.filter((l) => !l.lag).length, lag = a.links.filter((l) => l.lag && l.from !== l.to).length;
+    $("#ah-count").textContent = `${M.n} nodes: ${a.series} measured series and ${M.n - a.series} judged concepts and holdings. ${learned} same-month links learned, ${lag} lagged, ${a.judged.length} judged. ${sk.established.kept} links are established, with at most ${fx(sk.established.pfer_bound, 1)} expected false.`;
+    const ul = $("#ah-trust");
+    ul.replaceChildren();
+    const add = (k, v) => { const li = h("li"); li.append(h("span", null, k), h("b", "num", v)); ul.append(li); };
+    add("Links that point the way their own evidence says", pctTxt(a.direction.agree));
+    add("Connectedness (structural, 12 months)", `${fx(a.connectedness.total, 0)}%`);
+    const roll = a.connectedness.rolling;
+    if (roll && roll.total.length) add("Connectedness index (5-year, generalized)", `${fx(roll.total[roll.total.length - 1], 0)}% now`);
+    add("Data", `${a.months} months to ${isoNice(a.as_of + "-01").replace(/^\w+ \d+, /, "")}`);
+  }
+  function renderHeroAtlas() {
+    if (!$("#at-hero-cv")) return;
+    const S = atStage("at-hero-cv");
+    if (!S.wired) {
+      S.onStep = heroAtlasStep;
+      atWire(S, {});
+      const pr = $("#ah-presets");
+      HERO_PRESETS.forEach((id) => {
+        const p = BR_PRESETS.find((x) => x.id === id);
+        if (!p) return;
+        const b = h("button", "chip", p.n); b.type = "button"; b.dataset.p = id;
+        b.addEventListener("click", () => { S.auto = false; atStart(S, Object.assign({}, p.shock), id); });
+        pr.append(b);
+      });
+      const sel = $("#ah-node"), tg = $("#ah-target"), M = atMatrices(), a = M.a;
+      const groups = {};
+      M.nodes.forEach((n) => { const c = n.measured ? (a.communities.find((x) => x.id === n.community) || {}).name || "Learned" : n.family === "Book" ? "Holdings and the book" : "Judged concepts"; (groups[c] = groups[c] || []).push(n); });
+      Object.entries(groups).forEach(([c, ns]) => { const og = document.createElement("optgroup"); og.label = c; ns.sort((x, y) => x.short.localeCompare(y.short)).forEach((n) => { const o = h("option", null, n.short === n.name ? n.name : `${n.short} · ${n.name}`); o.value = n.id; og.append(o); }); sel.append(og); });
+      sel.value = "copper" in M.ix ? "copper" : M.ids[0];
+      ["book", "sp500", "NVDA", "y10", "cpi", "gold", "brent", "vix", "credit", "eur"].filter((k) => M.ix[k] != null).forEach((k) => { const o = h("option", null, M.nodes[M.ix[k]].short); o.value = k; tg.append(o); });
+      tg.value = "book";
+      tg.addEventListener("change", () => { S.target = tg.value; S.sc.mc = null; heroAtlasStep(S); atMCAsync(S, heroAtlasStep); });
+      $("#ah-go").addEventListener("click", () => { S.auto = false; atStart(S, { [sel.value]: clamp(Number($("#ah-size").value) || 1, -3, 3) }, null); });
+      $("#ah-play").addEventListener("click", () => { atPlayToggle(S); heroAtlasStep(S); });
+      $("#ah-prev").addEventListener("click", () => { S.playing = false; S.auto = false; atJump(S, Math.max(0, S.step - 1)); });
+      $("#ah-next").addEventListener("click", () => { S.playing = false; S.auto = false; atJump(S, Math.min(AT_H, S.step + 1)); });
+      heroAtlasStatic();
+      atStart(S, { hormuz: 1.5 }, "hormuz");
+    } else { atLayout(S); atFrame(S, performance.now(), true); if (!S.visible && S.playing) atTick(S); }
+  }
+  function setHeroBrain(mode) {
+    AH.mode = mode;
+    LS.set("bo-hero-brain", mode);
+    $("#hero-full").hidden = mode !== "full";
+    $("#hero-core").hidden = mode !== "core";
+    document.querySelectorAll("#hero-which button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.w === mode ? "true" : "false"));
+    if (mode === "full") { cancelAnimationFrame(HR.raf); HR.visible = false; guard("The whole brain", renderHeroAtlas, $("#hero-full")); }
+    else { const S = AT_STAGES["at-hero-cv"]; if (S) { cancelAnimationFrame(S.raf); S.visible = false; } guard("The brain, live", renderHero, $("#hero")); }
+  }
+  function wireHeroWhich() {
+    const w = $("#hero-which");
+    if (!w || w.dataset.wired) return;
+    w.dataset.wired = "1";
+    w.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => setHeroBrain(b.dataset.w)));
+    const M = atMatrices();
+    const fb = w.querySelector("button[data-w=full]");
+    if (fb) fb.textContent = `Whole brain · ${M.n} nodes`;
+    setHeroBrain(AH.mode);
+  }
+
+  /* ---------- the atlas desk ---------- */
+  function renderAtlasDesk() {
+    if (!$("#atv-cv")) return;
+    const a = atlasData(), M = atMatrices(), S = atStage("atv-cv");
+    const sk = a.skeleton;
+    const tiles = $("#atv-tiles");
+    if (!tiles.children.length) {
+      const learned = a.links.filter((l) => !l.lag).length, lag = a.links.filter((l) => l.lag && l.from !== l.to).length;
+      [[String(M.n), "Nodes", `${a.series} series measured monthly, ${M.n - a.series} judged`], [String(learned), "Same-month links", `${sk.edges_stable} stable, ${a.pruned || 0} pruned at |t| < 2`],
+        [String(sk.established.kept), "Established links", `at most ${fx(sk.established.pfer_bound, 1)} expected false`], [String(lag), "Lagged links", `|t| ≥ ${a.dynamics.lag_t}, Newey-West`],
+        [pctTxt(a.direction.agree), "Direction agrees", "with each link's own pairwise evidence"], [`${fx(a.connectedness.total, 0)}%`, "Connectedness", "structural, 12-month horizon"],
+        [fx(a.modularity, 2), "Modularity", `${a.communities.filter((c) => !c.judged).length} learned communities`]].forEach(([v, k, s]) => {
+        const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d);
+      });
+      $("#atv-sum").textContent = (a.findings || []).join(" ");
+      const sel = $("#atv-node");
+      const groups = {};
+      M.nodes.forEach((n) => { const c = n.measured ? (a.communities.find((x) => x.id === n.community) || {}).name || "Learned" : n.family === "Book" ? "Holdings and the book" : "Judged concepts"; (groups[c] = groups[c] || []).push(n); });
+      Object.entries(groups).forEach(([c, ns]) => { const og = document.createElement("optgroup"); og.label = c; ns.sort((x, y) => x.short.localeCompare(y.short)).forEach((n) => { const o = h("option", null, n.short === n.name ? n.name : `${n.short} · ${n.name}`); o.value = n.id; og.append(o); }); sel.append(og); });
+      sel.value = M.ix.sp500 != null ? "sp500" : M.ids[0];
+      sel.addEventListener("change", () => { atExplain(sel.value); S.sel = M.ix[sel.value]; S.auto = false; atStart(S, { [sel.value]: 1 }, null); });
+      S.onStep = (st) => { const k = Math.max(0, st.step); $("#atv-k").textContent = `h = ${k}`; atFan($("#atv-fan"), st, `${M.nodes[M.ix[st.target]].name}: cumulative response`); };
+      atWire(S, { wheel: true, onSelect: (n) => { sel.value = n.id; atExplain(n.id); } });
+      $("#atv-play").addEventListener("click", () => { atPlayToggle(S); });
+      atExplain(sel.value);
+      S.auto = false; S.sel = M.ix[sel.value];
+      atStart(S, { [sel.value]: 1 }, null);
+      atCharts();
+    } else { atLayout(S); atFrame(S, performance.now(), true); if (!S.visible && S.playing) atTick(S); atCharts(); }
+  }
+  function atExplain(id) {
+    const M = atMatrices(), a = M.a, i = M.ix[id], n = M.nodes[i];
+    if (i == null) return;
+    $("#atv-name").textContent = n.name;
+    const comm = a.communities.find((c) => c.id === n.community);
+    $("#atv-meta").textContent = n.measured ? `${n.family} · community: ${comm ? comm.name : "n/a"} · ${n.source} · ${n.from} to ${n.to}${n.clipped ? ` · ${n.clipped} extreme month${n.clipped === 1 ? "" : "s"} winsorized` : ""}` : `${n.family === "Book" ? "A holding or the book" : "A judged concept from the core map"}: its links are judged and labelled, not measured.`;
+    const rows = (dir) => M.ce.filter((e) => (dir === "in" ? e.t === i : e.f === i)).sort((x, y) => Math.abs(y.w) - Math.abs(x.w)).slice(0, 10).map((e) => {
+      const o = M.nodes[dir === "in" ? e.f : e.t];
+      return [o.short, sg(e.w), e.judged ? "judged" : `${pctTxt(e.p)}${e.est ? " ★" : ""}`, e.judged ? (e.why || "") : e.agree ? "agrees" : "against own evidence"];
+    });
+    fillTable($("#atv-in"), ["From", "Weight", "Stability", "Direction"], rows("in"), 1);
+    fillTable($("#atv-out"), ["To", "Weight", "Stability", "Direction"], rows("out"), 1);
+    const lag = M.le.filter((l) => (l.t === i || l.f === i) && !l.self).map((l) => `${M.nodes[l.f].short} → ${M.nodes[l.t].short} next month ${sg(l.w)}`);
+    const self = M.le.find((l) => l.self && l.t === i);
+    const flips = (a.regime_flips || []).filter((f) => f.from === id || f.to === id).map((f) => `${(M.nodes[M.ix[f.from]] || {}).short} → ${(M.nodes[M.ix[f.to]] || {}).short}: ${sg(f.before.w)} before 2022, ${sg(f.after.w)} after${f.flip ? " (sign flipped)" : ""}`);
+    const rank = (key) => { const ms = M.nodes.filter((x) => x.measured); return 1 + ms.filter((x) => (x[key] || 0) > (n[key] || 0)).length; };
+    atVoices(n);
+    $("#atv-more").textContent = n.measured ? `Systemic rank ${rank("systemic")} of ${a.series} (total effect on others ${fx(n.systemic, 2)}σ per σ); PageRank rank ${rank("pagerank")}. Its shocks explain ${fx(n.gives, 0)} points of others' forecast-error variance; others explain ${fx(n.takes, 0)}% of its own (net ${sg(n.net, 0)}).${self ? ` Own momentum ${sg(self.w)} a month.` : ""}${lag.length ? ` Lagged: ${lag.slice(0, 4).join("; ")}.` : ""}${flips.length ? ` Since 2022: ${flips.slice(0, 3).join("; ")}.` : ""}` : "";
+  }
+  // which investor-voices topic speaks to a node
+  const AT_VOICE = { Energy: "oil_energy", "Commodity FX": "dollar_debt", "European FX": "dollar_debt", "Asian FX": "china_em", Rates: "bonds_rates",
+    Inflation: "inflation_fed", Equities: "market_valuation", Volatility: "timing_crashes", Credit: "private_credit", Crypto: "bitcoin", Dollar: "dollar_debt", Activity: "recession_economy" };
+  const AT_VOICE_ID = { dollar: "dollar_debt", capex: "ai_boom", aidemand: "ai_boom", memory: "semis_nvidia", power: "ai_boom", pcredit: "private_credit", credit: "private_credit",
+    fed: "inflation_fed", fiscal: "dollar_debt", tp: "bonds_rates", tlt: "bonds_rates", corr: "bonds_rates", hormuz: "oil_energy", pods: "speculation_manias", NVDA: "semis_nvidia",
+    AVGO: "semis_nvidia", TSLA: "megacap_concentration", MSFT: "megacap_concentration", GOOGL: "megacap_concentration", AMZN: "megacap_concentration", META: "megacap_concentration",
+    ORCL: "ai_boom", book: "ai_boom", gold: "gold", y10: "bonds_rates", sp500: "market_valuation", vix: "timing_crashes", cpi: "inflation_fed", cny: "china_em" };
+  function atVoiceTopic(n) { const t = AT_VOICE_ID[n.id] || AT_VOICE[n.family]; return t && VC.topics[t] ? t : null; }
+  function atVoices(n) {
+    const box = $("#atv-voices");
+    if (!box) return;
+    box.replaceChildren();
+    const t = atVoiceTopic(n);
+    if (!t) return;
+    const R = vSearch(VC.topics[t].title, t), first = (s) => (R.spectrum[s] || [])[0];
+    const pick = [-2, 2].map(first).filter(Boolean).map((id) => vIdx().byId[id]);
+    pick.forEach((q) => { const p = h("p", "at-voice"); p.append(h("span", "vo-badge s" + (q.stance + 2), vName(q.stance)), document.createTextNode(` “${q.text}” `), h("b", null, `${q.speaker}, ${vDate(q.date)}`)); box.append(p); });
+    const b = h("button", "pill", `Every voice on ${VC.topics[t].title.toLowerCase()} →`);
+    b.type = "button";
+    b.addEventListener("click", () => { location.hash = "voices"; setTimeout(() => { $("#vo-q").value = VC.topics[t].title; vRun(VC.topics[t].title, t); }, 80); });
+    box.append(b);
+  }
+  function atCharts() {
+    const a = atlasData(), M = atMatrices();
+    const roll = a.connectedness.rolling, box = $("#atv-roll");
+    if (box && roll && roll.dates.length) {
+      const xs = roll.dates.map((d) => Number(d.slice(0, 4)) + (Number(d.slice(5, 7)) - 1) / 12);
+      const ticks = [];
+      for (let y = Math.ceil(xs[0] / 5) * 5; y <= xs[xs.length - 1]; y += 5) ticks.push([y, String(y)]);
+      xyChart(box, { series: [{ name: "Connectedness index", color: "var(--s1)", pts: xs.map((x, i) => [x, roll.total[i]]) }], height: 220, xticks: ticks, yfmt: (v) => fx(v, 0) + "%",
+        xfmt: (x) => `${Math.floor(x)}-${String(Math.round((x % 1) * 12) + 1).padStart(2, "0")}`, vmarks: [{ x: 2008.7, label: "2008" }, { x: 2020.2, label: "2020" }].filter((m) => m.x >= xs[0]),
+        label: "Rolling five-year connectedness of the series with current data, generalized forecast-error variance decomposition" });
+      const i = roll.total.indexOf(Math.max(...roll.total));
+      $("#atv-roll-t").textContent = `Highest at ${fx(roll.total[i], 0)}% in the five years to ${roll.dates[i]}; ${fx(roll.total[roll.total.length - 1], 0)}% in the five years to ${roll.dates[roll.dates.length - 1]}, across ${roll.series[roll.series.length - 1]} series.`;
+    }
+    const sb = $("#atv-sys");
+    if (sb) {
+      const ms = M.nodes.filter((n) => n.measured).sort((x, y) => y.systemic - x.systemic).slice(0, 14);
+      barsH(sb, ms.map((n) => ({ label: n.short, v: n.systemic, color: atNodeColor(n), lbl: fx(n.systemic, 2), tip: () => [[fx(n.systemic, 2), `${n.name}: summed same-month total effect on every other series, σ per σ`]] })), { fmt: (v) => fx(v, 1) });
+    }
+    const eb = $("#atv-ebic");
+    if (eb && a.skeleton.ebic_path.length) {
+      const P = a.skeleton.ebic_path;
+      xyChart(eb, { series: [{ name: "Links", color: "var(--s2)", pts: P.map((r) => [r.alpha, r.edges]), dots: true }], height: 190, yfmt: (v) => fx(v, 0), xfmt: (x) => `penalty ${fx(x, 3)}`,
+        xticks: P.filter((_, i) => i % 2 === 0).map((r) => [r.alpha, fx(r.alpha, 2)]), vmarks: [{ x: a.skeleton.alpha, label: "EBIC choice" }], label: "Links in the graph against the lasso penalty, with the extended-BIC choice" });
+    }
+    const cl = $("#atv-comms");
+    if (cl && !cl.children.length) {
+      a.communities.forEach((c) => {
+        const li = h("li"), sw = h("i", "at-sw");
+        sw.style.background = c.judged ? (c.name.startsWith("Holdings") ? AT_BOOK : AT_JUDGED) : AT_COLS[c.id % AT_COLS.length];
+        li.append(sw, h("b", null, `${c.name} (${c.size})`), h("span", null, c.members.map((m) => (M.nodes[M.ix[m]] || {}).short || m).join(", ")));
+        cl.append(li);
+      });
+    }
+    const ft = $("#atv-flips");
+    if (ft) fillTable(ft, ["Link", "Before 2022", "2022 on", "What changed"], (a.regime_flips || []).slice(0, 12).map((f) => [`${(M.nodes[M.ix[f.from]] || {}).short} → ${(M.nodes[M.ix[f.to]] || {}).short}`,
+      `${sg(f.before.w)} (t ${sg(f.before.t, 1)})`, `${sg(f.after.w)} (t ${sg(f.after.t, 1)})`, f.flip ? "sign flipped" : Math.abs(f.after.t) >= 2 ? "became significant" : "lost significance"]), 1);
+    const ot = $("#atv-oos");
+    if (ot) {
+      const rows = Object.entries(a.oos || {}).map(([k, v]) => [k, v]).sort((x, y) => y[1].oos_r2_vs_own - x[1].oos_r2_vs_own);
+      const pos = rows.filter(([, v]) => v.oos_r2_vs_own > 0).length;
+      fillTable(ot, ["Series", "Months tested", "Gain over own lag"], rows.slice(0, 10).map(([k, v]) => [(M.nodes[M.ix[k]] || {}).short || k, String(v.months), `${sg(100 * v.oos_r2_vs_own, 1)}%`]), 1);
+      $("#atv-oos-t").textContent = rows.length ? `The lagged links forecast next month better than each series' own past for ${pos} of ${rows.length} series tested out of sample from 2005; the gains are small, as efficient markets would predict. Same-month links describe how shocks spread; they are not a way to forecast.` : "";
+    }
+  }
+
   /* =====================================================================================
      today7.js (v0.7): the first screen answers five questions (what changed, why it matters to the book,
      what the choices are, what would reverse the call, and whether to trust it), plus the shared helpers
@@ -14620,7 +15309,7 @@ Quotes: ${JSON.stringify(cands)}`;
      boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {
-    today: { name: "Today", views: ["desk", "ooda", "noteworthy"] },
+    today: { name: "Today", views: ["desk", "atlas", "ooda", "noteworthy"] },
     decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
     research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
@@ -14636,7 +15325,8 @@ Quotes: ${JSON.stringify(cands)}`;
     if (location.hash === "#" + v) show(v, true); else location.hash = v;
   }
   const RENDER = {
-    desk: () => { guard("The brain, live", renderHero, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
+    atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
+    desk: () => { guard("Which brain", wireHeroWhich, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
@@ -14747,6 +15437,7 @@ Quotes: ${JSON.stringify(cands)}`;
     BR_PRESETS.forEach((p) => add(`Brain scenario: ${p.n}`, "Shock the system map and read the fourth-order effects", "Tool", "brain"));
     FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${COVERAGE[r.coverage] || "coverage n/a"}`, "Company", "fu-t-title", r.t));
     add("Voices: extreme bear to extreme bull", "Verbatim, sourced quotes from legendary and current investors on any question", "Tool", "voices", "quotes investors buffett munger dalio druckenmiller bitcoin gold ai bubble bonds");
+    add("The atlas", "The whole brain: every series, every learned link, communities, connectedness", "Tool", "atlas", "network graph lasso stability selection var lingam connectedness spillover diebold yilmaz pagerank");
     add("The brain, live", "Watch a shock travel the system order by order, with the math", "Tool", "hero", "animation propagation neumann leontief matrix monte carlo");
     add("How far to trust the brain", "Conformal error bars, stacked world models, robustness to hidden causes", "Tool", "brr-title", "conformal stacking robustness value confounding");
     add("Calculator", "Exact arithmetic with Black-Scholes, Kelly, NPV, IRR and live values; type = in search", "Tool", "calc", "math compute formula expression");
@@ -14820,6 +15511,10 @@ Quotes: ${JSON.stringify(cands)}`;
     if (bs && buyOk(bs)) { LIVE.buyside = bs; guard("Buyside", buildBuyside, $("#bs-sel")); if (current === "buyside") guard("Buyside", drawBuyside); } else if (bs) LIVE.problems.push("buyside.json did not match the expected shape");
     if (fd && feedsOk(fd)) { LIVE.feeds = fd; guard("Noteworthy", buildNoteworthy, $("#nw-grid")); } else if (fd) LIVE.problems.push("feeds.json did not match the expected shape");
     if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} data sources`; }
+  });
+  loadJSON("data/atlas.json").then((at) => {
+    if (at && atlasOk(at)) { LIVE.atlas = at; AT_M = null; if (current === "atlas") guard("The atlas", renderAtlasDesk, $("#atv-tiles")); }
+    else if (at) LIVE.problems.push("atlas.json did not match the expected shape; the page keeps the atlas snapshot");
   });
   Promise.all(["ooda", "causal", "engines"].map((n) => loadJSON(`data/${n}.json`))).then(([oo, ca, en]) => {
     if (oo && oodaOk(oo)) { LIVE.ooda = oo; if (current && ["ooda", "positions"].includes(current)) guard(TAB_NAME[current], RENDER[current]); } else if (oo) LIVE.problems.push("ooda.json did not match the expected shape; the page keeps the engine snapshot");

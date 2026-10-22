@@ -3,7 +3,16 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.12 puts the brain on the landing page and makes it check itself. The landing desk animates a shock
+Version 0.13 grows the brain by an order of magnitude in what it measures. `atlas.py` reads every monthly series it can
+reach (the GitHub mirrors of the public datasets everywhere; FRED as well in the daily Action), learns the structure
+with the graphical lasso (extended BIC) and stability selection (with a bound on false links), orients each link by
+its non-Gaussian signature (pairwise LiNGAM), fits a structural VAR pruned by its own t-statistics, and computes
+impulse responses, Diebold-Yilmaz connectedness (and a rolling index), communities, PageRank and total effects, regime
+flips and an out-of-sample test. The core map's judged concepts and holdings join it, so one brain carries both: 100
+nodes in the snapshot (72 series), about 130 in the daily run. The landing page shows the whole brain month by month;
+the Atlas desk explores it.
+
+Version 0.12 put the brain on the landing page and made it check itself. The landing desk animates a shock
 travelling the 35-node graph one order at a time, x_k = W'x_(k-1), with the arithmetic beside it: the largest flows of
 each step, the running sum converging on the Leontief limit at the rate of the spectral radius, and 300 Monte Carlo
 worlds. `brain_robust.py` scores five rival world models for every measured equation out of sample from 2000, stacks
@@ -49,7 +58,7 @@ the most mutual information, and doing (cut the node's causes) is kept apart fro
 observations on three clocks, compares competing explanations and ranks the evidence that separates them, registers
 ten unusual indicators before testing them, and watches expected events without reading silence as news. Today shows
 what each headline read before, and says so when nothing moved. The engine is also an MCP server
-(`mcp_server.py`): fifteen research and proposal tools for any assistant, none of which can place an order. Without
+(`mcp_server.py`): sixteen research and proposal tools for any assistant, none of which can place an order. Without
 Databento's paid adjustment factors, the book run falls back to a public split table and estimated bond-fund income.
 
 Version 0.7 answered the third project review. It fixes the accounting (one NAV and return convention, costs in
@@ -182,7 +191,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 244 tests, no data needed
+pytest                                    # 253 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -203,6 +212,8 @@ python -m buildout engine --out out       # the offline engines (valuation, caus
 python -m buildout engine --list          # the registry
 python scripts/snapshot_v11.py            # refresh the page's engine snapshot (decision loop, valuation, causal)
 python scripts/snapshot_v12.py            # refresh the brain's self-checks and the voices library in the page
+python -m buildout atlas --out out        # the atlas: every series, learned structure (FRED and GitHub mirrors)
+python scripts/snapshot_v13.py            # refresh the page's atlas snapshot
 python scripts/export_graph.py            # after editing the brain or field cases on the page (needs node)
 python scripts/snapshot_v09.py path/to/csvs  # refresh the page's monthly series for structure learning
 ```
@@ -235,6 +246,7 @@ Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app doe
 | `position_valuation` | One holding's accounting, implied growth against the base rates, and the two-sided why; override price or beta |
 | `hedge_book` | Switch prebuilt hedges on or off at chosen sizes: the book in every scenario, cost, and the advisor |
 | `investor_voices` | Verbatim, sourced quotes on a question, extreme bear to extreme bull; never generates a quote |
+| `atlas_trace` | The whole brain: trace any shock month by month to any node, or read a node's links, importance and regime changes |
 | `brain_selfcheck` | Conformal coverage, stacking weights and robustness values: how far to trust the brain |
 | `run_hedge_scenario` | hedge.tlt.v2 on any correlation path and inflation reading, every gate visible |
 | `evaluate_trade` | A portfolio on the seven scenarios: growth, worst case, loss limit, regret, the best portfolio on the grid; with `ambiguity`, its worst case over doubtful odds and the robust choice |
@@ -278,6 +290,7 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.13 | `atlas.py` | Every monthly series: graphical lasso with EBIC, stability selection, pairwise LiNGAM, pruned structural VAR, connectedness, communities, layout |
 | v0.12 | `brain_robust.py` | Five rival world models per equation scored one step ahead from 2000, stacking, adaptive conformal intervals, robustness values |
 | | `voices.py` | Verified investor quotes (assets/voices.json), BM25 retrieval with concepts and synonyms, the bear-to-bull spectrum, polarity |
 | v0.11 | `valuation.py` | Accounting quality (core earnings, cash conversion, accruals, stock pay, steady-state FCF, depreciation catch-up, leverage, returns), reverse DCF implied growth, Base Rate Book probabilities, verdicts, two-sided why |
@@ -293,7 +306,7 @@ credentials, and the holdings it is shown are not stored.
 | | `discovery.py` | DirectLiNGAM (pairwise likelihood ratio) with seeded bootstrap; Kalman time-varying links with drift by maximum likelihood; sign changes |
 | v0.8 | `thinking.py` | The brain's reasoning: total effects within K links, ridge abduction of root shocks with posterior covariance, predictions with sd, residuals and misfit gradients per link, single-cause evidence by Sherman-Morrison, mutual information for the next observation, do-interventions, shared exposure |
 | | `field.py` | Discrete Bayes over competing explanations and expected information (bits) of each unchecked piece of evidence |
-| | `mcp_server.py` | MCP over stdio: fifteen research and proposal tools; never executes |
+| | `mcp_server.py` | MCP over stdio: sixteen research and proposal tools; never executes |
 | | `data/corporate_actions.py` | Free fallback for Databento's paid adjustment factors: public split table, bond-fund income from Treasury yields |
 | v0.7 | `policy.py` | hedge.tlt.v2, size.equity.v2, limits.portfolio.v1: one function each for recommendation, text and backtest; unavailable inputs block, never default; decision snapshot |
 | | `reasoner.py` | Tempered Bayes posterior, scenario returns (duration, convexity, Black-Scholes put spreads, financing), exact grid search with a loss limit, alternatives with regret, simplex game against Nature, EVPI and EVSI, reverse stress from measured covariances; `python -m buildout reason` writes reason.json |
@@ -354,6 +367,11 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.13: on a planted graph with missing spans the atlas finds every causal link, keeps at least 80% real ones after
+  pruning the co-parent links a graphical model adds, and points at least three quarters the right way; the
+  pairwise-complete correlations equal pandas; responses equal matrix powers and the page's equal Python's; the
+  connectedness decomposition is exact and the rolling index has no look-ahead; communities recover a planted
+  partition; a gap in the data is not a move and a weaker currency reads negative.
 - v0.12: robustness values match Cinelli and Hazlett's published example; stacking recovers a true model and a true
   mixture; adaptive conformal intervals keep 90% coverage on Gaussian and fat-tailed data; no forecast changes when a
   later month does (no look-ahead); the landing brain's Leontief limit equals the series summed to convergence; the

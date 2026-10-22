@@ -84,6 +84,9 @@ def main(argv: list[str] | None = None) -> None:
     oo = sub.add_parser("ooda")
     oo.add_argument("--out", default="out")
     oo.add_argument("--config", default="config.toml")
+    at = sub.add_parser("atlas")
+    at.add_argument("--out", default="out")
+    at.add_argument("--no-fred", action="store_true", help="GitHub mirrors only")
     mc = sub.add_parser("mcp")
     mc.add_argument("--data", default=None, help="folder with the engine's JSON outputs")
     mc.add_argument("--config", default=None, help="model config; config.private.toml is refused")
@@ -103,6 +106,15 @@ def main(argv: list[str] | None = None) -> None:
         from .jsonout import write
         from .ooda import build as build_ooda
         print("wrote", write(build_ooda(a.out, a.config), a.out, "ooda.json"))
+        return
+    if a.cmd == "atlas":
+        from . import atlas
+        from .jsonout import write
+        r = atlas.build(atlas.download(fred=not a.no_fred))
+        r["findings"] = atlas.summary(r)
+        print("wrote", write(r, a.out, "atlas.json"))
+        for f in r["findings"]:
+            print(" ", f)
         return
     if a.cmd == "mcp":
         from .mcp_server import Context, serve

@@ -2,7 +2,7 @@
      boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {
-    today: { name: "Today", views: ["desk", "ooda", "noteworthy"] },
+    today: { name: "Today", views: ["desk", "atlas", "ooda", "noteworthy"] },
     decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
     research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
@@ -18,7 +18,8 @@
     if (location.hash === "#" + v) show(v, true); else location.hash = v;
   }
   const RENDER = {
-    desk: () => { guard("The brain, live", renderHero, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
+    atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
+    desk: () => { guard("Which brain", wireHeroWhich, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
@@ -129,6 +130,7 @@
     BR_PRESETS.forEach((p) => add(`Brain scenario: ${p.n}`, "Shock the system map and read the fourth-order effects", "Tool", "brain"));
     FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${COVERAGE[r.coverage] || "coverage n/a"}`, "Company", "fu-t-title", r.t));
     add("Voices: extreme bear to extreme bull", "Verbatim, sourced quotes from legendary and current investors on any question", "Tool", "voices", "quotes investors buffett munger dalio druckenmiller bitcoin gold ai bubble bonds");
+    add("The atlas", "The whole brain: every series, every learned link, communities, connectedness", "Tool", "atlas", "network graph lasso stability selection var lingam connectedness spillover diebold yilmaz pagerank");
     add("The brain, live", "Watch a shock travel the system order by order, with the math", "Tool", "hero", "animation propagation neumann leontief matrix monte carlo");
     add("How far to trust the brain", "Conformal error bars, stacked world models, robustness to hidden causes", "Tool", "brr-title", "conformal stacking robustness value confounding");
     add("Calculator", "Exact arithmetic with Black-Scholes, Kelly, NPV, IRR and live values; type = in search", "Tool", "calc", "math compute formula expression");
@@ -202,6 +204,10 @@
     if (bs && buyOk(bs)) { LIVE.buyside = bs; guard("Buyside", buildBuyside, $("#bs-sel")); if (current === "buyside") guard("Buyside", drawBuyside); } else if (bs) LIVE.problems.push("buyside.json did not match the expected shape");
     if (fd && feedsOk(fd)) { LIVE.feeds = fd; guard("Noteworthy", buildNoteworthy, $("#nw-grid")); } else if (fd) LIVE.problems.push("feeds.json did not match the expected shape");
     if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} data sources`; }
+  });
+  loadJSON("data/atlas.json").then((at) => {
+    if (at && atlasOk(at)) { LIVE.atlas = at; AT_M = null; if (current === "atlas") guard("The atlas", renderAtlasDesk, $("#atv-tiles")); }
+    else if (at) LIVE.problems.push("atlas.json did not match the expected shape; the page keeps the atlas snapshot");
   });
   Promise.all(["ooda", "causal", "engines"].map((n) => loadJSON(`data/${n}.json`))).then(([oo, ca, en]) => {
     if (oo && oodaOk(oo)) { LIVE.ooda = oo; if (current && ["ooda", "positions"].includes(current)) guard(TAB_NAME[current], RENDER[current]); } else if (oo) LIVE.problems.push("ooda.json did not match the expected shape; the page keeps the engine snapshot");

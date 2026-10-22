@@ -24,6 +24,8 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
   hedge_book              switch prebuilt hedges on or off and see the book in every scenario, plus the advisor
   investor_voices         verbatim, sourced quotes from legendary and current investors on a question, extreme bear to
                           extreme bull; never generates a quote
+  atlas_trace             the whole brain (every monthly series, learned links, judged concepts): trace any shock month
+                          by month to any node, or read one node's links, importance and regime changes
   brain_selfcheck         how far to trust the brain: honest error bars, the world model the data trusts, and what an
                           unseen cause would have to explain to erase each measured link
 """
@@ -658,6 +660,55 @@ def investor_voices(ctx: Context, args: dict) -> dict:
     return voices.answer(q.strip()[:300], stance=st, topic=tp, limit=lim)
 
 
+def _atlas(ctx: Context) -> dict:
+    a = ctx.load("atlas")
+    if not (a and isinstance(a.get("nodes"), list) and isinstance(a.get("links"), list) and isinstance(a.get("judged"), list)):
+        a = json.loads((Path(__file__).resolve().parent / "assets" / "atlas.json").read_text())
+    return a
+
+
+def atlas_trace(ctx: Context, args: dict) -> dict:
+    """Trace a shock through the whole brain month by month, or read one node."""
+    from . import atlas
+    a = _atlas(ctx)
+    M = atlas.matrices(a)
+    ix, ids = M["ix"], M["ids"]
+    byid = {n["id"]: n for n in a["nodes"]}
+    out = {"as_of": a.get("as_of"), "nodes": len(ids), "series": a.get("series"), "findings": a.get("findings") or atlas.summary(a)}
+    node = args.get("node")
+    if node is not None:
+        if node not in ix:
+            raise ToolError(f"unknown node {node!r}; examples: {', '.join(ids[:12])}")
+        n = byid[node]
+        lk = [l for l in a["links"] if node in (l["from"], l["to"])] + [dict(l, judged=True) for l in a["judged"] if node in (l["from"], l["to"])]
+        out["node"] = {k: n.get(k) for k in ("id", "name", "family", "source", "from", "to", "community", "systemic", "pagerank", "gives", "takes", "net") if k in n}
+        out["links"] = sorted(({"from": l["from"], "to": l["to"], "w": l["w"], "lag": l.get("lag", 0), "stability": l.get("stability"), "established": l.get("established"),
+                                "judged": bool(l.get("judged"))} for l in lk), key=lambda l: -abs(l["w"]))[:24]
+        out["regime_flips"] = [f for f in a.get("regime_flips", []) if node in (f["from"], f["to"])]
+    shock = args.get("shock")
+    if shock is not None:
+        if not isinstance(shock, dict) or not shock:
+            raise ToolError("shock must map node ids to sizes in standard deviations, e.g. {\"hormuz\": 1.5}")
+        for k, v in shock.items():
+            if k not in ix:
+                raise ToolError(f"unknown node {k!r} in shock")
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not -5 <= v <= 5:
+                raise ToolError("shock sizes must be numbers between -5 and 5 (standard deviations)")
+        h = int(_req_num(args, "horizon", 0, 24, 12))
+        targets = args.get("targets") or ["book", "sp500", "y10", "cpi"]
+        if not isinstance(targets, list) or any(t not in ix for t in targets):
+            raise ToolError("targets must list node ids")
+        R = atlas.respond(a, shock, h, M)
+        C = np.cumsum(R, axis=0)
+        out["responses"] = {t: {"name": byid[t]["name"], "by_month": [round(float(C[k, ix[t]]), 4) for k in range(h + 1)]} for t in targets}
+        top = np.argsort(-np.abs(C[-1]))
+        out["moved_most"] = [{"node": ids[i], "name": byid[ids[i]]["name"], "cumulative_sd": round(float(C[-1, i]), 4)} for i in top if ids[i] not in shock][:10]
+        out["units"] = "cumulative standard deviations of each series' monthly change (judged nodes: judged units)"
+    if node is None and shock is None:
+        raise ToolError("give a shock (e.g. {\"copper\": 1}) and/or a node to read")
+    return out
+
+
 def brain_selfcheck(ctx: Context, args: dict) -> dict:
     """The brain's self-checks: conformal coverage, stacking weights, robustness values (brain.json, else computed)."""
     from . import brain_robust
@@ -719,6 +770,12 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                               "stance": {"type": "integer", "enum": [-2, -1, 0, 1, 2], "description": "one stop on the spectrum; omit for all five"},
                               "topic": {"type": "string", "description": "force a topic key instead of the best match"},
                               "limit": {**NUM, "description": "quotes per stance, 1 to 10 (default 3)"}}, ["query"]), {"readOnlyHint": True, "openWorldHint": False}),
+    "atlas_trace": (atlas_trace, "The whole brain: every monthly series the engine reads (equities, rates, inflation, energy, metals, grains, softs, "
+                    "currencies, and in the daily run credit, activity and money), links learned by graphical lasso with stability selection and "
+                    "LiNGAM orientation, joined with the judged concepts and the holdings. Trace a shock month by month to any node, or read a node.",
+                    _obj({"shock": {"type": "object", "additionalProperties": NUM, "description": "node id to size in standard deviations"},
+                          "horizon": {**NUM, "description": "months, 0 to 24 (default 12)"}, "targets": {"type": "array", "items": {"type": "string"}},
+                          "node": {"type": "string", "description": "a node id to read"}}), {"readOnlyHint": True, "openWorldHint": False}),
     "brain_selfcheck": (brain_selfcheck, "How far to trust the brain: out-of-sample coverage of its 90% error bars (textbook against adaptive conformal), "
                         "the stacked weights on five rival world models, and each measured link's robustness value to an unseen common cause.",
                         _obj({}), {"readOnlyHint": True, "openWorldHint": False}),

@@ -37,7 +37,7 @@ from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
-         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines"]
+         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -72,10 +72,20 @@ def site_with(data: dict[str, object] | None, raw: dict[str, str] | None = None)
     return tmp / "site"
 
 
+async def settle(page, view_id: str, timeout: int = 3000) -> None:
+    """Wait for a navigation to land (a busy page may take longer than a fixed pause), then a beat for rendering.
+    A view that never appears is still caught by the check that follows."""
+    try:
+        await page.wait_for_function("(v) => { const e = document.querySelector('.view:not([hidden])'); return e && e.id === v; }", arg=view_id, timeout=timeout)
+    except Exception:
+        pass
+    await page.wait_for_timeout(120)
+
+
 async def check_page(page, label: str, views=VIEWS) -> None:
     for v in views:
         await page.evaluate(f"location.hash = '{v}'")
-        await page.wait_for_timeout(250)
+        await settle(page, "view-" + v)
         res = await page.evaluate("""(bad) => {
           const de = document.documentElement, view = document.querySelector('.view:not([hidden])');
           const txt = view ? view.innerText : '';
@@ -150,6 +160,7 @@ async def extreme_inputs(page, label: str) -> None:
         "making": [("#as-sig", 5), ("#as-g", 0.01), ("#as-k", 0.5), ("#as-A", 300), ("#as-g", 1), ("#gm-mu", 0), ("#gm-info", 100), ("#gm-s", 0.5), ("#gm-mu", 50),
                    ("#ex-q", 100), ("#ex-sig", 6), ("#ex-T", 1), ("#ex-l", 0), ("#ex-l", 20), ("#ex-Y", 1.5), ("#ex-q", 0.5), ("#ex-T", 10),
                    ("#fq-qb", 0), ("#fq-qa", 0), ("#fq-pf", 0), ("#fq-pf", 100), ("#fq-miss", 3), ("#fq-later", 100.05), ("#fq-cf", 0.5)],
+        "atlas": [("#atv-node", "book"), ("#atv-node", "copper"), ("#atv-node", "hormuz")],
         "ooda": [("#hb-e", 0.2), ("#hb-sz-tlt", 1), ("#hb-sz-put_spread", 0.03), ("#hb-sz-collar", 0), ("#hb-e", 1.5), ("#hb-sz-degross", 0.8), ("#hb-sz-vix_calls", 0.02)],
         "solve": [("#rz-dro-rho", 0), ("#rz-dro-rho", 7), ("#rz-loss", 5), ("#rz-prem", 0), ("#rz-eq", 1.5), ("#rz-h", 1), ("#rz-loss", 35), ("#rz-prem", 2), ("#rz-eq", 0), ("#rz-regime", "low_inflation"),
                   ("#calc-in", "1/0"), ("#calc-in", "foo("), ("#calc-in", "2^1024"), ("#calc-in", "bsput(100, 95, 0.25, ($vix + 3)%)")],
@@ -218,13 +229,13 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
-                        ("hero", "desk"), ("voices", "desk"), ("brr-title", "brain"), ("g-conformal", "appendix"),
+                        ("hero", "desk"), ("voices", "desk"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
                         ("oo-title", "ooda"), ("oo-dec-title", "ooda"), ("ps-title", "positions"), ("en-title", "engines"), ("ooda", "ooda"),
                         ("rzd-title", "solve"), ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
                         ("nw-memory", "noteworthy"), ("pr-pods-title", "prop"), ("bs-depr-title", "buyside"), ("brw-title", "brain"), ("g-leontief", "appendix")]:
         await page.evaluate(f"location.hash = {json.dumps(token)}")
-        await page.wait_for_timeout(250)
+        await settle(page, "view-" + view)
         got = await page.evaluate("document.querySelector('.view:not([hidden])').id")
         if got != "view-" + view:
             fail(f"{label}: #{token} opened {got}, expected {view}")
@@ -420,6 +431,7 @@ async def main() -> int:
     hostile["brain.json"]["learned"] = {"dates": [1], "order": {"low_inflation": {"learned": ["<b>"]}}, "links": {"y10>eq": {"beta": "x"}}}
     hostile["report.json"]["summary"]["adjustments"] = ["<b>x</b>"]
     hostile["brain.json"]["robust_brain"] = {"equations": {"eq": {"coverage": "x", "weights": None}}, "confounding": {"inflation": {"links": {"y10>eq": {"rv": "<b>"}}}}}
+    hostile["atlas.json"] = {"schema": 1, "nodes": [{"id": "<img src=x onerror=window.__pwned=4>", "x": 0, "y": 0}] * 12, "links": [], "judged": []}
     hostile["ooda.json"] = {"observe": {"moved": [{"node": "<b>", "z": "x"}]}, "orient": {"positions": {}}, "decide": {"positions": [{"ticker": 5}]}, "act": {}}
     hostile["causal.json"] = {"regimes": {"low_inflation": {"crisis": "bad"}}}
     hostile["engines.json"] = {"engines": [{"name": "<img src=x onerror=window.__pwned=3>", "status": 7}]}
@@ -619,9 +631,30 @@ async def voices_and_hero(page, label: str) -> None:
     key, survives hostile input, and every quote shown links to an https source."""
     await page.evaluate("location.hash = 'desk'")
     await page.wait_for_timeout(600)
-    st = await page.evaluate("({ cv: !!document.getElementById('hero-cv') && document.getElementById('hero-cv').height > 100, scn: document.getElementById('hero-scn').textContent })")
+    st = await page.evaluate("({ cv: !!document.getElementById('at-hero-cv') && document.getElementById('at-hero-cv').height > 100, scn: document.getElementById('ah-scn').textContent })")
     if not st["cv"] or not st["scn"]:
         fail(f"{label}: the landing brain did not draw {st}")
+    # the whole brain first: step through the months, run a custom shock, change the target
+    for _ in range(14):
+        await page.click("#ah-next")
+    if await page.evaluate("document.getElementById('ah-k').textContent") != "h = 12":
+        fail(f"{label}: the whole brain should step to month 12")
+    for _ in range(14):
+        await page.click("#ah-prev")
+    if await page.evaluate("document.getElementById('ah-k').textContent") != "h = 0":
+        fail(f"{label}: the whole brain should step back to month 0")
+    await setv(page, "#ah-node", "copper")
+    await setv(page, "#ah-size", -50)
+    await page.click("#ah-go")
+    await setv(page, "#ah-target", "sp500")
+    await page.wait_for_timeout(200)
+    t = await page.evaluate("document.getElementById('ah-scn').textContent + ' | ' + document.getElementById('ah-arrive').textContent")
+    if "Copper" not in t or "−3.00" not in t or any(x in t for x in BAD_TEXT):
+        fail(f"{label}: the whole brain's custom shock is wrong: {t!r}")
+    for b in await page.query_selector_all("#ah-presets button"):
+        await b.click()
+    await page.click("#hero-which button[data-w=core]")
+    await page.wait_for_timeout(300)
     await page.click("#hero-play")
     for _ in range(9):
         await page.click("#hero-next")
