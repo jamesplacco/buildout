@@ -356,7 +356,7 @@
   }
 
   /* ---------- the desk's hero: full brain or core map ---------- */
-  const AH = { mode: LS.get("bo-hero-brain", "full") === "core" ? "core" : "full" };
+  const AH = { mode: ["core", "full", "mind"].includes(LS.get("bo-hero-brain", "mind")) ? LS.get("bo-hero-brain", "mind") : "mind" };
   function heroAtlasStep(S) {
     const sc = S.sc, M = sc.M, k = Math.max(0, S.step), x = sc.R[k], C = sc.C[k], t = M.ix[S.target];
     $("#ah-scn").textContent = atScenarioName(S) || "Your shock";
@@ -429,8 +429,12 @@
     LS.set("bo-hero-brain", mode);
     $("#hero-full").hidden = mode !== "full";
     $("#hero-core").hidden = mode !== "core";
+    if ($("#hero-mind")) $("#hero-mind").hidden = mode !== "mind";
     document.querySelectorAll("#hero-which button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.w === mode ? "true" : "false"));
-    if (mode === "full") { cancelAnimationFrame(HR.raf); HR.visible = false; guard("The whole brain", renderHeroAtlas, $("#hero-full")); }
+    const ms = MS["mind-hero-cv"];
+    if (ms && mode !== "mind") { cancelAnimationFrame(ms.raf); ms.raf = 0; }
+    if (mode === "mind") { cancelAnimationFrame(HR.raf); HR.visible = false; const S = AT_STAGES["at-hero-cv"]; if (S) { cancelAnimationFrame(S.raf); S.visible = false; } guard("The mind", renderHeroMind, $("#hero-mind")); }
+    else if (mode === "full") { cancelAnimationFrame(HR.raf); HR.visible = false; guard("The whole brain", renderHeroAtlas, $("#hero-full")); }
     else { const S = AT_STAGES["at-hero-cv"]; if (S) { cancelAnimationFrame(S.raf); S.visible = false; } guard("The brain, live", renderHero, $("#hero")); }
   }
   function wireHeroWhich() {
@@ -441,6 +445,8 @@
     const M = atMatrices();
     const fb = w.querySelector("button[data-w=full]");
     if (fb) fb.textContent = `Whole brain · ${M.n} nodes`;
+    const mb = w.querySelector("button[data-w=mind]");
+    if (mb && typeof MIND_SNAP !== "undefined") mb.textContent = `The mind · ${MIND_SNAP.nodes.length.toLocaleString()} nodes`;
     setHeroBrain(AH.mode);
   }
 

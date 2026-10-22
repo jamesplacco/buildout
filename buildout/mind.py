@@ -1,0 +1,1074 @@
+"""The mind: the brain and the engine as one graph, and a reasoning loop that runs on it.
+
+One graph holds everything the engine knows and everything it does:
+  concepts    about 535 ideas an investor needs (assets/ontology.py), each with a plain definition, a formula where there
+              is one, and typed relations (is_a, part_of, measures, causes+, causes-, uses, opposes, hedges, ...)
+  markets     the atlas's 100 nodes: 72 measured monthly series, the judged core and the book, with the links the atlas
+              learned from data (graphical lasso, LiNGAM, structural VAR) as directed, signed causal edges
+  evidence    about 270 sourced facts and papers (assets/knowledge.json, each checked on its page by a second agent) and
+              the signals the engine derives from them and from its own tests (labs, atlas, research)
+  voices      18 topics, 64 investors and 267 verified quotes
+  engine      every Python module (its imports are edges), the labs' methods and the MCP tools
+  world       48 economies with their currencies and what they export
+Clusters are hub nodes so a question about "commodities" can reach every commodity idea.
+
+The reasoning loop (think) is the same in Python and on the page (site/src/mind.js; tests/test_v14.py holds them equal):
+  1 read      the question is normalized and tokenized exactly as the voices library does (stems, synonyms, phrases)
+  2 recall    BM25 over every node's name, aliases and text, plus exact alias hits, picks up to 12 seed nodes
+  3 spread    personalized PageRank (spreading activation) from the seeds over the weighted, typed graph: 40 steps,
+              continue probability 0.75, so what is two or three links away lights up in proportion to how connected it
+              is to what was asked
+  4 frame     the claim is the axis (an investor-voices topic, or "does this method give an edge?") whose evidence lit up
+              most, framed bull or bear by the question's own wording
+  5 weigh     each signal on that axis adds sign x strength x reliability x relevance to the log-odds of the bull case;
+              signals from the same source family share a 1/sqrt(n) discount so ten readings of one fact count as about
+              three; investor opinion is one more, low-reliability signal
+  6 test      leave-one-family-out gives the range of the verdict; the single signal whose removal moves it most is the
+              hinge; each counting signal states what reading would flip it
+  7 trace     the strongest causal chains from what lit up to the book run over the atlas's own learned links
+  8 decide    the verdict meets the book: hold, or review a named hedge in the hedge book, written as an MCP proposal for
+              a person to approve; nothing here executes
+"""
+from __future__ import annotations
+
+import ast
+import heapq
+import json
+import math
+import re
+from pathlib import Path
+
+from . import ontology, voices
+
+ROOT = Path(__file__).resolve().parent
+ASSETS = ROOT / "assets"
+
+ALPHA = 0.75          # continue probability of the walk
+STEPS = 40
+SEEDS = 12
+SEED_FLOOR = 0.3      # seeds keep at least this share of the best seed score
+W_BM, W_ALIAS = 0.6, 1.0
+DOC_W = (3, 2, 1)     # name, aliases, text repeats in a node's document
+KIND_RECALL = {"quote": 0.55, "signal": 0.8, "investor": 0.8}   # long documents match everything; damp them as seeds
+QSTOP = ["useful", "work", "works", "working", "good", "now", "keep", "still", "go", "away", "think", "thing", "make", "use", "need", "right",
+         "time", "best", "way", "say", "tell", "explain", "mean", "meaning"]
+AXIS_TOPIC_BOOST = 1.5
+EXPLAIN_RATIO = 0.12  # below this share of the top activation, the mind explains instead of weighing a claim
+
+EDGE_W = {"is_a": 0.9, "part_of": 0.8, "measures": 0.8, "implemented_by": 0.6, "uses": 0.7, "related": 0.6, "opposes": 0.6,
+          "causes+": 0.8, "causes-": 0.8, "example_of": 0.7, "hedges": 0.7, "priced_by": 0.6, "member": 0.35, "about": 0.6,
+          "said_by": 0.8, "evidence": 0.7, "currency": 0.8, "exports": 0.6, "imports": 0.5, "code": 0.5, "method_of": 0.8,
+          "tool": 0.7, "signal": 0.9, "cites": 0.6, "topic_of": 0.7}
+TYPES = list(EDGE_W) + ["learned", "judged"]
+
+GROUP_NAMES = {**{k: v for k, v in ontology.CLUSTERS.items()}, "markets": "Markets (atlas series)", "core": "Core drivers and the book",
+               "voices": "Investor voices", "engine": "The engine room", "world": "The world economy", "evidence": "Signals"}
+
+FACT_CLUSTER = {"private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
+                "games_negotiation_stats": "games", "trading_structure": "structure"}
+
+# ---------------------------------------------------------------- axes: the claims the mind can weigh
+EDGE_AXES = {
+    "edge:trend": {"title": "Trend rules (the 200-day or 10-month average)", "bull": "Trend rules give an edge worth having", "bear": "Trend rules do not beat holding",
+                   "node": "c:ma10m", "terms": ["c:ma200", "c:trend-following", "c:moving-average", "c:momentum"]},
+    "edge:oscillators": {"title": "Oscillators (RSI, MACD, Bollinger)", "bull": "Overbought and oversold signals predict returns", "bear": "They are mostly noise after testing",
+                         "node": "c:rsi", "terms": ["c:macd", "c:bollinger", "c:overbought", "c:golden-cross"]},
+    "edge:valuation_timing": {"title": "Timing the market with valuation", "bull": "Valuation tells you future returns", "bear": "Valuation does not time the market",
+                              "node": "c:cape", "terms": ["c:pe", "c:dividend-yield", "c:excess-cape-yield", "c:oos-r2"]},
+    "edge:active": {"title": "Active management", "bull": "Active managers can beat the index", "bear": "Most cannot, after fees",
+                    "node": "c:active-management", "terms": ["c:alpha", "c:skill-vs-luck", "c:fees", "c:passive-investing"]},
+    "edge:seasonality": {"title": "Calendar effects (Sell in May)", "bull": "The calendar gives an edge", "bear": "Calendar effects are data mining",
+                         "node": "c:seasonality", "terms": ["c:multiple-testing", "c:data-snooping"]},
+    "edge:first_offer": {"title": "Haggling: who should open", "bull": "Make the first offer, and make it bold", "bear": "Let the other side open first",
+                         "node": "c:first-offer", "terms": ["c:anchoring", "c:haggling", "c:negotiation-anchor", "c:zopa", "c:batna", "c:reservation-price"]},
+    "edge:sizing": {"title": "Bet sizing and leverage", "bull": "Bet big and lever up when you have an edge", "bear": "Size small: ruin is permanent",
+                    "node": "c:kelly", "terms": ["c:risk-of-ruin", "c:bankroll", "c:position-sizing", "c:leverage"]},
+}
+BOOK_SIGN = {"ai_boom": 1, "semis_nvidia": 1, "megacap_concentration": 1, "market_valuation": 1, "timing_crashes": 1, "speculation_manias": 1,
+             "recession_economy": 1, "inflation_fed": 1, "bonds_rates": 1, "oil_energy": -1, "private_credit": 1, "value_growth": 1}
+HEDGE_FOR = {"ai_boom": "ai_pair", "semis_nvidia": "ai_pair", "megacap_concentration": "degross", "market_valuation": "put_spread",
+             "timing_crashes": "trend", "speculation_manias": "vix_calls", "recession_economy": "put_spread", "inflation_fed": "gold",
+             "bonds_rates": "put_spread", "oil_energy": "gold", "private_credit": "beta_short", "value_growth": "degross"}
+HEDGE_NAMES = {"tlt": "Long Treasuries (TLT)", "put_spread": "Index put spread 95/85", "collar": "Collar 90/110", "gold": "Gold sleeve",
+               "vix_calls": "VIX call spread 25/40", "beta_short": "Short index futures", "ai_pair": "Short semiconductor basket", "trend": "Trend cut",
+               "degross": "Run less equity"}
+
+# ---------------------------------------------------------------- the world: economies, currencies and exports
+# (iso3, name, atlas currency id or None, exports as atlas or concept ids, note)
+COUNTRIES = [
+    ("USA", "United States", "dollar", ["a:natgas", "a:wti", "a:soybeans", "a:maize", "c:lng"], "Issuer of the reserve currency; home of the AI buildout."),
+    ("CHN", "China", "a:cny", ["c:china-demand"], "Buys about half the world's metals; its credit cycle drives the metals cycle."),
+    ("JPN", "Japan", "a:jpy", ["c:carry-trade"], "Imports almost all its energy; the yen funds the world's carry trades."),
+    ("DEU", "Germany", "a:eur", [], "Europe's industrial core."), ("IND", "India", "a:inr", [], "A large oil importer."),
+    ("GBR", "United Kingdom", "a:gbp", [], "A global financial centre."), ("FRA", "France", "a:eur", [], "Euro area."),
+    ("ITA", "Italy", "a:eur", ["a:olive"], "Euro area."), ("CAN", "Canada", "a:cad", ["a:wti", "a:natgas", "a:uranium"], "Oil, gas and uranium exporter."),
+    ("BRA", "Brazil", "a:brl", ["a:soybeans", "a:ironore", "a:arabica", "a:sugar", "a:beef"], "The largest exporter of soybeans, coffee and sugar."),
+    ("RUS", "Russia", None, ["a:brent", "a:gas_eu", "a:wheat", "a:nickel", "a:aluminum"], "Oil, gas, wheat and metals under sanctions."),
+    ("KOR", "South Korea", "a:krw", ["c:hbm"], "Makes most of the world's high-bandwidth memory."),
+    ("AUS", "Australia", "a:aud", ["a:ironore", "a:coal", "a:gold", "c:lng", "a:wool"], "Iron ore, coal, gold and LNG."),
+    ("MEX", "Mexico", "a:mxn", ["a:wti"], "Tied to US manufacturing."), ("ESP", "Spain", "a:eur", ["a:olive"], "Euro area."),
+    ("IDN", "Indonesia", None, ["a:palmoil", "a:coal", "a:nickel", "a:rubber", "a:tin"], "Palm oil, coal and nickel."),
+    ("NLD", "Netherlands", "a:eur", ["a:gas_eu"], "Home of the TTF gas hub."), ("SAU", "Saudi Arabia", None, ["a:brent", "c:opec", "c:hormuz-strait", "c:spare-capacity"], "OPEC's swing producer."),
+    ("TUR", "Turkey", None, [], "Straddles Europe's energy routes."), ("CHE", "Switzerland", "a:chf", ["a:gold"], "Gold refining; a haven currency."),
+    ("TWN", "Taiwan", "a:twd", ["c:gpu", "c:custom-silicon"], "Makes most of the world's advanced chips."),
+    ("POL", "Poland", None, [], "Fast-growing EU economy."), ("ARG", "Argentina", None, ["a:soybeans", "a:maize", "a:beef"], "Grain and soy exporter."),
+    ("SWE", "Sweden", "a:sek", [], "Small open economy."), ("NOR", "Norway", "a:nok", ["a:brent", "a:gas_eu", "a:salmon"], "Oil, gas and salmon."),
+    ("BEL", "Belgium", "a:eur", [], "Euro area."), ("IRN", "Iran", None, ["a:brent", "c:hormuz-strait"], "On the Strait of Hormuz."),
+    ("ARE", "United Arab Emirates", None, ["a:brent", "c:hormuz-strait"], "Left OPEC and OPEC+ on May 1, 2026."),
+    ("ISR", "Israel", None, [], "Technology exporter."), ("THA", "Thailand", "a:thb", ["a:rice", "a:rubber", "a:sugar"], "Rice, rubber and sugar."),
+    ("SGP", "Singapore", "a:sgd", [], "Asia's trading and refining hub."), ("MYS", "Malaysia", "a:myr", ["a:palmoil", "a:rubber", "a:tin"], "Palm oil and tin."),
+    ("ZAF", "South Africa", "a:zar", ["a:gold", "a:coal"], "Gold, platinum and coal."), ("NGA", "Nigeria", None, ["a:brent"], "Africa's large oil producer."),
+    ("EGY", "Egypt", None, ["c:lng"], "Controls the Suez Canal; a large wheat importer."), ("PHL", "Philippines", None, [], "Remittances and services."),
+    ("VNM", "Viet Nam", None, ["a:robusta", "a:rice", "a:shrimp"], "Robusta coffee and rice."), ("CHL", "Chile", None, ["a:copper"], "The largest copper producer."),
+    ("PER", "Peru", None, ["a:copper", "a:gold", "a:zinc", "a:fishmeal"], "Copper, gold and fishmeal."), ("COL", "Colombia", None, ["a:arabica", "a:coal", "a:brent"], "Coffee, coal and oil."),
+    ("NZL", "New Zealand", "a:nzd", ["a:lamb", "a:wool"], "Dairy, lamb and wool."), ("QAT", "Qatar", None, ["c:lng", "c:hormuz-strait"], "A top LNG exporter; Ras Laffan was damaged in 2026."),
+    ("KWT", "Kuwait", None, ["a:brent", "c:hormuz-strait"], "Exports through Hormuz."), ("IRQ", "Iraq", None, ["a:brent", "c:hormuz-strait"], "Exports through Hormuz."),
+    ("CIV", "Cote d'Ivoire", None, ["a:cocoa"], "The largest cocoa grower."), ("GHA", "Ghana", None, ["a:cocoa", "a:gold"], "Cocoa and gold."),
+    ("KAZ", "Kazakhstan", None, ["a:uranium", "a:brent"], "The largest uranium miner."), ("UKR", "Ukraine", None, ["a:wheat", "a:maize", "a:sunflower"], "Wheat, maize and sunflower oil."),
+]
+
+TOOL_MODULES = {"get_research_snapshot": ["research"], "get_portfolio_risk": ["pipeline"], "analyze_positions": ["valuation", "pipeline"],
+                "decision_loop": ["ooda"], "position_valuation": ["valuation"], "hedge_book": ["hedgebook"], "investor_voices": ["voices"],
+                "atlas_trace": ["atlas"], "brain_selfcheck": ["brain_robust"], "run_hedge_scenario": ["policy"], "evaluate_trade": ["reasoner"],
+                "create_order_proposal": ["mcp_server"], "review_decision": ["decisions"], "compare_explanations": ["field"],
+                "learned_structure": ["discovery"], "trace_exposure": ["thinking"], "reason": ["mind"], "labs_lookup": ["labs"],
+                "game_math": ["games2"]}
+
+METHODS = {"labs-trend": ("Trend lab", "The 10-month and 22 other moving-average rules on 156 years, with a stationary bootstrap, an SPA-style max test and a deflated Sharpe."),
+           "labs-oscillators": ("Oscillator lab", "RSI, MACD, Bollinger, golden cross and 52-week-high signals tested against forward returns with Newey-West errors."),
+           "labs-indicators": ("Indicator kernel", "SMA, EMA, Wilder RSI, MACD, Bollinger bands and drawdown, the same arithmetic on the page."),
+           "labs-valuation": ("Valuation lab", "CAPE, trailing P/E, dividend yield and the excess CAPE yield against 1- and 10-year real returns, with out-of-sample R squared."),
+           "labs-regimes": ("Regime lab", "Hamilton's two-state Markov switching model of monthly S&P 500 returns by EM, with the Kim smoother."),
+           "labs-volatility": ("Volatility lab", "GARCH(1,1) by quasi maximum likelihood for Brent, WTI and gas, with tail indexes."),
+           "labs-spreads": ("Spread lab", "Engle-Granger cointegration of Brent and WTI with simulated p-values, the spread's half-life and z-score; gold/oil."),
+           "labs-randomness": ("Randomness lab", "Lo-MacKinlay variance ratios against a random walk and against Working's averaging null."),
+           "labs-calendar": ("Calendar lab", "Sell in May since 1871 and since 1950, and natural gas seasonality."),
+           "labs": ("Multiple testing", "Every p-value from the labs in one table with Holm and Benjamini-Hochberg corrections.")}
+ENGINE_ALIAS = {"book": "pipeline", "brain-robust": "brain_robust", "causal": "causal_stats", "robust-bt": "analytics.robust_bt",
+                "options": "analytics.options", "trading": "microstructure", "reason": "reasoner"}
+
+
+def norm(text: str) -> str:
+    """Lower case, every run of non-alphanumerics to one space, padded: ' p e ratio '."""
+    return " " + re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip() + " "
+
+
+def slug(name: str) -> str:
+    n = re.sub(r"\(.*?\)", "", name)
+    words = [w for w in re.split(r"[^A-Za-z]+", n) if len(w) > 1]
+    return "-".join(w.lower() for w in words)
+
+
+def _engine_modules() -> list[dict]:
+    out = []
+    files = sorted(ROOT.glob("*.py")) + sorted((ROOT / "analytics").glob("*.py")) + sorted((ROOT / "data").glob("*.py"))
+    for f in files:
+        if f.name in ("__init__.py", "__main__.py"):
+            continue
+        mod = f.stem if f.parent == ROOT else f.parent.name + "." + f.stem
+        src = f.read_text()
+        tree = ast.parse(src)
+        doc = (ast.get_docstring(tree) or "").strip()
+        first = doc.split("\n\n")[0].replace("\n", " ").strip()
+        imps = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.level >= 1:
+                base = (node.module or "")
+                if f.parent != ROOT and node.level == 1:
+                    pref = f.parent.name + "."
+                    if base:
+                        imps.add(pref + base)
+                    else:
+                        imps.update(pref + a.name for a in node.names)
+                    continue
+                if f.parent != ROOT and node.level == 2:
+                    if base:
+                        imps.add(base)
+                    else:
+                        imps.update(a.name for a in node.names)
+                    continue
+                if base:
+                    imps.add(base)
+                else:
+                    imps.update(a.name for a in node.names)
+        out.append({"module": mod, "doc": first[:420], "imports": sorted(imps), "lines": src.count("\n") + 1})
+    names = {m["module"] for m in out}
+    for m in out:
+        m["imports"] = [i for i in m["imports"] if i in names and i != m["module"]]
+    return out
+
+
+def load_knowledge(path: Path | None = None) -> list[dict]:
+    p = path or (ASSETS / "knowledge.json")
+    if not p.exists():
+        return []
+    d = json.loads(p.read_text())
+    return d["items"] if isinstance(d, dict) else d
+
+
+def load_countries(path: Path | None = None) -> dict:
+    p = path or (ASSETS / "world.json")
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text())["countries"]
+
+
+def _fmt(x, d=1):
+    return f"{x:,.{d}f}"
+
+
+# ---------------------------------------------------------------- signals: evidence with a direction
+def signals(K: dict, L: dict | None, research_latest: dict | None, cape_pct: float | None) -> list[dict]:
+    """Every signal the mind weighs. Values come from the verified knowledge items (K, by id), the labs (L) and the
+    research run, so a correction to a source flows through. Each: axis, sign (+1 supports the axis's bull statement),
+    strength (log-odds units when fully relevant and fully reliable), reliability (how well this kind of evidence has
+    predicted out of sample or how certain the fact is), group (signals in one group share a dependence discount),
+    refs (nodes it rests on), flip (the reading that would reverse it)."""
+    S = []
+
+    def v(kid):
+        it = K.get(kid)
+        return None if it is None else it.get("value")
+
+    def add(sid, axis, sign, s, rel, group, text, refs, flip, targets=()):
+        refs = [r for r in refs if r.startswith(("e:", "m:", "a:", "c:")) or r[2:] in K]
+        if any(r.startswith("k:") and r[2:] not in K for r in refs):
+            return
+        S.append({"id": "s:" + sid, "axis": axis, "sign": sign, "s": s, "rel": rel, "group": group, "text": text, "refs": refs, "flip": flip,
+                  "targets": list(targets)})
+
+    # valuation of the market
+    cape = v("val-cape-2026-10-20")
+    if cape is not None:
+        pct = f", above {cape_pct:.0%} of months since 1881" if cape_pct is not None else ""
+        imp = ""
+        if L and L["valuation"]["cape"].get("now_source") == "research":
+            c = L["valuation"]["cape"]
+            imp = f" History implies {c['implied_10y_real']:.1%} a year after inflation for ten years (80% range {c['range80'][0]:.0%} to {c['range80'][1]:.0%})."
+        add("cape", "market_valuation", -1, 1.0, 0.6, "valuation", f"Shiller CAPE is {cape:.1f} (Oct 20, secondary source){pct}.{imp}",
+            ["k:val-cape-2026-10-20", "m:labs-valuation", "c:cape"], "CAPE back under about 25, or earnings catching up with price.", ["c:cape", "c:valuation-level"])
+    tpe = v("val-spx-trailing-pe-2026-10-16")
+    if tpe is not None:
+        add("tpe", "market_valuation", -1, 0.4, 0.5, "valuation", f"Trailing P/E is {tpe:.1f} against a 10-year average of 23.6.",
+            ["k:val-spx-trailing-pe-2026-10-16", "c:pe"], "Trailing P/E back to its 10-year average.", ["c:pe"])
+    fpe = v("val-spx-forward-pe-2026-10-16")
+    if fpe is not None:
+        add("fpe", "market_valuation", 1, 0.35, 0.4, "valuation", f"Forward P/E is {fpe:.1f}, at its 10-year average of 19.1, because earnings are expected to grow fast.",
+            ["k:val-spx-forward-pe-2026-10-16", "c:forward-pe"], "Estimates cut: forward P/E rises without the price rising.", ["c:forward-pe"])
+    bi = v("val-buffett-indicator-2026-10-20")
+    if bi is not None:
+        add("buffett", "market_valuation", -1, 0.5, 0.35, "valuation", f"Market value is {bi:.0f}% of GDP (Buffett indicator), far above any earlier peak.",
+            ["k:val-buffett-indicator-2026-10-20", "c:buffett-indicator"], "Market cap to GDP back toward 150%.", ["c:buffett-indicator"])
+    erp = v("val-erp-damodaran-2026-10-01")
+    if erp is not None:
+        add("erp", "market_valuation", 1, 0.25, 0.45, "rates_val", f"Damodaran's implied equity risk premium is {erp:.2f}%, near its own long-run range, so stocks are not priced for zero premium.",
+            ["k:val-erp-damodaran-2026-10-01", "c:equity-risk-premium"], "An implied premium under 3%.", ["c:equity-risk-premium"])
+    g26 = v("val-spx-cy2026-eps-growth")
+    if g26 is not None:
+        add("eps", "market_valuation", 1, 0.7, 0.55, "earnings", f"Analysts expect 2026 S&P 500 earnings growth of {g26:.1f}%; Q3 is tracking 29% with 84% of reporters beating.",
+            ["k:val-spx-cy2026-eps-growth", "k:val-spx-q3-2026-eps-growth", "c:earnings-growth"], "A season of misses and falling 2027 estimates.", ["c:earnings-growth", "c:eps"])
+        add("eps2", "recession_economy", 1, 0.45, 0.5, "earnings", f"Expected 2026 earnings growth of {g26:.1f}% is not what a recession looks like.",
+            ["k:val-spx-cy2026-eps-growth", "c:earnings-growth"], "Estimates falling for two months in a row.", ["c:earnings-growth", "c:recession"])
+    if L:
+        tr = L["trend"]
+        now = tr["now"]
+        add("trend_now", "timing_crashes", 1 if now["above"] else -1, 0.4, 0.4, "trend",
+            f"The S&P 500 is {now['gap']:+.1%} from its 10-month average ({now['date']}), so the trend rule says stay invested." if now["above"] else
+            f"The S&P 500 is {now['gap']:+.1%} below its 10-month average ({now['date']}), so the trend rule says step aside.",
+            ["m:labs-trend", "c:ma10m", "a:sp500"], "A month-end close below the 10-month average.", ["c:ma10m", "c:ma200"])
+        add("trend_now_v", "market_valuation", 1 if now["above"] else -1, 0.25, 0.35, "trend", f"Price trend is {'up' if now['above'] else 'down'}: {now['gap']:+.1%} versus the 10-month average.",
+            ["m:labs-trend", "c:momentum"], "A break below the 10-month average.", ["c:momentum"])
+        sd = tr["sharpe_diff"]
+        add("trend_sharpe", "edge:trend", 1, 0.35, 0.5, "trend_test", f"On 156 years, acting a month late, the 10-month rule's Sharpe is {tr['full']['rule']['sharpe']:.2f} against {tr['full']['hold']['sharpe']:.2f} for holding (90% range of the gain {sd['lo']:+.2f} to {sd['hi']:+.2f}).",
+            ["m:labs-trend", "c:sharpe-ratio", "c:stationary-bootstrap"], "A bootstrap range of the gain that sits below zero.", ["c:ma10m"])
+        add("trend_dd", "edge:trend", 1, 0.6, 0.7, "trend_test", f"Its worst drawdown is {tr['full']['rule'].get('maxdd', -0.48):.0%} against {tr['full']['hold'].get('maxdd', -0.77):.0%}; the cut in drawdown is clearly above zero.",
+            ["m:labs-trend", "c:drawdown", "c:max-drawdown"], "A sample in which the rule's drawdown is no better.", ["c:drawdown"])
+        add("trend_spa", "edge:trend", -1, 0.6, 0.7, "trend_test", f"On return alone, the best of 22 lengths is what luck produces {tr['spa_p']:.0%} of the time: no return edge after testing them all.",
+            ["m:labs-trend", "c:data-snooping", "c:multiple-testing"], "A length that survives the max test.", ["c:data-snooping"])
+        add("trend_dsr", "edge:trend", -1, 0.4, 0.6, "trend_test", f"The deflated excess Sharpe over holding is {tr['deflated']['excess_sharpe_annual']:+.2f} a year.",
+            ["m:labs-trend", "c:deflated-sharpe"], "A positive deflated excess Sharpe.", ["c:deflated-sharpe"])
+        add("trend_naive", "edge:trend", -1, 0.3, 0.8, "trend_test", f"Acting on the same month inflates the Sharpe to {tr['full']['naive']['sharpe']:.2f}: monthly averaging (Working 1960) flatters trend rules on averaged data.",
+            ["m:labs-trend", "c:time-averaging"], "Daily data that show the same gain.", ["c:time-averaging"])
+        add("trend_dd2", "risk_leverage_hedging", -1, 0.35, 0.6, "trend_test", "A trend rule cut the worst drawdown from -77% to -48% at a cost of about 1.4 points of return a year: protection that works, at a price.",
+            ["m:labs-trend", "c:drawdown"], "A rule that costs more than it saves.", ["c:drawdown", "c:hedge"])
+        add("timing_ret", "timing_crashes", 1, 0.5, 0.6, "trend_test", "Timing rules lowered risk but not return in 156 years: holding compounded faster (7.1% against 5.7% real).",
+            ["m:labs-trend", "c:ma10m"], "A timing rule that beats holding on return after costs.", ["c:ma10m", "c:crash"])
+        osc = L.get("oscillators") or []
+        mt = {r["test"]: r for r in L["multiple_testing"]["rows"]}
+        n_osc = sum(1 for o in osc if (o["name"] + " / " + o["asset"]) in mt)
+        n_pass = sum(1 for o in osc if (o["name"] + " / " + o["asset"]) in mt and mt[o["name"] + " / " + o["asset"]]["bh"] < 0.05)
+        if osc:
+            share = n_pass / max(1, n_osc) if n_osc else sum(1 for o in osc if o["p"] < 0.05) / len(osc)
+            label = f"{n_pass} of {n_osc}" if n_osc else f"{sum(1 for o in osc if o['p'] < 0.05)} of {len(osc)}"
+            add("osc", "edge:oscillators", 1 if share > 0.5 else -1, 0.6, 0.65, "osc_test", f"Of the oscillator signals the labs tested, {label} pass at 5% after the false discovery rate correction.",
+                ["m:labs-oscillators", "c:rsi", "c:fdr"], "Most of them passing on new data.", ["c:rsi", "c:macd"])
+        r = L["readings"]["sp500"]
+        add("rsi_now", "timing_crashes", -1 if r["rsi14"] > 70 else 1, 0.15, 0.2, "osc_now", f"Monthly RSI of the S&P 500 is {r['rsi14']:.0f}{' (overbought by the textbook)' if r['rsi14'] > 70 else ''}; the labs find such readings weak on their own.",
+            ["m:labs-oscillators", "c:rsi", "a:sp500"], "RSI back in the middle of its range.", ["c:rsi", "c:overbought"])
+        va = L["valuation"]["signals"]
+        c10 = va["CAPE"]["10y"]
+        c1 = va["CAPE"]["1y"]
+        add("val10", "edge:valuation_timing", 1, 0.6, 0.6, "val_test", f"CAPE explains a share of ten-year real returns out of sample (OOS R squared {c10.get('oos_r2', 0):.2f}); the excess CAPE yield does better ({va['Excess CAPE yield']['10y'].get('oos_r2', 0):.2f}).",
+            ["m:labs-valuation", "c:oos-r2", "c:cape"], "A negative out-of-sample R squared at ten years.", ["c:cape", "c:oos-r2"])
+        add("val1", "edge:valuation_timing", -1, 0.7, 0.6, "val_test", f"Over one year it explains almost nothing (OOS R squared {c1.get('oos_r2', 0):.2f}): valuation is a decade tool, not a timing tool.",
+            ["m:labs-valuation", "c:oos-r2"], "A one-year OOS R squared above 0.05.", ["c:cape"])
+        add("val_crash", "timing_crashes", -1, 0.2, 0.3, "val_test", "High valuations lower ten-year returns but say little about the next year.",
+            ["m:labs-valuation", "c:cape"], "Valuations back near average.", ["c:cape"])
+        reg = L["regimes"]
+        add("regime", "timing_crashes", 1 if reg["p_now"][1] < 0.5 else -1, 0.3, 0.4, "regime", f"Markov switching puts today's chance of the turbulent regime at {reg['p_now'][1]:.0%} (calm regimes last about {reg['duration'][0]:.0f} months on average).",
+            ["m:labs-regimes", "c:markov-switching", "c:regime"], "The turbulent-regime probability above 50%.", ["c:regime", "c:markov-switching"])
+        add("regime2", "speculation_manias", 1, 0.25, 0.35, "regime", f"Calm regime ({reg['p_now'][0]:.0%} probability): manias tend to run while volatility is low.",
+            ["m:labs-regimes", "c:regime"], "Volatility regime turning turbulent.", ["c:regime"])
+        cal = L["calendar"]
+        add("may50", "edge:seasonality", 1, 0.45, 0.4, "cal_test", f"Since 1950, November to April beat May to October (p = {cal['since 1950']['diff']['p']:.3f}).",
+            ["m:labs-calendar", "c:seasonality"], "The gap vanishing in the next decade.", ["c:seasonality", "c:sell-in-may"])
+        add("may1871", "edge:seasonality", -1, 0.4, 0.6, "cal_test", f"On the full sample since 1871 it is weaker (p = {cal['since 1871']['diff']['p']:.3f}), and the 1950 start is a choice made after seeing the data.",
+            ["m:labs-calendar", "c:data-snooping"], "Significance on the full sample.", ["c:data-snooping"])
+        tails = L["volatility"]["sp500_monthly_tails"]
+        add("tails", "risk_leverage_hedging", -1, 0.35, 0.6, "tails", f"Monthly S&P 500 returns have kurtosis {tails['kurtosis']:.0f} (3 for a bell curve) and a tail index near {tails['hill_alpha']:.1f}: crashes are far more common than a normal model says.",
+            ["m:labs-volatility", "c:fat-tails", "c:hill-estimator"], "Thin tails, which no long sample has shown.", ["c:fat-tails"])
+        b = L["readings"]["brent"]
+        add("brent_trend", "oil_energy", 1 if b["vs_ma200"] > 0 else -1, 0.3, 0.35, "oil_trend", f"Brent ${b['price']:.2f} ({b['date']}) is {b['vs_ma200']:+.0%} from its 200-day average of ${b['ma200']:.1f}{'; the 50-day is above the 200-day' if b['golden'] else ''}.",
+            ["m:labs-indicators", "c:ma200", "a:brent"], "Brent back under its 200-day average.", ["c:ma200", "c:brent"])
+        vb = L["volatility"]["brent"]
+        add("brent_vol", "risk_leverage_hedging", -1, 0.2, 0.5, "vol", f"Brent's GARCH volatility is {vb['annual_current']:.0%} a year against a long-run {vb['annual_long']:.0%}.",
+            ["m:labs-volatility", "c:garch", "a:brent"], "Volatility back to its long-run level.", ["c:garch", "c:volatility"])
+        sp = L["spreads"]["brent_wti"]
+        add("bw", "oil_energy", -1, 0.15, 0.3, "oil_spread", f"Brent-WTI is ${sp['spread_now']:.2f}, {sp['z_now']:.1f} standard deviations wide; the pair is cointegrated with a half-life near {sp['half_life']:.0f} days, so the gap tends to close from the Brent side when the shock fades.",
+            ["m:labs-spreads", "c:brent-wti", "c:cointegration"], "The spread widening further.", ["c:brent-wti"])
+        go = L["spreads"]["gold_oil"]
+        add("gold_oil", "gold", -1, 0.15, 0.25, "gold_val", f"An ounce of gold buys {go['now']:.0f} barrels of Brent ({go['date']}), more than in {go['percentile']:.0%} of months since {go.get('from', '1987')[:4]}: gold is dear against oil.",
+            ["m:labs-spreads", "c:gold"], "The ratio back near its median of 19.", ["c:gold"])
+    # rates and bonds
+    y10 = v("val-ust10y-2026-10-21")
+    if y10 is not None:
+        add("y10", "bonds_rates", 1, 0.4, 0.4, "rates", f"The 10-year Treasury yields {y10:.2f}% (Oct 21), high enough to pay for holding duration.",
+            ["k:val-ust10y-2026-10-21", "c:ten-year-yield", "a:y10"], "Yields falling back under 4%.", ["c:ten-year-yield"])
+        add("y10i", "inflation_fed", -1, 0.35, 0.4, "rates", f"A {y10:.2f}% 10-year yield says the bond market does not think inflation is beaten.",
+            ["k:val-ust10y-2026-10-21", "c:ten-year-yield"], "The 10-year back under 4.5%.", ["c:ten-year-yield", "c:inflation"])
+        add("y10g", "gold", -1, 0.35, 0.4, "rates", f"With the 10-year at {y10:.2f}%, holding gold costs a high yield given up.",
+            ["k:val-ust10y-2026-10-21", "c:real-yield"], "Yields falling.", ["c:real-yield"])
+        add("y10d", "dollar_debt", -1, 0.3, 0.35, "rates", f"A {y10:.2f}% 10-year raises the interest bill on a large federal debt.",
+            ["k:val-ust10y-2026-10-21", "c:government-debt"], "Yields falling with deficits.", ["c:government-debt"])
+    if research_latest:
+        c = research_latest.get("corr")
+        if c is not None:
+            add("sbcorr", "bonds_rates", -1 if c > 0 else 1, 0.5, 0.55, "corr", f"The 36-month stock-bond correlation is {c:+.2f} ({research_latest.get('month')}): {'bonds have been falling with stocks, a weak hedge' if c > 0 else 'bonds have been rising when stocks fall'}.",
+                ["e:research", "c:stock-bond-correlation", "a:corr"], "A correlation that turns negative.", ["c:stock-bond-correlation", "c:tlt"])
+    fms6 = v("am-bofa-fms-2026-10-yield-trigger")
+    if fms6 is not None:
+        add("fms6", "bonds_rates", 1, 0.2, 0.25, "sentiment", f"{fms6:.0f}% of fund managers say they would move into bonds at a 6% 10-year (BofA, October; secondary report).",
+            ["k:am-bofa-fms-2026-10-yield-trigger"], "Buyers stepping back at 6%.", ["c:fund-manager-survey"])
+    # oil
+    inv = v("oil-iea-omr-inventories-sep2026")
+    if inv is not None:
+        add("oil_inv", "oil_energy", 1, 0.5, 0.6, "oil_supply", f"Global observed oil stocks are {abs(inv):.0f} million barrels below end-February (IEA).",
+            ["k:oil-iea-omr-inventories-sep2026", "c:inventories"], "Stocks rebuilding for three months.", ["c:inventories", "c:storage-theory"])
+    fb = v("oil-iea-omr-brent-dated-oct2026")
+    if fb is not None:
+        add("oil_curve", "oil_energy", 1, 0.45, 0.5, "oil_supply", f"Dated (physical) Brent near $134 against futures near ${fb:.0f}: steep backwardation means barrels are short now.",
+            ["k:oil-iea-omr-brent-dated-oct2026", "c:backwardation"], "The curve flattening into contango.", ["c:backwardation", "c:convenience-yield"])
+    hz = v("oil-iea-omr-hormuz-flows-sep2026")
+    if hz is not None:
+        add("oil_hormuz", "oil_energy", -1, 0.6, 0.6, "oil_supply", f"Oil through the Strait of Hormuz recovered to {hz:.1f} mb/d in September (IEA): supply is coming back.",
+            ["k:oil-iea-omr-hormuz-flows-sep2026", "c:hormuz-strait", "a:hormuz"], "Flows falling again.", ["c:hormuz-strait", "c:oil-shock"])
+    dem = v("oil-iea-omr-demand-2026")
+    if dem is not None:
+        add("oil_dem", "oil_energy", -1, 0.5, 0.6, "oil_demand", f"The IEA has world oil demand falling {abs(dem):.1f} mb/d in 2026: high prices are destroying demand.",
+            ["k:oil-iea-omr-demand-2026", "c:oil-shock"], "Demand revised up.", ["c:brent"])
+        add("oil_dem2", "recession_economy", -1, 0.35, 0.45, "oil_demand", f"Oil demand falling {abs(dem):.1f} mb/d is a sign of strain on the world economy.",
+            ["k:oil-iea-omr-demand-2026", "c:recession"], "Demand stabilizing.", ["c:recession"])
+    eia = v("oil-eia-steo-brent-forecast-oct2026")
+    if eia is not None:
+        add("oil_eia", "oil_energy", -1, 0.5, 0.4, "oil_forecast", f"The EIA expects Brent near ${eia:.0f} in Q4 2026 and $84 for 2027, well under spot.",
+            ["k:oil-eia-steo-brent-forecast-oct2026", "c:brent"], "Forecasts revised up toward spot.", ["c:brent"])
+        add("oil_eia_inf", "inflation_fed", 1, 0.35, 0.35, "oil_forecast", f"If Brent falls toward the EIA's ${eia:.0f} for Q4 and $84 for 2027, energy inflation reverses.",
+            ["k:oil-eia-steo-brent-forecast-oct2026", "c:inflation"], "Oil holding above $110.", ["c:inflation"])
+    spot = v("oil-eia-spot-brent-wti-20261014")
+    if spot is not None:
+        add("oil_spot_inf", "inflation_fed", -1, 0.6, 0.5, "oil_level", f"Brent at ${spot:.2f} (Oct 14) keeps headline inflation up; the Fed hiked 25bp on September 16.",
+            ["k:oil-eia-spot-brent-wti-20261014", "c:oil-shock", "a:fed"], "Brent back under $90.", ["c:oil-shock", "c:policy-rate"])
+        add("oil_spot_rec", "recession_economy", -1, 0.4, 0.45, "oil_level", f"Brent at ${spot:.2f} is an oil shock; most past shocks of this size came before a slowdown.",
+            ["k:oil-eia-spot-brent-wti-20261014", "c:oil-shock"], "Oil back under $90.", ["c:oil-shock"])
+    if K.get("oil-uae-exits-opec-2026"):
+        add("uae", "oil_energy", -1, 0.25, 0.35, "oil_supply2", "The UAE left OPEC and OPEC+ on May 1: one big producer no longer bound by quotas (secondary report).",
+            ["k:oil-uae-exits-opec-2026", "c:opec"], "OPEC+ cuts that hold.", ["c:opec"])
+    mm = v("cot-wti-managed-money-20261013")
+    if mm is not None:
+        add("cot_wti", "oil_energy", 1, 0.1, 0.25, "positioning", f"Managed money is net long only {mm:,.0f} WTI contracts (CFTC, Oct 13): speculators are not crowded in oil.",
+            ["k:cot-wti-managed-money-20261013", "c:cot"], "A jump in speculative length.", ["c:cot"])
+    # gold
+    cb = v("gold-wgc-fy2025-demand")
+    if cb is not None:
+        add("cbgold", "gold", 1, 0.5, 0.5, "gold_flow", f"Central banks bought {cb:.0f} tonnes of gold in 2025 and {v('gold-wgc-q2-2026-demand') or 0:.0f} in Q2 2026 (World Gold Council).",
+            ["k:gold-wgc-fy2025-demand", "k:gold-wgc-q2-2026-demand", "c:central-bank-gold"], "Central banks turning sellers.", ["c:central-bank-gold"])
+        add("cbgold2", "dollar_debt", -1, 0.3, 0.4, "gold_flow", "Central banks keep buying gold, a slow move away from dollar reserves.",
+            ["k:gold-wgc-fy2025-demand", "c:dedollarization"], "Reserve buying of gold stopping.", ["c:central-bank-gold"])
+    gp, gh = v("gold-wgc-sep2026-price"), v("gold-wgc-record-jan2026")
+    if gp is not None and gh is not None:
+        add("goldtrend", "gold", -1, 0.35, 0.35, "gold_trend", f"Gold was ${gp:,.0f} at end-September, {gp / gh - 1:.0%} from its ${gh:,.0f} record in January.",
+            ["k:gold-wgc-sep2026-price", "k:gold-wgc-record-jan2026", "c:gold"], "A new high.", ["c:gold"])
+    # AI, semis, concentration, speculation
+    m7 = v("val-mag7-q3-2026-eps-growth")
+    if m7 is not None:
+        add("mag7", "ai_boom", 1, 0.6, 0.6, "ai_earn", f"Magnificent 7 earnings are growing {m7:.1f}% in Q3 against 27.7% for the other 493 (FactSet): the spend is showing up in profits.",
+            ["k:val-mag7-q3-2026-eps-growth", "c:hyperscaler"], "Hyperscaler earnings growth below the rest of the index.", ["c:ai-revenue", "c:hyperscaler"])
+        add("mag7b", "megacap_concentration", 1, 0.5, 0.55, "ai_earn", f"The biggest companies are out-earning the rest ({m7:.1f}% against 27.7%): their weight is earned, for now.",
+            ["k:val-mag7-q3-2026-eps-growth", "c:concentration"], "Their earnings growth falling to the index's.", ["c:concentration"])
+        add("mag7c", "semis_nvidia", 1, 0.45, 0.5, "ai_earn", f"Mag 7 earnings growth of {m7:.1f}% funds chip orders.",
+            ["k:val-mag7-q3-2026-eps-growth", "c:gpu"], "Capex guidance cut.", ["c:gpu"])
+        add("mag7d", "value_growth", 1, 0.35, 0.45, "ai_earn", f"The growth leaders are delivering growth: Mag 7 earnings +{m7:.1f}%.",
+            ["k:val-mag7-q3-2026-eps-growth", "c:growth-investing"], "Growth leaders missing.", ["c:growth-investing"])
+    ai = v("vc-us-ai-share-2026ytd-q3")
+    if ai is not None:
+        add("vcai", "ai_boom", -1, 0.4, 0.35, "ai_capital", f"AI took {ai:.1f}% of US venture dollars through Q3 2026 (PitchBook-NVCA): capital this concentrated in one theme has preceded busts before.",
+            ["k:vc-us-ai-share-2026ytd-q3", "c:ai-funding", "c:dot-com"], "AI's share falling while revenue keeps rising.", ["c:ai-funding", "c:venture-capital"])
+    dpi = v("vc-carta-dpi-2026q1")
+    if dpi is not None:
+        add("vcdpi", "ai_boom", -1, 0.2, 0.3, "ai_capital", f"Venture funds from 2017 have returned only {dpi:.2f}x their money in cash (median DPI, Carta): private marks are not yet cash.",
+            ["k:vc-carta-dpi-2026q1", "c:dpi"], "Distributions picking up.", ["c:dpi"])
+    crowd = v("am-bofa-fms-2026-07-crowded")
+    if crowd is not None:
+        add("semis_crowd", "semis_nvidia", -1, 0.35, 0.3, "sentiment", f"{crowd:.0f}% of fund managers named long semiconductors the most crowded trade in July (BofA; secondary report).",
+            ["k:am-bofa-fms-2026-07-crowded", "c:crowding"], "The trade falling down the crowded list.", ["c:crowding"])
+        add("semis_crowd2", "ai_boom", -1, 0.25, 0.3, "sentiment", "Long semiconductors is the most crowded trade in the BofA survey.",
+            ["k:am-bofa-fms-2026-07-crowded", "c:crowding"], "Positioning unwinding without a fall in price.", ["c:crowding"])
+    top10 = v("ts-sp500-top10-weight-2026-06")
+    if top10 is not None:
+        add("top10", "megacap_concentration", -1, 0.55, 0.5, "concentration", f"The ten largest stocks are {top10:.1f}% of the S&P 500 (June 30): an index fund is a concentrated bet.",
+            ["k:ts-sp500-top10-weight-2026-06", "c:concentration"], "Concentration falling as the rest catches up.", ["c:concentration"])
+        add("top10b", "diversification_indexing", -1, 0.3, 0.4, "concentration", f"With the top ten at {top10:.1f}% of the index, even indexers are concentrated; diversify beyond the cap-weighted index.",
+            ["k:ts-sp500-top10-weight-2026-06", "c:diversification"], "Weights spreading out.", ["c:diversification"])
+    md = v("ts-margin-debt-2026-09")
+    if md is not None:
+        add("margin", "speculation_manias", -1, 0.55, 0.45, "leverage", f"Margin debt is ${md / 1000:.2f} trillion (FINRA, September), near June's record, after a 15.9% jump in two months.",
+            ["k:ts-margin-debt-2026-09", "k:ts-margin-debt-surge-2026-04-05", "c:margin", "c:leverage"], "Margin debt falling while prices hold.", ["c:margin", "c:leverage"])
+        add("margin2", "market_valuation", -1, 0.3, 0.35, "leverage", f"Borrowed money in stocks is near a record (${md / 1000:.2f} trillion).",
+            ["k:ts-margin-debt-2026-09", "c:leverage"], "Deleveraging without a crash.", ["c:leverage"])
+        add("margin3", "risk_leverage_hedging", -1, 0.25, 0.4, "leverage", "Margin debt near a record means forced selling if prices drop.",
+            ["k:ts-margin-debt-2026-09", "c:margin-call"], "Lower margin balances.", ["c:margin-call"])
+    z = v("ts-spx-0dte-share-2026-07")
+    if z is not None:
+        add("zdte", "speculation_manias", -1, 0.3, 0.3, "derivs", f"Same-day (0DTE) options were a record {z:.1f}% of S&P 500 options volume in July (Cboe).",
+            ["k:ts-spx-0dte-share-2026-07", "c:zero-dte"], "That share falling.", ["c:zero-dte"])
+    rt = v("ts-us-retail-share-2025")
+    if rt is not None:
+        add("retail", "speculation_manias", -1, 0.15, 0.25, "retail", f"Retail investors were about {rt:.0f}% of US stock volume in 2025 (secondary report).",
+            ["k:ts-us-retail-share-2025", "c:retail-trading"], "Retail share falling.", ["c:retail-trading"])
+    ins = v("am-insider-selling-2026h1")
+    if ins is not None:
+        add("insider", "market_valuation", -1, 0.2, 0.25, "insider", f"Corporate insiders sold ${ins:.1f} billion of stock in the first half of 2026 (secondary report).",
+            ["k:am-insider-selling-2026h1", "c:signaling"], "Insider buying picking up.", ["c:signaling"])
+    cash = v("am-bofa-fms-2026-09-cash")
+    if cash is not None:
+        add("fmscash", "timing_crashes", -1, 0.25, 0.25, "sentiment", f"Fund managers held {cash:.1f}% cash in September (BofA; secondary report); low cash is the survey's own contrarian warning.",
+            ["k:am-bofa-fms-2026-09-cash", "c:fund-manager-survey", "c:sentiment"], "Cash back above 4.5%.", ["c:fund-manager-survey"])
+    br = v("ind-breadth-above-200d-2026-10-21")
+    if br is not None:
+        add("breadth", "market_valuation", 1 if br >= 50 else -1, 0.1, 0.25, "breadth", f"{br:.0f}% of S&P 500 members are above their 200-day average (secondary): participation is middling.",
+            ["k:ind-breadth-above-200d-2026-10-21", "c:breadth", "c:pct-above-200"], "Breadth under 40%.", ["c:breadth"])
+    # private markets
+    lp = v("secondaries-lp-pricing-h1-2026")
+    if lp is not None:
+        add("lp", "private_credit", -1, 0.45, 0.55, "private_marks", f"Buyers of fund stakes paid on average {lp:.0f}% of NAV in H1 2026, venture 79% and real estate 68% (Jefferies): private marks are above what cash buyers pay.",
+            ["k:secondaries-lp-pricing-h1-2026", "k:secondaries-pricing-by-strategy-h1-2026", "c:secondaries", "c:valuation-marks"], "Secondary prices at or above NAV.", ["c:secondaries", "c:nav"])
+    dist = v("pe-distributions-nav-2025")
+    if dist is not None:
+        add("pedist", "private_credit", -1, 0.35, 0.5, "private_cash", f"Buyout distributions were {dist:.0f}% of NAV (Bain), well below the long-run pace: money is stuck in funds.",
+            ["k:pe-distributions-nav-2025", "c:distribution", "c:dpi"], "Distributions back above 25% of NAV.", ["c:distribution"])
+    cv = v("secondaries-cv-share-h1-2026-jefferies")
+    if cv is not None:
+        add("cvs", "private_credit", -1, 0.25, 0.4, "private_cash", f"Continuation vehicles are {cv:.0f}% of GP-led secondaries: managers selling assets to themselves.",
+            ["k:secondaries-cv-share-h1-2026-jefferies", "c:continuation-vehicle"], "More exits to outside buyers.", ["c:continuation-vehicle"])
+    nav = v("pe-nav-loans-market-2026")
+    if nav is not None:
+        add("navloan", "private_credit", -1, 0.25, 0.35, "private_lev", f"NAV loans are about ${nav:.0f} billion and growing: borrowing against fund portfolios, sometimes to pay distributions.",
+            ["k:pe-nav-loans-market-2026", "c:nav-loan"], "NAV lending shrinking.", ["c:nav-loan"])
+    ex = v("pe-us-exit-value-2026q2")
+    if ex is not None:
+        add("peexit", "private_credit", 1, 0.3, 0.4, "private_exit", f"US PE exits were ${ex:.1f} billion in Q2 2026 (PitchBook), with IPOs reopening: the exit window is open.",
+            ["k:pe-us-exit-value-2026q2", "c:exits"], "IPO window shutting.", ["c:exits"])
+    sv = v("secondaries-volume-h1-2026-jefferies")
+    if sv is not None:
+        add("secvol", "private_credit", 1, 0.2, 0.35, "private_exit", f"Secondary volume hit ${sv:.0f} billion in H1 2026 (Jefferies): a deep market to sell into exists.",
+            ["k:secondaries-volume-h1-2026-jefferies", "c:secondaries"], "Volume drying up.", ["c:secondaries"])
+    # active versus passive
+    sr = v("am-morningstar-barometer-2026h1")
+    if sr is not None:
+        add("active", "edge:active", -1, 0.8, 0.7, "active", f"Only {sr:.0f}% of US active funds beat their passive peers over ten years (Morningstar, mid-2026).",
+            ["k:am-morningstar-barometer-2026h1", "c:active-management"], "A success rate above 50%.", ["c:active-management", "c:skill-vs-luck"])
+        add("active2", "diversification_indexing", -1, 0.5, 0.55, "active", f"{100 - sr:.0f}% of active funds trailed passive peers over ten years.",
+            ["k:am-morningstar-barometer-2026h1", "c:passive-investing"], "Active success above 50%.", ["c:passive-investing"])
+    fee = v("am-morningstar-fee-active-passive-2025")
+    if fee is not None:
+        add("fees", "edge:active", -1, 0.4, 0.85, "fees", f"Active funds charge {fee:.2f}% on average against 0.10% for passive (Morningstar 2025): a certain drag.",
+            ["k:am-morningstar-fee-active-passive-2025", "c:fees"], "Fees converging.", ["c:fees"])
+    for pid, axis, sign, s, rel, txt in (
+            ("am-paper-sharpe-1991", "edge:active", -1, 0.5, 0.9, "Sharpe (1991): before costs, active investors as a group earn the market return, so after costs they must trail it."),
+            ("am-paper-fama-french-2010", "edge:active", -1, 0.4, 0.6, "Fama and French (2010): few fund managers show skill beyond what luck would produce."),
+            ("am-paper-carhart-1997", "edge:active", -1, 0.3, 0.6, "Carhart (1997): fund performance persistence is mostly momentum and fees."),
+            ("am-paper-berk-green-2004", "edge:active", 1, 0.2, 0.4, "Berk and Green (2004): skilled managers exist, but money chases them until their edge is spent."),
+            ("ind-paper-hurst-ooi-pedersen-2017", "edge:trend", 1, 0.5, 0.5, "Hurst, Ooi and Pedersen (2017): trend following made money across markets since 1880, notably in crises."),
+            ("ind-paper-moskowitz-ooi-pedersen-2012", "edge:trend", 1, 0.4, 0.5, "Moskowitz, Ooi and Pedersen (2012): an asset's past year return predicts its next month across 58 futures."),
+            ("ind-paper-sullivan-timmermann-white-1999", "edge:trend", -1, 0.45, 0.6, "Sullivan, Timmermann and White (1999): after correcting for the thousands of rules tried, the best rule's edge disappears out of sample."),
+            ("ind-paper-faber-2007", "edge:trend", 1, 0.3, 0.4, "Faber (2007): the 10-month rule kept equity-like returns with bond-like volatility in his sample."),
+            ("ind-paper-park-irwin-2007", "edge:oscillators", 1, 0.25, 0.3, "Park and Irwin (2007): 56 of 95 modern studies found technical trading profits, with worries about snooping."),
+            ("ind-paper-lo-mamaysky-wang-2000", "edge:oscillators", 1, 0.2, 0.4, "Lo, Mamaysky and Wang (2000): some chart patterns carry a little information."),
+            ("val-paper-goyal-welch-2008", "edge:valuation_timing", -1, 0.5, 0.6, "Goyal and Welch (2008): popular predictors, valuation included, fail out of sample."),
+            ("val-paper-campbell-thompson-2008", "edge:valuation_timing", 1, 0.3, 0.5, "Campbell and Thompson (2008): with sensible limits, valuation predicts a little out of sample, enough to matter."),
+            ("val-paper-campbell-shiller-1998", "market_valuation", -1, 0.3, 0.5, "Campbell and Shiller (1998): high P/E and low dividend yields have been followed by poor long-run returns."),
+            ("stats-harvey-liu-zhu-2016", "edge:oscillators", -1, 0.35, 0.7, "Harvey, Liu and Zhu (2016): with hundreds of factors tried, a new finding needs a t-statistic above 3."),
+            ("negot-galinsky-mussweiler-2001", "edge:first_offer", 1, 0.6, 0.6, "Galinsky and Mussweiler (2001): whoever made the first offer, buyer or seller, got the better deal; the anchor pulls the final price toward it."),
+            ("negot-tversky-kahneman-1974", "edge:first_offer", 1, 0.3, 0.7, "Tversky and Kahneman (1974): people adjust too little from a starting number, which is why anchors work."),
+            ("negot-ayres-siegelman-1995", "edge:first_offer", 1, 0.2, 0.5, "Ayres and Siegelman (1995): car dealers opened higher with some buyers than others; whoever lets the seller anchor pays for it."),
+            ("negot-castillo-taxi-2013", "edge:first_offer", 1, 0.15, 0.5, "Castillo and coauthors (2013): Lima taxi drivers opened higher to passengers they judged would pay more."),
+            ("negot-keim-madhavan-1996", "edge:first_offer", -1, 0.2, 0.5, "Keim and Madhavan (1996): prices move against a block before it prints; revealing your hand early can cost you."),
+            ("negot-raiffa-1982", "edge:first_offer", -1, 0.15, 0.4, "Raiffa (1982): when you know little about the other side's walk-away price, an extreme opening can end the talks."),
+            ("games-fractional-kelly-overbetting", "edge:sizing", -1, 0.6, 0.85, "Betting twice the Kelly fraction gives zero long-run growth; half Kelly keeps 75% of the growth with far less risk (Thorp)."),
+            ("games-thorp-partnership-kelly", "edge:sizing", 1, 0.4, 0.5, "Thorp's partnership compounded about 20% a year with Kelly-style sizing, but only on measured edges."),
+            ("games-kelly-1956", "edge:sizing", 1, 0.3, 0.8, "Kelly (1956): with a real edge, betting a fixed fraction maximizes long-run growth."),
+            ("ts-paper-barber-odean-2000", "speculation_manias", -1, 0.25, 0.6, "Barber and Odean (2000): the most active retail traders earned the least."),
+            ("ts-paper-shleifer-vishny-1997", "speculation_manias", 1, 0.2, 0.5, "Shleifer and Vishny (1997): mispricing can run far because arbitrage needs capital that leaves when it hurts."),
+            ("paper-gorton-rouwenhorst-2006", "oil_energy", 1, 0.15, 0.4, "Gorton and Rouwenhorst (2006): commodity futures earned an equity-like premium and rose with unexpected inflation."),
+            ("paper-kilian-2009", "oil_energy", -1, 0.2, 0.5, "Kilian (2009): supply-driven oil spikes fade faster than demand-driven ones."),
+            ("paper-kaplan-schoar-2005", "private_credit", -1, 0.2, 0.5, "Kaplan and Schoar (2005): average private equity returns net of fees were roughly the S&P 500's."),
+            ("paper-hjk-2014", "private_credit", 1, 0.2, 0.5, "Harris, Jenkinson and Kaplan (2014): buyout funds beat public markets in most vintages."),
+    ):
+        if pid in K:
+            add("p-" + pid, axis, sign, s, rel, "paper:" + axis, txt, ["k:" + pid], "New evidence on a longer sample.", [])
+    if K.get("games-fractional-kelly-overbetting"):
+        add("kelly_risk", "risk_leverage_hedging", -1, 0.4, 0.8, "math", "Ruin is permanent: past twice the Kelly fraction, expected growth turns negative however good the edge.",
+            ["k:games-fractional-kelly-overbetting", "c:kelly", "c:risk-of-ruin", "e:games2"], "None: this is arithmetic.", ["c:kelly", "c:risk-of-ruin"])
+    return S
+
+
+# ---------------------------------------------------------------- the graph
+def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
+          research_latest: dict | None = None, layout: bool = True) -> dict:
+    nodes: list[dict] = []
+    idx: dict[str, int] = {}
+    edges: dict[tuple, list] = {}
+
+    def node(nid, kind, name, group, text="", aliases=(), **extra):
+        if nid in idx:
+            return idx[nid]
+        idx[nid] = len(nodes)
+        nodes.append({"id": nid, "k": kind, "n": name, "g": group, "t": text, "a": [a for a in aliases if a], **extra})
+        return idx[nid]
+
+    def edge(a, b, typ, w=None):
+        if a not in idx or b not in idx or a == b:
+            return
+        i, j = idx[a], idx[b]
+        key = (min(i, j), max(i, j))
+        ww = round(EDGE_W.get(typ, 0.5) if w is None else w, 4)
+        if key in edges:
+            if ww > edges[key][2]:
+                edges[key] = [i, j, ww, TYPES.index(typ)]
+            return
+        edges[key] = [i, j, ww, TYPES.index(typ)]
+
+    concepts = ontology.concepts()
+    for cl, title in ontology.CLUSTERS.items():
+        node("x:" + cl, "cluster", title, cl, f"Everything the mind knows about {title.lower()}.", [title])
+    for c in concepts:
+        node(c["id"], "concept", c["name"], c["cluster"], c["text"], c["aliases"], f=c["formula"])
+    # atlas
+    an = {n["id"]: n for n in atlas["nodes"]}
+    for n in atlas["nodes"]:
+        kind = "series" if n["measured"] else ("holding" if n["family"] == "Book" else "driver")
+        grp = "markets" if n["measured"] else "core"
+        node("a:" + n["id"], kind, n["name"], grp, f"{n['family']}. {n.get('source', '')}".strip(), [n.get("short", ""), n["id"]] if len(n["id"]) > 2 else [n.get("short", "")])
+    causal = []
+    for l in list(atlas["links"]) + [dict(x, judged=True) for x in atlas.get("judged", [])]:
+        if l.get("self"):
+            continue
+        a, b = "a:" + l["from"], "a:" + l["to"]
+        if l.get("judged"):
+            edge(a, b, "judged", 0.3 + 0.5 * min(1.0, abs(l["w"])))
+        else:
+            edge(a, b, "learned", 0.3 + 0.5 * min(1.0, abs(l.get("t", 2)) / 8))
+        if a in idx and b in idx:
+            causal.append([idx[a], idx[b], round(float(l["w"]), 5)])
+    # topics, investors, quotes
+    for k, t in voices.TOPICS.items():
+        node("t:" + k, "topic", t["title"], "voices", f"Bull case: {t['bull']}. Bear case: {t['bear']}.", [t["title"]])
+    for k, ax in EDGE_AXES.items():
+        pass
+    for q in quotes:
+        sp = q["speaker"]
+        pid = "p:" + slug(sp)
+        node(pid, "investor", re.sub(r"\s*\(.*?\)", "", sp).replace("Jerome H. Powell", "Jerome Powell"), "voices", q.get("role", ""), [])
+        node("q:" + q["id"], "quote", f"{nodes[idx[pid]]['n']}, {q['date'][:4]}", "voices",
+             f"{q['text']} {q.get('gist', '')} {' '.join(q.get('tags') or [])}", [], st=q["stance"])
+        edge("q:" + q["id"], "t:" + q["topic"], "about")
+        edge("q:" + q["id"], pid, "said_by")
+    # engine
+    mods = _engine_modules()
+    for m in mods:
+        node("e:" + m["module"], "engine", m["module"].replace("analytics.", "analytics/").replace("data.", "data/") + ".py", "engine", m["doc"], [m["module"]], lines=m["lines"])
+    for m in mods:
+        for i in m["imports"]:
+            edge("e:" + m["module"], "e:" + i, "code")
+    for mid, (name, text) in METHODS.items():
+        node("m:" + mid, "method", name, "engine", text, [])
+        edge("m:" + mid, "e:labs", "method_of")
+    try:
+        from . import mcp_server
+        tools = {n: d for n, (_, d, _, _) in mcp_server.TOOLS.items()}
+    except Exception:  # pragma: no cover
+        tools = {}
+    tools.setdefault("reason", "Ask the mind a question: what lit up, the verdict on the claim with its range, the arguments for and against, the causal chains to the book and a proposed action. Research only.")
+    tools.setdefault("labs_lookup", "The labs' tested claims: trend rules, oscillators, valuation, regimes, volatility, spreads, calendar and the multiple-testing table.")
+    tools.setdefault("game_math", "Poker equity, pot odds, Kelly, risk of ruin, Rubinstein and Nash bargaining, the best haggling offer, IRR, TVPI, PME and the J-curve.")
+    for tn, d in tools.items():
+        node("o:" + tn, "tool", tn, "engine", d[:400], [tn.replace("_", " ")])
+        edge("o:" + tn, "e:mcp_server", "tool")
+        for mm in TOOL_MODULES.get(tn, []):
+            edge("o:" + tn, "e:" + mm, "tool")
+
+    def resolve(ref):
+        kind, _, rest = ref.partition(":")
+        if kind in ("s", "j"):
+            return "a:" + rest
+        if kind == "e":
+            if rest.startswith("labs-") or rest == "labs":
+                return "m:" + rest if rest != "labs" else "e:labs"
+            return "e:" + ENGINE_ALIAS.get(rest, rest)
+        return ref
+    for c in concepts:
+        node_id = c["id"]
+        edge(node_id, "x:" + c["cluster"], "member")
+        for kind, tgt in c["rel"]:
+            edge(node_id, resolve(tgt if ":" in tgt else "c:" + tgt), kind)
+    # topic terms to concepts
+    alias_index: dict[str, list[str]] = {}
+    for c in concepts:
+        for a in [c["name"], *c["aliases"], c["id"][2:].replace("-", " ")]:
+            alias_index.setdefault(norm(a).strip(), []).append(c["id"])
+    for k, t in voices.TOPICS.items():
+        for term in t["terms"].split():
+            for cid in alias_index.get(term.replace("_", " "), [])[:1]:
+                edge("t:" + k, cid, "topic_of")
+    for k, ax in EDGE_AXES.items():
+        for cid in ax["terms"]:
+            edge(ax["node"], cid, "related")
+    # facts
+    tok_concepts = [(c["id"], set(voices.tokens(" ".join([c["name"], *c["aliases"]]), expand=False))) for c in concepts]
+    atlas_alias = {}
+    for n in atlas["nodes"]:
+        for a in (n["name"], n.get("short", ""), n["id"]):
+            if a and len(a) > 2:
+                atlas_alias[norm(a).strip()] = "a:" + n["id"]
+
+    def match(phrase):
+        p = norm(phrase).strip()
+        if p in alias_index:
+            return alias_index[p][:1]
+        if p in atlas_alias:
+            return [atlas_alias[p]]
+        if p.endswith("s") and p[:-1] in alias_index:
+            return alias_index[p[:-1]][:1]
+        qt = set(voices.tokens(phrase, expand=False))
+        if not qt:
+            return []
+        best, bid = 0.0, None
+        for cid, ts in tok_concepts:
+            if qt <= ts:
+                sc = len(qt) / len(ts)
+                if sc > best:
+                    best, bid = sc, cid
+        return [bid] if bid else []
+    for it in know:
+        grp = FACT_CLUSTER.get(it.get("cluster"), "valuation")
+        fid = "k:" + it["id"]
+        node(fid, "fact" if it["kind"] != "paper" else "paper", it["title"], grp, it["text"], [], **{k2: it.get(k2) for k2 in ("value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked")})
+        edge(fid, "x:" + grp, "member", 0.3)
+        for c in it.get("concepts") or []:
+            for m in match(c):
+                edge(fid, m, "evidence")
+    # world
+    world = world or {}
+    for iso, name, cur, exports, note in COUNTRIES:
+        w = world.get(iso, {})
+        bits = [note]
+        if w.get("gdp"):
+            bits.append(f"GDP ${w['gdp'] / 1e12:.2f} trillion ({w['gdp_year']}, World Bank)")
+        if w.get("inflation") is not None:
+            bits.append(f"inflation {w['inflation']:.1f}% ({w['inflation_year']})")
+        if w.get("pop"):
+            bits.append(f"population {w['pop'] / 1e6:.0f} million")
+        node("g:" + iso, "country", name, "world", "; ".join(bits) + ".", [name], gdp=w.get("gdp"))
+        if cur:
+            edge("g:" + iso, cur if ":" in cur else "c:" + cur, "currency")
+        for ex in exports:
+            edge("g:" + iso, ex, "exports")
+    # signals
+    K = {it["id"]: it for it in know}
+    cape_pct = None
+    if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
+        cape_pct = labs_L["valuation"]["cape"]["percentile"]
+    sigs = signals(K, labs_L, research_latest, cape_pct)
+    for s in sigs:
+        ax = s["axis"]
+        title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]
+        node(s["id"], "signal", s["text"][:90], "evidence", s["text"], [], axis=ax, sign=s["sign"])
+        edge(s["id"], "t:" + ax if ax in voices.TOPICS else EDGE_AXES[ax]["node"], "signal")
+        for r in s["refs"] + s["targets"]:
+            edge(s["id"], resolve(r) if r.startswith(("e:", "s:", "j:")) else r, "cites")
+        del title
+    E = sorted(edges.values(), key=lambda e: (e[0], e[1]))
+    G = {"nodes": nodes, "edges": E, "causal": causal, "signals": sigs, "axes": axes_meta(), "types": TYPES,
+         "groups": GROUP_NAMES, "params": params()}
+    if layout:
+        place(G)
+    return G
+
+
+def axes_meta() -> dict:
+    out = {k: {"title": t["title"], "bull": t["bull"], "bear": t["bear"], "node": "t:" + k, "book": BOOK_SIGN.get(k, 0), "hedge": HEDGE_FOR.get(k)} for k, t in voices.TOPICS.items()}
+    for k, a in EDGE_AXES.items():
+        out[k] = {"title": a["title"], "bull": a["bull"], "bear": a["bear"], "node": a["node"], "book": 0, "hedge": None}
+    return out
+
+
+def params() -> dict:
+    return {"alpha": ALPHA, "steps": STEPS, "seeds": SEEDS, "seed_floor": SEED_FLOOR, "w_bm": W_BM, "w_alias": W_ALIAS, "doc_w": list(DOC_W), "kind_recall": KIND_RECALL, "qstop": QSTOP,
+            "axis_topic_boost": AXIS_TOPIC_BOOST, "explain_ratio": EXPLAIN_RATIO, "hedges": HEDGE_NAMES}
+
+
+def place(G: dict) -> None:
+    """Galaxy layout: each group is laid out on its own (atlas.layout, force-directed then spread to an even disc whose
+    radius grows with the square root of its size); the discs are then placed by a force layout of the groups, pulled
+    together by the share of links between them (normalized, so a large graph cannot collapse the discs onto each
+    other) and kept apart by their radii. Deterministic."""
+    import numpy as np
+    from .atlas import layout as fr_layout
+    nodes = G["nodes"]
+    gs = sorted({n["g"] for n in nodes})
+    gi = {g: i for i, g in enumerate(gs)}
+    p = len(nodes)
+    members = {g: [i for i, n in enumerate(nodes) if n["g"] == g] for g in gs}
+    pos = {}
+    for g in gs:
+        idx = members[g]
+        loc = {i: k for k, i in enumerate(idx)}
+        A = np.zeros((len(idx), len(idx)))
+        for i, j, w, _ in G["edges"]:
+            if i in loc and j in loc:
+                A[loc[i], loc[j]] = A[loc[j], loc[i]] = w
+        pos[g] = fr_layout(A, [0] * len(idx), seed=11 + gi[g], iters=300, spread=True) if len(idx) > 1 else np.zeros((1, 2))
+    Gn = len(gs)
+    Cw = np.zeros((Gn, Gn))
+    for i, j, w, _ in G["edges"]:
+        a, b = gi[nodes[i]["g"]], gi[nodes[j]["g"]]
+        if a != b:
+            Cw[a, b] += w
+            Cw[b, a] += w
+    Cw = Cw / (Cw.max() or 1.0)
+    R = np.array([0.16 * math.sqrt(len(members[g])) for g in gs])
+    order = sorted(range(Gn), key=lambda k: -R[k])
+    C = np.zeros((Gn, 2))
+    for rank, k in enumerate(order):
+        a = 2.399963 * rank                                   # golden-angle spiral start
+        C[k] = [math.cos(a) * 0.4 * math.sqrt(rank + 1), math.sin(a) * 0.4 * math.sqrt(rank + 1)]
+    for it in range(900):
+        F = np.zeros_like(C)
+        for a in range(Gn):
+            for b in range(Gn):
+                if a == b:
+                    continue
+                d = C[a] - C[b]
+                dist = math.hypot(*d) + 1e-9
+                need = R[a] + R[b] + 0.08
+                if dist < need:
+                    F[a] += (need - dist) * d / dist * 0.5
+                F[a] -= 0.03 * Cw[a, b] * d / dist * min(1.0, dist)
+        F -= 0.01 * C
+        C += F * (1 - it / 1000)
+    X = np.zeros((p, 2))
+    for g in gs:
+        k = gi[g]
+        X[members[g]] = C[k] + pos[g] * R[k]
+    X -= (X.max(axis=0) + X.min(axis=0)) / 2
+    X /= (np.abs(X).max() or 1.0) / 0.97
+    for n, (x, y) in zip(nodes, X):
+        n["x"], n["y"] = round(float(x), 4), round(float(y), 4)
+
+
+# ---------------------------------------------------------------- thinking
+class Mind:
+    def __init__(self, G: dict, lib: voices.Library | None = None):
+        self.G = G
+        self.nodes = G["nodes"]
+        self.N = len(self.nodes)
+        self.idx = {n["id"]: i for i, n in enumerate(self.nodes)}
+        self.edges = G["edges"]
+        self.deg = [0.0] * self.N
+        for i, j, w, _ in self.edges:
+            self.deg[i] += w
+            self.deg[j] += w
+        docs = []
+        dw = G["params"]["doc_w"]
+        for n in self.nodes:
+            d = voices.tokens(n["n"]) * dw[0] + voices.tokens(" ".join(n["a"])) * dw[1] + voices.tokens(n["t"] or "") * dw[2]
+            docs.append(d)
+        self.index = voices.Index(docs)
+        self.alias = []
+        for i, n in enumerate(self.nodes):
+            if n["k"] in ("concept", "series", "driver", "holding", "topic", "country", "investor", "cluster", "tool"):
+                for a in [n["n"], *n["a"]]:
+                    s = norm(a)
+                    if len(s.strip()) >= 2:
+                        self.alias.append((s, i, min(1.0, 0.6 + 0.1 * len(s.split()))))
+        self.sigs = G["signals"]
+        self.sig_node = [self.idx[s["id"]] for s in self.sigs]
+        self.lib = lib
+
+    # 2 recall
+    def recall(self, text: str) -> list[tuple[int, float]]:
+        qs = set(voices.stem(w) for w in QSTOP)
+        q = [w for w in voices.tokens(text) if w not in qs]
+        bm = self.index.score(q) if q else [0.0] * self.N
+        bm = [b * KIND_RECALL.get(self.nodes[i]["k"], 1.0) for i, b in enumerate(bm)]
+        mx = max(bm) if bm else 0.0
+        score = [W_BM * (b / mx) if mx > 0 else 0.0 for b in bm]
+        t = norm(text)
+        hit = [0.0] * self.N
+        for s, i, w in self.alias:
+            if s in t and w > hit[i]:
+                hit[i] = w
+        for i in range(self.N):
+            score[i] += W_ALIAS * hit[i]
+        best = max(score) if score else 0.0
+        if best <= 0:
+            return []
+        cand = sorted(range(self.N), key=lambda i: (-score[i], i))[:SEEDS]
+        return [(i, score[i]) for i in cand if score[i] >= SEED_FLOOR * best]
+
+    # 3 spread
+    def spread(self, seeds: list[tuple[int, float]]) -> list[float]:
+        tot = sum(s for _, s in seeds)
+        s0 = [0.0] * self.N
+        for i, s in seeds:
+            s0[i] = s / tot
+        r = s0[:]
+        deg = self.deg
+        for _ in range(STEPS):
+            nr = [(1 - ALPHA) * x for x in s0]
+            dangling = 0.0
+            for i in range(self.N):
+                if deg[i] == 0:
+                    dangling += r[i]
+            for i, j, w, _ in self.edges:
+                nr[j] += ALPHA * w * r[i] / deg[i]
+                nr[i] += ALPHA * w * r[j] / deg[j]
+            if dangling:
+                for k in range(self.N):
+                    nr[k] += ALPHA * dangling * s0[k]
+            r = nr
+        return r
+
+    def chains(self, r: list[float], k: int = 3, prefer: list[int] | None = None) -> list[dict]:
+        """Strongest directed paths over the atlas's causal links from the most activated market nodes to the book."""
+        adj: dict[int, list] = {}
+        for a, b, w in self.G["causal"]:
+            adj.setdefault(a, []).append((b, w))
+        book = self.idx.get("a:book")
+        if book is None:
+            return []
+        rmax = max(r) or 1.0
+        ranked = [i for i in sorted(range(self.N), key=lambda i: (-r[i], i)) if self.nodes[i]["id"].startswith("a:") and i != book and r[i] >= 0.02 * rmax]
+        src = []
+        for i in (prefer or []) + ranked:
+            if i not in src and i != book:
+                src.append(i)
+        src = src[:k]
+        out = []
+        for s in src:
+            dist = {s: 0.0}
+            prev = {}
+            pq = [(0.0, s)]
+            done = set()
+            while pq:
+                d, u = heapq.heappop(pq)
+                if u in done:
+                    continue
+                done.add(u)
+                if u == book:
+                    break
+                for vtx, w in adj.get(u, []):
+                    st = min(0.95, max(0.05, abs(w)))
+                    nd = d - math.log(st)
+                    if nd < dist.get(vtx, math.inf) - 1e-15:
+                        dist[vtx] = nd
+                        prev[vtx] = (u, w)
+                        heapq.heappush(pq, (nd, vtx))
+            if book not in dist:
+                continue
+            path, signs, u = [book], 1, book
+            while u != s:
+                pu, w = prev[u]
+                signs *= 1 if w >= 0 else -1
+                path.append(pu)
+                u = pu
+            path.reverse()
+            out.append({"from": self.nodes[s]["id"], "path": [self.nodes[i]["id"] for i in path], "names": [self.nodes[i]["n"] for i in path],
+                        "sign": signs, "strength": round(math.exp(-dist[book]), 6)})
+        return out
+
+    def weigh(self, axis: str, r: list[float], text: str) -> dict:
+        rows = []
+        for si, s in enumerate(self.sigs):
+            if s["axis"] != axis:
+                continue
+            rows.append({"sig": s, "act": r[self.sig_node[si]]})
+        if axis in voices.TOPICS and self.lib is not None:
+            res = self.lib.search(text, topic=axis)
+            if res.get("lean") is not None:
+                lean = res["lean"]
+                n_q = sum(res["counts"].values())
+                rows.append({"sig": {"id": "s:voices:" + axis, "axis": axis, "sign": 1 if lean > 0 else -1 if lean < 0 else 0, "s": round(0.3 * abs(lean), 6), "rel": 0.3,
+                                     "group": "opinion", "text": f"Investor opinion in the library leans {lean:+.2f} on a -2 to +2 scale across {n_q} quotes.", "refs": ["t:" + axis],
+                                     "flip": "Opinion swinging the other way.", "targets": []},
+                             "act": r[self.idx["t:" + axis]]})
+        if not rows:
+            return {"axis": axis, "logodds": 0.0, "p_bull": 0.5, "rows": [], "lo": 0.5, "hi": 0.5, "hinge": None}
+        amax = max(x["act"] for x in rows) or 1.0
+        groups: dict[str, list] = {}
+        for x in rows:
+            s = x["sig"]
+            x["relevance"] = 0.5 + 0.5 * math.sqrt(x["act"] / amax) if amax > 0 else 0.5
+            x["raw"] = s["sign"] * s["s"] * s["rel"] * x["relevance"]
+            groups.setdefault(s["group"], []).append(x)
+        L = 0.0
+        for g in groups.values():                    # within a family the k-th strongest reading counts 1/sqrt(k)
+            g.sort(key=lambda x: (-abs(x["raw"]), x["sig"]["id"]))
+            for k, x in enumerate(g):
+                x["dep"] = 1 / math.sqrt(k + 1)
+                x["c"] = x["raw"] * x["dep"]
+        for x in rows:
+            L += x["c"]
+        p = 1 / (1 + math.exp(-L))
+        ps = []
+        for g in sorted(groups):
+            Lg = L - sum(x["c"] for x in rows if x["sig"]["group"] == g)
+            ps.append(1 / (1 + math.exp(-Lg)))
+        hinge = max(rows, key=lambda x: (abs(x["c"]), x["sig"]["id"]))
+        p_wo = 1 / (1 + math.exp(-(L - hinge["c"])))
+        rows.sort(key=lambda x: (-abs(x["c"]), x["sig"]["id"]))
+        return {"axis": axis, "logodds": L, "p_bull": p, "lo": min(ps + [p]), "hi": max(ps + [p]), "rows": rows,
+                "hinge": {"id": hinge["sig"]["id"], "text": hinge["sig"]["text"], "p_without": p_wo}}
+
+    def think(self, text: str) -> dict:
+        seeds = self.recall(text)
+        if not seeds:
+            return {"query": text, "found": False, "note": "Nothing in the mind matches. Name an asset, an indicator, a market or an idea."}
+        r = self.spread(seeds)
+        rmax = max(r)
+        topic = None
+        pol = {"side": "neither", "score": 0, "question": True}
+        if self.lib is not None:
+            vs = self.lib.search(text)
+            topic = vs.get("topic")
+            pol = vs["polarity"]
+        axes = self.G["axes"]
+        score = {}
+        for si, s in enumerate(self.sigs):
+            a = s["axis"]
+            v = r[self.sig_node[si]]
+            if v > score.get(a, 0.0):
+                score[a] = v
+        for a in list(score):
+            node_act = r[self.idx[axes[a]["node"]]]
+            score[a] = (0.5 * score[a] + node_act) * (AXIS_TOPIC_BOOST if a == topic else 1.0)
+        ranked = sorted(score, key=lambda a: (-score[a], a))
+        if not ranked:
+            return {"query": text, "found": False, "note": "The question lit up nodes with no evidence attached."}
+        main = ranked[0]
+        mode = "weigh" if score[main] >= EXPLAIN_RATIO * rmax else "explain"
+        verdicts = [self.weigh(a, r, text) for a in ranked[:3]]
+        V = verdicts[0]
+        side = pol["side"] if pol["side"] in ("bull", "bear") else "bull"
+        claim = axes[main][side]
+        p_claim = V["p_bull"] if side == "bull" else 1 - V["p_bull"]
+        lo, hi = (V["lo"], V["hi"]) if side == "bull" else (1 - V["hi"], 1 - V["lo"])
+        pros = [x for x in V["rows"] if (x["c"] > 0) == (side == "bull") and x["c"] != 0]
+        cons = [x for x in V["rows"] if (x["c"] > 0) != (side == "bull") and x["c"] != 0]
+        used = {x["sig"]["id"] for x in V["rows"]}
+        lit = sorted(range(self.N), key=lambda i: (-r[i], i))
+        concepts = [i for i in lit if self.nodes[i]["k"] == "concept"][:8]
+        facts = [i for i in lit if self.nodes[i]["k"] in ("fact", "paper")][:6]
+        engines = [i for i in lit if self.nodes[i]["k"] in ("engine", "method", "tool")][:5]
+        countries = [i for i in lit if self.nodes[i]["k"] == "country"][:3]
+        cited = set()
+        for x in V["rows"]:
+            cited.update(x["sig"]["refs"] + x["sig"]["targets"])
+        unknown = [self.nodes[i]["id"] for i in concepts if self.nodes[i]["id"] not in cited][:4]
+        book = axes[main]["book"]
+        tilt = book * (V["p_bull"] - 0.5) * 2
+        if book == 0 or abs(tilt) < 0.15:
+            act = {"action": "hold", "text": "Hold. The evidence on this claim is balanced or does not touch the book; no change, and look again when the hinge moves."}
+        elif tilt > 0:
+            act = {"action": "hold", "text": "Hold the book. The evidence leans the way the book is already positioned; do not add, because the position is already concentrated."}
+        else:
+            h = axes[main]["hedge"]
+            act = {"action": "review_hedge", "hedge": h, "text": f"Review protection: the evidence leans against the book on this claim. The hedge book's {HEDGE_NAMES.get(h, h)} is the matching hedge; size it there and write a proposal for a person to approve.",
+                   "mcp": [{"tool": "hedge_book", "args": {"on": [h]}}, {"tool": "create_order_proposal", "args": {"rationale": claim, "kill": V["hinge"]["text"] if V["hinge"] else ""}}]}
+        act["executed"] = False
+
+        def nd(i):
+            n = self.nodes[i]
+            return {"id": n["id"], "name": n["n"], "kind": n["k"], "act": round(r[i] / rmax, 6)}
+
+        def row(x):
+            s = x["sig"]
+            return {"id": s["id"], "text": s["text"], "c": round(x["c"], 6), "relevance": round(x["relevance"], 6), "rel": s["rel"], "group": s["group"],
+                    "refs": s["refs"], "flip": s["flip"]}
+        return {"query": text, "found": True, "mode": mode, "axis_score": round(score[main] / rmax, 6), "seeds": [nd(i) for i, _ in seeds], "polarity": pol, "topic": topic,
+                "axis": main, "axis_title": axes[main]["title"], "side": side, "claim": claim, "p": round(p_claim, 6), "range": [round(lo, 6), round(hi, 6)],
+                "logodds": round(V["logodds"], 6), "pros": [row(x) for x in pros[:6]], "cons": [row(x) for x in cons[:6]], "n_signals": len(V["rows"]),
+                "hinge": V["hinge"], "flip": [x["sig"]["flip"] for x in (pros[:3])], "others": [{"axis": v["axis"], "title": axes[v["axis"]]["title"], "p_bull": round(v["p_bull"], 6),
+                                                                                                 "n": len(v["rows"])} for v in verdicts[1:]],
+                "concepts": [nd(i) for i in concepts], "facts": [nd(i) for i in facts], "engines": [nd(i) for i in engines], "countries": [nd(i) for i in countries],
+                "unknowns": unknown, "chains": self.chains(r, prefer=[self.idx[c] for x in V["rows"] for c in x["sig"]["refs"] + x["sig"]["targets"] if c.startswith("a:") and c in self.idx][:3]), "decision": act, "used": sorted(used),
+                "trace": [{"step": "read", "out": len(voices.tokens(text))}, {"step": "recall", "out": len(seeds)},
+                          {"step": "spread", "out": sum(1 for x in r if x > 1e-4)}, {"step": "frame", "out": len(score)},
+                          {"step": "weigh", "out": len(V["rows"])}, {"step": "test", "out": len({x['sig']['group'] for x in V['rows']})},
+                          {"step": "trace", "out": 0}, {"step": "decide", "out": 1}]}
+
+
+def stats(G: dict) -> dict:
+    from collections import Counter
+    return {"nodes": len(G["nodes"]), "edges": len(G["edges"]), "causal": len(G["causal"]), "signals": len(G["signals"]),
+            "kinds": dict(Counter(n["k"] for n in G["nodes"])), "groups": dict(Counter(n["g"] for n in G["nodes"]))}
+
+
+def compact(G: dict) -> dict:
+    """The page's copy: short keys, no layout precision beyond 4 decimals."""
+    keep = ("f", "st", "value", "unit", "as_of", "source_url", "source_title", "publisher", "primary", "verification", "authors", "checked", "lines", "axis", "sign", "gdp")
+    nodes = []
+    for n in G["nodes"]:
+        d = {"id": n["id"], "k": n["k"], "n": n["n"], "g": n["g"], "t": n["t"], "a": n["a"], "x": n.get("x", 0), "y": n.get("y", 0)}
+        for k in keep:
+            if n.get(k) is not None:
+                d[k] = n[k]
+        nodes.append(d)
+    return {"nodes": nodes, "edges": G["edges"], "causal": G["causal"], "signals": G["signals"], "axes": G["axes"], "types": G["types"],
+            "groups": G["groups"], "params": G["params"]}
+
+
+def build_from_dir(out: Path | str) -> dict:
+    """The daily run's mind: the atlas and labs from the data folder when they exist, else the shipped atlas and no labs
+    signals; knowledge, voices and the world from the assets."""
+    out = Path(out)
+    atlas = json.loads((out / "atlas.json").read_text()) if (out / "atlas.json").exists() else json.loads((ASSETS / "atlas.json").read_text())
+    L = json.loads((out / "labs.json").read_text()) if (out / "labs.json").exists() else None
+    rl = None
+    if (out / "research.json").exists():
+        try:
+            rl = json.loads((out / "research.json").read_text()).get("hedge", {}).get("latest")
+        except (ValueError, AttributeError):
+            rl = None
+    G = build(atlas, voices.load(), load_knowledge(), load_countries(), L, rl)
+    return compact(G)

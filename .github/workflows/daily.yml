@@ -79,6 +79,10 @@ jobs:
         continue-on-error: true
         run: python -m buildout atlas --out site/data
 
+      - name: The labs (156 years of public data; trend, oscillators, valuation, regimes, volatility, spreads)
+        continue-on-error: true
+        run: python -m buildout labs --out site/data
+
       - name: Reasoner and games (reads the files above; no network)
         continue-on-error: true
         run: python -m buildout reason --out site/data

@@ -3,6 +3,22 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.14 makes the brain and the engine one mind, an order of magnitude larger, and gives it a reasoning loop.
+`mind.py` joins, in one typed graph of about 1,500 nodes and 3,800 links: 547 concepts with definitions, formulas and
+relations (`ontology.py`), the atlas's 100 market nodes and their learned causal links, 268 facts and papers checked
+twice on their sources (`assets/knowledge.json`), 267 verified quotes from 60 investors, every Python module with its
+imports as links, the lab methods and the MCP tools, 48 economies with their currencies and exports, and 107 signals
+(evidence with a direction, a strength and a reliability). Asked a question, it recalls by BM25 and exact names,
+spreads activation by personalized PageRank, frames the claim, weighs the evidence in log-odds with a family discount,
+gives a leave-one-family-out range and the hinge, traces causal chains to the book over the atlas's links and proposes
+an action it never executes; the page runs the same code (`site/src/mind.js`), held equal by tests. `labs.py` tests
+trading claims on 156 years (the 10-month and 200-day rule with a bootstrap, a max test and a deflated Sharpe,
+corrected for monthly averaging; RSI, MACD, Bollinger, golden cross; CAPE and P/E out of sample; Markov regimes;
+GARCH; cointegration; variance ratios; Sell in May; Holm and Benjamini-Hochberg). `games2.py` holds the card room's
+exact math: a seven-card evaluator and seeded equity, pot odds, Kelly and ruin, Rubinstein and Nash bargaining, the
+best haggling ask, IRR, TVPI, PME, the Takahashi-Alexander J-curve and the theory of storage. The page adds the Mind,
+Labs, Card room, Under the hood (the engine's source) and Agents desks, and 31 plain-English hard questions.
+
 Version 0.13 grows the brain by an order of magnitude in what it measures. `atlas.py` reads every monthly series it can
 reach (the GitHub mirrors of the public datasets everywhere; FRED as well in the daily Action), learns the structure
 with the graphical lasso (extended BIC) and stability selection (with a bound on false links), orients each link by
@@ -213,7 +229,12 @@ python -m buildout engine --list          # the registry
 python scripts/snapshot_v11.py            # refresh the page's engine snapshot (decision loop, valuation, causal)
 python scripts/snapshot_v12.py            # refresh the brain's self-checks and the voices library in the page
 python -m buildout atlas --out out        # the atlas: every series, learned structure (FRED and GitHub mirrors)
+python -m buildout labs --out out         # the labs: trend rules, oscillators, valuation, regimes, GARCH, spreads, calendar
+python -m buildout mind --out out         # the mind: one graph of the brain and the engine
+python -m buildout think "Is AI a bubble?" # ask the mind from the command line
 python scripts/snapshot_v13.py            # refresh the page's atlas snapshot
+python scripts/snapshot_v14.py            # refresh the labs, the mind and the code appendix in the page
+python scripts/build_knowledge.py K V     # merge research items (K) with the checkers' verdicts (V) into knowledge.json
 python scripts/export_graph.py            # after editing the brain or field cases on the page (needs node)
 python scripts/snapshot_v09.py path/to/csvs  # refresh the page's monthly series for structure learning
 ```
@@ -245,6 +266,9 @@ Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app doe
 | `decision_loop` | The engine's whole decision record: observe, orient, decide, act |
 | `position_valuation` | One holding's accounting, implied growth against the base rates, and the two-sided why; override price or beta |
 | `hedge_book` | Switch prebuilt hedges on or off at chosen sizes: the book in every scenario, cost, and the advisor |
+| `reason` | Ask the mind: the claim it weighed, the probability and its range, evidence for and against with sources, the hinge, chains to the book, a proposed action (never executed) |
+| `labs_lookup` | The labs' tested trading claims, by part |
+| `game_math` | Poker equity and pot odds, Kelly, ruin, bargaining, the best haggling ask, IRR, multiples, PME, the J-curve, the convenience yield |
 | `investor_voices` | Verbatim, sourced quotes on a question, extreme bear to extreme bull; never generates a quote |
 | `atlas_trace` | The whole brain: trace any shock month by month to any node, or read a node's links, importance and regime changes |
 | `brain_selfcheck` | Conformal coverage, stacking weights and robustness values: how far to trust the brain |
@@ -290,6 +314,10 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.14 | `mind.py` | One graph of the brain and the engine; recall (BM25, aliases), spreading activation (personalized PageRank), claim framing, log-odds weighing with a family discount, leave-one-family-out range, hinge, causal chains, decision |
+| | `ontology.py` | 547 concepts in 18 clusters with definitions, formulas, aliases and typed relations to concepts, series, engine modules and voices topics |
+| | `labs.py` | Indicators (SMA, EMA, RSI, MACD, Bollinger), the trend lab, oscillator tests, valuation out of sample, Markov switching, GARCH, Hill tails, Engle-Granger, variance ratios, calendar, Holm and BH |
+| | `games2.py` | Seven-card evaluator, seeded equity, pot odds, Kelly, risk of ruin, Rubinstein, Nash, best offer, IRR, multiples, PME, Takahashi-Alexander, cost of carry |
 | v0.13 | `atlas.py` | Every monthly series: graphical lasso with EBIC, stability selection, pairwise LiNGAM, pruned structural VAR, connectedness, communities, layout |
 | v0.12 | `brain_robust.py` | Five rival world models per equation scored one step ahead from 2000, stacking, adaptive conformal intervals, robustness values |
 | | `voices.py` | Verified investor quotes (assets/voices.json), BM25 retrieval with concepts and synonyms, the bear-to-bull spectrum, polarity |
@@ -367,6 +395,12 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.14: forty steps of spreading activation sit within 2 x 0.75^40 of the closed-form personalized PageRank; the
+  page's mind equals Python's on fifteen questions (seeds, claim, side, probability, range, pros and cons, hinge,
+  chains and decision); each family's k-th reading counts 1/sqrt(k); every typed reference in the ontology resolves;
+  every signal quotes the checked number it rests on; the hand evaluator ranks every category and pocket aces win
+  85% against a random hand; bargaining, Kelly, ruin, IRR, PME and storage match their closed forms and the page;
+  GARCH, two Markov regimes and a cointegrated pair are recovered on planted data.
 - v0.13: on a planted graph with missing spans the atlas finds every causal link, keeps at least 80% real ones after
   pruning the co-parent links a graphical model adds, and points at least three quarters the right way; the
   pairwise-complete correlations equal pandas; responses equal matrix powers and the page's equal Python's; the

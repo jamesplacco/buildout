@@ -16,6 +16,9 @@
   python -m buildout mcp --data site/data       MCP server on stdio: research, risk and reasoning tools, never orders
   python -m buildout engine --out site/data     run the offline engines (valuation, causal, hedges, decision loop) and the manifest
   python -m buildout ooda --out site/data       the decision loop alone: observe, orient, decide, act
+  python -m buildout labs --out site/data       the labs: trend rules, oscillators, valuation, regimes, GARCH, spreads, calendar
+  python -m buildout mind --out site/data       the mind: one graph of the brain and the engine
+  python -m buildout think "Is AI a bubble?"    ask the mind; prints the claim, the verdict, the evidence and the decision
 """
 from __future__ import annotations
 
@@ -87,6 +90,13 @@ def main(argv: list[str] | None = None) -> None:
     at = sub.add_parser("atlas")
     at.add_argument("--out", default="out")
     at.add_argument("--no-fred", action="store_true", help="GitHub mirrors only")
+    lb = sub.add_parser("labs")
+    lb.add_argument("--out", default="out")
+    md = sub.add_parser("mind")
+    md.add_argument("--out", default="out")
+    th = sub.add_parser("think")
+    th.add_argument("question")
+    th.add_argument("--data", default=None, help="folder with mind.json (default: the shipped snapshot)")
     mc = sub.add_parser("mcp")
     mc.add_argument("--data", default=None, help="folder with the engine's JSON outputs")
     mc.add_argument("--config", default=None, help="model config; config.private.toml is refused")
@@ -106,6 +116,41 @@ def main(argv: list[str] | None = None) -> None:
         from .jsonout import write
         from .ooda import build as build_ooda
         print("wrote", write(build_ooda(a.out, a.config), a.out, "ooda.json"))
+        return
+    if a.cmd == "labs":
+        from . import labs, mind
+        from .jsonout import write
+        K = {k["id"]: k for k in mind.load_knowledge()}
+        L = labs.build(labs.download(), cape_now=(K.get("val-cape-2026-10-20") or {}).get("value"))
+        L["findings"] = labs.summary(L)
+        print("wrote", write(labs.public(L), a.out, "labs.json"))
+        for f in L["findings"]:
+            print(" ", f)
+        return
+    if a.cmd == "mind":
+        from . import mind
+        from .jsonout import write
+        G = mind.build_from_dir(a.out)
+        print("wrote", write(G, a.out, "mind.json"), f"({len(G['nodes'])} nodes, {len(G['edges'])} links, {len(G['signals'])} signals)")
+        return
+    if a.cmd == "think":
+        from pathlib import Path
+        from . import mind, voices
+        p = Path(a.data) / "mind.json" if a.data else mind.ASSETS / "mind.json"
+        r = mind.Mind(json.loads(p.read_text()), voices.Library(voices.load())).think(a.question)
+        if not r["found"]:
+            print(r["note"])
+            return
+        print(f"{r['axis_title']}: \"{r['claim']}\" {r['p']:.0%} (range {r['range'][0]:.0%} to {r['range'][1]:.0%}, {r['n_signals']} signals)")
+        for x in r["pros"]:
+            print(f"  + {x['c']:+.3f}  {x['text']}")
+        for x in r["cons"]:
+            print(f"  - {x['c']:+.3f}  {x['text']}")
+        if r["hinge"]:
+            print(f"  hinge: {r['hinge']['text']}")
+        for c in r["chains"]:
+            print("  chain:", " -> ".join(c["names"]))
+        print("  decision:", r["decision"]["text"])
         return
     if a.cmd == "atlas":
         from . import atlas

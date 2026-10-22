@@ -1116,7 +1116,7 @@
   }
   const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
-    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", positions: "Positions", engines: "Engine room", atlas: "Atlas" };
+    noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
     "lg-griffin": "Griffin's lens", "regime-title": "The regime", "roc-title": "Rates of change" };
   function linkLabel(target) {
@@ -1618,7 +1618,7 @@
         box.append(d);
       });
     });
-    $("#faq-title").parentElement.querySelector(".prose").textContent = `${FAQ.length} questions a portfolio manager, a risk officer or an interviewer would ask, answered straight.`;
+    $("#faq-title").parentElement.querySelector(".prose").textContent = `${FAQ.length} questions, from plain English for a newcomer to the ones a portfolio manager, a risk officer or an interviewer would ask, answered straight.`;
   }
   function buildModelRisk() {
     fillTable($("#mr-table"), ["Model", "Assumes", "Breaks when", "What the desk does"], MODEL_RISK, 4);

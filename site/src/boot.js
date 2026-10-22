@@ -2,11 +2,11 @@
      boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {
-    today: { name: "Today", views: ["desk", "atlas", "ooda", "noteworthy"] },
-    decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "brain", "journal", "swans"] },
+    today: { name: "Today", views: ["desk", "mind", "atlas", "ooda", "noteworthy"] },
+    decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "cardroom", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
-    research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
-    reference: { name: "Methods", views: ["engine", "engines", "appendix"] },
+    research: { name: "Research", views: ["labs", "fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
+    reference: { name: "Methods", views: ["engine", "engines", "code", "agents", "appendix"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -19,6 +19,11 @@
   }
   const RENDER = {
     atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
+    mind: () => guard("The mind", renderMindDesk, $("#md-tiles")),
+    labs: () => guard("The labs", renderLabsDesk, $("#lb-tiles")),
+    cardroom: () => { guard("The labs", renderLabsDesk, $("#lb-tiles")); guard("The card room", drawYale, $("#cr-yale")); },
+    code: () => guard("Under the hood", renderCodeDesk, $("#cd-list")),
+    agents: () => {},
     desk: () => { guard("Which brain", wireHeroWhich, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },

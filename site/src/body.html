@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.13</span>
+      Buildout <span class="ver">v0.14</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -41,10 +41,25 @@
       <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
     </div>
     <section class="hero-brain" id="hero" aria-labelledby="hero-title">
-      <div class="hero-head"><p class="eyebrow">The brain · live</p><h2 id="hero-title">Watch a shock travel the system</h2>
-        <p class="prose">The whole brain: every monthly series the engine can read, its links learned from the data and checked for stability, joined with the judged concepts, the holdings and the book. A shock spreads the same month through x₀ = (I − W)⁻¹e, then carries forward month by month; the panel does the arithmetic in the open. The core map is the original 35-node model, order by order.</p>
-        <div class="seg hero-which" id="hero-which" role="group" aria-label="Which brain"><button type="button" data-w="full" aria-pressed="true">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 35 nodes</button></div></div>
-      <div id="hero-full">
+      <div class="hero-head"><p class="eyebrow">The mind · live</p><h2 id="hero-title">Ask it anything; watch it think</h2>
+        <p class="prose">The mind is the brain and the engine as one graph: every concept an investor needs, every measured market, every sourced fact and paper, every verified quote, every part of the engine and the world economy. Type a question and it recalls what matches, spreads activation through the links, frames the claim, weighs the evidence for and against in log-odds, tests how fragile the verdict is, traces the causal chain to the book and proposes an action it never executes. The whole brain and the core map show a shock travelling the markets themselves.</p>
+        <div class="seg hero-which" id="hero-which" role="group" aria-label="Which view of the brain"><button type="button" data-w="mind" aria-pressed="true">The mind</button><button type="button" data-w="full" aria-pressed="false">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 35 nodes</button></div></div>
+      <div id="hero-mind">
+        <div class="hero-grid">
+          <div class="hero-stage">
+            <canvas id="mind-hero-cv" role="img" aria-label="The mind: every node of the brain and the engine, lit by the current question"></canvas>
+            <div class="hero-ctl"><span class="hint">Hover a star to name it; click it to think about it. Gold is activation spreading from what you asked.</span></div>
+          </div>
+          <aside class="hero-math" aria-labelledby="mh-t">
+            <span class="panel-title" id="mh-t">Think</span>
+            <div class="m-ask"><label class="sr-only" for="mh-q">Question or claim</label><input id="mh-q" type="text" maxlength="300" placeholder="Is the stock market overvalued?" autocomplete="off"><button class="btn" type="button" id="mh-go">Think</button></div>
+            <div class="m-ex" id="mh-ex" role="group" aria-label="Example questions"></div>
+            <div id="mh-out" aria-live="polite"></div>
+            <p class="hint" id="mh-count"></p>
+          </aside>
+        </div>
+      </div>
+      <div id="hero-full" hidden>
         <div class="hero-grid">
           <div class="hero-stage">
             <div class="hero-presets" id="ah-presets" role="group" aria-label="Scenarios"></div>
@@ -2195,6 +2210,11 @@
           <tr><td>Connectedness rows sum to one, what is given is taken; rolling index has no look-ahead</td><td class="r">exact; none</td></tr>
           <tr><td>Communities on a planted two-block network; layout deterministic</td><td class="r">recovered; identical</td></tr>
           <tr><td>Atlas responses, page against Python, four shocks over 12 months</td><td class="r">agree to 1e-9</td></tr>
+          <tr><td>Mind: 40 steps of spreading activation against the closed-form personalized PageRank</td><td class="r">within 2 × 0.75<sup>40</sup></td></tr>
+          <tr><td>Mind on the page against Python: 15 questions, seeds, verdicts, ranges, hinges, chains, decisions</td><td class="r">identical; numbers to 1e-6</td></tr>
+          <tr><td>Card room: every hand category ranked, pocket aces against a random hand, page against Python</td><td class="r">exact; 85% as published</td></tr>
+          <tr><td>Labs on planted data: GARCH, two Markov regimes, a cointegrated pair, a random walk</td><td class="r">parameters recovered</td></tr>
+          <tr><td>Knowledge base: every item re-opened on its source by a second agent</td><td class="r">233 confirmed, 35 corrected, 0 failed</td></tr>
           <tr><td>Data plumbing: a three-month hole is not a move; a weaker currency reads negative</td><td class="r">as stated</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
@@ -2250,6 +2270,210 @@
     </ol>
   </section>
   <footer class="foot"><p>Built by Jamie Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
+</section>
+
+<!-- ======================= v0.14: THE MIND ======================= -->
+<section class="view" id="view-mind" hidden aria-labelledby="md-title">
+  <div class="vhead"><p class="eyebrow">The mind · the brain and the engine as one</p><h1 id="md-title">One graph that knows, measures and reasons</h1>
+    <p class="lede">Every concept an investor needs, every market the engine measures, every sourced fact and paper, every verified quote, every module of the engine and every economy, joined by typed links. Ask a question and the mind shows its work: what it recalled, how activation spread, which claim it weighed, the evidence on each side with its weight and its source, how fragile the verdict is, the causal chain to the book and what it would do.</p></div>
+  <div class="at-tiles" id="md-tiles"></div>
+  <section class="section" aria-labelledby="md-think-title">
+    <div class="section-head"><p class="eyebrow">Think</p><h2 id="md-think-title">Ask the mind</h2><p class="prose">Ctrl or ⌘ and scroll to zoom, drag to pan. Click any star to think about it and read its links.</p></div>
+    <div class="m-ask m-ask-lg"><label class="sr-only" for="md-q">Question or claim</label><input id="md-q" type="text" maxlength="300" placeholder="Does the 200-day moving average work?" autocomplete="off"><button class="btn" type="button" id="md-go">Think</button></div>
+    <div class="m-ex" id="md-ex" role="group" aria-label="Example questions"></div>
+    <p class="hint" id="md-seeds"></p>
+    <div class="hero-grid">
+      <div class="hero-stage"><canvas id="md-cv" role="img" aria-label="The mind, lit by the current question"></canvas>
+        <div class="hero-ctl"><button class="pill" type="button" id="md-zoomin" aria-label="Zoom in">+</button><button class="pill" type="button" id="md-zoomout" aria-label="Zoom out">−</button><button class="pill" type="button" id="md-reset">Reset view</button></div>
+        <div class="m-legend" id="md-legend"></div></div>
+      <aside class="hero-math" aria-labelledby="md-arg-t"><span class="panel-title" id="md-arg-t">The argument</span><div id="md-out"></div><p class="sr-only" id="md-live" aria-live="polite"></p></aside>
+    </div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">What it reached for</span><div id="md-learn"></div></div>
+      <div class="panel"><span class="panel-title">The trace: eight steps, every time</span><div id="md-trace"></div>
+        <p class="hint">Read the method below; the numbers here are for the question you asked.</p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="md-how-title">
+    <div class="section-head"><p class="eyebrow">How it thinks</p><h2 id="md-how-title">The reasoning loop, step by step</h2><p class="prose">The same code runs in Python (buildout/mind.py) and on this page (mind.js); a test holds them equal on every push.</p></div>
+    <ol class="m-steps">
+      <li><b>Read.</b> Your words are lower-cased, phrases mapped ("digital gold" to bitcoin and store of value), stop words dropped, endings trimmed ("rates" to "rate") and synonyms added ("NVDA" to Nvidia). Filler words such as "useful" or "work" are ignored for recall.</li>
+      <li><b>Recall.</b> Every node has a document: its name three times, its other names twice, its definition or text once. BM25, the ranking formula search engines use, scores all {N} documents against your words; a node whose exact name appears in your question gets a bonus. Up to twelve seeds are kept, each within 30% of the best.</li>
+      <li><b>Spread.</b> Spreading activation: a random walker starts at the seeds and, at each of 40 steps, follows a link with probability 0.75 (weighted by the link's type: "is a" counts more than "related") or jumps back to a seed. Where it spends its time is how relevant each node is to what you asked. This is personalized PageRank; two or three links away still lights up if it is well connected.</li>
+      <li><b>Frame.</b> Each claim the mind can weigh is an axis: the 18 investor-voices topics (stated as a bull case and a bear case) and seven "does this method give an edge?" questions. The axis whose evidence lit up most wins, with a boost if the voices library also picks that topic. Your wording decides which side is the claim: "Is AI a bubble?" weighs the bear case.</li>
+      <li><b>Weigh.</b> Each signal on that axis adds sign × strength × reliability × relevance to the log-odds of the bull case. Reliability is how well that kind of evidence has predicted out of sample, or how certain the fact is. Relevance is 0.5 to 1 by how much that signal lit up. Within one family of evidence the second reading counts 1/√2, the third 1/√3, so ten restatements of one fact do not outvote one independent fact. Investor opinion is one more, low-reliability signal. Probability = 1 / (1 + e<sup>−log-odds</sup>).</li>
+      <li><b>Test.</b> Each family of evidence is left out in turn; the spread of the verdict is the range shown. The single signal whose removal moves the verdict most is the hinge, and every signal states the reading that would flip it.</li>
+      <li><b>Trace.</b> From the market nodes the evidence rests on, the strongest directed path to the book over the atlas's own learned and judged links (Dijkstra on −log of each link's size), with its sign.</li>
+      <li><b>Decide.</b> If the evidence leans against the book on that claim, it names the matching hedge in the hedge book and writes the two MCP calls a person would review; otherwise it holds. It never places an order.</li>
+    </ol>
+  </section>
+  <section class="section" aria-labelledby="md-ex-title">
+    <div class="section-head"><p class="eyebrow">Explore</p><h2 id="md-ex-title">Any node and its neighbours</h2><p class="prose">Search the whole graph by name; links are grouped by type.</p></div>
+    <div class="grid2"><div class="panel"><div class="field"><label for="md-node">Find a node</label><input id="md-node" type="search" placeholder="RSI, Kelly, Chile, mind.py, Buffett…" autocomplete="off"></div><div class="m-ex" id="md-found"></div></div>
+      <div class="panel" id="md-explore"><p class="hint">Click a star or a search result.</p></div></div>
+  </section>
+  <section class="section" aria-labelledby="md-cl-title">
+    <div class="section-head"><p class="eyebrow">Library</p><h2 id="md-cl-title">Every concept, defined</h2><p class="prose" id="md-cl-n"></p></div>
+    <div class="seg m-seg" id="md-cl-seg" role="group" aria-label="Filter concepts by galaxy"></div>
+    <div class="field"><label for="md-cl-q">Filter</label><input id="md-cl-q" type="search" placeholder="moving average, backwardation, BATNA…" autocomplete="off"></div>
+    <div class="m-cl" id="md-cl"></div>
+  </section>
+  <section class="section" aria-labelledby="md-ev-title">
+    <div class="section-head"><p class="eyebrow">Evidence</p><h2 id="md-ev-title">Sourced facts and papers, checked twice</h2><p class="prose" id="md-ev-n"></p></div>
+    <p class="prose">Six research agents each found and confirmed their items on the source page; three more agents, who had not written them, opened every page again. Of 268 items, 233 were confirmed as written and 35 corrected (mostly by removing a detail the page did not carry); none failed. Secondary sources are marked.</p>
+    <div class="seg m-seg" id="md-ev-seg" role="group" aria-label="Filter evidence"></div>
+    <div class="field"><label for="md-ev-q">Filter</label><input id="md-ev-q" type="search" placeholder="margin debt, secondaries, Brent…" autocomplete="off"></div>
+    <div class="m-evl" id="md-ev"></div>
+  </section>
+</section>
+
+<!-- ======================= v0.14: THE LABS ======================= -->
+<section class="view" id="view-labs" hidden aria-labelledby="lb-title">
+  <div class="vhead"><p class="eyebrow">The labs · every claim a trader repeats, tested</p><h1 id="lb-title">Moving averages, RSI, P/E, regimes and the calendar, on 156 years</h1>
+    <p class="lede">The labs test what desks say on the longest data the engine can read, with the statistics that stop a lucky backtest passing for an edge: a stationary bootstrap, a max test across every variant tried, a deflated Sharpe ratio, Newey-West errors, out-of-sample R squared and one table of every p-value with Holm and Benjamini-Hochberg corrections.</p>
+    <p class="sentence" id="lb-sum"></p></div>
+  <div class="at-tiles" id="lb-tiles"></div>
+  <section class="section" aria-labelledby="lb-now-title">
+    <div class="section-head"><p class="eyebrow">Now</p><h2 id="lb-now-title">Today's readings</h2><p class="prose">The 200-day average, RSI, MACD and Bollinger bands on the latest data the engine read. Readings are not signals until the tests below say so.</p></div>
+    <div class="lb-read-grid" id="lb-read"></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">Brent against its 200-day average</span><div class="svgbox" id="lb-brent"></div></div>
+      <div class="panel"><span class="panel-title">Brent RSI(14): 70 and 30 are the textbook lines</span><div class="svgbox" id="lb-rsi"></div></div></div>
+  </section>
+  <section class="section" aria-labelledby="lb-tr-title">
+    <div class="section-head"><p class="eyebrow">Trend</p><h2 id="lb-tr-title">Does the 10-month (200-day) rule work?</h2>
+      <p class="prose">Hold the S&amp;P 500 with dividends when its month-end level is above its 10-month average, else hold cash. Shiller's prices are monthly averages, which makes returns look smoother and more trending than they were (Working 1960), so the rule here acts a month late. Judged that way: it cut the worst drawdown sharply, kept most of the return, and its Sharpe gain is not clearly above zero. Tried across 22 lengths, the best one is what luck produces almost every time.</p></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">Log wealth since 1871: holding (blue) against the rule (green)</span><div class="svgbox" id="lb-curve"></div></div>
+      <div class="panel"><span class="panel-title">Sharpe ratio by length (months); 10 in green, the best in amber</span><div class="svgbox" id="lb-lens"></div></div></div>
+  </section>
+  <section class="section" aria-labelledby="lb-os-title">
+    <div class="section-head"><p class="eyebrow">Oscillators</p><h2 id="lb-os-title">RSI, MACD, Bollinger bands and the golden cross</h2><p class="prose">Each signal's average forward return when on, minus when off, with Newey-West t-statistics so overlapping horizons are not counted as independent. Check the multiple-testing table before believing any one row.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="lb-osc"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="lb-va-title">
+    <div class="section-head"><p class="eyebrow">Valuation</p><h2 id="lb-va-title">P/E, CAPE and what they say about the next decade</h2><p class="prose">Valuation explains a real share of ten-year returns and almost nothing about next year. Today's CAPE is the latest secondary reading (multpl, October 20); the regression and its residuals come from Shiller's data since 1881.</p></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">CAPE against the next ten years' real return, with today's point and its 80% range</span><div class="svgbox" id="lb-cape"></div></div>
+      <div class="panel"><span class="panel-title">Each measure, in sample and out</span><div class="tablewrap"><table id="lb-val"></table></div><p class="hint">Out-of-sample R squared compares an expanding regression's forecasts with the historical mean (Campbell and Thompson 2008): above zero beats the mean.</p></div></div>
+  </section>
+  <section class="section" aria-labelledby="lb-rg-title">
+    <div class="section-head"><p class="eyebrow">Regimes and volatility</p><h2 id="lb-rg-title">Calm and turbulent markets; oil's volatility</h2><p class="prose">Hamilton's two-state model, fitted by EM on monthly returns since 1926, and GARCH(1,1) on daily oil and gas.</p></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">Smoothed chance of the turbulent regime</span><div class="svgbox" id="lb-reg"></div></div>
+      <div class="panel"><span class="panel-title">GARCH(1,1)</span><div class="tablewrap"><table id="lb-garch"></table></div><p class="hint">Persistence near 1 means shocks fade slowly; "integrated" means the model finds no long-run level to return to.</p></div></div>
+  </section>
+  <section class="section" aria-labelledby="lb-sp-title">
+    <div class="section-head"><p class="eyebrow">Commodities</p><h2 id="lb-sp-title">Spreads, seasons and randomness</h2></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">Brent minus WTI</span><div class="svgbox" id="lb-bw"></div><div class="tablewrap"><table id="lb-spr"></table></div></div>
+      <div class="panel"><span class="panel-title">Natural gas by calendar month (amber: p &lt; 0.05 before correction)</span><div class="svgbox" id="lb-gas"></div><div class="tablewrap"><table id="lb-cal"></table></div></div></div>
+    <div class="panel"><span class="panel-title">Random walk tests (Lo and MacKinlay variance ratios)</span><div class="tablewrap"><table id="lb-vr"></table></div><p class="hint">For monthly averages the null is Working's 1 + 2(1 − 1/q) × 0.25, not 1.</p></div>
+  </section>
+  <section class="section" aria-labelledby="lb-mt-title">
+    <div class="section-head"><p class="eyebrow">Honesty</p><h2 id="lb-mt-title">Every test in one table</h2><p class="prose">Run enough tests and some pass by luck. Holm controls the chance of any false positive; Benjamini-Hochberg controls the share of false ones among those declared.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="lb-mt"></table></div></div>
+  </section>
+</section>
+
+<!-- ======================= v0.14: THE CARD ROOM ======================= -->
+<section class="view" id="view-cardroom" hidden aria-labelledby="cr-title">
+  <div class="vhead"><p class="eyebrow">The card room · poker, haggling, private funds and storage</p><h1 id="cr-title">The decision math trading borrows</h1>
+    <p class="lede">Trading firms teach with poker because it trains the same habits: think in ranges, price every call against the pot, size bets so variance cannot end the game, and judge decisions by their odds rather than their outcome. Negotiation, private-fund cash flows and the commodity curve have their own exact math. Each calculator runs the engine's functions (buildout/games2.py), the same in Python and here.</p></div>
+  <div class="grid2">
+    <section class="panel" aria-labelledby="cr-eq-t"><h2 class="h3" id="cr-eq-t">Poker: equity and pot odds</h2>
+      <div class="cr-form"><label>Hand <input id="cr-hand" value="As Kd" autocomplete="off"></label><label>Board <input id="cr-board" value="" placeholder="Qs Jh 2c" autocomplete="off"></label>
+        <label>Opponents <input id="cr-opp" type="number" min="1" max="8" value="2"></label><label>Pot <input id="cr-pot" type="number" value="100"></label><label>To call <input id="cr-call" type="number" value="50"></label>
+        <button class="btn" type="button" id="cr-eq-go">Deal 4,000 times</button></div>
+      <p class="sentence" id="cr-eq-out" aria-live="polite"></p>
+      <p class="hint">A seven-card evaluator picks each player's best five; equity counts wins plus shared pots. Call when equity beats call ÷ (pot + call). The same seeded generator runs in Python, so the answer is reproducible.</p></section>
+    <section class="panel" aria-labelledby="cr-k-t"><h2 class="h3" id="cr-k-t">Kelly sizing and the risk of ruin</h2>
+      <div class="cr-form"><label>Win probability <input id="cr-p" type="number" step="0.01" value="0.55"></label><label>Pays (to 1) <input id="cr-b" type="number" step="0.1" value="1"></label><label>Bankroll in bets <input id="cr-bank" type="number" value="50"></label>
+        <button class="btn" type="button" id="cr-k-go">Size it</button></div>
+      <p class="sentence" id="cr-k-out" aria-live="polite"></p>
+      <p class="hint">Kelly (1956): stake p − (1 − p)/b. Twice Kelly gives zero long-run growth; ruin odds use the diffusion approximation e<sup>−2μB/σ²</sup>.</p></section>
+    <section class="panel" aria-labelledby="cr-b-t"><h2 class="h3" id="cr-b-t">Haggling and bargaining</h2>
+      <div class="cr-form"><label>Your patience d₁ <input id="cr-d1" type="number" step="0.01" value="0.95"></label><label>Theirs d₂ <input id="cr-d2" type="number" step="0.01" value="0.9"></label>
+        <label>Your walk-away price <input id="cr-cost" type="number" value="40"></label><label>Their walk-away, low <input id="cr-lo" type="number" value="50"></label><label>high <input id="cr-hi" type="number" value="120"></label>
+        <button class="btn" type="button" id="cr-b-go">Bargain</button></div>
+      <p class="sentence" id="cr-b-out" aria-live="polite"></p>
+      <p class="hint">Rubinstein (1982): the opener's share is (1 − d₂)/(1 − d₁d₂). The ask that maximizes expected surplus against a walk-away spread evenly between low and high is (high + your walk-away)/2. Make the first offer when you know the range (Galinsky and Mussweiler 2001); let them open when you do not.</p></section>
+    <section class="panel" aria-labelledby="cr-c-t"><h2 class="h3" id="cr-c-t">Commodities: the theory of storage</h2>
+      <div class="cr-form"><label>Spot <input id="cr-spot" type="number" value="134"></label><label>Future <input id="cr-fut" type="number" value="107"></label><label>Months to expiry <input id="cr-t" type="number" value="6"></label>
+        <label>Rate % <input id="cr-r" type="number" step="0.1" value="5.1"></label><label>Storage % a year <input id="cr-u" type="number" step="0.1" value="2"></label>
+        <button class="btn" type="button" id="cr-c-go">Read the curve</button></div>
+      <p class="sentence" id="cr-c-out" aria-live="polite"></p>
+      <p class="hint">F = S·e<sup>(r + u − y)T</sup> (Kaldor 1939, Working 1949). The defaults use mid-October's Dated Brent near $134 and futures near $107 (IEA); the expiry gap is illustrative.</p></section>
+  </div>
+  <section class="section" aria-labelledby="cr-y-t">
+    <div class="section-head"><p class="eyebrow">Private markets</p><h2 id="cr-y-t">A fund's J-curve (Takahashi and Alexander)</h2><p class="prose">Calls are a share of what is still uncommitted, distributions a rising share of NAV; the investor's net cash dips before it recovers. IRR, TVPI, DPI and the Kaplan-Schoar PME are in the engine for any cash flows.</p></div>
+    <div class="cr-form"><label>Growth % a year <input id="cr-y-g" type="number" step="0.5" value="10"></label><label>Bow (later = higher) <input id="cr-y-b" type="number" step="0.1" value="2.5"></label><label>Fund life, years <input id="cr-y-life" type="number" value="12"></label></div>
+    <div class="panel"><div class="svgbox" id="cr-yale"></div><p class="sentence" id="cr-y-out"></p></div>
+  </section>
+</section>
+
+<!-- ======================= v0.14: UNDER THE HOOD ======================= -->
+<section class="view" id="view-code" hidden aria-labelledby="cd-title">
+  <div class="vhead"><p class="eyebrow">Appendix · under the hood</p><h1 id="cd-title">The code, and how it thinks, decides and trades</h1>
+    <p class="lede">The engine's own Python, shipped with the page and readable here, with the path from a question to an order that a person approves. Nothing on this page or in the engine places a trade.</p></div>
+  <section class="section" aria-labelledby="cd-flow-t">
+    <div class="section-head"><p class="eyebrow">The path</p><h2 id="cd-flow-t">From data to a decision a person approves</h2></div>
+    <ol class="cd-flow">
+      <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
+      <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
+      <li><b>Know.</b> ontology.py defines 547 concepts and their relations; knowledge.json holds 268 facts and papers, each checked twice; voices.json holds 267 verified quotes.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 1,524 nodes and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide.</li>
+      <li><b>Decide.</b> ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
+      <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
+      <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
+    </ol>
+    <pre class="m-mcp" tabindex="0" aria-label="An example tool sequence">reason({"question": "Is the stock market overvalued?"})        // the mind's verdict, its range, the hinge
+hedge_book({"on": ["put_spread"]})                                 // size the matching hedge on seven scenarios
+create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, limit-checked, status "proposal_only"
+// a person reviews; any order is placed elsewhere by that person</pre>
+  </section>
+  <section class="section" aria-labelledby="cd-files-t">
+    <div class="section-head"><p class="eyebrow">The files</p><h2 id="cd-files-t">Read any module</h2><p class="prose" id="cd-sum"></p></div>
+    <div class="cd-grid"><div class="cd-list" id="cd-list" role="list"></div>
+      <div class="cd-view"><div class="cd-head"><b id="cd-path"></b><span class="hint" id="cd-doc"></span><div class="field"><label for="cd-find">Find in file</label><input id="cd-find" type="search" placeholder="def think" autocomplete="off"></div></div><pre class="cd-src" id="cd-src" tabindex="0"></pre></div></div>
+  </section>
+</section>
+
+<section class="view" id="view-agents" hidden aria-labelledby="ag-title">
+  <div class="vhead"><p class="eyebrow">Appendix · how it was built</p><h1 id="ag-title">The agents and subagents behind the engine</h1>
+    <p class="lede">The engine was built in conversation with Claude, working as a lead agent that writes and tests the code, and that hands narrow research and checking jobs to subagents running in parallel. This is how that worked, and where its limits are.</p></div>
+  <section class="section" aria-labelledby="ag-how-t">
+    <div class="section-head"><p class="eyebrow">The pattern</p><h2 id="ag-how-t">Lead, researchers, checkers</h2></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">The lead agent</span><ul class="m-learn-l">
+        <li>Holds the plan, the code, the tests and the house rules (no em dashes, no fabricated numbers, real positions never on the page, nothing executes).</li>
+        <li>Writes every module, the page and the parity tests, and runs them; it integrates what subagents return only after validation.</li>
+        <li>Treats a subagent's report as data, not instructions: it can be wrong, and it carries no authority.</li></ul></div>
+      <div class="panel"><span class="panel-title">A subagent</span><ul class="m-learn-l">
+        <li>Starts with a fresh context and only the brief it is given: the goal, the format, the limits, what to avoid.</li>
+        <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
+        <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v14-t">
+    <div class="section-head"><p class="eyebrow">v0.14</p><h2 id="ag-v14-t">This release, in numbers</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>6</b><span>Research agents</span><small>private markets, asset management, indicators and valuation, commodities, games and statistics, trading structure</small></div>
+      <div class="at-kpi"><b>125 of 168</b><span>Web searches used</span><small>a shared budget of 200 per turn; each researcher was capped at 28</small></div>
+      <div class="at-kpi"><b>268</b><span>Items found</span><small>each confirmed on its page by the agent that wrote it</small></div>
+      <div class="at-kpi"><b>3</b><span>Independent checkers</span><small>each opened every page again, without the researchers' notes</small></div>
+      <div class="at-kpi"><b>233 / 35 / 0</b><span>Confirmed / corrected / failed</span><small>corrections mostly removed a detail the page did not carry</small></div></div>
+    <ol class="m-steps">
+      <li><b>Brief.</b> One shared brief set the rules: primary sources first, every number confirmed on the linked page, plain English, a fixed JSON format, at most 28 searches, and a short report naming gaps and doubts.</li>
+      <li><b>Fan out.</b> Six researchers ran at the same time, each on one cluster, while the lead wrote the labs, the card-room math and the concept ontology.</li>
+      <li><b>Check.</b> Three checkers, each given two of the six files, re-opened every source. Where a page was blocked (many journal sites are), they confirmed paper details through Crossref, SSRN, NBER or RePEc and said so.</li>
+      <li><b>Merge.</b> scripts/build_knowledge.py applies the checkers' corrections, drops anything that failed or could not be reached (nothing did this time), records who confirmed what, and refuses text that breaks the house style.</li>
+      <li><b>Use.</b> mind.py reads each signal's numbers from the checked items by id, so a correction to a source flows into the verdicts on the next build.</li>
+    </ol>
+    <p class="prose">Earlier releases used the same pattern: in v0.12 independent agents re-checked all 267 investor quotes against their sources (11 corrected, none failed). Things the agents could not confirm stayed out, for example a retail-trading share from a primary source and a mislabelled World Bank inflation file, which the lead found matched the GDP deflator and left out.</p>
+  </section>
+  <section class="section" aria-labelledby="ag-run-t">
+    <div class="section-head"><p class="eyebrow">At run time</p><h2 id="ag-run-t">The agents the page and the engine can call</h2></div>
+    <ul class="m-learn-l">
+      <li><b>Ask Claude on the voices panel.</b> When you allow it, the page sends your question and the library's own quotes to Claude, which may reorder them and summarize a side in its own words, labelled as such. Any quote id it returns that is not in the library is dropped.</li>
+      <li><b>The MCP server.</b> Any assistant that speaks the Model Context Protocol can call the engine's tools: reason (the mind), labs_lookup, game_math, investor_voices, atlas_trace, decision_loop, hedge_book, evaluate_trade, create_order_proposal and the rest. It is research and proposals only.</li>
+      <li><b>Where judgment stays human.</b> Every proposal needs a rationale and a kill criterion, is hashed so it cannot be altered after review, and is marked proposal_only. The person decides.</li>
+    </ul>
+  </section>
 </section>
 
 <!-- ======================= APPENDIX ======================= -->

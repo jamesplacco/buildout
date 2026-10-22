@@ -13,6 +13,9 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
   run_hedge_scenario      the TLT hedge policy (hedge.tlt.v2) on any correlation path and inflation reading
   evaluate_trade          a candidate portfolio against the reasoner's scenarios: growth, worst case, loss limit, regret
   create_order_proposal   a structured, hashed proposal checked against the limits; never executed
+  reason                  the mind: recall, spreading activation, the weighed claim, chains to the book, a proposed action
+  labs_lookup             the labs' tested trading claims
+  game_math               poker, bargaining, private-fund and storage math
   review_decision         process score for one decision, or the full scorecard for a journal
   compare_explanations    competing explanations of one observation, and the evidence that best separates them
   trace_exposure          the brain: what explains the readings, what follows for each holding, what to look at next,
@@ -660,6 +663,107 @@ def investor_voices(ctx: Context, args: dict) -> dict:
     return voices.answer(q.strip()[:300], stance=st, topic=tp, limit=lim)
 
 
+_MIND = None
+
+
+def _mind(ctx: Context):
+    """The mind from the daily run's mind.json when present and well formed, else the shipped snapshot."""
+    global _MIND
+    from . import mind, voices
+    if _MIND is None:
+        g = ctx.load("mind")
+        if not (g and isinstance(g.get("nodes"), list) and len(g["nodes"]) > 100 and isinstance(g.get("signals"), list)):
+            g = json.loads((Path(__file__).resolve().parent / "assets" / "mind.json").read_text())
+        _MIND = mind.Mind(g, voices.Library(voices.load()))
+    return _MIND
+
+
+def reason(ctx: Context, args: dict) -> dict:
+    """Ask the mind: recall, spreading activation, the claim, the evidence for and against, the range, the causal chain
+    to the book and a proposed action that is never executed."""
+    q = args.get("question")
+    if not isinstance(q, str) or not q.strip():
+        raise ToolError("question must be a non-empty string")
+    r = _mind(ctx).think(q.strip()[:300])
+    if r.get("found"):
+        for k in ("trace",):
+            r.pop(k, None)
+        r["note"] = LIMIT_NOTE
+    return r
+
+
+def labs_lookup(ctx: Context, args: dict) -> dict:
+    """The labs' tested claims from the shipped snapshot (or the daily run's labs.json): trend rules, oscillators,
+    valuation, regimes, volatility, spreads, calendar effects and the multiple-testing table."""
+    L = ctx.load("labs")
+    if not (L and isinstance(L.get("trend"), dict)):
+        p = Path(__file__).resolve().parents[1] / "site" / "src" / "snap14.js"
+        txt = p.read_text() if p.exists() else ""
+        i = txt.find("const SNAP14 = ")
+        if i < 0:
+            raise ToolError("no labs results: run python -m buildout labs --out site/data")
+        body = txt[i + len("const SNAP14 = "):txt.index(";\n", i)]
+        L = json.loads(body.replace("<\\/", "</"))["labs"]
+    part = args.get("part")
+    parts = ["trend", "oscillators", "readings", "valuation", "regimes", "volatility", "spreads", "randomness", "calendar", "multiple_testing", "findings"]
+    if part is None:
+        return {"findings": L.get("findings"), "parts": parts, "note": "Pass part to read one block in full."}
+    if part not in parts:
+        raise ToolError(f"part must be one of: {', '.join(parts)}")
+    out = L.get(part)
+    if part == "trend" and isinstance(out, dict):
+        out = {k: v for k, v in out.items() if k != "curve"}
+    return {"part": part, "result": out}
+
+
+def game_math(ctx: Context, args: dict) -> dict:
+    """Exact decision math: poker equity and pot odds, Kelly and risk of ruin, Rubinstein and Nash bargaining, the best
+    haggling offer, IRR, TVPI, PME, the Takahashi-Alexander J-curve, and the theory of storage."""
+    from . import games2 as G
+    kind = args.get("kind")
+    a = args.get("args") or {}
+    if not isinstance(a, dict):
+        raise ToolError("args must be an object")
+    try:
+        if kind == "equity":
+            hero = [G.card(c) for c in a["hand"]]
+            board = [G.card(c) for c in a.get("board", [])]
+            if len(hero) != 2 or len(set(hero + board)) != len(hero + board) or len(board) not in (0, 3, 4, 5):
+                raise ToolError("hand needs two cards and board 0, 3, 4 or 5, all different (like 'As', 'Kd')")
+            r = G.equity(hero, board, int(min(8, max(1, a.get("opponents", 1)))), int(min(20000, max(200, a.get("trials", 4000)))), int(a.get("seed", 7)))
+            if "pot" in a and "call" in a:
+                r["needed"] = G.pot_odds(float(a["pot"]), float(a["call"]))
+                r["call_ev"] = G.call_ev(r["equity"], float(a["pot"]), float(a["call"]))
+            return r
+        if kind == "kelly":
+            p, b = float(a["p"]), float(a["b"])
+            return {"fraction": G.kelly(p, b), "half": G.kelly(p, b) / 2}
+        if kind == "ruin":
+            return {"ruin": G.risk_of_ruin(float(a["mu"]), float(a["sigma"]), float(a["bankroll"]))}
+        if kind == "rubinstein":
+            return G.rubinstein(float(a["d1"]), float(a["d2"]))
+        if kind == "nash":
+            return G.nash_split(float(a["pie"]), float(a["d1"]), float(a["d2"]), float(a.get("power", 0.5)))
+        if kind == "offer":
+            r = G.best_offer(float(a["cost"]), float(a["lo"]), float(a["hi"]))
+            return r
+        if kind == "irr":
+            return {"irr": G.irr([float(x) for x in a["flows"]], a.get("times"))}
+        if kind == "multiples":
+            return G.multiples([float(x) for x in a["calls"]], [float(x) for x in a["dists"]], float(a["nav"]))
+        if kind == "pme":
+            return {"pme": G.ks_pme([float(x) for x in a["calls"]], [float(x) for x in a["dists"]], float(a["nav"]), [float(x) for x in a["index"]])}
+        if kind == "jcurve":
+            return G.yale_model(growth=float(a.get("growth", 0.1)), bow=float(a.get("bow", 2.5)), life=int(a.get("life", 12)))
+        if kind == "carry":
+            S, F, r, u, T = float(a["spot"]), float(a["future"]), float(a["rate"]), float(a.get("storage", 0)), float(a["years"])
+            return {"convenience_yield": G.implied_convenience(S, F, r, u, T), "fair_at_zero_convenience": G.carry_price(S, r, u, 0.0, T)}
+    except (KeyError, TypeError, ValueError) as e:
+        raise ToolError(f"bad args for {kind}: {e}") from e
+    raise ToolError("kind must be one of: equity, kelly, ruin, rubinstein, nash, offer, irr, multiples, pme, jcurve, carry")
+
+
+
 def _atlas(ctx: Context) -> dict:
     a = ctx.load("atlas")
     if not (a and isinstance(a.get("nodes"), list) and isinstance(a.get("links"), list) and isinstance(a.get("judged"), list)):
@@ -764,6 +868,22 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                    "at chosen sizes: the book in every scenario, growth, worst case, cost, and the advisor's sets.",
                    _obj({"on": {"type": "array", "items": {"type": "string"}}, "sizes": {"type": "object", "additionalProperties": NUM},
                          "equity": {**NUM, "description": "equity exposure, x NAV"}, "signals": SIGNALS}), {"readOnlyHint": True, "openWorldHint": False}),
+    "reason": (reason, "Ask the mind (one graph of about 1,500 nodes joining the brain, the engine, 268 checked facts and papers, 267 verified quotes "
+               "and 48 economies) a question or claim. Returns what it recalled, the claim it weighed, the probability with a leave-one-family-out "
+               "range, the evidence for and against with weights and sources, the hinge, the causal chains to the book and a proposed action. "
+               "Research only; nothing is executed.", _obj({"question": {"type": "string", "description": "e.g. 'Does the 200-day moving average work?'"}}, ["question"]),
+               {"readOnlyHint": True, "openWorldHint": False}),
+    "labs_lookup": (labs_lookup, "The labs' tested trading claims on the longest data the engine reads: the 10-month trend rule with a bootstrap, max test "
+                    "and deflated Sharpe; RSI, MACD, Bollinger and golden-cross tests; CAPE and P/E against future returns out of sample; Markov regimes; "
+                    "GARCH; Brent-WTI cointegration; variance ratios; Sell in May; every p-value with Holm and BH corrections.",
+                    _obj({"part": {"type": "string", "description": "trend, oscillators, readings, valuation, regimes, volatility, spreads, randomness, calendar, multiple_testing or findings"}}),
+                    {"readOnlyHint": True, "openWorldHint": False}),
+    "game_math": (game_math, "Exact decision math from the card room: poker equity (seeded Monte Carlo over a seven-card evaluator) and pot odds, Kelly "
+                  "sizing, risk of ruin, Rubinstein and Nash bargaining, the expected-surplus haggling offer, IRR, TVPI/DPI/RVPI, Kaplan-Schoar PME, the "
+                  "Takahashi-Alexander J-curve, and the convenience yield a commodity curve implies.",
+                  _obj({"kind": {"type": "string", "enum": ["equity", "kelly", "ruin", "rubinstein", "nash", "offer", "irr", "multiples", "pme", "jcurve", "carry"]},
+                        "args": {"type": "object", "description": "e.g. {'hand': ['As','Kd'], 'board': [], 'opponents': 2} or {'p': 0.55, 'b': 1}"}}, ["kind"]),
+                  {"readOnlyHint": True, "openWorldHint": False}),
     "investor_voices": (investor_voices, "What legendary and current investors actually said about a question or claim, arranged from extreme bear (-2) "
                         "to extreme bull (+2): verbatim quotes with speaker, date and source link from a verified library. Never generates a quote.",
                         _obj({"query": {"type": "string", "description": "a question or statement, e.g. 'Is bitcoin digital gold?'"},

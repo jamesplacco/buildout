@@ -37,7 +37,7 @@ from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
-         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas"]
+         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "labs", "cardroom", "code", "agents"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -88,7 +88,8 @@ async def check_page(page, label: str, views=VIEWS) -> None:
         await settle(page, "view-" + v)
         res = await page.evaluate("""(bad) => {
           const de = document.documentElement, view = document.querySelector('.view:not([hidden])');
-          const txt = view ? view.innerText : '';
+          const code = view && view.querySelector('.cd-src');            // the engine's own source may say null or NaN
+          const txt = view ? (code ? view.innerText.replace(code.innerText, '') : view.innerText) : '';
           const hits = bad.filter((b) => txt.includes(b));
           if (/\bnull\b/.test(txt)) hits.push("null");
           const seen = {}, dup = [];
@@ -161,6 +162,11 @@ async def extreme_inputs(page, label: str) -> None:
                    ("#ex-q", 100), ("#ex-sig", 6), ("#ex-T", 1), ("#ex-l", 0), ("#ex-l", 20), ("#ex-Y", 1.5), ("#ex-q", 0.5), ("#ex-T", 10),
                    ("#fq-qb", 0), ("#fq-qa", 0), ("#fq-pf", 0), ("#fq-pf", 100), ("#fq-miss", 3), ("#fq-later", 100.05), ("#fq-cf", 0.5)],
         "atlas": [("#atv-node", "book"), ("#atv-node", "copper"), ("#atv-node", "hormuz")],
+        "cardroom": [("#cr-hand", "Zz Qq"), ("#cr-board", "2c 2c 2c"), ("#cr-opp", 99), ("#cr-pot", -5), ("#cr-call", 0), ("#cr-p", 2), ("#cr-b", -1), ("#cr-bank", 1e9),
+                     ("#cr-d1", 1), ("#cr-d2", 1), ("#cr-cost", 500), ("#cr-lo", 50), ("#cr-hi", 10), ("#cr-spot", 0), ("#cr-fut", -1), ("#cr-t", 0),
+                     ("#cr-y-g", -90), ("#cr-y-b", 0), ("#cr-y-life", 0), ("#cr-y-g", 300), ("#cr-y-life", 1)],
+        "mind": [("#md-node", "<img src=x onerror=window.__pwned=11>"), ("#md-node", "kelly"), ("#md-cl-q", "batna"), ("#md-cl-q", ""), ("#md-ev-q", "margin debt"), ("#md-ev-q", "zzzz")],
+        "code": [("#cd-find", "def think"), ("#cd-find", "<script>"), ("#cd-find", "")],
         "ooda": [("#hb-e", 0.2), ("#hb-sz-tlt", 1), ("#hb-sz-put_spread", 0.03), ("#hb-sz-collar", 0), ("#hb-e", 1.5), ("#hb-sz-degross", 0.8), ("#hb-sz-vix_calls", 0.02)],
         "solve": [("#rz-dro-rho", 0), ("#rz-dro-rho", 7), ("#rz-loss", 5), ("#rz-prem", 0), ("#rz-eq", 1.5), ("#rz-h", 1), ("#rz-loss", 35), ("#rz-prem", 2), ("#rz-eq", 0), ("#rz-regime", "low_inflation"),
                   ("#calc-in", "1/0"), ("#calc-in", "foo("), ("#calc-in", "2^1024"), ("#calc-in", "bsput(100, 95, 0.25, ($vix + 3)%)")],
@@ -176,12 +182,15 @@ async def extreme_inputs(page, label: str) -> None:
         for sel, val in steps:
             await setv(sel, val)
         await page.wait_for_timeout(500)
+        if view == "cardroom":
+            for b in ["#cr-eq-go", "#cr-k-go", "#cr-b-go", "#cr-c-go"]:
+                await page.click(b)
         for btn in ["#bs-type button[data-v=call]", "#po-strat button[data-k=barbell]", "#po-strat button[data-k=collar]", "#fu-eq button[data-v=NQ]", "#fu-rt button[data-v=ZN]"]:
             if view not in ("options", "hedges") or view == "options" and "fu-" in btn or view == "hedges" and ("bs-" in btn or "po-" in btn):
                 continue
             await page.click(btn)
         await page.wait_for_timeout(300)
-        txt = await page.evaluate("document.querySelector('.view:not([hidden])').innerText")
+        txt = await page.evaluate("(() => { const v = document.querySelector('.view:not([hidden])'), c = v.querySelector('.cd-src'); return c ? v.innerText.replace(c.innerText, '') : v.innerText; })()")
         bad = [b for b in BAD_TEXT if b in txt] + (["null"] if __import__("re").search(r"\bnull\b", txt) else [])
         if bad:
             fail(f"{label} extreme inputs on #{view}: shows {bad}")
@@ -229,7 +238,7 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
-                        ("hero", "desk"), ("voices", "desk"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
+                        ("hero", "desk"), ("voices", "desk"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("mind", "mind"), ("md-how-title", "mind"), ("lb-mt-title", "labs"), ("cr-y-t", "cardroom"), ("cd-files-t", "code"), ("ag-v14-t", "agents"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
                         ("oo-title", "ooda"), ("oo-dec-title", "ooda"), ("ps-title", "positions"), ("en-title", "engines"), ("ooda", "ooda"),
                         ("rzd-title", "solve"), ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
@@ -453,6 +462,7 @@ async def main() -> int:
         await scenario(browser, "good data, the brain thinks and the field desk", site_with(good), extra=think_and_field)
         await scenario(browser, "ask the brain (mocked Claude calling every tool)", site_with(good), extra=ask_flow, init=ASK_MOCK)
         await scenario(browser, "good data, the landing brain and voices", site_with(good), extra=voices_and_hero)
+        await scenario(browser, "good data, the mind, the labs and the code", site_with(good), extra=mind_flow)
         await scenario(browser, "good data, live research", site_with(good), extra=live_research)
         newer = copy.deepcopy(good)
         newer["capex.json"]["ttm"]["ORCL"] = {"quarter_end": "2026-11-30", "ocf": 90.0, "capex": 70.0, "cash": 50.0, "capex_to_ocf": 70 / 90}
@@ -631,6 +641,8 @@ async def voices_and_hero(page, label: str) -> None:
     key, survives hostile input, and every quote shown links to an https source."""
     await page.evaluate("location.hash = 'desk'")
     await page.wait_for_timeout(600)
+    await page.click("#hero-which button[data-w=full]")
+    await page.wait_for_timeout(400)
     st = await page.evaluate("({ cv: !!document.getElementById('at-hero-cv') && document.getElementById('at-hero-cv').height > 100, scn: document.getElementById('ah-scn').textContent })")
     if not st["cv"] or not st["scn"]:
         fail(f"{label}: the landing brain did not draw {st}")
@@ -709,6 +721,72 @@ async def voices_and_hero(page, label: str) -> None:
     hrefs = await page.evaluate("[...document.querySelectorAll('#voices a[href]')].map((a) => a.getAttribute('href'))")
     if any(not h.startswith("https://") for h in hrefs):
         fail(f"{label}: a voices link is not https: {hrefs[:3]}")
+
+
+async def mind_flow(page, label: str) -> None:
+    """v0.14: the landing mind draws and thinks, survives hostile and unknown questions; the Mind desk weighs a claim,
+    searches and explores nodes, filters the libraries; the labs fill every table; the code appendix opens files."""
+    await page.evaluate("location.hash = 'desk'")
+    await page.wait_for_timeout(800)
+    await page.click("#hero-which button[data-w=mind]")
+    await page.wait_for_timeout(600)
+    st = await page.evaluate("({ cv: document.getElementById('mind-hero-cv').height > 100, out: document.getElementById('mh-out').innerText })")
+    if not st["cv"] or "%" not in st["out"]:
+        fail(f"{label}: the landing mind did not draw or think {st}")
+    async def think(sel_q, sel_go, q):
+        await page.fill(sel_q, q)
+        await page.click(sel_go)
+        await page.wait_for_timeout(250)
+    await think("#mh-q", "#mh-go", '<img src=x onerror="window.__pwned=12"> zzqx')
+    r = await page.evaluate("({ pwned: window.__pwned || 0, imgs: document.querySelectorAll('#hero-mind img').length, t: document.getElementById('mh-out').innerText })")
+    if r["pwned"] or r["imgs"]:
+        fail(f"{label}: hostile question injected markup {r}")
+    await think("#mh-q", "#mh-go", "Does the 200-day moving average work?")
+    t = await page.evaluate("document.getElementById('mh-out').innerText")
+    if "Trend rules" not in t or any(x in t for x in BAD_TEXT):
+        fail(f"{label}: the landing mind should weigh the trend rule, saw {t[:200]!r}")
+    await page.evaluate("location.hash = 'mind'")
+    await page.wait_for_timeout(1200)
+    for q in ["Is AI a bubble?", "Will oil keep rising?", "Do active managers beat the index?", "x" * 400, "Should I make the first offer when haggling?"]:
+        await think("#md-q", "#md-go", q)
+        t = await page.evaluate("document.getElementById('md-out').innerText + document.getElementById('md-learn').innerText + document.getElementById('md-trace').innerText")
+        if any(x in t for x in BAD_TEXT) or re.search(r"\bnull\b", t):
+            fail(f"{label}: the Mind desk shows bad text for {q[:40]!r}")
+    if "Make the first offer" not in await page.evaluate("document.getElementById('md-out').innerText"):
+        fail(f"{label}: the haggling question should weigh the first-offer claim")
+    hrefs = await page.evaluate("[...document.querySelectorAll('#view-mind a[href]')].map((a) => a.getAttribute('href'))")
+    if any(not (h.startswith("https://") or h.startswith("#")) for h in hrefs):
+        fail(f"{label}: a mind link is not https: {[h for h in hrefs if not h.startswith('https://')][:3]}")
+    await setv(page, "#md-node", "Kelly")
+    await page.wait_for_timeout(150)
+    n = await page.evaluate("document.querySelectorAll('#md-found button').length")
+    if not n:
+        fail(f"{label}: node search found nothing for Kelly")
+    await page.click("#md-found button")
+    await page.wait_for_timeout(150)
+    if "Kelly" not in await page.evaluate("document.getElementById('md-explore').innerText"):
+        fail(f"{label}: exploring a node did not show it")
+    await page.click("#md-explore .m-link")
+    for b in (await page.query_selector_all("#md-cl-seg button"))[:4]:
+        await b.click()
+    for b in (await page.query_selector_all("#md-ev-seg button"))[:3]:
+        await b.click()
+    await page.evaluate("location.hash = 'labs'")
+    await page.wait_for_timeout(800)
+    rows = await page.evaluate("['#lb-osc', '#lb-mt', '#lb-garch', '#lb-vr', '#lb-cal', '#lb-spr', '#lb-val'].map((s) => document.querySelectorAll(s + ' tbody tr').length)")
+    if min(rows) < 1:
+        fail(f"{label}: a labs table is empty {rows}")
+    await page.evaluate("location.hash = 'code'")
+    await page.wait_for_timeout(500)
+    items = await page.query_selector_all("#cd-list .cd-item")
+    if len(items) < 30:
+        fail(f"{label}: the code appendix lists {len(items)} files")
+    await items[3].click()
+    await setv(page, "#cd-find", "def ")
+    if not await page.evaluate("document.querySelectorAll('#cd-src .cd-ln.hit').length"):
+        fail(f"{label}: find in file highlighted nothing")
+    if await page.evaluate("window.__pwned || 0"):
+        fail(f"{label}: something injected markup")
 
 
 async def no_injection(page, label: str) -> None:

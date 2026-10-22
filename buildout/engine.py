@@ -88,6 +88,11 @@ def _reason(out: Path) -> None:
     _write(out, "reason.json", reasoner.build(out))
 
 
+def _mind(out: Path) -> None:
+    from . import mind
+    _write(out, "mind.json", mind.build_from_dir(out))
+
+
 def _voices(out: Path) -> None:
     from . import voices
     q = voices.load()
@@ -111,6 +116,8 @@ REGISTRY: list[Engine] = [
     Engine("capex", "Fundamentals", [], ["capex.json"], "fundamentals.py", False, "SEC XBRL: TTM cash flows, capex, debt, depreciation paths"),
     Engine("atlas", "The atlas", [], ["atlas.json"], "atlas.py", False,
            "Every monthly series: graphical lasso with stability selection, LiNGAM orientation, structural VAR, connectedness"),
+    Engine("labs", "The labs", [], ["labs.json"], "labs.py", False,
+           "Trading claims on 156 years: trend rules with a bootstrap, max test and deflated Sharpe; oscillators; valuation out of sample; Markov regimes; GARCH; cointegration; multiple testing"),
     Engine("feeds", "Noteworthy", [], ["feeds.json"], "feeds.py", False, "Feeds, heat, niche skew, lead time"),
     Engine("reason", "Solver and games", ["macro.json", "research.json", "brain.json", "capex.json", "report.json"], ["reason.json"], "reasoner.py", True,
            "Tempered Bayes, the constrained choice, the game against Nature, value of information, games", _reason),
@@ -121,6 +128,8 @@ REGISTRY: list[Engine] = [
     Engine("hedges", "Hedge book", [], ["hedges.json"], "hedgebook.py", True, "Prebuilt hedges, priced and run through the scenarios; the advisor", _hedges),
     Engine("ooda", "Decision loop", ["macro.json", "research.json", "brain.json", "capex.json", "report.json"], ["ooda.json"], "ooda.py", True,
            "Observe, orient, decide, act: one decision record per position and hedge", _ooda),
+    Engine("mind", "The mind", ["atlas.json", "labs.json", "research.json"], ["mind.json"], "mind.py", True,
+           "One graph of the brain and the engine: concepts, markets, checked evidence, voices, engine modules, economies and signals", _mind),
     Engine("voices", "Investor voices", [], ["voices.json"], "voices.py", True, "Verified quotes, extreme bear to extreme bull; integrity checked on every run", _voices),
     Engine("status", "Run status", ["*"], ["status.json"], "status.py", True, "Freshness and sanity checks on every output", _status),
 ]
