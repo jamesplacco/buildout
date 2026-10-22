@@ -2,7 +2,7 @@
      boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {   // v0.18: each group reads from the answer to the method, start-here desks first
-    today: { name: "Today", views: ["desk", "ooda", "mind", "noteworthy", "atlas"] },
+    today: { name: "Today", views: ["desk", "decision", "ooda", "mind", "noteworthy", "atlas"] },
     decide: { name: "Decide", views: ["decide", "solve", "positions", "swans", "journal", "brain", "games", "cardroom"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "making", "prop"] },
     research: { name: "Research", views: ["findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "legends", "lenses", "lab"] },
@@ -30,6 +30,7 @@
     agents: () => {},
     desk: () => { guard("Which brain", wireHeroWhich, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
     bonds: () => guard("Bonds, simply", renderBonds, $("#bd-tiles")),
+    decision: () => guard("Decision engine", renderDecision, $("#dx-card")),
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },

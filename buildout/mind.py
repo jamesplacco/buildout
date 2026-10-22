@@ -672,6 +672,8 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("decision", "Decision engine", "One pipeline from 156 years of data to today's sized exposure and hedge: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, model averaging, a risk budget and an evidence gate, walked forward from 1940.",
+     ["c:hidden-markov-model", "c:bayesian-model-averaging", "c:neural-network", "c:crra-utility", "c:expected-shortfall", "c:reinforcement-learning", "c:kalman", "c:stacking"]),
     ("bonds", "Bonds, simply", "Set the 10-year and 30-year yields and see every Treasury ETF repriced bond by bond: price, 12-month return, break-even and what it means for stocks.", ["c:duration", "c:convexity", "c:tlt", "c:bond-etf", "c:yield-curve"]),
     ("rates", "Rates and curves", "The Treasury curve through 2026, spreads, the forward curve and liquidity.", ["c:yield-curve", "c:term-premium", "c:bear-steepening"]),
     ("ml", "The machine-learning lab", "Purged walk-forward forecasts, the combination forecast, CPCV and the overfitting probability, and why complex models backtest better than they forecast.", ["c:machine-learning", "c:overfitting", "c:data-snooping"]),
@@ -761,6 +763,59 @@ def v17_nodes(node, edge, nodes, idx, chron, bonds, cx) -> None:
     if cx:
         for i in range(len(cx["conclusions"])):
             edge("d:ml", f"cx:{i}", "routes", 0.6)
+
+
+DX_CONCEPTS = ("c:hidden-markov-model", "c:markov-switching", "c:regime", "c:bayesian-model-averaging", "c:neural-network", "c:deep-learning", "c:dropout", "c:ensemble",
+               "c:stacking", "c:crra-utility", "c:risk-aversion", "c:expected-shortfall", "c:mean-cvar-optimization", "c:kalman", "c:thompson-sampling", "c:contextual-bandit",
+               "c:reinforcement-learning", "c:offline-reinforcement-learning", "c:conformal", "c:robust-decision", "c:decision-quality")
+
+
+def v19_nodes(node, edge, dec) -> None:
+    """v0.19: the decision engine's stages, today's decision and its findings."""
+    if not dec:
+        return
+    n = dec["now"]
+    node("x:decision", "model", "Today's decision (model book)", "core",
+         f"Model-book exposure {n['exposure']:.2f}x stocks; the engine's own optimum {n['engine_exposure']:.2f}x, scaled by an evidence gate of {n['gate']['value']:.0%} "
+         f"(its departures from 1x improved utility with t {n['gate']['t']:.1f} since {dec['start'][:4]}). Hedge: {n['hedge']['name'].lower()} in a {n['hedge']['context']}. "
+         f"Stressed regime next month {n['regime']['next'][n['regime']['worst']]:.0%}; changepoint odds {n['changepoint']['recent']:.0%}. Research only; never an order.",
+         ["decision engine", "today's decision", "what should the book do", "exposure", "model book exposure"], exposure=n["exposure"])
+    edge("x:decision", "e:decide", "implemented_by", 0.9)
+    edge("d:decision", "x:decision", "routes", 0.8)
+    for i, st in enumerate(dec["pipeline"]):
+        node(f"dx:stage:{i}", "method", f"Decision engine, {st['stage'].lower()}", "core", st["what"], [st["stage"].lower() + " stage"])
+        edge(f"dx:stage:{i}", "x:decision", "part_of", 0.7)
+        if i:
+            edge(f"dx:stage:{i - 1}", f"dx:stage:{i}", "routes", 0.6)
+    for k, mod in (("dx:stage:2", "e:nn"), ("dx:stage:3", "e:infer"), ("dx:stage:4", "e:decide"), ("dx:stage:1", "e:ml")):
+        edge(k, mod, "implemented_by", 0.7)
+    for i, f in enumerate(dec["findings"]):
+        node(f"dx:{i}", "finding", f[:80], "core", f, [])
+        edge(f"dx:{i}", "x:decision", "related", 0.7)
+    for cid in DX_CONCEPTS:
+        edge("x:decision", cid, "related", 0.5)
+
+
+def v19_signals(K: dict, dec: dict | None) -> list[dict]:
+    """v0.19: the decision engine's regime read, its forecasts and its own record."""
+    if not dec:
+        return []
+    n = dec["now"]
+    S = []
+    w = n["regime"]["next"][n["regime"]["worst"]]
+    S.append({"id": "s:dx-regime", "axis": "market_valuation", "sign": 1 if w < 0.3 else -1, "s": round(0.3 * abs(0.3 - w) / 0.3, 6), "rel": 0.4, "group": "decision",
+              "text": f"The hidden Markov model ({n['regime']['K']} states, filtered) puts next month's odds of the stressed regime at {w:.0%}; the chance a new regime began in the last six months is {n['changepoint']['recent']:.0%}.",
+              "refs": ["e:infer", "x:decision"], "flip": "The stressed regime's odds rising past " + (f"{n['flip']['cut_if_stress_prob_above']:.0%}." if n["flip"].get("cut_if_stress_prob_above") is not None else "half."),
+              "targets": ["c:hidden-markov-model"]})
+    fs = dec["forecast_scores"]["nn"]
+    S.append({"id": "s:dx-nn", "axis": "edge:ml", "sign": 1 if fs["skill"] > 0 else -1, "s": 0.4, "rel": 0.7, "group": "decision",
+              "text": f"A deep ensemble of small neural networks, walked forward since {dec['start'][:4]}, forecasts 12-month returns with skill {fs['skill']:+.1%} against the historical mean (Diebold-Mariano t {fs['dm']['t']:.1f}); the stack gives it {n['forecasts']['weights']['nn']:.0%} of the weight.",
+              "refs": ["e:nn", "e:decide"], "flip": "The ensemble beating the mean out of sample.", "targets": ["c:neural-network"]})
+    g = n["gate"]
+    S.append({"id": "s:dx-gate", "axis": "edge:ml", "sign": 1 if g["value"] > 0 else -1, "s": 0.5, "rel": 0.8, "group": "decision",
+              "text": f"The decision engine's departures from holding improved a risk-averse investor's utility with t {g['t']:.1f} since {dec['start'][:4]}, under the {g['t0']:.1f} expected from the best of {g['n_tried']} useless strategies, so it moves the book {g['value']:.0%} of the way toward its {n['engine_exposure']:.2f}x optimum.",
+              "refs": ["e:decide", "x:decision"], "flip": "The engine's utility gain clearing the bar.", "targets": ["c:robust-decision"]})
+    return S
 
 
 def v17_signals(K: dict, bonds: dict | None, cx: dict | None) -> list[dict]:
@@ -993,7 +1048,7 @@ def propagate(net: dict, fixed: dict | None = None) -> list[float]:
 def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
           research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
           positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None,
-          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None) -> dict:
+          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None, dec: dict | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -1205,12 +1260,13 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
             for mod in re.findall(r"([a-z_/]+)\.py", m["where"]):
                 edge(f"as:{i}", "e:" + mod.replace("/", "."), "related", 0.6)
     v17_nodes(node, edge, nodes, idx, chron, bonds, cx)
+    v19_nodes(node, edge, dec)
     # signals
     K = {it["id"]: it for it in know}
     cape_pct = None
     if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
         cape_pct = labs_L["valuation"]["cape"]["percentile"]
-    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx)
+    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx) + v19_signals(K, dec)
     for s in sigs:
         ax = s["axis"]
         title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]

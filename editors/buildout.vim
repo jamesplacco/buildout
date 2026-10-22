@@ -66,13 +66,14 @@ let s:gen = 0
 let s:cur = {'gen': 0, 'running': 0, 'buf': -1, 'lines': 0}
 let s:last = {}
 
-let s:subcommands = ['atlas', 'bench', 'bonds', 'brain', 'buyside', 'capex', 'connect', 'cost', 'dcf', 'demo',
+let s:subcommands = ['atlas', 'bench', 'bonds', 'brain', 'buyside', 'capex', 'connect', 'cost', 'dcf', 'decide', 'demo',
       \ 'doctor', 'engine', 'erp', 'fa', 'feeds', 'history', 'journal', 'kalshi', 'labs', 'macro', 'market', 'mcp',
       \ 'mind', 'ml', 'ooda', 'positions', 'reality', 'reason', 'research', 'rl', 'run', 'sources', 'status', 'ta',
       \ 'think', 'triage']
 let s:flags = {
       \ 'think': ['--json', '--data'],
       \ 'bonds': ['--y10', '--y30', '--front', '--live', '--out'],
+      \ 'decide': ['--out', '--quick', '--json'],
       \ 'engine': ['--out', '--only', '--list'],
       \ 'triage': ['--published', '--cost-bps', '--turns', '--vol', '--skew', '--kurt', '--periods'],
       \ 'erp': ['--level', '--cash-yield', '--growth', '--rf'],

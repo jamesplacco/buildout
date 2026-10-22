@@ -144,6 +144,10 @@ def main(argv: list[str] | None = None) -> None:
     hs.add_argument("query")
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
+    dc = sub.add_parser("decide", help="the decision engine: data, features, models, inference, decision, walked forward from 1940")
+    dc.add_argument("--out", default="out")
+    dc.add_argument("--quick", action="store_true", help="coarser refits, for a fast look")
+    dc.add_argument("--json", action="store_true")
     ps = sub.add_parser("positions")
     ps.add_argument("csv")
     ps.add_argument("--write", default=None, help="write the weights as JSON here (keep it out of git)")
@@ -410,6 +414,27 @@ def main(argv: list[str] | None = None) -> None:
         print(h["name"], "\n ", h["text"])
         for r in h["related"]:
             print(f"  [{r['type']}] {r['name']}" + (f": next 12 months {r['ret_next']:+.0%}" if r.get("ret_next") is not None else ""))
+        return
+    if a.cmd == "decide":
+        from . import decide, labs, mind
+        from .jsonout import write
+        K = {k["id"]: k for k in mind.load_knowledge()}
+        cape = (K.get("val-cape-2026-10-20") or {}).get("value")
+        o = decide.build(labs.download(), cape_now=cape, y10_now=5.13, quick=a.quick)
+        path = write(o, a.out, "decision.json")
+        if a.json:
+            print(json.dumps(o["now"], default=float, indent=1))
+            return
+        n = o["now"]
+        print(f"decision {n['exposure']:.2f}x stocks (engine {n['engine_exposure']:.2f}x, evidence gate {n['gate']['value']:.0%}); hedge: {n['hedge']['name']}")
+        print(f"  regime: {n['regime']['K']} states, stressed next month {n['regime']['next'][n['regime']['worst']]:.0%}; changepoint in the last 6 months {n['changepoint']['recent']:.0%}")
+        print("  models:", ", ".join(f"{o['now']['models']['names'][k]} {v:.0%}" for k, v in n["models"]["weights"].items()))
+        print("  forecasts (12m real):", ", ".join(f"{n['forecasts']['names'][k]} {v:+.1%}" for k, v in n["forecasts"]["now"].items()), f"-> stacked {n['forecasts']['stacked']:+.1%}")
+        for d in n["drivers"]:
+            print(f"  without {d['part']}: {d['without']:.2f}x")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
         return
     if a.cmd == "rl":
         from . import labs, rl

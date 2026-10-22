@@ -26,7 +26,7 @@
   function placeMarks() {
     document.querySelectorAll(".view > .vhead > .eyebrow").forEach((e) => { if (!e.querySelector(".vmark")) e.prepend(markEl("vmark")); });
     document.querySelectorAll(".view > .foot").forEach((f) => {
-      if (f.previousElementSibling && f.previousElementSibling.classList.contains("mark-end")) return;
+      if (f.previousElementSibling && (f.previousElementSibling.classList.contains("mark-end") || f.previousElementSibling.classList.contains("rosette-end"))) return;
       const end = h("div", "mark-end");
       end.setAttribute("aria-hidden", "true");
       end.append(markEl("brand-mark"), h("span", null, "Buildout"));

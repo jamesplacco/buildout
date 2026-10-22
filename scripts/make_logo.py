@@ -41,11 +41,11 @@ def rosette(steps_in: int = 700, steps_out: int = 450) -> str:
     every size, as the canvas draws them."""
     inner = " ".join(path(hypo(120, 45, 36 + k * 2.2, k * math.pi / 54, steps=steps_in), 1.0, 165.0) for k in range(18))
     outer = " ".join(path(epi(140, 10, 6 + k * 0.6, k * 0.05, steps=steps_out), 1.0, 165.0) for k in range(10))
-    vs = 'vector-effect="non-scaling-stroke"'
-    # the hairline and its opacity are the canvas's (0.6 px at 0.5 and 0.35); a page may thicken them for a small
-    # rendering through --lotus-w and --lotus-o, which reach inside the symbol because custom properties inherit
-    return (f'<path d="{inner}" fill="none" stroke="currentColor" style="stroke-width: var(--lotus-w, 0.6px); opacity: var(--lotus-o, 0.5)" {vs}/>'
-            f'<path d="{outer}" fill="none" stroke="var(--muted, #6f7c76)" style="stroke-width: var(--lotus-w, 0.6px); opacity: calc(var(--lotus-o, 0.5) * 0.7)" {vs}/>')
+    # the canvas draws 0.6 px lines on a rosette about 260 px across: 0.76 units of this 330-unit field, scaling with
+    # the mark so a small rendering is the same drawing shrunk; --lotus-w and --lotus-o let a very small rendering
+    # thicken it a little (custom properties inherit into the symbol)
+    return (f'<path d="{inner}" fill="none" stroke="currentColor" style="stroke-width: var(--lotus-w, 0.76); opacity: var(--lotus-o, 0.5)"/>'
+            f'<path d="{outer}" fill="none" stroke="var(--muted, #6f7c76)" style="stroke-width: var(--lotus-w, 0.76); opacity: calc(var(--lotus-o, 0.5) * 0.7)"/>')
 
 
 def main() -> None:
@@ -53,7 +53,7 @@ def main() -> None:
     (ROOT / "site" / "src" / "logo.html").write_text(
         '<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">'
         f'<symbol id="lotus" viewBox="0 0 330 330">{ro}</symbol></svg>\n')
-    fav = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 330" color="#1d5b49">{rosette(200, 130).replace("var(--muted, #6f7c76)", "#6f7c76")}</svg>'
+    fav = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 330" color="#1d5b49">{rosette(200, 130).replace("var(--muted, #6f7c76)", "#6f7c76").replace("var(--lotus-w, 0.76)", "3.2").replace("var(--lotus-o, 0.5)", "0.85")}</svg>'
     (ROOT / "site" / "src" / "favicon.svg").write_text(fav)
     print("logo.html", len(ro), "bytes; favicon", len(fav))
 

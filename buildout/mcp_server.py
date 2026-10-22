@@ -924,6 +924,15 @@ def _snap16(part: str):
     return json.loads(txt[i + len("const SNAP16 = "):txt.index(";\n", i)].replace("<\\/", "</"))[part]
 
 
+def _snap19(part: str):
+    p = Path(__file__).resolve().parents[1] / "site" / "src" / "snap19.js"
+    txt = p.read_text() if p.exists() else ""
+    i = txt.find("const SNAP19 = ")
+    if i < 0:
+        return None
+    return json.loads(txt[i + len("const SNAP19 = "):txt.index(";\n", i)].replace("<\\/", "</")).get(part)
+
+
 def technical_analysis(ctx: Context, args: dict) -> dict:
     t = str(args.get("ticker", "")).upper().strip()
     if not t or len(t) > 12:
@@ -960,6 +969,26 @@ def fundamental_analysis(ctx: Context, args: dict) -> dict:
 def rl_policy(ctx: Context, args: dict) -> dict:
     o = ctx.load("rl") or _snap16("rl")
     return {k: o.get(k) for k in ("findings", "best", "now", "configs", "hold", "trend", "deflated_excess", "policy")}
+
+
+def decision_engine(ctx: Context, args: dict) -> dict:
+    o = ctx.load("decision") or _snap19("decision")
+    if not o:
+        raise ToolError("no decision run yet; run `python -m buildout decide`")
+    n = o["now"]
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"findings": o["findings"], "exposure": n["exposure"], "engine_exposure": n["engine_exposure"], "gate": n["gate"], "hedge": {k: n["hedge"][k] for k in ("name", "context", "p_best", "names", "as_of")},
+                "regime": {k: n["regime"][k] for k in ("K", "now", "next", "worst", "mu", "sd")}, "changepoint": {k: n["changepoint"][k] for k in ("recent", "expected_run", "alarms")},
+                "models": n["models"], "forecasts": n["forecasts"], "drivers": n["drivers"], "rl": n["rl"],
+                "note": "The MODEL book, not personal positions. Research only: this engine never places orders."}
+    if part == "backtest":
+        return {k: o[k] for k in ("start", "end", "months", "configs", "hold", "trend", "rl", "deflated_excess", "hedges")}
+    if part == "flip":
+        return {"flip": n["flip"], "evpi": n["evpi"], "distribution": n["distribution"], "gate": n["gate"]}
+    if part == "forecasts":
+        return {"scores": o["forecast_scores"], "now": n["forecasts"]}
+    raise ToolError("part is one of summary, backtest, flip, forecasts")
 
 
 def bond_scenario(ctx: Context, args: dict) -> dict:
@@ -1070,6 +1099,10 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "rl_policy": (rl_policy, "The reinforcement-learning sizing agent (fitted Q iteration over trend, volatility, valuation and drawdown states): its out-of-sample "
                   "record against holding and the trend rule, the deflated chance its edge is real, and today's exposure. Research only.",
                   _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
+    "decision_engine": (decision_engine, "The decision engine for the MODEL book: today's stock exposure and hedge with the evidence gate that decides how far to trust "
+                        "the engine, regime probabilities (hidden Markov), changepoint odds, model-averaging weights, stacked forecasts including a neural-network "
+                        "ensemble, what drives and what would flip the decision, and its walk-forward record since 1940. Research only; never places orders.",
+                        _obj({"part": {"type": "string", "enum": ["summary", "backtest", "flip", "forecasts"]}}), {"readOnlyHint": True, "openWorldHint": False}),
     "bond_scenario": (bond_scenario, "Every Treasury ETF (SHY, IEI, IEF, TLH, TLT, EDV, ZROZ) repriced bond by bond at a 10-year and 30-year yield you set, on today's Treasury "
                       "par curve: price, instant change, 12-month total return with income and roll, and the break-even yield rise. Research only.",
                       _obj({"y10": {**NUM, "description": "10-year yield in percent, e.g. 4"}, "y30": {**NUM, "description": "30-year yield in percent; omit to move it with the 10-year"},

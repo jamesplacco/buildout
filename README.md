@@ -3,6 +3,29 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.19 turns the harness into a decision engine: one pipeline from data to a sized, explained decision, walked
+forward from 1940 (`decide.py`, desk "Decision engine", `python -m buildout decide`, MCP tool `decision_engine`).
+Data: 1,868 months of US stocks with the 10-year yield and a 10-year bond's return built from it. Features: the ML lab's
+eight. Models: the historical mean, ridge, the restricted combination and a deep ensemble of five small neural networks
+(`nn.py`: numpy only, backpropagation checked against finite differences to about 1e-7, dropout, weight decay, Adam,
+early stopping on the newest fifth of the data, quantile and logistic losses, a purged walk-forward), stacked with
+non-negative weights fit only on forecasts whose outcome was known. Inference (`infer.py`): a Gaussian hidden Markov
+model of regimes (Baum-Welch with several starts, states by BIC, refit every five years, filtered so no decision sees
+the future, means shrunk toward the long-run mean), Bayesian online changepoint detection, a Kalman filter on the
+stock-bond beta, and dynamic model averaging of the return models by their discounted predictive log score. Decision:
+the exposure from 0 to 1.5x that maximizes expected CRRA utility of next month's wealth under the averaged mixture, with
+risk aversion set once on 1871 to 1939 data so holding is optimal in an average month, inside a 12% monthly expected-
+shortfall budget; then an evidence gate scales the move away from 1x by the engine's own walked-forward utility gain
+over holding, deflated for the strategies tried. Today the engine's optimum is 1.5x (a calm regime, 79% likely next
+month) and the decision is 1.0x: since 1940 its departures from holding earned a timing alpha of about 1.5% a year
+(t 1.8) but did not make a risk-averse investor better off (utility t 0.4 against the 1.1 the best of seven useless
+strategies would show; Sharpe 0.64 against 0.64). The desk shows each input's weight, what drives the optimum (leave
+one out), what would flip it, its distribution over 2,000 draws of regime, model and forecast, the value of knowing the
+regime, a Bayesian hedge selector by regime and trend, and a conservative reinforcement-learning check (a bootstrapped
+ensemble of fitted-Q agents acting on the lower confidence bound: Sharpe 0.65 with a worst drawdown of 31% against 52%,
+at about half the exposure). The neural networks lose to the mean out of sample (skill -37%, Diebold-Mariano t -2.6),
+like every flexible model before them; the stack gives them 11%. Seventeen planted-answer tests cover the new parts.
+
 Version 0.18 makes the engine stronger and the page easier to read. The mark is the Today desk's rosette, the green lotus, drawn from the same curves (`scripts/make_logo.py` writes it as an SVG symbol and the page icon). The layout follows the firm and product sites: a centred navigation band, 44-pixel pill buttons, and a floating desk bar with the way back, the map and the way on. The engine gains a framework in `buildout/core/`:
 a content-addressed cache (`cache.py`: results keyed by the source of the code and a canonical hash of the data, written
 atomically with a checksum, corrupted entries dropped and recomputed, network inputs served from the last good copy when
@@ -463,6 +486,9 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `technicals.py` | Indicator library, signals, chart structure, event study with Newey-West and BH, evidence-weighted composite judged out of sample |
 | | `statements.py` | Annual statements from XBRL company facts; ratios; Piotroski F, Altman Z'', Beneish M; valuation multiples with a price |
 | | `rl.py` | Fitted Q iteration sizing agent over 54 market states and the last action, walk-forward, bootstrap and deflated Sharpe |
+| | `nn.py` | Multi-layer perceptrons and deep ensembles in numpy: gradient-checked backpropagation, dropout, weight decay, Adam, early stopping on the newest data, mse, pinball and logistic losses, purged walk-forward |
+| | `infer.py` | Gaussian hidden Markov model (Baum-Welch, filter, smoother, Viterbi, BIC), Bayesian online changepoint detection, Kalman time-varying regression, stacking, mixture risk |
+| | `decide.py` | The decision engine: walked-forward regimes and forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
 | | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |
 | | `damodaran.py` | Implied equity risk premium; narrative-to-numbers DCF with fading growth, target margin, sales-to-capital reinvestment and failure odds |

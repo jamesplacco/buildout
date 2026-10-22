@@ -108,7 +108,7 @@ one that holds this file."
   "Name of the results buffer.")
 
 (defconst buildout-subcommands
-  '("atlas" "bench" "bonds" "brain" "buyside" "capex" "connect" "cost" "dcf" "demo" "doctor"
+  '("atlas" "bench" "bonds" "brain" "buyside" "capex" "connect" "cost" "dcf" "decide" "demo" "doctor"
     "engine" "erp" "fa" "feeds" "history" "journal" "kalshi" "labs" "macro" "market" "mcp"
     "mind" "ml" "ooda" "positions" "reality" "reason" "research" "rl" "run" "sources" "status"
     "ta" "think" "triage")
