@@ -88,6 +88,16 @@ def _reason(out: Path) -> None:
     _write(out, "reason.json", reasoner.build(out))
 
 
+def _voices(out: Path) -> None:
+    from . import voices
+    q = voices.load()
+    lib = voices.Library(q)
+    bad = [x["id"] for x in q if not str(x.get("source_url", "")).startswith("https://") or x.get("stance") not in voices.STANCES]
+    if bad:
+        raise ValueError(f"{len(bad)} quotes fail integrity: {bad[:5]}")
+    _write(out, "voices.json", {"quotes": lib.quotes, "topics": {k: {"title": v["title"], "bull": v["bull"], "bear": v["bear"]} for k, v in voices.TOPICS.items()}})
+
+
 def _status(out: Path) -> None:
     from .status import build_status
     _write(out, "status.json", build_status(out))
@@ -96,7 +106,7 @@ def _status(out: Path) -> None:
 REGISTRY: list[Engine] = [
     Engine("macro", "Market regime", [], ["macro.json"], "macro.py", False, "FRED: curve, spreads, levels, stock-bond correlation and regime"),
     Engine("research", "Long-history research", [], ["research.json"], "research.py", False, "155 years: the hedge line out of sample, fat tails, base rates"),
-    Engine("brain", "Brain links", [], ["brain.json"], "brain.py", False, "Measured links by regime, the series, structure learning, robust links"),
+    Engine("brain", "Brain links", [], ["brain.json"], "brain.py", False, "Measured links by regime, the series, structure learning, robust links, self-checks (conformal, stacking, robustness values)"),
     Engine("book", "Book run", ["research.json"], ["report.json"], "pipeline.py", False, "Databento: exposures, regime, hedge, sizing, VaR, stress, backtest, robustness"),
     Engine("capex", "Fundamentals", [], ["capex.json"], "fundamentals.py", False, "SEC XBRL: TTM cash flows, capex, debt, depreciation paths"),
     Engine("feeds", "Noteworthy", [], ["feeds.json"], "feeds.py", False, "Feeds, heat, niche skew, lead time"),
@@ -109,6 +119,7 @@ REGISTRY: list[Engine] = [
     Engine("hedges", "Hedge book", [], ["hedges.json"], "hedgebook.py", True, "Prebuilt hedges, priced and run through the scenarios; the advisor", _hedges),
     Engine("ooda", "Decision loop", ["macro.json", "research.json", "brain.json", "capex.json", "report.json"], ["ooda.json"], "ooda.py", True,
            "Observe, orient, decide, act: one decision record per position and hedge", _ooda),
+    Engine("voices", "Investor voices", [], ["voices.json"], "voices.py", True, "Verified quotes, extreme bear to extreme bull; integrity checked on every run", _voices),
     Engine("status", "Run status", ["*"], ["status.json"], "status.py", True, "Freshness and sanity checks on every output", _status),
 ]
 

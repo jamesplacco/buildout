@@ -218,6 +218,7 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
+                        ("hero", "desk"), ("voices", "desk"), ("brr-title", "brain"), ("g-conformal", "appendix"),
                         ("oo-title", "ooda"), ("oo-dec-title", "ooda"), ("ps-title", "positions"), ("en-title", "engines"), ("ooda", "ooda"),
                         ("rzd-title", "solve"), ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
@@ -418,6 +419,7 @@ async def main() -> int:
     hostile["brain.json"]["series"] = {"cols": [], "dates": ["x"], "z": [[None]] * 6}
     hostile["brain.json"]["learned"] = {"dates": [1], "order": {"low_inflation": {"learned": ["<b>"]}}, "links": {"y10>eq": {"beta": "x"}}}
     hostile["report.json"]["summary"]["adjustments"] = ["<b>x</b>"]
+    hostile["brain.json"]["robust_brain"] = {"equations": {"eq": {"coverage": "x", "weights": None}}, "confounding": {"inflation": {"links": {"y10>eq": {"rv": "<b>"}}}}}
     hostile["ooda.json"] = {"observe": {"moved": [{"node": "<b>", "z": "x"}]}, "orient": {"positions": {}}, "decide": {"positions": [{"ticker": 5}]}, "act": {}}
     hostile["causal.json"] = {"regimes": {"low_inflation": {"crisis": "bad"}}}
     hostile["engines.json"] = {"engines": [{"name": "<img src=x onerror=window.__pwned=3>", "status": 7}]}
@@ -438,6 +440,7 @@ async def main() -> int:
         await scenario(browser, "good data, journal", site_with(good), extra=journal_flow)
         await scenario(browser, "good data, the brain thinks and the field desk", site_with(good), extra=think_and_field)
         await scenario(browser, "ask the brain (mocked Claude calling every tool)", site_with(good), extra=ask_flow, init=ASK_MOCK)
+        await scenario(browser, "good data, the landing brain and voices", site_with(good), extra=voices_and_hero)
         await scenario(browser, "good data, live research", site_with(good), extra=live_research)
         newer = copy.deepcopy(good)
         newer["capex.json"]["ttm"]["ORCL"] = {"quarter_end": "2026-11-30", "ocf": 90.0, "capex": 70.0, "cash": 50.0, "capex_to_ocf": 70 / 90}
@@ -609,6 +612,70 @@ async def filing_propagation(page, label: str) -> None:
     cap = await page.evaluate("document.getElementById('gt-capex-table').textContent")
     if "$70.0B" not in cap or "new filing" not in cap:
         fail(f"{label}: the capex game did not use the newer filing")
+
+
+async def voices_and_hero(page, label: str) -> None:
+    """v0.12: the landing brain steps, pauses and takes a custom shock; voices answers, walks the spectrum by click and
+    key, survives hostile input, and every quote shown links to an https source."""
+    await page.evaluate("location.hash = 'desk'")
+    await page.wait_for_timeout(600)
+    st = await page.evaluate("({ cv: !!document.getElementById('hero-cv') && document.getElementById('hero-cv').height > 100, scn: document.getElementById('hero-scn').textContent })")
+    if not st["cv"] or not st["scn"]:
+        fail(f"{label}: the landing brain did not draw {st}")
+    await page.click("#hero-play")
+    for _ in range(9):
+        await page.click("#hero-next")
+    k = await page.evaluate("document.getElementById('hero-k').textContent")
+    if k != "doubt":
+        fail(f"{label}: stepping past the last order should show the doubt, saw {k!r}")
+    for _ in range(9):
+        await page.click("#hero-prev")
+    if await page.evaluate("document.getElementById('hero-k').textContent") != "k = 0":
+        fail(f"{label}: stepping back should reach k = 0")
+    await setv(page, "#hero-node", "pcredit")
+    await setv(page, "#hero-size", 99)
+    await page.click("#hero-go")
+    await page.wait_for_timeout(300)
+    t = await page.evaluate("document.getElementById('hero-scn').textContent")
+    if "Private credit" not in t or "+3.00" not in t:
+        fail(f"{label}: a custom shock should be clamped to 3 sigma and named, saw {t!r}")
+    for b in await page.query_selector_all("#hero-presets button"):
+        await b.click()
+    await page.click("#hero-regime button[data-b='0']")
+    await page.wait_for_timeout(200)
+    txt = await page.evaluate("document.getElementById('hero').innerText")
+    if any(x in txt for x in BAD_TEXT):
+        fail(f"{label}: the landing brain shows bad text")
+    async def ask(q):
+        await page.fill("#vo-q", q)
+        await page.click("#vo-form button[type=submit]")
+        await page.wait_for_timeout(150)
+    await ask("Is bitcoin digital gold and worth gold's market cap?")
+    r = await page.evaluate("""() => ({ topic: document.getElementById('vo-topic').textContent, pressed: [...document.querySelectorAll('#vo-spec .vo-stop')].map((b) => [b.getAttribute('aria-pressed'), b.disabled]),
+      quote: (document.querySelector('#vo-card .vo-quote') || {}).textContent || '', href: (document.querySelector('#vo-card .vo-src a') || {}).href || '' })""")
+    if "Bitcoin" not in r["topic"] or not r["quote"] or not r["href"].startswith("https://") or ["true", False] not in r["pressed"]:
+        fail(f"{label}: voices did not answer the bitcoin question {r}")
+    seen = set()
+    await page.click("#vo-spec .vo-stop:not([disabled])")
+    for _ in range(6):
+        await page.keyboard.press("ArrowRight")
+        seen.add(await page.evaluate("(document.querySelector('#vo-card .vo-badge') || {}).textContent"))
+    if not {"Bull", "Extreme bull"} & seen:
+        fail(f"{label}: arrow keys did not walk toward the bull end: {seen}")
+    first = await page.evaluate("document.querySelector('#vo-card .vo-quote').textContent")
+    await page.keyboard.press("n")
+    second = await page.evaluate("document.querySelector('#vo-card .vo-quote').textContent")
+    if first == second and await page.evaluate("document.querySelector('#vo-card .vo-pos').textContent.endsWith('of 1')") is False:
+        fail(f"{label}: N did not show another voice")
+    await ask('<img src=x onerror="window.__pwned=7"> purple elephants')
+    r = await page.evaluate("({ pwned: window.__pwned || 0, imgs: document.querySelectorAll('#voices img').length, t: document.getElementById('vo-topic').textContent })")
+    if r["pwned"] or r["imgs"] or "No voices" not in r["t"]:
+        fail(f"{label}: hostile or unknown query mishandled {r}")
+    await ask("x" * 5000)
+    await ask("Is AI a bubble?")
+    hrefs = await page.evaluate("[...document.querySelectorAll('#voices a[href]')].map((a) => a.getAttribute('href'))")
+    if any(not h.startswith("https://") for h in hrefs):
+        fail(f"{label}: a voices link is not https: {hrefs[:3]}")
 
 
 async def no_injection(page, label: str) -> None:

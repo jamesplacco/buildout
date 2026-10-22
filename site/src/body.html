@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.11</span>
+      Buildout <span class="ver">v0.12</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -40,6 +40,61 @@
       <p class="t7-status" id="t7-status"></p>
       <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
     </div>
+    <section class="hero-brain" id="hero" aria-labelledby="hero-title">
+      <div class="hero-head"><p class="eyebrow">The brain · live</p><h2 id="hero-title">Watch a shock travel the system</h2>
+        <p class="prose">Thirty-five parts of the system, linked by signed weights: eleven measured from 440 months of data, the rest judged and labelled. A shock enters one node and moves one link per order, x<sub>k</sub> = W′x<sub>k−1</sub>; the glow is each node's running total, and the panel does the arithmetic in the open.</p></div>
+      <div class="hero-grid">
+        <div class="hero-stage">
+          <div class="hero-presets" id="hero-presets" role="group" aria-label="Scenarios"></div>
+          <canvas id="hero-cv" role="img" aria-label="The brain"></canvas>
+          <div class="hero-ctl">
+            <button class="pill" type="button" id="hero-prev" aria-label="Previous order">←</button>
+            <button class="pill" type="button" id="hero-play" aria-pressed="true">Pause</button>
+            <button class="pill" type="button" id="hero-next" aria-label="Next order">→</button>
+            <span class="hero-k" id="hero-k">k = 0</span>
+            <div class="seg" id="hero-mode" role="group" aria-label="Draw it as"><button type="button" data-m="graph" aria-pressed="true">Graph</button><button type="button" data-m="matrix" aria-pressed="false">Matrix</button></div>
+            <div class="seg" id="hero-regime" role="group" aria-label="Which measured links"><button type="button" data-b="1" aria-pressed="true">Links since 2022</button><button type="button" data-b="0" aria-pressed="false">1990 to 2021</button></div>
+          </div>
+          <div class="hero-own"><label for="hero-node">Shock</label><select id="hero-node"></select><label for="hero-size">by σ</label><input type="number" id="hero-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="hero-go">Run it</button><span class="hint">or click any node (shift-click for a fall)</span></div>
+        </div>
+        <aside class="hero-math" aria-labelledby="hero-math-t">
+          <span class="panel-title" id="hero-math-t">The math, live</span>
+          <p class="hero-scn" id="hero-scn"></p>
+          <p class="hero-eq">x<sub>k</sub> = W′x<sub>k−1</sub> &nbsp;·&nbsp; S<sub>K</sub> = x<sub>1</sub> + … + x<sub>K</sub> &nbsp;→&nbsp; S<sub>∞</sub> = ((I − W′)<sup>−1</sup> − I)x<sub>0</sub></p>
+          <p class="hint" id="hero-x0"></p>
+          <p class="hero-steph" id="hero-step"></p>
+          <ol class="br-list" id="hero-flows"></ol>
+          <p class="sentence" id="hero-arrive"></p>
+          <span class="panel-title">The book's running sum, order by order</span>
+          <div class="svgbox" id="hero-conv"></div>
+          <p class="hint" id="hero-rho"></p><p class="hint" id="hero-lim"></p>
+          <span class="panel-title">300 worlds of doubt</span>
+          <canvas id="hero-hist" aria-hidden="true"></canvas>
+          <span class="panel-title">Can the brain be trusted?</span>
+          <ul class="br-list" id="hero-trust"></ul>
+          <a class="more-link" href="#brr-title">How the brain checks itself →</a>
+          <p class="sr-only" id="hero-live" aria-live="polite"></p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="voices" id="voices" aria-labelledby="vo-title">
+      <div class="hero-head"><p class="eyebrow">Voices · extreme bear to extreme bull</p><h2 id="vo-title">Ask what the great investors said</h2>
+        <p class="prose">Type a question or a claim, then move along the spectrum. Every quote is verbatim, dated and linked to where it was said; the stance is judged per quote, not per person.</p><p class="hint" id="vo-count"></p></div>
+      <form class="vo-form" id="vo-form" role="search" aria-label="Find investor voices"><label for="vo-q" class="sr-only">Your question or statement</label><input type="search" id="vo-q" maxlength="300" autocomplete="off" placeholder="Is bitcoin digital gold?"><button class="btn" type="submit">Find the voices</button></form>
+      <div class="vo-examples" id="vo-examples" role="group" aria-label="Example questions"></div>
+      <div class="vo-out" id="vo-out" hidden>
+        <div class="vo-head"><h3 class="h3" id="vo-topic"></h3><div class="vo-related" id="vo-related"></div></div>
+        <p class="sentence" id="vo-read"></p>
+        <div class="vo-spec" id="vo-spec" role="group" aria-label="The spectrum, extreme bear to extreme bull"></div>
+        <article class="vo-card" id="vo-card" aria-live="polite"></article>
+        <div class="vo-nav" id="vo-nav"></div>
+        <div class="vo-claude-row"><button class="pill" type="button" id="vo-claude" hidden>Ask Claude to rank these for my exact question</button><span class="hint" id="vo-claude-out" aria-live="polite"></span></div>
+        <details class="tableview" id="vo-all" hidden><summary id="vo-all-sum">Every voice</summary><ol class="vo-all" id="vo-all-list"></ol></details>
+        <p class="hint">Keys: ← and → move along the spectrum; N shows another voice. Quotes are short excerpts with links to the full source. The library is curated, so its lean is not a poll.</p>
+      </div>
+    </section>
+
     <div class="t7-grid">
       <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">What changed, and why it matters to the book</h2><p class="t7-quiet" id="t7-quiet" aria-live="polite"></p><ol class="t7-changes" id="t7-changes"></ol></section>
       <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Your choices</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with your own limits →</a></section>
@@ -48,7 +103,7 @@
     </div>
     <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
     <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 165 of 165 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 244 of 244 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
@@ -1400,6 +1455,23 @@
       <p class="hint">Least squares against a Huber fit that lets big months count linearly, t-statistics with Newey-West errors that do not assume independent months, and the number of the most influential months that, dropped, would reverse the sign (each count checked by refitting; "over 10%" means it would not reverse). A link that flips on three months is a hypothesis, however large its t.</p></div>
   </section>
 
+  <section class="section" id="br-robust-sec" aria-labelledby="brr-title">
+    <div class="section-head"><p class="eyebrow">Self-checks</p><h2 id="brr-title">How far to trust the brain</h2>
+      <p class="prose" id="brr-sum"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Do its 90% error bars hold? Every month predicted from earlier months only, 2000 on</span><div class="tablewrap"><table class="rz" id="brr-cov"></table></div>
+        <p class="hint">Textbook: the ensemble's Gaussian interval. Conformal: adaptive conformal inference (Gibbs and Candès, 2021), whose width is the 90% quantile of past standardized errors and whose target adapts after every miss, so coverage stays near 90% even when the world shifts. "Honest width now" is the conformal half-width over the textbook one.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Stocks against the honest band, last five years</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="brr-band"></div><p class="sentence" id="brr-band-t"></p></figure>
+    </div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Which world model the data trusts, scored out of sample</span><div class="tablewrap"><table class="rz" id="brr-stack"></table></div>
+        <p class="hint">Five rival models of each measured equation: full-history least squares, the last 36 months only, an outlier-resistant Huber fit, links that drift (Kalman filter), and no link at all. Stacking (Yao, Vehtari, Simpson and Gelman, 2018) picks the mixture with the best out-of-sample log score; each month's weights use earlier months only.</p></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Stocks: the weight on each world model, fitted on 2000 to each date</span><span class="legend" id="brr-path-l"></span></div><div class="svgbox" id="brr-path"></div></figure>
+    </div>
+    <div class="panel"><span class="panel-title">What would an unseen common cause have to explain to erase each link?</span><div class="tablewrap"><table class="rz" id="brr-conf"></table></div>
+      <p class="hint">The robustness value (Cinelli and Hazlett, 2020): the share of the residual variance of both the parent and the child that a confounder would have to explain to drive the link to zero, and in brackets to make it insignificant at 5%. Compare it with the strongest observed parent: a hidden cause stronger than anything measured is possible, but it is a claim to argue, not a default.</p></div>
+  </section>
+
   <section class="section" aria-labelledby="brw-title">
     <div class="section-head"><p class="eyebrow">Reasoning</p><h2 id="brw-title">How the answer is built</h2><p class="prose">Each order is one more link in the chain. Most people stop at the first; the graph does not.</p></div>
     <div class="grid2">
@@ -1991,7 +2063,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">232 of 232 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">244 of 244 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2016,7 +2088,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, thirteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, fifteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2034,6 +2106,11 @@
           <tr><td>Hedge book and advisor, Python and page</td><td class="r">agree to 1e-12; same sets chosen</td></tr>
           <tr><td>Granger and partial correlation on planted chains</td><td class="r">direction and independence found</td></tr>
           <tr><td>Decision rules, the loop, and an engine that fails on purpose</td><td class="r">as stated; failure isolated</td></tr>
+          <tr><td>Robustness value on Cinelli and Hazlett's published example</td><td class="r">13.9% and 7.6%, as published</td></tr>
+          <tr><td>Stacking on a planted true model and a planted mixture</td><td class="r">both recovered</td></tr>
+          <tr><td>Adaptive conformal intervals on Gaussian and fat-tailed data; no look-ahead</td><td class="r">coverage near 90%; none</td></tr>
+          <tr><td>Landing brain: Leontief limit against the series summed to convergence</td><td class="r">equal to 1e-9</td></tr>
+          <tr><td>Voices retrieval, Python and page, 22 queries; every quote sourced</td><td class="r">identical; all https</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>

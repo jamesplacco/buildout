@@ -3,7 +3,16 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.11 makes the engine decide, and the page its harness. `ooda.py` runs Observe, Orient, Decide, Act into one
+Version 0.12 puts the brain on the landing page and makes it check itself. The landing desk animates a shock
+travelling the 35-node graph one order at a time, x_k = W'x_(k-1), with the arithmetic beside it: the largest flows of
+each step, the running sum converging on the Leontief limit at the rate of the spectral radius, and 300 Monte Carlo
+worlds. `brain_robust.py` scores five rival world models for every measured equation out of sample from 2000, stacks
+them (Yao, Vehtari, Simpson and Gelman 2018), puts adaptive conformal error bars on the result (Gibbs and Candes 2021),
+and gives each measured link its robustness value to an unseen common cause (Cinelli and Hazlett 2020). `voices.py`
+answers a question or claim with verbatim, dated, sourced quotes from legendary and current investors, arranged from
+extreme bear to extreme bull; the page runs the same retrieval, held equal by tests, and never writes a quote.
+
+Version 0.11 made the engine decide, and the page its harness. `ooda.py` runs Observe, Orient, Decide, Act into one
 record (`ooda.json`): what moved and which world it fits; the explanations and what each asset did in stocks' worst
 months; the solver with and without doubt; a hedge book of nine prebuilt hedges you can switch on or off, with an
 advisor that enumerates every combination (`hedgebook.py`); an action per position run through outside view, inside
@@ -40,7 +49,7 @@ the most mutual information, and doing (cut the node's causes) is kept apart fro
 observations on three clocks, compares competing explanations and ranks the evidence that separates them, registers
 ten unusual indicators before testing them, and watches expected events without reading silence as news. Today shows
 what each headline read before, and says so when nothing moved. The engine is also an MCP server
-(`mcp_server.py`): thirteen research and proposal tools for any assistant, none of which can place an order. Without
+(`mcp_server.py`): fifteen research and proposal tools for any assistant, none of which can place an order. Without
 Databento's paid adjustment factors, the book run falls back to a public split table and estimated bond-fund income.
 
 Version 0.7 answered the third project review. It fixes the accounting (one NAV and return convention, costs in
@@ -173,7 +182,7 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 232 tests, no data needed
+pytest                                    # 244 tests, no data needed
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -193,6 +202,7 @@ python -m buildout mcp --data out         # MCP server on stdio (see below)
 python -m buildout engine --out out       # the offline engines (valuation, causal, hedges, decision loop) and engines.json
 python -m buildout engine --list          # the registry
 python scripts/snapshot_v11.py            # refresh the page's engine snapshot (decision loop, valuation, causal)
+python scripts/snapshot_v12.py            # refresh the brain's self-checks and the voices library in the page
 python scripts/export_graph.py            # after editing the brain or field cases on the page (needs node)
 python scripts/snapshot_v09.py path/to/csvs  # refresh the page's monthly series for structure learning
 ```
@@ -224,6 +234,8 @@ Claude Desktop: add to `claude_desktop_config.json` (absolute paths; the app doe
 | `decision_loop` | The engine's whole decision record: observe, orient, decide, act |
 | `position_valuation` | One holding's accounting, implied growth against the base rates, and the two-sided why; override price or beta |
 | `hedge_book` | Switch prebuilt hedges on or off at chosen sizes: the book in every scenario, cost, and the advisor |
+| `investor_voices` | Verbatim, sourced quotes on a question, extreme bear to extreme bull; never generates a quote |
+| `brain_selfcheck` | Conformal coverage, stacking weights and robustness values: how far to trust the brain |
 | `run_hedge_scenario` | hedge.tlt.v2 on any correlation path and inflation reading, every gate visible |
 | `evaluate_trade` | A portfolio on the seven scenarios: growth, worst case, loss limit, regret, the best portfolio on the grid; with `ambiguity`, its worst case over doubtful odds and the robust choice |
 | `create_order_proposal` | A hashed proposal checked against gross, single-name and universe limits. Never executed |
@@ -266,6 +278,8 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 155 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.12 | `brain_robust.py` | Five rival world models per equation scored one step ahead from 2000, stacking, adaptive conformal intervals, robustness values |
+| | `voices.py` | Verified investor quotes (assets/voices.json), BM25 retrieval with concepts and synonyms, the bear-to-bull spectrum, polarity |
 | v0.11 | `valuation.py` | Accounting quality (core earnings, cash conversion, accruals, stock pay, steady-state FCF, depreciation catch-up, leverage, returns), reverse DCF implied growth, Base Rate Book probabilities, verdicts, two-sided why |
 | | `hedgebook.py` | Nine prebuilt hedges priced and run through the scenarios; exhaustive advisor |
 | | `causal_stats.py` | Granger, partial correlations, crisis behaviour, tail dependence, lead-lag by regime |
@@ -279,7 +293,7 @@ credentials, and the holdings it is shown are not stored.
 | | `discovery.py` | DirectLiNGAM (pairwise likelihood ratio) with seeded bootstrap; Kalman time-varying links with drift by maximum likelihood; sign changes |
 | v0.8 | `thinking.py` | The brain's reasoning: total effects within K links, ridge abduction of root shocks with posterior covariance, predictions with sd, residuals and misfit gradients per link, single-cause evidence by Sherman-Morrison, mutual information for the next observation, do-interventions, shared exposure |
 | | `field.py` | Discrete Bayes over competing explanations and expected information (bits) of each unchecked piece of evidence |
-| | `mcp_server.py` | MCP over stdio: thirteen research and proposal tools; never executes |
+| | `mcp_server.py` | MCP over stdio: fifteen research and proposal tools; never executes |
 | | `data/corporate_actions.py` | Free fallback for Databento's paid adjustment factors: public split table, bond-fund income from Treasury yields |
 | v0.7 | `policy.py` | hedge.tlt.v2, size.equity.v2, limits.portfolio.v1: one function each for recommendation, text and backtest; unavailable inputs block, never default; decision snapshot |
 | | `reasoner.py` | Tempered Bayes posterior, scenario returns (duration, convexity, Black-Scholes put spreads, financing), exact grid search with a loss limit, alternatives with regret, simplex game against Nature, EVPI and EVSI, reverse stress from measured covariances; `python -m buildout reason` writes reason.json |
@@ -340,6 +354,11 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.12: robustness values match Cinelli and Hazlett's published example; stacking recovers a true model and a true
+  mixture; adaptive conformal intervals keep 90% coverage on Gaussian and fat-tailed data; no forecast changes when a
+  later month does (no look-ahead); the landing brain's Leontief limit equals the series summed to convergence; the
+  page's voices retrieval equals Python's token for token on 22 queries; every quote has an https source, at most 45
+  words, no banned text; the MCP tool returns only library quotes.
 - v0.11: the reverse DCF solves PV = EV exactly and moves the right way with price and rates; base rates match the
   book's exhibit and invert; quality reads planted accounts flag by flag, and cash lifted by prepayments does not raise the steady-state margin; switching every hedge off is the book, each
   hedge pays in the scenarios it claims (the test caught TLT wrongly claiming the liquidity crash), and hedges add

@@ -18,7 +18,7 @@
     if (location.hash === "#" + v) show(v, true); else location.hash = v;
   }
   const RENDER = {
-    desk: () => { guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
+    desk: () => { guard("The brain, live", renderHero, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
@@ -29,7 +29,7 @@
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
     noteworthy: () => {}, buyside: drawBuyside, solve: () => guard("The solver", () => renderSolve(false), $("#rz-ledger")), games: drawGames,
-    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); guard("Causal statistics", renderCausalPanel, $("#brl-crisis")); },
+    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); guard("Causal statistics", renderCausalPanel, $("#brl-crisis")); guard("Brain self-checks", renderRobustBrain, $("#brr-cov")); },
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
     ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); },
     positions: () => guard("Positions", renderPositions, $("#ps-grid")),
@@ -128,6 +128,9 @@
     BR_NODES.forEach((n) => add(`${n.n} in the brain`, n.why, "Node", "brain", n.s));
     BR_PRESETS.forEach((p) => add(`Brain scenario: ${p.n}`, "Shock the system map and read the fourth-order effects", "Tool", "brain"));
     FUND.rows.forEach((r) => add(`${r.name} fundamentals`, `${r.t}: capex ${B$(r.capex)} against cash flow ${B$(r.ocf)} · ${COVERAGE[r.coverage] || "coverage n/a"}`, "Company", "fu-t-title", r.t));
+    add("Voices: extreme bear to extreme bull", "Verbatim, sourced quotes from legendary and current investors on any question", "Tool", "voices", "quotes investors buffett munger dalio druckenmiller bitcoin gold ai bubble bonds");
+    add("The brain, live", "Watch a shock travel the system order by order, with the math", "Tool", "hero", "animation propagation neumann leontief matrix monte carlo");
+    add("How far to trust the brain", "Conformal error bars, stacked world models, robustness to hidden causes", "Tool", "brr-title", "conformal stacking robustness value confounding");
     add("Calculator", "Exact arithmetic with Black-Scholes, Kelly, NPV, IRR and live values; type = in search", "Tool", "calc", "math compute formula expression");
     add("The solver", "Evidence ledger, posterior, constrained choice, game against Nature, value of information", "Tool", "solve", "bayes optimize reason");
     add("Reverse stress test", "The most plausible way to breach the loss limit", "Tool", "rzr-title", "mahalanobis breach");

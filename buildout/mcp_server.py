@@ -22,6 +22,10 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
   decision_loop           observe, orient, decide, act: the engine's whole decision record
   position_valuation      one holding's accounting, implied growth against base rates, and the two-sided why
   hedge_book              switch prebuilt hedges on or off and see the book in every scenario, plus the advisor
+  investor_voices         verbatim, sourced quotes from legendary and current investors on a question, extreme bear to
+                          extreme bull; never generates a quote
+  brain_selfcheck         how far to trust the brain: honest error bars, the world model the data trusts, and what an
+                          unseen cause would have to explain to erase each measured link
 """
 from __future__ import annotations
 
@@ -638,6 +642,37 @@ def hedge_book(ctx: Context, args: dict) -> dict:
 
 
 # ---------------------------------------------------------------- registry
+def investor_voices(ctx: Context, args: dict) -> dict:
+    """Verbatim quotes on a question, arranged from extreme bear to extreme bull, each with its source."""
+    from . import voices
+    q = args.get("query")
+    if not isinstance(q, str) or not q.strip():
+        raise ToolError("query must be a non-empty string")
+    st = args.get("stance")
+    if st is not None and (isinstance(st, bool) or st not in voices.STANCES):
+        raise ToolError("stance must be one of -2, -1, 0, 1, 2 (extreme bear to extreme bull)")
+    tp = args.get("topic")
+    if tp is not None and tp not in voices.TOPICS:
+        raise ToolError(f"topic must be one of: {', '.join(voices.TOPICS)}")
+    lim = int(_req_num(args, "limit", 1, 10, 3))
+    return voices.answer(q.strip()[:300], stance=st, topic=tp, limit=lim)
+
+
+def brain_selfcheck(ctx: Context, args: dict) -> dict:
+    """The brain's self-checks: conformal coverage, stacking weights, robustness values (brain.json, else computed)."""
+    from . import brain_robust
+    from .brain import PARENTS, REGIMES
+    b = ctx.load("brain") or {}
+    r = b.get("robust_brain")
+    if not r:
+        series = b.get("series") or json.loads(GRAPH_PATH.read_text())["series"]
+        r = brain_robust.analyze(series, PARENTS, REGIMES)
+        r["findings"] = brain_robust.summary(r)
+    eqs = {k: {kk: v.get(kk) for kk in ("coverage", "kappa", "weights", "weights_recent", "weights_now", "log_score_recent")} for k, v in r["equations"].items()}
+    return {"findings": r.get("findings", []), "equations": eqs, "confounding": r["confounding"], "models": r["models"], "start": r["start"],
+            "method": "Out-of-sample from 2000: stacking (Yao et al. 2018), adaptive conformal inference (Gibbs and Candes 2021), robustness values (Cinelli and Hazlett 2020)"}
+
+
 def _obj(props: dict, required: list[str] | None = None) -> dict:
     s = {"type": "object", "properties": props, "additionalProperties": False}
     if required:
@@ -678,6 +713,15 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                    "at chosen sizes: the book in every scenario, growth, worst case, cost, and the advisor's sets.",
                    _obj({"on": {"type": "array", "items": {"type": "string"}}, "sizes": {"type": "object", "additionalProperties": NUM},
                          "equity": {**NUM, "description": "equity exposure, x NAV"}, "signals": SIGNALS}), {"readOnlyHint": True, "openWorldHint": False}),
+    "investor_voices": (investor_voices, "What legendary and current investors actually said about a question or claim, arranged from extreme bear (-2) "
+                        "to extreme bull (+2): verbatim quotes with speaker, date and source link from a verified library. Never generates a quote.",
+                        _obj({"query": {"type": "string", "description": "a question or statement, e.g. 'Is bitcoin digital gold?'"},
+                              "stance": {"type": "integer", "enum": [-2, -1, 0, 1, 2], "description": "one stop on the spectrum; omit for all five"},
+                              "topic": {"type": "string", "description": "force a topic key instead of the best match"},
+                              "limit": {**NUM, "description": "quotes per stance, 1 to 10 (default 3)"}}, ["query"]), {"readOnlyHint": True, "openWorldHint": False}),
+    "brain_selfcheck": (brain_selfcheck, "How far to trust the brain: out-of-sample coverage of its 90% error bars (textbook against adaptive conformal), "
+                        "the stacked weights on five rival world models, and each measured link's robustness value to an unseen common cause.",
+                        _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
     "run_hedge_scenario": (run_hedge_scenario, "Run the TLT hedge policy hedge.tlt.v2 on a stock-bond correlation path and a 36-month inflation reading.",
                            _obj({"correlation": {**NUM, "description": "one 63-day stock-bond correlation"},
                                  "correlations": {"type": "array", "items": NUM, "description": "a path of correlations, oldest first"},
