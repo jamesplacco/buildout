@@ -3,7 +3,7 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
-Version 0.18 makes the engine stronger and the page easier to read. The mark is now the guilloche lotus of the Today desk's rosette (`scripts/make_logo.py` writes it as SVG symbols and the page icon). The engine gains a framework in `buildout/core/`:
+Version 0.18 makes the engine stronger and the page easier to read. The mark is the Today desk's rosette, the green lotus, drawn from the same curves (`scripts/make_logo.py` writes it as an SVG symbol and the page icon). The layout follows the firm and product sites: a centred navigation band, 44-pixel pill buttons, and a floating desk bar with the way back, the map and the way on. The engine gains a framework in `buildout/core/`:
 a content-addressed cache (`cache.py`: results keyed by the source of the code and a canonical hash of the data, written
 atomically with a checksum, corrupted entries dropped and recomputed, network inputs served from the last good copy when
 a source fails), a parallel runner (`runner.py`: engines ordered by the files they read and write, each in its own

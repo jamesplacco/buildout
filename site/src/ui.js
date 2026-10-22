@@ -4,15 +4,15 @@
   const NS = "http://www.w3.org/2000/svg";
   const $ = (s, r = document) => r.querySelector(s);
 
-  /* ---------- the Buildout mark (v0.18): the guilloche lotus of the Today desk's rosette, one set of symbols
-     (site/src/logo.html, from scripts/make_logo.py) used in the header, every desk, empty states and the brain.
-     The small cut reads at 16 to 32 pixels, the middle cut at 40 to 100, the full rosette above. ---------- */
-  function lotusSvg(cut, cls) {
+  /* ---------- the Buildout mark (v0.18): the Today desk's rosette, the green lotus, exactly as drawRosette draws it,
+     one symbol (site/src/logo.html, from scripts/make_logo.py) used in the header, every desk, empty states and the
+     brain ---------- */
+  function lotusSvg(cls) {
     const s = document.createElementNS(NS, "svg");
-    s.setAttribute("viewBox", "0 0 100 100");
+    s.setAttribute("viewBox", "0 0 330 330");
     s.setAttribute("class", cls || "lotus");
     const u = document.createElementNS(NS, "use");
-    u.setAttribute("href", "#lotus" + (cut ? "-" + cut : ""));
+    u.setAttribute("href", "#lotus");
     s.append(u);
     return s;
   }
@@ -20,7 +20,7 @@
     const wrap = document.createElement("span");
     wrap.className = cls || "vmark";
     wrap.setAttribute("aria-hidden", "true");
-    wrap.append(lotusSvg(cls === "brand-mark" ? "md" : "sm"));
+    wrap.append(lotusSvg());
     return wrap;
   }
   function placeMarks() {

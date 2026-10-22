@@ -687,7 +687,7 @@
   function logoMark(parent, x, y, size, attrs = {}) {
     const g = svg("g", Object.assign({ transform: `translate(${(x - size / 2).toFixed(1)},${(y - size / 2).toFixed(1)})`, class: "logo-mark" }, attrs), parent);
     svg("circle", { cx: size / 2, cy: size / 2, r: size / 2, fill: "var(--surface)" }, g);
-    const u = svg("use", { href: "#lotus-md", width: size, height: size }, g);
+    const u = svg("use", { href: "#lotus", width: size, height: size }, g);
     u.style.color = "var(--accent)";
     return g;
   }

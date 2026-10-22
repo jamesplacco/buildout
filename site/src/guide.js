@@ -110,6 +110,7 @@
     GPOS.heads = view ? [...view.querySelectorAll(":scope > .section > .section-head h2, :scope > section > .section-head h2")] : [];
     if (here) here.textContent = "";
     guideProgress();
+    deskbarFor(v);
   }
   function guideHere() {
     const here = $("#sub-here");
@@ -127,11 +128,13 @@
       const max = document.documentElement.scrollHeight - innerHeight;
       bar.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0})`;
       guideHere();
+      deskbarScroll();
     });
   }
   function wireGuide() {
     buildGuides();
     buildMap();
+    buildDeskbar();
     addEventListener("scroll", guideProgress, { passive: true });
     addEventListener("keydown", (e) => {
       if (e.key !== "0" || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -142,4 +145,49 @@
       const d = $("#sitemap");
       if (d && !d.hidden) closeMap(); else openMap(current);
     });
+  }
+  // the floating desk bar: the way back, where you are, the map and the way on, following the reader down the desk
+  function buildDeskbar() {
+    if ($("#deskbar")) return;
+    const bar = h("nav", "deskbar");
+    bar.id = "deskbar";
+    bar.setAttribute("aria-label", "Desk navigation");
+    const prev = h("a", "db-prev"), here = h("button", "db-here"), map = h("button", "db-map"), next = h("a", "db-next");
+    here.type = "button"; map.type = "button";
+    here.title = "Back to the top of this desk";
+    here.addEventListener("click", () => scrollTo({ top: 0, behavior: calmMotion() ? "auto" : "smooth" }));
+    map.addEventListener("click", () => openMap(current));
+    const ic = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    ic.setAttribute("viewBox", "0 0 16 16"); ic.setAttribute("width", "17"); ic.setAttribute("height", "17"); ic.setAttribute("aria-hidden", "true");
+    ic.innerHTML = '<path d="M1.5 3.5l4-1.5 5 1.5 4-1.5v10.5l-4 1.5-5-1.5-4 1.5z M5.5 2v10.5 M10.5 3.5V14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path>';
+    map.append(ic, h("span", "db-map-l", "All desks"));
+    map.setAttribute("aria-label", "All desks");
+    bar.append(prev, h("span", "db-sep"), here, h("span", "db-sep"), map, next);
+    document.body.append(bar);
+  }
+  const calmMotion = () => !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function deskbarFor(v) {
+    buildDeskbar();
+    const bar = $("#deskbar"), i = VIEWS.indexOf(v), pv = i > 0 ? VIEWS[i - 1] : null, nx = guideNext(v);
+    const prev = bar.querySelector(".db-prev"), next = bar.querySelector(".db-next"), here = bar.querySelector(".db-here");
+    prev.replaceChildren(h("span", null, "←"), h("span", "db-label", pv ? TAB_NAME[pv] : ""));
+    prev.href = pv ? "#" + pv : "#desk";
+    prev.hidden = !pv;
+    prev.setAttribute("aria-label", pv ? `Previous desk: ${TAB_NAME[pv]}` : "");
+    next.replaceChildren(h("span", "db-label", nx ? TAB_NAME[nx] : ""), h("span", null, "→"));
+    next.href = nx ? "#" + nx : "#desk";
+    next.hidden = !nx;
+    next.setAttribute("aria-label", nx ? `Next desk: ${TAB_NAME[nx]}` : "");
+    here.replaceChildren(h("b", null, TAB_NAME[v] || v), h("small", null, ""));
+    deskbarScroll();
+  }
+  function deskbarScroll() {
+    const bar = $("#deskbar");
+    if (!bar) return;
+    const show = scrollY > 420 && !document.body.classList.contains("printing");
+    bar.classList.toggle("show", show);
+    bar.setAttribute("aria-hidden", show ? "false" : "true");
+    bar.querySelectorAll("a, button").forEach((x) => { x.tabIndex = show ? 0 : -1; });
+    const sm = bar.querySelector(".db-here small"), here = $("#sub-here");
+    if (sm) sm.textContent = here && here.textContent ? here.textContent : (DESK_GUIDE[current] || {}).q || "";
   }

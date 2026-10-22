@@ -1,7 +1,5 @@
-"""Write the Buildout mark, the guilloche lotus of the Today desk's rosette, as SVG symbols (site/src/logo.html) and a
-favicon. The curves are the rosette's own: hypotrochoids with R = 120 and r = 45 (five petals over three turns),
-nudged in pen offset and rotation, inside a ring of epitrochoids. A small cut with fewer, bolder curves stays legible
-at 16 to 32 pixels; the full cut is for 48 pixels and up.
+"""Write the Buildout mark, the Today desk's guilloche rosette (the green lotus) exactly as views.js draws it, as an
+SVG symbol (site/src/logo.html) and the page icon (site/src/favicon.svg). Same curves, same colours, same hairlines.
 
     python scripts/make_logo.py
 """
@@ -36,33 +34,28 @@ def path(pts, scale, c=50.0):
     return "M" + "L".join(f"{c + x * scale:.1f} {c + y * scale:.1f}" for x, y in pts) + "Z"
 
 
-def build(cut: str) -> str:
-    """Hairlines that stay hairlines at every size (non-scaling strokes), as the canvas rosette draws them. The small
-    cut keeps three curves so the five loops read at 16 to 32 pixels; the middle cut eight; the full cut all 18."""
-    scale = 46.0 / 162.0                                         # the outer ring's reach (150 + a pen of 11.4) to 46 units
-    n = {"sm": 3, "md": 8, "lg": 18}[cut]
-    inner = " ".join(path(hypo(120, 45, 36 + (k * 17 / max(1, n - 1)) * 2.2, (k * 17 / max(1, n - 1)) * math.pi / 54, steps=240 if cut == "sm" else 420), scale) for k in range(n))
+def rosette(steps_in: int = 700, steps_out: int = 450) -> str:
+    """The Today desk's rosette exactly (views.js drawRosette): on a 330 by 330 field centred at 165, 18
+    hypotrochoids (R 120, r 45, pen 36 + 2.2k, turned k pi / 54) in the accent at half opacity, inside 10
+    epitrochoids (R 140, r 10, pen 6 + 0.6k, turned 0.05k) in the muted ink at 0.35; hairlines of 0.6 pixels at
+    every size, as the canvas draws them."""
+    inner = " ".join(path(hypo(120, 45, 36 + k * 2.2, k * math.pi / 54, steps=steps_in), 1.0, 165.0) for k in range(18))
+    outer = " ".join(path(epi(140, 10, 6 + k * 0.6, k * 0.05, steps=steps_out), 1.0, 165.0) for k in range(10))
     vs = 'vector-effect="non-scaling-stroke"'
-    if cut == "sm":
-        ring = f'<circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45" {vs}/>'
-        return ring + f'<path d="{inner}" fill="none" stroke="currentColor" stroke-width="1.1" {vs}/>'
-    if cut == "md":
-        ring = f'<circle cx="50" cy="50" r="47.5" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4" {vs}/>'
-        return ring + f'<path d="{inner}" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.85" {vs}/>'
-    rr = " ".join(path(epi(140, 10, 6 + k * 0.6, k * 0.05), scale) for k in range(10))
-    return (f'<path d="{rr}" fill="none" stroke="var(--muted, #6f7c76)" stroke-width="0.6" opacity="0.4" {vs}/>'
-            f'<path d="{inner}" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.6" {vs}/>')
+    # the hairline and its opacity are the canvas's (0.6 px at 0.5 and 0.35); a page may thicken them for a small
+    # rendering through --lotus-w and --lotus-o, which reach inside the symbol because custom properties inherit
+    return (f'<path d="{inner}" fill="none" stroke="currentColor" style="stroke-width: var(--lotus-w, 0.6px); opacity: var(--lotus-o, 0.5)" {vs}/>'
+            f'<path d="{outer}" fill="none" stroke="var(--muted, #6f7c76)" style="stroke-width: var(--lotus-w, 0.6px); opacity: calc(var(--lotus-o, 0.5) * 0.7)" {vs}/>')
 
 
 def main() -> None:
-    sm, md, lg = build("sm"), build("md"), build("lg")
+    ro = rosette()
     (ROOT / "site" / "src" / "logo.html").write_text(
         '<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">'
-        f'<symbol id="lotus-sm" viewBox="0 0 100 100">{sm}</symbol><symbol id="lotus-md" viewBox="0 0 100 100">{md}</symbol>'
-        f'<symbol id="lotus" viewBox="0 0 100 100">{lg}</symbol></svg>\n')
-    fav = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" color="#1d5b49">{sm}</svg>'
+        f'<symbol id="lotus" viewBox="0 0 330 330">{ro}</symbol></svg>\n')
+    fav = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 330" color="#1d5b49">{rosette(200, 130).replace("var(--muted, #6f7c76)", "#6f7c76")}</svg>'
     (ROOT / "site" / "src" / "favicon.svg").write_text(fav)
-    print("logo.html", len(sm) + len(md) + len(lg), "bytes; favicon", len(fav))
+    print("logo.html", len(ro), "bytes; favicon", len(fav))
 
 
 if __name__ == "__main__":

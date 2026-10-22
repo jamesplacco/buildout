@@ -1675,4 +1675,86 @@ html.map-open { overflow: hidden; }
 .sub-here { margin-left: auto; align-self: center; font: italic 400 var(--t-sm)/1.2 var(--f-body); color: var(--muted); max-width: 40ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 720px) { .sub-here { display: none; } }
 @media print { .dguide, .dnext, .readbar, .sitemap, #map-open { display: none !important; } }
+
+/* ---------- v0.18: the layout. A centred navigation band in the manner of the firm and product sites (a clear
+   brand at left, the five sections in the middle, the tools at right; the desks of the section as large pills on a
+   second line), buttons sized to be pressed (44 pixels, pill-shaped, filled for the main action), and a floating
+   bar that follows the reader down every desk with the way back, the way on and the map. ---------- */
+:root { --hit: 44px; --ease: cubic-bezier(.2, .7, .2, 1); }
+.topbar { background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px); }
+.topbar-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px 20px; padding-block: 12px 10px; }
+.brand { padding-bottom: 0; font: 600 1.55rem/1 var(--f-display); letter-spacing: 0.1em; gap: 12px; justify-self: start; }
+.brand svg.lotus { width: 44px; height: 44px; --lotus-w: 0.9px; --lotus-o: 0.85; }
+.hero-mark svg.lotus { --lotus-w: 0.8px; --lotus-o: 0.75; }
+.vmark svg.lotus, .empty svg.lotus { --lotus-w: 0.8px; --lotus-o: 0.9; }
+.mark-end svg.lotus { width: 120px; height: 120px; }
+.search-btn, .tool-btn { white-space: nowrap; }
+.tabs { justify-self: center; background: color-mix(in srgb, var(--ink) 6%, transparent); border-radius: 999px; padding: 4px; gap: 2px; }
+.tabs a { font: 600 1.08rem/1 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.07em; text-transform: none; padding: 11px 15px; min-height: 40px; display: inline-flex; align-items: center; border-radius: 999px; border: 0; color: var(--ink-2); transition: background-color .2s var(--ease), color .2s var(--ease); }
+.tabs a:hover { color: var(--ink); background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.tabs a[aria-current="page"] { background: var(--accent); color: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 4px 14px color-mix(in srgb, var(--accent) 28%, transparent); }
+.tools { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.search-btn, .tool-btn { height: 40px; margin: 0; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--rule); font: 500 0.98rem/1 var(--f-body); color: var(--ink); background: var(--surface); transition: border-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--ease); }
+.search-btn:hover, .tool-btn:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(0, 0, 0, .07); transform: translateY(-1px); }
+.subtabs { justify-content: center; gap: 8px; padding-block: 2px 12px; }
+.subtabs .sub-label { display: none; }
+.subtabs a { font: 500 1rem/1 var(--f-body); padding: 10px 17px; min-height: 40px; display: inline-flex; align-items: center; border: 1.5px solid var(--rule); border-radius: 999px; background: var(--surface); color: var(--ink); transition: all .2s var(--ease); }
+.subtabs a:hover { border-color: var(--accent); background: var(--accent-wash); transform: translateY(-1px); }
+.subtabs a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.sub-here { display: none; }
+/* buttons people know to press */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--hit); padding: 0 22px; border-radius: 999px; font: 600 1.02rem/1.1 var(--f-body); letter-spacing: 0.01em; border-width: 1.5px; box-shadow: 0 1px 2px rgba(0, 0, 0, .1), 0 6px 18px color-mix(in srgb, var(--accent) 22%, transparent); transition: transform .2s var(--ease), box-shadow .2s var(--ease), background-color .2s var(--ease); }
+.btn:hover { filter: none; background: color-mix(in srgb, var(--accent) 86%, #000); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 10px 24px color-mix(in srgb, var(--accent) 30%, transparent); }
+.btn:active { transform: none; }
+.btn.ghost { box-shadow: none; border: 1.5px solid var(--accent); }
+.btn.ghost:hover { background: var(--accent-wash); }
+.seg { gap: 8px; }
+.seg button { min-height: 42px; padding: 9px 17px; border-radius: 999px; border: 1.5px solid var(--rule); font: 500 0.98rem/1.15 var(--f-body); color: var(--ink); background: var(--surface); transition: all .2s var(--ease); }
+.seg button:hover:not([aria-pressed="true"]) { border-color: var(--accent); background: var(--accent-wash); transform: translateY(-1px); }
+.seg button[aria-pressed="true"] { box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 25%, transparent); }
+.pill { display: inline-flex; align-items: center; min-height: 40px; padding: 9px 16px; font: 500 0.96rem/1.15 var(--f-body); border: 1.5px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; transition: all .2s var(--ease); }
+.pill:hover { border-color: var(--accent); background: var(--accent-wash); transform: translateY(-1px); }
+.toc { gap: 8px; }
+.toc a { font-size: 0.96rem; padding: 9px 15px; min-height: 40px; display: inline-flex; align-items: center; border: 1.5px solid var(--rule); color: var(--ink); transition: all .2s var(--ease); }
+.toc a:hover { background: var(--accent-wash); transform: translateY(-1px); }
+input[type="text"], input[type="number"], input[type="search"], select, textarea { min-height: 42px; font-size: 1rem; }
+.dguide-map { min-height: 40px; padding: 0 18px; border: 1.5px solid var(--accent); color: var(--accent); background: transparent; font: 600 0.98rem/1 var(--f-body); }
+.dguide-map:hover { background: var(--accent); color: var(--surface); }
+.dnext-a { transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease); }
+.dnext-a:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 0, 0, .08); }
+/* the floating desk bar */
+.deskbar { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: flex; align-items: center; gap: 6px; padding: 6px; max-width: calc(100% - 32px);
+  background: color-mix(in srgb, var(--surface) 86%, transparent); backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px);
+  border: 1px solid var(--rule); border-radius: 999px; box-shadow: 0 10px 40px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .06);
+  transform: translate(-50%, 140%); opacity: 0; transition: transform .35s var(--ease), opacity .35s var(--ease); }
+.deskbar.show { transform: translate(-50%, 0); opacity: 1; }
+.deskbar a, .deskbar button { display: inline-flex; align-items: center; gap: 6px; min-height: var(--hit); padding: 0 16px; border-radius: 999px; border: 0; background: transparent; color: var(--ink); font: 500 0.98rem/1.1 var(--f-body); text-decoration: none; cursor: pointer; white-space: nowrap; }
+.deskbar a:hover, .deskbar button:hover { background: var(--accent-wash); }
+.deskbar .db-here { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; padding: 0 16px; min-width: 0; max-width: 34ch; }
+.deskbar .db-here b { font: 600 1.02rem/1.1 var(--f-display); }
+.deskbar .db-here small { font: italic 400 0.85rem/1.1 var(--f-body); color: var(--muted); overflow: hidden; text-overflow: ellipsis; max-width: 32ch; }
+.deskbar .db-next { background: var(--accent); color: var(--surface); font-weight: 600; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent); }
+.deskbar .db-next:hover { background: color-mix(in srgb, var(--accent) 86%, #000); }
+.deskbar .db-sep { width: 1px; align-self: stretch; margin-block: 8px; background: var(--rule); }
+.page { padding-bottom: 96px; }
+@media (max-width: 1000px) {
+  .topbar-inner { grid-template-columns: minmax(0, 1fr) auto; }
+  .tabs { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; justify-content: space-between; overflow-x: auto; }
+  .tabs a { padding: 10px 12px; font-size: 1rem; flex: 1 0 auto; justify-content: center; }
+}
+@media (max-width: 720px) {
+  .brand { font-size: 1.25rem; } .brand svg.lotus { width: 34px; height: 34px; } .brand .ver { display: none; }
+  .tools { gap: 6px; } .search-btn, .tool-btn { padding: 0 11px; }
+  .subtabs { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; }
+  .subtabs::-webkit-scrollbar { display: none; }
+  .subtabs a { flex: none; padding: 9px 14px; }
+  .deskbar { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: none; transform: translateY(140%); justify-content: space-between; }
+  .deskbar.show { transform: none; }
+  .deskbar .db-label, .deskbar .db-map-l { display: none; }
+  .deskbar .db-here { flex: 1; max-width: none; }
+  .deskbar a, .deskbar button { padding: 0 12px; }
+}
+@media (max-width: 460px) { .tabs { padding: 3px; } .tabs a { padding: 9px 6px; font-size: 0.9rem; letter-spacing: 0.02em; flex: 1 1 auto; } }
+@media (prefers-reduced-motion: reduce) { .deskbar, .btn, .seg button, .pill, .subtabs a, .toc a, .dnext-a { transition: none; } }
+@media print { .deskbar { display: none !important; } .page { padding-bottom: 0; } }
 </style>
