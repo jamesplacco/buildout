@@ -2,11 +2,11 @@
      boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {
-    today: { name: "Today", views: ["desk", "noteworthy"] },
-    decide: { name: "Decide", views: ["solve", "decide", "games", "brain", "journal", "swans"] },
+    today: { name: "Today", views: ["desk", "ooda", "noteworthy"] },
+    decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "brain", "journal", "swans"] },
     markets: { name: "Markets", views: ["rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
     research: { name: "Research", views: ["fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
-    reference: { name: "Methods", views: ["engine", "appendix"] },
+    reference: { name: "Methods", views: ["engine", "engines", "appendix"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -29,8 +29,11 @@
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
     noteworthy: () => {}, buyside: drawBuyside, solve: () => guard("The solver", () => renderSolve(false), $("#rz-ledger")), games: drawGames,
-    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); },
+    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); guard("Causal statistics", renderCausalPanel, $("#brl-crisis")); },
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
+    ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); },
+    positions: () => guard("Positions", renderPositions, $("#ps-grid")),
+    engines: () => guard("Engine room", renderEngines, $("#en-table")),
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
     making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },
   };
@@ -196,6 +199,11 @@
     if (bs && buyOk(bs)) { LIVE.buyside = bs; guard("Buyside", buildBuyside, $("#bs-sel")); if (current === "buyside") guard("Buyside", drawBuyside); } else if (bs) LIVE.problems.push("buyside.json did not match the expected shape");
     if (fd && feedsOk(fd)) { LIVE.feeds = fd; guard("Noteworthy", buildNoteworthy, $("#nw-grid")); } else if (fd) LIVE.problems.push("feeds.json did not match the expected shape");
     if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} data sources`; }
+  });
+  Promise.all(["ooda", "causal", "engines"].map((n) => loadJSON(`data/${n}.json`))).then(([oo, ca, en]) => {
+    if (oo && oodaOk(oo)) { LIVE.ooda = oo; if (current && ["ooda", "positions"].includes(current)) guard(TAB_NAME[current], RENDER[current]); } else if (oo) LIVE.problems.push("ooda.json did not match the expected shape; the page keeps the engine snapshot");
+    if (ca && ca.regimes && ca.regimes.low_inflation && ca.regimes.low_inflation.crisis) LIVE.causal = ca;
+    if (en && Array.isArray(en.engines)) LIVE.engines = en;
   });
   Promise.all(["macro", "report", "capex", "status", "research"].map((n) => loadJSON(`data/${n}.json`))).then(([m, r, cx, st, rs]) => {
     if (cx) {

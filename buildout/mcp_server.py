@@ -19,6 +19,9 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
                           the gap between seeing a value and setting it, which world fits, how surprising the readings
                           are, each cause's but-for share, the channels, how a bad quarter happens, and counterfactuals
   learned_structure       the causal order learned from the data, and how each measured link has moved over time
+  decision_loop           observe, orient, decide, act: the engine's whole decision record
+  position_valuation      one holding's accounting, implied growth against base rates, and the two-sided why
+  hedge_book              switch prebuilt hedges on or off and see the book in every scenario, plus the advisor
 """
 from __future__ import annotations
 
@@ -580,6 +583,60 @@ def learned_structure(ctx: Context, args: dict) -> dict:
             "evidence": "Estimated; the order assumes linear links and no hidden common cause"}
 
 
+def decision_loop(ctx: Context, args: dict) -> dict:
+    """Observe, orient, decide, act: the engine's ooda.json if the daily run wrote one, else built now from the data folder."""
+    from . import ooda
+    live = ctx.load("ooda")
+    if isinstance(live, dict) and live.get("decide"):
+        o, src = live, "ooda.json (latest daily run)"
+    else:
+        cfg = Path(__file__).resolve().parents[1] / "config.toml"
+        o, src = ooda.build(ctx.data_dir, str(cfg) if cfg.exists() else None), "built now from the data folder and the shipped snapshots"
+    part = args.get("part")
+    if part is not None and part not in ("observe", "orient", "decide", "act"):
+        raise ToolError("part must be observe, orient, decide or act")
+    keep = [part] if part else ["observe", "orient", "decide", "act"]
+    return {"source": src, "as_of": o.get("as_of"), **{k: o.get(k) for k in keep}, "frameworks": o.get("frameworks"), "note": LIMIT_NOTE}
+
+
+def position_valuation(ctx: Context, args: dict) -> dict:
+    """One position's fundamentals, accounting quality, implied growth against base rates, and the two-sided why."""
+    from . import ooda, valuation
+    t = str(args.get("ticker", "")).upper()
+    snap = ooda.positions_snapshot()
+    if t not in snap["ttm"]:
+        raise ToolError(f"unknown ticker {t!r}; covered: {', '.join(snap['ttm'])}")
+    funds = ooda.merged_fundamentals(snap, ctx.load("capex"))
+    rf = ooda._ten_year(ctx.load("macro"), snap.get("rf_10y", 4.2)) / 100
+    mc = _req_num(args, "market_cap_bn", 1, 1e5, snap["market_caps"][t]["market_cap"])
+    beta = _req_num(args, "beta", 0.2, 4, snap["betas"].get(t, 1.2))
+    r = valuation.analyze_position(t, funds[t], mc, rf, beta)
+    r["inputs_source"] = {"fundamentals": funds[t].get("source"), "period_end": funds[t].get("period_end"), "price": snap["market_caps_as_of"]}
+    return r
+
+
+def hedge_book(ctx: Context, args: dict) -> dict:
+    """Switch prebuilt hedges on or off at chosen sizes and see the book in every scenario, plus the advisor."""
+    from . import hedgebook
+    on = args.get("on") or []
+    if not isinstance(on, list) or any(h not in hedgebook.HEDGE_IDS for h in on):
+        raise ToolError(f"on must list hedge ids from: {', '.join(hedgebook.HEDGE_IDS)}")
+    sizes = {h["id"]: h["default"] for h in hedgebook.HEDGES}
+    for k, v in (args.get("sizes") or {}).items():
+        spec = next((h for h in hedgebook.HEDGES if h["id"] == k), None)
+        if spec is None or isinstance(v, bool) or not isinstance(v, (int, float)) or not spec["range"][0] <= v <= spec["range"][1]:
+            raise ToolError(f"size for {k!r} must be within {spec['range'] if spec else 'a known hedge'}")
+        sizes[k] = float(v)
+    e = _req_num(args, "equity", 0.0, 1.5, 1.0)
+    obs = _signals(args)
+    post = reasoner.posterior([s["prior"] for s in reasoner.SCENARIOS], reasoner.SIGNALS, obs)["posterior"]
+    r = hedgebook.evaluate({h: sizes[h] for h in on}, e, post)
+    adv = hedgebook.advisor(sizes, e, post)
+    return {"on": on, "sizes": sizes, "equity": e, "by_scenario": {s["id"]: {"book": b, "hedged": x} for s, b, x in zip(reasoner.SCENARIOS, r["base"], r["rets"])},
+            "growth_3m": r["ce"], "worst_3m": r["worst"], "cost_bp": r["cost_bp"], "loss_limit": adv["loss_limit"],
+            "advisor": {k: adv[k][:3] for k in ("cheapest_meeting_limit", "best_growth", "best_worst_case")}, "catalog": hedgebook.catalog(), "note": LIMIT_NOTE}
+
+
 # ---------------------------------------------------------------- registry
 def _obj(props: dict, required: list[str] | None = None) -> dict:
     s = {"type": "object", "properties": props, "additionalProperties": False}
@@ -611,6 +668,16 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                                 "nav": {**NUM, "description": "total account value including cash; default positions plus cash"},
                                 "cash": {**NUM, "description": "cash balance, same units as market_value"}}, ["positions"]),
                           {"readOnlyHint": True, "openWorldHint": False}),
+    "decision_loop": (decision_loop, "The engine's decision loop: what the data says (observe), what it means and what each price requires (orient), the "
+                      "solver, the hedge book and an action per position with its frameworks (decide), and proposals, what to watch and when to look again (act).",
+                      _obj({"part": {"type": "string", "enum": ["observe", "orient", "decide", "act"]}}), {"readOnlyHint": True, "openWorldHint": False}),
+    "position_valuation": (position_valuation, "One holding's accounting quality, the 10-year growth its price requires (reverse DCF), how often companies that size "
+                           "achieved it (base rates), and the case the price is right and wrong. Override market value or beta to test.",
+                           _obj({"ticker": {"type": "string"}, "market_cap_bn": NUM, "beta": NUM}, ["ticker"]), {"readOnlyHint": True, "openWorldHint": False}),
+    "hedge_book": (hedge_book, "Switch the prebuilt hedges (TLT, put spread, collar, gold, VIX calls, index short, semis short, trend cut, de-gross) on or off "
+                   "at chosen sizes: the book in every scenario, growth, worst case, cost, and the advisor's sets.",
+                   _obj({"on": {"type": "array", "items": {"type": "string"}}, "sizes": {"type": "object", "additionalProperties": NUM},
+                         "equity": {**NUM, "description": "equity exposure, x NAV"}, "signals": SIGNALS}), {"readOnlyHint": True, "openWorldHint": False}),
     "run_hedge_scenario": (run_hedge_scenario, "Run the TLT hedge policy hedge.tlt.v2 on a stock-bond correlation path and a 36-month inflation reading.",
                            _obj({"correlation": {**NUM, "description": "one 63-day stock-bond correlation"},
                                  "correlations": {"type": "array", "items": NUM, "description": "a path of correlations, oldest first"},

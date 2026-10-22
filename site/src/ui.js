@@ -46,7 +46,7 @@
     root.querySelectorAll('svg[role="img"]').forEach((s) => { if (s.querySelector("[tabindex]")) s.setAttribute("role", "group"); });
     // a table that scrolls sideways must be reachable from the keyboard
     root.querySelectorAll(".tablewrap").forEach((w) => {
-      if (w.scrollWidth > w.clientWidth + 1) { w.tabIndex = 0; w.setAttribute("role", "region"); w.setAttribute("aria-label", "Table, scrolls sideways"); }
+      if (w.scrollWidth > w.clientWidth) { w.tabIndex = 0; w.setAttribute("role", "region"); w.setAttribute("aria-label", "Table, scrolls sideways"); }
       else if (w.getAttribute("role") === "region") { w.removeAttribute("tabindex"); w.removeAttribute("role"); w.removeAttribute("aria-label"); }
     });
   }

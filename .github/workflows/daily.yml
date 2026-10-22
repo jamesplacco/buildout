@@ -79,6 +79,10 @@ jobs:
         continue-on-error: true
         run: python -m buildout reason --out site/data
 
+      - name: Decision engines and the manifest (valuation, causal statistics, hedge book, decision loop; no network)
+        continue-on-error: true
+        run: python -m buildout engine --out site/data --only valuation,causal,hedges,ooda
+
       - name: Status (freshness and sanity checks for the page)
         if: always()
         run: python -m buildout status --out site/data

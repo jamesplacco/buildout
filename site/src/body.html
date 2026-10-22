@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.10</span>
+      Buildout <span class="ver">v0.11</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -1391,6 +1391,10 @@
         <div class="svgbox" id="brl-chart"></div><p class="sentence" id="brl-t"></p>
         <p class="hint">Each link as a random walk, smoothed by a Kalman filter and the Rauch-Tung-Striebel smoother, with a 90% band; how fast it may drift is chosen by maximum likelihood, so the data decides whether the 2022 break was a step or a slide.</p></figure>
     </div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">What each asset did in stocks' worst months, by regime</span><div class="tablewrap"><table class="rz" id="brl-crisis"></table></div><p class="hint">Average 3-month-change z-score in the 10% of months when stocks fell most. A hedge earns its place by what it does here, not on average.</p></div>
+      <div class="panel"><span class="panel-title">Who predicts whom (Granger, 1990 to 2021)</span><ol class="br-list" id="brl-granger"></ol><p class="hint">Two lags of one series improving the forecast of another, F-test at 5%. Predictive precedence, not proof of cause; read beside the learned order.</p></div>
+    </div>
     <div class="panel"><span class="panel-title">How fragile is each measured link?</span><p class="sentence" id="brl-frag-t"></p>
       <div class="tablewrap"><table class="rz" id="brl-frag"></table></div>
       <p class="hint">Least squares against a Huber fit that lets big months count linearly, t-statistics with Newey-West errors that do not assume independent months, and the number of the most influential months that, dropped, would reverse the sign (each count checked by refitting; "over 10%" means it would not reverse). A link that flips on three months is a hypothesis, however large its t.</p></div>
@@ -1408,6 +1412,90 @@
     </div>
     <details class="tableview"><summary>Show every node's response as a table</summary><div class="tablewrap"><table id="br-table"></table></div></details>
     <div class="math"><span class="mlabel">The arithmetic</span>Order <var>k</var>: <var>x</var><sub>k</sub> = <var>W</var>&#8868;<var>x</var><sub>k&minus;1</sub>, with <var>x</var><sub>0</sub> the shock. Total over <var>K</var> orders = &sum;<sub>k=1..K</sub> <var>x</var><sub>k</sub>, which tends to the Leontief inverse [(<var>I</var> &minus; <var>W</var>&#8868;)<sup>&minus;1</sup> &minus; <var>I</var>] <var>x</var><sub>0</sub> when the spectral radius &rho;(<var>W</var>) is below 1 (estimated by Gelfand's formula, &rho; = lim &#8214;<var>W</var><sup>n</sup>&#8214;<sup>1/n</sup>). Measured links: recursive regressions of standardized monthly changes in the order oil, CPI, 10-year, stocks, VIX, gold, per regime; the slider blends the two sets. Robustness: 400 draws with every weight ~ N(<var>w</var>, <var>sd</var>), sd = the regression's standard error or half a judged weight. Inverse: the minimum-norm driver shock <var>s</var> = <var>y</var> &middot; <var>m</var> &divide; &#8214;<var>m</var>&#8214;<sup>2</sup>, where <var>m</var><sub>i</sub> is the total effect of driver <var>i</var> on the target.</div>
+  </section>
+</section>
+
+<!-- ======================= OODA ======================= -->
+<section class="view" id="view-ooda" hidden aria-labelledby="oo-title">
+  <div class="vhead">
+    <p class="eyebrow">Decision loop · Observe, orient, decide, act</p>
+    <h1 id="oo-title">From the data to what to do, in one loop.</h1>
+    <p class="lede">The engine reads the market, explains it, checks what each position's price requires against how often that has ever happened, runs the book and its hedges through the scenarios, and writes proposals with their reasons and the evidence that would reverse them. Nothing here is an order.</p>
+    <p class="t7-status" id="oo-status"></p>
+  </div>
+  <ol class="oo-strip" id="oo-strip" aria-label="The four steps"></ol>
+  <section class="section" id="oo-obs-sec" aria-labelledby="oo-obs-title">
+    <div class="section-head"><p class="eyebrow">1 · Observe</p><h2 id="oo-obs-title">What the data says now</h2><p class="prose" id="oo-obs-t"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">What moved most (3-month change, σ)</span><ol class="br-list" id="oo-moved"></ol></div>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Which world the readings fit</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="oo-world"></div></figure>
+    </div>
+  </section>
+  <section class="section" id="oo-ori-sec" aria-labelledby="oo-ori-title">
+    <div class="section-head"><p class="eyebrow">2 · Orient</p><h2 id="oo-ori-title">What it means for the book</h2><p class="prose" id="oo-ori-t"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Competing explanations</span><ol class="br-list" id="oo-expl"></ol><p class="sentence" id="oo-link"></p></div>
+      <div class="panel"><span class="panel-title">What each asset did in stocks' worst months</span><div class="tablewrap"><table class="rz" id="oo-crisis"></table></div><p class="hint" id="oo-crisis-t"></p></div>
+    </div>
+    <div class="panel"><span class="panel-title">What each price requires, against the base rates</span><div class="tablewrap"><table class="rz" id="oo-pos"></table></div>
+      <p class="hint">Implied growth: the ten-year revenue growth a reverse DCF needs to justify today's enterprise value. Base rate: the share of US companies of the same size that achieved it, 1950 to 2015, real. Full workings on the <a href="#positions">Positions</a> desk.</p></div>
+  </section>
+  <section class="section" id="oo-dec-sec" aria-labelledby="oo-dec-title">
+    <div class="section-head"><p class="eyebrow">3 · Decide</p><h2 id="oo-dec-title">The choice, the hedges, and every position</h2><p class="prose" id="oo-dec-t"></p></div>
+    <div class="panel hb">
+      <div class="panel-head"><span class="panel-title">Prebuilt hedges: switch any on or off</span><span class="hint" id="hb-sum" aria-live="polite"></span></div>
+      <div class="hb-grid" id="hb-list"></div>
+      <div class="field"><div class="field-top"><label for="hb-e">Equity exposure, x NAV</label><output id="hb-e-o" for="hb-e"></output></div><input type="range" id="hb-e" min="0.2" max="1.5" step="0.05" value="1"></div>
+      <div class="grid2">
+        <div><h3 class="h3">The book in each scenario</h3><div class="tablewrap"><table class="rz" id="hb-scen"></table></div></div>
+        <div><h3 class="h3">The advisor</h3><ol class="br-list" id="hb-adv"></ol><p class="hint" id="hb-adv-t"></p></div>
+      </div>
+      <div class="fd-actions"><button class="pill" type="button" id="hb-reset">All off</button><button class="pill" type="button" id="hb-copy">Copy as config.toml</button><span class="hint" id="hb-msg" aria-live="polite"></span></div>
+      <textarea id="hb-export" class="fd-export" hidden readonly aria-label="Hedge settings for config.toml"></textarea>
+    </div>
+    <div class="panel"><span class="panel-title">Every position, through the frameworks</span><div class="tablewrap"><table class="rz" id="oo-actions"></table></div>
+      <p class="hint">Outside view sets the direction, inside view the size: a price outside 99% of base-rate outcomes trims half, or a quarter when the company already grows faster than the price needs and its accounting is not weak; a price outside 95% holds and leans on the hedges. Rules are stated in the engine's code and labelled; none is a forecast.</p></div>
+  </section>
+  <section class="section" id="oo-act-sec" aria-labelledby="oo-act-title">
+    <div class="section-head"><p class="eyebrow">4 · Act</p><h2 id="oo-act-title">Proposals, what to watch, and when to look again</h2><p class="prose" id="oo-act-t"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Proposals (for a person to review)</span><ol class="br-list" id="oo-props"></ol></div>
+      <div class="panel"><span class="panel-title">Watch, then loop</span><ol class="br-list" id="oo-watch"></ol><p class="sentence" id="oo-review"></p>
+        <div class="fd-actions"><button class="pill" type="button" id="oo-copy">Copy the decision record</button><span class="hint" id="oo-msg" aria-live="polite"></span></div>
+        <textarea id="oo-export" class="fd-export" hidden readonly aria-label="Decision record"></textarea></div>
+    </div>
+  </section>
+  <footer class="foot"><p id="oo-frames"></p></footer>
+</section>
+
+<!-- ======================= POSITIONS ======================= -->
+<section class="view" id="view-positions" hidden aria-labelledby="ps-title">
+  <div class="vhead">
+    <p class="eyebrow">Positions · Fundamentals, accounting and what the price requires</p>
+    <h1 id="ps-title">Is the market being rational about each name, and if not, why?</h1>
+    <p class="lede">For each holding: the accounting under the earnings, the growth today's price requires by reverse DCF, how often companies that size have ever done it, the case the price is right and the case it is wrong, each in points of required growth.</p>
+    <p class="t7-status" id="ps-status"></p>
+  </div>
+  <div class="filters" id="ps-filter" role="group" aria-label="Filter positions"></div>
+  <div class="cards2" id="ps-grid"></div>
+  <div class="math"><span class="mlabel">How it is computed</span>Enterprise value = market value &minus; cash + debt. Free cash flow margin moves in a straight line from today's (after stock pay) to the steady-state margin (what the business throws off when it stops growing: the lower of after-tax operating earnings and operating cash flow &minus; D&amp;A &minus; stock pay, over revenue, so customer prepayments, deferred taxes and other timing do not flatter it) over ten years; terminal growth 3%; discount rate = 10-year yield + beta &times; 4.5% equity premium, blended with after-tax debt. The implied growth solves PV = EV by bisection. Base rates: Mauboussin, Callahan and Majd, The Base Rate Book (2016), 10-year real sales CAGR by starting size, 1950 to 2015; implied nominal growth less 2.5% inflation is compared with them.</div>
+  <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are a dated market snapshot. Assumptions are labelled. Research on a model book, not advice.</p></footer>
+</section>
+
+<!-- ======================= ENGINES ======================= -->
+<section class="view" id="view-engines" hidden aria-labelledby="en-title">
+  <div class="vhead">
+    <p class="eyebrow">Engine room · The data engine behind the page</p>
+    <h1 id="en-title">The engines are the product. The page is the harness.</h1>
+    <p class="lede">Every number on this page comes from an engine: a pure function of dated files, run daily, isolated so one failure never stops the rest, and recorded with the content hashes of what it read and wrote. The same engines answer any assistant through the MCP server.</p>
+  </div>
+  <section class="section" aria-labelledby="en-reg-title">
+    <div class="section-head"><p class="eyebrow">Registry</p><h2 id="en-reg-title">What runs, what it reads, what it writes</h2><p class="prose" id="en-t"></p></div>
+    <div class="tablewrap"><table class="rz" id="en-table"></table></div>
+  </section>
+  <section class="section" aria-labelledby="en-flow-title">
+    <div class="section-head"><p class="eyebrow">Flow</p><h2 id="en-flow-title">From sources to decisions</h2></div>
+    <ol class="en-flow" id="en-flow"></ol>
   </section>
 </section>
 
@@ -1903,7 +1991,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">210 of 210 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">232 of 232 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -1928,7 +2016,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, ten tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, thirteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -1941,6 +2029,11 @@
           <tr><td>Worst case over a KL ball against a brute-force optimizer</td><td class="r">agree to 1e-5; constraint binds</td></tr>
           <tr><td>Overfitting test: thirty equal rules, then one with a real edge</td><td class="r">PBO near 50%; then below 10%</td></tr>
           <tr><td>Price screen: a bad print, a frozen feed, a gap, a real crash</td><td class="r">three flagged; the crash is not</td></tr>
+          <tr><td>Reverse DCF solves PV = EV; base rates invert; quality on planted accounts; prepayments do not lift the steady state</td><td class="r">exact to 1e-9; every flag found</td></tr>
+          <tr><td>Hedge book: off is the book, each hedge pays where it says, hedges add up</td><td class="r">exact; one false label caught and fixed</td></tr>
+          <tr><td>Hedge book and advisor, Python and page</td><td class="r">agree to 1e-12; same sets chosen</td></tr>
+          <tr><td>Granger and partial correlation on planted chains</td><td class="r">direction and independence found</td></tr>
+          <tr><td>Decision rules, the loop, and an engine that fails on purpose</td><td class="r">as stated; failure isolated</td></tr>
           <tr><td>Depreciation model against reported depreciation</td><td class="r">exact in the fit year</td></tr>
           <tr><td>Page decision math (Kelly, Brier, luck, rates of change) against the engine</td><td class="r">agree to 1e-12</td></tr>
           <tr><td>Brain: planted links recovered by regime; page propagation against the engine and the Leontief inverse</td><td class="r">agree to 1e-12</td></tr>

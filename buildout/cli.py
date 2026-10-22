@@ -14,6 +14,8 @@
   python -m buildout feeds --out site/data      Noteworthy: RSS, Substack, Telegram, X (with a token), Reddit, HN, news
   python -m buildout sources --out site/data    the registry of every source the engine and the page read
   python -m buildout mcp --data site/data       MCP server on stdio: research, risk and reasoning tools, never orders
+  python -m buildout engine --out site/data     run the offline engines (valuation, causal, hedges, decision loop) and the manifest
+  python -m buildout ooda --out site/data       the decision loop alone: observe, orient, decide, act
 """
 from __future__ import annotations
 
@@ -75,11 +77,33 @@ def main(argv: list[str] | None = None) -> None:
     rz.add_argument("--out", default="out", help="folder with the other daily files; reason.json is written there")
     jn = sub.add_parser("journal")
     jn.add_argument("path", help="decision journal exported from the page (JSON)")
+    en = sub.add_parser("engine")
+    en.add_argument("--out", default="out")
+    en.add_argument("--only", default=None, help="comma-separated engine names")
+    en.add_argument("--list", action="store_true")
+    oo = sub.add_parser("ooda")
+    oo.add_argument("--out", default="out")
+    oo.add_argument("--config", default="config.toml")
     mc = sub.add_parser("mcp")
     mc.add_argument("--data", default=None, help="folder with the engine's JSON outputs")
     mc.add_argument("--config", default=None, help="model config; config.private.toml is refused")
     a = ap.parse_args(argv)
 
+    if a.cmd == "engine":
+        from .engine import REGISTRY, run as run_engines
+        if a.list:
+            for e in REGISTRY:
+                print(f"{e.name:10s} {'offline' if e.offline else 'network'}  reads {', '.join(e.reads) or '-'}  writes {', '.join(e.writes)}  ({e.does})")
+            return
+        m = run_engines(a.out, a.only.split(",") if a.only else None)
+        for r in m["engines"]:
+            print(f"{r['name']:10s} {r['status']:9s} {r.get('seconds', '')}  {r.get('error', '')}")
+        return
+    if a.cmd == "ooda":
+        from .jsonout import write
+        from .ooda import build as build_ooda
+        print("wrote", write(build_ooda(a.out, a.config), a.out, "ooda.json"))
+        return
     if a.cmd == "mcp":
         from .mcp_server import Context, serve
         serve(Context(a.data, a.config))
