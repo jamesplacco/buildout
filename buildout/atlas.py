@@ -678,13 +678,13 @@ def layout(W: np.ndarray, groups: list[int], seed: int = 3, iters: int = 400, sp
     same = np.equal.outer(groups, groups)
     k = 2.2 / math.sqrt(p)
     t = 0.12
+    Aw = A * (1 + 0.6 * same) + 0.04 * same                        # attraction, plus a gentle pull toward one's community
     for it in range(iters):
-        d = X[:, None, :] - X[None, :, :]
-        dist = np.sqrt((d ** 2).sum(-1)) + 1e-9
-        rep = (k * k / dist ** 2)[:, :, None] * d
-        att = -((A * (1 + 0.6 * same)) * dist / k)[:, :, None] * d
-        att += -(0.04 * same * dist / k)[:, :, None] * d          # gentle pull toward one's community
-        F = (rep + att).sum(axis=1) - 0.02 * X                     # and a little gravity to the centre
+        dx = X[:, 0:1] - X[:, 0]                                    # pairwise differences, one coordinate at a time (no p x p x 2 temporaries)
+        dy = X[:, 1:2] - X[:, 1]
+        dist = np.sqrt(dx * dx + dy * dy) + 1e-9
+        coef = k * k / (dist * dist) - Aw * dist / k               # repulsion minus attraction, per pair
+        F = np.column_stack([(coef * dx).sum(axis=1), (coef * dy).sum(axis=1)]) - 0.02 * X   # and a little gravity to the centre
         L = np.sqrt((F ** 2).sum(-1)) + 1e-9
         X = X + (F / L[:, None]) * np.minimum(L, t)[:, None]
         t *= 0.992

@@ -3,6 +3,24 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.16 makes data the focus. `datahub.py` reads Databento (split-adjusted daily OHLCV and futures), Yahoo's
+chart API, Stooq, the SEC's XBRL company facts, the Treasury's par curve, the CFTC's traders-in-financial-futures and
+FRED behind one interface, tried in priority order per ticker with the answering source recorded, plus a connection
+check (`python -m buildout connect`). `technicals.py` is a tested technical-analysis library (moving averages, RSI,
+MACD, Bollinger, ATR, ADX, stochastic, Williams %R, CCI, TSI, Ichimoku, Supertrend, parabolic SAR, Keltner, Donchian,
+OBV, money flow, Chaikin money flow, VWAP, swing levels, Fibonacci, pivots, divergences, the trend template and
+relative strength) with an event study of thirteen signals on each asset's own history (Newey-West t, Benjamini-
+Hochberg) and a composite that weights each signal by its evidence. `statements.py` turns company facts into annual
+statements and computes margins, ROIC, cash conversion, accruals, capex against depreciation, growth and its
+acceleration, the Rule of 40, Piotroski F, Altman Z'' and Beneish M, marking unknown what the filings do not carry.
+`rl.py` is a reinforcement-learning sizing agent (fitted Q iteration over trend, volatility, valuation and drawdown,
+walk-forward from 1940): it does not beat holding, and the 10-month trend rule beats both. `ml.py` adds the Rapach-
+Strauss-Zhou combination with Campbell-Thompson restrictions, the first model to beat the historical mean out of
+sample (+2.5% skill, t 1.45), and an accuracy-weighted ensemble. The Edge desk adds a distribution scorecard of each
+holding's own disclosures. The page adds a Technicals and fundamentals desk with a broker-CSV reader that runs in the
+browser (Robinhood, Schwab, Fidelity exports); `python -m buildout positions export.csv` does the same locally.
+The mind's layout is three times faster and the page no longer runs the solver at load (about 5.4s to 1.6s).
+
 Version 0.15 asks how far to trust any model, including its own. `ml.py` scores six machine-learning models (CAPE
 regression, ridge, random forest, gradient boosting, nearest analogs, an ensemble) on forecasting 12-month real returns
 and 15% falls every month since 1940 with purged walk-forward refits, against the historical mean with Diebold-Mariano
@@ -335,6 +353,10 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 156 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.16 | `datahub.py` | Databento, Yahoo, Stooq, SEC company facts, Treasury curve, CFTC positioning, FRED; per-ticker fallbacks; connection check; broker CSV import; the market run |
+| | `technicals.py` | Indicator library, signals, chart structure, event study with Newey-West and BH, evidence-weighted composite judged out of sample |
+| | `statements.py` | Annual statements from XBRL company facts; ratios; Piotroski F, Altman Z'', Beneish M; valuation multiples with a price |
+| | `rl.py` | Fitted Q iteration sizing agent over 54 market states and the last action, walk-forward, bootstrap and deflated Sharpe |
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
 | | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |
 | | `damodaran.py` | Implied equity risk premium; narrative-to-numbers DCF with fading growth, target margin, sales-to-capital reinvestment and failure odds |
@@ -420,6 +442,13 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.16: indicators match their definitions (SMA, true range, Wilder ATR, OBV, WMA, Fibonacci) and stay in range;
+  signals never change when only the future changes; the event study finds planted momentum and noise earns little
+  weight; a planted company passes all nine Piotroski tests and its Altman Z'' and ratios match by hand; Beneish is
+  neutral when nothing changes; Yahoo and Stooq parsers adjust and clean; the hub falls back in order; broker exports
+  parse the same in Python and on the page; the connection check never prints a secret; the RL agent learns a planted
+  policy and its states use only earlier data; the combination obeys its restrictions; accuracy weights use only
+  known outcomes; the layout is fast and deterministic.
 - v0.15: walk-forward finds a planted predictor (skill above 0.3, DM t above 2) and not a fake one, and never trains
   on an outcome that overlaps the forecast; CPCV gives low overfitting odds to a real linear signal and high odds to a
   memorizing model; conformal intervals cover 80% of iid errors; kappa reads 0 for a bell curve and positive for

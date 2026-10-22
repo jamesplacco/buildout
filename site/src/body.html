@@ -9,7 +9,7 @@
         <path d="M6 20 C10 19, 12 15, 14 13 S19 8, 22 8" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"></path>
         <circle cx="22" cy="8" r="2" fill="var(--surface)"></circle>
       </svg>
-      Buildout <span class="ver">v0.15</span>
+      Buildout <span class="ver">v0.16</span>
     </a>
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
@@ -152,7 +152,7 @@
     </div>
     <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
     <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 304 of 304 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 322 of 322 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
         <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
@@ -2157,7 +2157,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">304 of 304 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">322 of 322 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2376,10 +2376,44 @@
   </section>
 </section>
 
+<!-- ======================= v0.16: TECHNICALS AND FUNDAMENTALS ======================= -->
+<section class="view" id="view-analysis" hidden aria-labelledby="an-title">
+  <div class="vhead"><p class="eyebrow">Technicals and fundamentals · tested, sourced, connected</p><h1 id="an-title">Every chart signal judged on its own asset, every ratio read from the filing</h1>
+    <p class="lede">Technical analysis here is an indicator library plus a test: each signal's edge on the asset's own history, with errors that respect overlap and a false-discovery correction across the signals tried, and a composite that weights each signal only by how well it worked. Fundamental analysis starts from the XBRL facts in the company's own filings and computes what an analyst would by hand: margins, returns on capital, cash conversion, accruals, capex against depreciation, growth and its acceleration, and the Piotroski, Altman and Beneish scores, with every tag recorded.</p></div>
+  <div class="at-tiles" id="an-tiles"></div>
+  <section class="section" aria-labelledby="an-ta-title">
+    <div class="section-head"><p class="eyebrow">Technicals</p><h2 id="an-ta-title">Readings, structure and what each signal has earned</h2><p class="prose">The daily run adds every holding, the market and the hedges from Databento, then Yahoo, then Stooq. Here, the public daily series this build can reach.</p></div>
+    <div class="seg m-seg" id="an-seg" role="group" aria-label="Choose a series"></div>
+    <div class="lb-read-grid" id="an-read"></div>
+    <ul class="br-list" id="an-text"></ul>
+    <div class="grid2"><div class="panel"><span class="panel-title">Event study: each signal on this series' own history</span><div class="tablewrap"><table id="an-ev"></table></div>
+        <p class="hint">Daily edge is the average next-day log return earned by following the signal. The weight is t²/(t² + 4) when the edge has the signal's own sign and zero otherwise, so a t of 2 earns half weight. "Fade" signals bet on reversal. The VIX is an index, not something you can hold.</p></div>
+      <div class="panel"><span class="panel-title">Fibonacci retracements of the last year's move</span><div class="tablewrap"><table id="an-fib"></table></div></div></div>
+  </section>
+  <section class="section" aria-labelledby="an-fa-title">
+    <div class="section-head"><p class="eyebrow">Fundamentals</p><h2 id="an-fa-title">From the filings: ratios, scores and flags</h2><p class="prose">Shown here from the SEC facts fixture, which carries cash flow, capex, revenue, operating income and debt; scores whose inputs it lacks are marked unknown rather than failed. The daily Action reads each company's full company facts with your SEC contact string.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="an-co-all"></table></div></div>
+    <div class="seg m-seg" id="an-co-seg" role="group" aria-label="Choose a company"></div>
+    <div class="panel"><div class="tablewrap"><table id="an-co"></table></div><div id="an-co-scores"></div><ul class="br-list" id="an-co-flags"></ul><p class="hint" id="an-co-tags"></p></div>
+  </section>
+  <section class="section" aria-labelledby="an-data-title">
+    <div class="section-head"><p class="eyebrow">Data</p><h2 id="an-data-title">The data hub: every source, its key and whether it answers</h2>
+      <p class="prose">One interface to Databento, Yahoo, Stooq, the SEC, the Treasury, the CFTC, FRED and the GitHub mirrors, tried in priority order per ticker with the source recorded. Keys live in the repository's secrets: DATABENTO_API_KEY, and SEC_USER_AGENT as a variable. Run <code>python -m buildout connect</code> to check them.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="an-conn"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="an-broker-title">
+    <div class="section-head"><p class="eyebrow">Tool · your positions</p><h2 id="an-broker-title">Read your broker's export against the model book</h2>
+      <p class="prose">Robinhood, Schwab, Fidelity and most brokers export positions as a CSV. Choose the file or paste it: the page reads it in this browser, compares your weights with the model book, and sends nothing anywhere. There is no Robinhood connector in Claude's directory today; the engine's MCP tool analyze_positions takes the same weights from any assistant that can read your account.</p></div>
+    <div class="grid2"><div class="panel"><div class="field"><label for="an-file">Positions CSV</label><input id="an-file" type="file" accept=".csv,text/csv"></div>
+        <div class="field"><label for="an-paste">Or paste it</label><textarea id="an-paste" rows="5" placeholder="Symbol,Quantity,Price&#10;NVDA,100,180&#10;MSFT,40,520"></textarea></div></div>
+      <div class="panel" aria-live="polite"><div id="an-broker"><p class="hint">Nothing loaded.</p></div></div></div>
+  </section>
+</section>
+
 <!-- ======================= v0.15: THE ML LAB ======================= -->
 <section class="view" id="view-ml" hidden aria-labelledby="ml-title">
-  <div class="vhead"><p class="eyebrow">The machine-learning lab · forecasting, judged honestly</p><h1 id="ml-title">Machine learning does not beat the average at forecasting next year's return</h1>
-    <p class="lede">Six models, from one-variable CAPE regression to gradient boosting, forecast the S&amp;P 500's next twelve months each month since 1940, refit only on what was known at the time. None beats the plain historical average out of sample. That is the finding, and it is the useful one: it tells you which model claims to distrust and why the engine leans on valuation ranges, hedges and sizing instead of point forecasts.</p>
+  <div class="vhead"><p class="eyebrow">The machine-learning lab · forecasting, judged honestly</p><h1 id="ml-title">Only the humblest model beats the average at forecasting next year's return</h1>
+    <p class="lede">Seven models, from one-variable CAPE regression to gradient boosting, forecast the S&amp;P 500's next twelve months each month since 1940, refit only on what was known at the time. The flexible ones lose to the plain historical average out of sample. The one that wins is the simplest: an average of eight one-variable forecasts with Campbell and Thompson's sign restrictions, by a small margin that is not yet statistically significant, which is what Rapach, Strauss and Zhou found on other data. A reinforcement-learning sizing agent, judged the same way, does not beat holding either. That is the useful finding: it says which model claims to distrust and why the engine leans on ranges, hedges and sizing rules instead of point forecasts.</p>
     <p class="sentence" id="ml-sum"></p></div>
   <div class="at-tiles" id="ml-tiles"></div>
   <section class="section" aria-labelledby="ml-sb-title">
@@ -2408,11 +2442,19 @@
       <p class="prose">Nearest neighbours on the same standardized features, no two within 18 months of each other. The eight nearest months run from July 1929 to October 2018, and they split evenly: four were followed by a fall of 15% or more within a year (1929, 1966, 2000 and 2007) and four by gains. Novelty measures how far today sits from its 24 nearest months against how far a typical month sits from its own; a model is extrapolating when today is further out than most of history.</p></div>
     <div class="grid2"><div class="panel"><div class="tablewrap"><table id="ml-an"></table></div></div><div class="panel"><div class="tablewrap"><table id="ml-shift"></table></div></div></div>
   </section>
+  <section class="section" aria-labelledby="rl-title">
+    <div class="section-head"><p class="eyebrow">Reinforcement learning</p><h2 id="rl-title">A learning agent that sizes the position, judged out of sample</h2>
+      <p class="prose">Each month the agent picks 0, 0.5, 1 or 1.5 times capital in stocks from what it could know: the trend (a month late), volatility and valuation terciles set on earlier data only, the drawdown and its own last choice. Its reward is the month's log growth after trading and borrowing costs, Kelly's objective, with an optional penalty on losses. Because one investor's trades do not move the market, this is a contextual bandit with switching costs, and fitted Q iteration on the record solves it exactly; thin states are shrunk toward the all-month average so it cannot memorize a handful of months. Retrained every year from 1940 and compared with holding and the 10-month trend rule on the same months.</p>
+      <p class="sentence" id="rl-sum"></p></div>
+    <div class="at-tiles" id="rl-tiles"></div>
+    <div class="grid2"><div class="panel"><div class="svgbox" id="rlx-curve"></div><div class="legend" id="rlx-curve-l"></div></div>
+      <div class="panel"><div class="tablewrap"><table id="rl-cfg"></table></div><p class="hint">Four configurations were tried (with and without a loss penalty, with a light and a heavy prior); all four are shown, and the deflated chance counts all of them.</p></div></div>
+  </section>
   <section class="section" aria-labelledby="ml-use-title">
     <div class="section-head"><p class="eyebrow">Use</p><h2 id="ml-use-title">What a PM should take from this</h2></div>
     <ol class="m-steps">
       <li><b>Distrust any return forecast that has not been scored like this.</b> Purged, walk-forward, against the historical mean, with a Diebold-Mariano test. Most published predictors fail it (Goyal, Welch and Zafirov); here, every model does.</li>
-      <li><b>Prefer the simple model when the complex one only wins in sample.</b> The one-variable CAPE regression loses least out of sample; in cross-validation gradient boosting fits the past best and the future worst. Complexity bought fit, not foresight.</li>
+      <li><b>Prefer the simple model when the complex one only wins in sample.</b> The restricted combination of one-variable forecasts is the only model above the mean out of sample; in cross-validation gradient boosting fits the past best and the future worst. Complexity bought fit, not foresight.</li>
       <li><b>Use ML for what it is good at here: ranges, analogs and novelty.</b> The conformal interval says how wide the honest range is; the analogs say which histories to read; novelty says when every model is extrapolating.</li>
       <li><b>Size from ranges, not points.</b> A forecast of +2.4% with an interval of ±23% is a statement about uncertainty, and the sizing and hedge desks are built for that.</li>
     </ol>
@@ -2495,6 +2537,12 @@
     <div class="seg m-seg" id="ed-seg" role="group" aria-label="Filter sources"></div>
     <div class="ed-grid" id="ed-src"></div>
   </section>
+  <section class="section" aria-labelledby="ed-dist-title">
+    <div class="section-head"><p class="eyebrow">Distribution is the new moat</p><h2 id="ed-dist-title">Who already reaches the customer</h2>
+      <p class="prose">When a capable model can be copied in months, the durable advantage is the path to the user: the seats, the daily users, the developers and the installed base that receive a new feature on day one. Each figure below is the company's own disclosure, checked on its page by a second agent. Nvidia and Broadcom do not disclose user counts, so their entries are revenue, labelled as such.</p></div>
+    <div class="ed-grid" id="ed-dist"></div>
+    <div class="panel"><span class="panel-title">The idea, and the case against it</span><div id="ed-dist-idea"></div></div>
+  </section>
   <section class="section" aria-labelledby="ed-erp-title">
     <div class="section-head"><p class="eyebrow">Tool · Damodaran</p><h2 id="ed-erp-title">The implied equity risk premium</h2><p class="prose">The discount rate that makes the index equal to the present value of the cash it is expected to return: five years of growth, then growth at the risk-free rate forever. Subtract the risk-free rate and what is left is the premium the market is pricing in. It needs no forecast of the index, only of cash flows.</p></div>
     <div class="grid2"><div class="panel"><div class="rt-form">
@@ -2568,8 +2616,8 @@
     <ol class="cd-flow">
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
-      <li><b>Know.</b> ontology.py defines 606 concepts and their relations; knowledge.json holds 418 facts, papers and source profiles, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 2,614 nodes and about 5,600 typed links, with 606 concepts, and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li>
+      <li><b>Know.</b> ontology.py defines 630 concepts and their relations; knowledge.json holds 454 facts, papers, source profiles and distribution metrics, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 2,697 nodes and about 5,800 typed links, with 630 concepts, and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li>
       <li><b>Decide.</b> ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
       <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
@@ -2601,6 +2649,13 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v16-t">
+    <div class="section-head"><p class="eyebrow">v0.16</p><h2 id="ag-v16-t">This release, in numbers</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>1</b><span>Research agent</span><small>the distribution metrics each company discloses, and the case for and against distribution as a moat</small></div>
+      <div class="at-kpi"><b>36</b><span>Items found</span><small>30 company metrics and 6 on the idea, each confirmed on its page</small></div>
+      <div class="at-kpi"><b>35 / 1 / 0</b><span>Confirmed / corrected / failed</span><small>by a second agent that reopened every page; the one fix was a date</small></div></div>
+    <p class="prose">The lead wrote the data hub, the technical and fundamental analysis, the reinforcement-learning agent and the faster layout, with synthetic data that plants the answer for every test. The build workspace can reach only GitHub and the package registries, so Databento, the SEC and the quote services are exercised in the daily Action, not here.</p>
   </section>
   <section class="section" aria-labelledby="ag-v15-t">
     <div class="section-head"><p class="eyebrow">v0.15</p><h2 id="ag-v15-t">This release, in numbers</h2></div>

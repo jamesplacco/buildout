@@ -25,6 +25,12 @@
   python -m buildout triage 1.2 8 40 --published --cost-bps 5 --turns 24   a quant's backtest Sharpe after costs, decay and luck
   python -m buildout erp --cash-yield 0.035 --growth 0.06 --rf 0.0513     Damodaran's implied equity risk premium
   python -m buildout dcf --revenue 100 --growth 0.25 --margin 0.30 --target 0.35   Damodaran's narrative-to-numbers DCF
+  python -m buildout connect --out site/data    check every data source and credential (Databento, SEC, Yahoo, Stooq, FRED, Treasury, CFTC)
+  python -m buildout market --out site/data     technical and fundamental analysis for the book (best available source per ticker)
+  python -m buildout ta NVDA                    one ticker's technical read in the terminal
+  python -m buildout fa NVDA                    one company's fundamentals from its filings (needs SEC_USER_AGENT)
+  python -m buildout rl --out site/data         the reinforcement-learning sizing agent, judged out of sample
+  python -m buildout positions robinhood.csv    a broker CSV export to private weights (never committed); pipe to analyze_positions
 """
 from __future__ import annotations
 
@@ -107,6 +113,20 @@ def main(argv: list[str] | None = None) -> None:
     for name in ("ml", "reality"):
         q = sub.add_parser(name)
         q.add_argument("--out", default="out")
+    cn = sub.add_parser("connect")
+    cn.add_argument("--out", default=None)
+    mk = sub.add_parser("market")
+    mk.add_argument("--out", default="out")
+    mk.add_argument("--tickers", default=None, help="comma list; default the model book, the market and the hedges")
+    mk.add_argument("--no-fundamentals", action="store_true")
+    for name in ("ta", "fa"):
+        q = sub.add_parser(name)
+        q.add_argument("ticker")
+    rlp = sub.add_parser("rl")
+    rlp.add_argument("--out", default="out")
+    ps = sub.add_parser("positions")
+    ps.add_argument("csv")
+    ps.add_argument("--write", default=None, help="write the weights as JSON here (keep it out of git)")
     tr = sub.add_parser("triage")
     tr.add_argument("sharpe", type=float)
     tr.add_argument("years", type=float)
@@ -231,6 +251,70 @@ def main(argv: list[str] | None = None) -> None:
         print("wrote", write(o, a.out, "reality.json"))
         for f in o["findings"]:
             print(" ", f)
+        return
+    if a.cmd == "connect":
+        from . import datahub
+        rows = datahub.check()
+        for r in rows:
+            cred = "" if r["credential"] is None else ("key set" if r["credential"] else "no key")
+            print(f"{r['source']:10s} {'ok ' if r['ok'] else 'NO '} {cred:8s} {str(r['ms'] or ''):>6s}ms  {r['what']}  {r['note']}")
+        if a.out:
+            from .jsonout import write
+            print("wrote", write({"checked": __import__("datetime").datetime.utcnow().isoformat(timespec="seconds") + "Z", "sources": rows}, a.out, "connections.json"))
+        return
+    if a.cmd == "market":
+        from . import datahub
+        cfg = load_config("config.toml") if __import__("pathlib").Path("config.toml").exists() else default_config()
+        book = list(getattr(cfg.universe, "book", {}) or {}) or list(cfg.universe.ai_factor)
+        tickers = a.tickers.split(",") if a.tickers else sorted(set(book + [cfg.universe.market] + list(cfg.universe.hedges) + ["SPY", "GLD"]))
+        print(datahub.market(a.out, tickers, bench=cfg.universe.market, fundamentals=not a.no_fundamentals))
+        return
+    if a.cmd == "ta":
+        from . import datahub, technicals
+        df, src, errs = datahub.ohlcv(a.ticker)
+        if df.empty:
+            print("no data:", errs)
+            return
+        b, _, _ = datahub.ohlcv("QQQ")
+        r = technicals.analyze(df, a.ticker, b["close"] if not b.empty else None)
+        print(f"{a.ticker} from {src}, {r['bars']} bars to {r['date']}")
+        for line in technicals.text(r):
+            print(" ", line)
+        for k, v in r["studies"].items():
+            if v.get("t") is not None:
+                print(f"  {k:14s} now {r['signals_now'][k]!s:>4s}  t {v['t']:+.2f}  BH {v.get('bh', 1):.3f}  weight {r['weights'][k]:.2f}")
+        return
+    if a.cmd == "fa":
+        from . import datahub, statements
+        r = statements.analyze(datahub.companyfacts(a.ticker), a.ticker)
+        if not r["ok"]:
+            print(r["note"])
+            return
+        last = r["ratios"][-1]
+        print(f"{a.ticker} fiscal year to {r['fiscal_year_end']}")
+        for k in ("revenue_growth", "gross_margin", "op_margin", "fcf_margin", "roic", "cash_conversion", "accruals", "capex_to_da", "sbc_share_of_cfo", "net_debt_to_ebitda", "rule_of_40"):
+            if last.get(k) is not None:
+                print(f"  {k:20s} {last[k]:+.3f}")
+        for line in r["flags"]:
+            print(" ", line)
+        return
+    if a.cmd == "rl":
+        from . import labs, rl
+        from .jsonout import write
+        o = rl.build(labs.download())
+        print("wrote", write(o, a.out, "rl.json"))
+        for f in o["findings"]:
+            print(" ", f)
+        return
+    if a.cmd == "positions":
+        from . import datahub
+        p = datahub.import_positions(a.csv)
+        if a.write:
+            from pathlib import Path
+            Path(a.write).write_text(json.dumps(p, indent=1))
+            print(f"wrote {len(p['weights'])} positions to {a.write} (keep it out of git)")
+        else:
+            print(json.dumps({"positions": [{"symbol": k, "weight": round(v, 6)} for k, v in p["weights"].items()]}, indent=1))
         return
     if a.cmd == "triage":
         from .assumptions import triage

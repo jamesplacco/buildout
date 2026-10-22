@@ -37,7 +37,7 @@ from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
-         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "labs", "ml", "reality", "edge", "cardroom", "code", "agents"]
+         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -166,6 +166,7 @@ async def extreme_inputs(page, label: str) -> None:
                      ("#cr-d1", 1), ("#cr-d2", 1), ("#cr-cost", 500), ("#cr-lo", 50), ("#cr-hi", 10), ("#cr-spot", 0), ("#cr-fut", -1), ("#cr-t", 0),
                      ("#cr-y-g", -90), ("#cr-y-b", 0), ("#cr-y-life", 0), ("#cr-y-g", 300), ("#cr-y-life", 1)],
         "mind": [("#md-node", "<img src=x onerror=window.__pwned=11>"), ("#md-node", "kelly"), ("#md-cl-q", "batna"), ("#md-cl-q", ""), ("#md-ev-q", "margin debt"), ("#md-ev-q", "zzzz")],
+        "analysis": [("#an-paste", "Symbol,Quantity,Price\nNVDA,100,180\nMSFT,40,520"), ("#an-paste", "garbage<script>window.__pwned=1</script>"), ("#an-paste", "Name,Value\nx,1\ny,2\nz,3"), ("#an-paste", "")],
         "reality": [("#rt-sr", 9.9), ("#rt-yrs", 0.5), ("#rt-n", 100000), ("#rt-cost", 1e6), ("#rt-turn", 0), ("#rt-vol", 1), ("#rt-sr", -4.9), ("#rt-yrs", 200), ("#rt-n", 1),
                     ("#rt-yrs", 0), ("#rt-sr", 1.2), ("#rt-yrs", 8), ("#rt-n", 40), ("#rt-rho", -0.8), ("#rt-rho", 0.8)],
         "edge": [("#ed-erp-cy", 0), ("#ed-erp-cy", 25), ("#ed-erp-g", 40), ("#ed-erp-rf", 0), ("#ed-erp-cy", 0.01), ("#ed-erp-g", -20), ("#ed-erp-cy", 3.5), ("#ed-erp-g", 6), ("#ed-erp-rf", 5.13),
@@ -243,7 +244,7 @@ async def keyboard_and_links(page, label: str) -> None:
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
-                        ("hero", "desk"), ("voices", "desk"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("mind", "mind"), ("md-how-title", "mind"), ("lb-mt-title", "labs"), ("cr-y-t", "cardroom"), ("cd-files-t", "code"), ("ag-v14-t", "agents"), ("ag-v15-t", "agents"), ("ml-cv-title", "ml"), ("rt-triage-title", "reality"), ("ed-dcf-title", "edge"), ("md-net-title", "mind"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
+                        ("hero", "desk"), ("voices", "desk"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("mind", "mind"), ("md-how-title", "mind"), ("lb-mt-title", "labs"), ("cr-y-t", "cardroom"), ("cd-files-t", "code"), ("ag-v14-t", "agents"), ("ag-v15-t", "agents"), ("ag-v16-t", "agents"), ("an-fa-title", "analysis"), ("rl-title", "ml"), ("ed-dist-title", "edge"), ("ml-cv-title", "ml"), ("rt-triage-title", "reality"), ("ed-dcf-title", "edge"), ("md-net-title", "mind"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
                         ("oo-title", "ooda"), ("oo-dec-title", "ooda"), ("ps-title", "positions"), ("en-title", "engines"), ("ooda", "ooda"),
                         ("rzd-title", "solve"), ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),

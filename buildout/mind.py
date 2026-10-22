@@ -75,7 +75,7 @@ GROUP_NAMES = {**{k: v for k, v in ontology.CLUSTERS.items()}, "markets": "Marke
                "voices": "Investor voices", "engine": "The engine room", "world": "The world economy", "evidence": "Signals",
                "companies": "S&P 500 companies"}
 
-FACT_CLUSTER = {"edge_sources": "edge", "model_risk": "reality", "ml_finance": "ml", "private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
+FACT_CLUSTER = {"distribution": "ai", "edge_sources": "edge", "model_risk": "reality", "ml_finance": "ml", "private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
                 "games_negotiation_stats": "games", "trading_structure": "structure"}
 
 # ---------------------------------------------------------------- axes: the claims the mind can weigh
@@ -170,7 +170,13 @@ METHODS = {"labs-trend": ("Trend lab", "The 10-month and 22 other moving-average
            "as-kappa": ("Taleb's kappa", "Fat-tailedness in sample-size terms, for stocks, oil, gas and the VIX.", "assumptions"),
            "as-fragility": ("Fragility heuristic", "Whether the book's losses accelerate in the tail, with and without each hedge.", "assumptions"),
            "dm-erp": ("Implied equity risk premium", "The discount rate that equates the index with its expected cash flows.", "damodaran"),
-           "dm-dcf": ("Narrative-to-numbers DCF", "A story turned into growth, margin, reinvestment, cost of capital and failure risk.", "damodaran")}
+           "dm-dcf": ("Narrative-to-numbers DCF", "A story turned into growth, margin, reinvestment, cost of capital and failure risk.", "damodaran"),
+           "ta-indicators": ("Indicator library", "Moving averages, RSI, MACD, Bollinger, ATR, ADX, stochastic, Ichimoku, Supertrend, SAR, OBV, money flow.", "technicals"),
+           "ta-event": ("Signal event study", "Each signal's edge on the asset's own history, Newey-West t and false-discovery control; weights shrink with evidence.", "technicals"),
+           "fa-statements": ("Statements from filings", "Annual statements from XBRL company facts, latest filing wins, tags recorded.", "statements"),
+           "fa-scores": ("Piotroski, Altman and Beneish", "The three classic accounting scores, with unknown inputs marked unknown.", "statements"),
+           "rl-fqi": ("Fitted Q iteration sizing", "Offline reinforcement learning over trend, volatility, valuation and drawdown, walk-forward from 1940.", "rl"),
+           "dh-check": ("Data connection check", "Credentials and reachability for every data source, with fallbacks per ticker.", "datahub")}
 INDUSTRY_CONCEPTS = {"Semiconductors": ["c:gpu", "c:semis-cycle", "c:custom-silicon"], "Semiconductor Materials & Equipment": ["c:semis-cycle", "c:capex"],
                      "Systems Software": ["c:cloud", "c:hyperscaler"], "Application Software": ["c:cloud", "c:ai-revenue"], "Interactive Media & Services": ["c:hyperscaler", "c:ai-capex"],
                      "Broadline Retail": ["c:cloud"], "Internet Services & Infrastructure": ["c:data-center", "c:neocloud"], "Data Center REITs": ["c:data-center", "c:leases"],
@@ -621,6 +627,36 @@ def signals(K: dict, L: dict | None, research_latest: dict | None, cape_pct: flo
     return S
 
 
+def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
+    """v0.16: the reinforcement-learning agent's record, each series' evidence-weighted technical composite, and the
+    distribution metrics the companies disclose."""
+    S = []
+
+    def add(sid, axis, sign, s, rel, group, text, refs, flip, targets=()):
+        refs = [r for r in refs if not r.startswith("k:") or r[2:] in K]
+        S.append({"id": "s:" + sid, "axis": axis, "sign": sign, "s": s, "rel": rel, "group": group, "text": text, "refs": refs, "flip": flip, "targets": list(targets)})
+    if rlo:
+        b = rlo["configs"][rlo["best"]]
+        add("rl-agent", "edge:ml", 1 if b["sharpe_vs_hold"]["est"] > 0 and rlo["deflated_excess"]["dsr"] > 0.5 else -1, 0.5, 0.7, "rl",
+            f"A reinforcement-learning sizing agent retrained yearly since {rlo['start'][:4]} reached a Sharpe of {b['perf']['sharpe']:.2f} against {rlo['hold']['sharpe']:.2f} for holding and {rlo['trend']['sharpe']:.2f} for the trend rule.",
+            ["e:rl", "c:reinforcement-learning"], "The agent beating the trend rule out of sample.", ["c:reinforcement-learning"])
+        add("rl-trend", "edge:trend", 1 if rlo["trend"]["sharpe"] > rlo["hold"]["sharpe"] else -1, 0.3, 0.6, "rl",
+            f"On the same months the simple 10-month rule beat both holding and the learning agent on Sharpe ({rlo['trend']['sharpe']:.2f}).", ["e:rl", "c:ma10m"], "Holding beating the rule.", [])
+    for key, axis, nm in (("brent", "oil_energy", "Brent"), ("gas", "oil_energy", "Henry Hub gas")):
+        a = (tech or {}).get(key)
+        if a and abs(a["composite"]) > 1e-9:
+            add(f"ta-{key}", axis, 1 if a["composite"] > 0 else -1, round(min(0.4, abs(a["composite"])), 6), 0.25, "technicals",
+                f"{nm}'s technical signals, each weighted by how it worked on {nm}'s own history, net to {a['composite']:+.2f} on a -1 to +1 scale.",
+                ["e:technicals", "c:technical-analysis"], "The weighted signals turning.", ["c:technical-analysis"])
+    dist = [k for k in K.values() if k.get("cluster") == "distribution" and k.get("kind") == "stat" and k.get("ticker") in ("MSFT", "GOOGL", "META")]
+    if dist:
+        pick = {"dm-msft-m365-copilot-seats", "dm-googl-gemini-app-mau", "dm-meta-family-dap"}
+        chosen = [k for k in dist if k["id"] in pick] or dist[:3]
+        add("dist-ai", "ai_boom", 1, 0.4, 0.5, "distribution", "Distribution is reaching AI users at scale: " + "; ".join(k["title"] for k in chosen[:3]) + ".",
+            ["k:" + k["id"] for k in chosen[:3]] + ["c:distribution-moat"], "User growth stalling or paid conversion falling.", ["c:distribution-moat"])
+    return S
+
+
 def more_signals(K: dict, mlo: dict | None, aso: dict | None, positions: dict | None) -> list[dict]:
     """v0.15: evidence from the machine-learning engine, the reality check (assumptions), each holding's reverse DCF and
     the model-risk and machine-learning literature."""
@@ -644,8 +680,13 @@ def more_signals(K: dict, mlo: dict | None, aso: dict | None, positions: dict | 
         csk = c["scores"]["ensemble"]["skill"]
         add("ml-crash", "timing_crashes", 1 if cp < cb else -1, 0.4, max(0.03, min(0.5, csk * 5)), "ml", f"Models put a 15% fall within a year at {cp:.0%} against a base rate of {cb:.0%}; their Brier skill out of sample is {csk:+.1%}.",
             ["e:ml", "c:brier-score"], "Skill turning positive with the probability still above base.", ["c:crash"])
-        add("ml-skill", "edge:ml", 1 if sk > 0 else -1, 0.8, 0.75, "ml_test", f"Purged walk-forward since {mlo['start_oos']}: the ensemble's skill at forecasting 12-month returns is {sk:+.1%} against the historical mean; the best single model, CAPE alone, is {r['scores']['cape_ols']['skill']:+.1%}.",
+        bestk = max((k for k in r["scores"] if k not in ("ensemble", "dmspe")), key=lambda k: r["scores"][k]["skill"])
+        add("ml-skill", "edge:ml", 1 if sk > 0 else -1, 0.8, 0.75, "ml_test", f"Purged walk-forward since {mlo['start_oos']}: the ensemble's skill at forecasting 12-month returns is {sk:+.1%} against the historical mean; the best single model, {r['labels'][bestk].lower()}, is {r['scores'][bestk]['skill']:+.1%}.",
             ["e:ml", "m:ml-walkforward", "c:purged-cv"], "Positive skill on the next decade of data.", ["c:machine-learning", "c:walk-forward"])
+        if "combo" in r["scores"]:
+            cs = r["scores"]["combo"]
+            add("ml-combo", "edge:ml", 1 if cs["skill"] > 0 else -1, 0.5, 0.6, "ml_combo", f"The one model that beats the mean: averaging eight one-variable forecasts with Campbell and Thompson's sign restrictions earns {cs['skill']:+.1%} skill (Diebold-Mariano t {cs['dm']['t']:.1f}), small and not yet significant, as Rapach, Strauss and Zhou found.",
+                ["e:ml", "m:ml-walkforward", "c:forecast-combination"], "The combination's skill turning negative.", ["c:forecast-combination"])
         add("ml-pbo", "edge:ml", -1 if pbo > 0.5 else 1, 0.6, 0.7, "ml_test", f"Across {r['cpcv']['splits']} combinatorial purged splits, the configuration that looked best in sample landed below the median out of sample {pbo:.0%} of the time.",
             ["e:ml", "m:ml-cpcv", "c:pbo"], "A probability of overfitting below 20%.", ["c:cpcv", "c:pbo"])
         add("ml-pbo2", "edge:models", -1 if pbo > 0.5 else 1, 0.4, 0.7, "ml_test", f"Picking the in-sample winner misleads {pbo:.0%} of the time on this data.",
@@ -801,7 +842,7 @@ def propagate(net: dict, fixed: dict | None = None) -> list[float]:
 # ---------------------------------------------------------------- the graph
 def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
           research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
-          positions: dict | None = None, companies: list[dict] | None = None) -> dict:
+          positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -1016,7 +1057,7 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     cape_pct = None
     if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
         cape_pct = labs_L["valuation"]["cape"]["percentile"]
-    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions)
+    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech)
     for s in sigs:
         ax = s["axis"]
         title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]
@@ -1059,13 +1100,18 @@ def place(G: dict) -> None:
     p = len(nodes)
     members = {g: [i for i, n in enumerate(nodes) if n["g"] == g] for g in gs}
     pos = {}
+    gid = np.array([gi[n["g"]] for n in nodes])
+    local = np.zeros(p, dtype=int)
+    for g in gs:
+        local[members[g]] = np.arange(len(members[g]))
+    E = np.array([[i, j, w] for i, j, w, _ in G["edges"]], dtype=float).reshape(-1, 3)
+    ei, ej = E[:, 0].astype(int), E[:, 1].astype(int)
     for g in gs:
         idx = members[g]
-        loc = {i: k for k, i in enumerate(idx)}
         A = np.zeros((len(idx), len(idx)))
-        for i, j, w, _ in G["edges"]:
-            if i in loc and j in loc:
-                A[loc[i], loc[j]] = A[loc[j], loc[i]] = w
+        m = (gid[ei] == gi[g]) & (gid[ej] == gi[g])                # edges inside this group, without a Python scan per group
+        A[local[ei[m]], local[ej[m]]] = E[m, 2]
+        A[local[ej[m]], local[ei[m]]] = E[m, 2]
         pos[g] = fr_layout(A, [0] * len(idx), seed=11 + gi[g], iters=300, spread=True) if len(idx) > 1 else np.zeros((1, 2))
     Gn = len(gs)
     Cw = np.zeros((Gn, Gn))
@@ -1081,19 +1127,15 @@ def place(G: dict) -> None:
     for rank, k in enumerate(order):
         a = 2.399963 * rank                                   # golden-angle spiral start
         C[k] = [math.cos(a) * 0.4 * math.sqrt(rank + 1), math.sin(a) * 0.4 * math.sqrt(rank + 1)]
-    for it in range(900):
-        F = np.zeros_like(C)
-        for a in range(Gn):
-            for b in range(Gn):
-                if a == b:
-                    continue
-                d = C[a] - C[b]
-                dist = math.hypot(*d) + 1e-9
-                need = R[a] + R[b] + 0.08
-                if dist < need:
-                    F[a] += (need - dist) * d / dist * 0.5
-                F[a] -= 0.03 * Cw[a, b] * d / dist * min(1.0, dist)
-        F -= 0.01 * C
+    need = R[:, None] + R[None, :] + 0.08
+    off = ~np.eye(Gn, dtype=bool)
+    for it in range(900):                                     # vectorized over all pairs of groups
+        d = C[:, None, :] - C[None, :, :]
+        dist = np.sqrt((d ** 2).sum(-1)) + 1e-9
+        push = np.where((dist < need) & off, (need - dist) * 0.5, 0.0)
+        pull = np.where(off, 0.03 * Cw * np.minimum(1.0, dist), 0.0)
+        F = ((push - pull) / dist)[:, :, None] * d
+        F = F.sum(axis=1) - 0.01 * C
         C += F * (1 - it / 1000)
     X = np.zeros((p, 2))
     for g in gs:
@@ -1472,6 +1514,7 @@ def build_from_dir(out: Path | str) -> dict:
         except (ValueError, AttributeError):
             rl = None
     rd = lambda n: json.loads((out / n).read_text()) if (out / n).exists() else None
+    tech = {k.lower(): v for k, v in ((rd("technicals.json") or {}).get("assets") or {}).items()}
     G = build(atlas, voices.load(), load_knowledge(), load_countries(), L, rl, mlo=rd("ml.json"), aso=rd("reality.json"), positions=load_positions(),
-              companies=load_companies())
+              companies=load_companies(), rlo=rd("rl.json"), tech=tech)
     return compact(G)

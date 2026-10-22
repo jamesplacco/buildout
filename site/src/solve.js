@@ -297,7 +297,7 @@
         rec.disabled = false;
       });
     }
-    renderSolve(true);
+    if (current === "solve") renderSolve(true);          // the full solve (about a second) runs when the desk opens, not at page load
     guard("Decision boundary", renderBoundary, $("#rz-bnd"));
     guard("Robust solver", renderDRO, $("#rz-dro"));
   }

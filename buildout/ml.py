@@ -103,6 +103,36 @@ def today_row(X: pd.DataFrame, S: pd.DataFrame, cape_now: float | None, y10_now:
 
 
 # ---------------------------------------------------------------- models
+THEORY_SIGN = {"log_cape": -1, "ecy": 1, "infl12": -1, "mom12_1": 1, "trend_gap": 1, "drawdown": -1}   # expected sign of each slope
+
+
+class Combination:
+    """Rapach, Strauss and Zhou (2010): the mean of one-variable OLS forecasts, one per feature, with Campbell and
+    Thompson's (2008) restrictions: a slope with the wrong theoretical sign is set to zero (that forecast becomes the
+    historical mean), and the combined forecast is floored at zero (a stock forecast below zero is not believed)."""
+
+    def __init__(self, feats: list[str], floor: float | None = 0.0):
+        self.feats, self.floor = feats, floor
+
+    def fit(self, X, y):
+        X, y = np.asarray(X, float), np.asarray(y, float)
+        self.mu = float(y.mean())
+        self.coef = []
+        for j, f in enumerate(self.feats):
+            x = X[:, j]
+            v = float(np.var(x))
+            b = float(np.cov(x, y, bias=True)[0, 1] / v) if v > 0 else 0.0
+            if THEORY_SIGN.get(f, 0) * b < 0:
+                b = 0.0
+            self.coef.append((b, float(x.mean())))
+        return self
+
+    def predict(self, X):
+        X = np.asarray(X, float)
+        p = np.mean([self.mu + b * (X[:, j] - m) for j, (b, m) in enumerate(self.coef)], axis=0)
+        return np.maximum(p, self.floor) if self.floor is not None else p
+
+
 def models(task: str) -> dict:
     from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor, RandomForestClassifier, RandomForestRegressor
     from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
@@ -113,13 +143,14 @@ def models(task: str) -> dict:
         return {
             "cape_ols": ("Classic: CAPE alone", lambda: LinearRegression(), ["log_cape"]),
             "ridge": ("Ridge regression", lambda: make_pipeline(StandardScaler(), Ridge(alpha=30.0)), FEATURES),
-            "forest": ("Random forest", lambda: RandomForestRegressor(n_estimators=150, max_depth=4, min_samples_leaf=36, max_features=0.5, random_state=SEED, n_jobs=1), FEATURES),
+            "forest": ("Random forest", lambda: RandomForestRegressor(n_estimators=150, max_depth=4, min_samples_leaf=36, max_features=0.5, random_state=SEED, n_jobs=-1), FEATURES),
             "boost": ("Gradient boosting", lambda: HistGradientBoostingRegressor(max_depth=3, learning_rate=0.04, max_iter=120, min_samples_leaf=36, l2_regularization=1.0, random_state=SEED), FEATURES),
             "analogs": ("Nearest historical analogs", lambda: make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=36)), FEATURES),
+            "combo": ("Combination of one-variable forecasts, restricted", lambda: Combination(FEATURES), FEATURES),
         }
     return {
         "logit": ("Logistic regression", lambda: make_pipeline(StandardScaler(), LogisticRegression(C=0.3, max_iter=500)), FEATURES),
-        "forest": ("Random forest", lambda: RandomForestClassifier(n_estimators=150, max_depth=4, min_samples_leaf=36, max_features=0.5, random_state=SEED, n_jobs=1), FEATURES),
+        "forest": ("Random forest", lambda: RandomForestClassifier(n_estimators=150, max_depth=4, min_samples_leaf=36, max_features=0.5, random_state=SEED, n_jobs=-1), FEATURES),
         "boost": ("Gradient boosting", lambda: HistGradientBoostingClassifier(max_depth=3, learning_rate=0.04, max_iter=120, min_samples_leaf=36, l2_regularization=1.0, random_state=SEED), FEATURES),
         "analogs": ("Nearest historical analogs", lambda: make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=36)), FEATURES),
     }
@@ -177,9 +208,33 @@ def walk_forward(D: pd.DataFrame, task: str, start: int = START_OOS, refit: int 
         stack = np.vstack([preds[k] for k in M if k != "cape_ols"])
         ens = np.where(np.isnan(stack).all(axis=0), np.nan, np.nanmean(np.where(np.isnan(stack), 0, stack), axis=0) * stack.shape[0] / np.maximum(1, (~np.isnan(stack)).sum(axis=0)))
     preds["ensemble"] = ens
+    preds["dmspe"] = dmspe([preds[k] for k in M if k != "cape_ols"], y, ok)
     out = {"task": task, "dates": [d.strftime("%Y-%m") for d in idx[ok]], "y": y[ok].tolist(), "bench": bench[ok].tolist(),
            "preds": {k: v[ok].tolist() for k, v in preds.items()}, "n": int(ok.sum()), "refits": len(blocks),
            "importance": {k: {f: (float(np.mean(v)) if v else None) for f, v in d.items()} for k, d in imp.items()}}
+    return out
+
+
+def dmspe(P: list[np.ndarray], y: np.ndarray, ok: np.ndarray, delta: float = 0.9 ** (1 / 12), min_known: int = 24) -> np.ndarray:
+    """Stock and Watson's discounted-MSPE combination: each model's weight is inversely proportional to its
+    discounted sum of squared errors on outcomes already known at the forecast date (H months back), so the weights
+    use no future information. Equal weights until 24 errors are known."""
+    P = np.vstack(P)
+    n = P.shape[1]
+    out = np.full(n, np.nan)
+    pos = np.where(ok)[0]
+    for a, i in enumerate(pos):
+        known = [j for j in pos[:a] if j <= i - H - 1]
+        col = P[:, i]
+        if len(known) < min_known:
+            out[i] = np.nanmean(col)
+            continue
+        kj = np.array(known)
+        w_t = delta ** (i - 1 - kj)
+        e2 = ((P[:, kj] - y[kj]) ** 2 * w_t).sum(axis=1)
+        w = 1 / np.maximum(e2, 1e-12)
+        good = ~np.isnan(col)
+        out[i] = float((w[good] * col[good]).sum() / w[good].sum()) if good.any() else np.nan
     return out
 
 
@@ -382,8 +437,13 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
             p, _ = _fit_predict(make, feats, Dt.iloc[:cut + 1], Dt[ycol].to_numpy(), row.to_frame().T.astype(float), task)
             now[k2] = float(p[0])
         now["ensemble"] = float(np.mean([v for k2, v in now.items() if k2 != "cape_ols"]))
+        ks = [k2 for k2 in M if k2 != "cape_ols"]
+        yy = np.array(W["y"])
+        age = np.arange(len(yy))[::-1]
+        wts = {k2: 1 / max(float((((np.array(W["preds"][k2]) - yy) ** 2) * (0.9 ** (1 / 12)) ** age)[~np.isnan(W["preds"][k2])].sum()), 1e-12) for k2 in ks}
+        now["dmspe"] = float(sum(wts[k2] * now[k2] for k2 in ks) / sum(wts.values()))
         now["benchmark"] = float(Dt[ycol].mean())
-        res = {"labels": {k2: M[k2][0] for k2 in M} | {"ensemble": "Equal-weight ensemble"}, "scores": sc, "now": now, "n_oos": W["n"], "refits": W["refits"],
+        res = {"labels": {k2: M[k2][0] for k2 in M} | {"ensemble": "Equal-weight ensemble", "dmspe": "Accuracy-weighted ensemble"}, "scores": sc, "now": now, "n_oos": W["n"], "refits": W["refits"],
                "importance": W["importance"], "series": {"dates": W["dates"][::3], "y": [round(v, 4) for v in W["y"][::3]], "bench": [round(v, 4) for v in W["bench"][::3]],
                                                           "ensemble": [round(v, 4) for v in W["preds"]["ensemble"][::3]]}}
         if task == "return":

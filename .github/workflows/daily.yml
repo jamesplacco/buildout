@@ -83,6 +83,24 @@ jobs:
         continue-on-error: true
         run: python -m buildout labs --out site/data
 
+      - name: Data connections (which sources and credentials answer today)
+        continue-on-error: true
+        env:
+          DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+        run: python -m buildout connect --out site/data
+
+      - name: Technical and fundamental analysis (Databento, then Yahoo, then Stooq; SEC filings)
+        continue-on-error: true
+        env:
+          DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+        run: python -m buildout market --out site/data
+
+      - name: Reinforcement-learning sizing agent (fitted Q iteration, judged out of sample)
+        continue-on-error: true
+        run: python -m buildout rl --out site/data
+
       - name: Machine-learning lab (purged walk-forward, CPCV, conformal intervals, analogs)
         continue-on-error: true
         run: python -m buildout ml --out site/data

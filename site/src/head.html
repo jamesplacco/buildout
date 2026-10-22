@@ -1573,4 +1573,13 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .ky-badge { right: max(12px, env(safe-area-inset-right, 0px)); letter-spacing: 0.08em; }
 .ky-msg { left: max(12px, env(safe-area-inset-left, 0px)); max-width: min(560px, calc(100vw - 140px)); color: #e2deff; line-height: 1.35; }
 @media print { .ky-bar, .ky-badge, .ky-msg, #md-net .pill { display: none !important; } .rt-grid, .ed-grid { display: block; } .rt-card, .ed-card { break-inside: avoid; margin-bottom: 8px; } }
+/* ---------- v0.16: analysis desk ---------- */
+#an-paste, #an-file { width: 100%; max-width: 100%; min-width: 0; font: 400 var(--t-sm)/1.4 var(--f-mono); padding: 8px 10px; border-radius: 7px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+#an-paste { min-height: 96px; resize: vertical; }
+.an-scores .at-kpi { min-width: 0; }
+.an-scores { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr)); gap: 10px; margin: 12px 0; }
+#an-text, #an-co-flags { margin: 10px 0; max-width: 90ch; }
+#an-co-tags { overflow-wrap: anywhere; }
+#an-read { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+#an-read .lb-dl dd { white-space: normal; overflow-wrap: anywhere; max-width: 22ch; }
 </style>

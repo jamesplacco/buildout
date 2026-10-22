@@ -20,6 +20,10 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
   reality_check           every model's assumptions tested: tails, dependence, stability, breakpoints, kappa, fragility, worlds
   triage_backtest         a quant's backtest Sharpe after costs, decay, luck across the variants tried and too little data
   damodaran_value         Damodaran's implied equity risk premium and narrative-to-numbers DCF
+  technical_analysis      every indicator, signal, level and event study for a ticker, from the daily run or a live fetch
+  fundamental_analysis    a company's statements, ratios and Piotroski, Altman and Beneish scores from its filings
+  rl_policy               the reinforcement-learning sizing agent's record and today's exposure
+  data_connections        which data sources and credentials the engine can reach
   review_decision         process score for one decision, or the full scorecard for a journal
   compare_explanations    competing explanations of one observation, and the evidence that best separates them
   trace_exposure          the brain: what explains the readings, what follows for each holding, what to look at next,
@@ -911,6 +915,63 @@ def damodaran_value(ctx: Context, args: dict) -> dict:
     raise ToolError("kind must be erp or dcf")
 
 
+def _snap16(part: str):
+    p = Path(__file__).resolve().parents[1] / "site" / "src" / "snap16.js"
+    txt = p.read_text() if p.exists() else ""
+    i = txt.find("const SNAP16 = ")
+    if i < 0:
+        raise ToolError("no v0.16 snapshot: run python scripts/snapshot_v16.py")
+    return json.loads(txt[i + len("const SNAP16 = "):txt.index(";\n", i)].replace("<\\/", "</"))[part]
+
+
+def technical_analysis(ctx: Context, args: dict) -> dict:
+    t = str(args.get("ticker", "")).upper().strip()
+    if not t or len(t) > 12:
+        raise ToolError("ticker is required")
+    T = (ctx.load("technicals") or {}).get("assets") or {}
+    if t not in T:
+        T = {k.upper(): v for k, v in _snap16("technicals").get("assets", {}).items()}
+    if t in T:
+        return T[t]
+    if args.get("live"):
+        from . import datahub, technicals
+        df, src, errs = datahub.ohlcv(t)
+        if df.empty:
+            raise ToolError(f"no data for {t}: {errs}")
+        r = technicals.analyze(df, t)
+        r["source"], r["text"] = src, technicals.text(r)
+        return r
+    raise ToolError(f"{t} is not in the latest run; pass live: true to fetch it (needs network)")
+
+
+def fundamental_analysis(ctx: Context, args: dict) -> dict:
+    t = str(args.get("ticker", "")).upper().strip()
+    C = (ctx.load("statements") or {}).get("companies") or {}
+    if t not in C:
+        C = _snap16("statements").get("companies", {})
+    if t in C:
+        return C[t]
+    if args.get("live"):
+        from . import datahub, statements
+        return statements.analyze(datahub.companyfacts(t), t)
+    raise ToolError(f"{t} is not in the latest run; pass live: true to read its filings (needs SEC_USER_AGENT and network)")
+
+
+def rl_policy(ctx: Context, args: dict) -> dict:
+    o = ctx.load("rl") or _snap16("rl")
+    return {k: o.get(k) for k in ("findings", "best", "now", "configs", "hold", "trend", "deflated_excess", "policy")}
+
+
+def data_connections(ctx: Context, args: dict) -> dict:
+    o = ctx.load("connections")
+    if o:
+        return o
+    if args.get("live"):
+        from . import datahub
+        return {"sources": datahub.check()}
+    return {"sources": _snap16("connections"), "note": "From the last snapshot; pass live: true to test now."}
+
+
 TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "get_research_snapshot": (get_research_snapshot, "The engine's latest research: the out-of-sample TLT hedge line and its band, the stock-bond regime, "
                               "data checks, the reasoner's scenario probabilities and the brain's readings, each with its date and evidence label.",
@@ -968,6 +1029,19 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "damodaran_value": (damodaran_value, "Damodaran's two tools: the implied equity risk premium (kind erp: level, cash_yield, growth, rf) and the "
                         "narrative-to-numbers DCF (kind dcf: revenue, growth_high, margin_now, margin_target, sales_to_capital, wacc_start, wacc_mature, rf, p_fail...).",
                         _obj({"kind": {"type": "string", "enum": ["erp", "dcf"]}, "args": {"type": "object"}}, ["kind"]), {"readOnlyHint": True, "openWorldHint": False}),
+    "technical_analysis": (technical_analysis, "Technical analysis for one ticker: every indicator (moving averages, RSI, MACD, Bollinger, ATR, ADX, stochastic, "
+                           "Ichimoku, Supertrend, parabolic SAR, OBV, money flow), today's signals, support and resistance, Fibonacci, pivots, divergences, the trend "
+                           "template, relative strength, and an event study of each signal on the ticker's own history with false-discovery control.",
+                           _obj({"ticker": {"type": "string"}, "live": {"type": "boolean", "description": "fetch now if the ticker is not in the latest run"}}, ["ticker"]),
+                           {"readOnlyHint": True, "openWorldHint": True}),
+    "fundamental_analysis": (fundamental_analysis, "A company's annual statements from its SEC filings, ratios (margins, ROIC, cash conversion, accruals, capex "
+                             "to depreciation, stock pay, leverage, growth and its acceleration, Rule of 40), Piotroski F, Altman Z'' and Beneish M scores, and flags.",
+                             _obj({"ticker": {"type": "string"}, "live": {"type": "boolean"}}, ["ticker"]), {"readOnlyHint": True, "openWorldHint": True}),
+    "rl_policy": (rl_policy, "The reinforcement-learning sizing agent (fitted Q iteration over trend, volatility, valuation and drawdown states): its out-of-sample "
+                  "record against holding and the trend rule, the deflated chance its edge is real, and today's exposure. Research only.",
+                  _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
+    "data_connections": (data_connections, "Which data sources (Databento, Yahoo, Stooq, SEC, Treasury, CFTC, FRED, GitHub mirrors) and credentials the engine can reach.",
+                         _obj({"live": {"type": "boolean"}}), {"readOnlyHint": True, "openWorldHint": True}),
     "investor_voices": (investor_voices, "What legendary and current investors actually said about a question or claim, arranged from extreme bear (-2) "
                         "to extreme bull (+2): verbatim quotes with speaker, date and source link from a verified library. Never generates a quote.",
                         _obj({"query": {"type": "string", "description": "a question or statement, e.g. 'Is bitcoin digital gold?'"},
