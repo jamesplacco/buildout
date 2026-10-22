@@ -35,6 +35,7 @@ import os
 import re
 import tomllib
 import urllib.parse
+import urllib.request
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -160,7 +161,6 @@ def fetch_source(src: dict, getter=http.get) -> list[dict]:
 def fetch_x(query: str, token: str, getter=http.get) -> list[dict]:
     q = urllib.parse.urlencode({"query": f"({query}) -is:retweet lang:en", "max_results": 50,
                                 "tweet.fields": "created_at,public_metrics,author_id", "expansions": "author_id", "user.fields": "username"})
-    import urllib.request
     req = urllib.request.Request("https://api.twitter.com/2/tweets/search/recent?" + q,
                                  headers={"Authorization": f"Bearer {token}", "User-Agent": UA})
     with urllib.request.urlopen(req, timeout=30) as r:

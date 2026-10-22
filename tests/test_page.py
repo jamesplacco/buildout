@@ -436,7 +436,6 @@ def test_buyside_math_matches_the_engine():
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
 def test_brain_propagation_matches_the_engine():
-    import numpy as np
     from buildout import brain
     cases = [{"fn": "brain", "blend": b, "dataOnly": d, "shock": s, "K": k} for b, d, s, k in
              ((1, False, {"hormuz": 1.5}, 6), (0, False, {"fed": -1.5}, 8), (0.5, True, {"oil": 1}, 4), (1, False, {"capex": -1.5}, 40))]

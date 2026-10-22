@@ -23,7 +23,7 @@ import snapshot_v15 as S15  # noqa: E402
 import snapshot_v16 as S16  # noqa: E402
 
 BANNED = S14.BANNED
-S15.EXTRA_CODE += ["buildout/bondlab.py", "buildout/chronicle.py", "buildout/complexity.py", "scripts/snapshot_v17.py"]
+S15.EXTRA_CODE += ["buildout/bondlab.py", "buildout/chronicle.py", "buildout/complexity.py", "scripts/snapshot_v17.py", "buildout/core/cache.py", "buildout/core/runner.py", "buildout/core/contracts.py", "buildout/core/doctor.py"]
 TAPE_KEEP = ("id", "kind", "ticker", "title", "text", "value", "unit", "as_of", "source_url", "publisher", "verification", "checked")
 
 

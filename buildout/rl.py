@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 
 from . import labs
+from .core import cache
 
 ACTIONS = (0.0, 0.5, 1.0, 1.5)
 COST = 0.001            # 10bp per unit of exposure traded
@@ -130,6 +131,7 @@ def _perf(x: np.ndarray) -> dict:
     return labs.perf(s)
 
 
+@cache.memo("rl.build", deps=("buildout.labs",), require=("dl",))
 def build(dl: dict | None = None, B: int = 600) -> dict:
     from scipy import stats
     dl = dl or labs.download()

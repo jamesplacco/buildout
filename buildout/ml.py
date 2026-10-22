@@ -32,6 +32,7 @@ import numpy as np
 import pandas as pd
 
 from . import labs
+from .core import cache
 
 H = 12
 EMBARGO = 1
@@ -418,6 +419,7 @@ def shift(D: pd.DataFrame, row: pd.Series, k: int = 24, gap: int = 24) -> dict:
     return {"novelty": nov, "novelty_pct": float(np.mean(hist < nov)), "k": k, "features": feats, "typical": float(np.median(hist))}
 
 
+@cache.memo("ml.build", deps=("buildout.labs",), require=("dl",))
 def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float | None = None, quick: bool = False) -> dict:
     dl = dl or labs.download()
     S = labs.shiller(dl)

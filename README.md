@@ -3,6 +3,22 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.18 makes the engine stronger and the page easier to read. The engine gains a framework in `buildout/core/`:
+a content-addressed cache (`cache.py`: results keyed by the source of the code and a canonical hash of the data, written
+atomically with a checksum, corrupted entries dropped and recomputed, network inputs served from the last good copy when
+a source fails), a parallel runner (`runner.py`: engines ordered by the files they read and write, each in its own
+process with a time limit, retries with backoff, output contracts from `contracts.py` and the previous good files
+restored when an engine fails, hangs or writes a bad file), structured logs (`log.py`), a health check
+(`python -m buildout doctor`) and a benchmark (`python -m buildout bench`). Measured on this machine: the mind rebuilds in
+1.6 seconds instead of 12 with a warm cache; a question takes about 0.05 seconds in Python instead of 0.4 (vectorized
+recall and spreading activation); the offline engines run in about 5 seconds instead of 19; the page does about half the
+main-thread work at load (2.3 seconds instead of 4.5) because it builds the desk you open first and the rest in idle
+time. The page is set in EB Garamond, inlined under the SIL Open Font License; every desk opens with what it answers,
+when to open it and how to read it, ends with the next desk, and numbers its sections; a map (press 0) lists every desk
+by the question it answers; the desks are reordered so each group reads from the answer to the method. The Vim and
+Emacs clients are rewritten (asynchronous jobs, a results buffer, commands for every engine; see Editors). A real bug
+in the X feed reader (an import that shadowed `urllib`) was found by the new lint pass and fixed.
+
 Version 0.17 does two things. First, bonds broken down to what they are: `bondlab.py` reprices every Treasury ETF
 (SHY, IEI, IEF, TLH, TLT, EDV, ZROZ) bond by bond at any 10-year and 30-year yield on today's Treasury par curve. Each
 fund is an equal-face ladder centred on the issuer's reported average maturity, with one coupon calibrated so the
@@ -19,7 +35,7 @@ falls; 1,710 overlapping months hold about 142 independent observations; all eig
 10.5% in sample while ordinary least squares with eight predictors costs about 5.6% out of
 sample; a regression fitted before 1950 put a weight of -20.8 on a 10-year yield that later tripled; the CAPE slope
 drifts; Stambaugh's bias moves its p-value from 0.03 to 0.12; and on planted data complexity pays only when the signal
-is strong and genuinely nonlinear. The mind grows to 8,592 nodes and about 34,700 links: 4,295 concepts (eight writer
+is strong and genuinely nonlinear. The mind grows to 8,598 nodes and about 34,700 links: 4,295 concepts (eight writer
 agents, a ninth fact-checking 958 entries), every month since 1871 with its eight nearest analogs and what followed
 (`chronicle.py`), 25 named episodes, the Treasury ETFs, the desks, and similarity links between concepts; it answers
 history questions ("what happened in 1974", "months like now") directly. `python -m buildout history "black monday"`
@@ -268,7 +284,13 @@ critical accessibility violation.
 
 ```bash
 pip install -e ".[databento,dev]"
-pytest                                    # 253 tests, no data needed
+pytest                                    # about 400 tests, no data needed
+python -m buildout doctor                 # health check: environment, secrets, knowledge, bond ladders, engine graph, page, cache
+python -m buildout bench                  # time the mind, the bond lab, the engines and the page's mind
+python -m buildout cache info             # the result cache (also: prune, clear); BUILDOUT_NO_CACHE=1 turns it off
+python -m buildout engine --out out --jobs 4   # engines in parallel, isolated, contract-checked; --serial to debug; --graph
+python -m buildout bonds --y10 4 --y30 4  # every Treasury ETF at those yields
+python -m buildout history "black monday" # the chronicle: a month, a year, an episode or "months like now"
 python -m buildout demo                   # full run on a synthetic market with planted answers
 python -m buildout macro --out out        # free FRED regime monitor
 
@@ -350,6 +372,61 @@ client. Claude reads your holdings there, passes them to `analyze_positions` and
 proposal; any order goes through Robinhood's dedicated Agentic account with trade approvals on. Buildout never sees
 credentials, and the holdings it is shown are not stored.
 
+## Editors
+
+`editors/buildout.vim` (Vim 8.1 or Neovim) and `editors/buildout.el` (Emacs 25.1 or later) run
+`python -m buildout` from inside the editor, with nothing to install beyond the file itself. Commands run in the
+background, so the editor never freezes. Every result lands in one read-only buffer (`buildout://out` in Vim,
+`*buildout*` in Emacs) that shows the command, the folder and interpreter it ran with, the elapsed time and the
+output. A missing interpreter, a wrong repository folder or a non-zero exit is reported in that same buffer. Plus
+signs and positive numbers are green, minus signs and negative numbers red, headings and percentages stand out.
+
+Install. Vim: copy `buildout.vim` to `~/.vim/plugin/` (Neovim: `~/.config/nvim/plugin/`). Emacs: put `buildout.el`
+on your `load-path`, then `(require 'buildout)` and `(buildout-mode 1)`, or bind the prefix map yourself with
+`(global-set-key (kbd "C-c b") 'buildout-command-map)`.
+
+| Command (Vim / Emacs) | Key | Does |
+|---|---|---|
+| `:Buildout {sub} [args]` / `buildout-run` | `g` | Any subcommand; Tab (Vim) or completion (Emacs) offers the names, Vim also their flags |
+| `:BuildoutThink [question]` / `buildout-think` | `t` | Ask the mind; prompts when empty; uses the Visual selection or the active region |
+| `buildout-think-at-point` | `w` | Ask about the word under the cursor (Emacs: `C-u` for the line) |
+| `buildout-think-line` | `l` | Ask about the current line, without its indent, comment leader or bullet |
+| `:BuildoutWhatIf [condition]` / `buildout-what-if` | `i` | A what-if over the belief network; the selection or region works too |
+| `:BuildoutBonds [y10 [y30 [front]]]` / `buildout-bonds` | `b` | Prompts for the 10-year and 30-year yields in percent; an empty 30-year moves with the 10-year |
+| `:BuildoutHistory [query]` / `buildout-history` | `h` | A month, a year, an episode or `now` from the chronicle |
+| `:BuildoutTA [ticker]` / `buildout-ta` | `a` | Technicals for the ticker under the cursor (`$nvda,` reads as NVDA) |
+| `:BuildoutFA [ticker]` / `buildout-fa` | `f` | Fundamentals for the ticker under the cursor |
+| `:BuildoutEngine [dir]` / `buildout-engine` | `e` | Run the offline engines into `out` (or the folder given) |
+| `:BuildoutEngineList` / `buildout-engine-list` | `E` (Emacs) | The engine registry |
+| `:BuildoutDoctor` / `buildout-doctor` | `d` | Check the setup |
+| `:BuildoutBench` / `buildout-bench` | `m` | Time the engine |
+| `:BuildoutRerun` / `buildout-rerun` | `r` | Run the last command again, from the same folder |
+| `:BuildoutLog` / `buildout-log` | `L` | Recent commands; pick one to run it again (`:BuildoutLog!` clears the Vim log) |
+| `:BuildoutStop` / `buildout-stop` | `s` | Stop the running command |
+| `:BuildoutOpen` / `buildout-show` | `o` | Show the results buffer again |
+
+The keys sit under a prefix: `<Leader>b` in Vim (so `<Leader>bt` asks the mind) and `C-c b` in Emacs with
+`buildout-mode` on. Vim also keeps `:BuildoutTriage`, `:BuildoutERP`, `:BuildoutDCF`, `:BuildoutML` and
+`:BuildoutReality`; Emacs has them on `T`, `P`, `D`, `M` and `R`. Every Vim key is also a `<Plug>(buildout-...)`
+map for your own bindings. In the results buffer, `q` closes it, `r` reruns, `y` copies the output (Vim: to the
+unnamed register; Emacs: to the kill ring), `n` and `p` jump to the next and previous section and `s` stops.
+
+| Vim option | Emacs option | Default |
+|---|---|---|
+| `g:buildout_python` | `buildout-python` | `python3` |
+| `g:buildout_root` | `buildout-root` | The nearest folder above the current file holding `pyproject.toml` and `buildout/`, else the folder above the plugin |
+| `g:buildout_prefix`, `g:buildout_no_mappings` | bind `buildout-command-map` yourself | `<Leader>b`, mappings on |
+| `g:buildout_focus` | `buildout-select-window` | Move to the results window |
+| `g:buildout_engine_out` | `buildout-engine-out` | `out` |
+| `g:buildout_log_size` | `buildout-log-size` | 50 |
+| `g:buildout_height` | | 15 lines |
+| `g:buildout_sync` | | Off; on runs commands with `system()` and waits (the tests use it) |
+| `g:buildout_history` | `buildout-run-log`, `buildout-query-history` | The query log, newest first, and the minibuffer history |
+
+`tests/test_editors.py` runs the Vim plugin headless against stub engines (one that exits 0, one that exits 2) and
+checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds ERT tests for Emacs
+(`emacs -Q --batch -L editors -l editors/buildout-test.el -f ert-run-tests-batch-and-exit`).
+
 ## Data
 
 | Source | What | Cost |
@@ -375,6 +452,10 @@ credentials, and the holdings it is shown are not stored.
 | | `marketstate.py`, `roc.py` | What moved, insurance and liquidity reads; inflation against the hedge line; velocity, acceleration and time to trigger |
 | Decisions | `decisions.py` | Kelly (bets and positions), Brier, calibration, binomial luck test, alpha after beta, conjunction, Bayes, the compound-growth hedge test, journal scorecard |
 | Research | `research.py`, `fundamentals.py` | 156 years of public data (hedge line, fat tails, earnings rate of change, oil shocks, VIX spikes, inflation spells, gold, CAPE); last-twelve-month SEC analysis, Minsky stages, depreciation vintages |
+| v0.18 | `core/cache.py` | Content-addressed result cache; last-good fetch for network inputs; prune and info |
+| | `core/runner.py` | Parallel dependency-graph runner: process isolation, timeouts, retries, contracts, last-good fallback, provenance |
+| | `core/contracts.py` | What each output file must contain (fields, finite numbers, ranges) before anything reads it |
+| | `core/doctor.py`, `core/bench.py`, `core/log.py` | Health check, benchmarks, structured logs and timing spans |
 | v0.17 | `bondlab.py` | Treasury ETFs as calibrated ladders; the curve moved to any 10-year and 30-year yield; price, 12-month return with roll, break-even, grid; stocks per point of yield by inflation band; reading yield questions |
 | | `complexity.py` | Complexity sweep, effective sample, cost of estimation, extrapolation, drift, Stambaugh bias, planted-signal experiment, written conclusions |
 | | `chronicle.py` | Every month since 1871, years and named episodes, analogs on six standardized features, the spiral layout |
@@ -385,7 +466,7 @@ credentials, and the holdings it is shown are not stored.
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
 | | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |
 | | `damodaran.py` | Implied equity risk premium; narrative-to-numbers DCF with fading growth, target margin, sales-to-capital reinvestment and failure odds |
-| | `editors/` | `buildout.vim` and `buildout.el`: think, what-if, triage, ERP and DCF from inside Vim or Emacs |
+| | `editors/` | `buildout.vim` and `buildout.el`: every subcommand from inside Vim or Emacs, run in the background into one results buffer (see Editors) |
 | v0.14 | `mind.py` | One graph of the brain and the engine; recall (BM25, aliases), spreading activation (personalized PageRank), claim framing, log-odds weighing with a family discount, leave-one-family-out range, hinge, causal chains, decision |
 | | `ontology.py` | 547 concepts in 18 clusters with definitions, formulas, aliases and typed relations to concepts, series, engine modules and voices topics |
 | | `labs.py` | Indicators (SMA, EMA, RSI, MACD, Bollinger), the trend lab, oscillator tests, valuation out of sample, Markov switching, GARCH, Hill tails, Engle-Granger, variance ratios, calendar, Holm and BH |
@@ -467,6 +548,13 @@ credentials, and the holdings it is shown are not stored.
   blames the link that was planted wrong; Python and the page agree on the page's own graph to 1e-9.
 - The field desk's Bayes and information ranking match between languages; evidence equally likely under every story
   is worth zero bits; milestones read upcoming, due, inside the reporting lag and overdue at the right dates.
+- v0.18: the cache hits on equal data and misses on different data, hashes canonically (dict order, DataFrames,
+  dtypes), drops a truncated entry and recomputes, survives an unwritable folder, bypasses calls that would fetch their
+  own data, and serves the last good copy when a source fails; the runner orders by files read and written, runs
+  independent engines in parallel, stops a hung engine, isolates one that crashes the interpreter, retries a flaky
+  one, restores the last good files after a failure or a NaN, flags dependents that read last-good inputs and refuses
+  a cycle; doctor finds nothing broken; bond prices fall and bend upward in yield for any yield (property tests), a
+  bond at its own coupon prices at par, and reading a yield question never throws on arbitrary text.
 - v0.17: a zero-coupon ladder's duration equals its price-weighted maturity over one plus half the yield; the
   calibrated ladders hit the reported duration and centre on the reported maturity; the curve move lands exactly on
   the 10-year and 30-year and keeps the hump; par bonds on a flat curve lose what duration and convexity say and gain

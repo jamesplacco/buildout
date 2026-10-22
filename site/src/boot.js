@@ -1,12 +1,12 @@
   /* =====================================================================================
      boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
-  const GROUPS = {
-    today: { name: "Today", views: ["desk", "mind", "atlas", "ooda", "noteworthy"] },
-    decide: { name: "Decide", views: ["solve", "positions", "decide", "games", "cardroom", "brain", "journal", "swans"] },
-    markets: { name: "Markets", views: ["bonds", "rates", "options", "hedges", "making", "prop", "securities", "insurers"] },
-    research: { name: "Research", views: ["analysis", "labs", "ml", "reality", "edge", "fundamentals", "findings", "buyside", "physics", "theses", "legends", "lenses", "field", "lab"] },
-    reference: { name: "Methods", views: ["engine", "engines", "code", "agents", "appendix"] },
+  const GROUPS = {   // v0.18: each group reads from the answer to the method, start-here desks first
+    today: { name: "Today", views: ["desk", "ooda", "mind", "noteworthy", "atlas"] },
+    decide: { name: "Decide", views: ["decide", "solve", "positions", "swans", "journal", "brain", "games", "cardroom"] },
+    markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "making", "prop"] },
+    research: { name: "Research", views: ["findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "legends", "lenses", "lab"] },
+    reference: { name: "Methods", views: ["engine", "engines", "appendix", "code", "agents"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -58,6 +58,7 @@
     if (!el && /^sec-/.test(token) && secFilter !== "All") { secFilter = "All"; renderSecurities(); el = document.getElementById(token); }
     if (!el && /^ep-/.test(token) && epKind !== "All") { epKind = "All"; buildEpisodes(); el = document.getElementById(token); }
     if (!el && /^lg-/.test(token) && lgGroup !== "All") { lgGroup = "All"; renderLegends(); el = document.getElementById(token); }
+    if (!el && LAZY.pending) { lazyFlushAll(); el = document.getElementById(token); }      // a deep link into a desk not built yet
     const v = el && el.closest(".view");
     return v ? { view: v.id.slice(5), el } : { view: "desk", el: null };
   }
@@ -76,8 +77,12 @@
       const a = h("a", null, TAB_NAME[v]);
       a.href = "#" + v;
       if (v === view) a.setAttribute("aria-current", "page");
+      if (typeof DESK_GUIDE === "object" && DESK_GUIDE[v]) a.title = DESK_GUIDE[v].q;
       nav.append(a);
     });
+    const here = h("span", "sub-here");
+    here.id = "sub-here"; here.hidden = true;
+    nav.append(here);
   }
   // a view change cross-fades where the browser supports view transitions and the reader allows motion
   const calm = () => !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -94,10 +99,12 @@
     let t = token;
     try { t = decodeURIComponent(token); } catch (e) { t = ""; }
     const { view, el } = resolve(t);
+    lazyFlush(view);
     VIEWS.forEach((v) => { $("#view-" + v).hidden = v !== view; });
     current = view;
     lastInGroup[groupOf(view)] = view;
     renderSubtabs(view);
+    guard("Guide", () => guideOnShow(view));
     document.title = (view === "desk" ? "" : TAB_NAME[view] + " · ") + "Buildout Risk Engine";
     guard(TAB_NAME[view], RENDER[view]);
     hideTip();
@@ -156,7 +163,26 @@
     Object.assign(KIND_RANK, { Decision: 8, Finding: 7, Trend: 6, Chain: 5, Swan: 5, Company: 5, Node: 4, Legend: 4, Assumption: 4, Principle: 3, Overlooked: 3 });
   }
 
-  /* ---------- boot ---------- */
+  /* ---------- boot ----------
+     v0.18: the desk being opened is built first and painted; every other desk's builders wait in a queue that runs in
+     idle time, one desk at a time, or at once when that desk is opened, a deep link needs its content, or the page is
+     printed. A builder belongs to the desk that contains its target element; builders without one run at once. */
+  const LAZY = { byView: {}, pending: 0 };
+  const lazyView = (box) => { const el = box ? $(box) : null, v = el && el.closest(".view"); return v ? v.id.slice(5) : null; };
+  function lazyFlush(v) {
+    const q = LAZY.byView[v];
+    if (q) { delete LAZY.byView[v]; LAZY.pending -= q.length; q.forEach(([n, f, b]) => guard(n, f, b ? $(b) : null)); }
+    guard("Glossary links", () => linkTerms([v]));
+  }
+  function lazyFlushAll() { VIEWS.forEach((v) => lazyFlush(v)); }
+  const idle = (fn) => (typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 40));
+  const LAZY_ON_OPEN = new Set(["solve"]);   // heavy desks (the solver searches thousands of portfolios) build only when opened
+  function lazyDrain() {
+    const v = Object.keys(LAZY.byView).find((k) => !LAZY_ON_OPEN.has(k));
+    if (v) { lazyFlush(v); idle(lazyDrain); return; }
+    idle(() => guard("Glossary links", () => linkTerms()));
+  }
+  const BOOT_VIEW = (() => { try { return resolve(decodeURIComponent(location.hash.slice(1))).view; } catch (e) { return "desk"; } })();
   [["The mark", placeMarks], ["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
@@ -165,7 +191,12 @@
    ["Episode atlas", buildEpisodes, "#ep-grid"], ["Glossary", buildGlossary, "#gloss"], ["Methods", buildMethods, "#methods"], ["Numbers to know", buildRules, "#rules"], ["Worked examples", buildExamples, "#examples"], ["Hard questions", buildFAQ, "#faq"], ["Model risk", buildModelRisk],
    ["Solver", buildSolve, "#rz-ledger"], ["Policy record", renderPolicyLive, "#pol-live"], ["Games", buildGames, "#gt-matrix"], ["Field", buildField, "#fd-ev"], ["Today", renderToday7, "#today7"],
    ["Data dictionary", buildDict], ["Reading list", buildReading, "#reading"], ["Checklists", buildChecklists, "#checklists"], ["Changelog", buildChangelog],
-   ["Contents", buildTOCs], ["Glossary links", linkTerms], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Vim and Emacs keys", wireKeys], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => guard(name, fn, box ? $(box) : null));
+   ["Contents", buildTOCs], ["Guide", wireGuide], ["Glossary links", () => linkTerms([BOOT_VIEW])], ["Search", buildIndex], ["Search, v0.5", buildIndex5], ["Navigation", wireNavigation], ["Vim and Emacs keys", wireKeys], ["Show the math", wireMath], ["Journal", wireJournal, "#jr-list"]].forEach(([name, fn, box]) => {
+    const v = box && name !== "Journal" ? lazyView(box) : null;
+    if (!v || v === BOOT_VIEW) { guard(name, fn, box ? $(box) : null); return; }
+    (LAZY.byView[v] = LAZY.byView[v] || []).push([name, fn, box]);
+    LAZY.pending++;
+  });
 
   ["#bc-cpn", "#bc-yld", "#bc-mat", "#bc-face", "#bc-shock"].forEach((id) => $(id).addEventListener("input", () => guard("Bond calculator", updateBond)));
   ["#ct-dv01", "#ct-d2", "#ct-d10"].forEach((id) => $(id).addEventListener("input", () => guard("Curve trade", updateCurveTrade)));
@@ -182,6 +213,7 @@
     .forEach(([name, fn]) => guard(name, fn));
   show(location.hash.slice(1), false);
   window.addEventListener("hashchange", () => show(location.hash.slice(1), true));
+  idle(lazyDrain);
 
   let raf = 0, lastW = 0;
   if (typeof ResizeObserver === "function") {

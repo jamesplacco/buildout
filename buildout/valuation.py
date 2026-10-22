@@ -24,8 +24,6 @@ labelled Observed), a market price (Observed), or a stated assumption (Assumed);
 """
 from __future__ import annotations
 
-import math
-from typing import Sequence
 
 # 10-year real sales CAGR, 1950-2015, by starting sales (US$ millions, 2015 dollars). Bins in percent; share of firms.
 BASE_RATES = {

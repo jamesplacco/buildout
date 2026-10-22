@@ -136,7 +136,8 @@ def _synthetic_raw(seed=3):
 
 def test_compact_output_has_exactly_the_pages_shape():
     """The daily run writes research.json in the shape the page's FINDINGS snapshot has, key for key."""
-    import json, re
+    import json
+    import re
     from pathlib import Path
     out = rs.compact(rs.run(_synthetic_raw()))
     src = (Path(__file__).resolve().parent.parent / "site" / "src" / "research.js").read_text()

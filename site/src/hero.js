@@ -226,7 +226,7 @@
       } else if ((!L.narrow || nd.ring <= 2 || showVal) && (L.lab[i].fit || src.has(i) || !L.narrow)) {
         const lb = L.lab[i], lx = lb.lx, ly = lb.ly;
         g.textAlign = lb.al;
-        g.font = `${src.has(i) ? 700 : 500} ${lb.fs}px system-ui, sans-serif`;
+        g.font = `${src.has(i) ? 700 : 500} ${lb.fs}px "EB Garamond", Georgia, serif`;
         g.fillStyle = "#d9d5ff";
         g.fillText(nd.s, lx, ly);
         if (showVal) { g.fillStyle = v > 0 ? "#ffb98c" : "#8fd9ff"; g.font = `600 ${L.narrow ? 9.5 : 10.5}px ui-monospace, Menlo, monospace`; g.fillText(`${sg(v)}σ`, lx, ly + (L.narrow ? 11 : 12.5)); }
@@ -295,7 +295,7 @@
     g.fillText(k >= 1 ? `S${sub(k)}` : `S${sub(sc.K)}`, xv + colW + 6 + colW / 2, y0 - 8);
     g.textAlign = "left"; g.fillText(k >= 1 ? `x${sub(k - 1)} (input, by column)` : "x₀ (the shock)", x0, 13);
     if (cs >= 8) {
-      g.font = `500 ${Math.min(10, cs - 1)}px system-ui, sans-serif`; g.textAlign = "right"; g.fillStyle = "#bdb7ff";
+      g.font = `500 ${Math.min(10, cs - 1)}px "EB Garamond", Georgia, serif`; g.textAlign = "right"; g.fillStyle = "#bdb7ff";
       BR_NODES.forEach((nd, i) => g.fillText(nd.s.length > 10 ? nd.s.slice(0, 9) + "…" : nd.s, x0 - 4, y0 + i * cs + cs * 0.75));
     }
     g.textAlign = "left"; g.fillStyle = "#bdb7ff"; g.font = `600 ${L.narrow ? 9.5 : 11}px ui-monospace, Menlo, monospace`;

@@ -96,6 +96,9 @@ def main(argv: list[str] | None = None) -> None:
     en.add_argument("--out", default="out")
     en.add_argument("--only", default=None, help="comma-separated engine names")
     en.add_argument("--list", action="store_true")
+    en.add_argument("--jobs", type=int, default=None, help="engines run in parallel (default: CPUs, at most 8)")
+    en.add_argument("--serial", action="store_true", help="run in this process, one at a time (debugging)")
+    en.add_argument("--graph", action="store_true", help="print the dependency levels and exit")
     oo = sub.add_parser("ooda")
     oo.add_argument("--out", default="out")
     oo.add_argument("--config", default="config.toml")
@@ -122,6 +125,15 @@ def main(argv: list[str] | None = None) -> None:
     for name in ("ta", "fa"):
         q = sub.add_parser(name)
         q.add_argument("ticker")
+    dr = sub.add_parser("doctor", help="check the installation, the knowledge, the bond lab, the page and the cache")
+    dr.add_argument("--net", action="store_true", help="also test which data sources answer")
+    dr.add_argument("--json", action="store_true")
+    bn = sub.add_parser("bench", help="time the hot paths (mind, bonds, engine, the page's mind)")
+    bn.add_argument("--no-engine", action="store_true")
+    bn.add_argument("--out", default=None)
+    ca = sub.add_parser("cache", help="the result cache: info, prune or clear")
+    ca.add_argument("action", choices=["info", "prune", "clear"], nargs="?", default="info")
+    ca.add_argument("--max-mb", type=int, default=2048)
     bd = sub.add_parser("bonds", help="every Treasury ETF repriced at the 10-year and 30-year yields you set")
     bd.add_argument("--y10", type=float, default=None, help="10-year yield in percent, e.g. 4")
     bd.add_argument("--y30", type=float, default=None, help="30-year yield in percent; default moves with the 10-year")
@@ -176,9 +188,18 @@ def main(argv: list[str] | None = None) -> None:
             for e in REGISTRY:
                 print(f"{e.name:10s} {'offline' if e.offline else 'network'}  reads {', '.join(e.reads) or '-'}  writes {', '.join(e.writes)}  ({e.does})")
             return
-        m = run_engines(a.out, a.only.split(",") if a.only else None)
+        if a.graph:
+            from .core.runner import levels
+            from .engine import tasks
+            for i, lvl in enumerate(levels(tasks())):
+                print(f"level {i}: {', '.join(lvl)}")
+            return
+        m = run_engines(a.out, a.only.split(",") if a.only else None, jobs=1 if a.serial else a.jobs, isolate=not a.serial)
         for r in m["engines"]:
-            print(f"{r['name']:10s} {r['status']:9s} {r.get('seconds', '')}  {r.get('error', '')}")
+            note = " (kept last good)" if r.get("kept_last_good") else ""
+            print(f"{r['name']:10s} {r['status']:9s} {r.get('seconds', '')}  {r.get('error', '')}{note}")
+        rn = m["runner"]
+        print(f"{m['ok']} ok, {m['failed']} failed; {rn['wall_seconds']}s wall for {rn['serial_seconds']}s of work on {rn['jobs']} workers ({rn['speedup']}x)")
         return
     if a.cmd == "ooda":
         from .jsonout import write
@@ -318,6 +339,35 @@ def main(argv: list[str] | None = None) -> None:
                 print(f"  {k:20s} {last[k]:+.3f}")
         for line in r["flags"]:
             print(" ", line)
+        return
+    if a.cmd == "doctor":
+        from .core import doctor
+        rows = doctor.run(net=a.net)
+        if a.json:
+            print(json.dumps([{"status": s, "check": n, "detail": d} for s, n, d in rows], indent=1))
+        else:
+            for st, n, d in rows:
+                print(f"{st:4s}  {n:38s} {d}")
+            nf, nw = sum(r[0] == "FAIL" for r in rows), sum(r[0] == "warn" for r in rows)
+            print(f"\n{len(rows) - nf - nw} ok, {nw} warnings, {nf} failures")
+        raise SystemExit(1 if any(r[0] == "FAIL" for r in rows) else 0)
+    if a.cmd == "bench":
+        from .core import bench
+        r = bench.run(skip_engine=a.no_engine)
+        for part, vals in r.items():
+            print(part.ljust(7), "  ".join(f"{k} {v}" for k, v in vals.items()))
+        if a.out:
+            from .jsonout import write
+            print("wrote", write({"bench": r}, a.out, "bench.json"))
+        return
+    if a.cmd == "cache":
+        from .core import cache
+        if a.action == "clear":
+            print("removed", cache.clear(), "entries")
+        elif a.action == "prune":
+            print(cache.prune(a.max_mb << 20))
+        else:
+            print(json.dumps(cache.info(), indent=1))
         return
     if a.cmd == "bonds":
         from . import bondlab, mind as mnd

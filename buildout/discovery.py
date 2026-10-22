@@ -71,7 +71,6 @@ def lingam_order(X: np.ndarray) -> list[int]:
 
 def order_agreement(learned: Sequence[int], assumed: Sequence[int]) -> dict:
     pos_l = {v: k for k, v in enumerate(learned)}
-    pos_a = {v: k for k, v in enumerate(assumed)}
     pairs = [(a, b) for i, a in enumerate(assumed) for b in assumed[i + 1:]]
     agree = [(a, b) for a, b in pairs if pos_l[a] < pos_l[b]]
     return {"agree": len(agree), "pairs": len(pairs), "share": len(agree) / len(pairs),

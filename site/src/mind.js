@@ -55,19 +55,26 @@
     return cand.filter((i) => score[i] >= MP.seed_floor * best).map((i) => [i, score[i]]);
   }
   function mindSpread(M, seeds, keep = false) {
+    // personalized PageRank over typed arrays built once per graph (weight over degree, both directions), no
+    // allocation inside the loop; buildout/mind.py runs the same walk vectorized and the two agree to 1e-12
     const N = M.N, a = MP.alpha, tot = seeds.reduce((x, s) => x + s[1], 0);
-    const s0 = new Float64Array(N);
+    if (!M.csr) {
+      const E = M.edges, m = E.length, I = new Int32Array(m), J = new Int32Array(m), WI = new Float64Array(m), WJ = new Float64Array(m);
+      for (let k = 0; k < m; k++) { const e = E[k]; I[k] = e[0]; J[k] = e[1]; WI[k] = e[2] / M.deg[e[0]]; WJ[k] = e[2] / M.deg[e[1]]; }
+      const dang = []; for (let i = 0; i < N; i++) if (M.deg[i] === 0) dang.push(i);
+      M.csr = { m, I, J, WI, WJ, dang: Int32Array.from(dang) };
+    }
+    const C = M.csr, s0 = new Float64Array(N);
     seeds.forEach(([i, s]) => { s0[i] = s / tot; });
-    let r = Float64Array.from(s0);
-    const hist = keep ? [Float64Array.from(r)] : null, deg = M.deg, E = M.edges;
+    let r = Float64Array.from(s0), nr = new Float64Array(N);
+    const hist = keep ? [Float64Array.from(r)] : null;
     for (let step = 0; step < MP.steps; step++) {
-      const nr = new Float64Array(N);
       for (let k = 0; k < N; k++) nr[k] = (1 - a) * s0[k];
       let dangling = 0;
-      for (let i = 0; i < N; i++) if (deg[i] === 0) dangling += r[i];
-      for (let k = 0; k < E.length; k++) { const e = E[k], i = e[0], j = e[1], w = e[2]; nr[j] += a * w * r[i] / deg[i]; nr[i] += a * w * r[j] / deg[j]; }
+      for (let q = 0; q < C.dang.length; q++) dangling += r[C.dang[q]];
+      for (let k = 0; k < C.m; k++) { const i = C.I[k], j = C.J[k]; nr[j] += a * (C.WI[k] * r[i]); nr[i] += a * (C.WJ[k] * r[j]); }
       if (dangling) for (let k = 0; k < N; k++) nr[k] += a * dangling * s0[k];
-      r = nr;
+      const t = r; r = nr; nr = t;
       if (keep) hist.push(Float64Array.from(r));
     }
     return keep ? { r, hist } : r;
@@ -469,7 +476,7 @@
       const n = M.nodes[i], fs = n.k === "cluster" ? (L.narrow ? 9.5 : 11) : L.narrow ? 9.5 : 11;
       let lab = n.k === "signal" ? "signal: " + n.n.slice(0, 34) + "…" : n.n;
       if (lab.length > 40) lab = lab.slice(0, 39) + "…";
-      g.font = `${n.k === "cluster" ? 700 : 500} ${fs}px system-ui, sans-serif`;
+      g.font = `${n.k === "cluster" ? 700 : 500} ${fs}px "EB Garamond", Georgia, serif`;
       const w = g.measureText(lab).width + 4, bx = clamp(P[i][0] - w / 2, 2, L.Wd - w - 2), by = P[i][1] + 6;
       const box = [bx, by, w, fs + 3];
       if (by + fs + 4 > L.Hd || placed.some((q) => box[0] < q[0] + q[2] && box[0] + box[2] > q[0] && box[1] < q[1] + q[3] && box[1] + box[3] > q[1])) continue;
@@ -755,8 +762,8 @@
       MM_EX.slice(0, 6).forEach((q) => { const b = h("button", "pill", q); b.type = "button"; b.addEventListener("click", () => { S.auto = false; think(q); }); ex.append(b); });
       S.onIdle = () => { MH.idle = (MH.idle + 1) % MM_EX.length; think(MM_EX[MH.idle]); };
       const st = MIND_SNAP.nodes.length;
-      $("#mh-count").textContent = `${st.toLocaleString()} nodes and ${MIND_SNAP.edges.length.toLocaleString()} links: ${SNAP14.stats.kinds.concept} concepts, ${SNAP14.stats.kinds.series} measured series, ${(SNAP14.stats.kinds.fact || 0) + (SNAP14.stats.kinds.paper || 0)} sourced facts and papers, ${SNAP14.stats.kinds.quote} quotes, ${SNAP14.stats.kinds.engine + SNAP14.stats.kinds.method + SNAP14.stats.kinds.tool} engine parts, ${SNAP14.stats.kinds.country} economies and ${SNAP14.stats.kinds.signal} signals.`;
-      think(MM_EX[0]);
+      $("#mh-count").textContent = `${st.toLocaleString()} nodes and ${MIND_SNAP.edges.length.toLocaleString()} links: ${SNAP14.stats.kinds.concept.toLocaleString()} concepts, ${(SNAP14.stats.kinds.month || 0).toLocaleString()} months of history, ${SNAP14.stats.kinds.series} measured series, ${(SNAP14.stats.kinds.fact || 0) + (SNAP14.stats.kinds.paper || 0)} sourced facts and papers, ${SNAP14.stats.kinds.quote} quotes, ${SNAP14.stats.kinds.engine + SNAP14.stats.kinds.method + SNAP14.stats.kinds.tool} engine parts, ${SNAP14.stats.kinds.country} economies and ${SNAP14.stats.kinds.signal} signals.`;
+      requestAnimationFrame(() => setTimeout(() => { if (!S.res) think(MM_EX[0]); }, 0));   // paint the page first, then think
     }
     mLoop(S);
   }

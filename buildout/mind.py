@@ -49,6 +49,7 @@ import re
 from pathlib import Path
 
 from . import ontology, voices
+from .core import cache
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "assets"
@@ -230,8 +231,15 @@ def slug(name: str) -> str:
 
 
 def _engine_modules() -> list[dict]:
+    """Every engine module, its first docstring paragraph, its internal imports and size; cached by the files' contents."""
+    files = sorted(ROOT.glob("*.py")) + sorted((ROOT / "analytics").glob("*.py")) + sorted((ROOT / "data").glob("*.py")) + sorted((ROOT / "core").glob("*.py"))
+    return _engine_modules_of(tuple((str(f), f.read_bytes()) for f in files))
+
+
+@cache.memo("mind.engine_modules")
+def _engine_modules_of(srcs: tuple) -> list[dict]:
     out = []
-    files = sorted(ROOT.glob("*.py")) + sorted((ROOT / "analytics").glob("*.py")) + sorted((ROOT / "data").glob("*.py"))
+    files = [Path(p) for p, _ in srcs]
     for f in files:
         if f.name in ("__init__.py", "__main__.py"):
             continue
@@ -679,6 +687,7 @@ EPISODE_TERMS = {"crash-1929": ["1929", "great-depression"], "dotcom": ["dot-com
                  "bull-1982": ["1982"], "panic-1873": ["1873"], "panic-1893": ["1893"]}
 
 
+@cache.memo("mind.similar_concepts")
 def similar_concepts(concepts: list[dict], k: int = 4, floor: float = 0.22) -> list[tuple[str, str, float]]:
     """v0.17: each concept linked to the few whose definitions read most alike (TF-IDF cosine on name, aliases and
     definition), so thinking about one idea also recalls its neighbours even where no writer typed the relation."""
@@ -931,7 +940,6 @@ def network(atlas: dict, sigs: list[dict]) -> dict:
     and read the cumulative 12-month response of every other axis's series (sign-adjusted so 'bull' means bull on
     both). Weights are scaled so the strongest is 1; weak ones are dropped. Each axis also gets its base log-odds from
     all of its evidence at full relevance."""
-    import numpy as np
     from . import atlas as AT
     axes = [a for a in AXIS_REP if any(s["axis"] == a for s in sigs)]
     M = AT.matrices(atlas)
@@ -1017,7 +1025,6 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     for a, b, w in similar_concepts(concepts):
         edge(a, b, "similar", w)
     # atlas
-    an = {n["id"]: n for n in atlas["nodes"]}
     for n in atlas["nodes"]:
         kind = "series" if n["measured"] else ("holding" if n["family"] == "Book" else "driver")
         grp = "markets" if n["measured"] else "core"
@@ -1236,13 +1243,19 @@ def params() -> dict:
             "rx_month": RX_MONTH, "rx_year": RX_YEAR, "rx_now": RX_NOW, "rx_hist": RX_HIST}
 
 
+@cache.memo("mind.group_layout", deps=("buildout.atlas",))
+def _group_layout(A, seed: int, iters: int):
+    """One galaxy's force layout; cached by its adjacency, so an unchanged group is never laid out twice."""
+    from .atlas import layout as fr_layout
+    return fr_layout(A, [0] * len(A), seed=seed, iters=iters, spread=True)
+
+
 def place(G: dict) -> None:
     """Galaxy layout: each group is laid out on its own (atlas.layout, force-directed then spread to an even disc whose
     radius grows with the square root of its size); the discs are then placed by a force layout of the groups, pulled
     together by the share of links between them (normalized, so a large graph cannot collapse the discs onto each
     other) and kept apart by their radii. Deterministic."""
     import numpy as np
-    from .atlas import layout as fr_layout
     nodes = G["nodes"]
     gs = sorted({n["g"] for n in nodes})
     gi = {g: i for i, g in enumerate(gs)}
@@ -1265,7 +1278,7 @@ def place(G: dict) -> None:
         m = (gid[ei] == gi[g]) & (gid[ej] == gi[g])                # edges inside this group, without a Python scan per group
         A[local[ei[m]], local[ej[m]]] = E[m, 2]
         A[local[ej[m]], local[ei[m]]] = E[m, 2]
-        pos[g] = fr_layout(A, [0] * len(idx), seed=11 + gi[g], iters=300 if len(idx) < 800 else 150, spread=True) if len(idx) > 1 else np.zeros((1, 2))
+        pos[g] = _group_layout(A, 11 + gi[g], 300 if len(idx) < 800 else 150) if len(idx) > 1 else np.zeros((1, 2))
     Gn = len(gs)
     Cw = np.zeros((Gn, Gn))
     for i, j, w, _ in G["edges"]:
@@ -1351,27 +1364,33 @@ class Mind:
         return [(i, score[i]) for i in cand if score[i] >= SEED_FLOOR * best]
 
     # 3 spread
+    def _ppr(self):
+        """The walk's arrays, built once: each edge's weight over its endpoint's degree, both directions."""
+        if getattr(self, "_walk", None) is None:
+            import numpy as np
+            E = np.asarray([e[:3] for e in self.edges], dtype=float).reshape(-1, 3)
+            I, J, W = E[:, 0].astype(np.int64), E[:, 1].astype(np.int64), E[:, 2]
+            deg = np.asarray(self.deg)
+            self._walk = (I, J, W / np.where(deg[I] > 0, deg[I], 1), W / np.where(deg[J] > 0, deg[J], 1), np.flatnonzero(deg == 0))
+        return self._walk
+
     def spread(self, seeds: list[tuple[int, float]]) -> list[float]:
+        """Personalized PageRank from the seeds: STEPS iterations, restart probability 1 - ALPHA, dangling mass back to
+        the seeds. Vectorized (numpy); site/src/mind.js runs the same walk and agrees to 1e-12."""
+        import numpy as np
+        I, J, WI, WJ, dang = self._ppr()
         tot = sum(s for _, s in seeds)
-        s0 = [0.0] * self.N
+        s0 = np.zeros(self.N)
         for i, s in seeds:
             s0[i] = s / tot
-        r = s0[:]
-        deg = self.deg
+        r = s0.copy()
         for _ in range(STEPS):
-            nr = [(1 - ALPHA) * x for x in s0]
-            dangling = 0.0
-            for i in range(self.N):
-                if deg[i] == 0:
-                    dangling += r[i]
-            for i, j, w, _ in self.edges:
-                nr[j] += ALPHA * w * r[i] / deg[i]
-                nr[i] += ALPHA * w * r[j] / deg[j]
+            nr = (1 - ALPHA) * s0 + ALPHA * (np.bincount(J, WI * r[I], self.N) + np.bincount(I, WJ * r[J], self.N))
+            dangling = float(r[dang].sum()) if len(dang) else 0.0
             if dangling:
-                for k in range(self.N):
-                    nr[k] += ALPHA * dangling * s0[k]
+                nr += ALPHA * dangling * s0
             r = nr
-        return r
+        return r.tolist()
 
     def chains(self, r: list[float], k: int = 3, prefer: list[int] | None = None) -> list[dict]:
         """Strongest directed paths over the atlas's causal links from the most activated market nodes to the book."""

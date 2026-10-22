@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import math
 
-import numpy as np
 from scipy import optimize
 
 RANKS = "23456789TJQKA"

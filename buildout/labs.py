@@ -46,7 +46,24 @@ FILES = {"shiller": "s-and-p-500/main/data/data.csv", "cpi": "cpi-us/main/data/c
          "gold": "gold-prices/main/data/monthly.csv"}
 
 
-def download() -> dict:
+LAST_FETCH: dict = {}
+
+
+def download(max_age: float = 6 * 3600) -> dict:
+    """The public datasets, at most max_age seconds old: reused from the cache when fresh; when a source fails, the
+    last complete copy is used and LAST_FETCH says so (stale, with the error), so the daily run degrades instead of
+    stopping."""
+    from .core import cache
+    try:
+        dl, meta = cache.fetch("labs.download", _download_live, max_age, ok=lambda d: bool(d) and not d["failed"] and bool(d["raw"]))
+    except Exception as exc:                       # nothing cached yet and the live copy is incomplete: use what came back
+        dl, meta = _download_live(), {"source": "live", "partial": True, "error": f"{type(exc).__name__}: {exc}"[:200]}
+    LAST_FETCH.clear()
+    LAST_FETCH.update(meta)
+    return dl
+
+
+def _download_live() -> dict:
     raw, failed = {}, {}
     for k, p in FILES.items():
         try:

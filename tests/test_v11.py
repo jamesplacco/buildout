@@ -1,6 +1,5 @@
 """v0.11: valuation and accounting, the hedge book, causal statistics, the decision loop and the engine registry."""
 import json
-import math
 import shutil
 import subprocess
 from pathlib import Path

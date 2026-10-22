@@ -16,10 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import time
-import traceback
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
@@ -152,26 +149,39 @@ def _hash(p: Path) -> str | None:
         return None
 
 
-def run(out_dir, only: list[str] | None = None) -> dict:
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    rows = []
+TIMEOUTS = {"mind": 600.0, "reason": 600.0}
+
+
+def tasks(only: list[str] | None = None) -> list:
+    """The registry as runner tasks: offline engines with a function run; the rest are recorded as external."""
+    from .core.runner import Task
+    out = []
     for e in REGISTRY:
-        row = {"name": e.name, "title": e.title, "module": e.module, "offline": e.offline, "does": e.does, "reads": e.reads, "writes": e.writes}
-        if not e.offline or e.run is None or (only and e.name not in only):
-            row.update({"status": "external" if not e.offline else "skipped", "outputs": {w: _hash(out / w) for w in e.writes}})
-            rows.append(row)
-            continue
-        ins = {r: _hash(out / r) for r in e.reads if r != "*"}
-        t0 = time.perf_counter()
-        try:
-            e.run(out)
-            row["status"] = "ok"
-        except Exception as exc:                       # isolated: one engine failing never stops the others
-            row.update({"status": "failed", "error": f"{type(exc).__name__}: {exc}"[:300], "trace": traceback.format_exc()[-800:]})
-        row.update({"seconds": round(time.perf_counter() - t0, 3), "inputs": ins, "outputs": {w: _hash(out / w) for w in e.writes}})
+        runnable = e.offline and e.run is not None and (not only or e.name in only)
+        out.append(Task(e.name, e.run if runnable else None, [r for r in e.reads if r != "*"], list(e.writes), timeout=TIMEOUTS.get(e.name, 300.0),
+                        meta={"title": e.title, "module": e.module, "offline": e.offline, "does": e.does, "skipped": e.offline and not runnable}))
+    return out
+
+
+def run(out_dir, only: list[str] | None = None, jobs: int | None = None, isolate: bool = True) -> dict:
+    """Run the offline engines through the core runner (parallel, isolated, contract-checked, last-good fallback)
+    and write engines.json, the manifest the page and `status` read."""
+    from .core import runner
+    out = Path(out_dir)
+    ts = tasks(only)
+    res = runner.run(ts, out, jobs=jobs, isolate=isolate)
+    rows = []
+    for t in ts:
+        r = res["tasks"].get(t.name, {})
+        st = "skipped" if t.meta["skipped"] else ("external" if t.fn is None else r.get("status", "skipped"))
+        row = {"name": t.name, "title": t.meta["title"], "module": t.meta["module"], "offline": t.meta["offline"], "does": t.meta["does"],
+               "reads": t.reads, "writes": t.writes, "status": st, "outputs": r.get("outputs") or {w: _hash(out / w) for w in t.writes}}
+        for k in ("seconds", "inputs", "error", "trace", "attempts", "contract", "kept_last_good", "stale_inputs"):
+            if r.get(k) not in (None, [], {}):
+                row[k] = r[k]
         rows.append(row)
-    manifest = {"schema": 1, "version": __version__, "run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "engines": rows,
-                "ok": sum(r["status"] == "ok" for r in rows), "failed": sum(r["status"] == "failed" for r in rows)}
+    manifest = {"schema": 2, "version": __version__, "run_at": res["run_at"], "engines": rows,
+                "ok": sum(r["status"] == "ok" for r in rows), "failed": sum(r["status"] in ("failed", "timeout", "rejected") for r in rows),
+                "runner": {k: res[k] for k in ("jobs", "isolated", "wall_seconds", "serial_seconds", "speedup", "levels")}}
     _write(out, "engines.json", manifest)
     return manifest

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from buildout.analytics.bonds import (bond_price, calibrate_coupon, constant_maturity_returns,

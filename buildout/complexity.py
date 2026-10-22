@@ -27,6 +27,7 @@ import numpy as np
 import pandas as pd
 
 from . import labs, ml
+from .core import cache
 
 ORIGINS = [(1950, 1980), (1980, 2000), (2000, 2026)]     # train through the first year minus a purge; test until the second
 SEED = 17
@@ -213,6 +214,7 @@ def experiment(sims: int = 12) -> dict:
     return {"rows": out, "sims": sims, "months": n}
 
 
+@cache.memo("complexity.build", deps=("buildout.ml", "buildout.labs"), require=("dl",))
 def build(dl: dict | None = None, quick: bool = False) -> dict:
     dl = dl or labs.download()
     S = labs.shiller(dl)

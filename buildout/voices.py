@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from functools import lru_cache
 from pathlib import Path
 
 ASSETS = Path(__file__).resolve().parent / "assets"
@@ -98,6 +99,7 @@ DIRECTION = {"rise", "higher", "up", "soar", "double", "fall", "lower", "down", 
 FLIP = {"bonds_rates": {"yield", "rates", "rate", "10year"}, "inflation_fed": {"inflation", "prices", "cpi"}}
 
 
+@lru_cache(maxsize=1 << 17)
 def stem(w: str) -> str:
     if len(w) > 4 and w.endswith("ies"):
         return w[:-3] + "y"
@@ -112,13 +114,14 @@ def stem(w: str) -> str:
     return w
 
 
-_PHRASE_RE = [(re.compile(r"(?<![a-z0-9])" + re.escape(p) + r"(?![a-z0-9])"), " " + rep + " ") for p, rep in PHRASES]
+_PHRASE_RE = [(p, re.compile(r"(?<![a-z0-9])" + re.escape(p) + r"(?![a-z0-9])"), " " + rep + " ") for p, rep in PHRASES]
 
 
 def _phrase(text: str) -> str:
     t = text.lower().replace("\u2019", "'").replace("\u2018", "'")
-    for rx, rep in _PHRASE_RE:
-        t = rx.sub(rep, t)
+    for p, rx, rep in _PHRASE_RE:
+        if p in t:                       # the cheap test first: a phrase that is absent cannot match
+            t = rx.sub(rep, t)
     return t
 
 
@@ -127,18 +130,25 @@ def raw_tokens(text: str) -> list[str]:
     return [w for w in re.split(r"[^a-z0-9_&+]+", t) if w]
 
 
+@lru_cache(maxsize=1 << 17)
+def _word(w: str, expand: bool) -> tuple[str, ...]:
+    """One word's tokens: its stem, then the stems of its synonyms; computed once per word."""
+    if w in STOP or w in NEGATORS:
+        return ()
+    s = stem(w)
+    out = [s]
+    if expand:
+        for x in SYN.get(w, []) + (SYN.get(s, []) if s != w else []):
+            xs = stem(x)
+            if xs != s:
+                out.append(xs)
+    return tuple(out)
+
+
 def tokens(text: str, expand: bool = True) -> list[str]:
-    out = []
+    out: list[str] = []
     for w in raw_tokens(text):
-        if w in STOP or w in NEGATORS:
-            continue
-        s = stem(w)
-        out.append(s)
-        if expand:
-            for x in SYN.get(w, []) + (SYN.get(s, []) if s != w else []):
-                xs = stem(x)
-                if xs != s:
-                    out.append(xs)
+        out.extend(_word(w, expand))
     return out
 
 
@@ -160,18 +170,30 @@ class Index:
                 df[w] = df.get(w, 0) + 1
         self.idf = {w: math.log(1 + (self.n - k + 0.5) / (k + 0.5)) for w, k in df.items()}
 
+    def _postings(self) -> dict:
+        """term -> (documents, BM25 weights), built on first use; a query then touches only documents with its terms."""
+        if getattr(self, "_post", None) is None:
+            import numpy as np
+            acc: dict[str, tuple[list, list]] = {}
+            for i, c in enumerate(self.tf):
+                L = len(self.docs[i])
+                for w, f in c.items():
+                    d, v = acc.setdefault(w, ([], []))
+                    d.append(i)
+                    v.append(self.idf[w] * f * (K1 + 1) / (f + K1 * (1 - B + B * L / (self.avg or 1))))
+            self._post = {w: (np.asarray(d, dtype=np.int64), np.asarray(v, dtype=float)) for w, (d, v) in acc.items()}
+        return self._post
+
     def score(self, q: list[str]) -> list[float]:
-        qs = sorted(set(q))
-        out = []
-        for i, c in enumerate(self.tf):
-            L = len(self.docs[i])
-            s = 0.0
-            for w in qs:
-                f = c.get(w)
-                if f:
-                    s += self.idf[w] * f * (K1 + 1) / (f + K1 * (1 - B + B * L / (self.avg or 1)))
-            out.append(s)
-        return out
+        """BM25 of every document. Terms are added in sorted order, so each score is bit-for-bit the plain loop's."""
+        import numpy as np
+        post = self._postings()
+        out = np.zeros(self.n)
+        for w in sorted(set(q)):
+            p = post.get(w)
+            if p is not None:
+                out[p[0]] += p[1]
+        return out.tolist()
 
 
 def config() -> dict:

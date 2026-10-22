@@ -275,7 +275,7 @@
     for (const [i] of pri) {
       if (shown >= cap) break;
       const n = M.nodes[i], [x, y] = P[i], r = atRad(n, mxs), fs = L.narrow ? 9.5 : 11, lab = n.short || n.id, val = Math.abs(vals[i]) > 0.02 ? ` ${sg(vals[i])}σ` : "";
-      g.font = `${src.has(i) || i === sel ? 700 : 500} ${fs}px system-ui, sans-serif`;
+      g.font = `${src.has(i) || i === sel ? 700 : 500} ${fs}px "EB Garamond", Georgia, serif`;
       const w = g.measureText(lab + val).width + 4, bx = clamp(x - w / 2, 2, L.Wd - w - 2), by = y + r + 3;
       const box = [bx, by, w, fs + 3];
       if (box[1] + box[3] > L.Hd || placed.some((q) => box[0] < q[0] + q[2] && box[0] + box[2] > q[0] && box[1] < q[1] + q[3] && box[1] + box[3] > q[1])) continue;

@@ -20,7 +20,6 @@ same arithmetic (site/src/brainx.js; tests/test_v10.py checks they agree):
 from __future__ import annotations
 
 import math
-from typing import Sequence
 
 import numpy as np
 

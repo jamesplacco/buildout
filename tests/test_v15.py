@@ -328,13 +328,14 @@ def test_editor_plugins_call_the_engine_and_never_trade():
     vim = (ROOT / "editors" / "buildout.vim").read_text()
     el = (ROOT / "editors" / "buildout.el").read_text()
     for cmd in ("BuildoutThink", "BuildoutWhatIf", "BuildoutTriage", "BuildoutERP", "BuildoutDCF"):
-        assert re.search(r"command! -nargs=\S+ " + cmd + r"\b", vim), cmd
-    for fn in ("buildout-think", "buildout-what-if", "buildout-triage", "buildout-erp", "buildout-dcf", "global-buildout-mode"):
-        assert f"({'define-globalized-minor-mode' if fn.startswith('global') else 'defun'} {fn}" in el, fn
+        assert re.search(r"command!(?: -\S+)+ " + cmd + r"\b", vim), cmd
+    for fn in ("buildout-think", "buildout-what-if", "buildout-triage", "buildout-erp", "buildout-dcf"):
+        assert f"(defun {fn}" in el, fn
+    assert "(define-minor-mode buildout-mode" in el and "global-buildout-mode" in el
     if shutil.which("vim"):
         out = ROOT / ".pytest_vim.txt"
-        subprocess.run(["vim", "-Nes", "-u", "NONE", "-i", "NONE", "-c", f"let g:buildout_root='{ROOT}'", "-c", "source editors/buildout.vim", "-c", "BuildoutTriage 1.0 5 45",
-                        "-c", f"call writefile(getline(1, '$'), '{out}')", "-c", "qa!"], cwd=ROOT, timeout=120)
+        subprocess.run(["vim", "-Nes", "-u", "NONE", "-i", "NONE", "-c", f"let g:buildout_root='{ROOT}'", "-c", "let g:buildout_sync=1", "-c", "source editors/buildout.vim", "-c", "BuildoutTriage 1.0 5 45",
+                        "-c", f"call writefile(getbufline('buildout://out', 1, '$'), '{out}')", "-c", "qa!"], cwd=ROOT, timeout=120)
         try:
             assert "minimum backtest" in out.read_text()
         finally:

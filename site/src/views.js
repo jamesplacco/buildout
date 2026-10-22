@@ -1833,7 +1833,8 @@
     });
   }
   const NO_LINK = "a, button, label, h1, h2, h3, h4, h5, h6, summary, svg, script, style, input, select, textarea, code, kbd, var, table, dt, .src, .eyebrow, .badge, .tip, .gloss, .methods, .term, .signals, #levels, .chart-title, .panel-title, .flabel, .tagline, .kind, .sig-state, .toc, .chips, .tchips, .sec, .readouts, .sentence";
-  function linkTerms() {
+  const LINKED = new Set();
+  function linkTerms(only) {
     const entries = [];
     GLOSSARY.forEach((g) => [g.term, ...(g.alt || [])].forEach((t) => entries.push({ t, id: g.id, cs: (t.match(/[A-Z0-9]/g) || []).length >= 2 && t === t.toUpperCase() || /^[A-Z][a-z]?[A-Z]/.test(t) })));
     entries.sort((a, b) => b.t.length - a.t.length);
@@ -1843,7 +1844,9 @@
     const byCS = new Map(entries.filter((e) => e.cs).map((e) => [e.t, e.id])), byCI = new Map(entries.filter((e) => !e.cs).map((e) => [e.t.toLowerCase(), e.id]));
     const defs = Object.fromEntries(GLOSSARY.map((g) => [g.id, g]));
     let made = 0;
-    VIEWS.forEach((v) => {
+    (only || VIEWS).forEach((v) => {
+      if (LINKED.has(v)) return;
+      LINKED.add(v);
       const root = $("#view-" + v), used = new Set();
       const flowing = (el) => { const d = getComputedStyle(el).display; return !/flex|grid/.test(d); };
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.nodeValue.trim().length > 2 && !n.parentElement.closest(NO_LINK) && flowing(n.parentElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
@@ -1990,6 +1993,7 @@
     let printState = null;
     window.addEventListener("beforeprint", () => {
       if (printState) return;
+      lazyFlushAll();
       const shut = [...document.querySelectorAll(".faq details:not([open])")];
       printState = { hidden: VIEWS.map((v) => $("#view-" + v).hidden), shut };
       document.body.classList.add("printing");

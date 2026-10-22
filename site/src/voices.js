@@ -10,7 +10,7 @@
   const VSET = (a) => new Set(a);
   const V_STOP = VSET(VC.stop), V_NEG = VSET(VC.negators), V_BULL = VSET(VC.bull), V_BEAR = VSET(VC.bear), V_DIR = VSET(VC.direction);
   const V_FLIP = Object.fromEntries(Object.entries(VC.flip).map(([k, v]) => [k, VSET(v)]));
-  const V_PHRASE = VC.phrases.map(([p, rep]) => [new RegExp("(?<![a-z0-9])" + p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![a-z0-9])", "g"), " " + rep + " "]);
+  const V_PHRASE = VC.phrases.map(([p, rep]) => [p, new RegExp("(?<![a-z0-9])" + p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![a-z0-9])", "g"), " " + rep + " "]);
   function vStem(w) {
     if (w.length > 4 && w.endsWith("ies")) return w.slice(0, -3) + "y";
     if (w.length > 4 && (w.endsWith("ches") || w.endsWith("shes") || w.endsWith("xes") || w.endsWith("ses") || w.endsWith("zes"))) return w.slice(0, -2);
@@ -21,32 +21,56 @@
   }
   function vRaw(text) {
     let t = String(text).toLowerCase().replace(/’/g, "'").replace(/‘/g, "'");
-    for (const [rx, rep] of V_PHRASE) t = t.replace(rx, rep);
+    for (const [p, rx, rep] of V_PHRASE) if (t.includes(p)) t = t.replace(rx, rep);   // the cheap test first: a phrase that is absent cannot match
     t = t.replace(/'s(?![a-z0-9])/g, "").split("n't").join("nt").split("'").join("");
     return t.split(/[^a-z0-9_&+]+/).filter(Boolean);
   }
+  const V_WORD = [new Map(), new Map()];   // word -> its tokens (stem, then synonyms), computed once per word
+  function vWord(w, expand) {
+    const memo = V_WORD[expand ? 1 : 0];
+    let t = memo.get(w);
+    if (t) return t;
+    t = [];
+    if (!(V_STOP.has(w) || V_NEG.has(w))) {
+      const s = vStem(w);
+      t.push(s);
+      if (expand) for (const x of (VC.syn[w] || []).concat(s !== w ? VC.syn[s] || [] : [])) { const xs = vStem(x); if (xs !== s) t.push(xs); }
+    }
+    memo.set(w, t);
+    return t;
+  }
   function vTokens(text, expand = true) {
     const out = [];
-    for (const w of vRaw(text)) {
-      if (V_STOP.has(w) || V_NEG.has(w)) continue;
-      const s = vStem(w);
-      out.push(s);
-      if (expand) for (const x of (VC.syn[w] || []).concat(s !== w ? VC.syn[s] || [] : [])) { const xs = vStem(x); if (xs !== s) out.push(xs); }
-    }
+    for (const w of vRaw(text)) { const t = vWord(w, expand); for (let k = 0; k < t.length; k++) out.push(t[k]); }
     return out;
   }
   function vIndex(docs) {
-    const n = docs.length, avg = n ? docs.reduce((a, d) => a + d.length, 0) / n : 0, df = new Map();
-    const tf = docs.map((d) => { const c = new Map(); d.forEach((w) => c.set(w, (c.get(w) || 0) + 1)); c.forEach((_, w) => df.set(w, (df.get(w) || 0) + 1)); return c; });
+    // BM25 with an inverted index: each term's postings (document, weight) are built once, so a query touches only the
+    // documents that contain its terms. Per document the terms are still added in sorted order, so every score is
+    // bit-for-bit what the plain loop gives (buildout/voices.py Index.score).
+    const n = docs.length, avg = n ? docs.reduce((a, d) => a + d.length, 0) / n : 0, df = new Map(), post = new Map();
+    docs.forEach((d, i) => {
+      const c = new Map();
+      for (const w of d) c.set(w, (c.get(w) || 0) + 1);
+      const L = d.length;
+      c.forEach((f, w) => {
+        df.set(w, (df.get(w) || 0) + 1);
+        let p = post.get(w);
+        if (!p) post.set(w, (p = { doc: [], tf: [], len: [] }));
+        p.doc.push(i); p.tf.push(f); p.len.push(L);
+      });
+    });
     const idf = new Map(); df.forEach((k, w) => idf.set(w, Math.log(1 + (n - k + 0.5) / (k + 0.5))));
     return {
       score(q) {
-        const qs = [...new Set(q)].sort();
-        return tf.map((c, i) => {
-          const L = docs[i].length; let s = 0;
-          for (const w of qs) { const f = c.get(w); if (f) s += idf.get(w) * f * (VC.k1 + 1) / (f + VC.k1 * (1 - VC.b + VC.b * L / (avg || 1))); }
-          return s;
-        });
+        const out = new Array(n).fill(0);
+        for (const w of [...new Set(q)].sort()) {
+          const p = post.get(w);
+          if (!p) continue;
+          const id = idf.get(w);
+          for (let k = 0; k < p.doc.length; k++) { const f = p.tf[k]; out[p.doc[k]] += id * f * (VC.k1 + 1) / (f + VC.k1 * (1 - VC.b + VC.b * p.len[k] / (avg || 1))); }
+        }
+        return out;
       },
     };
   }

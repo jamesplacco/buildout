@@ -46,6 +46,7 @@ import numpy as np
 import pandas as pd
 
 from .data import http
+from .core import cache
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 RAW = "https://raw.githubusercontent.com/datasets/{}"
@@ -811,6 +812,7 @@ def _core() -> dict:
     return json.loads((ASSETS / "brain_graph.json").read_text())["graph"]
 
 
+@cache.memo("atlas.build", deps=("buildout.labs",), require=("dl",))
 def build(dl: dict | None = None, n_sub: int = N_SUB) -> dict:
     dl = dl if dl is not None else download()
     P, meta = panel(dl)

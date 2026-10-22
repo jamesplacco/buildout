@@ -19,12 +19,14 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "site" / "src"
 OUT = ROOT / "site" / "page.html"
 SCRIPTS = ["math.js", "engine7.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js",
-           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "keys.js", "today7.js",
+           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "guide.js", "keys.js", "today7.js",
            "boot.js"]
 
 
 def assemble(src: Path = SRC) -> str:
     head = (src / "head.html").read_text().rstrip()
+    if (src / "fonts.css").exists():                     # the typeface, inlined (site/src/fonts.css, SIL OFL)
+        head = head.replace("/*FONTS*/", (src / "fonts.css").read_text().rstrip(), 1)
     body = (src / "body.html").read_text().strip()
     js = "\n\n".join((src / name).read_text().rstrip() for name in SCRIPTS)
     return f'{head}\n{body}\n<script>\n(() => {{\n  "use strict";\n{js}\n}})();\n</script>\n'

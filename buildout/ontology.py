@@ -676,7 +676,7 @@ RAW: list[tuple] = [
 
 # single words too common to identify one concept when they appear in a question
 GENERIC = {"market", "limit", "stop", "spread", "equity", "risk", "growth", "yield", "earnings", "carry", "value", "quality", "costs", "multiple",
-           "power", "selling", "range", "position", "variance", "skew", "luck", "skill", "anchor", "fair", "speed", "cycle", "variance", "tell"}
+           "power", "selling", "range", "position", "variance", "skew", "luck", "skill", "anchor", "fair", "speed", "cycle", "tell"}
 
 
 def _extra() -> list[tuple]:

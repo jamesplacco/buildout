@@ -1,7 +1,6 @@
 """v0.10: robustness. Robust link statistics, the distributionally robust solver, backtest robustness and the data
 screen, checked against brute force, planted answers, properties and the page's JavaScript."""
 import json
-import math
 import shutil
 import subprocess
 from pathlib import Path

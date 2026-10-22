@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 
 from . import labs, ml
+from .core import cache
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 LONG = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
@@ -121,6 +122,7 @@ def describe(row) -> str:
     return txt
 
 
+@cache.memo("chronicle.build", deps=("buildout.ml", "buildout.labs"), require=("S",))
 def build(S: pd.DataFrame) -> dict:
     """Nodes (id, kind, name, text, aliases, group, extra) and edges (a, b, type, weight) for mind.build to add."""
     D = frame(S)
