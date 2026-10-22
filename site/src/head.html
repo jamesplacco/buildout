@@ -1498,4 +1498,13 @@ td.lvl-bad { color: var(--bad-ink); font-weight: 700; } td.lvl-warn { color: var
 .cd-ln { display: block; padding: 0 12px 0 0; white-space: pre; }
 .cd-ln i { display: inline-block; width: 4.6em; padding-right: 1em; text-align: right; color: #a7a2db; font-style: normal; user-select: none; }
 .cd-ln.hit { background: rgba(255, 209, 102, 0.18); }
+@media print {
+  .m-evl, .m-cl, .lb-read-grid, .cd-grid, .m-cols, .m-trace { display: block; }
+  .m-ev-i, .m-cl-i, .lb-read, .m-trace li { break-inside: avoid; margin-bottom: 6px; }
+  .cd-list, .m-ex, .m-ask, .m-legend { display: none; }
+  .cd-src { max-height: none; overflow: visible; background: none; color: #000; }
+  .cd-ln { white-space: pre-wrap; }
+  .cd-ln i { color: #555; }
+  .m-mcp { background: none; color: #000; white-space: pre-wrap; }
+}
 </style>
