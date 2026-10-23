@@ -23,7 +23,7 @@
   function rtBadge(st) { return h("span", "rt-badge rt-" + st, RT_STATUS[st] || st); }
   function renderRealityDesk() {
     const tiles = $("#rt-tiles");
-    if (!tiles || !rtOk(REAL_SNAP)) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The reality-check snapshot is missing or malformed.")); return; }
+    if (!tiles || !rtOk(REAL_SNAP)) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The reality-check data is missing or malformed.")); return; }
     const C = REAL_SNAP.checks;
     if (!tiles.children.length) {
       const broken = REAL_SNAP.map.filter((m) => m.verdict === "broken").length;

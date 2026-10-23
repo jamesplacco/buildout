@@ -72,7 +72,7 @@ def site_with(data: dict[str, object] | None, raw: dict[str, str] | None = None)
     return tmp / "site"
 
 
-async def settle(page, view_id: str, timeout: int = 3000) -> None:
+async def settle(page, view_id: str, timeout: int = 8000) -> None:
     """Wait for a navigation to land (a busy page may take longer than a fixed pause), then a beat for rendering.
     A view that never appears is still caught by the check that follows."""
     try:

@@ -25,24 +25,25 @@
       { label: "Jul 1", y: [3.67, 3.85, 4.00, 4.00, 4.17, 4.19, 4.24, 4.35, 4.48, 4.97, 4.97] },
       { label: "Oct 1", y: [4.06, 4.17, 4.27, 4.44, 4.78, 4.91, 5.01, 5.12, 5.24, 5.64, 5.61] },
       { label: "Oct 19", y: [4.11, 4.27, 4.37, 4.50, 4.77, 4.85, 4.94, 5.04, 5.15, 5.53, 5.48] },
+      { label: "Oct 21", y: [4.09, 4.25, 4.35, 4.52, 4.81, 4.89, 4.95, 5.03, 5.13, 5.47, 5.42] },
     ],
   };
 
   const LEVELS = [
     { label: "Fed funds target", value: "3.75–4.00%", note: "Hiked 25bp on Sep 16. October hike odds about 33% on Oct 16, up from 19% on Oct 8.", src: [SRC.fxstreet, SRC.roic] },
     { label: "Nasdaq-100", value: "29,529", note: "Oct 19 close; 30,569 on Oct 13.", src: SRC.fred, live: ["latest", "NASDAQ100", "n0"], fid: "NASDAQ100" },
-    { label: "VIX", value: "19.99", note: "Oct 16 close; 16.46 the day before.", src: F("VIXCLS"), live: ["level", "vix", "n2"], fid: "VIXCLS" },
+    { label: "VIX", value: "18.44", note: "Oct 19 close; 19.99 on Oct 16, a four-month high.", src: F("VIXCLS"), live: ["level", "vix", "n2"], fid: "VIXCLS" },
     { label: "Nasdaq-100 volatility", value: "25.56", note: "VXN, Oct 19; 21.14 on Oct 13.", src: F("VXNCLS"), live: ["level", "vxn", "n2"], fid: "VXNCLS" },
-    { label: "3-month bill", value: "4.27%", note: "Oct 19 close.", src: SRC.treasury, live: ["curve", "3M"] },
-    { label: "2-year Treasury", value: "4.77%", note: "Oct 19; up 130bp since Jan 2.", src: SRC.treasury, live: ["curve", "2Y"] },
-    { label: "10-year Treasury", value: "5.15%", note: "Oct 19; up 96bp since Jan 2.", src: SRC.treasury, live: ["curve", "10Y"] },
-    { label: "30-year Treasury", value: "5.48%", note: "Oct 19; 5.66% on Oct 5.", src: SRC.treasury, live: ["curve", "30Y"] },
-    { label: "10-year real yield", value: "2.74%", note: "TIPS, Oct 16; 2.91% on Oct 7, near an 18-year high.", src: [F("DFII10"), SRC.macroradar], live: ["level", "real10"], fid: "DFII10" },
+    { label: "3-month bill", value: "4.25%", note: "Oct 21 close.", src: SRC.treasury, live: ["curve", "3M"] },
+    { label: "2-year Treasury", value: "4.81%", note: "Oct 21; up 134bp since Jan 2.", src: SRC.treasury, live: ["curve", "2Y"] },
+    { label: "10-year Treasury", value: "5.13%", note: "Oct 21 par yield; up 94bp since Jan 2. 5.02% intraday on Oct 22.", src: SRC.treasury, live: ["curve", "10Y"] },
+    { label: "30-year Treasury", value: "5.42%", note: "Oct 21; 5.66% on Oct 5.", src: SRC.treasury, live: ["curve", "30Y"] },
+    { label: "10-year real yield", value: "2.77%", note: "TIPS, Oct 20; 2.91% on Oct 7, near an 18-year high.", src: [F("DFII10"), SRC.macroradar], live: ["level", "real10"], fid: "DFII10" },
     { label: "10-year breakeven", value: "2.35%", note: "Oct 19; 2.46% on Apr 29.", src: F("T10YIE"), live: ["level", "breakeven10"], fid: "T10YIE" },
     { label: "High-yield spread", value: "3.29%", note: "Oct 19; 3.16% on Oct 13.", src: F("BAMLH0A0HYM2"), live: ["level", "hy_oas"], fid: "BAMLH0A0HYM2" },
-    { label: "CCC spread", value: "12.97%", note: "Oct 16; 8.53% in July 2025. The weakest borrowers first.", src: [F("BAMLH0A3HYC"), SRC.macrotrends], live: ["level", "ccc_oas"], fid: "BAMLH0A3HYC" },
+    { label: "CCC spread", value: "13.10%", note: "Oct 19; 8.53% in July 2025. The weakest borrowers first.", src: [F("BAMLH0A3HYC"), SRC.macrotrends], live: ["level", "ccc_oas"], fid: "BAMLH0A3HYC" },
     { label: "Japan 30-year", value: "4.11%", note: "Oct 8 auction average yield.", src: SRC.mof },
-    { label: "Brent crude", value: "$126.55", note: "Oct 14; WTI $101.91. Iran war since Feb 28.", src: F("DCOILBRENTEU"), live: ["level", "brent", "$"], fid: "DCOILBRENTEU" },
+    { label: "Brent crude", value: "$126.55", note: "Oct 14 spot (EIA); WTI $101.91. Brent futures $111.95 on Oct 22. Iran war since Feb 28.", src: F("DCOILBRENTEU"), live: ["level", "brent", "$"], fid: "DCOILBRENTEU" },
     { label: "Gold", value: "$4,182", note: "Oct 13; up 2.6% from a year earlier.", src: SRC.fortune },
     { label: "Bitcoin", value: "$81,804", note: "Oct 19, Coinbase.", src: F("CBBTCUSD"), live: ["level", "bitcoin", "$0"], fid: "CBBTCUSD" },
     { label: "USD/JPY", value: "158.00", note: "Oct 16; yen per dollar.", src: F("DEXJPUS"), live: ["level", "usdjpy", "n2"], fid: "DEXJPUS" },
@@ -57,21 +58,22 @@
   const STATIC_MOVES = { from: "Oct 13", rows: [
     ["Nasdaq-100", "pct", 30569.48, 29529.34, "Oct 19", "NASDAQ100", true],
     ["S&P 500", "pct", 7805.45, 7690.73, "Oct 19", "SP500"],
-    ["2-year Treasury", "bp", 4.79, 4.74, "Oct 16", "DGS2"],
-    ["10-year Treasury", "bp", 5.21, 5.15, "Oct 19", "DGS10"],
-    ["30-year Treasury", "bp", 5.56, 5.43, "Oct 16", "DGS30", true],
-    ["10-year real yield", "bp", 2.88, 2.74, "Oct 16", "DFII10"],
+    ["2-year Treasury", "bp", 4.79, 4.81, "Oct 21", "DGS2"],
+    ["10-year Treasury", "bp", 5.21, 5.13, "Oct 21", "DGS10"],
+    ["30-year Treasury", "bp", 5.56, 5.42, "Oct 21", "DGS30", true],
+    ["10-year real yield", "bp", 2.88, 2.77, "Oct 20", "DFII10"],
     ["10-year breakeven", "bp", 2.33, 2.35, "Oct 19", "T10YIE"],
     ["Investment-grade spread", "bp", 0.83, 0.87, "Oct 19", "BAMLC0A0CM"],
     ["High-yield spread", "bp", 3.16, 3.29, "Oct 19", "BAMLH0A0HYM2"],
-    ["CCC spread", "bp", 12.67, 12.97, "Oct 16", "BAMLH0A3HYC", true],
-    ["VIX", "pts", 15.27, 19.99, "Oct 16", "VIXCLS", true],
+    ["CCC spread", "bp", 12.67, 13.10, "Oct 19", "BAMLH0A3HYC", true],
+    ["VIX", "pts", 15.27, 18.44, "Oct 19", "VIXCLS", true],
     ["Nasdaq-100 volatility (VXN)", "pts", 21.14, 25.56, "Oct 19", "VXNCLS"],
     ["Brent crude", "pct", 125.78, 126.55, "Oct 14", "DCOILBRENTEU"],
     ["Broad dollar", "pct", 121.4433, 121.4048, "Oct 16", "DTWEXBGS"],
     ["Yen per dollar", "pct", 158.36, 158.0, "Oct 16", "DEXJPUS"],
   ] };
   // insurance and plumbing snapshot, from FRED (values in index points, percent, and $ trillions)
+  const TLT_DUR = 14.85;                 // TLT effective duration, iShares, Oct 20, 2026 (knowledge item bd-tlt-duration)
   const STATIC_VOL = { vxn: [25.56, "Oct 19"], vix: [19.99, "Oct 16"], vix3m: [20.5, "Oct 16"] };
   const STATIC_LIQ = { assets: [6.755639, "Oct 14"], tga: [0.883373, "Oct 14"], rrp: [0.00033, "Oct 19"], reserves: [3.02214, "Oct 14"], sofr: [3.88, "Oct 16"], iorb: [3.9, "Oct 16"] };
 
@@ -88,7 +90,7 @@
   ];
   // grades: 2 strong, 1 partial, 0 little or none, -1 tends to hurt
   const MATRIX = [
-    { h: "T-bills and cash", sub: "SGOV, BIL", g: [1, 1, 1, 1, 1, -1], note: "Holds its value in every crash scenario and pays 4.27% (3-month, Oct 19). It protects by not falling, not by rising. Loses real value under debasement. The safe side of a barbell." },
+    { h: "T-bills and cash", sub: "SGOV, BIL", g: [1, 1, 1, 1, 1, -1], note: "Holds its value in every crash scenario and pays 4.25% (3-month, Oct 21). It protects by not falling, not by rising. Loses real value under debasement. The safe side of a barbell." },
     { h: "Long Treasuries", sub: "TLT, ZB, UB", g: [2, 1, -1, 1, 1, -1], note: "Rallies when growth fears pull yields down, as on Oct 8. Falls with stocks when inflation, oil or bond supply push yields up, as in March 2026. Mixed in March 2020's dash for cash." },
     { h: "Intermediate Treasuries", sub: "IEF, ZN", g: [1, 1, 0, 1, 1, -1], note: "About half of TLT's duration: a smaller hedge in a growth scare and smaller damage in an inflation shock." },
     { h: "TIPS", sub: "TIP, SCHP", g: [1, 0, 1, 0, 0, 1], note: "Protect against inflation surprises but lose when real yields jump, as in 2022 and 2026. At a real yield near 2.75%, they lock in a positive real return if held." },
@@ -107,7 +109,7 @@
 
   const SECS = [
     { n: "Treasury bills", f: "Rates", d: ["Rates", "Liquidity"], w: "Government debt maturing within a year, sold at a discount.", now: "4.27% (3-month, Oct 19)", acc: "SGOV, BIL, TreasuryDirect", role: "Safe leg of a barbell; collateral." },
-    { n: "Treasury notes and bonds", f: "Rates", d: ["Rates"], w: "Coupon-paying government debt from 2 to 30 years.", now: "10-year 5.15%, 30-year 5.48% (Oct 19)", acc: "IEF, TLT, direct", role: "Duration; hedges growth scares only." },
+    { n: "Treasury notes and bonds", f: "Rates", d: ["Rates"], w: "Coupon-paying government debt from 2 to 30 years.", now: "10-year 5.13%, 30-year 5.42% (Oct 21)", acc: "IEF, TLT, direct", role: "Duration; hedges growth scares only." },
     { n: "TIPS", f: "Rates", d: ["Rates", "Inflation"], w: "Treasuries whose principal adjusts with CPI.", now: "10-year real yield 2.91% (Oct 7)", acc: "TIP, SCHP, direct", role: "Real-return anchor; inflation hedge." },
     { n: "STRIPS and zero-coupon funds", f: "Rates", d: ["Rates", "Volatility"], w: "Treasury cash flows sold separately, paying everything at maturity.", now: "Duration roughly equal to maturity", acc: "ZROZ, EDV", role: "Most duration and convexity per dollar." },
     { n: "Treasury futures", f: "Rates", d: ["Rates", "Liquidity"], w: "Exchange-traded contracts on 2- to 30-year Treasuries.", now: "Margin, not full cash outlay", acc: "ZT, ZF, ZN, TN, ZB, UB", role: "Hedge DV01 without selling stock." },
@@ -148,7 +150,7 @@
       ev: ["Since April the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp.", "The Sep 17 10-year TIPS auction cleared at 2.653%, the highest real yield in nearly 18 years.", "The Fed hiked to 3.75–4.00% on Sep 16; UOB expects 4.50% by early 2027.", "Japan's 30-year cleared at 4.11% on Oct 8."],
       ex: "Hold the safe leg in bills (4.27%) and TIPS (about 2.75% real) instead of long nominals.", hd: "Options for the tail; duration only when the engine's correlation turns negative.",
       kill: ["Breakevens fall sharply alongside a growth scare.", "The engine's stock-bond correlation (63-day half-life) drops below −0.10."], data: ["TIPS real yield and breakeven (FRED)", "Nasdaq-100 vs long-bond correlation (engine)"] },
-    { id: "t3", t: "Energy security is the tail risk you cannot diversify away", st: "active", stance: "Carry explicit oil-shock protection.",
+    { id: "t3", t: "Energy security is the tail risk that cannot be diversified away", st: "active", stance: "Carry explicit oil-shock protection.",
       ev: ["The Iran war began Feb 28, 2026 and closed the Strait of Hormuz, which carries about 20% of global oil and LNG.", "Brent averaged $118 in April (its daily high was about $138), fell to $78 by late June on a ceasefire framework, and traded at $125 on Oct 7.", "US CPI hit 4.2% year over year in May, with gasoline up 40.5%."],
       ex: "Energy producers or Brent exposure sized to offset the book's loss in an oil shock.", hd: "This is itself the hedge for the lane where stocks and bonds fall together.",
       kill: ["A durable ceasefire with Brent back below $80.", "Breakevens and oil decouple for a full quarter."], data: ["Brent and WTI daily (FRED)", "10-year breakeven (FRED)"] },
@@ -168,7 +170,7 @@
       ev: ["Gold was $4,182 on Oct 13, up only 2.6% from a year earlier despite a war and an inflation spike.", "Bitcoin was $81,804 on Oct 19.", "Real yields near 3% raise the cost of holding assets that pay nothing."],
       ex: "A sized debasement sleeve rebalanced on rules.", hd: "T-bills and TIPS as the true safe leg.",
       kill: ["Real yields fall and the Fed turns to cuts: the sleeve should then lead."], data: ["10-year real yield (FRED)", "Broad dollar index (FRED)"] },
-    { id: "t8", t: "Volatility is the cheapest honest hedge", st: "active", stance: "Run a standing tail budget instead of a bond hedge whose correlation can flip.",
+    { id: "t8", t: "Volatility is the cheapest contractual hedge", st: "active", stance: "Run a standing tail budget instead of a bond hedge whose correlation can flip.",
       ev: ["Cboe flagged volatility and convexity premia at their lowest of the year in mid-August, before October's AI selloff.", "The Fed's own data show stocks and bonds falling together through July 2026.", "A put's payoff is contractual; a bond hedge's is statistical."],
       ex: "1–2% of NAV a year in rolled index put spreads; bills and TIPS as the safe leg.", hd: "This is the hedge.",
       kill: ["Implied volatility stays rich to realized for a full quarter: cut the budget and lean on size and trend instead."], data: ["VIX (FRED)", "Realized volatility of the book (engine)"] },

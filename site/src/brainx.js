@@ -592,7 +592,7 @@ The reader's question: ${q}`;
       else { ul = null; el.append(h("p", null, t.replace(/\*\*/g, "").replace(/^#+\s*/, ""))); }
     });
   }
-  const ASK_CHIPS = ["What is driving the book right now, and what would change your mind?", "Has the stock-bond link really flipped, or is it fading?",
+  const ASK_CHIPS = ["What is driving the book right now, and what would change the view?", "Has the stock-bond link really flipped, or is it fading?",
     "How does a 1-in-20 bad quarter most plausibly happen?", "Had oil not spiked, where would the book be?", "Which holdings are secretly the same bet?", "What should I watch this week to tell the top explanations apart?"];
   async function askRun(q) {
     if (!ASK.sample || ASK.busy) return;

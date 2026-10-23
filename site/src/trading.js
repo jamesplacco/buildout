@@ -46,7 +46,7 @@
     const out = $("#pe-out"), kel = Math.max(0, s.kelly);
     out.className = "sentence " + (s.E > 0 ? "ok" : "warn");
     out.textContent = s.E > 0
-      ? `Each trade earns ${sg(s.E, 3)} R after costs. A ${fx(p * 100, 0)}% win rate needs ${fx(s.breakeven * 100, 1)}% to break even at this payoff, so the margin of error is ${fx((p - s.breakeven) * 100, 1)} points. Proving the edge at t = 2 takes about ${Math.ceil(s.tradesToProve).toLocaleString("en-US")} trades. Full Kelly risks ${fx(kel * 100, 1)}% a trade; you risk ${fx(r * 100, 2)}%${r > kel ? ", above Kelly: more risk now buys less growth" : r > kel / 2 ? ", between half and full Kelly" : ", at or below half Kelly"}.`
+      ? `Each trade earns ${sg(s.E, 3)} R after costs. A ${fx(p * 100, 0)}% win rate needs ${fx(s.breakeven * 100, 1)}% to break even at this payoff, so the margin of error is ${fx((p - s.breakeven) * 100, 1)} points. Proving the edge at t = 2 takes about ${Math.ceil(s.tradesToProve).toLocaleString("en-US")} trades. Full Kelly risks ${fx(kel * 100, 1)}% a trade; the setting risks ${fx(r * 100, 2)}%${r > kel ? ", above Kelly: more risk now buys less growth" : r > kel / 2 ? ", between half and full Kelly" : ", at or below half Kelly"}.`
       : `No edge after costs: a ${fx(p * 100, 0)}% win rate needs a payoff above ${fx((1 - p + c) / p, 2)} R. Every trade loses ${fx(-s.E, 3)} R on average; more size only loses faster.`;
     const box = $("#pe-chart");
     if (box && box.clientWidth) {
@@ -209,7 +209,7 @@
     $("#ex-imp").textContent = fx(I * 1e4, 1) + " bp";
     $("#ex-tot").textContent = fx(I * 1e4 + o.spread / 2, 1) + " bp";
     $("#ex-cost").textContent = `${fx(cM.e, 1)} ± ${fx(cM.sd, 1)} bp`;
-    $("#ex-out").textContent = `Trading ${fx(o.qty * 100, 1)}% of a day's volume costs about ${fx(I * 1e4, 1)} bp of impact by the square-root law (Y = ${fx(o.Y, 2)}), plus ${fx(o.spread / 2, 1)} bp of half-spread. Four times the size costs only twice the impact per share. Spreading it over ${o.days} ${o.days === 1 ? "day" : "days"}: the even pace expects ${fx(cT.e, 1)} bp with ${fx(cT.sd, 1)} bp of timing risk; your urgency trades ${fx(cM.e - cT.e, 1)} bp more expected cost for ${fx(cT.sd - cM.sd, 1)} bp less risk.`;
+    $("#ex-out").textContent = `Trading ${fx(o.qty * 100, 1)}% of a day's volume costs about ${fx(I * 1e4, 1)} bp of impact by the square-root law (Y = ${fx(o.Y, 2)}), plus ${fx(o.spread / 2, 1)} bp of half-spread. Four times the size costs only twice the impact per share. Spreading it over ${o.days} ${o.days === 1 ? "day" : "days"}: the even pace expects ${fx(cT.e, 1)} bp with ${fx(cT.sd, 1)} bp of timing risk; the chosen urgency trades ${fx(cM.e - cT.e, 1)} bp more expected cost for ${fx(cT.sd - cM.sd, 1)} bp less risk.`;
     const box = $("#ex-chart");
     if (box && box.clientWidth) {
       const t = (tr) => tr.map((x, j) => [(j / N) * o.days, (x / X) * 100]);

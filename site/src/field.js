@@ -120,7 +120,7 @@
   function renderNotes() {
     const t = $("#fd-notes");
     if (!t) return;
-    if (!FD.notes.length) { t.replaceChildren(h("p", "hint", "No field notes yet. They stay in this browser until you copy them out.")); return; }
+    if (!FD.notes.length) { t.replaceChildren(h("p", "hint", "No field notes yet. They stay in this browser until exported.")); return; }
     t.replaceChildren(tableBlock(["Learned", "Entity", "Claim", "Access", "Family", "Resolves when", ""], FD.notes.map((n) => [n.learned || "n/a", n.entity, n.claim, n.access, n.family || "n/a", n.resolve || "n/a", ""]), 7));
     t.querySelectorAll("tbody tr").forEach((tr, i) => {
       const b = h("button", "pill", "Delete"); b.type = "button";

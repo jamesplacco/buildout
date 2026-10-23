@@ -697,11 +697,11 @@ def summary(L: dict) -> list[str]:
     t, v, m, mt = L["trend"], L["valuation"], L["regimes"], L["multiple_testing"]
     out = [f"The 10-month average rule on {t['years']:.0f} years of the S&P 500, acting a month late so monthly averaging cannot flatter it: Sharpe {t['full']['rule']['sharpe']:.2f} against {t['full']['hold']['sharpe']:.2f} for holding, "
            f"worst drawdown {t['full']['rule']['maxdd']:.0%} against {t['full']['hold']['maxdd']:.0%}; the Sharpe gain's 90% range is {t['sharpe_diff']['lo']:+.2f} to {t['sharpe_diff']['hi']:+.2f}. "
-           f"Of all 22 lengths the best is {t['best']} months; judged on return alone, a no-edge world produces one that good {t['spa_p']:.0%} of the time: the rule cuts risk, not the return.",
+           f"Of all 22 lengths the best is {t['best']} months; judged on return alone, a no-edge world produces one that good {t['spa_p']:.1%} of the time: the rule cuts risk, not the return.",
            f"CAPE {v['cape']['now']:.1f} is above {v['cape']['percentile']:.0%} of months since 1881; history implies {v['cape']['implied_10y_real']:.1%} a year real for ten years "
            f"(80% range {v['cape']['range80'][0]:.1%} to {v['cape']['range80'][1]:.1%}). Over one year valuation explains almost nothing.",
            f"Markov-switching: a calm regime ({m['sd'][0] * math.sqrt(12):.0%} annual volatility) lasting about {m['duration'][0]:.0f} months and a turbulent one ({m['sd'][1] * math.sqrt(12):.0%}) lasting about "
-           f"{m['duration'][1]:.0f}; today's chance of the turbulent regime is {m['p_now'][1]:.0%}.",
+           f"{m['duration'][1]:.0f}; today's chance of the turbulent regime is {m['p_now'][1]:.0%} (a two-state model on stocks since 1871; the decision and portfolio engines use richer models and put the stressed state higher).",
            f"Of {mt['n']} indicator and calendar tests, {mt['raw_5pct']} pass at 5% before correction, {mt['bh_5pct']} after controlling the false discovery rate, {mt['holm_5pct']} after Holm."]
     return out
 

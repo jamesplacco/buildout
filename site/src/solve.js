@@ -175,7 +175,7 @@
     ht.append(thead, hb);
     // 6. the game against Nature
     const rb = R.robust, natTop = rb.nature.map((p, i) => [p, i]).filter((x) => x[0] > 0.005).sort((a, b) => b[0] - a[0]);
-    $("#rz-nature").textContent = `If Nature picks the scenario that hurts most, the best you can guarantee is ${sPct(rb.value, 1)} over three months, with ${rb.names.map((n, i) => (rb.mix[i] > 0.995 ? `"${names[n]}"` : rb.mix[i] > 0.005 ? `${pct0(rb.mix[i])} in "${names[n]}"` : null)).filter(Boolean).join(" and ")}. Nature's equilibrium attack: ${natTop.map(([p, i]) => `${RZ_SCENARIOS[i].name} ${pct0(p)}`).join(", ")}. That blend, not the posterior, is what the book is most exposed to.`;
+    $("#rz-nature").textContent = `If Nature picks the scenario that hurts most, the best that can be guaranteed is ${sPct(rb.value, 1)} over three months, with ${rb.names.map((n, i) => (rb.mix[i] > 0.995 ? `"${names[n]}"` : rb.mix[i] > 0.005 ? `${pct0(rb.mix[i])} in "${names[n]}"` : null)).filter(Boolean).join(" and ")}. Nature's equilibrium attack: ${natTop.map(([p, i]) => `${RZ_SCENARIOS[i].name} ${pct0(p)}`).join(", ")}. That blend, not the posterior, is what the book is most exposed to.`;
     // 7. value of information
     if (R.voi) {
       const vt = $("#rz-voi tbody");

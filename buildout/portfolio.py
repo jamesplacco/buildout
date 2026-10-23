@@ -501,15 +501,17 @@ def summary(o: dict) -> list[str]:
     sim = o["simulation"]
     gp = n["gate_policy"].replace("_", " ").replace("sixty forty", "60/40")
     out = [
-        f"Portfolio decision for the model book: {_mix(n['decision'])}. The regime optimum is {_mix(n['optimum'])}. Of the {len(o['meta']['names'])} policies walked forward since "
-        f"{o['start'][:4]}, the one with the strongest evidence of making a risk-averse investor better off than holding stocks is {gp} (utility t {n['gate_t']:.1f}, against "
-        f"{n['gate_t0']:.1f} expected from the best of {o['n_tried']} useless ones), so the gate moves {n['gate']:.0%} of the way toward it.",
+        f"Portfolio decision for the model book: {_mix(n['decision'])}. The regime optimum is {_mix(n['optimum'])}. Of the {len(o['meta']['names'])} active policies walked forward since "
+        f"{o['start'][:4]} (eight including holding stocks and the learner), the one with the strongest evidence of making a risk-averse investor better off than holding "
+        f"stocks is {gp} (utility t {n['gate_t']:.1f}, against {n['gate_t0']:.1f} expected from the best of {o['n_tried']} useless strategies), so the gate moves "
+        f"{n['gate']:.0%} of the way toward it.",
         f"Regimes: {n['K']} states of stocks, bonds and gold together. Next month is most likely {st[cur]['name'].lower()} ({w[cur]:.0%}), where stocks and Treasuries "
         f"have moved with a correlation of {st[cur]['corr_sb']:+.2f}; in the stressed state ({w[n['worst']]:.0%}) it is {st[n['worst']]['corr_sb']:+.2f}.",
         f"Walked forward with costs since {o['start'][:4]}: Sharpe {P['regime']['sharpe']:.2f} for the regime allocation, {P['gated']['sharpe']:.2f} gated, "
         f"{P['meta']['sharpe']:.2f} for the learner over six policies, against {P['hold']['sharpe']:.2f} for holding stocks, {P['sixty_forty']['sharpe']:.2f} for 60/40 "
-        f"and {P['risk_parity']['sharpe']:.2f} for risk parity; worst drawdowns {P['regime']['maxdd']:.0%}, {P['meta']['maxdd']:.0%}, {P['hold']['maxdd']:.0%}, {P['sixty_forty']['maxdd']:.0%}.",
-        f"Deflated for the {o['n_tried']} policies tried, the chance the best one ({o['deflated']['best'].replace('_', ' ')}) has a real edge in Sharpe is {o['deflated']['dsr']:.0%}.",
+        f"and {P['risk_parity']['sharpe']:.2f} for risk parity; worst drawdowns, in the same order, {P['regime']['maxdd']:.0%}, {P['gated']['maxdd']:.0%}, {P['meta']['maxdd']:.0%}, "
+        f"{P['hold']['maxdd']:.0%}, {P['sixty_forty']['maxdd']:.0%} and {P['risk_parity']['maxdd']:.0%}.",
+        f"Deflated for the {o['n_tried']} strategies tried (the six policies, the gated engine, the learner and the stock-only decision engine), the chance the best one ({o['deflated']['best'].replace('_', ' ')}) has a real edge in Sharpe is {o['deflated']['dsr']:.0%}.",
     ]
     h10 = sim["hold"]["horizons"]["120"]
     s10 = sim["sixty_forty"]["horizons"]["120"]

@@ -34,7 +34,7 @@
       const g = h("td", "r", fin(r.capex_last_q_yoy) ? sPct(r.capex_last_q_yoy, 0) + accel : "n/a");
       if (fin(r.capex_accel)) g.title = `Growth ${r.capex_accel > 0 ? "sped up" : "slowed"} by ${fx(Math.abs(r.capex_accel) * 100, 0)} points against the prior quarter's (the second derivative)`;
       const st = h("td");
-      st.append(h("span", "stage " + (r.stage || ""), r.coverage === "interest_uncovered" ? "Interest not covered" : r.coverage === "funding_gap" ? `Funding gap ${B$(r.funding_gap, 0)}` : r.coverage === "self_funded" ? "Self-funded" : "n/a"));
+      st.append(h("span", "stage mk " + (r.stage || ""), r.coverage === "interest_uncovered" ? "Interest not covered" : r.coverage === "funding_gap" ? `Funding gap ${B$(r.funding_gap, 0)}` : r.coverage === "self_funded" ? "Self-funded" : "n/a"));
       if (r.refreshed) st.append(h("small", null, ` new filing to ${isoNice(r.quarter_end)}`));
       if (fin(r.gap_cover_years)) st.title = `Cash on hand covers ${fx(r.gap_cover_years, 1)} years of the gap at this rate; debt maturities are not modelled.`;
       tr.append(th, td(B$(r.revenue)), td(B$(r.ocf)), td(B$(r.capex)), td(B$(r.fcf), r.fcf < 0), td(pct0(r.capex_to_ocf), r.capex_to_ocf > 1), g, td(pct0(r.nonop_share), r.nonop_share > 0.3), td(B$(r.net_cash), r.net_cash < 0), st);
@@ -49,7 +49,7 @@
     const s = srcLink(SRC5.secapi), c = srcLink(SRC5.crwv), e = srcLink(SRC5.sec);
     [e, s, c].forEach((x, i) => { if (i) note.append(document.createTextNode(" · ")); note.append(x); });
     const newer = FUND.rows.filter((r) => r.refreshed);
-    if (newer.length) note.append(document.createTextNode(` Newer filings from the daily run replace the snapshot field by field, and every view on the page redraws from them: ${newer.map((r) => `${r.t} to ${isoNice(r.quarter_end)}, capex ${pct0(r.capex_to_ocf)} of cash flow (${COVERAGE[r.coverage] || "coverage n/a"})`).join("; ")}.`));
+    if (newer.length) note.append(document.createTextNode(` Newer filings from the daily run replace the shipped figures field by field, and every view on the page redraws from them: ${newer.map((r) => `${r.t} to ${isoNice(r.quarter_end)}, capex ${pct0(r.capex_to_ocf)} of cash flow (${COVERAGE[r.coverage] || "coverage n/a"})`).join("; ")}.`));
   }
   function renderMinsky() {
     const box = $("#fu-minsky");

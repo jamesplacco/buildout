@@ -16,7 +16,7 @@
     { id: "power", n: "Grid power prices", s: "Power", ring: 0, a: 58, d: "nw-power", why: "PJM 2027/28 capacity cleared at the cap, about 6.6 GW (6,623 MW) short of the reliability target." },
     { id: "aidemand", n: "AI end demand", s: "AI demand", ring: 0, a: 118, d: "nw-saas", why: "Paid use of AI by businesses and consumers: the revenue that has to justify the build." },
     { id: "cpi", n: "Consumer prices", s: "CPI", ring: 1, a: 246, m: "cpi", d: "d-duration", why: "CPI-U: 3.7% over the year to September; 3.6% annualized over three months." },
-    { id: "y10", n: "10-year yield", s: "10-year", ring: 1, a: 284, m: "y10", d: "rates-title", why: "5.15% on Oct 19 (Treasury)." },
+    { id: "y10", n: "10-year yield", s: "10-year", ring: 1, a: 284, m: "y10", d: "rates-title", why: "5.13% on Oct 21 (Treasury)." },
     { id: "tp", n: "Term premium", s: "Term prem.", ring: 1, a: 318, d: "rates-title", why: "The extra yield for holding duration; supply pushes it up." },
     { id: "dep", n: "Depreciation catch-up", s: "Depreciation", ring: 1, a: 12, d: "bs-depr-title", why: "Server lives of 5 to 6 years against 2 to 3 years of frontier economic life." },
     { id: "pods", n: "Pod crowding and de-grossing", s: "Pods", ring: 1, a: 54, d: "pr-pods-title", why: "Multi-manager AUM grew 175% from 2017 to 2023 (per the field manual); crowded longs unwind together." },
@@ -407,7 +407,7 @@
   function brTrace(th, ob, W) {
     const steps = [], ex = th.explanations, ab = th.abduce, pr = th.predict, cr = th.criticize, obsIdx = ab.obs;
     const name = (i) => BR_NODES[i].n, hyp = (r) => (r.root == null ? "nothing unusual (noise)" : name(r.root));
-    steps.push({ k: "obs", h: "Observe", nodes: obsIdx, t: `${obsIdx.length} readings: ${obsIdx.map((i, j) => `${BR_NODES[i].s} ${sg(ab.y[j], 2)}σ`).join(", ")}. Measured nodes come from the data; your own observations count the same way.` });
+    steps.push({ k: "obs", h: "Observe", nodes: obsIdx, t: `${obsIdx.length} readings: ${obsIdx.map((i, j) => `${BR_NODES[i].s} ${sg(ab.y[j], 2)}σ`).join(", ")}. Measured nodes come from the data; added observations count the same way.` });
     const top = ex.slice(0, 3);
     steps.push({ k: "hyp", h: "Explain", nodes: top.filter((r) => r.root != null).map((r) => r.root), t: `Competing single causes, ranked by how well each explains every reading at once: ${top.map((r) => `${hyp(r)} ${pct0(r.p)}${r.root != null ? ` (${sg(r.s, 1)}σ)` : ""}`).join("; ")}.${top.length > 1 && Math.abs(top[0].p - top[1].p) < 0.05 ? ` The readings cannot tell the first two apart: ${hyp(top[0])} and ${hyp(top[1])} leave the same footprint on what is observed.` : ""}` });
     const strong = ab.roots.map((r, j) => ({ r, s: ab.s[j], sd: ab.sd[j] })).filter((x) => Math.abs(x.s) >= 0.2).sort((a, b) => Math.abs(b.s) - Math.abs(a.s)).slice(0, 4);

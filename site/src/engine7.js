@@ -63,7 +63,7 @@
   function effectiveFund(rows, live) {
     return rows.map((r0) => {
       const r = Object.assign({}, r0), m = live && live[r0.t], src = {};
-      FUND_FIELDS.forEach((f) => { if (fin(r0[f])) src[f] = "snapshot " + r0.quarter_end; });
+      FUND_FIELDS.forEach((f) => { if (fin(r0[f])) src[f] = "filings to " + r0.quarter_end; });
       if (m && typeof m === "object" && isoOk(m.quarter_end) && m.quarter_end > r0.quarter_end) {
         FUND_FIELDS.forEach((f) => { if (fin(m[f])) { r[f] = m[f]; src[f] = "filing " + m.quarter_end; } });
         r.quarter_end = m.quarter_end; r.refreshed = true;

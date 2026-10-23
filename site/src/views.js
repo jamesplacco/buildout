@@ -353,7 +353,7 @@
     const series = CURVES.dates.map((d, i) => ({ name: d.label, color: QCOL[i], width: i === CURVES.dates.length - 1 ? 2.75 : 1.5,
       dots: i === CURVES.dates.length - 1, pts: d.y.map((y, j) => [j, y]) }));
     xyChart(box, { series, xticks: CURVES.tenors.map((t, j) => [j, t]), xfmt: (j) => CURVES.tenors[j], yfmt: (v) => fx(v, 2) + "%",
-      label: "Treasury par yield curve on five dates in 2026", height: 280, yTicks: 5, snapXs: CURVES.tenors.map((_, j) => j) });
+      label: "Treasury par yield curve on six dates in 2026", height: 280, yTicks: 5, snapXs: CURVES.tenors.map((_, j) => j) });
   }
   function buildRatesStatic() {
     legendLines($("#curve-legend"), CURVES.dates.map((d, i) => [QCOL[i], d.label]));
@@ -383,13 +383,13 @@
       d.append(row);
     });
     d.append(h("p", "hint", "In three weeks the 10-year rose 32bp: 26bp from the real yield and 6bp from inflation expectations. The breakeven was 2.46% on Apr 29."));
-    // duration menu at Oct 19 yields
+    // duration menu at the latest shipped curve
     const rows = [
       ["3-month bill", "SGOV, BIL", 0.25, last[ix("3M")], "Safe leg; collateral"],
       ["2-year note", "SHY, ZT", 2, last[ix("2Y")], "Fed-path exposure"],
       ["5-year note", "IEI, ZF", 5, last[ix("5Y")], "Belly of the curve"],
       ["10-year note", "IEF, ZN, TN", 10, last[ix("10Y")], "Benchmark duration"],
-      ["30-year bond", "TLT, ZB, UB", 30, last[ix("30Y")], "Growth-scare hedge"],
+      ["30-year par bond", "ZB, UB; TLT holds 20 to 30 years (duration 14.85)", 30, last[ix("30Y")], "Growth-scare hedge"],
     ];
     const out = rows.map(([n, tick, mat, y, role]) => {
       // a bill has one cash flow: duration is maturity over (1 + y·t); coupon bonds are repriced on the grid
@@ -491,7 +491,7 @@
     $("#ct-pnl").textContent = signedMoney(pnl);
     const out = $("#ct-out");
     out.className = "sentence " + (pnl >= 0 ? "ok" : "warn");
-    out.textContent = `The 2-year leg makes ${signedMoney(pnl2)} and the 10-year leg ${signedMoney(pnl10)}. A steepener earns about the risk times the spread change (${money(dv)} × ${bp(ds)} ≈ ${signedMoney(dv * ds)}); convexity explains the rest. Starting curve: 2-year ${last[4].toFixed(2)}%, 10-year ${last[8].toFixed(2)}% (Oct 19).`;
+    out.textContent = `The 2-year leg makes ${signedMoney(pnl2)} and the 10-year leg ${signedMoney(pnl10)}. A steepener earns about the risk times the spread change (${money(dv)} × ${bp(ds)} ≈ ${signedMoney(dv * ds)}); convexity explains the rest. Starting curve: 2-year ${last[4].toFixed(2)}%, 10-year ${last[8].toFixed(2)}% (${CURVES.dates[CURVES.dates.length - 1].label}).`;
     $("#ct-presets").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", Number(b.dataset.d2) === d2 && Number(b.dataset.d10) === d10 ? "true" : "false"));
   }
   function buildCurveTrade() {
@@ -510,7 +510,7 @@
   let bsType = "put";
   function updateBS() {
     const S = readNum($("#bs-S"), 0.01, 1e7, 100), K = readNum($("#bs-K"), 0.01, 1e7, 90), days = Number($("#bs-T").value);
-    const v = Number($("#bs-v").value) / 100, r = readNum($("#bs-r"), -5, 30, 4.27) / 100, q = readNum($("#bs-q"), 0, 30, 0.6) / 100;
+    const v = Number($("#bs-v").value) / 100, r = readNum($("#bs-r"), -5, 30, 4.25) / 100, q = readNum($("#bs-q"), 0, 30, 0.6) / 100;
     $("#bs-T-o").textContent = days + " days";
     $("#bs-v-o").textContent = fx(v * 100, 1) + "%";
     const o = bs(S, K, days / 365, r, q, v, bsType);
@@ -545,7 +545,7 @@
     { k: "spread", n: "Put spread", d: "Long a 95% put, short an 80% put. Cheaper insurance that pays between a 5% and a 20% drop.", book: 1, legs: [["put", 0.95, 1], ["put", 0.80, -1]] },
     { k: "collar", n: "Collar", d: "Long a 90% put, short a 110% call. Near-zero cost; protection below 90%, gains capped above 110%.", book: 1, legs: [["put", 0.90, 1], ["call", 1.10, -1]] },
     { k: "covered", n: "Covered call", d: "Short a 105% call against the book. Income in flat markets, no crash protection.", book: 1, legs: [["call", 1.05, -1]] },
-    { k: "barbell", n: "Barbell", d: "Taleb's shape: 90% of NAV in T-bills, 10% in 105%-strike calls. The most you can lose by expiry is the premium less the bill interest; the upside stays open.", book: 0, legs: [["call", 1.05, "budget10"]] },
+    { k: "barbell", n: "Barbell", d: "Taleb's shape: 90% of NAV in T-bills, 10% in 105%-strike calls. The most that can be lost by expiry is the premium less the bill interest; the upside stays open.", book: 0, legs: [["call", 1.05, "budget10"]] },
   ];
   let stratKey = "put";
   function updatePayoff() {
@@ -580,7 +580,7 @@
         vmarks: [{ x: 0, label: "Today" }], label: "Payoff at expiry", height: 260 });
     }
     const rows = legs.map((L) => [`${L.n > 0 ? "Long" : "Short"} ${Math.abs(L.n).toFixed(st.book === 0 ? 2 : 0)} × ${L.type} @ ${L.K.toFixed(0)}`, L.prem.toFixed(2), pctPlain(Math.abs(L.n * L.prem) / 100, 2)]);
-    if (st.book === 0) rows.unshift(["90% of NAV in T-bills at 4.27%", "", pct(bill, 2)]);
+    if (st.book === 0) rows.unshift(["90% of NAV in T-bills at 4.25%", "", pct(bill, 2)]);
     const t = $("#po-table");
     fillTable(t, ["Leg", "Premium per 100", "Share of NAV"], rows);
     const tb = h("tbody"), hr = h("tr");
@@ -679,7 +679,7 @@
   /* =====================================================================================
      HEDGES: matrix, hedge lab, sizing lab
      ===================================================================================== */
-  const GLYPH = { 2: ["●●", "g2", "Strong"], 1: ["●", "g1", "Partial"], 0: ["○", "g0", "Little or none"], "-1": ["✕", "gx", "Tends to hurt"] };
+  const GLYPH = { 2: ["Strong", "g2", "Strong"], 1: ["Partial", "g1", "Partial"], 0: ["None", "g0", "Little or none"], "-1": ["Hurts", "gx", "Tends to hurt"] };
   function buildMatrix() {
     const t = $("#matrix"), thead = h("thead"), hr = h("tr");
     hr.append(h("th", null, "Hedge"));
@@ -868,7 +868,7 @@
     const fname = st.f === 1 ? "full" : st.f === 0.5 ? "half" : "quarter", e = $("#z-edge");
     e.className = "sentence " + (need > have ? "warn" : "ok");
     e.textContent = `Running ${xx(run)} at ${fname} Kelly assumes about ${pctPlain(need, 1)} a year over cash. Your inputs give ${pctPlain(Math.max(have, 0), 1)}. ` +
-      (need > have ? `At this Kelly fraction your return assumption supports ${xx(kelly)}. Size above that rests on the risk limits alone.` : "The return assumption supports this size.");
+      (need > have ? `At this Kelly fraction the return assumption supports ${xx(kelly)}. Size above that rests on the risk limits alone.` : "The return assumption supports this size.");
     $("#dd-title").textContent = `One-year max drawdown at ${Math.round(st.q * 100)}% confidence, by gross exposure`;
     const xs = Array.from({ length: 21 }, (_, i) => i * 0.1), ys = xs.map((L) => ddQuantile(st.mu, st.sig, L, st.q, st.r, st.sp));
     lastCurve = { xs, ys, st, cap, run };
@@ -954,7 +954,8 @@
       const r = ok[ok.length - 1] || rows[rows.length - 1];
       const ttm = ok.slice(-4);
       const sum = (k) => ttm.reduce((a, x) => a + (x[k] || 0), 0);
-      return { t, r, rows: ok, ratio: r.ocf ? r.capex / r.ocf : null, ttmRatio: ttm.length === 4 && sum("ocf") > 0 ? sum("capex") / sum("ocf") : null };
+      return { t, r, rows: ok, ratio: r.ocf ? r.capex / r.ocf : null, ttmRatio: ttm.length === 4 && sum("ocf") > 0 ? sum("capex") / sum("ocf") : null,
+        ttmCapex: ttm.length === 4 ? sum("capex") : null, ttmOcf: ttm.length === 4 ? sum("ocf") : null };
     }).sort((a, b) => (b.ratio ?? -1) - (a.ratio ?? -1));
     LIVE.capex = latest;
     const wrap = $("#capex-live");
@@ -1203,7 +1204,7 @@
         tr.append(th, h("td", "r", fmtLevel(fid, kind, b)), h("td", "r", fmtMove(kind, moveChange(kind, a, b))), h("td", "r", date));
         tb.append(tr);
       });
-      $("#mv-note").textContent = `Snapshot from FRED: the ${STATIC_MOVES.from} close against each series' latest close. The daily run replaces it with day, month, year-to-date and one-year changes and flags unusual moves.`;
+      $("#mv-note").textContent = `FRED, as shipped: the ${STATIC_MOVES.from} close against each series' latest close. The daily run replaces it with day, month, year-to-date and one-year changes and flags unusual moves.`;
     }
     tbl.replaceChildren(thead, tb);
   }
@@ -1231,7 +1232,7 @@
       : tile("VIX over 3-month VIX", fx(ratio, 2), `${fx(S.vix[0], 2)} against ${fx(S.vix3m[0], 2)}, ${S.vix3m[1]}.`));
     const rank = ndx && fin(ndx.implied_rank10y) ? ndx.implied_rank10y : null, flat = ratio >= 0.95 ? " The VIX curve is flattening: near-term fear is building." : "";
     let cls = "", msg;
-    if (ratio >= 1) { cls = "warn"; msg = `Stress is priced now: the VIX curve is inverted at ${fx(ratio, 2)}. Monetize puts in stages; if you must buy, buy spreads.`; }
+    if (ratio >= 1) { cls = "warn"; msg = `Stress is priced now: the VIX curve is inverted at ${fx(ratio, 2)}. Monetize puts in stages; any new protection should be spreads.`; }
     else if (ndx && rank != null && rank <= 1 / 3 && (!fin(ndx.vrp_median10y) || ndx.vrp <= ndx.vrp_median10y + 2)) { cls = "ok"; msg = `Insurance is cheap: VXN sits at the ${rankTxt(rank)} and only ${signed(ndx.vrp)} points over realized. Buy convexity: puts and put spreads, at longer tenors.${flat}`; }
     else if (ndx && rank != null && rank >= 0.8) { cls = "warn"; msg = `Insurance is expensive: VXN sits at the ${rankTxt(rank)}. Prefer put spreads and collars to outright puts, and size from the budget, not from fear.${flat}`; }
     else if (ndx) { msg = `Fairly priced: VXN at the ${rankTxt(rank) || "middle of its range"}, ${signed(ndx.vrp)} points over realized${fin(ndx.vrp_median10y) ? ` against a ten-year median of ${signed(ndx.vrp_median10y)}` : ""}.${flat}`; }
@@ -1367,10 +1368,11 @@
       case "oil": return L("brent");
       case "curve": { const c = curveNow(); return c && fin(c.by["10Y"]) && fin(c.by["2Y"]) ? { v: (c.by["10Y"] - c.by["2Y"]) * 100, date: c.date } : null; }
       case "capex": {
-        const rows = (LIVE.capex || []).filter((x) => fin(x.ratio));
+        // the builders as one balance sheet, trailing twelve months, the same figure the Fundamentals desk prints
+        const rows = (LIVE.capex || []).filter((x) => fin(x.ttmCapex) && fin(x.ttmOcf) && x.ttmOcf > 0);
         if (!rows.length) return null;
-        const r = rows.map((x) => x.ratio).sort((a, b) => a - b), med = r[Math.floor((r.length - 1) / 2)];
-        return { v: med, date: rows.map((x) => x.r.quarter_end).sort().pop(), note: `median of ${rows.length} companies, latest quarter` };
+        const capex = rows.reduce((a, x) => a + x.ttmCapex, 0), ocf = rows.reduce((a, x) => a + x.ttmOcf, 0);
+        return { v: capex / ocf, date: rows.map((x) => x.r.quarter_end).sort().pop(), note: `${rows.length} builders, trailing twelve months: capex $${fx(capex, 0)}B against operating cash flow of $${fx(ocf, 0)}B` };
       }
       default: return null;
     }
@@ -1407,7 +1409,7 @@
       const foot = h("div", "sig-foot");
       if (lv && sg.id === "capex") foot.append(h("span", "src", `SEC filings · quarter ended ${niceDate(lv.date)}`));
       else if (lv) foot.append(liveBadge(lv.date, STALE_DAYS[sg.id] || STALE_AFTER));
-      else if (use && use.src) { const sp = h("span", "src"); sp.append(document.createTextNode("Snapshot · " + use.date + " · ")); const a = h("a", null, use.src[0]); a.href = use.src[1]; sp.append(a); foot.append(sp); }
+      else if (use && use.src) { const sp = h("span", "src"); sp.append(document.createTextNode("As of " + use.date + " · ")); const a = h("a", null, use.src[0]); a.href = use.src[1]; sp.append(a); foot.append(sp); }
       else foot.append(h("span", "src", "Live only: fills in after the first daily run"));
       if (sg.link) { const a = h("a", null, linkLabel(sg.link) + " →"); a.href = "#" + sg.link; a.className = "src"; foot.append(a); }
       card.append(foot);
@@ -1439,7 +1441,7 @@
     const wrap = $("#fw-dates");
     wrap.replaceChildren();
     const sets = curveSets();
-    if (!fwPick || !sets.some((x) => x.label === fwPick)) fwPick = (sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 19") || sets[sets.length - 1]).label;
+    if (!fwPick || !sets.some((x) => x.label === fwPick)) fwPick = (sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 21") || sets[sets.length - 1]).label;
     sets.forEach((x) => {
       const b = h("button", null, x.label);
       b.type = "button";
@@ -1541,9 +1543,9 @@
     $("#fu-tlt-o").textContent = Math.round(tlt * 100) + "%";
     $("#fu-eq").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === fuEq ? "true" : "false"));
     $("#fu-rt").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === fuRt ? "true" : "false"));
-    const sets = curveSets(), set = sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 19");
+    const sets = curveSets(), set = sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 21");
     const betaUsd = book * beta * share, perContract = ndx * EQ_MULT[fuEq], nEq = betaUsd / perContract;
-    const notional = book * tlt, dv = notional * 15.5 * 1e-4, all = Object.keys(FUT).map((k) => futuresDV01(set.years, set.y, k)), f = all.find((x) => x.key === fuRt), nRt = dv / f.dv01;
+    const notional = book * tlt, dv = notional * TLT_DUR * 1e-4, all = Object.keys(FUT).map((k) => futuresDV01(set.years, set.y, k)), f = all.find((x) => x.key === fuRt), nRt = dv / f.dv01;
     $("#fu-bd").textContent = money(betaUsd);
     $("#fu-n-eq").textContent = `${Math.round(nEq).toLocaleString("en-US")} ${fuEq}`;
     $("#fu-dv").textContent = money(dv) + "/bp";
@@ -1594,7 +1596,7 @@
     const box = $("#methods");
     METHODS.forEach((g) => {
       const grp = h("div", "mgroup");
-      grp.append(h("h3", null, g.group));
+      grp.append(h("h3", null, g.group.replace(/\s*\(v\d+\.\d+\)\s*$/, "")));
       g.items.forEach((m) => {
         const row = h("div", "method"), f = h("div", "formula"), say = h("p", "say");
         f.innerHTML = m.f;          // static, authored markup from reference.js
@@ -1629,7 +1631,9 @@
       const key = id.split(/[\s,…]+/)[0], c = cov && cov[key];
       return c ? `${niceDate(c.first)} to ${niceDate(c.last)}` : cov ? "not in the last run" : "after the first run";
     };
-    fillTable($("#dict-fred"), ["Series", "What it is", "Used for", "Coverage in the last run"], FRED_DICT.map((r) => [...r, covText(r[0])]), 4);
+    // the coverage column exists only once a daily run has reported it
+    if (cov) fillTable($("#dict-fred"), ["Series", "What it is", "Used for", "Coverage in the last run"], FRED_DICT.map((r) => [...r, covText(r[0])]), 4);
+    else fillTable($("#dict-fred"), ["Series", "What it is", "Used for"], FRED_DICT.map((r) => r.slice(0, 3)), 3);
     fillTable($("#dict-other"), ["Source", "What the engine reads", "Used for"], OTHER_DICT, 3);
     fillTable($("#dict-json"), ["File", "Fields the page reads"], JSON_DICT, 2);
   }
@@ -1707,7 +1711,7 @@
     const lv = LIVE.macro && LIVE.macro.rates && LIVE.macro.rates.levels && LIVE.macro.rates.levels.vix;
     return lv && fin(lv.value) && isoOk(lv.date) ? { v: lv.value, date: niceDate(lv.date) } : { v: STATIC_VOL.vix[0], date: STATIC_VOL.vix[1] };
   }
-  function curveNowSet() { const sets = curveSets(); return sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 19") || sets[sets.length - 1]; }
+  function curveNowSet() { const sets = curveSets(); return sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 21") || sets[sets.length - 1]; }
   function curveYield(tenor) { const set = curveNowSet(); return parAt(set.years, set.y, { "3M": 0.25, "2Y": 2, "10Y": 10, "30Y": 30 }[tenor]); }
   function examples() {
     const set = curveNowSet(), on = set.label, y = (t) => parAt(set.years, set.y, t), repo = y(0.25), out = [];
@@ -1722,15 +1726,15 @@
         a: `About ${money(dv, 0)} per basis point, so a 10bp move is about ${money(Math.round(dv) * 10, 0)}.` });
     }
     {
-      const yy = y(30), up = longBondReturn(yy, 100, 15.5), dn = longBondReturn(yy, -100, 15.5);
+      const yy = y(30), up = longBondReturn(yy, 100, TLT_DUR), dn = longBondReturn(yy, -100, TLT_DUR);
       out.push({ id: "tlt100", q: "What does a 100bp rise in long yields do to TLT?", link: ["hedge", "Hedge lab"],
-        steps: [["Duration alone: −15.5 × 1%", pct(-0.155, 1)], [`Exact repricing of a TLT-like bond from ${fx(yy * 100, 2)}%`, pct(up, 2)], ["The same bond after a 100bp fall", pct(dn, 2)]],
+        steps: [[`Duration alone: −${TLT_DUR} × 1%`, pct(-TLT_DUR / 100, 1)], [`Exact repricing of a TLT-like bond from ${fx(yy * 100, 2)}%`, pct(up, 2)], ["The same bond after a 100bp fall", pct(dn, 2)]],
         a: `About ${pct(up, 1)}. Convexity makes the loss smaller than duration alone says and the gain larger: ${pct(dn, 1)} for a 100bp fall.` });
     }
     {
-      const f = futuresDV01(set.years, set.y, "ZN"), dv = 1e6 * 15.5 * 1e-4, n = dv / f.dv01;
+      const f = futuresDV01(set.years, set.y, "ZN"), dv = 1e6 * TLT_DUR * 1e-4, n = dv / f.dv01;
       out.push({ id: "zn", q: "How many 10-year futures replace $1 million of TLT?", link: ["fut-title", "Futures hedge"],
-        steps: [["TLT DV01 = $1,000,000 × 15.5 × 0.0001", money(dv, 0)], [`ZN: cheapest to deliver ${fx(f.ctdYears, 1)} years, conversion factor ${fx(f.cf, 4)}`, money(f.dv01, 2) + " a contract"], ["Contracts = TLT DV01 ÷ ZN DV01", fx(n, 1)]],
+        steps: [[`TLT DV01 = $1,000,000 × ${TLT_DUR} × 0.0001`, money(dv, 0)], [`ZN: cheapest to deliver ${fx(f.ctdYears, 1)} years, conversion factor ${fx(f.cf, 4)}`, money(f.dv01, 2) + " a contract"], ["Contracts = TLT DV01 ÷ ZN DV01", fx(n, 1)]],
         a: `About ${Math.round(n)} ZN contracts carry the rate risk of $1 million of TLT, for margin instead of cash.` });
     }
     {
@@ -1761,7 +1765,7 @@
       const sig = 0.32, L = 1.5, need = L * sig * sig;
       out.push({ id: "kelly", q: "What edge would justify running a 32%-volatility book at 1.5x?", link: ["size", "Sizing lab"],
         steps: [["Kelly leverage = edge ÷ variance, so full Kelly needs edge = 1.5 × 0.32²", pctPlain(need, 1) + " a year"], ["Half Kelly needs twice that", pctPlain(need * 2, 1) + " a year"], ["Quarter Kelly needs four times", pctPlain(need * 4, 1) + " a year"]],
-        a: `About ${pctPlain(need * 4, 0)} a year over cash at quarter Kelly. No honest forecast clears that, so the risk limits, not the forecast, set the size.` });
+        a: `About ${pctPlain(need * 4, 0)} a year over cash at quarter Kelly. No forecast with a tested record clears that, so the risk limits, not the forecast, set the size.` });
     }
     return out;
   }
@@ -1814,7 +1818,7 @@
     box.append(tiles, ul);
     const chip = $("#chip-run");
     chip.querySelector(".dot").className = "dot " + (st.ok ? "good" : "warn");
-    chip.lastElementChild.textContent = st.ok ? `Daily run: all ${st.checks.length} checks pass` : `Daily run: ${st.checks.length - passed} of ${st.checks.length} checks failing`;
+    chip.lastElementChild.textContent = st.ok ? `Daily run ${st.checks.length} of ${st.checks.length} checks` : `Daily run ${passed} of ${st.checks.length} checks`;
   }
 
   /* =====================================================================================

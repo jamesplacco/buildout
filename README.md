@@ -22,7 +22,10 @@ does as well (geometry over random t -0.2): the gain is the fatter tails of a mi
 point forecasts (skill -15% for returns, -26% by whole distributions) are not used. The book stays at 1.00x. Also in
 this version: a Games desk bug fixed (two top-level functions shared a name; the assembler now refuses that), stale
 counts and dates refreshed across the page, the code viewer and background desk building made incremental, and dead
-code and CSS removed.
+code and CSS removed. A second, independent review (60 findings) then drove a register and consistency pass: one
+governing equity size on Today with the other rules as cross-checks, the capex signal on the five builders' trailing
+ratio, the rate-of-change and bond-tape column bugs fixed, every static level on the Oct 21 close, evidence grades as
+quiet dot marks rather than pills, and a standards-mode skeleton on the raw page.
 
 Version 0.21 rebuilds the heaviest parts of the engine around matrix multiplication, the operation AI hardware is built
 for (prompted by DeFi Education's note on Pearl, a blockchain whose proof of work is that same math). The regime filter,

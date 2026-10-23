@@ -8,7 +8,7 @@
   const mxMs = (v) => (v >= 100 ? Math.round(v).toLocaleString("en-US") : fx(v, v >= 10 ? 1 : 2)) + " ms";
   function renderMatrix() {
     const top = $("#mx-tiles");
-    if (!top || !mxOk()) { if (top && !top.children.length) top.append(h("p", "hint", "The matrix shortcut is missing from the snapshot.")); return; }
+    if (!top || !mxOk()) { if (top && !top.children.length) top.append(h("p", "hint", "The matrix shortcut is missing from this build.")); return; }
     const B = MX21.bench;
     if (!top.children.length) {
       const hm = B.hmm.find((r) => r.K === 3) || B.hmm[0], EN = MX21.engines || {};

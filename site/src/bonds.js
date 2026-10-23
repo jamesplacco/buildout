@@ -20,7 +20,7 @@
   }
   function renderBonds() {
     const tiles = $("#bd-tiles");
-    if (!tiles || !bdOk()) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The bond snapshot is missing or malformed.")); return; }
+    if (!tiles || !bdOk()) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The bond data is missing or malformed.")); return; }
     if (BD.ready) { bdUpdate(); return; }
     BD.ready = true;
     const C = BONDS17.curve, cs = BONDS17.cases, T = (k) => cs[k].funds.TLT, tlt = BONDS17.funds.TLT, fa = (BONDS17.facts || {}).TLT || {};
@@ -59,6 +59,8 @@
       bdHeat(); bdUpdate();
     }));
     bdHeat();
+    // open on the latest day's move rather than on a zero move, so the first table already says something
+    if (fin(tape.d10) && fin(tape.d30) && !BD.touched) bdSet(C["10y"] + tape.d10, C["30y"] + tape.d30);
     bdUpdate();
     bdTape();
     bdEquity();
@@ -167,9 +169,24 @@
       const x = by[id];
       if (!x) return;
       const tm = (x.text.match(/(\d{1,2}:\d{2} [ap]\.m\. ET)/) || [])[1] || (x.text.includes("early") ? "early" : "");
-      const v = x.unit === "percent" && /yield/.test(name) ? (x.value).toFixed(2) + "%" : x.unit === "percent" ? pct(x.value / 100, 2) : fx(x.value, 2);
-      const lv = /yield/.test(name) ? (x.text.match(/(fell|rose) (\d+) basis points/) || [])[0] || "" : (x.text.match(/\$[\d,]+\.\d+/) || [])[0] || "";
-      rows.push([name, h("span", /yield/.test(name) ? "" : x.value >= 0 ? "pos" : "neg", v), lv, tm, x.source_url ? bdLink(x.publisher || "source", x.source_url) : ""]);
+      // three kinds of row: an index or stock (the value is its move), a yield (the value is its level; the move is in
+      // basis points), and a price or index level (the value is its level; the move is the quoted change)
+      const yieldRow = /yield/.test(name), levelRow = /Brent|VIX/.test(name);
+      let move, level;
+      if (yieldRow) {
+        const m = x.text.match(/(fell|rose) (\d+) basis points/);
+        move = m ? (m[1] === "fell" ? MINUS : "+") + m[2] + " bp" : "";
+        level = x.value.toFixed(2) + "%";
+      } else if (levelRow) {
+        const m = x.text.match(/\(([+\u2212-][\d.]+%)\)/);
+        move = m ? m[1].replace("-", MINUS) : "";
+        level = /Brent/.test(name) ? "$" + fx(x.value, 2) : fx(x.value, 2);
+      } else {
+        move = pct(x.value / 100, 2);
+        level = (x.text.match(/\$[\d,]+\.\d+/) || [])[0] || "";
+      }
+      const moveEl = h("span", yieldRow ? (move.startsWith(MINUS) ? "neg" : "pos") : levelRow ? (move.startsWith(MINUS) ? "neg" : "pos") : x.value >= 0 ? "pos" : "neg", move || "n/a");
+      rows.push([name, moveEl, level, tm, x.source_url ? bdLink(x.publisher || "source", x.source_url) : ""]);
     });
     fillTable($("#bd-tape"), ["", "Move", "Level", "Time", "Source"], rows, 1);
     const why = ["tp-why-ai", "tp-why-yields"].map((k) => by[k]).filter(Boolean);

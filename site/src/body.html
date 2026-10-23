@@ -37,6 +37,7 @@
       <h1 id="desk-title">Bond hedge reliability in the current regime</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
+      <p class="t7-sizing" id="t7-sizing"></p>
       <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
     </div>
     <section class="hero-brain" id="hero" aria-labelledby="hero-title">
@@ -47,7 +48,7 @@
         <div class="hero-grid">
           <div class="hero-stage">
             <canvas id="mind-hero-cv" role="img" aria-label="The mind: every node of the brain and the engine, lit by the current question"></canvas>
-            <div class="hero-ctl"><span class="hint">Hover a star to name it; click it to think about it. Gold is activation spreading from what you asked.</span></div>
+            <div class="hero-ctl"><span class="hint">Hover to identify a node; click to query it. Gold marks activation spreading from the question.</span></div>
           </div>
           <aside class="hero-math" aria-labelledby="mh-t">
             <span class="panel-title" id="mh-t">Think</span>
@@ -129,7 +130,7 @@
     <section class="voices" id="voices" aria-labelledby="vo-title">
       <div class="hero-head"><p class="eyebrow">Voices · extreme bear to extreme bull</p><h2 id="vo-title">Investor views by topic</h2>
         <p class="prose">Type a question or a claim, then move along the spectrum. Every quote is verbatim, dated and linked to where it was said; the stance is judged per quote, not per person.</p><p class="hint" id="vo-count"></p></div>
-      <form class="vo-form" id="vo-form" role="search" aria-label="Find investor voices"><label for="vo-q" class="sr-only">Your question or statement</label><input type="search" id="vo-q" maxlength="300" autocomplete="off" placeholder="Is bitcoin digital gold?"><button class="btn" type="submit">Find the voices</button></form>
+      <form class="vo-form" id="vo-form" role="search" aria-label="Find investor voices"><label for="vo-q" class="sr-only">Question or statement</label><input type="search" id="vo-q" maxlength="300" autocomplete="off" placeholder="Is bitcoin digital gold?"><button class="btn" type="submit">Find the voices</button></form>
       <div class="vo-examples" id="vo-examples" role="group" aria-label="Example questions"></div>
       <div class="vo-out" id="vo-out" hidden>
         <div class="vo-head"><h3 class="h3" id="vo-topic"></h3><div class="vo-related" id="vo-related"></div></div>
@@ -137,7 +138,7 @@
         <div class="vo-spec" id="vo-spec" role="group" aria-label="The spectrum, extreme bear to extreme bull"></div>
         <article class="vo-card" id="vo-card" aria-live="polite"></article>
         <div class="vo-nav" id="vo-nav"></div>
-        <div class="vo-claude-row"><button class="pill" type="button" id="vo-claude" hidden>Ask Claude to rank these for my exact question</button><span class="hint" id="vo-claude-out" aria-live="polite"></span></div>
+        <div class="vo-claude-row"><button class="pill" type="button" id="vo-claude" hidden>Ask Claude to rank these for the exact question</button><span class="hint" id="vo-claude-out" aria-live="polite"></span></div>
         <details class="tableview" id="vo-all" hidden><summary id="vo-all-sum">Every voice</summary><ol class="vo-all" id="vo-all-list"></ol></details>
         <p class="hint">Keys: ← and → move along the spectrum; N shows another voice. Quotes are short excerpts with links to the full source. The library is curated, so its lean is not a poll.</p>
       </div>
@@ -145,17 +146,17 @@
 
     <div class="t7-grid">
       <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet" aria-live="polite"></p><ol class="t7-changes" id="t7-changes"></ol></section>
-      <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Decision options</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with your own limits →</a></section>
+      <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Decision options</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with explicit limits →</a></section>
       <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">Reversal conditions</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decide">The decision board →</a></section>
       <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#engine">Methods and tests →</a></section>
     </div>
     <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
     <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 469 of 469 pass</span></span>
-        <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
-        <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
-        <span class="chip"><span class="dot good"></span><span id="chip-sources">99 data sources</span></span>
-        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 22, 2026</span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 469 of 469</span></span>
+        <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run on GitHub Actions</span></span>
+        <span class="chip"><span class="dot warn"></span>Databento key pending</span>
+        <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
+        <span class="chip"><span class="dot idle"></span>Data as of Oct 22, 2026</span>
       </div>
   </div>
 
@@ -163,8 +164,8 @@
     <h2 class="sr-only" id="pulse-title">Current readings</h2>
     <div class="pulse-grid">
       <div class="panel rings-panel"><div class="rings" id="rings" role="img" aria-label="Risk rings"></div><ul class="ring-key" id="ring-key"></ul></div>
-      <div class="panel since-panel"><span class="panel-title">Since your last visit</span><div id="since"></div></div>
-      <div class="panel checkin-panel"><div class="panel-head"><span class="panel-title">Morning check-in</span><span class="streak" id="streak"></span></div><ul class="checkin" id="checkin"></ul><p class="hint">Saved in this browser. Finish all five on consecutive weekdays to build a streak.</p></div>
+      <div class="panel since-panel"><span class="panel-title">Since the last visit</span><div id="since"></div></div>
+      <div class="panel checkin-panel"><div class="panel-head"><span class="panel-title">Daily checklist</span><span class="streak" id="streak"></span></div><ul class="checkin" id="checkin"></ul><p class="hint">Saved in this browser; resets each weekday.</p></div>
     </div>
   </section>
 
@@ -199,11 +200,11 @@
     <div class="section-head">
       <p class="eyebrow">Signals</p>
       <h2 id="sig-title">Monitoring priorities</h2>
-      <p class="prose" id="sig-sub">Twelve signals, each with a rule and an action. Live values replace the dated snapshot after each daily run.</p>
+      <p class="prose" id="sig-sub">Twelve signals, each with a rule and an action. Each carries its date; the daily run replaces it with the latest value.</p>
     </div>
     <div class="read" id="desk-read" aria-live="polite"></div>
     <div class="signals" id="signals-grid"></div>
-    <p class="hint">Thresholds are the desk's rules of thumb, not laws; tune them to your own process. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
+    <p class="hint">Thresholds are the desk's working rules, not laws, and each can be tuned. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
   </section>
 
   <section class="section" id="sysmap" aria-labelledby="map-title">
@@ -228,7 +229,7 @@
     <div class="section-head">
       <p class="eyebrow">Market</p>
       <h2 id="levels-title">Key levels</h2>
-      <p class="prose" id="levels-sub">A dated snapshot from official and market sources. Tiles marked live refresh from the engine's daily run.</p>
+      <p class="prose" id="levels-sub">Dated readings from official and market sources. Tiles marked live refresh from the daily run.</p>
     </div>
     <div class="tiles" id="levels"></div>
   </section>
@@ -325,7 +326,7 @@
 
 <!-- ======================= NOTEWORTHY ======================= -->
 <section class="view" id="view-decision" hidden aria-labelledby="dx-title">
-  <div class="vhead"><p class="eyebrow">Decision engine · data, features, models, inference, decision</p><h1 id="dx-title">From 156 years of data to a sized exposure, gated by its own record</h1>
+  <div class="vhead"><p class="eyebrow">Decision engine</p><h1 id="dx-title">From 156 years of data to a sized exposure, gated by its own record</h1>
     <p class="lede" id="dx-bluf"></p></div>
   <div class="dx-top">
     <div class="dx-card" id="dx-card"></div>
@@ -344,11 +345,11 @@
   </section>
   <section class="section" aria-labelledby="dx-mod-title">
     <div class="section-head"><p class="eyebrow">Models</p><h2 id="dx-mod-title">Model weights and their basis</h2>
-      <p class="prose">Two layers of averaging, both scored only on what was already known. The return density for next month averages the regime model, the changepoint model, the long-run average and (since v0.22) the geometric-analog model by their recent predictive likelihood (2% forgetting a month). The analog model reads the 12 months after the 8 past windows whose stock-bond covariance is nearest today's; a placebo on the Geometry desk shows its gain comes from mixing several pasts, not from the resemblance. The 12-month view stacks four forecasters with non-negative weights fit on their earlier out-of-sample errors; it tilts the monthly mean.</p></div>
+      <p class="prose">Two layers of averaging, both scored only on what was already known. The return density for next month averages the regime model, the changepoint model, the long-run average and the geometric-analog model by their recent predictive likelihood (2% forgetting a month). The analog model reads the 12 months after the 8 past windows whose stock-bond covariance is nearest today's; a placebo on the Geometry desk shows its gain comes from mixing several pasts, not from the resemblance. The 12-month view stacks four forecasters with non-negative weights fit on their earlier out-of-sample errors; it tilts the monthly mean.</p></div>
     <div class="grid2 dx-g2">
       <div class="panel"><span class="panel-title">Return-density models, weight today</span><div class="svgbox" id="dx-mw"></div>
         <span class="panel-title">Their weights through history</span><div class="svgbox" id="dx-mwh"></div><div class="legend" id="dx-mwh-leg"></div></div>
-      <div class="panel"><span class="panel-title">The 12-month forecasters, out of sample since 1940</span><div class="tablewrap"><table id="dx-fc"></table></div><p class="prose" id="dx-nn"></p></div>
+      <div class="panel"><span class="panel-title">The 12-month forecasters, out of sample since 1940</span><div class="tablewrap"><table id="dx-fc"></table></div><p class="prose" id="dx-nn"></p><p class="hint">Scores differ slightly from the ML lab's: this run refits every 24 months on the decision engine's feature set; the lab refits every 12 on its own.</p></div>
     </div>
   </section>
   <section class="section" aria-labelledby="dx-dec-title">
@@ -395,13 +396,13 @@
     <div class="panel"><span class="panel-title">Real stock return per point of 10-year yield, Kalman filtered, 90% band</span><div class="svgbox" id="dx-kal"></div><p class="prose" id="dx-kal-note"></p></div>
   </section>
   <section class="section" aria-labelledby="dx-f-title">
-    <div class="section-head"><p class="eyebrow">Findings</p><h2 id="dx-f-title">Conclusions</h2></div>
+    <div class="section-head"><p class="eyebrow">Findings</p><h2 id="dx-f-title">What the decision engine concludes</h2></div>
     <ol class="dx-find" id="dx-find"></ol>
     <p class="hint">Code: buildout/decide.py (the pipeline), buildout/infer.py (regimes, changepoints, Kalman, stacking), buildout/nn.py (the networks, gradient-checked). Run it: python -m buildout decide. Agents: the decision_engine tool. The MODEL book, not personal positions; research only, never an order.</p>
   </section>
 </section>
 <section class="view" id="view-portfolio" hidden aria-labelledby="pf-title">
-  <div class="vhead"><p class="eyebrow">Portfolio engine · stocks, Treasuries, gold and cash</p><h1 id="pf-title">Allocation across stocks, Treasuries, gold and cash, with the process chosen by its record</h1>
+  <div class="vhead"><p class="eyebrow">Portfolio engine</p><h1 id="pf-title">Allocation across stocks, Treasuries, gold and cash, with the process chosen by its record</h1>
     <p class="lede" id="pf-bluf"></p></div>
   <div class="dx-top">
     <div class="dx-card" id="pf-card"></div>
@@ -432,13 +433,13 @@
     </div>
   </section>
   <section class="section" aria-labelledby="pf-f-title">
-    <div class="section-head"><p class="eyebrow">Findings</p><h2 id="pf-f-title">Conclusions</h2></div>
+    <div class="section-head"><p class="eyebrow">Findings</p><h2 id="pf-f-title">What the portfolio engine concludes</h2></div>
     <ol class="dx-find" id="pf-find"></ol>
     <p class="hint">Code: buildout/portfolio.py, buildout/infer.py (the multivariate regime model and Hedge). Run it: python -m buildout portfolio. Agents: the portfolio_engine tool. The MODEL book, not personal positions; research only, never an order.</p>
   </section>
 </section>
 <section class="view" id="view-matrix" hidden aria-labelledby="mxs-title">
-  <div class="vhead"><p class="eyebrow">The shortcut · matrix multiplication</p><h1 id="mxs-title">The engine as matrix multiplication: method, speed and equivalence</h1>
+  <div class="vhead"><p class="eyebrow">Matrix methods</p><h1 id="mxs-title">The engine as matrix multiplication: method, speed and equivalence</h1>
     <p class="lede">A model cannot read a question or observe a market directly. It represents both as matrices and multiplies them against the matrices it has learned. One multiplication can carry thousands of connections at once, which is why chips built to multiply grids now run AI, and why this engine was rebuilt around the same move: the mind thinks about many questions as one product, the regime filter runs as a scan of matrix products instead of a month-by-month loop, and the brain answers every shock against every holding as one sum of matrix powers. The answers are the same; the work is shorter.</p></div>
   <div class="at-tiles" id="mx-tiles"></div>
   <section class="section" aria-labelledby="mx-how-title">
@@ -452,8 +453,8 @@
   </section>
   <section class="section" aria-labelledby="mx-board-title">
     <div class="section-head"><p class="eyebrow">The whole board</p><h2 id="mx-board-title">All tracked claims evaluated in a single pass</h2>
-      <p class="prose">Each claim the mind tracks is asked as a question, all of them are spread through the graph together as one matrix, and each is weighed on its own column. Run it here to time it in your browser.</p></div>
-    <div class="panel"><div class="mx-run"><button type="button" class="btn" id="mx-go">Think about every claim at once, here</button><span class="hint" id="mx-board-src"></span></div>
+      <p class="prose">Each claim the mind tracks is asked as a question, all of them are spread through the graph together as one matrix, and each is weighed on its own column. Run it here to time it in this browser.</p></div>
+    <div class="panel"><div class="mx-run"><button type="button" class="btn" id="mx-go">Run the board in this browser</button><span class="hint" id="mx-board-src"></span></div>
       <p class="prose" id="mx-live"></p><div class="tablewrap"><table id="mx-board"></table></div></div>
   </section>
   <section class="section" aria-labelledby="mx-scan-title">
@@ -488,12 +489,12 @@
   </section>
 </section>
 <section class="view" id="view-geometry" hidden aria-labelledby="geo-title">
-  <div class="vhead"><p class="eyebrow">The shape of the market · geometry, topology, transport</p><h1 id="geo-title">Market structure describes risk well and forecasts returns poorly</h1>
+  <div class="vhead"><p class="eyebrow">Market geometry</p><h1 id="geo-title">Market structure describes risk well and forecasts returns poorly</h1>
     <p class="lede" id="geo-bluf"></p></div>
   <div class="at-tiles" id="geo-tiles"></div>
   <section class="section" aria-labelledby="geo-map-title">
     <div class="section-head"><p class="eyebrow">Covariance geometry</p><h2 id="geo-map-title">150 years of risk structure</h2>
-      <p class="prose">Every 36 months of stocks, 10-year Treasuries and gold has a covariance matrix: three volatilities and three correlations. Those matrices are not points on a flat sheet; they live on a curved space where the honest distance between two of them (the affine-invariant distance, the size of the logarithm of A<sup>&minus;1/2</sup> B A<sup>&minus;1/2</sup>) asks how much one era's risk must be stretched to become another's, whatever the units. Flatten that space with the matrix logarithm, measure every year against every other year at once (one Gram matrix), and draw the result with classical multidimensional scaling: each dot is a year, and dots close together had risk that looked alike.</p></div>
+      <p class="prose">Every 36 months of stocks, 10-year Treasuries and gold has a covariance matrix: three volatilities and three correlations. Those matrices are not points on a flat sheet; they live on a curved space where the natural distance between two of them (the affine-invariant distance, the size of the logarithm of A<sup>&minus;1/2</sup> B A<sup>&minus;1/2</sup>) asks how much one era's risk must be stretched to become another's, whatever the units. Flatten that space with the matrix logarithm, measure every year against every other year at once (one Gram matrix), and draw the result with classical multidimensional scaling: each dot is a year, and dots close together had risk that looked alike.</p></div>
     <div class="panel"><div class="svgbox" id="geo-map"></div><div class="legend" id="geo-map-leg"></div><p class="hint" id="geo-map-n"></p></div>
   </section>
   <section class="section" aria-labelledby="geo-an-title">
@@ -580,12 +581,12 @@
 
 <!-- ======================= RATES ======================= -->
 <section class="view" id="view-bonds" hidden aria-labelledby="bd-title">
-  <div class="vhead"><p class="eyebrow">Bonds, simply · a price is a promise discounted at a yield</p><h1 id="bd-title">Treasury ETF values across yield scenarios for the 10-year and 30-year</h1>
+  <div class="vhead"><p class="eyebrow">Bonds</p><h1 id="bd-title">Treasury ETF values across yield scenarios for the 10-year and 30-year</h1>
     <p class="lede" id="bd-lede"></p></div>
   <div class="at-tiles" id="bd-tiles"></div>
   <section class="section" aria-labelledby="bd-set-title">
     <div class="section-head"><p class="eyebrow">Set the yields</p><h2 id="bd-set-title">Yield scenarios</h2>
-      <p class="prose">Each fund is repriced bond by bond: an equal-face ladder across its maturity range, centred on the average maturity the issuer reports, with one coupon set so the ladder's duration equals the reported duration. Maturities between 10 and 30 years move by a straight-line blend of your two moves; shorter ones move with the 10-year, or less if you anchor the front end to the Fed. Today's bumps in the curve, such as the 20-year sitting above the 30-year, are kept.</p></div>
+      <p class="prose">Each fund is repriced bond by bond: an equal-face ladder across its maturity range, centred on the average maturity the issuer reports, with one coupon set so the ladder's duration equals the reported duration. Maturities between 10 and 30 years move by a straight-line blend of the two moves; shorter ones move with the 10-year, or less when the front end is anchored to the Fed. Today's bumps in the curve, such as the 20-year sitting above the 30-year, are kept.</p></div>
     <div class="panel bd-ctl">
       <div class="bd-sliders">
         <label class="bd-sl"><span>10-year yield <b id="bd-y10-v"></b></span><input type="range" id="bd-y10" min="2.5" max="8" step="0.05"></label>
@@ -603,7 +604,7 @@
     <div class="grid2">
       <div class="panel"><div class="chart-head"><span class="chart-title">TLT against the level of yields, both moving together</span><span class="legend" id="bd-px-legend"></span></div><div class="svgbox" id="bd-px-chart"></div>
         <p class="hint">The curve bends: when yields fall a point, TLT gains more than it loses when they rise a point. The straight line is the duration rule of thumb; the gap is convexity, and it is the holder's.</p></div>
-      <div class="panel"><div class="chart-head"><span class="chart-title">Today's par curve and the curve you set</span><span class="legend" id="bd-cv-legend"></span></div><div class="svgbox" id="bd-cv-chart"></div>
+      <div class="panel"><div class="chart-head"><span class="chart-title">Today's par curve and the curve as set</span><span class="legend" id="bd-cv-legend"></span></div><div class="svgbox" id="bd-cv-chart"></div>
         <p class="hint" id="bd-cv-note"></p></div>
     </div>
     <div class="panel"><span class="panel-title">TLT's change for every pair of 10-year (rows) and 30-year (columns) yields</span><div class="tablewrap"><table class="bd-heat" id="bd-heat"></table></div>
@@ -630,24 +631,24 @@
   <div class="vhead">
     <p class="eyebrow">Rates &amp; curves</p>
     <h1 id="rates-title">A parallel rise in the curve, led by real yields</h1>
-    <p class="lede">Every Treasury yield from one month to 30 years is 40 to 130bp higher than on Jan 2, led by the 2- and 3-year notes as the Fed turned to hikes. Since spring the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp. That is a real-rate squeeze, the regime in which long bonds stop hedging stocks.</p>
+    <p class="lede">Every Treasury yield from one month to 30 years is 35 to 135bp higher than on Jan 2, led by the 2- and 3-year notes as the Fed turned to hikes. Since spring the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp. That is a real-rate squeeze, the regime in which long bonds stop hedging stocks.</p>
   </div>
 
   <section class="section" aria-label="Treasury curve">
     <div class="panel">
-      <div class="chart-head"><span class="chart-title">US Treasury par yield curve, five dates in 2026</span><span class="legend" id="curve-legend"></span></div>
+      <div class="chart-head"><span class="chart-title">US Treasury par yield curve, six dates in 2026</span><span class="legend" id="curve-legend"></span></div>
       <div class="svgbox" id="curve-chart"></div>
       <span class="src">Source: <a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/2026/all?type=daily_treasury_yield_curve">US Treasury, daily par yield curve rates</a></span>
       <details class="tableview"><summary>Show as table, with change since Jan 2</summary><div class="tablewrap"><table id="curve-table"></table></div></details>
     </div>
     <div class="grid2">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title">Curve spreads, Oct 19 vs Jan 2</span></div>
+        <div class="panel-head"><span class="panel-title">Curve spreads, Oct 21 vs Jan 2</span></div>
         <div class="tiles compact" id="spread-tiles"></div>
         <p class="hint">2s10s and 10s30s flattened as the front end priced hikes; 3m10y steepened because 2-year and longer yields rose more than bills. 20s30s went from +5bp to −5bp: the 20-year again yields more than the 30-year, the old kink from thin demand for 20-year bonds.</p>
       </div>
       <div class="panel">
-        <div class="panel-head"><span class="panel-title">What the 10-year pays you for</span><span class="src">Sep 17 and Oct 7, 2026</span></div>
+        <div class="panel-head"><span class="panel-title">What the 10-year pays for</span><span class="src">Sep 17 and Oct 7, 2026</span></div>
         <div class="decomp" id="decomp"></div>
         <p class="hint">Nominal yield = real yield (TIPS) + breakeven inflation. The Sep 17 10-year TIPS auction cleared at a 2.653% real yield, the highest in nearly 18 years. Sources: <a href="https://www.macroradar.io/as-of/2026-10-07">FRED via MacroRadar</a> · <a href="https://tipswatch.com/2026/09/17/10-year-tips-reopening-gets-real-yield-of-2-653-highest-in-nearly-18-years/">Tipswatch</a> · <a href="https://www.roic.ai/news/breakeven-rates-on-10-year-tips-rise-to-246-highest-since-february-2025-04-29-2026">ROIC (Apr 29 breakeven 2.46%)</a></p>
       </div>
@@ -743,7 +744,7 @@
   </section>
 
   <section class="section" aria-labelledby="dm-title">
-    <div class="section-head"><p class="eyebrow">Reference</p><h2 id="dm-title">Implementation choices for duration</h2><p class="prose">Par-bond approximation at Oct 19 yields. DV01 is the dollar change per basis point on $100,000.</p></div>
+    <div class="section-head"><p class="eyebrow">Reference</p><h2 id="dm-title">Implementation choices for duration</h2><p class="prose">Par-bond approximation at Oct 21 yields. DV01 is the dollar change per basis point on $100,000.</p></div>
     <div class="panel"><div class="tablewrap"><table id="duration-table"></table></div></div>
   </section>
 </section>
@@ -769,7 +770,7 @@
         <div class="field"><div class="field-top"><label for="bs-T">Days to expiry</label><output id="bs-T-o" for="bs-T"></output></div><input type="range" id="bs-T" min="7" max="730" step="1" value="91"></div>
         <div class="field"><div class="field-top"><label for="bs-v">Implied volatility</label><output id="bs-v-o" for="bs-v"></output></div><input type="range" id="bs-v" min="5" max="100" step="0.5" value="24"></div>
         <div class="inline2">
-          <div class="field"><label for="bs-r">Rate, %</label><input type="number" id="bs-r" value="4.27" step="0.01" min="-2" max="20"></div>
+          <div class="field"><label for="bs-r">Rate, %</label><input type="number" id="bs-r" value="4.25" step="0.01" min="-2" max="20"></div>
           <div class="field"><label for="bs-q">Dividend yield, %</label><input type="number" id="bs-q" value="0.6" step="0.1" min="0" max="20"></div>
         </div>
         <div class="field"><label for="bs-mkt">Market price, optional: solves for implied volatility</label><input type="number" id="bs-mkt" step="0.01" min="0" placeholder="e.g. 1.25"></div>
@@ -875,7 +876,7 @@
   <section class="section" aria-labelledby="mx-title">
     <div class="section-head"><p class="eyebrow">Matrix</p><h2 id="mx-title">Hedge effectiveness by scenario</h2></div>
     <div class="panel">
-      <div class="matrix-legend"><span><b class="grade g2" style="display:inline;width:auto">●●</b>Strong</span><span><b class="grade g1" style="display:inline;width:auto">●</b>Partial</span><span><b class="grade g0" style="display:inline;width:auto">○</b>Little or none</span><span><b class="grade gx" style="display:inline;width:auto">✕</b>Tends to hurt</span></div>
+      <div class="matrix-legend"><span class="grade g2">Strong</span><span class="grade g1">Partial</span><span class="grade g0">Little or none</span><span class="grade gx">Tends to hurt</span></div>
       <div class="tablewrap matrix-wrap"><table class="matrix" id="matrix"></table></div>
       <div class="matrix-m" id="matrix-m"></div>
       <p class="sentence" id="matrix-detail" aria-live="polite">Select a cell to see why a hedge works, or fails, in that scenario.</p>
@@ -889,7 +890,7 @@
       <article class="lane good">
         <div class="lane-head"><h3>Growth scare</h3><span class="verdict good"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Bonds hedge</span></div>
         <ol class="chain"><li>AI revenue or demand disappoints</li><li>Growth and rate expectations fall</li><li>Long yields drop</li><li>TLT rallies while the book falls</li></ol>
-        <div class="evidence"><p><strong>Oct 8, 2026.</strong> Reports of weak OpenAI revenue hit AI names; the Nasdaq-100 fell 1.39%. The 30-year yield fell 5.9bp, worth about +0.9% on a bond with TLT's 15.5-year duration.</p><span class="src"><a href="https://investinglive.com/stocks/nasdaq-indices-lead-the-slide-as-ai-stocks-tumble/">investingLive</a></span></div>
+        <div class="evidence"><p><strong>Oct 8, 2026.</strong> Reports of weak OpenAI revenue hit AI names; the Nasdaq-100 fell 1.39%. The 30-year yield fell 5.9bp, worth about +0.9% on a bond with TLT's 14.85-year duration.</p><span class="src"><a href="https://investinglive.com/stocks/nasdaq-indices-lead-the-slide-as-ai-stocks-tumble/">investingLive</a></span></div>
       </article>
       <article class="lane bad">
         <div class="lane-head"><h3>Financing or inflation shock</h3><span class="verdict bad"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>Bonds fail</span></div>
@@ -966,19 +967,19 @@
   </section>
 
   <section class="section" id="size" aria-labelledby="size-title">
-    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="size-title">Sizing lab</h2><p class="prose">Risk limits set the size: the smaller of the volatility target, the drawdown cap and the engine's 1.5x gross limit. Kelly then checks whether your return assumption supports it. Leverage needs edge: on a 32%-volatility book, full Kelly at 1.5x requires about 15% a year over cash, and the engine's quarter Kelly about 61%.</p></div>
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="size-title">Sizing lab</h2><p class="prose">Risk limits set the size: the smaller of the volatility target, the drawdown cap and the engine's 1.5x gross limit. Kelly then checks whether the return assumption supports it. Leverage needs edge: on a 32%-volatility book, full Kelly at 1.5x requires about 15% a year over cash, and the engine's quarter Kelly about 61%.</p></div>
     <div class="lab">
       <form class="panel controls" id="size-form" aria-label="Sizing inputs">
         <div class="field"><div class="field-top"><label for="s-mu">Expected return, per year</label><output id="s-mu-o" for="s-mu"></output></div><input type="range" id="s-mu" min="0" max="30" step="0.5" value="12"></div>
         <div class="field"><div class="field-top"><label for="s-sig">Book volatility, per year</label><output id="s-sig-o" for="s-sig"></output></div><input type="range" id="s-sig" min="12" max="60" step="0.5" value="32"></div>
         <div class="field"><div class="field-top"><label for="s-tv">Target volatility</label><output id="s-tv-o" for="s-tv"></output></div><input type="range" id="s-tv" min="5" max="40" step="0.5" value="20"></div>
-        <div class="field"><div class="field-top"><label for="s-dd">Largest drawdown you will accept</label><output id="s-dd-o" for="s-dd"></output></div><input type="range" id="s-dd" min="10" max="50" step="1" value="25"></div>
+        <div class="field"><div class="field-top"><label for="s-dd">Largest acceptable drawdown</label><output id="s-dd-o" for="s-dd"></output></div><input type="range" id="s-dd" min="10" max="50" step="1" value="25"></div>
         <div class="field"><div class="field-top"><label for="s-conf">Confidence, one-year horizon</label><select id="s-conf"><option value="0.90">90%</option><option value="0.95" selected>95%</option><option value="0.99">99%</option></select></div></div>
         <div class="field"><div class="field-top"><label for="s-kf">Kelly fraction</label><select id="s-kf"><option value="0.25" selected>Quarter</option><option value="0.5">Half</option><option value="1">Full</option></select></div></div>
         <details class="more"><summary>Financing</summary><div class="inner">
           <div class="field"><div class="field-top"><label for="s-r">Cash rate</label><output id="s-r-o" for="s-r"></output></div><input type="range" id="s-r" min="0" max="7" step="0.05" value="4.25"></div>
           <div class="field"><div class="field-top"><label for="s-sp">Borrow spread over cash</label><output id="s-sp-o" for="s-sp"></output></div><input type="range" id="s-sp" min="0" max="3" step="0.05" value="1"></div>
-          <p class="hint">Cash default is near the 3-month bill (4.27% on Oct 19).</p>
+          <p class="hint">Cash default is near the 3-month bill (4.25% on Oct 21).</p>
         </div></details>
       </form>
       <div class="panel" aria-live="polite">
@@ -1043,7 +1044,7 @@
           <dt>Equity</dt><dd>Exposure to the residual value of a business.</dd>
           <dt>Inflation</dt><dd>Real value lost, or protected, as prices rise.</dd>
           <dt>Volatility</dt><dd>Value that moves with the size of price swings rather than their direction.</dd>
-          <dt>Liquidity</dt><dd>Cost and delay of selling when you need to.</dd>
+          <dt>Liquidity</dt><dd>Cost and delay of selling when a sale is forced.</dd>
           <dt>Currency</dt><dd>Value changes from the exchange rate alone.</dd>
         </dl>
         <figure class="chart" style="margin:0">
@@ -1154,7 +1155,7 @@
     </div>
   </section>
   <section class="section" id="pr-chal" aria-labelledby="chal-title">
-    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="chal-title">Prop challenge simulator</h2><p class="prose">A funded-account evaluation is a race between a profit target and two loss limits. Three thousand simulated attempts show the pass rate at your risk, and the risk that maximizes it.</p></div>
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="chal-title">Prop challenge simulator</h2><p class="prose">A funded-account evaluation is a race between a profit target and two loss limits. Three thousand simulated attempts show the pass rate at the chosen risk, and the risk that maximizes it.</p></div>
     <div class="lab">
       <form class="panel controls" aria-label="Challenge inputs">
         <div class="inline2">
@@ -1207,7 +1208,7 @@
   <section class="section" aria-labelledby="prp-title">
     <div class="section-head"><p class="eyebrow">Process</p><h2 id="prp-title">Daily trading workflow</h2></div>
     <ol class="steps">
-      <li><div><strong>Before the open: write the limits down.</strong><span>Daily loss limit, size per trade, the three names you will trade. A limit set mid-loss is not a limit.</span></div></li>
+      <li><div><strong>Before the open: write the limits down.</strong><span>Daily loss limit, size per trade, the three names to be traded. A limit set mid-loss is not a limit.</span></div></li>
       <li><div><strong>Every trade gets a reason and an exit.</strong><span>Log the hypothesis and the price that proves it wrong in the <a href="#journal">decision journal</a> before entry.</span></div></li>
       <li><div><strong>Size from the edge, then shrink.</strong><span>Quarter Kelly at most, and never more than the challenge-optimal risk while proving the edge.</span></div></li>
       <li><div><strong>Stop at the daily limit.</strong><span>The simulator shows most failures are a breach, not a missed target.</span></div></li>
@@ -1274,7 +1275,7 @@
     </div>
   </section>
   <section class="section" id="mm-ex" aria-labelledby="ex-title">
-    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="ex-title">Execution costs and optimal scheduling</h2><p class="prose">Impact grows with the square root of size: four times the order costs twice the impact per share. Trading slowly saves impact and buys timing risk; the Almgren-Chriss schedule finds the best trade-off for your urgency.</p></div>
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="ex-title">Execution costs and optimal scheduling</h2><p class="prose">Impact grows with the square root of size: four times the order costs twice the impact per share. Trading slowly saves impact and buys timing risk; the Almgren-Chriss schedule finds the best trade-off for the stated urgency.</p></div>
     <div class="lab">
       <form class="panel controls" aria-label="Execution inputs">
         <div class="field"><div class="field-top"><label for="ex-q">Order size</label><output id="ex-q-o" for="ex-q"></output></div><input type="range" id="ex-q" min="0.5" max="100" step="0.5" value="10"></div>
@@ -1396,7 +1397,7 @@
     <div class="section-head">
       <p class="eyebrow">The board</p>
       <h2 id="dec-title">Current decisions</h2>
-      <p class="prose" id="dec-sub">Seven calls the desk makes every morning. Live inputs replace the dated snapshot after each daily run.</p>
+      <p class="prose" id="dec-sub">Seven calls the desk makes every morning. Each input carries its date; the daily run replaces it with the latest value.</p>
     </div>
     <div class="read" id="dec-read" aria-live="polite"></div>
     <div class="decisions" id="dec-board"></div>
@@ -1417,11 +1418,11 @@
     <div class="section-head">
       <p class="eyebrow">Weighted assumptions</p>
       <h2 id="as-title">Required conditions, probabilities and failure modes</h2>
-      <p class="prose">Fragility = (1 &minus; <var>p</var>) &times; impact. The most fragile assumptions sit at the top. Move a slider to change your own probability; every decision that rests on it updates.</p>
+      <p class="prose">Fragility = (1 &minus; <var>p</var>) &times; impact. The most fragile assumptions sit at the top. Move a slider to change a probability; every decision that rests on it updates.</p>
     </div>
     <div class="chainmath" id="as-math"></div>
     <div class="panel"><div class="tablewrap"><table class="assume" id="as-table"></table></div>
-      <p class="hint">Probabilities are the desk's judgment, written down so they can be argued with. Each row names the evidence and the test that would falsify it. Your changes stay in this browser.</p></div>
+      <p class="hint">Probabilities are the desk's judgment, written down so they can be argued with. Each row names the evidence and the test that would falsify it. Changes stay in this browser.</p></div>
   </section>
 
   <section class="section" id="knowns" aria-labelledby="kk-title">
@@ -1449,11 +1450,11 @@
   <div class="vhead">
     <p class="eyebrow">Decide · the solver</p>
     <h1 id="solve-title">From evidence to a sized allocation, with every step disclosed</h1>
-    <p class="lede">Seven observed signals update the odds of seven three-month scenarios. A search over 18,414 portfolios finds the one with the highest expected log growth that keeps the worst scenario inside your loss limit. Then the desk plays the same choice against an adversarial Nature, prices what each signal is worth to learn, and finds the most plausible way to breach the limit.</p>
+    <p class="lede">Seven observed signals update the odds of seven three-month scenarios. A search over 18,414 portfolios finds the one with the highest expected log growth that keeps the worst scenario inside the loss limit. Then the desk plays the same choice against an adversarial Nature, prices what each signal is worth to learn, and finds the most plausible way to breach the limit.</p>
   </div>
 
   <section class="section" id="calc" aria-labelledby="calc-title">
-    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="calc-title">Calculator</h2><p class="prose">Exact arithmetic with finance built in: Black-Scholes, Kelly, NPV and IRR, the normal distribution, square-root impact, and live values such as $vix and $y10. Suffixes read as you would say them: 25bp, 5bn, 3m, 50%. Press Enter to keep a line; also works from search with "=".</p></div>
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="calc-title">Calculator</h2><p class="prose">Exact arithmetic with finance built in: Black-Scholes, Kelly, NPV and IRR, the normal distribution, square-root impact, and live values such as $vix and $y10. Suffixes read as spoken: 25bp, 5bn, 3m, 50%. Press Enter to keep a line; also works from search with "=".</p></div>
     <div class="panel calc">
       <label class="sr-only" for="calc-in">Expression</label>
       <input class="calc-in" id="calc-in" type="text" inputmode="text" autocomplete="off" spellcheck="false" value="bsput(100, 95, 0.25, ($vix + 3)%)">
@@ -1466,7 +1467,7 @@
 
   <section class="section" aria-labelledby="rz-title">
     <div class="section-head"><p class="eyebrow">Answer</p><h2 id="rz-title">Evidence-supported allocation</h2><p class="prose" id="rz-answer" aria-live="polite"></p>
-      <div class="rz-record"><button class="btn" id="rz-record" type="button">Record this decision</button><span class="hint" id="rz-record-msg" aria-live="polite">Saves the inputs, the four alternatives, the choice and a content hash to your journal, locked.</span></div></div>
+      <div class="rz-record"><button class="btn" id="rz-record" type="button">Record this decision</button><span class="hint" id="rz-record-msg" aria-live="polite">Saves the inputs, the four alternatives, the choice and a content hash to the journal, locked.</span></div></div>
     <div class="lab">
       <form class="panel controls" aria-label="Limits and the current book">
         <div class="field"><div class="field-top"><label for="rz-loss">Loss limit, worst scenario over 3 months</label><output id="rz-loss-o" for="rz-loss"></output></div><input type="range" id="rz-loss" min="5" max="35" step="1" value="15"></div>
@@ -1619,7 +1620,7 @@
   </section>
 
   <section class="section" aria-labelledby="gtm-title">
-    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="gtm-title">Two-player game solver</h2><p class="prose">Pick a situation or type your own payoffs (row player first). The solver finds every Nash equilibrium (pure cells by best response, mixed ones by support enumeration), the dominated strategies, the Pareto-efficient cells and the price of anarchy.</p></div>
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="gtm-title">Two-player game solver</h2><p class="prose">Pick a situation or enter payoffs (row player first). The solver finds every Nash equilibrium (pure cells by best response, mixed ones by support enumeration), the dominated strategies, the Pareto-efficient cells and the price of anarchy.</p></div>
     <div class="lab">
       <div class="panel controls"><div class="field"><label for="gt-preset">Situation</label><select id="gt-preset"></select></div><p class="hint" id="gt-note"></p></div>
       <div class="panel" aria-live="polite"><div id="gt-matrix"></div><ul class="eq-list" id="gt-eq"></ul><p class="sentence" id="gt-facts"></p></div>
@@ -1641,7 +1642,7 @@
   <div class="vhead">
     <p class="eyebrow">The brain · higher-order thinking, computed</p>
     <h1 id="br-title">Second- through fourth-order effects of the core assumptions</h1>
-    <p class="lede">Thirty-four parts of the system, from Hormuz and the Fed through credit and the curve to each holding and your book, joined by a hundred and ten signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and adjustable. A shock to any node can be traced through the system. Or let the brain think: it reads what moved, infers the most likely causes, checks what else must then be true, doubts its own map, and tells you what to look at next.</p>
+    <p class="lede">Thirty-four parts of the system, from Hormuz and the Fed through credit and the curve to each holding and your book, joined by a hundred and ten signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and adjustable. A shock to any node can be traced through the system. Or let the brain think: it reads what moved, infers the most likely causes, checks what else must then be true, doubts its own map, and names what to check next.</p>
   </div>
   <section class="section" aria-labelledby="brm-title">
     <h2 class="sr-only" id="brm-title">The map</h2>
@@ -1655,11 +1656,11 @@
         <div class="field"><div class="field-top"><label for="br-blend">Regime weights</label><output id="br-blend-o" for="br-blend"></output></div><input type="range" id="br-blend" min="0" max="100" step="5" value="100"><p class="hint">0 uses the 1990 to 2021 measured links, 100 the links since 2022.</p></div>
         <div class="field"><div class="field-top"><label for="br-K">Orders of effect</label><output id="br-K-o" for="br-K"></output></div><input type="range" id="br-K" min="1" max="8" step="1" value="6"></div>
         <div class="field"><span class="flabel" id="br-mode-l">Mode</span><div class="seg" role="group" aria-labelledby="br-mode-l" id="br-mode"><button type="button" data-v="all" aria-pressed="true">PM: data and judgment</button><button type="button" data-v="data" aria-pressed="false">Quant: measured links only</button></div></div>
-        <details class="more"><summary>Edit a link (your assumptions)</summary><div class="inner">
+        <details class="more"><summary>Edit a link (judged weights)</summary><div class="inner">
           <div class="field"><label for="br-edge">Link</label><select id="br-edge"></select></div>
           <div class="field"><div class="field-top"><label for="br-w">Weight, σ per σ</label><output id="br-w-o" for="br-w"></output></div><input type="range" id="br-w" min="-1" max="1" step="0.01" value="0"></div>
           <p class="hint" id="br-edge-note"></p>
-          <div class="seg"><button type="button" id="br-w-reset">Reset this link</button><button type="button" id="br-reset-all">Reset all my edits</button></div>
+          <div class="seg"><button type="button" id="br-w-reset">Reset this link</button><button type="button" id="br-reset-all">Reset all edits</button></div>
           <p class="hint">Edits stay in this browser only.</p>
         </div></details>
       </form>
@@ -1677,11 +1678,11 @@
   </section>
   <section class="section" id="br-ask-sec" aria-labelledby="bra-title">
     <div class="section-head"><p class="eyebrow">Ask the brain</p><h2 id="bra-title">Natural-language queries, quantitative answers</h2>
-      <p class="prose">Claude reads your question, runs the brain's exact functions on this page (think, shock, counterfactual, the loss story, the learned structure) and answers only with the numbers they return. Every call is listed as it happens. It uses your own Claude usage and asks first.</p></div>
+      <p class="prose">Claude reads the question, runs the brain's exact functions on this page (think, shock, counterfactual, the loss story, the learned structure) and answers only with the numbers they return. Every call is listed as it happens. It uses the viewer's own Claude usage and asks first.</p></div>
     <div class="panel bra">
       <form id="bra-form" class="bra-form">
-        <label for="bra-q" class="sr-only">Your question for the brain</label>
-        <textarea id="bra-q" rows="2" maxlength="600" placeholder="What is driving the book right now, and what would change your mind?"></textarea>
+        <label for="bra-q" class="sr-only">Question for the brain</label>
+        <textarea id="bra-q" rows="2" maxlength="600" placeholder="What is driving the book right now, and what would change the view?"></textarea>
         <div class="fd-actions"><button class="btn" id="bra-go" type="submit">Ask</button><button class="pill" id="bra-stop" type="button" hidden>Stop</button><span class="hint" id="bra-status" aria-live="polite"></span></div>
       </form>
       <div class="bra-chips" id="bra-chips" role="group" aria-label="Suggested questions"></div>
@@ -1780,7 +1781,7 @@
     <div class="grid2">
       <div class="panel"><span class="panel-title">Do its 90% error bars hold? Every month predicted from earlier months only, 2000 on</span><div class="tablewrap"><table class="rz" id="brr-cov"></table></div>
         <p class="hint">Textbook: the ensemble's Gaussian interval. Conformal: adaptive conformal inference (Gibbs and Candès, 2021), whose width is the 90% quantile of past standardized errors and whose target adapts after every miss, so coverage stays near 90% even when the world shifts. "Honest width now" is the conformal half-width over the textbook one.</p></div>
-      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Stocks against the honest band, last five years</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="brr-band"></div><p class="sentence" id="brr-band-t"></p></figure>
+      <figure class="chart panel"><div class="chart-head"><span class="chart-title">Stocks against the error band, last five years</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="brr-band"></div><p class="sentence" id="brr-band-t"></p></figure>
     </div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Which world model the data trusts, scored out of sample</span><div class="tablewrap"><table class="rz" id="brr-stack"></table></div>
@@ -1792,7 +1793,7 @@
   </section>
 
   <section class="section" aria-labelledby="brw-title">
-    <div class="section-head"><p class="eyebrow">Reasoning</p><h2 id="brw-title">Methodology</h2><p class="prose">Each order is one more link in the chain. Most people stop at the first; the graph does not.</p></div>
+    <div class="section-head"><p class="eyebrow">Reasoning</p><h2 id="brw-title">How the effect is composed, order by order</h2><p class="prose">Each order is one more link in the chain. Most people stop at the first; the graph does not.</p></div>
     <div class="grid2">
       <figure class="chart panel"><div class="chart-head"><span class="chart-title">Effect by order</span></div><div class="svgbox" id="br-orders"></div></figure>
       <div class="panel"><span class="panel-title">Strongest channels</span><ol class="br-list" id="br-paths"></ol></div>
@@ -1808,7 +1809,7 @@
 
 <!-- ======================= OODA ======================= -->
 <section class="view" id="view-atlas" aria-labelledby="atv-title" hidden>
-  <div class="vhead"><p class="eyebrow">The atlas · the whole brain, learned</p><h1 id="atv-title">Cross-market linkages supported by the data</h1>
+  <div class="vhead"><p class="eyebrow">Atlas</p><h1 id="atv-title">Cross-market linkages supported by the data</h1>
     <p class="lede">The engine reads every monthly series it can reach, learns which pairs are linked once all the others are held fixed, keeps only links that survive half-sample after half-sample, orients them by the non-Gaussian signature of cause and effect, and fits a structural model through which any shock can be traced month by month.</p>
     <p class="sentence" id="atv-sum"></p></div>
   <div class="at-tiles" id="atv-tiles"></div>
@@ -1861,14 +1862,14 @@
   </div>
   <ol class="oo-strip" id="oo-strip" aria-label="The four steps"></ol>
   <section class="section" id="oo-obs-sec" aria-labelledby="oo-obs-title">
-    <div class="section-head"><p class="eyebrow">1 · Observe</p><h2 id="oo-obs-title">Observe: current data</h2><p class="prose" id="oo-obs-t"></p></div>
+    <div class="section-head"><p class="eyebrow">Observe</p><h2 id="oo-obs-title">Observe: current data</h2><p class="prose" id="oo-obs-t"></p></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">What moved most (3-month change, σ)</span><ol class="br-list" id="oo-moved"></ol></div>
       <figure class="chart panel"><div class="chart-head"><span class="chart-title">Which world the readings fit</span><span class="ev ev-est">Estimated</span></div><div class="svgbox" id="oo-world"></div></figure>
     </div>
   </section>
   <section class="section" id="oo-ori-sec" aria-labelledby="oo-ori-title">
-    <div class="section-head"><p class="eyebrow">2 · Orient</p><h2 id="oo-ori-title">Orient: portfolio implications</h2><p class="prose" id="oo-ori-t"></p></div>
+    <div class="section-head"><p class="eyebrow">Orient</p><h2 id="oo-ori-title">Orient: portfolio implications</h2><p class="prose" id="oo-ori-t"></p></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Competing explanations</span><ol class="br-list" id="oo-expl"></ol><p class="sentence" id="oo-link"></p></div>
       <div class="panel"><span class="panel-title">What each asset did in stocks' worst months</span><div class="tablewrap"><table class="rz" id="oo-crisis"></table></div><p class="hint" id="oo-crisis-t"></p></div>
@@ -1877,7 +1878,7 @@
       <p class="hint">Implied growth: the ten-year revenue growth a reverse DCF needs to justify today's enterprise value. Base rate: the share of US companies of the same size that achieved it, 1950 to 2015, real. Full workings on the <a href="#positions">Positions</a> desk.</p></div>
   </section>
   <section class="section" id="oo-dec-sec" aria-labelledby="oo-dec-title">
-    <div class="section-head"><p class="eyebrow">3 · Decide</p><h2 id="oo-dec-title">Decide: allocation, hedges and positions</h2><p class="prose" id="oo-dec-t"></p></div>
+    <div class="section-head"><p class="eyebrow">Decide</p><h2 id="oo-dec-title">Decide: allocation, hedges and positions</h2><p class="prose" id="oo-dec-t"></p></div>
     <div class="panel hb">
       <div class="panel-head"><span class="panel-title">Prebuilt hedges: switch any on or off</span><span class="hint" id="hb-sum" aria-live="polite"></span></div>
       <div class="hb-grid" id="hb-list"></div>
@@ -1893,7 +1894,7 @@
       <p class="hint">Outside view sets the direction, inside view the size: a price outside 99% of base-rate outcomes trims half, or a quarter when the company already grows faster than the price needs and its accounting is not weak; a price outside 95% holds and leans on the hedges. Rules are stated in the engine's code and labelled; none is a forecast.</p></div>
   </section>
   <section class="section" id="oo-act-sec" aria-labelledby="oo-act-title">
-    <div class="section-head"><p class="eyebrow">4 · Act</p><h2 id="oo-act-title">Act: proposals, monitoring and review dates</h2><p class="prose" id="oo-act-t"></p></div>
+    <div class="section-head"><p class="eyebrow">Act</p><h2 id="oo-act-title">Act: proposals, monitoring and review dates</h2><p class="prose" id="oo-act-t"></p></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Proposals (for a person to review)</span><ol class="br-list" id="oo-props"></ol></div>
       <div class="panel"><span class="panel-title">Watch, then loop</span><ol class="br-list" id="oo-watch"></ol><p class="sentence" id="oo-review"></p>
@@ -1915,7 +1916,7 @@
   <div class="filters" id="ps-filter" role="group" aria-label="Filter positions"></div>
   <div class="cards2" id="ps-grid"></div>
   <div class="math"><span class="mlabel">How it is computed</span>Enterprise value = market value &minus; cash + debt. Free cash flow margin moves in a straight line from today's (after stock pay) to the steady-state margin (what the business throws off when it stops growing: the lower of after-tax operating earnings and operating cash flow &minus; D&amp;A &minus; stock pay, over revenue, so customer prepayments, deferred taxes and other timing do not flatter it) over ten years; terminal growth 3%; discount rate = 10-year yield + beta &times; 4.5% equity premium, blended with after-tax debt. The implied growth solves PV = EV by bisection. Base rates: Mauboussin, Callahan and Majd, The Base Rate Book (2016), 10-year real sales CAGR by starting size, 1950 to 2015; implied nominal growth less 2.5% inflation is compared with them.</div>
-  <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are a dated market snapshot. Assumptions are labelled. Research on a model book, not advice.</p></footer>
+  <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are dated market readings. Assumptions are labelled. Research on a model book, not advice.</p></footer>
 </section>
 
 <!-- ======================= ENGINES ======================= -->
@@ -1967,14 +1968,14 @@
     </div>
     <div class="tiles compact" id="jrs-tiles"></div>
     <div class="grid2">
-      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Calibration: stated odds against how often you were right</span></div><div class="svgbox" id="jrs-cal"></div><p class="hint">On the diagonal you are calibrated. Below it you are overconfident; above it, underconfident.</p></figure>
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Calibration: stated odds against realized frequency</span></div><div class="svgbox" id="jrs-cal"></div><p class="hint">On the diagonal, calibrated. Below it, overconfident; above it, underconfident.</p></figure>
       <div class="panel"><div class="panel-head"><span class="panel-title">Process against outcome</span><span class="src">Outcome = return after the market's share (beta)</span></div><div class="pog" id="jrs-pog"></div>
         <p class="hint">Good process means at least three of four: logged before entry, sized by the rule, kill line respected, two independent sources. Judge the process, not the outcome (Annie Duke calls the opposite "resulting").</p></div>
     </div>
     <div class="panel" id="jrs-luck"></div>
     <div class="math"><span class="mlabel">The scorecard</span>Brier = (1/<var>n</var>) &sum; (<var>p</var><sub>i</sub> &minus; <var>y</var><sub>i</sub>)<sup>2</sup>: 0 is perfect, 0.25 is a coin flip. Alpha<sub>i</sub> = <var>r</var><sub>i</sub> &minus; &beta;<sub>i</sub> <var>r</var><sub>bench</sub>; <var>t</var> = mean(alpha) &divide; (sd/&radic;<var>n</var>). Luck test: P(at least <var>k</var> hits in <var>n</var> | coin flip). Decisions needed for <var>t</var> = 2: (2&middot;sd &divide; mean)<sup>2</sup>. Kelly: <var>f</var><sup>*</sup> = <var>p</var> &minus; (1 &minus; <var>p</var>) &divide; <var>b</var>, with <var>b</var> = win &divide; loss.</div>
   </section>
-  <footer class="foot"><p>Your entries are private to you: in the published page they live in your own space on the artifact (no one else can read them, the owner included); elsewhere they stay in this browser. Examples are illustrative and never saved.</p></footer>
+  <footer class="foot"><p>Entries are private: in the published page they live in the viewer's own space on the artifact (no one else can read them, the owner included); elsewhere they stay in this browser. Examples are illustrative and never saved.</p></footer>
 </section>
 
 <!-- ======================= SWANS ======================= -->
@@ -1982,7 +1983,7 @@
   <div class="vhead">
     <p class="eyebrow">Swans · Fat tails and the hedges that survive them</p>
     <h1 id="sw-title">Tail risk: measurement and cost-efficient protection</h1>
-    <p class="lede">A normal model says a six-sigma month comes once in 84 million years. Since 1871 the S&amp;P 500 has had two. The desk's answer is Taleb's: name the gray swans you can, own convexity for the ones you can't, and never size so that one of them is ruin.</p>
+    <p class="lede">A normal model says a six-sigma month comes once in 84 million years. Since 1871 the S&amp;P 500 has had two. The desk's answer is Taleb's: name the gray swans that can be named, own convexity for the rest, and never size so that one of them is ruin.</p>
   </div>
   <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#tails-title">Fat tails</a><a href="#atlas-title">Swan atlas</a><a href="#tal-title">Taleb's toolkit</a><a href="#tl-title">Tail-hedge lab</a></nav>
   <section class="section" aria-labelledby="tails-title">
@@ -2203,7 +2204,7 @@
       <thead><tr><th>Claim</th><th>Manual</th><th>Data now</th><th>Why they differ, and what the engine uses</th></tr></thead>
       <tbody>
         <tr><td>Brent crude</td><td>$97 to $102 (Sept)</td><td>$126.55 EIA spot (Oct 14); about $107 futures and $134 Dated (IEA, Oct 14)</td><td>The manual quotes futures from early September; spot jumped to $131 by Sep 15. Physical barrels trade far above futures. The engine tracks both and shows the gap.</td></tr>
-        <tr><td>10-year real yield</td><td>About 1.6%</td><td>2.74% TIPS (Oct 16, FRED)</td><td>1.6% is the backward-looking real rate (5.2% minus CPI); 2.74% is what the market demands now. Equity discount rates follow the second, which is the one in decisions 1 to 3.</td></tr>
+        <tr><td>10-year real yield</td><td>About 1.6%</td><td>2.77% TIPS (Oct 20, FRED)</td><td>1.6% is the backward-looking real rate (5.2% minus CPI); 2.74% is what the market demands now. Equity discount rates follow the second, which is the one in decisions 1 to 3.</td></tr>
         <tr><td>Stock-bond correlation</td><td>About +0.40</td><td>+0.15 (36 months, engine); +0.21 (one year, Federal Reserve)</td><td>Different windows, indexes and frequencies. All three are positive, which is what matters: bonds are not hedging. The engine uses its own.</td></tr>
         <tr><td>CPI</td><td>3.4% (August)</td><td>3.7% (September, Oct 14)</td><td>A newer print, released the week the manual was written. It strengthens the manual's case.</td></tr>
         <tr><td>Next Fed decision</td><td>Oct 28; about 80% hold</td><td>Oct 27 to 28; 82 to 84% hold (Oct 9)</td><td>Agree.</td></tr>
@@ -2231,7 +2232,7 @@
       <li class="done"><div><strong>Risk engine with fat tails and replays.</strong><span>Built: Student-t and historical shortfall at 97.5%, five episode replays. The book run adds daily shortfall for the model book.</span></div></li>
       <li class="done"><div><strong>Accounting layer.</strong><span>Built for the nine builders: red flags, cash earnings bridge, reverse DCF, depreciation by life. Next: the top 20 S&amp;P 500 names.</span></div></li>
       <li class="part"><div><strong>Credit and bottleneck layer.</strong><span>Built: private credit stress test, power and memory trackers on Noteworthy, BDC queue and PIK monitors. Next: BDC price to NAV and PIK share straight from 10-Q filings.</span></div></li>
-      <li class="part"><div><strong>Execution link.</strong><span>Your Robinhood agent project: paper trading first, human approval for every live order. The Trading desks' sizing and execution tools are the inputs it would read.</span></div></li>
+      <li class="part"><div><strong>Execution link.</strong><span>The Robinhood agent project: paper trading first, human approval for every live order. The Trading desks' sizing and execution tools are the inputs it would read.</span></div></li>
     </ol>
   </section>
 </section>
@@ -2328,7 +2329,7 @@
   </section>
   <section class="section" aria-labelledby="fde-title">
     <div class="section-head"><p class="eyebrow">Compare explanations</p><h2 id="fde-title">Competing explanations and next checks</h2>
-      <p class="prose">Pick an observation. Mark what you have checked. Bayes' rule updates the explanations; the ranking shows which unchecked evidence would remove the most doubt (expected information, in bits). The likelihoods are judged, so argue with them.</p></div>
+      <p class="prose">Pick an observation. Mark each item once checked. Bayes' rule updates the explanations; the ranking shows which unchecked evidence would remove the most doubt (expected information, in bits). The likelihoods are judged, so argue with them.</p></div>
     <div class="field"><label for="fd-case">Observation</label><select id="fd-case"></select></div>
     <div class="fd-grid">
       <div><h3 class="h3">Evidence</h3><div id="fd-ev" class="fd-ev"></div></div>
@@ -2544,7 +2545,7 @@
 
 <!-- ======================= v0.14: THE MIND ======================= -->
 <section class="view" id="view-mind" hidden aria-labelledby="md-title">
-  <div class="vhead"><p class="eyebrow">The mind · the brain and the engine as one</p><h1 id="md-title">A single knowledge graph for retrieval, measurement and inference</h1>
+  <div class="vhead"><p class="eyebrow">The mind</p><h1 id="md-title">A single knowledge graph for retrieval, measurement and inference</h1>
     <p class="lede">Every concept an investor needs, every market the engine measures, every sourced fact and paper, every verified quote, every module of the engine and every economy, joined by typed links. Ask a question and the mind shows its work: what it recalled, how activation spread, which claim it weighed, the evidence on each side with its weight and its source, how fragile the verdict is, the causal chain to the book and what it would do.</p></div>
   <div class="at-tiles" id="md-tiles"></div>
   <section class="section" aria-labelledby="md-think-title">
@@ -2572,10 +2573,10 @@
   <section class="section" aria-labelledby="md-how-title">
     <div class="section-head"><p class="eyebrow">How it thinks</p><h2 id="md-how-title">The reasoning loop, step by step</h2><p class="prose">The same code runs in Python (buildout/mind.py) and on this page (mind.js); a test holds them equal on every push.</p></div>
     <ol class="m-steps">
-      <li><b>Read.</b> Your words are lower-cased, phrases mapped ("digital gold" to bitcoin and store of value), stop words dropped, endings trimmed ("rates" to "rate") and synonyms added ("NVDA" to Nvidia). Filler words such as "useful" or "work" are ignored for recall.</li>
-      <li><b>Recall.</b> Every node has a document: its name three times, its other names twice, its definition or text once. BM25, the ranking formula search engines use, scores all {N} documents against your words; a node whose exact name appears in your question gets a bonus. Long kinds of node (quotes, signals, investors) are damped so a long text cannot win on length. Up to twelve seeds are kept, each scoring at least 30% of the best.</li>
-      <li><b>Spread.</b> Spreading activation: a random walker starts at the seeds and, at each of 40 steps, follows a link with probability 0.75 (weighted by the link's type: "is a" counts more than "related") or jumps back to a seed. Where it spends its time is how relevant each node is to what you asked. This is personalized PageRank; two or three links away still lights up if it is well connected.</li>
-      <li><b>Frame.</b> Each claim the mind can weigh is an axis: the 18 investor-voices topics (stated as a bull case and a bear case) and seven "does this method give an edge?" questions. The axis whose evidence lit up most wins, with a boost if the voices library also picks that topic. Your wording decides which side is the claim: "Is AI a bubble?" weighs the bear case. "What is X?" adds X's definition; "What if X, what happens to Y?" sets X's claim in the belief network and weighs Y, or the model book.</li>
+      <li><b>Read.</b> The question's words are lower-cased, phrases mapped ("digital gold" to bitcoin and store of value), stop words dropped, endings trimmed ("rates" to "rate") and synonyms added ("NVDA" to Nvidia). Filler words such as "useful" or "work" are ignored for recall.</li>
+      <li><b>Recall.</b> Every node has a document: its name three times, its other names twice, its definition or text once. BM25, the ranking formula search engines use, scores all {N} documents against the question's words; a node whose exact name appears in the question gets a bonus. Long kinds of node (quotes, signals, investors) are damped so a long text cannot win on length. Up to twelve seeds are kept, each scoring at least 30% of the best.</li>
+      <li><b>Spread.</b> Spreading activation: a random walker starts at the seeds and, at each of 40 steps, follows a link with probability 0.75 (weighted by the link's type: "is a" counts more than "related") or jumps back to a seed. Where it spends its time is how relevant each node is to the question. This is personalized PageRank; two or three links away still lights up if it is well connected.</li>
+      <li><b>Frame.</b> Each claim the mind can weigh is an axis: the 18 investor-voices topics (stated as a bull case and a bear case) and seven "does this method give an edge?" questions. The axis whose evidence lit up most wins, with a boost if the voices library also picks that topic. The wording decides which side is the claim: "Is AI a bubble?" weighs the bear case. "What is X?" adds X's definition; "What if X, what happens to Y?" sets X's claim in the belief network and weighs Y, or the model book.</li>
       <li><b>Weigh.</b> Each signal on that axis adds sign × strength × reliability × relevance to the log-odds of the bull case. Reliability is how well that kind of evidence has predicted out of sample, or how certain the fact is. Relevance is 0.5 to 1 by how much that signal lit up. Within one family of evidence the second reading counts 1/√2, the third 1/√3, so ten restatements of one fact count about five times one reading, not ten. One more row is the pull of connected claims through the belief network, capped so it informs a verdict and never decides it. Investor opinion is one more, low-reliability signal. Probability = 1 / (1 + e<sup>−log-odds</sup>).</li>
       <li><b>Test.</b> Each family of evidence is left out in turn; the spread of the verdict is the range shown. The single signal whose removal moves the verdict most is the hinge, and every signal states the reading that would flip it.</li>
       <li><b>Trace.</b> From the market nodes the evidence rests on, the strongest directed path to the book over the atlas's own learned and judged links (Dijkstra on −log of each link's size), with its sign.</li>
@@ -2595,7 +2596,7 @@
   </section>
   <section class="section" aria-labelledby="md-ev-title">
     <div class="section-head"><p class="eyebrow">Evidence</p><h2 id="md-ev-title">Verified facts and research</h2><p class="prose" id="md-ev-n"></p></div>
-    <p class="prose">In v0.14 six research agents each found and confirmed their items on the source page, and three more, who had not written them, opened every page again: of 268 items, 233 were confirmed as written and 35 corrected (mostly by removing a detail the page did not carry); none failed. v0.15 added 150 more the same way (133 confirmed, 17 corrected, none failed) on information sources, model risk and machine learning in finance. Secondary sources are marked.</p>
+    <p class="prose">For the first knowledge base, six research agents each found and confirmed their items on the source page, and three more, who had not written them, opened every page again: of 268 items, 233 were confirmed as written and 35 corrected (mostly by removing a detail the page did not carry); none failed. v0.15 added 150 more the same way (133 confirmed, 17 corrected, none failed) on information sources, model risk and machine learning in finance. Secondary sources are marked.</p>
     <div class="seg m-seg" id="md-ev-seg" role="group" aria-label="Filter evidence"></div>
     <div class="field"><label for="md-ev-q">Filter</label><input id="md-ev-q" type="search" placeholder="margin debt, secondaries, Brent…" autocomplete="off"></div>
     <div class="m-evl" id="md-ev"></div>
@@ -2604,7 +2605,7 @@
 
 <!-- ======================= v0.14: THE LABS ======================= -->
 <section class="view" id="view-labs" hidden aria-labelledby="lb-title">
-  <div class="vhead"><p class="eyebrow">The labs · every claim a trader repeats, tested</p><h1 id="lb-title">Common trading rules tested on 156 years of data</h1>
+  <div class="vhead"><p class="eyebrow">Labs</p><h1 id="lb-title">Common trading rules tested on 156 years of data</h1>
     <p class="lede">The labs test what desks say on the longest data the engine can read, with the statistics that stop a lucky backtest passing for an edge: a stationary bootstrap, a max test across every variant tried, a deflated Sharpe ratio, Newey-West errors, out-of-sample R squared and one table of every p-value with Holm and Benjamini-Hochberg corrections.</p>
     <p class="sentence" id="lb-sum"></p></div>
   <div class="at-tiles" id="lb-tiles"></div>
@@ -2648,7 +2649,7 @@
 
 <!-- ======================= v0.16: TECHNICALS AND FUNDAMENTALS ======================= -->
 <section class="view" id="view-analysis" hidden aria-labelledby="an-title">
-  <div class="vhead"><p class="eyebrow">Technicals and fundamentals · tested, sourced, connected</p><h1 id="an-title">Technical signals validated by asset; fundamentals from primary filings</h1>
+  <div class="vhead"><p class="eyebrow">Analysis</p><h1 id="an-title">Technical signals validated by asset; fundamentals from primary filings</h1>
     <p class="lede">Technical analysis here is an indicator library plus a test: each signal's edge on the asset's own history, with errors that respect overlap and a false-discovery correction across the signals tried, and a composite that weights each signal only by how well it worked. Fundamental analysis starts from the XBRL facts in the company's own filings and computes what an analyst would by hand: margins, returns on capital, cash conversion, accruals, capex against depreciation, growth and its acceleration, and the Piotroski, Altman and Beneish scores, with every tag recorded.</p></div>
   <div class="at-tiles" id="an-tiles"></div>
   <section class="section" aria-labelledby="an-ta-title">
@@ -2657,11 +2658,11 @@
     <div class="lb-read-grid" id="an-read"></div>
     <ul class="br-list" id="an-text"></ul>
     <div class="grid2"><div class="panel"><span class="panel-title">Event study: each signal on this series' own history</span><div class="tablewrap"><table id="an-ev"></table></div>
-        <p class="hint">Daily edge is the average next-day log return earned by following the signal. The weight is t²/(t² + 4) when the edge has the signal's own sign and zero otherwise, so a t of 2 earns half weight. "Fade" signals bet on reversal. The VIX is an index, not something you can hold.</p></div>
+        <p class="hint">Daily edge is the average next-day log return earned by following the signal. The weight is t²/(t² + 4) when the edge has the signal's own sign and zero otherwise, so a t of 2 earns half weight. "Fade" signals bet on reversal. The VIX is an index, not a holdable instrument.</p></div>
       <div class="panel"><span class="panel-title">Fibonacci retracements of the last year's move</span><div class="tablewrap"><table id="an-fib"></table></div></div></div>
   </section>
   <section class="section" aria-labelledby="an-fa-title">
-    <div class="section-head"><p class="eyebrow">Fundamentals</p><h2 id="an-fa-title">From the filings: ratios, scores and flags</h2><p class="prose">Shown here from the SEC facts fixture, which carries cash flow, capex, revenue, operating income and debt; scores whose inputs it lacks are marked unknown rather than failed. The daily Action reads each company's full company facts with your SEC contact string.</p></div>
+    <div class="section-head"><p class="eyebrow">Fundamentals</p><h2 id="an-fa-title">From the filings: ratios, scores and flags</h2><p class="prose">Shown here from the SEC facts fixture, which carries cash flow, capex, revenue, operating income and debt; scores whose inputs it lacks are marked unknown rather than failed. The daily Action reads each company's full company facts with the SEC contact string set in the repository.</p></div>
     <div class="panel"><div class="tablewrap"><table id="an-co-all"></table></div></div>
     <div class="seg m-seg" id="an-co-seg" role="group" aria-label="Choose a company"></div>
     <div class="panel"><div class="tablewrap"><table id="an-co"></table></div><div id="an-co-scores"></div><ul class="br-list" id="an-co-flags"></ul><p class="hint" id="an-co-tags"></p></div>
@@ -2672,8 +2673,8 @@
     <div class="panel"><div class="tablewrap"><table id="an-conn"></table></div></div>
   </section>
   <section class="section" aria-labelledby="an-broker-title">
-    <div class="section-head"><p class="eyebrow">Tool · your positions</p><h2 id="an-broker-title">Broker export reconciliation</h2>
-      <p class="prose">Robinhood, Schwab, Fidelity and most brokers export positions as a CSV. Choose the file or paste it: the page reads it in this browser, compares your weights with the model book, and sends nothing anywhere. There is no Robinhood connector in Claude's directory today; the engine's MCP tool analyze_positions takes the same weights from any assistant that can read your account.</p></div>
+    <div class="section-head"><p class="eyebrow">Tool · positions</p><h2 id="an-broker-title">Broker export reconciliation</h2>
+      <p class="prose">Robinhood, Schwab, Fidelity and most brokers export positions as a CSV. Choose the file or paste it: the page reads it in this browser, compares the weights with the model book, and sends nothing anywhere. There is no Robinhood connector in Claude's directory today; the engine's MCP tool analyze_positions takes the same weights from any assistant that can read the account.</p></div>
     <div class="grid2"><div class="panel"><div class="field"><label for="an-file">Positions CSV</label><input id="an-file" type="file" accept=".csv,text/csv"></div>
         <div class="field"><label for="an-paste">Or paste it</label><textarea id="an-paste" rows="5" placeholder="Symbol,Quantity,Price&#10;NVDA,100,180&#10;MSFT,40,520"></textarea></div></div>
       <div class="panel" aria-live="polite"><div id="an-broker"><p class="hint">Nothing loaded.</p></div></div></div>
@@ -2682,7 +2683,7 @@
 
 <!-- ======================= v0.15: THE ML LAB ======================= -->
 <section class="view" id="view-ml" hidden aria-labelledby="ml-title">
-  <div class="vhead"><p class="eyebrow">The machine-learning lab · forecasting, judged honestly</p><h1 id="ml-title">Return forecasting: only the simplest model outperforms the historical mean</h1>
+  <div class="vhead"><p class="eyebrow">Machine-learning lab</p><h1 id="ml-title">Return forecasting: only the simplest model outperforms the historical mean</h1>
     <p class="lede">Seven models, from one-variable CAPE regression to gradient boosting, forecast the S&amp;P 500's next twelve months each month since 1940, refit only on what was known at the time. The flexible ones lose to the plain historical average out of sample. The one that wins is the simplest: an average of eight one-variable forecasts with Campbell and Thompson's sign restrictions, by a small margin that is not yet statistically significant, which is what Rapach, Strauss and Zhou found on other data. A reinforcement-learning sizing agent, judged the same way, does not beat holding either. That is the useful finding: it says which model claims to distrust and why the engine leans on ranges, hedges and sizing rules instead of point forecasts.</p>
     <p class="sentence" id="ml-sum"></p></div>
   <div class="at-tiles" id="ml-tiles"></div>
@@ -2739,17 +2740,17 @@
   <section class="section" aria-labelledby="ml-use-title">
     <div class="section-head"><p class="eyebrow">Use</p><h2 id="ml-use-title">Implications for portfolio management</h2></div>
     <ol class="m-steps">
-      <li><b>Distrust any return forecast that has not been scored like this.</b> Purged, walk-forward, against the historical mean, with a Diebold-Mariano test. Most published predictors fail it (Goyal, Welch and Zafirov); here, every model does.</li>
+      <li><b>Distrust any return forecast that has not been scored like this.</b> Purged, walk-forward, against the historical mean, with a Diebold-Mariano test. Most published predictors fail it (Goyal, Welch and Zafirov); here, every flexible model does, and the one combination that passes does so by a margin that is not yet significant.</li>
       <li><b>Prefer the simple model when the complex one only wins in sample.</b> The restricted combination of one-variable forecasts is the only model above the mean out of sample; in cross-validation gradient boosting fits the past best and the future worst. Complexity bought fit, not foresight.</li>
-      <li><b>Use ML for what it is good at here: ranges, analogs and novelty.</b> The conformal interval says how wide the honest range is; the analogs say which histories to read; novelty says when every model is extrapolating.</li>
-      <li><b>Size from ranges, not points.</b> A forecast of +2.4% with an interval of ±23% is a statement about uncertainty, and the sizing and hedge desks are built for that.</li>
+      <li><b>Use ML for what it is good at here: ranges, analogs and novelty.</b> The conformal interval says how wide the range is; the analogs say which histories to read; novelty says when every model is extrapolating.</li>
+      <li><b>Size from ranges, not points.</b> A forecast of +2.8% with an 80% interval of ±23% is a statement about uncertainty, and the sizing and hedge desks are built for that.</li>
     </ol>
   </section>
 </section>
 
 <!-- ======================= v0.15: THE REALITY CHECK ======================= -->
 <section class="view" id="view-reality" hidden aria-labelledby="rt-title">
-  <div class="vhead"><p class="eyebrow">The reality check · where models meet the world</p><h1 id="rt-title">Model assumptions tested, with each conclusion's breakpoint</h1>
+  <div class="vhead"><p class="eyebrow">Reality check</p><h1 id="rt-title">Model assumptions tested, with each conclusion's breakpoint</h1>
     <p class="lede">A common portfolio-management concern is that quantitative models rest on assumptions that fail in live markets. The remedy is not a better model. It is to write down what each model assumes, test the assumption on the data every day, know how wrong it can be before the conclusion changes, rerun the decision in worlds where it fails, and haircut every backtest for what backtests usually lose live.</p>
     <p class="sentence" id="rt-sum"></p></div>
   <div class="at-tiles" id="rt-tiles"></div>
@@ -2764,7 +2765,7 @@
       <div class="panel"><div class="rt-form">
         <div class="field"><label for="rt-sr">Backtest Sharpe, annual</label><input id="rt-sr" type="number" step="0.05" value="1.2"></div>
         <div class="field"><label for="rt-yrs">Years of backtest</label><input id="rt-yrs" type="number" step="1" value="8"></div>
-        <div class="field"><label for="rt-n">Variants tried (honestly)</label><input id="rt-n" type="number" step="1" min="1" value="40"></div>
+        <div class="field"><label for="rt-n">Variants tried, all of them</label><input id="rt-n" type="number" step="1" min="1" value="40"></div>
         <div class="field"><label for="rt-cost">Cost per trade, bp</label><input id="rt-cost" type="number" step="0.5" min="0" value="5"></div>
         <div class="field"><label for="rt-turn">Trades a year (one-way, full size)</label><input id="rt-turn" type="number" step="1" min="0" value="24"></div>
         <div class="field"><label for="rt-vol">Strategy volatility, %</label><input id="rt-vol" type="number" step="1" min="1" value="15"></div>
@@ -2779,7 +2780,7 @@
         <li><b>What does it assume about tails, independence and stability, and what does it do when those fail?</b> Ask for the breakpoint, not the base case.</li>
         <li><b>What are the costs at the size we would run, and the capacity?</b> Most high-turnover anomalies do not survive costs (Novy-Marx and Velikov).</li>
         <li><b>Who else runs it?</b> Crowded models fail together, as the August 2007 quant funds did (Khandani and Lo).</li>
-        <li><b>What result in the next six months would make you turn it off?</b> A model without a kill rule is an opinion with a backtest.</li>
+        <li><b>What result in the next six months would turn it off?</b> A model without a kill rule is an opinion with a backtest.</li>
       </ol></div>
   </section>
   <section class="section" aria-labelledby="rt-bp-title">
@@ -2815,7 +2816,7 @@
 
 <!-- ======================= v0.15: THE INFORMATION EDGE ======================= -->
 <section class="view" id="view-edge" hidden aria-labelledby="ed-title">
-  <div class="vhead"><p class="eyebrow">The information edge · sources and lenses</p><h1 id="ed-title">Information advantage from primary sources</h1>
+  <div class="vhead"><p class="eyebrow">Information edge</p><h1 id="ed-title">Information advantage from primary sources</h1>
     <p class="lede">An edge in information is rarely a secret. It is a primary source most people do not read (a filing, a weekly Fed balance sheet, a futures positioning report), an independent analyst who reads one industry more closely than the sell side, or a lens that corrects a bias everyone shares. Each source below says what it is uniquely good for and what to watch for in it. Taleb's lens asks how much the tails cost; Damodaran's asks what story the price needs.</p></div>
   <div class="at-tiles" id="ed-tiles"></div>
   <section class="section" aria-labelledby="ed-src-title">
@@ -2859,7 +2860,7 @@
 
 <!-- ======================= v0.14: THE CARD ROOM ======================= -->
 <section class="view" id="view-cardroom" hidden aria-labelledby="cr-title">
-  <div class="vhead"><p class="eyebrow">The card room · poker, haggling, private funds and storage</p><h1 id="cr-title">Decision theory from poker, bargaining and storage</h1>
+  <div class="vhead"><p class="eyebrow">Decision math</p><h1 id="cr-title">Decision theory from poker, bargaining and storage</h1>
     <p class="lede">Trading firms use poker in training because it builds the same disciplines: think in ranges, price every call against the pot, size bets so variance cannot end the game, and judge decisions by their odds rather than their outcome. Negotiation, private-fund cash flows and the commodity curve have their own exact math. Each calculator runs the engine's functions (buildout/games2.py), the same in Python and here.</p></div>
   <div class="grid2">
     <section class="panel" aria-labelledby="cr-eq-t"><h2 class="h3" id="cr-eq-t">Poker: equity and pot odds</h2>
@@ -2943,7 +2944,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
   </section>
   <section class="section" aria-labelledby="ag-v22-t">
     <div class="section-head"><p class="eyebrow">v0.22</p><h2 id="ag-v22-t">Release metrics</h2></div>
-    <div class="at-tiles"><div class="at-kpi"><b>40</b><span>Stale items found by an auditor agent</span><small>a real bug, old counts and dates, dead code and CSS; most fixed here</small></div>
+    <div class="at-tiles"><div class="at-kpi"><b>40 + 60</b><span>Findings from two independent review agents</span><small>a real bug, stale counts and dates, column bugs, register; most fixed here</small></div>
       <div class="at-kpi"><b>1 of 8</b><span>Geometric claims that survive</span><small>walked forward, corrected for testing many</small></div>
       <div class="at-kpi"><b>&minus;0.2</b><span>The placebo's t</span><small>nearest analogs against random ones</small></div>
       <div class="at-kpi"><b>19</b><span>New concepts in the mind</span><small>Riemannian geometry to Benjamini-Hochberg</small></div></div>
@@ -3029,7 +3030,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
   <section class="section" aria-labelledby="ag-run-t">
     <div class="section-head"><p class="eyebrow">At run time</p><h2 id="ag-run-t">Agents available at run time</h2></div>
     <ul class="m-learn-l">
-      <li><b>Ask Claude on the voices panel.</b> When you allow it, the page sends your question and the library's own quotes to Claude, which may reorder them and summarize a side in its own words, labelled as such. Any quote id it returns that is not in the library is dropped.</li>
+      <li><b>Ask Claude on the voices panel.</b> With permission, the page sends the question and the library's own quotes to Claude, which may reorder them and summarize a side in its own words, labelled as such. Any quote id it returns that is not in the library is dropped.</li>
       <li><b>The MCP server.</b> Any assistant that speaks the Model Context Protocol can call the engine's tools: reason (the mind), labs_lookup, game_math, investor_voices, atlas_trace, decision_loop, hedge_book, evaluate_trade, create_order_proposal and the rest. It is research and proposals only.</li>
       <li><b>Where judgment stays human.</b> Every proposal needs a rationale and a kill criterion, is hashed so it cannot be altered after review, and is marked proposal_only. The person decides.</li>
     </ul>

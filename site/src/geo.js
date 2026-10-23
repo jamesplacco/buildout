@@ -13,7 +13,7 @@
   const geoName = (k) => (GEO22.labels && GEO22.labels[k] ? GEO22.labels[k].name : k);
   function renderGeometry() {
     const top = $("#geo-tiles");
-    if (!top || !geoOk()) { if (top && !top.children.length) top.append(h("p", "hint", "The geometry study is missing from the snapshot.")); return; }
+    if (!top || !geoOk()) { if (top && !top.children.length) top.append(h("p", "hint", "The geometry study is missing from this build.")); return; }
     const O = GEO22, C = O.covariance, N = C.now, E = O.engine_model, PL = E.placebo, SP = O.spectrum, TP = O.topology, SC = O.scaling;
     if (!top.children.length) {
       const surv = O.tests.filter((t) => t.q <= 0.10);
@@ -21,8 +21,8 @@
       $("#geo-bluf").textContent = `Recommendation: no change to the 1.00x exposure. Covariance structure is informative about risk but not about returns. Of ${O.tests.length} geometric hypotheses tested out of sample, ${surv.length} ${surv.length === 1 ? "survives" : "survive"} a 10% false-discovery rate. The survivor, the decision engine's new analog model, outperforms the long-run average (t ${fx(E.t, 1)}), but a placebo of randomly selected windows performs equally well (nearest versus random, t ${fx(PL.geometry_t, 1)}). The improvement comes from the fatter tails of a mixture of historical periods, not from similarity to today. The engine therefore retains the model for tail shape only, and the geometry serves as a descriptive map rather than a signal.`;
       dxKpis(top, [
         [`${surv.length} of ${O.tests.length}`, "Claims that survive", "Benjamini-Hochberg, 10% false-discovery rate"],
-        [fx(E.t, 1), "Analog model over the long run", `log score +${fx(E.mean_gain, 3)} a month since 1940`],
-        [fx(PL.geometry_t, 1), "Nearest over random analogs", "placebo: similarity adds no measurable value"],
+        ["t " + fx(E.t, 1), "Analog model over the long run", `log score +${fx(E.mean_gain, 3)} a month since 1940`],
+        ["t " + fx(PL.geometry_t, 1), "Nearest over random analogs", "placebo: similarity adds no measurable value"],
         ...(SP ? [[String(SP.now.above), "Real factors in world markets", `${SP.now.N} series, eigenvalues above the noise edge of ${fx(SP.now.edges[1], 2)}`]] : []),
         [near[0].replace("-", " to "), "Today's nearest era", `distance ${fx(near[1].distance_now, 2)} to its Frechet mean`],
         [fx(SC.all, 2), "Hurst exponent of returns", `shuffled range ${fx(SC.null_q05, 2)} to ${fx(SC.null_q95, 2)}; partly an averaging artifact`]]);

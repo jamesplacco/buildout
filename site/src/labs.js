@@ -115,7 +115,7 @@
     try { return !!(L && L.trend && L.trend.full && L.valuation && L.valuation.cape && L.readings && L.multiple_testing && Array.isArray(L.multiple_testing.rows)); } catch (e) { return false; }
   }
   function renderLabsDesk() {
-    if (!$("#lb-tiles") || !labsOk(LB)) { const b = $("#lb-tiles"); if (b && !b.children.length) b.append(h("p", "hint", "The labs snapshot is missing or malformed.")); return; }
+    if (!$("#lb-tiles") || !labsOk(LB)) { const b = $("#lb-tiles"); if (b && !b.children.length) b.append(h("p", "hint", "The labs data is missing or malformed.")); return; }
     const tiles = $("#lb-tiles");
     const T = LB.trend, V = LB.valuation, R = LB.readings, MT = LB.multiple_testing;
     if (!tiles.children.length) {
@@ -234,7 +234,7 @@
       if (!(p > 0 && p < 1 && b > 0)) { out.textContent = "Win probability between 0 and 1, and odds above 0."; return; }
       const f = gKelly(p, b), mu = p * b - (1 - p), sd = Math.sqrt(p * (b - mu) ** 2 + (1 - p) * (-1 - mu) ** 2);
       const units = Math.max(1, num("cr-bank") || 50);
-      out.textContent = `Kelly stakes ${lPct(f, 1)} of the bankroll (half Kelly ${lPct(f / 2, 1)}: about three quarters of the growth for half the swings). Edge ${fx(mu, 3)} and spread ${fx(sd, 2)} per unit bet: with ${units} betting units the chance of ever going broke is about ${gRuin(mu, sd, units) < 1e-4 ? "under 0.01%" : lPct(gRuin(mu, sd, units), 2)}; for 1% you need ${mu > 0 ? fx(gBankrollFor(mu, sd, 0.01), 0) : "infinitely many"} units.`;
+      out.textContent = `Kelly stakes ${lPct(f, 1)} of the bankroll (half Kelly ${lPct(f / 2, 1)}: about three quarters of the growth for half the swings). Edge ${fx(mu, 3)} and spread ${fx(sd, 2)} per unit bet: with ${units} betting units the chance of ever going broke is about ${gRuin(mu, sd, units) < 1e-4 ? "under 0.01%" : lPct(gRuin(mu, sd, units), 2)}; 1% needs ${mu > 0 ? fx(gBankrollFor(mu, sd, 0.01), 0) : "infinitely many"} units.`;
     };
     $("#cr-k-go").addEventListener("click", kGo);
     const bGo = () => {

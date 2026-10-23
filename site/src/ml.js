@@ -11,7 +11,7 @@
   const mlP = (v, d = 0) => (fin(v) ? `${Math.abs(v * 100).toFixed(d)}%` : "n/a");
   function renderMlDesk() {
     const tiles = $("#ml-tiles");
-    if (!tiles || !mlOk(ML_SNAP)) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The machine-learning snapshot is missing or malformed.")); return; }
+    if (!tiles || !mlOk(ML_SNAP)) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The machine-learning data is missing or malformed.")); return; }
     const R = ML_SNAP.return, Cr = ML_SNAP.crash, sh = ML_SNAP.shift;
     if (!tiles.children.length) {
       [[mlPct(R.scores.ensemble.skill), "Ensemble skill, 12-month return", `out of sample since ${ML_SNAP.start_oos}, against the historical mean`],

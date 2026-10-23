@@ -82,9 +82,9 @@
       const solo = hbEvaluate({ [k]: HBS.sizes[k] }, HBS.e, post);
       card.querySelector(".hb-eff").textContent = `Alone: worst case ${sPct(solo.worst, 1)} (book ${sPct(Math.min(...base), 1)}), expected cost ${fx(solo.cost_bp, 0)}bp a quarter`;
     });
-    fillTable($("#hb-scen"), ["Scenario", "Odds", "Book", "With hedges"], RZ_SCENARIOS.map((s, i) => [s.name, pct0(post[i]), sPct(base[i], 1), sPct(r.rets[i], 1)]), 1);
+    fillTable($("#hb-scen"), ["Scenario", `Odds (engine run, ${isoNice(oodaData().as_of)} signals)`, "Book", "With hedges"], RZ_SCENARIOS.map((s, i) => [s.name, pct0(post[i]), sPct(base[i], 1), sPct(r.rets[i], 1)]), 1);
     const nOn = Object.keys(on).length, L = RZ_DEFAULTS.max_loss;
-    $("#hb-sum").textContent = `${nOn} on · growth ${sPct(r.ce, 2)} a quarter · worst ${sPct(r.worst, 1)} ${r.worst >= -L - 1e-12 ? "(inside" : "(outside"} the ${Math.round(L * 100)}% loss limit) · cost ${fx(r.cost_bp, 0)}bp`;
+    $("#hb-sum").textContent = `Current book (proposals are listed under Act): ${nOn} hedge${nOn === 1 ? "" : "s"} on · growth ${sPct(r.ce, 2)} a quarter · worst ${sPct(r.worst, 1)} ${r.worst >= -L - 1e-12 ? "(inside" : "(outside"} the ${Math.round(L * 100)}% loss limit) · cost ${fx(r.cost_bp, 0)}bp`;
     const sizes = Object.assign({}, HBS.sizes), adv = hbAdvisor(sizes, HBS.e, post), al = $("#hb-adv");
     al.replaceChildren();
     const show = (lab, row) => {
@@ -107,7 +107,7 @@
   function renderOODA() {
     const o = oodaData(), box = $("#oo-strip");
     if (!box) return;
-    $("#oo-status").textContent = `${oodaLive() ? "Engine run of " + isoNice(o.as_of) : "Engine snapshot of " + isoNice(o.as_of)} · fundamentals ${o.observe.inputs ? o.observe.inputs.fundamentals : "n/a"} · prices ${o.observe.inputs ? o.observe.inputs.prices : "n/a"} · model book, not personal positions`;
+    $("#oo-status").textContent = `${oodaLive() ? "Engine run of " + isoNice(o.as_of) : "Engine output as of " + isoNice(o.as_of)} · fundamentals ${o.observe.inputs ? o.observe.inputs.fundamentals : "n/a"} · prices ${o.observe.inputs ? o.observe.inputs.prices : "n/a"} · model book, not personal positions`;
     // observe
     const ml = $("#oo-moved");
     ml.replaceChildren();
@@ -121,7 +121,9 @@
     // orient
     const el = $("#oo-expl");
     el.replaceChildren();
-    (o.orient.explanations || []).forEach((r) => { const li = h("li"); li.append(h("span", null, r.cause === "noise only" ? "Nothing unusual" : nodeNm(r.cause)), h("b", "num", pct0(r.p))); el.append(li); });
+    const ex = o.orient.explanations || [], shown = ex.reduce((a, r) => a + (fin(r.p) ? r.p : 0), 0);
+    ex.forEach((r) => { const li = h("li"); li.append(h("span", null, r.cause === "noise only" ? "Nothing unusual" : nodeNm(r.cause)), h("b", "num", pct0(r.p))); el.append(li); });
+    if (ex.length && shown < 0.995) { const li = h("li"); li.append(h("span", null, "Other single causes, each under the list"), h("b", "num", pct0(1 - shown))); el.append(li); }
     const kl = o.orient.key_link && o.orient.key_link.regimes, ki = kl && kl.inflation, ko = kl && kl.low_inflation;
     $("#oo-link").textContent = ki && fin(ki.ols) ? `The link the bond hedge rests on (10-year to stocks) reads ${sg(ki.ols, 2)} since 2022 with a Newey-West t of ${fx(ki.hac_t, 1)}${ki.months_to_flip ? ` and reverses on ${ki.months_to_flip} months` : ""}; ${ko && fin(ko.ols) ? `${sg(ko.ols, 2)} before 2022.` : ""} Treat its sign as a hypothesis.` : "";
     const cb = o.orient.crisis_behaviour || {}, cm = cb.in_stocks_worst_months || {};
@@ -177,7 +179,7 @@
     c.dataset.wired = "1";
     c.addEventListener("click", async () => {
       const o = oodaData(), on = HB_IDS.filter((k) => HBS.on[k]);
-      const rec = { recorded: new Date().toISOString(), as_of: o.as_of, source: oodaLive() ? "engine run" : "engine snapshot", proposals: o.act.proposals, hedges_on: on, equity: HBS.e,
+      const rec = { recorded: new Date().toISOString(), as_of: o.as_of, source: oodaLive() ? "engine run" : "engine output as shipped", proposals: o.act.proposals, hedges_on: on, equity: HBS.e,
         positions: o.decide.positions.map((a) => ({ ticker: a.ticker, action: a.action, from: a.weight, to: a.target, confidence: a.confidence, kill: (a.frameworks || {}).kill_criteria })) };
       const txt = JSON.stringify(rec, null, 2);
       try { await navigator.clipboard.writeText(txt); $("#oo-msg").textContent = "Copied: paste it into the journal's import or keep it with the decision."; }
@@ -208,7 +210,7 @@
     const grid = $("#ps-grid");
     if (!grid) return;
     const o = oodaData(), V = o.valuation.positions, acts = Object.fromEntries(o.decide.positions.map((a) => [a.ticker, a]));
-    $("#ps-status").textContent = `${oodaLive() ? "Engine run" : "Engine snapshot"} · ${o.observe.inputs ? o.observe.inputs.fundamentals : ""} · prices ${o.observe.inputs ? o.observe.inputs.prices : ""} · 10-year yield ${fin(o.valuation.rf) ? fx(o.valuation.rf * 100, 2) + "%" : "n/a"}`;
+    $("#ps-status").textContent = `${oodaLive() ? "Engine run" : "Engine output as shipped"} · ${o.observe.inputs ? o.observe.inputs.fundamentals : ""} · prices ${o.observe.inputs ? o.observe.inputs.prices : ""} · 10-year yield ${fin(o.valuation.rf) ? fx(o.valuation.rf * 100, 2) + "%" : "n/a"}`;
     const fl = $("#ps-filter");
     if (!fl.dataset.wired) {
       fl.dataset.wired = "1";
@@ -228,14 +230,16 @@
       head.append(h("h3", null, `${t} · ${v.name || t}`), badge(code));
       card.append(head, h("p", "ps-verdict", (v.verdict || {}).text || ""));
       const nums = h("div", "nw-nums");
-      [["Market value", bnFmt(v.market_cap)], ["Implied growth", pctOrNa(v.implied_growth, 1)], ["Discount rate", pctOrNa(v.discount_rate, 1)], ["P/E", fin(v.pe) ? fx(v.pe, 0) + "x" : "n/a"],
+      [["Market value", bnFmt(v.market_cap)], ["Implied growth", pctOrNa(v.implied_growth, 1)], ["Discount rate", pctOrNa(v.discount_rate, 1)], ["P/E", fin(v.pe) && v.pe > 0 ? fx(v.pe, 0) + "x" : fin(v.pe) ? "negative earnings" : "n/a"],
         ["EV / sales", fin(v.ev_sales) ? fx(v.ev_sales, 1) + "x" : "n/a"], ["FCF yield after stock pay", pctOrNa(v.owner_fcf_yield, 1)]].forEach(([k, val]) => { const d = h("div"); d.append(h("b", "num", val), h("small", null, k)); nums.append(d); });
       card.append(nums);
       if (fin(v.implied_real_pct) && v.base_rate_bucket) { const mini = h("div", "ps-mini"); baseRateMini(mini, v.base_rate_bucket, v.implied_real_pct); card.append(mini); }
       const lists = h("div", "ps-two");
       const mk = (title, arr, cls) => { const d = h("div"); d.append(h("h4", null, title)); const ol = h("ol", "ps-why " + cls); (arr || []).slice(0, 4).forEach((w) => { const li = h("li"); li.append(h("span", null, w.text), h("b", "num", `${fx(Math.abs(w.points), 1)} pts`)); ol.append(li); }); if (!(arr || []).length) ol.append(h("li", "none", "Nothing material.")); d.append(ol); return d; };
-      lists.append(mk("Why the price could be wrong", v.why, "neg"), mk("What a buyer is betting on", v.why_right, "pos"));
-      card.append(lists);
+      if ((v.why || []).length || (v.why_right || []).length) {         // SpaceX has no filings yet, so no case either way
+        lists.append(mk("Why the price could be wrong", v.why, "neg"), mk("What a buyer is betting on", v.why_right, "pos"));
+        card.append(lists);
+      }
       const q = v.quality || {}, rows = QUAL_ROWS.filter(([k]) => fin(q[k])).map(([k, n, f]) => [n, f === "pct" ? fx(q[k] * 100, 1) + "%" : fx(q[k], 2) + "x"]);
       const det = h("details", "tableview"), sum = h("summary", null, `The accounting (quality ${q.quality_grade || "n/a"}${(q.flags || []).length ? `; ${(q.flags || []).length} flag${q.flags.length > 1 ? "s" : ""}` : ""})`);
       det.append(sum);

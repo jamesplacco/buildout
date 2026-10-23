@@ -65,7 +65,7 @@
     box.replaceChildren();
     const fmtAgo = (ms) => { const hrs = ms / 36e5; return hrs < 1 ? "under an hour ago" : hrs < 48 ? `${Math.round(hrs)} hours ago` : `${Math.round(hrs / 24)} days ago`; };
     if (!prev || !prev.v) {
-      box.append(h("p", "since-first", "Welcome. Come back tomorrow and this panel will show what moved and which decisions flipped while you were away."));
+      box.append(h("p", "since-first", "On the next visit, this panel shows what moved and which decisions flipped in between."));
     } else {
       box.append(h("p", "hint", `Last visit ${fmtAgo(t - prev.t)}.`));
       const rows = [["Gross the rule allows", "gross", (x) => xx(x)], ["Three-year inflation", "infl36", (x) => fx(x, 2) + "%"], ["Stock-bond correlation", "corr", (x) => sgn2(x)],
@@ -81,7 +81,7 @@
       const flips = Object.entries(now.acts).filter(([id, act]) => prev.acts && prev.acts[id] && prev.acts[id] !== act);
       flips.forEach(([id, act]) => { const li = h("li", "flip"), a = h("a", null, act); a.href = "#" + id; li.append(h("span", null, "Decision changed"), a); ul.append(li); });
       if (ul.children.length) box.append(ul);
-      else box.append(h("p", "since-first", "Nothing moved since then: the desk reads the same snapshot. Live data replaces it after each daily run."));
+      else box.append(h("p", "since-first", "Nothing moved since then: the desk reads the same dated figures. The daily run replaces them with live data."));
     }
     if (!prev || t - prev.t > 3 * 36e5) LS.set("bo-visit", { t, v: Object.fromEntries(Object.entries(now).filter(([k]) => k !== "acts")), acts: now.acts });
   }
@@ -94,7 +94,7 @@
     const streakEl = $("#streak");
     const showStreak = () => {
       const live = st.lastFull === today || st.lastFull === prevWeekday(today) ? st.streak || 0 : 0;
-      streakEl.textContent = live ? `${live}-day streak` : "Start a streak";
+      streakEl.textContent = live ? `${live} consecutive weekday${live === 1 ? "" : "s"} complete` : "";
       streakEl.className = "streak" + (live ? " on" : "");
     };
     ul.replaceChildren();
@@ -119,4 +119,4 @@
     });
     showStreak();
   }
-  function buildPulse() { guard("Risk rings", renderRings, $("#rings")); guard("Since your last visit", renderSince, $("#since")); guard("Check-in", renderCheckin, $("#checkin")); }
+  function buildPulse() { guard("Risk rings", renderRings, $("#rings")); guard("Since the last visit", renderSince, $("#since")); guard("Check-in", renderCheckin, $("#checkin")); }

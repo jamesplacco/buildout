@@ -46,7 +46,7 @@
   function edLink(url, label) { const a = h("a", null, label); a.href = url; a.target = "_blank"; a.rel = "noopener"; return a; }
   function renderEdgeDesk() {
     const tiles = $("#ed-tiles");
-    if (!tiles || !edOk(SNAP15)) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The edge snapshot is missing or malformed.")); return; }
+    if (!tiles || !edOk(SNAP15)) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The edge data is missing or malformed.")); return; }
     if (tiles.children.length) return;
     const E = EDGE_SNAP.edge, src = E.filter((x) => x.kind === "source"), D = DAM_SNAP;
     [[String(src.length), "Sources profiled", "each with its edge, its biases, cadence and cost"], [String(src.filter((x) => x.feed_url).length), "With a live feed", "RSS or Atom, confirmed to load"],

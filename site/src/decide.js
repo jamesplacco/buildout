@@ -55,7 +55,7 @@
       capexTTM: sum("capex"), ocfTTM: sum("ocf"),
     };
   }
-  const liveTag = (o) => (o && o.live ? "latest available" : "snapshot");
+  const liveTag = (o) => (o && o.live ? "latest available" : "as shipped with this version");
 
   /* ---------- assumption probabilities: the desk's, or the viewer's own ---------- */
   let asOverride = LS.get("bo-assume", {});
@@ -102,7 +102,7 @@
     // 3. the inflation sleeve
     const oilRel = I.oil.v / I.oilAvg5, sleeve = I.infl.avg36 >= I.lineAt || oilRel >= 1.3, G = readF().gold;
     out.push({ id: "d-inflation", n: "Replace bonds with what?", q: "The inflation sleeve: gold and energy", level: sleeve ? 1 : 0,
-      ins: [["Brent against its 5-year average", `$${fx(I.oil.v, 2)} = ${fx(oilRel, 2)}x`, `${isoNice(I.oil.d)} · average $${fx(I.oilAvg5, 2)}`],
+      ins: [["Brent against its 5-year average", `$${fx(I.oil.v, 2)} = ${fx(oilRel, 2)}x`, `${isoNice(I.oil.d)}, EIA dated spot · average $${fx(I.oilAvg5, 2)}${I.oil.live ? "" : " · futures $111.95 on Oct 22, within $2 of the line"}`],
         ["Gold when stocks fell 15% (real, 12 months)", sPct(G.stocks_down15.gold, 1), `up ${fin(G.stocks_down15.share_gold_up) ? Math.round(G.stocks_down15.share_gold_up * 100) + "%" : "n/a"} of the time, since ${G.since}`],
         ["Gold in high-inflation years (real)", sPct(G.high_infl.gold, 1), `stocks ${sPct(G.high_infl.stocks, 1)}`],
         ["10-year breakeven", pctPts(I.be.v), `${isoNice(I.be.d)} · ${liveTag(I.be)}`]],
@@ -118,7 +118,7 @@
       ins: [["VIX", fx(vx, 2), `${isoNice(I.vix.d)} · ${liveTag(I.vix)}`], ["VIX over 3-month VIX", fx(t, 3), `${isoNice(I.term.d)} · below 0.95 normal, above 1 inverted`],
         ["VXN", fx(I.vxn.v, 2), "Nasdaq-100 implied"], ["Budget", "1.5% of NAV a year", "Options desk, tail budget"]],
       rule: "Buy convexity while it is cheap (VIX below 20, curve in contango). When the front of the curve flattens toward 1, buy before it inverts. Once it inverts or VIX tops 30, monetize in stages.",
-      act: tail[0], sub: "Put spreads beat outright puts when skew is steep: you sell the far tail you do not need.",
+      act: tail[0], sub: "Put spreads beat outright puts when skew is steep: the far tail is sold off.",
       flip: `The curve inverts at 1.00, <strong>${fx(Math.max(0, 1 - t), 3)}</strong> away; VIX reaches 30 in ${fx(Math.max(0, 30 - vx), 2)} points.`, as: ["a-vrp", "a-mech"], link: "tb-title",
       math: `contango &hArr; VIX/VIX3M &lt; 0.95; now ${fx(t, 3)}` });
 
@@ -184,7 +184,7 @@
       fill.style.width = Math.round(conf * 100) + "%";
       rng.style.left = Math.round(fr.lo * 100) + "%"; rng.style.width = Math.max(1, Math.round((fr.hi - fr.lo) * 100)) + "%";
       bar.append(rng, fill);
-      mk.append(h("span", null, `All assumptions hold: ${Math.round(fr.lo * 100)} to ${Math.round(fr.hi * 100)}%`), h("b", null, `${Math.round(conf * 100)}% if independent`));
+      mk.append(h("span", null, Math.round(fr.lo * 100) === Math.round(fr.hi * 100) ? `All assumptions hold: ${Math.round(fr.lo * 100)}%` : `All assumptions hold: ${Math.round(fr.lo * 100)} to ${Math.round(fr.hi * 100)}%`), h("b", null, `${Math.round(conf * 100)}% if independent`));
       meter.append(bar, mk);
       meter.setAttribute("role", "img");
       meter.setAttribute("aria-label", `All ${d.as.length} assumptions hold with probability between ${Math.round(fr.lo * 100)}% and ${Math.round(fr.hi * 100)}% (bounds that need no independence assumption); ${Math.round(conf * 100)}% if they were independent`);
@@ -212,9 +212,13 @@
     const a = h("a", null, weakest.n.replace("?", ""));
     a.href = "#" + weakest.id;
     s1.append(a, document.createTextNode(`, at ${Math.round(decConf(weakest.as) * 100)}% confidence because it rests on ${weakest.as.length} uncertain assumptions at once.`));
+    try {
+      const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null;
+      if (N && fin(N.exposure)) s1.append(document.createTextNode(` The gross here is the volatility rule's; the governing equity size is the decision engine's gated call, ${xx(N.exposure)}.`));
+    } catch (e) { /* the decision engine is optional here */ }
     read.append(s1);
     const I = inputs();
-    $("#dec-sub").textContent = `Inputs dated ${isoNice(I.real.d)}${I.real.live ? ", from the daily run" : " (the snapshot; the daily run replaces it)"}. Each card: the data, the rule, today's action, the confidence its assumptions allow, and the distance to a flip.`;
+    $("#dec-sub").textContent = `Inputs dated ${isoNice(I.real.d)}${I.real.live ? ", from the daily run" : " (as shipped; the daily run replaces them)"}. Each card: the data, the rule, today's action, the confidence its assumptions allow, and the distance to a flip.`;
   }
 
   /* ---------- rates of change ---------- */
@@ -258,16 +262,16 @@
       const ms = LIVE.macro && LIVE.macro.macro_state, n = ms && ms.nfci;
       if (n && fin(n.v13) && isoOk(n.date)) return { level: n.value, date: n.date, v13: n.v13, v4: n.v4, a13: n.a13, live: true, how: "weekly: 13- and 4-week least-squares slopes" };
       const w = (Date.parse(S.wk_dates[1]) - Date.parse(S.wk_dates[0])) / WEEK_MS;
-      return { level: S.value, date: S.date, v13: NaN, v4: (S.wk[1] - S.wk[0]) / w, a13: NaN, live: false, how: `snapshot: the change since ${isoNice(S.wk_dates[0])}` };
+      return { level: S.value, date: S.date, v13: NaN, v4: (S.wk[1] - S.wk[0]) / w, a13: NaN, live: false, how: `as shipped: the change since ${isoNice(S.wk_dates[0])}` };
     }
     if (row.k === "ccc" || row.k === "hy") {
       const w = (Date.parse(S.wk_dates[1]) - Date.parse(S.wk_dates[0])) / WEEK_MS;
       const v13 = row.k === "ccc" ? (S.value - S.from) / ((Date.parse(S.date) - Date.parse(S.from_date)) / WEEK_MS) : NaN;
       return { level: S.value, date: S.date, v13, v4: (S.wk[1] - S.wk[0]) / w, a13: NaN, live: false, w13: row.k === "ccc" ? "since Jul 2025" : null, w4: "last week only",
-        how: row.k === "ccc" ? `snapshot: the average pace since ${isoNice(S.from_date)}, and the last week; the daily run replaces both with 13- and 4-week slopes` : "snapshot: the last week only; the daily run replaces it with 13- and 4-week slopes" };
+        how: row.k === "ccc" ? `as shipped: the average pace since ${isoNice(S.from_date)}, and the last week; the daily run replaces both with 13- and 4-week slopes` : "as shipped: the last week only; the daily run replaces it with 13- and 4-week slopes" };
     }
     const k = row.unit === "pp" ? 1 / 100 : 1;                    // snapshot slopes are in bp per week for rates
-    return { level: S.value, date: S.date, v13: S.v13 * k, v4: S.v4 * k, a13: S.a13 * k, live: false, how: "snapshot: 13- and 4-week least-squares slopes, computed with the engine's code" };
+    return { level: S.value, date: S.date, v13: S.v13 * k, v4: S.v4 * k, a13: S.a13 * k, live: false, how: "as shipped: 13- and 4-week least-squares slopes, computed with the engine's code" };
   }
   // the rule line the market is heading toward at pace v, and how long it takes
   function lineAhead(row, level, v) {
@@ -315,15 +319,17 @@
     const tbl = $("#roc-table");
     if (!tbl) return;
     const rows = rocRows(), thead = h("thead"), hr = h("tr"), tb = h("tbody");
-    [["Signal", ""], ["Level", "r"], ["Pace, 13 weeks", "r"], ["Pace, 4 weeks", "r"], ["Speeding up?", ""], ["Heading", ""], ["At the 13-week pace", ""], ["At the 4-week pace", ""]]
+    [["Signal", ""], ["Level", "r"], ["Pace, 13 weeks", "r"], ["Pace, 4 weeks", "r"], ["Speeding up?", ""], ["Heading, 4-week", ""], ["At the 13-week pace", ""], ["At the 4-week pace", ""]]
       .forEach(([t, c]) => { const th = h("th", c || null, t); th.scope = "col"; hr.append(th); });
     thead.append(hr);
     rows.forEach(({ row, r, at13, at4 }) => {
       const tr = h("tr"), th = h("th", null, row.n);
       th.scope = "row";
-      th.append(h("small", null, `${row.freq === "m" ? monthNice(r.date) : isoNice(r.date)} · ${r.live ? "live" : "snapshot"}`));
-      const v = fin(r.v13) ? r.v13 : r.v4, toward = fin(v) && v !== 0 ? Math.sign(v) * row.risk : 0;
-      const accel = !fin(r.a13) || !fin(r.v13) ? "n/a" : Math.abs(r.a13) < 1e-9 ? "steady" : Math.sign(r.a13) === Math.sign(r.v13) ? "faster" : "slower";
+      th.append(h("small", null, `${row.freq === "m" ? monthNice(r.date) : isoNice(r.date)} · ${r.live ? "live" : "as shipped"}`));
+      // the heading is the most recent pace (4 weeks); "speeding up" compares the two paces the row prints
+      const v = fin(r.v4) ? r.v4 : r.v13, toward = fin(v) && v !== 0 ? Math.sign(v) * row.risk : 0;
+      const accel = !fin(r.v4) || !fin(r.v13) ? "n/a" : Math.abs(r.v4) < 1e-9 && Math.abs(r.v13) < 1e-9 ? "steady"
+        : Math.sign(r.v4) !== Math.sign(r.v13) && Math.abs(r.v13) > 1e-9 ? "reversing" : Math.abs(r.v4) > Math.abs(r.v13) * 1.1 ? "faster" : Math.abs(r.v4) < Math.abs(r.v13) * 0.9 ? "slower" : "steady";
       const paceCell = (which) => { const td = h("td", "r", paceTxt(row, r, which)), w = which === 13 ? r.w13 : r.w4; if (w && fin(which === 13 ? r.v13 : r.v4)) td.append(h("small", "ttl", w)); return td; };
       tr.append(th, h("td", "r", fmtRocLevel(row, r.level)), paceCell(13), paceCell(4), h("td", null, accel));
       const d = h("td", "dir " + (toward > 0 ? "up" : toward < 0 ? "down" : "flat"), !fin(v) || v === 0 ? "→" : v > 0 ? "↑" : "↓");
@@ -335,7 +341,7 @@
     });
     tbl.replaceChildren(thead, tb);
     const anyLive = rows.some((x) => x.r.live);
-    $("#roc-note").textContent = (anyLive ? "Live rows come from the daily FRED run: 13- and 4-week least-squares slopes in the unit each market is quoted in. " : "Snapshot rows use Treasury, CBOE, EIA, BLS and ICE histories through mid-October, with slopes computed by the engine's own code; the daily run replaces them. ")
+    $("#roc-note").textContent = (anyLive ? "Live rows come from the daily FRED run: 13- and 4-week least-squares slopes in the unit each market is quoted in. " : "Rows as shipped use Treasury, CBOE, EIA, BLS and ICE histories through mid-October, with slopes computed by the engine's own code; the daily run replaces them. ")
       + "Inflation is monthly, so its paces are a three-month slope and the last one-month change. Red is a rule line approaching in the risk direction, amber within six months, green is relief. Hover a row for its method.";
   }
 

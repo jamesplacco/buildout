@@ -13,7 +13,7 @@
   function anOk() { return typeof SNAP16 === "object" && SNAP16 && TA_SNAP && TA_SNAP.assets && FA_SNAP && FA_SNAP.companies; }
   function renderAnalysisDesk() {
     const tiles = $("#an-tiles");
-    if (!tiles || !anOk()) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The analysis snapshot is missing or malformed.")); return; }
+    if (!tiles || !anOk()) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The analysis data is missing or malformed.")); return; }
     if (tiles.children.length) return;
     const A = TA_SNAP.assets, keys = Object.keys(A);
     const sig = keys.reduce((n, k) => n + Object.values(A[k].studies).filter((s) => s.t != null && s.bh < 0.05).length, 0);
@@ -21,7 +21,7 @@
     const conn = CONN_SNAP.filter((r) => r.ok).length;
     [[String(keys.length), "Series analyzed here", "every holding in the daily run"], [`${sig} of ${tests}`, "Signals that survive", "Benjamini-Hochberg at 5%, on each asset's own history"],
       [String(Object.values(FA_SNAP.companies).filter((c) => c.ok).length), "Companies from filings", "ratios, Piotroski, Altman, Beneish"],
-      [`${conn} of ${CONN_SNAP.length}`, "Data sources reachable", "from the build workspace; the Action checks with your keys"]].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
+      [`${conn} of ${CONN_SNAP.length}`, "Data sources reachable", "from the build workspace; the daily run checks with the configured keys"]].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
     anAssetSeg();
     anCompanySeg();
     anConnections();
@@ -136,7 +136,7 @@
         const names = [...new Set([...Object.keys(r.weights), ...Object.keys(book)])].sort((a, b) => (r.weights[b] || 0) - (r.weights[a] || 0));
         out.replaceChildren(h("p", null, `${r.n} positions read in this browser; nothing was uploaded or stored.`),
           tableBlock(["Symbol", "Your weight", "Model book", "Gap"], names.slice(0, 40).map((k) => [k, anP(r.weights[k] || 0, 1), anP(book[k] || 0, 1), anPct((r.weights[k] || 0) - (book[k] || 0), 1)]), 1),
-          h("p", "hint", "To run them through the engine's lenses, pass the same weights to the MCP tool analyze_positions, or on your machine: python -m buildout positions export.csv."));
+          h("p", "hint", "To run them through the engine's lenses, pass the same weights to the MCP tool analyze_positions, or locally: python -m buildout positions export.csv."));
       } catch (e) { out.replaceChildren(h("p", "hint", `Could not read that file: ${e.message}. It needs a symbol column and a market value, quantity and price, or weight column.`)); }
     };
     inp.addEventListener("change", () => { const f = inp.files && inp.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => show(rd.result); rd.readAsText(f); });

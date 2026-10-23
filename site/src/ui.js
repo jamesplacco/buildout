@@ -221,6 +221,11 @@
       if (e.key === "ArrowRight") { e.preventDefault(); at(idx + 1); }
       if (e.key === "ArrowLeft") { e.preventDefault(); at(idx - 1); }
     });
+    // two or more named series always get a legend; a chart whose panel already carries one keeps that one
+    if (series.length > 1 && series.every((ser) => ser.name) && cfg.legend !== false) {
+      const scope = box.closest(".panel, figure, .chart, .t7-card") || box.parentElement;
+      if (!scope || !scope.querySelector(".legend")) { const lg = h("div", "legend auto"); legendLines(lg, series.map((ser) => [ser.color, ser.name])); box.append(lg); }
+    }
   }
 
   /* ---------- v0.5: generic bar charts. One scale per chart, recessive grid, labels in ink tokens ---------- */

@@ -63,7 +63,7 @@
 
   // 1. ergodicity: the coin game that makes the average a liar
   toy("lab-coin", "The coin game: why the average lies",
-    "Each round, a fair coin: heads your stake gains 50%, tails it loses 40%. The average player gets richer every round. Bet everything and almost everyone goes broke anyway. Move the share of wealth you bet.",
+    "Each round, a fair coin: heads the stake gains 50%, tails it loses 40%. The average player gets richer every round. Bet everything and almost everyone goes broke anyway. Move the share of wealth you bet.",
     [{ k: "f", label: "Share of wealth bet each round", min: 0.05, max: 1, step: 0.05, v: 1, fmt: (x) => pc(x) }, { k: "n", label: "Rounds", min: 10, max: 200, step: 10, v: 60, fmt: (x) => String(x) }],
     (v) => {
       const G = ergodicGame(10000, v.n, 0.5, 0.4, v.f, 7), gT = (f) => 0.5 * Math.log1p(0.5 * f) + 0.5 * Math.log1p(-0.4 * f), kel = 0.5 / 0.4 - 0.5 / 0.5;
@@ -80,14 +80,14 @@
 
   // 2. the Kelly hill
   toy("lab-kelly", "The Kelly hill: how much to bet on an edge",
-    "Growth rises with bet size, peaks at the Kelly fraction, then falls; at twice Kelly it is back to zero. Because your probability is an estimate, the desk bets a quarter of it.",
+    "Growth rises with bet size, peaks at the Kelly fraction, then falls; at twice Kelly it is back to zero. Because the probability is an estimate, the desk bets a quarter of it.",
     [{ k: "p", label: "Probability of winning", min: 0.35, max: 0.85, step: 0.01, v: 0.55, fmt: (x) => pc(x) }, { k: "b", label: "Payoff odds (win per $1 lost)", min: 0.5, max: 4, step: 0.1, v: 1.2, fmt: (x) => fx(x, 1) + " to 1" }],
     (v) => {
       const k = kelly(v.p, v.b), gk = k > 0 ? logGrowth(k, v.p, v.b) : 0, gq = k > 0 ? logGrowth(k / 4, v.p, v.b) : 0, gh = k > 0 ? logGrowth(k / 2, v.p, v.b) : 0;
       const top = Math.min(1, Math.max(0.2, 2.4 * k));
       return {
         ro: [["Kelly fraction", k > 0 ? pc(k, 1) : "No bet", true], ["Growth per bet at Kelly", fx(gk * 1e4, 0) + "bp"], ["At half Kelly", `${fx(gh / (gk || 1) * 100, 0)}% of the growth`], ["At quarter Kelly", `${fx(gq / (gk || 1) * 100, 0)}% of the growth`]],
-        say: k > 0 ? `Half Kelly keeps ${fx(gh / gk * 100, 0)}% of the growth with half the volatility; quarter Kelly keeps ${fx(gq / gk * 100, 0)}%. Overestimate your odds by a few points and full Kelly becomes overbetting, which costs far more than underbetting.` : "No edge: at these odds every bet lowers growth. Kelly says do not play.",
+        say: k > 0 ? `Half Kelly keeps ${fx(gh / gk * 100, 0)}% of the growth with half the volatility; quarter Kelly keeps ${fx(gq / gk * 100, 0)}%. Overestimate the odds by a few points and full Kelly becomes overbetting, which costs far more than underbetting.` : "No edge: at these odds every bet lowers growth. Kelly says do not play.",
         cls: k > 0 ? "ok" : "warn",
         chart: (box) => xyChart(box, { height: 200, label: "Growth per bet against the fraction bet", zero: true,
           series: [{ name: "Log growth per bet", color: "var(--s1)", pts: Array.from({ length: 81 }, (_, i) => { const f = (i / 80) * top; return [f, logGrowth(f, v.p, v.b) * 1e4]; }).filter((p) => fin(p[1]) && p[1] > -400) }],
@@ -132,7 +132,7 @@
     "P(all) = &prod; <var>p</var><sub>i</sub> if independent. When assumptions move together, the product is a floor: correlated assumptions fail together, which is worse for the book.");
 
   // 5. Bayes
-  toy("lab-bayes", "Bayes: how far one signal should move you",
+  toy("lab-bayes", "Bayes: how far one signal should move the odds",
     "A recession signal fires. How likely is a recession now? It depends on how rare recessions are, how often the signal catches them, and how often it cries wolf.",
     [{ k: "prior", label: "Base rate (chance before the signal)", min: 0.02, max: 0.5, step: 0.01, v: 0.15, fmt: (x) => pc(x) }, { k: "sens", label: "Signal catches a real one", min: 0.5, max: 0.99, step: 0.01, v: 0.8, fmt: (x) => pc(x) }, { k: "fpr", label: "False alarms (fires with no event)", min: 0.01, max: 0.5, step: 0.01, v: 0.2, fmt: (x) => pc(x) }],
     (v) => {

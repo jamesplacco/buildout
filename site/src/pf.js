@@ -27,7 +27,7 @@
   }
   function renderPortfolio() {
     const card = $("#pf-card");
-    if (!card || !pfOk()) { if (card && !card.children.length) card.append(h("p", "hint", "The portfolio engine is missing from the snapshot.")); return; }
+    if (!card || !pfOk()) { if (card && !card.children.length) card.append(h("p", "hint", "The portfolio engine is missing from this build.")); return; }
     const O = PF20, N = O.now, P = O.perf, st = N.states;
     let cur = 0; N.next.forEach((v, i) => { if (v > N.next[cur]) cur = i; });
     const sim = O.simulation;
@@ -44,7 +44,7 @@
       card.append(lg, h("p", "dx-note", "The MODEL book, not personal positions. Research only: the engine never places orders."));
       const h10 = sim.hold.horizons["120"], s10 = sim.sixty_forty.horizons["120"];
       dxKpis($("#pf-tiles"), [
-        [pct(N.next[cur], 0, false), st[cur].name + " regime next month", `${N.K} states of stocks, bonds and gold by BIC`],
+        [pct(N.next[cur], 0, false), st[cur].name + " regime next month", `${N.K}-state model of stocks, bonds and gold together; stressed ${pct(N.next[N.worst], 0, false)} (the decision engine's stock-only model says more)`],
         [(st[cur].corr_sb >= 0 ? "+" : MINUS) + Math.abs(st[cur].corr_sb).toFixed(2), "Stock-bond correlation there", "above zero, Treasuries do not hedge stocks"],
         [fx(P.meta.sharpe, 2), "The learner's Sharpe", `worst drawdown ${pct(P.meta.maxdd, 0)} against ${pct(P.hold.maxdd, 0)}`],
         [fx(h10.q50, 2) + "x", "All stocks, ten years, median", `5% to 95%: ${fx(h10.q05, 2)}x to ${fx(h10.q95, 2)}x real`],

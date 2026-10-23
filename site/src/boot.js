@@ -43,7 +43,11 @@
     journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
     fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
-    noteworthy: () => {}, buyside: drawBuyside, solve: () => { guard("The solver", () => renderSolve(!RZ_LAST || !RZ_LAST.voi), $("#rz-ledger")); guard("Decision boundary", renderBoundary, $("#rz-bnd")); guard("Robust solver", renderDRO, $("#rz-dro")); }, games: drawGames,
+    noteworthy: () => {}, buyside: drawBuyside, solve: () => {
+      guard("The solver", () => renderSolve(!RZ_LAST || !RZ_LAST.voi), $("#rz-ledger"));
+      // the boundary sweep (90 solves) and the robust sweep follow once the desk is on screen, so opening it never stalls
+      idle(() => { guard("Decision boundary", renderBoundary, $("#rz-bnd")); guard("Robust solver", renderDRO, $("#rz-dro")); });
+    }, games: drawGames,
     brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); guard("Causal statistics", renderCausalPanel, $("#brl-crisis")); guard("Brain self-checks", renderRobustBrain, $("#brr-cov")); },
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
     ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); },
@@ -259,7 +263,7 @@
     if (b && brainOk(b)) { LIVE.brain = b; guard("Brain links", renderBrainMeasured, $("#br-meas")); guard("The brain", updateBrain, $("#br-svg-box")); } else if (b) LIVE.problems.push("brain.json did not match the expected shape; the page keeps its snapshot");
     if (bs && buyOk(bs)) { LIVE.buyside = bs; guard("Buyside", buildBuyside, $("#bs-sel")); if (current === "buyside") guard("Buyside", drawBuyside); } else if (bs) LIVE.problems.push("buyside.json did not match the expected shape");
     if (fd && feedsOk(fd)) { LIVE.feeds = fd; guard("Noteworthy", buildNoteworthy, $("#nw-grid")); } else if (fd) LIVE.problems.push("feeds.json did not match the expected shape");
-    if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} data sources`; }
+    if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} sources`; }
   });
   loadJSON("data/atlas.json").then((at) => {
     if (at && atlasOk(at)) { LIVE.atlas = at; AT_M = null; if (current === "atlas") guard("The atlas", renderAtlasDesk, $("#atv-tiles")); }
@@ -290,7 +294,7 @@
     } else if (rs) LIVE.problems.push("research.json did not match the expected shape; the page keeps its snapshot");
     if (m && m.latest) {
       const miss = missingFields(m, MACRO_SPEC);
-      if (miss.length) errorState($("#macro-body"), "The market file is incomplete.", `Missing or malformed: ${miss.join(", ")}. The rest of the page uses the dated snapshot.`);
+      if (miss.length) errorState($("#macro-body"), "The market file is incomplete.", `Missing or malformed: ${miss.join(", ")}. The rest of the page uses the dated figures shipped with it.`);
       else {
         LIVE.macro = m;
         guard("Engine readout", () => renderMacro(m), $("#macro-body"));
@@ -305,7 +309,7 @@
         guard("Data dictionary", buildDict);
         guard("Episode atlas", buildEpisodes, $("#ep-grid"));
       }
-    } else if (m) errorState($("#macro-body"), "The market file is incomplete.", "It has no latest block. The rest of the page uses the dated snapshot.");
+    } else if (m) errorState($("#macro-body"), "The market file is incomplete.", "It has no latest block. The rest of the page uses the dated figures shipped with it.");
     if (r && r.summary && r.summary.data && r.summary.data !== "synthetic") {
       const miss = missingFields(r, BOOK_SPEC);
       if (miss.length) errorState($("#book-body"), "The book file is incomplete.", `Missing or malformed: ${miss.join(", ")}.`);

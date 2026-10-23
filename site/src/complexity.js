@@ -6,7 +6,7 @@
   function cxOk() { try { return typeof CX17 === "object" && CX17.sweep && CX17.information && Array.isArray(CX17.conclusions) && CX17.conclusions.length; } catch (e) { return false; } }
   function renderComplexity() {
     const tiles = $("#cmx-tiles");
-    if (!tiles || !cxOk()) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The complexity study is missing from the snapshot.")); return; }
+    if (!tiles || !cxOk()) { if (tiles && !tiles.children.length) tiles.append(h("p", "hint", "The complexity study is missing from this build.")); return; }
     if (!tiles.children.length) {
       const I = CX17.information, st = CX17.stambaugh, E = CX17.extrapolation;
       $("#cmx-bluf").textContent = `Because the history is far shorter than it looks and the signal is far weaker than the noise. ${I.months.toLocaleString("en-US")} months of overlapping 12-month returns hold about ${Math.round(I.n_eff)} independent observations, valuation has a half-life of about ${Math.round(I.cape_half_life_months / 12)} years, and all eight predictors together explain ${pct(I.r2_in_sample_all, 1, false)} of returns in sample. A flexible model spends that thin data memorizing the past: its in-sample fit climbs toward 100% while its forecast of the years after gets worse at every step. It extrapolates relationships into ranges it never saw, and the relationships themselves drift. The models that forecast best are the ones that assume the least.`;

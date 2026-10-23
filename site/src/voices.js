@@ -270,7 +270,7 @@ Quotes: ${JSON.stringify(cands)}`;
     if (VS.ctl) VS.ctl.abort();
     VS.ctl = new AbortController();
     btn.disabled = true;
-    msg.textContent = "Asking Claude to rank these for your exact question…";
+    msg.textContent = "Asking Claude to rank these for the exact question…";
     try {
       const out = await VS.sample.json(prompt, { signal: VS.ctl.signal, modelTier: "quick", cache: true });
       const valid = new Set(cands.map((c) => c.id)), order = {}, why = {};
@@ -282,10 +282,10 @@ Quotes: ${JSON.stringify(cands)}`;
       });
       VS.claude = { order, why };
       VS.pos = {};
-      msg.textContent = "Ranked by Claude for your question. Quotes are unchanged; the one-line summaries are Claude's words.";
+      msg.textContent = "Ranked by Claude for this question. Quotes are unchanged; the one-line summaries are Claude's words.";
       renderVoices();
     } catch (e) {
-      msg.textContent = e && e.code === "rate_limited" ? "Claude is busy; try again in a minute." : e && e.code === "not_granted" ? "Claude is not available on this page for you." : "Claude could not rank these just now; the library order stands.";
+      msg.textContent = e && e.code === "rate_limited" ? "Claude is busy; try again in a minute." : e && e.code === "not_granted" ? "Claude is not available on this page." : "Claude could not rank these just now; the library order stands.";
     } finally { btn.disabled = false; }
   }
   function wireVoices() {

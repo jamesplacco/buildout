@@ -1005,7 +1005,7 @@ ol.orders { list-style: none; margin: 0; padding: 0; }
 .stage { display: inline-grid; grid-template-columns: repeat(4, 18px) auto; gap: 3px; align-items: center; }
 .stage span { height: 6px; border-radius: 3px; background: var(--grid); }
 .stage span.on { background: var(--s3); }
-.stage small { margin-left: 6px; font: 500 var(--t-xs)/1 var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+.stage small { margin-left: 6px; font: 500 0.78rem/1 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; color: var(--ink-2); white-space: nowrap; }
 .nw-bluf, .nw p.nw-bluf { overflow-wrap: anywhere; }
 .nw .nw-bluf { font-size: var(--t-sm); line-height: 1.55; padding: 0; background: none; color: var(--ink-2); }
 .nw-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
@@ -1871,4 +1871,70 @@ html { scrollbar-gutter: stable; }
 .geo-f li, .geo-find li { line-height: 1.5; }
 .geo-find li { max-width: 92ch; }
 #geo-map svg .hit { cursor: default; }
+/* v0.22: one quiet system for state marks and category tags. A state mark is a 6px dot and a small-caps label in body
+   type with no fill; a category tag is the same label inside a hairline. Colour lives only in the dot. */
+.ev, .sig-state, .status, .stage.mk, .rt-badge, .pb .tagline, .stance, .brief .bk, .jr-store, .flag, .whatif, .jr-item .ex {
+  display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none;
+  font: 500 0.8rem/1 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; text-transform: none; color: var(--ink-2); white-space: nowrap; vertical-align: 0.02em; margin-inline: 0; }
+.ev::before, .sig-state::before, .status::before, .stage.mk::before, .rt-badge::before, .pb .tagline::before, .stance::before, .brief .bk::before, .jr-store::before {
+  content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--mk, var(--muted)); }
+.ev { margin-inline: 4px 2px; }
+.ev-obs { --mk: var(--good); } .ev-est { --mk: var(--s1); } .ev-hist { --mk: var(--muted); } .ev-hyp { --mk: var(--warn); } .ev-na { --mk: var(--bad); }
+.ev-asm::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+.status.active, .sig.l0 .sig-state, .stage.hedge, .stance.on, .rt-badge.rt-holds { --mk: var(--good); color: var(--ink-2); background: transparent; }
+.status.watch, .sig.l1 .sig-state, .stage.speculative, .stance.mid, .rt-badge.rt-strained { --mk: var(--warn); color: var(--ink-2); background: transparent; }
+.status.risk, .sig.l2 .sig-state, .stage.ponzi, .stance.off, .rt-badge.rt-broken { --mk: var(--bad); color: var(--ink-2); background: transparent; }
+.sig.lx .sig-state, .rt-badge.rt-untested { --mk: transparent; color: var(--muted); background: transparent; }
+.sig.lx .sig-state::before, .rt-badge.rt-untested::before { box-shadow: inset 0 0 0 1.5px var(--muted); }
+.pb .tagline, .brief .bk, .jr-store, .flag, .whatif { --mk: var(--accent); }
+p.stance { white-space: normal; align-items: baseline; line-height: 1.4; font: 500 0.95rem/1.4 var(--f-body); font-variant-caps: normal; letter-spacing: 0; color: var(--ink); }
+p.stance::before { position: relative; top: -1px; }
+.card .tag, .ep .kind, .ord .lvl, .kind-tag, .drv, .sec .fam, .dguide-lvl, .tile .badge, .nw-live .badge, .node .tag, .ed-kind {
+  display: inline-flex; align-items: center; padding: 3px 8px; border: 1px solid var(--rule); border-radius: 4px; background: transparent;
+  font: 500 0.78rem/1 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; text-transform: none; color: var(--ink-2); white-space: nowrap; }
+.dguide-lvl.lvl-start { border-color: var(--accent); color: var(--accent); background: transparent; }
+.dguide-lvl.lvl-deep { border-color: var(--rule); color: var(--ink-2); background: transparent; }
+.ev-key { gap: 4px 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.ev-key .ev { margin-inline: 0; color: var(--muted); }
+.ev-key::before { content: "Evidence grade"; font: 500 0.78rem/1 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; color: var(--muted); margin-right: 4px; }
+.ev-key::before, .ev-key .ev { align-self: center; }
+/* status chips: one quiet row, hairline separators, no pills */
+.chips { display: flex; flex-wrap: wrap; gap: 4px 0; align-items: center; }
+.chip { padding: 2px 14px 2px 0; margin-right: 14px; border: 0; border-right: 1px solid var(--rule); border-radius: 0; background: transparent; font: 500 0.78rem/1.3 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.05em; color: var(--ink-2); gap: 7px; }
+.chip:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
+.chip .dot { width: 6px; height: 6px; }
+.vo-examples .chip, .vo-related .chip { padding: 8px 12px; margin: 0; border: 1px solid var(--rule); border-radius: 999px; font: 500 var(--t-sm)/1.3 var(--f-body); font-variant-caps: normal; letter-spacing: 0; }
+.sig { border-left-width: 2px; }
+.t7-sizing { margin: 6px 0 0; max-width: 72ch; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
+.t7-sizing strong { color: var(--ink); }
+/* v0.22: hedge grades as words with a one-hue dot, not glyphs */
+.grade { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: 500 0.78rem/1 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; color: var(--ink-2); opacity: 1; }
+.grade::before { content: ""; width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--mk, var(--muted)); }
+.grade.g2 { --mk: var(--good); color: var(--ink); } .grade.g1 { --mk: color-mix(in srgb, var(--good) 55%, var(--surface)); color: var(--ink-2); opacity: 1; }
+.grade.g0 { --mk: transparent; color: var(--muted); } .grade.g0::before { box-shadow: inset 0 0 0 1.5px var(--muted); }
+.grade.gx { --mk: var(--bad); color: var(--ink-2); }
+.matrix-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.matrix-legend .grade { width: auto; min-height: 0; }
+.mrow .grade { justify-content: flex-start; }
+/* v0.22: wide screens show every desk of a group on up to two rows; narrow ones keep the swipe row. Smaller pills and a
+   tighter header give the content more of the screen; tables that scroll sideways show a fading edge where they do */
+@media (min-width: 1100px) { .subtabs { flex-wrap: wrap; overflow: visible; -webkit-mask-image: none; mask-image: none; justify-content: center; row-gap: 6px; } }
+.subtabs a { min-height: 36px; padding: 8px 14px; font-size: 0.94rem; }
+.topbar-inner { padding-block: 10px 8px; }
+.subtabs { padding-block: 0 10px; }
+.tablewrap { background: linear-gradient(90deg, var(--surface) 30%, transparent) left / 40px 100% no-repeat local, linear-gradient(270deg, var(--surface) 30%, transparent) right / 40px 100% no-repeat local,
+  linear-gradient(90deg, color-mix(in srgb, var(--ink) 14%, transparent), transparent) left / 14px 100% no-repeat scroll, linear-gradient(270deg, color-mix(in srgb, var(--ink) 14%, transparent), transparent) right / 14px 100% no-repeat scroll; }
+.hit:focus-visible { stroke: var(--accent); stroke-width: 2.5; outline: none; }
+svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.svgbox .legend.auto { margin-top: 6px; }
+/* v0.22: the guide card and empty states take less of the first screen */
+.dguide { gap: 8px; padding: 12px 16px; }
+.dguide-grid { gap: 8px 22px; }
+.dguide-grid dt { font: 500 0.72rem/1.3 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; text-transform: none; margin-bottom: 2px; }
+.dguide-grid dd { font-size: var(--t-sm); line-height: 1.4; }
+.dguide-grid > div:first-child dd { font-size: 1rem; }
+.dguide-map { min-height: 34px; padding: 0 14px; font-size: var(--t-sm); }
+.empty { display: block; padding: 10px 14px; border-radius: 8px; border: 1px dashed var(--rule); background: transparent; color: var(--muted); font-size: var(--t-xs); line-height: 1.5; }
+.empty strong { color: var(--ink-2); font-weight: 600; margin-right: 6px; }
+.empty .vmark { display: none; }
 </style>

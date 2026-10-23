@@ -154,7 +154,7 @@ def test_a_newer_filing_updates_row_coverage_and_date_together():
     new, old = _js([{"fn": "fund", "rows": rows, "live": live}, {"fn": "fund", "rows": rows, "live": stale}])
     r = new[0]
     assert r["quarter_end"] == "2026-11-30" and r["coverage"] == "self_funded" and r["fcf"] == 20.0 and r["src"]["ocf"] == "filing 2026-11-30"
-    assert r["src"]["debt"] == "snapshot 2026-08-31" and abs(r["net_cash"] - (50.0 - 125.3)) < 1e-9
+    assert r["src"]["debt"] == "filings to 2026-08-31" and abs(r["net_cash"] - (50.0 - 125.3)) < 1e-9
     assert old[0]["coverage"] == "funding_gap" and old[0]["quarter_end"] == "2026-08-31"   # an older filing never wins
 
 

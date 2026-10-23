@@ -68,7 +68,7 @@
   function setStore(mode, note) {
     JR.mode = mode;
     const el = $("#jr-store");
-    if (el) el.textContent = mode === "cloud" ? "Private to you on this page" : mode === "local" ? "Saved in this browser" : "Not saved: storage is blocked here";
+    if (el) el.textContent = mode === "cloud" ? "Private on this page" : mode === "local" ? "Saved in this browser" : "Not saved: storage is blocked here";
     if (note) jrMsg(note);
   }
   function jrMsg(t) { const m = $("#jr-msg"); if (m) m.textContent = t || ""; }
@@ -123,7 +123,7 @@
     b.addEventListener("click", async () => {
       b.disabled = true;
       for (const r of list) await saveRec(r);
-      jrMsg(`Moved ${list.length} into your private space.`);
+      jrMsg(`Moved ${list.length} into the private space.`);
     });
     m.append(b);
   }
@@ -287,7 +287,7 @@
     const r = JR.draft;
     if (!r) {
       const e = h("div", "empty");
-      e.append(h("strong", null, "Pick a decision, or start a new one."), h("span", null, "Each entry locks its forecast when you first save it, so the score cannot be rewritten after the fact."));
+      e.append(h("strong", null, "Pick a decision, or start a new one."), h("span", null, "Each entry locks its forecast when it is first saved, so the score cannot be rewritten after the fact."));
       form.append(e);
       return;
     }
@@ -368,9 +368,9 @@
 
     // 4. how it dies
     const f4 = h("fieldset"); f4.append(h("legend", null, "4 · How it dies"));
-    f4.append(field("Kill line", lock(inputEl("text", "jr-f-kill", r.kill, { maxlength: "400" }), "kill"), "The data that would prove you wrong, decided now."),
+    f4.append(field("Kill line", lock(inputEl("text", "jr-f-kill", r.kill, { maxlength: "400" }), "kill"), "The data that would prove the call wrong, decided now."),
       field("Pre-mortem", lock(inputEl("textarea", "jr-f-premortem", r.premortem), "premortem"), "It is the horizon date and this failed. What happened? (Munger: invert.)"),
-      field("Known unknowns", lock(inputEl("textarea", "jr-f-unknowns", r.unknowns), "unknowns"), "What you know you do not know, and how you sized for it."));
+      field("Known unknowns", lock(inputEl("textarea", "jr-f-unknowns", r.unknowns), "unknowns"), "Known unknowns, and how the size allows for them."));
     form.append(f1, f2, f3, f4);
 
     // 5. outcome and review
@@ -404,7 +404,7 @@
     // actions
     const bar = h("div", "jr-bar");
     if (ro) {
-      const cp = h("button", "btn", "Copy as my own decision");
+      const cp = h("button", "btn", "Copy as a new decision");
       cp.type = "button";
       cp.addEventListener("click", () => {
         const c = JSON.parse(JSON.stringify(JR.draft));
@@ -490,7 +490,7 @@
     if (!JR.draft.example) collectForm();
     const r = cleanRecord(JR.draft), s = sizing(r);
     const kTxt = !fin(s.fStar) ? "n/a" : s.fStar <= 0 ? "No bet" : s.fStar > 1 ? fx(s.fStar, 1) + "x NAV" : pct(s.fStar, 1, false);
-    const verdictSize = !fin(s.fStar) ? "" : s.fStar <= 0 ? "Kelly says no bet: the expected value is negative at these odds." : r.size > s.fStar ? "Above full Kelly: this size lowers long-run growth even if your odds are right." : r.size > s.quarter ? "Above the desk's quarter-Kelly cap." : "Within the quarter-Kelly cap.";
+    const verdictSize = !fin(s.fStar) ? "" : s.fStar <= 0 ? "Kelly says no bet: the expected value is negative at these odds." : r.size > s.fStar ? "Above full Kelly: this size lowers long-run growth even if the odds are right." : r.size > s.quarter ? "Above the desk's quarter-Kelly cap." : "Within the quarter-Kelly cap.";
     box.replaceChildren(
       tile("Break-even odds", pctPlain(s.breakeven, 0), "Below this probability the bet loses money on average."),
       tile("Expected value", `${s.ev >= 0 ? "+" : MINUS}${fx(Math.abs(s.ev) * 100, 2)}%`, "Per unit of position: p × gain − (1 − p) × loss."),
@@ -534,8 +534,8 @@
     const ref = fin(sc.hitRate) ? sc.hitRate * (1 - sc.hitRate) : NaN, skill = fin(sc.brier) && ref > 0 ? 1 - sc.brier / ref : NaN;
     tiles.replaceChildren(
       tile("Brier score", fin(sc.brier) ? fx(sc.brier, 3) : "n/a", "0 is perfect; 0.25 is a coin flip at 50%."),
-      tile("Brier skill", fin(skill) ? (skill >= 0 ? "+" : MINUS) + fx(Math.abs(skill), 2) : "n/a", "Against always forecasting your own hit rate; above 0 is real skill."),
-      tile("Hit rate against stated odds", fin(sc.hitRate) ? `${Math.round(sc.hitRate * 100)}% vs ${Math.round(sc.stated * 100)}%` : "n/a", fin(sc.over) ? (sc.over > 0.05 ? "Overconfident: you are right less often than you say." : sc.over < -0.05 ? "Underconfident: you are right more often than you say." : "Calibrated within 5 points.") : ""),
+      tile("Brier skill", fin(skill) ? (skill >= 0 ? "+" : MINUS) + fx(Math.abs(skill), 2) : "n/a", "Against always forecasting the base hit rate; above 0 is real skill."),
+      tile("Hit rate against stated odds", fin(sc.hitRate) ? `${Math.round(sc.hitRate * 100)}% vs ${Math.round(sc.stated * 100)}%` : "n/a", fin(sc.over) ? (sc.over > 0.05 ? "Overconfident: you are right less often than you say." : sc.over < -0.05 ? "Underconfident: right more often than stated." : "Calibrated within 5 points.") : ""),
       tile("Payoff ratio", fin(sc.payoff) ? fx(sc.payoff, 2) + "x" : "n/a", "Average win over average loss. With hit rate, this is the edge."),
       tile("Expectancy", fin(sc.expectancy) ? `${sc.expectancy >= 0 ? "+" : MINUS}${fx(Math.abs(sc.expectancy) * 100, 2)}%` : "n/a", "Mean return per closed decision, before the market's share."));
     renderCal(sc);
@@ -585,9 +585,9 @@
     t.append(
       tile("Base rates do this well", pctPlain(sc.luckP, 0), `P(at least ${hits} fully right of ${sc.nClosed}) if each call came true at its own base rate (average ${pct0(sc.luckBase)}; 50% where none was logged). Correlated calls overstate the evidence. Not the probability that you were lucky.`),
       tile("Alpha per decision", fin(A.mean) ? `${sBp(A.mean * 100, 2)}%` : "n/a", fin(A.t) ? `t-statistic ${fx(A.t, 2)} (2 is the usual bar)` : "Needs two closed decisions."),
-      tile("Decisions to prove it", need === Infinity ? "Never at this alpha" : String(need), need === Infinity ? "Mean alpha is not positive." : `For t = 2 at today's mean and spread; you have ${sc.nClosed}.`));
+      tile("Decisions to prove it", need === Infinity ? "Never at this alpha" : String(need), need === Infinity ? "Mean alpha is not positive." : `For t = 2 at today's mean and spread; ${sc.nClosed} closed so far.`));
     box.append(t, h("p", "sentence " + (sc.luckP < 0.05 && A.t >= 2 ? "ok" : "warn"),
-      sc.luckP < 0.05 && A.t >= 2 ? "Both tests pass: the record is unlikely to be luck. Keep scoring: skill decays." : `Not yet distinguishable from luck. Base rates alone match this record ${Math.round(sc.luckP * 100)}% of the time${need !== Infinity ? `, and about ${need} decisions at this edge would be needed to tell` : ""}. ${mine ? "" : "These are the examples; your own entries replace them."}`));
+      sc.luckP < 0.05 && A.t >= 2 ? "Both tests pass: the record is unlikely to be luck. Keep scoring: skill decays." : `Not yet distinguishable from luck. Base rates alone match this record ${Math.round(sc.luckP * 100)}% of the time${need !== Infinity ? `, and about ${need} decisions at this edge would be needed to tell` : ""}. ${mine ? "" : "Examples; saved entries replace them."}`));
   }
 
   /* ---------- export and import ---------- */
@@ -657,7 +657,7 @@
       renderJrForm();
       const t = $("#jr-f-title");
       if (t) t.focus();
-      jrMsg("New entry: pick a decision from today's board to prefill it, or write your own.");
+      jrMsg("New entry: pick a decision from today's board to prefill it, or write a new one.");
     });
     $("#jr-ex").addEventListener("click", () => { JR.showEx = !JR.showEx; if (!JR.showEx && JR.draft && JR.draft.example) { JR.sel = null; JR.draft = null; } renderJournal(); });
     $("#jr-export").addEventListener("click", () => doExport());

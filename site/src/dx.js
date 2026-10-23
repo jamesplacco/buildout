@@ -11,7 +11,7 @@
   }
   function renderDecision() {
     const card = $("#dx-card");
-    if (!card || !dxOk()) { if (card && !card.children.length) card.append(h("p", "hint", "The decision engine is missing from the snapshot.")); return; }
+    if (!card || !dxOk()) { if (card && !card.children.length) card.append(h("p", "hint", "The decision engine is missing from this build.")); return; }
     const O = DX19, N = O.now, R = N.regime, G = N.gate, Fc = N.forecasts, E = O.configs.engine, Hd = O.hold;
     if (!card.children.length) {
       const worst = R.next[R.worst];
@@ -23,14 +23,14 @@
       [["Engine's optimum", dxX(N.engine_exposure), N.capped ? "held down by the risk budget" : "expected utility, inside the risk budget"],
         ["Evidence gate", pct(G.value, 0, false), `utility gain t ${fx(G.t, 1)} vs ${fx(G.t0, 1)} for the best of ${G.n_tried} useless strategies`],
         ["Hedge", N.hedge.name, `${N.hedge.context}; best with ${pct(Math.max(...N.hedge.p_best), 0, false)} odds (bond data to ${N.hedge.as_of})`],
-        ["RL checks", `${dxX(N.rl.v16)} and ${dxX(N.rl.conservative.action)}`, `v0.16 agent and the conservative ensemble (${pct(N.rl.conservative.agreement, 0, false)} of its agents agree)`]]
+        ["RL checks", `${dxX(N.rl.v16)} and ${dxX(N.rl.conservative.action)}`, `the fitted-Q agent and the conservative ensemble (${pct(N.rl.conservative.agreement, 0, false)} of its agents agree)`]]
         .forEach(([k, v, s]) => { const r = h("div", "dx-row"); r.append(h("span", "dx-rk", k), h("b", null, v), h("small", null, s)); why.append(r); });
       card.append(big, why, h("p", "dx-note", "The MODEL book, not personal positions. Research only: the engine never places orders."));
       // the pipeline
       const pipe = $("#dx-pipe");
       O.pipeline.forEach((p, i) => { const s = h("li", "dx-stage"); s.append(h("span", "dx-n", String(i + 1).padStart(2, "0")), h("b", null, p.stage), h("span", null, p.what)); pipe.append(s); });
       dxKpis($("#dx-tiles"), [
-        [pct(worst, 0, false), "Stressed regime, next month", `${R.K} states by BIC; filtered, never smoothed`],
+        [pct(worst, 0, false), "Stressed regime, next month", `${R.K}-state model of stock returns alone; the portfolio engine's three-asset model and the labs' two-state model put it lower`],
         [pct(N.changepoint.recent, 0, false), "New regime in the last 6 months", `changepoint odds; expected run ${Math.round(N.changepoint.expected_run)} months`],
         [pct(Fc.stacked, 1), "Stacked 12-month real return", `historical mean ${pct(Fc.now.mean, 1)}`],
         [fx(E.perf.sharpe - Hd.sharpe, 2), "Engine Sharpe minus holding", `90% range ${fx(E.sharpe_vs_hold.lo, 2)} to ${fx(E.sharpe_vs_hold.hi, 2)}, since ${O.start.slice(0, 4)}`],

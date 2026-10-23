@@ -125,7 +125,7 @@
       case "minsky": return [spec.length >= 2 ? "off" : "mid", `${spec.length} of 5 builders (${spec.join(", ")}) are past hedge finance, and CoreWeave sits at the Ponzi edge: the drift Minsky described.`];
       case "beauty": return ["mid", "Price what others will be forced to do, not what they think: the fourth-order chains on the Decide desk."];
       case "herd": return ["off", "The AI trade is the index. When everyone owns it, the exit is narrow."];
-      case "calibration": return ["mid", "Score your own forecasts: the Journal's Brier score and calibration chart."];
+      case "calibration": return ["mid", "Score forecasts: the Journal's Brier score and calibration chart."];
       case "ooda": return ["mid", "Signals observe, the system map orients, Decide decides, the Journal reviews. The loop is the edge."];
       default: return ["mid", ""];
     }
