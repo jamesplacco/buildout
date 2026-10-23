@@ -991,6 +991,18 @@ def decision_engine(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, backtest, flip, forecasts")
 
 
+def mind_board(ctx: Context, args: dict) -> dict:
+    from . import mind, voices
+    G = json.loads((mind.ASSETS / "mind.json").read_text())
+    M = mind.Mind(G, voices.Library(voices.load()))
+    if args.get("related"):
+        nid = str(args["related"])
+        if nid not in M.idx:
+            raise ToolError("related takes a node id such as c:kalman")
+        return {"node": nid, "related": M.related(nid, int(args.get("limit", 10)))}
+    return {"board": M.board(), "note": "Every claim the mind weighs, each asked as a question and all spread through the graph as one matrix product per step."}
+
+
 def portfolio_engine(ctx: Context, args: dict) -> dict:
     o = ctx.load("portfolio") or _snap("snap20.js", "SNAP20", "portfolio")
     if not o:
@@ -1132,6 +1144,10 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                         "the engine, regime probabilities (hidden Markov), changepoint odds, model-averaging weights, stacked forecasts including a neural-network "
                         "ensemble, what drives and what would flip the decision, and its walk-forward record since 1940. Research only; never places orders.",
                         _obj({"part": {"type": "string", "enum": ["summary", "backtest", "flip", "forecasts"]}}), {"readOnlyHint": True, "openWorldHint": False}),
+    "mind_board": (mind_board, "The mind's verdict on every claim it weighs, computed at once by spreading all of them through the graph as one matrix: the odds each "
+                   "claim is true, its range, its number of signals and what it hinges on. With related: a node id, the nodes nearest it in the mind's 64-number "
+                   "spectral map instead.", _obj({"related": {"type": "string"}, "limit": {**NUM, "description": "how many related nodes, default 10"}}),
+                   {"readOnlyHint": True, "openWorldHint": False}),
     "portfolio_engine": (portfolio_engine, "The portfolio engine for the MODEL book: today's mix of stocks, 10-year Treasuries, gold and cash; the regimes of the three "
                          "assets together with each one's stock-bond correlation; eight policies walked forward since 1940 and a learner over them; ten years simulated "
                          "from today's regime odds; and today's mixes replayed through eight drawdowns. Research only; never places orders.",

@@ -678,6 +678,8 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("matrix", "The shortcut", "How the engine runs on matrix multiplication: the mind's question as a vector and its knowledge as a matrix, many questions thought at once, the filter as a scan of matrix products, the graph in 64 numbers per node, and Pearl, where the same matrix math mines a blockchain.",
+     ["c:matrix-multiplication", "c:parallel-prefix-scan", "c:personalized-pagerank", "c:proof-of-useful-work", "c:gpu", "c:embedding", "c:proof-of-work"]),
     ("portfolio", "Portfolio engine", "Stocks, 10-year Treasuries, gold and cash decided together: regimes with their stock-bond correlation, eight policies since 1940, a learner over them, ten simulated years and eight replayed drawdowns.",
      ["c:strategic-asset-allocation", "c:tactical-asset-allocation", "c:risk-parity", "c:sixty-forty", "c:stock-bond-correlation", "c:monte-carlo", "c:gold"]),
     ("decision", "Decision engine", "Stocks, Treasuries and gold decided together from regimes, a learner over whole policies, ten years simulated, and one pipeline from 156 years of data to today's sized exposure and hedge: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, model averaging, a risk budget and an evidence gate, walked forward from 1940.",
@@ -1508,23 +1510,127 @@ class Mind:
             self._walk = (I, J, W / np.where(deg[I] > 0, deg[I], 1), W / np.where(deg[J] > 0, deg[J], 1), np.flatnonzero(deg == 0))
         return self._walk
 
+    def walk_matrix(self):
+        """The whole graph as one sparse matrix P (N by N): P[j, i] is the share of node i's activation that flows to j
+        in one step (an edge's weight over its endpoint's degree, both directions). One step of thinking is then
+        r <- (1 - ALPHA) s + ALPHA P r: a single matrix-vector product, or for many questions at once, one matrix
+        product P R with a column per question."""
+        if getattr(self, "_P", None) is None:
+            import numpy as np
+            from scipy import sparse
+            I, J, WI, WJ, dang = self._ppr()
+            self._P = sparse.csr_matrix((np.concatenate([WI, WJ]), (np.concatenate([J, I]), np.concatenate([I, J]))), shape=(self.N, self.N))
+        return self._P
+
+    def spread_many(self, seed_sets: list[list[tuple[int, float]]]):
+        """Personalized PageRank for many questions at once: the seed vectors are the columns of S, and each of the
+        STEPS iterations is one sparse matrix product for all of them. Returns an N by Q array; column q equals
+        spread(seed_sets[q]) to about 1e-15."""
+        import numpy as np
+        _, _, _, _, dang = self._ppr()
+        P = self.walk_matrix()
+        S0 = np.zeros((self.N, len(seed_sets)))
+        for q, seeds in enumerate(seed_sets):
+            tot = sum(w for _, w in seeds)
+            for i, w in seeds:
+                S0[i, q] += w / tot
+        R = S0.copy()
+        for _ in range(STEPS):
+            nR = (1 - ALPHA) * S0 + ALPHA * (P @ R)
+            if len(dang):
+                nR += ALPHA * R[dang].sum(0)[None, :] * S0
+            R = nR
+        return R
+
     def spread(self, seeds: list[tuple[int, float]]) -> list[float]:
         """Personalized PageRank from the seeds: STEPS iterations, restart probability 1 - ALPHA, dangling mass back to
-        the seeds. Vectorized (numpy); site/src/mind.js runs the same walk and agrees to 1e-12."""
+        the seeds, as sparse matrix products (spread_many with one column); site/src/mind.js runs the same walk and
+        agrees to 1e-12."""
+        key = tuple(seeds)
+        cache = getattr(self, "_spread_cache", None)
+        if cache is not None and key in cache:
+            return cache[key]
+        return self.spread_many([seeds])[:, 0].tolist()
+
+    def think_many(self, texts: list[str]) -> list[dict]:
+        """Many questions in one pass: every question's seeds are spread together as one matrix product per step, then
+        each is reasoned on exactly as think() would."""
+        seed_sets = [self.recall(t) for t in texts]
+        uniq = [s for s in dict.fromkeys(tuple(s) for s in seed_sets) if s]
+        self._spread_cache = {}
+        if uniq:
+            R = self.spread_many([list(s) for s in uniq])
+            self._spread_cache = {s: R[:, q].tolist() for q, s in enumerate(uniq)}
+        try:
+            return [self.think(t) for t in texts]
+        finally:
+            self._spread_cache = None
+
+    def board(self) -> list[dict]:
+        """The mind's verdict on every question it weighs at once: each axis's own claim is a question, all of them are
+        spread in one batched pass, and each axis is weighed on its own activation."""
+        axes = self.G["axes"]
+        names = list(axes)
+        texts = [axes[a]["bull"] for a in names]
+        seed_sets = [self.recall(t) for t in texts]
+        ok = [q for q, s in enumerate(seed_sets) if s]
+        R = self.spread_many([seed_sets[q] for q in ok]) if ok else None
+        out = []
+        for c, q in enumerate(ok):
+            a = names[q]
+            V = self.weigh(a, R[:, c].tolist(), texts[q])
+            if not V["rows"]:
+                continue
+            out.append({"axis": a, "title": axes[a]["title"], "claim": axes[a]["bull"], "p_bull": round(V["p_bull"], 6), "lo": round(V["lo"], 6), "hi": round(V["hi"], 6),
+                        "n": len(V["rows"]), "hinge": V["hinge"]["text"] if V.get("hinge") else None, "book": axes[a]["book"]})
+        out.sort(key=lambda x: -abs(x["p_bull"] - 0.5))
+        return out
+
+    def spectral(self, k: int = 64):
+        """The graph compressed to k numbers per node: the leading eigenvectors of the symmetric walk matrix
+        S = D^(-1/2) W D^(-1/2). Since the walk's matrix is D^(1/2) S D^(-1/2), personalized PageRank has the closed form
+        r = (1 - a) D^(1/2) (I - a S)^(-1) D^(-1/2) s, and keeping k eigenpairs gives the shortcut
+        (I - a S)^(-1) ~ I + U diag(a lam / (1 - a lam)) U^T: two thin matrix products instead of forty sparse steps."""
+        if getattr(self, "_spec", None) is None or self._spec[0] != k:
+            import numpy as np
+            from scipy import sparse
+            from scipy.sparse.linalg import eigsh
+            I, J, _, _, _ = self._ppr()
+            E = np.asarray([e[:3] for e in self.edges], dtype=float).reshape(-1, 3)
+            W = sparse.csr_matrix((np.concatenate([E[:, 2], E[:, 2]]), (np.concatenate([I, J]), np.concatenate([J, I]))), shape=(self.N, self.N))
+            deg = np.asarray(self.deg, float)
+            dh = np.where(deg > 0, 1 / np.sqrt(np.where(deg > 0, deg, 1)), 0.0)
+            Sm = sparse.diags(dh) @ W @ sparse.diags(dh)
+            lam, U = eigsh(Sm, k=k, which="LA", v0=np.ones(self.N) / math.sqrt(self.N))
+            self._spec = (k, lam, U, np.sqrt(deg), dh)
+        return self._spec
+
+    def spread_fast(self, seeds: list[tuple[int, float]], k: int = 64) -> list[float]:
+        """The low-rank shortcut to spread(): exact in the leading k directions of the graph, approximate in the rest."""
         import numpy as np
-        I, J, WI, WJ, dang = self._ppr()
-        tot = sum(s for _, s in seeds)
+        _, lam, U, dsq, dh = self.spectral(k)
+        tot = sum(w for _, w in seeds)
         s0 = np.zeros(self.N)
-        for i, s in seeds:
-            s0[i] = s / tot
-        r = s0.copy()
-        for _ in range(STEPS):
-            nr = (1 - ALPHA) * s0 + ALPHA * (np.bincount(J, WI * r[I], self.N) + np.bincount(I, WJ * r[J], self.N))
-            dangling = float(r[dang].sum()) if len(dang) else 0.0
-            if dangling:
-                nr += ALPHA * dangling * s0
-            r = nr
-        return r.tolist()
+        for i, w in seeds:
+            s0[i] += w / tot
+        v = dh * s0
+        v = v + U @ ((ALPHA * lam / (1 - ALPHA * lam)) * (U.T @ v))
+        return ((1 - ALPHA) * dsq * v).tolist()
+
+    def related(self, node_id: str, n: int = 10, k: int = 64) -> list[dict]:
+        """Nodes nearest in the spectral map (cosine of their k-number coordinates): related by the shape of the whole
+        graph, not only by a direct link."""
+        import numpy as np
+        if node_id not in self.idx:
+            return []
+        _, lam, U, _, _ = self.spectral(k)
+        Z = U * np.sqrt(np.maximum(lam, 0))[None, :]
+        nrm = np.linalg.norm(Z, axis=1)
+        i = self.idx[node_id]
+        sim = (Z @ Z[i]) / np.maximum(nrm * nrm[i], 1e-12)
+        sim[i] = -np.inf
+        top = np.argsort(-sim)[:n]
+        return [{"id": self.nodes[j]["id"], "name": self.nodes[j]["n"], "kind": self.nodes[j]["k"], "similarity": round(float(sim[j]), 6)} for j in top]
 
     def chains(self, r: list[float], k: int = 3, prefer: list[int] | None = None) -> list[dict]:
         """Strongest directed paths over the atlas's causal links from the most activated market nodes to the book."""

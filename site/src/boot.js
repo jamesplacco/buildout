@@ -6,7 +6,7 @@
     decide: { name: "Decide", views: ["decide", "solve", "positions", "swans", "journal", "brain", "games", "cardroom"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "making", "prop"] },
     research: { name: "Research", views: ["findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "legends", "lenses", "lab"] },
-    reference: { name: "Methods", views: ["engine", "engines", "appendix", "code", "agents"] },
+    reference: { name: "Methods", views: ["engine", "engines", "matrix", "appendix", "code", "agents"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -32,6 +32,7 @@
     bonds: () => guard("Bonds, simply", renderBonds, $("#bd-tiles")),
     decision: () => { guard("Decision engine", renderDecision, $("#dx-card")); guard("What if", renderWhatIf, $("#dxw-out")); },
     portfolio: () => guard("Portfolio engine", renderPortfolio, $("#pf-card")),
+    matrix: () => guard("The shortcut", renderMatrix, $("#mx-tiles")),
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },

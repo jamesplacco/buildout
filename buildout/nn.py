@@ -39,6 +39,19 @@ Why ensembles and MC dropout for uncertainty.
     the average within-member MC dropout variance plus the variance of the
     member means.
 
+Why the ensemble trains batched.
+    The networks are tiny, so a training step is dominated by Python and numpy
+    call overhead rather than arithmetic. Training the M members one after
+    another pays that overhead M times. With `batched=True` (the default) the
+    ensemble stacks every member's weights along a leading member axis and
+    runs each layer's forward and backward pass for all members as one
+    batched matmul. Each member still draws its own random streams in the
+    same order, keeps its own Adam state, clipping norm, early stopping and
+    scalers, and every member's slice goes through the same BLAS call with
+    the same shapes as in `MLP.fit`. The result is the same trained networks,
+    bit for bit, in a fraction of the time. `batched=False` keeps the plain
+    loop over `MLP.fit`.
+
 Why pinball loss for quantiles.
     Returns are fat tailed and their spread changes with the regime. The
     pinball (quantile) loss fits conditional quantiles directly, without
@@ -131,6 +144,24 @@ def _as_2d(y: np.ndarray) -> np.ndarray:
     return y.reshape(-1, 1) if y.ndim == 1 else y
 
 
+def _stacked_views(flat: np.ndarray, like: list[np.ndarray]) -> list[np.ndarray]:
+    """Per-parameter views of shape [A, *p.shape] into the rows of a 2D [A, P] buffer.
+
+    The batched counterpart of `MLP._views`: row a of `flat` is member a's
+    flat parameter (or gradient) vector, and writing into a view writes into
+    that row.
+    """
+    out, o = [], 0
+    rows = flat.shape[0]
+    for p in like:
+        v = flat[:, o:o + p.size].reshape((rows, *p.shape))
+        if not np.shares_memory(v, flat):
+            raise RuntimeError("stacked parameter view would be a copy")
+        out.append(v)
+        o += p.size
+    return out
+
+
 class MLP:
     """Feed-forward network with dropout, L2, Adam and early stopping.
 
@@ -220,6 +251,22 @@ class MLP:
         self.history_: dict[str, list[float]] = {"train": [], "val": []}
 
     # -- setup ---------------------------------------------------------------
+
+    def _config(self) -> tuple:
+        """Every setting except the seed. Members with equal configs can train batched."""
+        return (self.n_in, self.hidden, self.out, self.activation, self.dropout, self.l2, self.lr, self.epochs, self.batch,
+                self.patience, self.val_frac, self.loss, self.quantiles, self.standardize, self.clip, self.val_gap)
+
+    def _split(self, n: int) -> tuple[int, int, bool]:
+        """Training rows, validation rows and whether early stopping is used, for n rows."""
+        n_val = int(np.floor(self.val_frac * n))
+        n_tr = n - n_val - self.val_gap
+        use_val = n_val >= 2 and n_tr >= 2
+        if not use_val:
+            n_val, n_tr = 0, n
+        if n_tr < 1:
+            raise ValueError("not enough rows to train")
+        return n_tr, n_val, use_val
 
     def _check_X(self, X: np.ndarray) -> np.ndarray:
         X = np.asarray(X, dtype=float)
@@ -393,6 +440,92 @@ class MLP:
                 grads[k] += self.l2 * params[k]
         return loss, grads
 
+    # -- batched core math (used by DeepEnsemble) ----------------------------
+    #
+    # These mirror `_draw_masks`, `_forward` and `_loss_grad` for A networks of
+    # this architecture at once. Weights are stacked as [A, fan_in, fan_out],
+    # biases as [A, fan_out], activations as [A, ..., rows, units]. np.matmul
+    # loops over the leading axes in C and gives each member's slice the same
+    # BLAS call, with the same shapes and strides, as the 2D code above, and
+    # every reduction runs over the same numbers in the same order. That is
+    # what makes the batched ensemble reproduce the sequential one exactly.
+
+    def _draw_masks_stacked(self, rngs: Sequence[np.random.Generator], shape: tuple[int, ...]) -> list[np.ndarray] | None:
+        """Dropout masks [A, *shape, units] per hidden layer, one generator per member.
+
+        One draw of `shape` rows consumes a generator exactly like consecutive
+        `_draw_masks` calls whose row counts add up to it, because the
+        generator buffers the unused half of each 64-bit word across calls.
+        So a whole epoch (or a block of MC samples) can be drawn at once.
+        """
+        if self.dropout <= 0.0 or not self.hidden:
+            return None
+        keep = 1.0 - self.dropout
+        u = np.stack([r.random((*shape, sum(self.hidden)), dtype=np.float32) for r in rngs])
+        full = (u < keep) * (1.0 / keep)
+        return [full[..., lo:hi] for lo, hi in self._mask_bounds]
+
+    def _forward_stacked(self, Z: np.ndarray, params: list[np.ndarray], masks: list[np.ndarray] | None, grad: bool = False):
+        """Batched `_forward`. Z is [A, ..., rows, n_in]; axes between the member
+        axis and the rows (the MC sample axis in predict_dist) broadcast."""
+        rows = params[0].shape[0]
+        pad = (1,) * (Z.ndim - 3)
+        h = Z
+        cache = []
+        for i in range(len(self.hidden)):
+            W, b = params[2 * i], params[2 * i + 1]
+            a = np.matmul(h, W.reshape((rows, *pad, *W.shape[1:])))
+            a += b.reshape((rows, *pad, 1, b.shape[1]))
+            v, d = self._act(a, grad)
+            if masks is not None:
+                v = v * masks[i]
+            cache.append((h, d))
+            h = v
+        W, b = params[-2], params[-1]
+        out = np.matmul(h, W.reshape((rows, *pad, *W.shape[1:])))
+        out += b.reshape((rows, *pad, 1, b.shape[1]))
+        cache.append((h, None))
+        return out, cache
+
+    def _loss_grad_stacked(self, Z, T, params, masks, gbuf) -> np.ndarray:
+        """Batched `_loss_grad` with penalty=False: per-member data losses [A];
+        gradients are written into the stacked views `gbuf`.
+
+        Z is [A, rows, n_in] and T is [A, rows, out]. Each member's loss is the
+        mean over its own rows and outputs, as in the 2D version.
+        """
+        rows = Z.shape[0]
+        out, cache = self._forward_stacked(Z, params, masks, grad=True)
+        k = out.shape[1] * out.shape[2]  # one member's out.size
+        if self.loss == "mse":
+            r = out - T
+            rf = r.reshape(rows, 1, k)
+            # [1, k] @ [k, 1] per member is the same dot product as rf @ rf in 2D.
+            loss = np.matmul(rf, rf.transpose(0, 2, 1)).reshape(rows) / k
+            r *= 2.0 / k
+            g = r
+        elif self.loss == "pinball":
+            r = T - out
+            loss = np.maximum(self._q * r, (self._q - 1.0) * r).reshape(rows, k).mean(axis=1)
+            g = np.where(r > 0, -self._q, 1.0 - self._q) / k
+        else:
+            loss = (np.logaddexp(0.0, out) - T * out).reshape(rows, k).mean(axis=1)
+            g = (_sigmoid(out) - T) / k
+        h_last, _ = cache[-1]
+        np.matmul(h_last.transpose(0, 2, 1), g, out=gbuf[-2])
+        np.sum(g, axis=1, out=gbuf[-1])
+        dh = np.matmul(g, params[-2].transpose(0, 2, 1)) if self.hidden else None
+        for i in range(len(self.hidden) - 1, -1, -1):
+            h_in, d = cache[i]
+            if masks is not None:
+                dh *= masks[i]
+            dh *= d
+            np.matmul(h_in.transpose(0, 2, 1), dh, out=gbuf[2 * i])
+            np.sum(dh, axis=1, out=gbuf[2 * i + 1])
+            if i > 0:
+                dh = np.matmul(dh, params[2 * i].transpose(0, 2, 1))
+        return loss
+
     # -- training ------------------------------------------------------------
 
     def fit(self, X, y) -> MLP:
@@ -400,13 +533,7 @@ class MLP:
         X = self._check_X(X)
         Y = self._check_y(y, X.shape[0])
         n = X.shape[0]
-        n_val = int(np.floor(self.val_frac * n))
-        n_tr = n - n_val - self.val_gap
-        use_val = n_val >= 2 and n_tr >= 2
-        if not use_val:
-            n_val, n_tr = 0, n
-        if n_tr < 1:
-            raise ValueError("not enough rows to train")
+        n_tr, n_val, use_val = self._split(n)
         Xtr, Ytr = X[:n_tr], Y[:n_tr]
         # Scalers come from the training slice only, so validation rows stay unseen.
         self._set_scalers(Xtr, Ytr)
@@ -500,7 +627,7 @@ class MLP:
             return _sigmoid(raw)
         y = raw * self.y_std_ + self.y_mean_
         if self.loss == "pinball":
-            y = np.sort(y, axis=1)
+            y = np.sort(y, axis=-1)  # last axis, so a stack of draws sorts the same way
         return y
 
     @staticmethod
@@ -540,27 +667,232 @@ class DeepEnsemble:
     `predict` averages the members' deterministic forecasts. `predict_dist`
     returns the mean and a total std that adds the spread between member means
     to each member's own MC dropout variance (law of total variance).
+
+    With `batched=True` (the default) `fit`, `predict` and `predict_dist` run
+    all members together through batched matmuls over a leading member axis.
+    The results are identical to `batched=False`, which loops over the
+    members' own methods, and `members` is a list of ordinary fitted `MLP`s
+    either way. If the members' settings have been made to differ (anything
+    but the seed), the ensemble falls back to the loop.
     """
 
-    def __init__(self, n_in: int, M: int = 5, seed: int = 0, **mlp_kwargs) -> None:
+    def __init__(self, n_in: int, M: int = 5, seed: int = 0, batched: bool = True, **mlp_kwargs) -> None:
         if M < 1:
             raise ValueError("M must be at least 1")
         self.n_in = int(n_in)
         self.M = int(M)
         self.seed = int(seed)
+        self.batched = bool(batched)
         self.mlp_kwargs = dict(mlp_kwargs)
         self.members = [MLP(n_in, seed=self.seed * 1000 + m, **mlp_kwargs) for m in range(self.M)]
 
+    def _use_batched(self) -> bool:
+        lead = self.members[0]._config()
+        return self.batched and all(m._config() == lead for m in self.members[1:])
+
     def fit(self, X, y) -> DeepEnsemble:
-        for m in self.members:
-            m.fit(X, y)
+        if self._use_batched():
+            self._fit_batched(X, y)
+        else:
+            for m in self.members:
+                m.fit(X, y)
         return self
 
+    def _fit_batched(self, X, y) -> None:
+        """`MLP.fit` for every member at once.
+
+        Line for line this follows `MLP.fit`, with each per-member quantity
+        given a leading member axis. Members that are still training occupy
+        the rows of `theta` (and of the Adam moments and gradient buffer) in
+        the order listed in `act`. When a member stops early it is dropped
+        from those rows, so its weights are frozen and it costs nothing more;
+        its best weights were already copied to `best_theta`. The loop ends
+        when every member has stopped or the epoch limit is reached.
+        """
+        ms = self.members
+        lead = ms[0]
+        X = lead._check_X(X)
+        Y = lead._check_y(y, X.shape[0])
+        n = X.shape[0]
+        n_tr, n_val, use_val = lead._split(n)
+        Xtr, Ytr = X[:n_tr], Y[:n_tr]
+
+        # Per-member scalers (from the training slice only), standardized data,
+        # initial weights and training generator, exactly as in MLP.fit.
+        Ztr_l, Ttr_l, Zva_l, Tva_l, rows, rngs = [], [], [], [], [], []
+        init: list[np.ndarray] = []
+        for mdl in ms:
+            mdl._set_scalers(Xtr, Ytr)
+            Ztr_l.append(mdl._sx(Xtr))
+            Ttr_l.append(mdl._sy(Ytr))
+            if use_val:
+                Zva_l.append(mdl._sx(X[n - n_val:]))
+                Tva_l.append(mdl._sy(Y[n - n_val:]))
+            init = mdl._init_params(np.random.default_rng([mdl.seed, 0]), Ttr_l[-1])
+            rows.append(np.concatenate([p.ravel() for p in init]))
+            rngs.append(np.random.default_rng([mdl.seed, 1]))
+        Ztr_all, Ttr_all = np.stack(Ztr_l), np.stack(Ttr_l)
+        Zva_all = np.stack(Zva_l) if use_val else None
+
+        act = np.arange(len(ms))
+        theta = np.stack(rows)
+        best_theta = theta.copy()  # indexed by member, not by active row
+        m1 = np.zeros_like(theta)
+        m2 = np.zeros_like(theta)
+        l2vec = np.concatenate([np.full(p.size, lead.l2 if k % 2 == 0 else 0.0) for k, p in enumerate(init)])
+        use_l2 = lead.l2 > 0.0
+        b1, b2, eps_adam = 0.9, 0.999, 1e-8
+        step = 0
+        bs = max(1, min(lead.batch, n_tr))
+        n_m = len(ms)
+        best_val = [np.inf] * n_m
+        best_epoch = [0] * n_m
+        wait = [0] * n_m
+        n_epochs = [0] * n_m
+        stopped = [False] * n_m
+        hist_tr: list[list[float]] = [[] for _ in ms]
+        hist_va: list[list[float]] = [[] for _ in ms]
+
+        def rebuild():
+            # Buffers and views for the current set of active rows.
+            nonlocal gflat, tmp, params, gbuf, Ztr, Ttr, Zva
+            gflat = np.zeros_like(theta)
+            tmp = np.empty_like(theta)
+            params = _stacked_views(theta, init)
+            gbuf = _stacked_views(gflat, init)
+            Ztr, Ttr = Ztr_all[act], Ttr_all[act]
+            Zva = Zva_all[act] if use_val else None
+
+        gflat = tmp = Ztr = Ttr = Zva = None
+        params = gbuf = []
+        rebuild()
+
+        epoch = 0
+        for epoch in range(1, lead.epochs + 1):
+            A = len(act)
+            # Each member draws its batch order, then the dropout masks for the
+            # whole epoch in one call (the same stream as one call per batch).
+            if bs < n_tr:
+                order = np.stack([rngs[j].permutation(n_tr) for j in act])
+                ar = np.arange(A)[:, None]
+                Zep, Tep = Ztr[ar, order], Ttr[ar, order]
+            else:
+                Zep, Tep = Ztr, Ttr
+            full = lead._draw_masks_stacked([rngs[j] for j in act], (n_tr,))
+            ep_loss = np.zeros(A)
+            for s in range(0, n_tr, bs):
+                e = min(s + bs, n_tr)
+                masks = None if full is None else [f[:, s:e] for f in full]
+                loss = lead._loss_grad_stacked(Zep[:, s:e], Tep[:, s:e], params, masks, gbuf)
+                ep_loss += loss * (e - s)
+                if use_l2:
+                    np.multiply(l2vec, theta, out=tmp)
+                    gflat += tmp
+                # Each member's own global norm: a [1, P] @ [P, 1] dot per row.
+                gnorm = np.sqrt(np.matmul(gflat[:, None, :], gflat[:, :, None]).reshape(A))
+                over = gnorm > lead.clip
+                if over.any():
+                    gflat[over] *= (lead.clip / gnorm[over])[:, None]
+                step += 1
+                lr_t = lead.lr * np.sqrt(1.0 - b2 ** step) / (1.0 - b1 ** step)
+                m1 *= b1
+                m1 += (1.0 - b1) * gflat
+                m2 *= b2
+                np.multiply(gflat, gflat, out=tmp)
+                tmp *= 1.0 - b2
+                m2 += tmp
+                np.sqrt(m2, out=tmp)
+                tmp += eps_adam
+                np.divide(m1, tmp, out=tmp)
+                tmp *= lr_t
+                theta -= tmp
+            for a, j in enumerate(act):
+                hist_tr[j].append(float(ep_loss[a]) / n_tr)
+                n_epochs[j] = epoch
+            if not use_val:
+                continue
+            out_va, _ = lead._forward_stacked(Zva, params, None)
+            done = []
+            for a, j in enumerate(act):
+                v = ms[j]._data_loss(out_va[a], Tva_l[j])
+                hist_va[j].append(v)
+                if v < best_val[j] - 1e-9:
+                    best_val[j], best_epoch[j], wait[j] = v, epoch, 0
+                    best_theta[j] = theta[a]
+                else:
+                    wait[j] += 1
+                    if wait[j] >= lead.patience:
+                        stopped[j] = True
+                        done.append(a)
+            if done:
+                keep = np.setdiff1d(np.arange(A), done)
+                act, theta, m1, m2 = act[keep], theta[keep], m1[keep], m2[keep]
+                if not len(act):
+                    break
+                rebuild()
+
+        for a, j in enumerate(act):
+            n_epochs[j] = epoch  # members that never stopped ran to the end
+            if not use_val:
+                # Without a validation slice the final weights are kept.
+                best_theta[j] = theta[a]
+                best_epoch[j] = epoch
+        for j, mdl in enumerate(ms):
+            mdl.params = MLP._views(best_theta[j].copy(), init)
+            mdl.n_epochs_ = n_epochs[j]
+            mdl.best_epoch_ = best_epoch[j]
+            mdl.stopped_early_ = stopped[j]
+            mdl.history_ = {"train": hist_tr[j], "val": hist_va[j]}
+            mdl.fitted = True
+
+    def _stacked_params(self) -> list[np.ndarray]:
+        return [np.stack([m.params[k] for m in self.members]) for k in range(len(self.members[0].params))]
+
+    def _check_fitted(self, what: str) -> None:
+        if not all(m.fitted for m in self.members):
+            raise RuntimeError(f"call fit before {what}")
+
     def predict(self, X) -> np.ndarray:
-        return np.mean([m.predict(X) for m in self.members], axis=0)
+        if not self._use_batched():
+            return np.mean([m.predict(X) for m in self.members], axis=0)
+        self._check_fitted("predict")
+        ms = self.members
+        X = ms[0]._check_X(X)
+        Z = np.stack([m._sx(X) for m in ms])
+        raw, _ = ms[0]._forward_stacked(Z, self._stacked_params(), None)
+        return np.mean([m._shape(m._output(raw[a])) for a, m in enumerate(ms)], axis=0)
+
+    def _member_dists(self, X, samples: int) -> list[tuple[np.ndarray, np.ndarray]]:
+        """Each member's `predict_dist(X, samples)`, from batched forward passes.
+
+        Samples are stacked on an axis after the member axis, in blocks small
+        enough to keep memory bounded. Each member's generator draws its masks
+        block after block, which is the same stream as one draw per sample.
+        """
+        ms = self.members
+        lead = ms[0]
+        X = lead._check_X(X)
+        Z = np.stack([m._sx(X) for m in ms])[:, None]  # [M, 1, n, n_in]
+        S, n = int(samples), X.shape[0]
+        params = self._stacked_params()
+        rngs = [np.random.default_rng([m.seed, 2]) for m in ms]
+        width = max((*lead.hidden, lead.out, sum(lead.hidden)))
+        block = max(1, min(S, (1 << 22) // max(1, len(ms) * n * width)))
+        draws = np.empty((len(ms), S, n, lead.out))
+        for s0 in range(0, S, block):
+            s1 = min(S, s0 + block)
+            masks = lead._draw_masks_stacked(rngs, (s1 - s0, n))
+            raw, _ = lead._forward_stacked(Z, params, masks)
+            for a, m in enumerate(ms):
+                draws[a, s0:s1] = m._output(raw[a])
+        return [(m._shape(draws[a].mean(axis=0)), m._shape(draws[a].std(axis=0))) for a, m in enumerate(ms)]
 
     def predict_dist(self, X, samples: int = 50) -> tuple[np.ndarray, np.ndarray]:
-        stats = [m.predict_dist(X, samples=samples) for m in self.members]
+        if self._use_batched():
+            self._check_fitted("predict_dist")
+            stats = self._member_dists(X, samples)
+        else:
+            stats = [m.predict_dist(X, samples=samples) for m in self.members]
         means = np.array([s[0] for s in stats])
         within = np.mean([s[1] ** 2 for s in stats], axis=0)
         between = means.var(axis=0)

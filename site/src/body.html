@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.20</span>
+      Buildout <span class="ver">v0.21</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -436,6 +436,56 @@
     <div class="section-head"><p class="eyebrow">Findings</p><h2 id="pf-f-title">What the portfolio engine concludes</h2></div>
     <ol class="dx-find" id="pf-find"></ol>
     <p class="hint">Code: buildout/portfolio.py, buildout/infer.py (the multivariate regime model and Hedge). Run it: python -m buildout portfolio. Agents: the portfolio_engine tool. The MODEL book, not personal positions; research only, never an order.</p>
+  </section>
+</section>
+<section class="view" id="view-matrix" hidden aria-labelledby="mxs-title">
+  <div class="vhead"><p class="eyebrow">The shortcut · matrix multiplication</p><h1 id="mxs-title">Every part of the engine is a grid of numbers, and thinking is multiplying grids</h1>
+    <p class="lede">A computer cannot read a question or look at a market. It turns both into grids of numbers (matrices) and multiplies them against the grids it has learned. One multiplication can carry thousands of connections at once, which is why chips built to multiply grids now run AI, and why this engine was rebuilt around the same move: the mind thinks about many questions as one product, the regime filter runs as a scan of matrix products instead of a month-by-month loop, and the brain answers every shock against every holding as one sum of matrix powers. The answers are the same; the work is shorter.</p></div>
+  <div class="at-tiles" id="mx-tiles"></div>
+  <section class="section" aria-labelledby="mx-how-title">
+    <div class="section-head"><p class="eyebrow">How the mind multiplies</p><h2 id="mx-how-title">A question becomes a vector; the knowledge is a matrix</h2>
+      <p class="prose">The mind's 8,644 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
+    <div class="mx-eq panel">
+      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,644, forty times</small></div>
+      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,644 by Q, forty times</small></div>
+      <div><span class="dx-k">A neural network layer</span><code>h = f(W x + b)</code><small>the same product, learned weights W</small></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="mx-board-title">
+    <div class="section-head"><p class="eyebrow">The whole board</p><h2 id="mx-board-title">Every claim the mind weighs, thought about at once</h2>
+      <p class="prose">Each claim the mind tracks is asked as a question, all of them are spread through the graph together as one matrix, and each is weighed on its own column. Run it here to time it in your browser.</p></div>
+    <div class="panel"><div class="mx-run"><button type="button" class="btn" id="mx-go">Think about every claim at once, here</button><span class="hint" id="mx-board-src"></span></div>
+      <p class="prose" id="mx-live"></p><div class="tablewrap"><table id="mx-board"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="mx-scan-title">
+    <div class="section-head"><p class="eyebrow">The scan</p><h2 id="mx-scan-title">A month-by-month filter, done in eleven rounds</h2>
+      <p class="prose">The regime filter carries yesterday's odds into today's: odds(t) = odds(t - 1) times A times the month's evidence. Written out, the odds for every month are running products of matrices, and products can be grouped in any order. So in round one each month multiplies in its neighbour's matrix, in round two the product from two months back, then four, eight, and so on: after eleven rounds (2 to the 11th is more than 1,868 months) every month's odds are known, each round being one batched matrix multiplication. The backward pass runs the same scan from the end, and every random start of the fit runs in the same batch.</p></div>
+    <div class="panel"><div class="mx-scan" id="mx-scan" aria-hidden="true"></div>
+      <span class="panel-title">Measured on the build machine, step by step against matrix products</span><div class="tablewrap"><table id="mx-bench"></table></div>
+      <p class="hint" id="mx-spec-note"></p></div>
+  </section>
+  <section class="section" aria-labelledby="mx-br-title">
+    <div class="section-head"><p class="eyebrow">The brain, all at once</p><h2 id="mx-br-title">Every shock against every holding: one matrix</h2></div>
+    <div class="panel"><p class="prose" id="mx-brain-n"></p><div id="mx-brain"></div></div>
+  </section>
+  <section class="section" aria-labelledby="mx-rel-title">
+    <div class="section-head"><p class="eyebrow">The map in 64 numbers</p><h2 id="mx-rel-title">Related by the shape of the whole graph, not only by a link</h2>
+      <p class="prose">Compress each node to 64 numbers (its coordinates on the graph's leading eigenvectors) and nodes that sit in the same part of the web land near each other, even with no direct link between them.</p></div>
+    <div class="mx-rel" id="mx-rel"></div>
+  </section>
+  <section class="section" aria-labelledby="mx-pearl-title">
+    <div class="section-head"><p class="eyebrow">Pearl · when the matrix math is the mining</p><h2 id="mx-pearl-title">The same multiplications that run AI, securing a blockchain</h2>
+      <p class="prose">Prompted by DeFi Education's October 22 note. Traditional proof of work spends electricity on hashes that secure the chain and do nothing else. Pearl asks miners for matrix multiplications instead, the work AI inference already does, so one computation can serve a customer and win a block. If that holds, an AI provider earns twice from the same chips and can charge less for inference.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">What the sources say</span><ul class="mx-facts" id="mx-pearl"></ul></div>
+      <div class="panel"><span class="panel-title">Why it matters for this book, and what to watch</span>
+        <ul class="mx-facts">
+          <li><b>Demand for matrix math.</b> Every design that pays for matrix multiplication, inference or mining, is demand for the chips the book owns (NVIDIA and Broadcom) and for the power and data centers the buildout desks track.</li>
+          <li><b>Cheaper inference.</b> If mining rewards subsidize inference, the price of a token of AI falls; cheaper inference tends to raise usage, which is the bull case for the buildout's revenue.</li>
+          <li><b>What has to be true.</b> Verification of the work must stay cheap, buyers must pay for the useful output (there was no PRL-priced inference market as of June), and issuance is front-loaded (about half the supply in four years), so the reward's value is the open question.</li>
+          <li><b>What would change the view.</b> Paying inference demand on Pearl at scale, or a verification failure. Neither is in the engine's data yet; this is a thesis to watch, not a signal.</li>
+        </ul></div>
+    </div>
   </section>
 </section>
 <section class="view" id="view-noteworthy" hidden aria-labelledby="nw-title">
@@ -2792,8 +2842,8 @@
     <ol class="cd-flow">
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
-      <li><b>Know.</b> ontology.py and concepts17.json define 4,295 concepts and their relations; knowledge.json holds 601 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 8,634 nodes and about 34,700 typed links, with 4,295 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Know.</b> ontology.py and concepts17.json define 4,299 concepts and their relations; knowledge.json holds 601 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 8,644 nodes and about 34,700 typed links, with 4,295 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
       <li><b>Decide.</b> ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
       <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
@@ -2830,6 +2880,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v21-t">
+    <div class="section-head"><p class="eyebrow">v0.21</p><h2 id="ag-v21-t">This release, in numbers</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>93 s to 33 s</b><span>The decision engine</span><small>the same decision, every digit</small></div>
+      <div class="at-kpi"><b>0.0</b><span>Batched ensemble against sequential</span><small>largest difference in any weight, measured by the builder agent</small></div>
+      <div class="at-kpi"><b>11</b><span>Rounds for 1,868 months</span><small>the regime filter as a scan of matrix products</small></div>
+      <div class="at-kpi"><b>27</b><span>Claims in one pass</span><small>the mind's board, in Python and in the page</small></div></div>
+    <p class="prose">A subagent rebuilt the neural ensemble so its five networks train side by side through batched matrix products, reproducing the sequential training bit for bit (same random streams, separate early stopping) and about twice as fast. The lead turned the regime filter into a scan, batched every random start of each fit, put the mind's graph into one sparse matrix so many questions think at once, built the board, the spectral map, the shortcut desk and the Pearl section from two sources it read, and kept the step-by-step versions as references the tests check against.</p>
   </section>
   <section class="section" aria-labelledby="ag-v20-t">
     <div class="section-head"><p class="eyebrow">v0.20</p><h2 id="ag-v20-t">This release, in numbers</h2></div>

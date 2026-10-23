@@ -108,9 +108,9 @@ one that holds this file."
   "Name of the results buffer.")
 
 (defconst buildout-subcommands
-  '("atlas" "bench" "bonds" "brain" "buyside" "capex" "connect" "cost" "dcf" "decide" "demo" "doctor"
+  '("atlas" "bench" "board" "bonds" "brain" "buyside" "capex" "connect" "cost" "dcf" "decide" "demo" "doctor"
     "engine" "erp" "fa" "feeds" "history" "journal" "kalshi" "labs" "macro" "market" "mcp"
-    "mind" "ml" "ooda" "portfolio" "positions" "reality" "reason" "research" "rl" "run" "sources" "status"
+    "mind" "ml" "ooda" "portfolio" "positions" "reality" "reason" "related" "research" "rl" "run" "sources" "status"
     "ta" "think" "triage")
   "Subcommands of python -m buildout, offered by `buildout-run'.")
 

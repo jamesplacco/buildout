@@ -3,6 +3,23 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.21 rebuilds the heaviest parts of the engine around matrix multiplication, the operation AI hardware is built
+for (prompted by DeFi Education's note on Pearl, a blockchain whose proof of work is that same math). The regime filter,
+which carried odds forward one month at a time, is now a scan of matrix products (`infer._scan`, `forward_backward`):
+because the forward recursion is a product of matrices and products are associative, every month's odds come out of
+log2(T) rounds of batched multiplication, the backward pass is the same scan over suffixes, and every random start of a
+fit runs in the same batch. The five-network ensemble trains its members side by side (`nn.DeepEnsemble(batched=True)`,
+written by a subagent, identical to sequential training bit for bit). Measured on the build machine: the decision
+engine rebuilds in 33 seconds instead of 93 and the portfolio engine in 9 instead of 24, with the same findings to the
+last digit; the forward-backward pass is about 3x faster and agrees with the loop to about 1e-14. The mind's graph is
+one sparse 8,644 by 8,644 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
+questions (`spread_many`, `think_many`), which gives the board: the mind's verdict on all 27 claims it weighs in one
+pass (`python -m buildout board`, MCP tool `mind_board`, and live in the page). A 64-eigenvector map of the graph is
+about 9x faster per question but changes half of the top twenty answers, so it is used only to find related ideas
+(`Mind.related`, `python -m buildout related c:kalman`). A new desk, The shortcut, explains and measures each of these,
+shows the brain's every-shock-against-every-holding matrix, and covers Pearl with facts from Alea Research and Bankless.
+`python -m buildout bench` now includes the matrix benchmarks.
+
 Version 0.20 widens the decision from a stock weight to a portfolio and adds a layer that chooses between whole
 decision processes (`portfolio.py`, desk "Portfolio", `python -m buildout portfolio`, MCP tool `portfolio_engine`). Real
 monthly returns on stocks, 10-year Treasuries (Shiller's long rate spliced with the GS10 series to 2026) and gold feed a
@@ -507,7 +524,7 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `statements.py` | Annual statements from XBRL company facts; ratios; Piotroski F, Altman Z'', Beneish M; valuation multiples with a price |
 | | `rl.py` | Fitted Q iteration sizing agent over 54 market states and the last action, walk-forward, bootstrap and deflated Sharpe |
 | | `nn.py` | Multi-layer perceptrons and deep ensembles in numpy: gradient-checked backpropagation, dropout, weight decay, Adam, early stopping on the newest data, mse, pinball and logistic losses, purged walk-forward |
-| | `infer.py` | Gaussian hidden Markov model (Baum-Welch, filter, smoother, Viterbi, BIC), Bayesian online changepoint detection, Kalman time-varying regression, stacking, mixture risk |
+| | `infer.py` | Hidden Markov models (one asset or several, full covariance) fit by EM with the forward-backward pass as a scan of matrix products and every start batched; Bayesian online changepoints; Kalman regression; stacking; mixture risk; exponential weights |
 | | `decide.py` | The decision engine: walked-forward regimes and forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
 | | `portfolio.py` | The portfolio engine: three-asset regimes, utility-optimal mixes in a risk budget, eight policies walked forward, the Hedge learner, a regime-switching bootstrap and stress replays |
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |

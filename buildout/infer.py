@@ -51,42 +51,113 @@ def _backward(B: np.ndarray, A: np.ndarray, c: np.ndarray) -> np.ndarray:
     return beta
 
 
+# ---------------------------------------------------------------- the forward-backward pass as matrix products
+# The forward recursion a_t = a_(t-1) A diag(b_t) is a product of matrices, and matrix multiplication is associative, so
+# every prefix product can be formed by doubling: in round r each partial product is multiplied by the one 2^r steps
+# back, and after log2(T) rounds of batched matrix multiplication every month's filter is known. The same trick runs
+# the backward pass over suffixes, and a leading batch axis runs every random start of the EM at once. This is the
+# shortcut AI hardware is built around: many small matrix products at the same time instead of one step after another.
+def _scan(C: np.ndarray, reverse: bool = False) -> tuple[np.ndarray, np.ndarray]:
+    """Inclusive prefix products C[0] C[1] ... C[t] along axis -3 (suffix products C[t] ... C[-1] with reverse=True)
+    by Hillis-Steele doubling. Each partial product is rescaled to a total of 1 and its log scale carried."""
+    Q = C.copy()
+    L = np.zeros(C.shape[:-2])
+    n = C.shape[-3]
+    d = 1
+    while d < n:
+        P = Q[..., :-d, :, :] @ Q[..., d:, :, :]
+        Ln = L[..., :-d] + L[..., d:]
+        if reverse:
+            Q[..., :-d, :, :], L[..., :-d] = P, Ln
+        else:
+            Q[..., d:, :, :], L[..., d:] = P, Ln
+        sc = np.einsum("...ij->...", Q)                       # the total of each nonnegative product: one fast contraction
+        sc = np.where(sc > 0, sc, 1.0)
+        Q /= sc[..., None, None]
+        L += np.log(sc)
+        d *= 2
+    return Q, L
+
+
+def forward_backward(B: np.ndarray, pi: np.ndarray, A: np.ndarray, smooth: bool = True) -> dict:
+    """Filtered and smoothed state probabilities, the summed transition posteriors and the log-likelihood (of the
+    emission densities as given), for one sequence or a batch: B [..., T, K], pi [..., K], A [..., K, K]."""
+    T, K = B.shape[-2:]
+    a1 = pi * B[..., 0, :]
+    out: dict = {}
+    if T == 1:
+        alpha = a1[..., None, :]
+        ll = np.log(a1.sum(-1))
+    else:
+        C = A[..., None, :, :] * B[..., 1:, None, :]                       # C_t = A diag(b_t)
+        Qf, Lf = _scan(C)
+        rest = (a1[..., None, None, :] @ Qf)[..., 0, :]
+        alpha = np.concatenate([a1[..., None, :], rest], axis=-2)
+        ll = np.log(alpha[..., -1, :].sum(-1)) + Lf[..., -1]
+    alpha = alpha / alpha.sum(-1, keepdims=True)
+    out["alpha"], out["loglik"] = alpha, ll
+    if not smooth:
+        return out
+    if T == 1:
+        out["gamma"], out["xi"] = alpha, np.zeros(A.shape)
+        return out
+    Qb, _ = _scan(C, reverse=True)
+    beta = np.concatenate([Qb.sum(-1), np.ones(B.shape[:-2] + (1, K))], axis=-2)
+    beta = beta / beta.sum(-1, keepdims=True)
+    g = alpha * beta
+    out["gamma"] = g / g.sum(-1, keepdims=True)
+    xi = alpha[..., :-1, :, None] * A[..., None, :, :] * (B[..., 1:, :] * beta[..., 1:, :])[..., None, :]
+    xi = xi / xi.sum(axis=(-1, -2), keepdims=True)
+    out["xi"] = xi.sum(-3)
+    return out
+
+
 def hmm_fit(x: np.ndarray, K: int = 2, iters: int = 200, starts: int = 4, seed: int = 7, tol: float = 1e-6, min_sd: float = 1e-3) -> dict:
-    """Baum-Welch for a K-state Gaussian HMM; the best of several random starts. States are ordered by mean (state 0
-    the worst). Returns pi, A, mu, sd, the log-likelihood and BIC."""
+    """Baum-Welch for a K-state Gaussian HMM; the best of several random starts, all run at once as one batch (each
+    start stops updating when it converges, exactly as if run alone). States are ordered by mean (state 0 the worst).
+    Returns pi, A, mu, sd, the log-likelihood and BIC."""
     x = np.asarray(x, float)
     T = len(x)
     rng = np.random.default_rng(seed)
-    best = None
+    MU, SD = [], []
     for s in range(starts):
         q = np.sort(rng.choice(x, K, replace=False)) if s else np.quantile(x, (np.arange(K) + 0.5) / K)
-        mu = q.astype(float)
-        sd = np.full(K, x.std()) * (0.6 + 0.8 * rng.random(K) if s else 1.0)
-        A = np.full((K, K), 0.05 / max(1, K - 1))
-        np.fill_diagonal(A, 0.95)
-        if K == 1:
-            A = np.ones((1, 1))
-        pi = np.full(K, 1.0 / K)
-        ll_old = -np.inf
-        for _ in range(iters):
-            B = _norm_pdf(x, mu, sd) + 1e-300
-            alpha, c = _forward(B, pi, A)
-            beta = _backward(B, A, c)
-            g = alpha * beta
-            g /= g.sum(1, keepdims=True)
-            xi = A * (alpha[:-1].T @ (B[1:] * beta[1:] / c[1:, None]))
-            pi = g[0]
-            A = xi / np.maximum(xi.sum(1, keepdims=True), 1e-300)
-            w = g.sum(0)
-            mu = (g * x[:, None]).sum(0) / w
-            sd = np.sqrt(np.maximum((g * (x[:, None] - mu) ** 2).sum(0) / w, min_sd ** 2))
-            ll = float(np.log(c).sum())
-            if ll - ll_old < tol * abs(ll):
-                break
-            ll_old = ll
-        if best is None or ll > best["loglik"]:
-            o = np.argsort(mu)
-            best = {"K": K, "pi": pi[o], "A": A[np.ix_(o, o)], "mu": mu[o], "sd": sd[o], "loglik": ll}
+        MU.append(q.astype(float))
+        SD.append(np.full(K, x.std()) * (0.6 + 0.8 * rng.random(K) if s else 1.0))
+    mu, sd = np.array(MU), np.array(SD)
+    A0 = np.full((K, K), 0.05 / max(1, K - 1))
+    np.fill_diagonal(A0, 0.95)
+    if K == 1:
+        A0 = np.ones((1, 1))
+    A = np.repeat(A0[None], starts, 0)
+    pi = np.full((starts, K), 1.0 / K)
+    active = np.ones(starts, bool)
+    ll_old = np.full(starts, -np.inf)
+    ll_last = np.full(starts, -np.inf)
+    for _ in range(iters):
+        if not active.any():
+            break
+        ix = np.flatnonzero(active)                               # only the starts still moving are computed
+        z = (x[None, :, None] - mu[ix, None, :]) / sd[ix, None, :]
+        B = np.exp(-0.5 * z * z) / (sd[ix, None, :] * math.sqrt(2 * math.pi)) + 1e-300
+        mx = B.max(-1, keepdims=True)
+        F = forward_backward(B / mx, pi[ix], A[ix])
+        ll = F["loglik"] + np.log(mx[..., 0]).sum(-1)
+        g, xi = F["gamma"], F["xi"]
+        w = g.sum(1)
+        mu[ix] = (g * x[None, :, None]).sum(1) / w
+        sd[ix] = np.sqrt(np.maximum((g * (x[None, :, None] - mu[ix][:, None, :]) ** 2).sum(1) / w, min_sd ** 2))
+        pi[ix] = g[:, 0]
+        A[ix] = xi / np.maximum(xi.sum(-1, keepdims=True), 1e-300)
+        ll_last[ix] = ll
+        done = ll - ll_old[ix] < tol * np.abs(ll)
+        ll_old[ix[~done]] = ll[~done]
+        active[ix[done]] = False
+    best = None
+    for s in range(starts):
+        if best is None or ll_last[s] > best["loglik"]:
+            o = np.argsort(mu[s])
+            best = {"K": K, "pi": pi[s][o], "A": A[s][np.ix_(o, o)], "mu": mu[s][o], "sd": sd[s][o], "loglik": float(ll_last[s])}
     p = best["K"] * (best["K"] - 1) + 2 * best["K"] + (best["K"] - 1)       # transitions, means and sds, initial
     best["bic"] = -2 * best["loglik"] + p * math.log(T)
     return best
@@ -95,16 +166,12 @@ def hmm_fit(x: np.ndarray, K: int = 2, iters: int = 200, starts: int = 4, seed: 
 def hmm_filter(x: np.ndarray, m: dict) -> np.ndarray:
     """P(state at t | data up to t): causal regime probabilities."""
     B = _norm_pdf(np.asarray(x, float), m["mu"], m["sd"]) + 1e-300
-    alpha, _ = _forward(B, m["pi"], m["A"])
-    return alpha
+    return forward_backward(B / B.max(-1, keepdims=True), m["pi"], m["A"], smooth=False)["alpha"]
 
 
 def hmm_smooth(x: np.ndarray, m: dict) -> np.ndarray:
     B = _norm_pdf(np.asarray(x, float), m["mu"], m["sd"]) + 1e-300
-    alpha, c = _forward(B, m["pi"], m["A"])
-    beta = _backward(B, m["A"], c)
-    g = alpha * beta
-    return g / g.sum(1, keepdims=True)
+    return forward_backward(B / B.max(-1, keepdims=True), m["pi"], m["A"])["gamma"]
 
 
 def viterbi(x: np.ndarray, m: dict) -> np.ndarray:
@@ -273,14 +340,14 @@ def _regularize(S: np.ndarray, floor: float, shrink: float) -> np.ndarray:
 def mvhmm_fit(X: np.ndarray, K: int = 2, iters: int = 150, starts: int = 3, seed: int = 7, tol: float = 1e-6, init: dict | None = None,
               floor: float = 1e-6, shrink: float = 0.05, order_by: int = 0) -> dict:
     """Baum-Welch for a K-state HMM with full-covariance normal emissions (several assets at once, so the regime also
-    describes how they move together). Covariances are shrunk 5% toward their diagonal and floored. `init` warm-starts
-    from an earlier fit (refits then take a few iterations, and the states keep their meaning). States are ordered by
-    the mean of column `order_by` (state 0 the worst)."""
+    describes how they move together), every start run at once as one batch. Covariances are shrunk 5% toward their
+    diagonal and floored. `init` warm-starts from an earlier fit (refits then take a few iterations, and the states
+    keep their meaning). States are ordered by the mean of column `order_by` (state 0 the worst)."""
     X = np.asarray(X, float)
     T, d = X.shape
     rng = np.random.default_rng(seed)
-    best = None
     tries = ([init] if init is not None and init["K"] == K else []) + [None] * (starts if init is None or init["K"] != K else 1)
+    PI, AA, MU, SS = [], [], [], []
     for s, ini in enumerate(tries):
         if ini is not None:
             pi, A, mu, S = ini["pi"].copy(), ini["A"].copy(), ini["mu"].copy(), ini["S"].copy()
@@ -297,28 +364,36 @@ def mvhmm_fit(X: np.ndarray, K: int = 2, iters: int = 150, starts: int = 3, seed
             if K == 1:
                 A = np.ones((1, 1))
             pi = np.full(K, 1.0 / K)
-        ll_old = -np.inf
-        ll = -np.inf
-        for _ in range(iters):
-            B, mx = _scaled(_mv_logpdf(X, mu, S))
-            alpha, c = _forward(B, pi, A)
-            beta = _backward(B, A, c)
-            g = alpha * beta
-            g /= g.sum(1, keepdims=True)
-            xi = A * (alpha[:-1].T @ (B[1:] * beta[1:] / c[1:, None]))
-            pi = g[0]
-            A = xi / np.maximum(xi.sum(1, keepdims=True), 1e-300)
-            w = g.sum(0) + 1e-12
-            mu = (g.T @ X) / w[:, None]
-            S = np.stack([((X - mu[k]) * g[:, k:k + 1]).T @ (X - mu[k]) / w[k] for k in range(K)])
-            S = _regularize(S, floor, shrink)
-            ll = float(np.log(c).sum() + mx.sum())
-            if ll - ll_old < tol * abs(ll):
-                break
-            ll_old = ll
-        if best is None or ll > best["loglik"]:
-            o = np.argsort(mu[:, order_by])
-            best = {"K": K, "d": d, "pi": pi[o], "A": A[np.ix_(o, o)], "mu": mu[o], "S": S[o], "loglik": ll}
+        PI.append(pi); AA.append(A); MU.append(mu); SS.append(S)
+    pi, A, mu, S = np.array(PI), np.array(AA), np.array(MU, float), np.array(SS, float)
+    n = len(tries)
+    active = np.ones(n, bool)
+    ll_old = np.full(n, -np.inf)
+    ll_last = np.full(n, -np.inf)
+    for _ in range(iters):
+        if not active.any():
+            break
+        ix = np.flatnonzero(active)
+        lB = np.stack([_mv_logpdf(X, mu[s], S[s]) for s in ix])
+        mx = lB.max(-1, keepdims=True)
+        F = forward_backward(np.exp(lB - mx), pi[ix], A[ix])
+        ll = F["loglik"] + mx[..., 0].sum(-1)
+        g, xi = F["gamma"], F["xi"]
+        w = g.sum(1) + 1e-12                                                  # [n, K]
+        mu[ix] = np.einsum("stk,td->skd", g, X) / w[..., None]
+        D = X[None, None, :, :] - mu[ix][:, :, None, :]                       # [n, K, T, d]
+        S[ix] = _regularize(np.einsum("stk,sktd,skte->skde", g, D, D) / w[..., None, None], floor, shrink)
+        pi[ix] = g[:, 0]
+        A[ix] = xi / np.maximum(xi.sum(-1, keepdims=True), 1e-300)
+        ll_last[ix] = ll
+        done = ll - ll_old[ix] < tol * np.abs(ll)
+        ll_old[ix[~done]] = ll[~done]
+        active[ix[done]] = False
+    best = None
+    for s in range(n):
+        if best is None or ll_last[s] > best["loglik"]:
+            o = np.argsort(mu[s][:, order_by])
+            best = {"K": K, "d": d, "pi": pi[s][o], "A": A[s][np.ix_(o, o)], "mu": mu[s][o], "S": S[s][o], "loglik": float(ll_last[s])}
     p = K * (K - 1) + K * d + K * d * (d + 1) // 2 + (K - 1)
     best["bic"] = -2 * best["loglik"] + p * math.log(T)
     return best
@@ -332,16 +407,12 @@ def mvhmm_select(X: np.ndarray, Ks=(1, 2, 3), init: dict | None = None, **kw) ->
 
 def mvhmm_filter(X: np.ndarray, m: dict) -> np.ndarray:
     B, _ = _scaled(_mv_logpdf(np.asarray(X, float), m["mu"], m["S"]))
-    alpha, _ = _forward(B, m["pi"], m["A"])
-    return alpha
+    return forward_backward(B, m["pi"], m["A"], smooth=False)["alpha"]
 
 
 def mvhmm_smooth(X: np.ndarray, m: dict) -> np.ndarray:
     B, _ = _scaled(_mv_logpdf(np.asarray(X, float), m["mu"], m["S"]))
-    alpha, c = _forward(B, m["pi"], m["A"])
-    beta = _backward(B, m["A"], c)
-    g = alpha * beta
-    return g / g.sum(1, keepdims=True)
+    return forward_backward(B, m["pi"], m["A"])["gamma"]
 
 
 def mvviterbi(X: np.ndarray, m: dict) -> np.ndarray:

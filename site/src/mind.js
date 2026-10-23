@@ -79,6 +79,45 @@
     }
     return keep ? { r, hist } : r;
   }
+  /* many questions at once (mind.Mind.spread_many): column q of R is the activation for seed set q, laid out
+     node-major (R[k * Q + q]) so every edge updates all questions in one pass; each column equals mindSpread exactly */
+  function mindSpreadMany(M, sets) {
+    mindSpread(M, sets[0] || [[0, 1]]);                       // builds the typed arrays once
+    const N = M.N, Q = sets.length, a = MP.alpha, C = M.csr;
+    const S0 = new Float64Array(N * Q);
+    sets.forEach((seeds, q) => { const tot = seeds.reduce((x, s) => x + s[1], 0); seeds.forEach(([i, s]) => { S0[i * Q + q] += s / tot; }); });
+    let R = Float64Array.from(S0), nR = new Float64Array(N * Q);
+    const dang = new Float64Array(Q);
+    for (let step = 0; step < MP.steps; step++) {
+      for (let k = 0; k < N * Q; k++) nR[k] = (1 - a) * S0[k];
+      dang.fill(0);
+      for (let d = 0; d < C.dang.length; d++) { const o = C.dang[d] * Q; for (let q = 0; q < Q; q++) dang[q] += R[o + q]; }
+      for (let k = 0; k < C.m; k++) {
+        const oi = C.I[k] * Q, oj = C.J[k] * Q, wi = C.WI[k], wj = C.WJ[k];
+        for (let q = 0; q < Q; q++) { nR[oj + q] += a * (wi * R[oi + q]); nR[oi + q] += a * (wj * R[oj + q]); }
+      }
+      for (let q = 0; q < Q; q++) if (dang[q]) for (let k = 0; k < N; k++) nR[k * Q + q] += a * dang[q] * S0[k * Q + q];
+      const t = R; R = nR; nR = t;
+    }
+    return R;
+  }
+  function mindColumn(R, Q, q, N) { const r = new Float64Array(N); for (let k = 0; k < N; k++) r[k] = R[k * Q + q]; return r; }
+  /* the mind's verdict on every axis at once (mind.Mind.board) */
+  function mindBoard() {
+    const M = mindInit(), axes = MD.axes, names = Object.keys(axes);
+    const texts = names.map((a) => axes[a].bull), sets = texts.map((t) => mindRecall(M, t));
+    const ok = sets.map((s, q) => (s.length ? q : -1)).filter((q) => q >= 0);
+    if (!ok.length) return [];
+    const R = mindSpreadMany(M, ok.map((q) => sets[q])), Q = ok.length, r6 = (x) => Math.round(x * 1e6) / 1e6;
+    const out = [];
+    ok.forEach((q, c) => {
+      const a = names[q], V = mindWeigh(M, a, mindColumn(R, Q, c, M.N), texts[q]);
+      if (!V.rows.length) return;
+      out.push({ axis: a, title: axes[a].title, claim: axes[a].bull, p_bull: r6(V.p_bull), lo: r6(V.lo), hi: r6(V.hi), n: V.rows.length, hinge: V.hinge ? V.hinge.text : null, book: axes[a].book });
+    });
+    out.sort((x, y) => Math.abs(y.p_bull - 0.5) - Math.abs(x.p_bull - 0.5));
+    return out;
+  }
   function mindChains(M, r, k = 3, prefer = []) {
     const adj = new Map();
     M.causal.forEach(([a, b, w]) => { if (!adj.has(a)) adj.set(a, []); adj.get(a).push([b, w]); });

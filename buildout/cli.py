@@ -144,6 +144,10 @@ def main(argv: list[str] | None = None) -> None:
     hs.add_argument("query")
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
+    bo = sub.add_parser("board", help="the mind's verdict on every claim it weighs, thought about at once as one matrix")
+    bo.add_argument("--json", action="store_true")
+    rel = sub.add_parser("related", help="nodes nearest a node in the mind's 64-number spectral map")
+    rel.add_argument("node", help="a node id such as c:kalman, or a name")
     pfp = sub.add_parser("portfolio", help="the portfolio engine: stocks, Treasuries, gold and cash from regimes, a learner over policies, ten simulated years")
     pfp.add_argument("--out", default="out")
     pfp.add_argument("--quick", action="store_true")
@@ -417,6 +421,28 @@ def main(argv: list[str] | None = None) -> None:
         print(h["name"], "\n ", h["text"])
         for r in h["related"]:
             print(f"  [{r['type']}] {r['name']}" + (f": next 12 months {r['ret_next']:+.0%}" if r.get("ret_next") is not None else ""))
+        return
+    if a.cmd in ("board", "related"):
+        import time as _time
+        from . import mind as mnd, voices
+        G = json.loads((mnd.ASSETS / "mind.json").read_text())
+        M = mnd.Mind(G, voices.Library(voices.load()))
+        if a.cmd == "board":
+            t0 = _time.perf_counter()
+            B = M.board()
+            if a.json:
+                print(json.dumps(B, indent=1))
+                return
+            print(f"{len(B)} claims, thought about at once in {(_time.perf_counter() - t0) * 1000:.0f} ms")
+            for r in B:
+                print(f"  {r['p_bull']:4.0%}  {r['claim']}  ({r['lo']:.0%} to {r['hi']:.0%}, {r['n']} signals)")
+            return
+        nid = a.node if a.node in M.idx else next((n["id"] for n in M.nodes if n["n"].lower() == a.node.lower()), None)
+        if nid is None:
+            print("no such node; try an id like c:kalman or a concept's name")
+            return
+        for r in M.related(nid, 12):
+            print(f"  {r['similarity']:.3f}  {r['name']}  [{r['kind']}]")
         return
     if a.cmd == "portfolio":
         from . import atlas, labs, portfolio

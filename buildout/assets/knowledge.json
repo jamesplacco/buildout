@@ -13279,6 +13279,86 @@
     "AI financing"
    ],
    "checked": "confirmed on the issuer's or publisher's page by the checker, who added it (a single check)"
+  },
+  {
+   "id": "pearl-mechanism-alea",
+   "cluster": "distribution",
+   "kind": "fact",
+   "title": "Pearl: proof of work by matrix multiplication",
+   "text": "Pearl is a Bitcoin-style Layer 1 that \"replaces SHA-256 hashing with matrix multiplication as its proof of work function.\" \"The chain has a fixed 2.1B PRL supply and targets 194-second blocks.\" Miners commit to their input matrices first, and the result is verifiable by other nodes without re-running the full workload.",
+   "as_of": "2026-06-10",
+   "source_title": "Pearl: Proof of Useful Work for AI",
+   "source_url": "https://www.alearesearch.io/newsletters/pearl-proof-of-useful-work-for-ai",
+   "publisher": "Alea Research",
+   "primary": false,
+   "verification": "on-source-paraphrased",
+   "concepts": [
+    "proof of work",
+    "matrix multiplication",
+    "AI compute",
+    "GPU"
+   ],
+   "checked": "confirmed on the publisher's page by the checker, who added it (a single check)"
+  },
+  {
+   "id": "pearl-together-alea",
+   "cluster": "distribution",
+   "kind": "fact",
+   "title": "A Pearl-powered inference endpoint at a discount",
+   "text": "In May 2026 Together AI launched a Pearl-powered endpoint for Gemma-4-31B-it-Pearl priced at a discount of 25% or more to standard rates; Pearl did not yet have a marketplace where buyers pay PRL for inference.",
+   "as_of": "2026-06-10",
+   "source_title": "Pearl: Proof of Useful Work for AI",
+   "source_url": "https://www.alearesearch.io/newsletters/pearl-proof-of-useful-work-for-ai",
+   "publisher": "Alea Research",
+   "primary": false,
+   "verification": "on-source-paraphrased",
+   "concepts": [
+    "AI inference",
+    "pricing",
+    "AI compute"
+   ],
+   "checked": "confirmed on the publisher's page by the checker, who added it (a single check)"
+  },
+  {
+   "id": "pearl-duplex-bankless",
+   "cluster": "distribution",
+   "kind": "fact",
+   "title": "Pearl's duplex work: the same matmuls earn twice",
+   "text": "\"That work is matrix multiplications, the core math behind AI inference (running a trained model to answer requests).\" \"AI revenue helps pay for the machines; PRL rewards become extra income.\" Bankless describes Pearl as a fork of Bitcoin that launched in April, with launch inference prices up to roughly 75% below a major provider's standard rates, potentially subsidized by mining rewards.",
+   "as_of": "2026-10-16",
+   "source_title": "Pearl and the Security Budget Bitcoin Can't Solve",
+   "source_url": "https://www.bankless.com/read/who-pays-for-proof-of-work-pearl-has-an-answer.md",
+   "publisher": "Bankless (David Christopher)",
+   "primary": false,
+   "verification": "on-source-paraphrased",
+   "concepts": [
+    "proof of work",
+    "matrix multiplication",
+    "AI inference",
+    "mining"
+   ],
+   "checked": "confirmed on the publisher's page by the checker, who added it (a single check)"
+  },
+  {
+   "id": "pearl-issuance-bankless",
+   "cluster": "distribution",
+   "kind": "stat",
+   "title": "Pearl's issuance front-loads supply",
+   "text": "Pearl's issuance \"follows a smooth, polynomial decay curve rather than Bitcoin's four-year halvings.\" \"About half its supply is mined in the first four years\", so inflation falls each year, to roughly 30% by year three and about 11% by year five.",
+   "value": 50,
+   "unit": "percent of supply in four years",
+   "as_of": "2026-10-16",
+   "source_title": "Pearl and the Security Budget Bitcoin Can't Solve",
+   "source_url": "https://www.bankless.com/read/who-pays-for-proof-of-work-pearl-has-an-answer.md",
+   "publisher": "Bankless (David Christopher)",
+   "primary": false,
+   "verification": "on-source-paraphrased",
+   "concepts": [
+    "token supply",
+    "dilution",
+    "mining"
+   ],
+   "checked": "confirmed on the publisher's page by the checker, who added it (a single check)"
   }
  ]
 }

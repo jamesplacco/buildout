@@ -32986,6 +32986,42 @@
 "rel": "related:model-limitations,gfc-2008,specification-error",
 "formula": null,
 "aliases": "dsge,dynamic stochastic general equilibrium"
+},
+{
+"id": "matrix-multiplication",
+"name": "Matrix multiplication",
+"cluster": "ml",
+"def": "Combining two grids of numbers so each output entry is a weighted sum of a row of the first against a column of the second. A neural network's layer, a graph walk and a portfolio's return across scenarios are all matrix products, which is why GPUs, built to do many of them at once, run AI.",
+"rel": "related:gpu,tensor-core,neural-network,inference",
+"formula": "C_ij = sum_k A_ik B_kj",
+"aliases": "matmul,matrix product,GEMM"
+},
+{
+"id": "parallel-prefix-scan",
+"name": "Parallel prefix scan",
+"cluster": "ml",
+"def": "Computing every running total (or running product) of a sequence in about log2 of its length rounds by combining partial results that double in span each round, possible whenever the operation is associative. Matrix products are, so a step-by-step recursion such as a filter can be run as a scan of matrix multiplications.",
+"rel": "related:matrix-multiplication,hidden-markov-model",
+"formula": "P_t = M_1 M_2 ... M_t for every t, in log2(T) rounds",
+"aliases": "prefix sum,associative scan,Hillis-Steele scan"
+},
+{
+"id": "personalized-pagerank",
+"name": "Personalized PageRank",
+"cluster": "ml",
+"def": "A random walk on a graph that restarts at chosen seed nodes with a fixed probability each step; how often it visits each node ranks the nodes by their connection to the seeds. Each step is one sparse matrix-vector product, and many seed sets can be walked at once as one matrix product.",
+"rel": "related:matrix-multiplication,embedding",
+"formula": "r = (1 - a) s + a P r",
+"aliases": "random walk with restart,spreading activation"
+},
+{
+"id": "proof-of-useful-work",
+"name": "Proof of useful work",
+"cluster": "crypto",
+"def": "A blockchain consensus design in which the computation miners must do to add blocks is itself useful, such as the matrix multiplications of AI inference, instead of hashing done only to secure the chain. Its claims rest on cheap verification of the work and on whether the useful output finds paying buyers.",
+"rel": "is_a:proof-of-work; related:matrix-multiplication,inference,gpu",
+"formula": "",
+"aliases": "PoUW,useful proof of work,Pearl"
 }
 ]
 }
