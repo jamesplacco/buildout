@@ -123,6 +123,9 @@ REGISTRY: list[Engine] = [
     Engine("market", "Technicals and fundamentals", [], ["technicals.json", "statements.json"], "technicals.py", False,
            "Daily OHLCV from the best available source: every indicator, signals, levels and an event study per ticker; SEC statements, ratios and scores"),
     Engine("rl", "Reinforcement-learning sizing", [], ["rl.json"], "rl.py", False, "Fitted Q iteration over trend, volatility, valuation and drawdown states, walk-forward from 1940"),
+    Engine("portfolio", "Portfolio engine", [], ["portfolio.json"], "portfolio.py", False,
+           "Stocks, Treasuries, gold and cash from a three-asset regime model, utility-optimal mixes in a risk budget, eight policies walked forward, "
+           "a learner over policies, a regime-switching bootstrap of ten years and eight replayed drawdowns"),
     Engine("decide", "Decision engine", [], ["decision.json"], "decide.py", False,
            "Data to decision: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, a Kalman stock-bond beta, "
            "dynamic model averaging, utility-optimal exposure inside a risk budget, an evidence gate, a hedge selector and a conservative RL check, walked forward from 1940"),

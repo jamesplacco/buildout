@@ -214,6 +214,12 @@ RX_YEAR = r"\b(18[7-9]\d|19\d\d|20[0-2]\d)\b"
 RX_NOW = r"\b(?:months? like (?:now|today)|like today|historical analogs?|analog months?|now in history|history rhymes?)\b"
 RX_HIST = r"\b(?:what happened|happened in|in history|history of|remember|back in|like in|episode|crash of|panic of)\b"
 MON3 = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+RX_DECIDE = (r"\b(?:what should (?:i|we|the (?:model )?book) (?:do|hold|own|buy)|how much (?:in )?(?:stocks?|equit(?:y|ies))|(?:stock|equity|market) exposure|"
+             r"allocat(?:e|ion)|position siz(?:e|ing)|decision engine|(?:what|which) regime|regime (?:are we|now|today)|risk[- ]on|risk[- ]off|stay invested|de-?risk)\b")
+RX_PSTRESS = (r"(?:stress(?:ed)?|bear|crash|recession|risk[- ]off)\s*(?:regime\s*)?(?:odds|probability|chance|risk)?\s*(?:of|at|to|is|are|were|was|be|hits?|reach(?:es)?|rises? to|rose to|=)?\s*(\d{1,3}(?:\.\d+)?)\s*%"
+              r"|(\d{1,3}(?:\.\d+)?)\s*%\s*(?:odds|chance|probability)\s*(?:of\s*)?(?:a\s*|the\s*)?(?:stress(?:ed)?|bear|crash|recession|risk[- ]off)")
+RX_R12 = r"(?:forecast|expected (?:real )?return|returns? next year|next year's return)\s*(?:of|at|is|to|=)?\s*([+\-\u2212]?\d{1,2}(?:\.\d+)?)\s*%"
+RX_GAMMA = r"risk aversion\s*(?:of|at|is|to|=)?\s*(\d{1,2}(?:\.\d+)?)"
 RX_EXPLAIN = r"^\s*(?:what\s+is|what's|whats|what\s+are|define|explain|meaning\s+of|tell\s+me\s+about)\b"
 ENGINE_ALIAS = {"book": "pipeline", "brain-robust": "brain_robust", "causal": "causal_stats", "robust-bt": "analytics.robust_bt",
                 "options": "analytics.options", "trading": "microstructure", "reason": "reasoner"}
@@ -672,7 +678,9 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
-    ("decision", "Decision engine", "One pipeline from 156 years of data to today's sized exposure and hedge: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, model averaging, a risk budget and an evidence gate, walked forward from 1940.",
+    ("portfolio", "Portfolio engine", "Stocks, 10-year Treasuries, gold and cash decided together: regimes with their stock-bond correlation, eight policies since 1940, a learner over them, ten simulated years and eight replayed drawdowns.",
+     ["c:strategic-asset-allocation", "c:tactical-asset-allocation", "c:risk-parity", "c:sixty-forty", "c:stock-bond-correlation", "c:monte-carlo", "c:gold"]),
+    ("decision", "Decision engine", "Stocks, Treasuries and gold decided together from regimes, a learner over whole policies, ten years simulated, and one pipeline from 156 years of data to today's sized exposure and hedge: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, model averaging, a risk budget and an evidence gate, walked forward from 1940.",
      ["c:hidden-markov-model", "c:bayesian-model-averaging", "c:neural-network", "c:crra-utility", "c:expected-shortfall", "c:reinforcement-learning", "c:kalman", "c:stacking"]),
     ("bonds", "Bonds, simply", "Set the 10-year and 30-year yields and see every Treasury ETF repriced bond by bond: price, 12-month return, break-even and what it means for stocks.", ["c:duration", "c:convexity", "c:tlt", "c:bond-etf", "c:yield-curve"]),
     ("rates", "Rates and curves", "The Treasury curve through 2026, spreads, the forward curve and liquidity.", ["c:yield-curve", "c:term-premium", "c:bear-steepening"]),
@@ -796,6 +804,53 @@ def v19_nodes(node, edge, dec) -> None:
         edge("x:decision", cid, "related", 0.5)
 
 
+def v20_nodes(node, edge, pf) -> None:
+    """v0.20: the portfolio engine's regimes, policies, simulation and today's mix."""
+    if not pf:
+        return
+    n = pf["now"]
+    mix = lambda a: ", ".join(f"{v:.0%} {k}" for k, v in zip(("stocks", "Treasuries", "gold"), a) if v > 1e-9) or "all cash"
+    node("x:portfolio", "model", "Today's portfolio decision (model book)", "core",
+         f"Stocks, 10-year Treasuries, gold and cash decided together: {mix(n['decision'])}. The regime optimum is {mix(n['optimum'])}; the gate moves {n['gate']:.0%} of the way "
+         f"toward the best-evidenced policy ({n['gate_policy'].replace('_', ' ')}). Research only; never an order.",
+         ["portfolio decision", "asset allocation", "allocation", "stocks bonds gold", "what mix"])
+    edge("x:portfolio", "e:portfolio", "implemented_by", 0.9)
+    edge("x:portfolio", "x:decision", "related", 0.8)
+    edge("d:decision", "x:portfolio", "routes", 0.8)
+    for k, st in enumerate(n["states"]):
+        node(f"pf:state:{k}", "model", f"Regime: {st['name'].lower()}", "core",
+             f"A state of stocks, Treasuries and gold together (hidden Markov model, 1871 to {pf['end']}): stocks {st['mu'][0]:+.1%} a year real with {st['vol'][0]:.0%} volatility, "
+             f"Treasuries {st['mu'][1]:+.1%}, gold {st['mu'][2]:+.1%}; stock-bond correlation {st['corr_sb']:+.2f}; it lasts about {st['persistence_months']:.0f} months. "
+             f"Odds for next month: {n['next'][k]:.0%}.", [st["name"].lower() + " regime"])
+        edge(f"pf:state:{k}", "x:portfolio", "part_of", 0.7)
+        edge(f"pf:state:{k}", "c:hidden-markov-model", "is_a", 0.6)
+        edge(f"pf:state:{k}", "c:stock-bond-correlation", "related", 0.6)
+    for i, f in enumerate(pf["findings"]):
+        node(f"pf:{i}", "finding", f[:80], "core", f, [])
+        edge(f"pf:{i}", "x:portfolio", "related", 0.7)
+    for cid in ("c:strategic-asset-allocation", "c:tactical-asset-allocation", "c:risk-parity", "c:sixty-forty", "c:gold", "c:stock-bond-correlation", "c:monte-carlo",
+                "c:minimax-regret", "c:diversification", "c:model-stress-test"):
+        edge("x:portfolio", cid, "related", 0.5)
+
+
+def v20_signals(K: dict, pf: dict | None) -> list[dict]:
+    if not pf:
+        return []
+    n, P = pf["now"], pf["perf"]
+    cur = max(range(len(n["next"])), key=lambda i: n["next"][i])
+    st = n["states"][cur]
+    S = [{"id": "s:pf-corr", "axis": "bonds_rates", "sign": 1 if st["corr_sb"] < 0 else -1, "s": round(min(0.4, abs(st["corr_sb"])), 6), "rel": 0.6, "group": "portfolio",
+          "text": f"The portfolio engine's regime model puts next month in its {st['name'].lower()} state ({n['next'][cur]:.0%}), where stocks and 10-year Treasuries have moved with a "
+                  f"correlation of {st['corr_sb']:+.2f}: " + ("bonds have hedged stocks there." if st["corr_sb"] < 0 else "bonds have not hedged stocks there."),
+          "refs": ["e:portfolio", "x:portfolio"], "flip": "A shift into a state where the stock-bond correlation is negative.", "targets": ["c:stock-bond-correlation"]},
+         {"id": "s:pf-learner", "axis": "edge:ml", "sign": 1 if P["regime"]["sharpe"] > P["hold"]["sharpe"] else -1, "s": 0.5, "rel": 0.8, "group": "portfolio",
+          "text": f"Timing stocks, Treasuries and gold by regime, walked forward since {pf['start'][:4]}, earned a Sharpe of {P['regime']['sharpe']:.2f} against {P['hold']['sharpe']:.2f} for holding "
+                  f"stocks and {P['sixty_forty']['sharpe']:.2f} for 60/40; a learner that weights six whole policies by their record reached {P['meta']['sharpe']:.2f} with a worst drawdown of "
+                  f"{P['meta']['maxdd']:.0%} against {P['hold']['maxdd']:.0%}. Diversifying across policies did better than predicting regimes.",
+          "refs": ["e:portfolio", "x:portfolio"], "flip": "Regime timing beating 60/40 out of sample.", "targets": ["c:tactical-asset-allocation"]}]
+    return S
+
+
 def v19_signals(K: dict, dec: dict | None) -> list[dict]:
     """v0.19: the decision engine's regime read, its forecasts and its own record."""
     if not dec:
@@ -856,6 +911,25 @@ def v17_signals(K: dict, bonds: dict | None, cx: dict | None) -> list[dict]:
             f"Corrected for Stambaugh's small-sample bias, the CAPE slope shrinks from {st['slope']:+.3f} to {st['slope_corrected']:+.3f} a year per log point, and its p-value rises from {st['p_naive']:.2f} to {st['p_bias_aware']:.2f}: valuation still points down, more weakly.",
             ["e:complexity", "c:stambaugh-bias", "c:cape"], "The bias-corrected slope losing its sign.", ["c:cape"])
     return S
+
+
+def decision_compact(dec: dict, pf: dict | None) -> dict:
+    """What the mind needs to answer decision questions and recompute them: the engine's mixture, weights, grid and gate
+    (the shape of decision.json's "now", which the page's dxlive.js reads too) and the portfolio engine's call."""
+    n = dec["now"]
+    keep = ("mixture", "tilt", "gamma", "es_limit", "grid", "borrow", "gh", "exposure", "engine_exposure", "capped")
+    out = {k: n[k] for k in keep if k in n}
+    out["models"] = {"weights": n["models"]["weights"]}
+    out["regime"] = {k: n["regime"][k] for k in ("K", "worst", "next", "now")}
+    out["forecasts"] = {"now": {"mean": n["forecasts"]["now"]["mean"]}, "stacked": n["forecasts"]["stacked"]}
+    out["gate"] = {k: n["gate"][k] for k in ("value", "t", "n_tried")}
+    out["hedge"] = {"name": n["hedge"]["name"], "context": n["hedge"]["context"]}
+    out["changepoint"] = {"recent": n["changepoint"]["recent"]}
+    if pf:
+        p = pf["now"]
+        out["portfolio"] = {"decision": p["decision"], "optimum": p["optimum"], "gate": p["gate"], "gate_policy": p["gate_policy"], "next": p["next"],
+                            "states": [{"name": s["name"], "corr_sb": s["corr_sb"]} for s in p["states"]], "meta_mix": p["meta_mix"]}
+    return out
 
 
 def bonds_compact(b: dict) -> dict:
@@ -1048,7 +1122,7 @@ def propagate(net: dict, fixed: dict | None = None) -> list[float]:
 def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
           research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
           positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None,
-          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None, dec: dict | None = None) -> dict:
+          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None, dec: dict | None = None, pf: dict | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -1261,12 +1335,13 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
                 edge(f"as:{i}", "e:" + mod.replace("/", "."), "related", 0.6)
     v17_nodes(node, edge, nodes, idx, chron, bonds, cx)
     v19_nodes(node, edge, dec)
+    v20_nodes(node, edge, pf)
     # signals
     K = {it["id"]: it for it in know}
     cape_pct = None
     if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
         cape_pct = labs_L["valuation"]["cape"]["percentile"]
-    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx) + v19_signals(K, dec)
+    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx) + v19_signals(K, dec) + v20_signals(K, pf)
     for s in sigs:
         ax = s["axis"]
         title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]
@@ -1280,6 +1355,8 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
          "groups": GROUP_NAMES, "params": params(), "net": network(atlas, sigs)}
     if bonds:
         G["bonds"] = bonds_compact(bonds)
+    if dec and dec.get("now", {}).get("mixture"):
+        G["decision"] = decision_compact(dec, pf)
     if layout:
         place(G)
     return G
@@ -1296,7 +1373,8 @@ def params() -> dict:
     return {"alpha": ALPHA, "steps": STEPS, "seeds": SEEDS, "seed_floor": SEED_FLOOR, "w_bm": W_BM, "w_alias": W_ALIAS, "doc_w": list(DOC_W), "kind_recall": KIND_RECALL, "qstop": QSTOP,
             "axis_topic_boost": AXIS_TOPIC_BOOST, "explain_ratio": EXPLAIN_RATIO, "hedges": HEDGE_NAMES, "whatif_up": WHATIF_UP, "whatif_down": WHATIF_DOWN,
             "whatif_split": WHATIF_SPLIT, "rx_whatif": RX_WHATIF, "rx_explain": RX_EXPLAIN, "rx_book": RX_BOOK, "net_cap": NET_CAP,
-            "rx_month": RX_MONTH, "rx_year": RX_YEAR, "rx_now": RX_NOW, "rx_hist": RX_HIST}
+            "rx_month": RX_MONTH, "rx_year": RX_YEAR, "rx_now": RX_NOW, "rx_hist": RX_HIST, "rx_decide": RX_DECIDE, "rx_pstress": RX_PSTRESS, "rx_r12": RX_R12,
+            "rx_gamma": RX_GAMMA}
 
 
 @cache.memo("mind.group_layout", deps=("buildout.atlas",))
@@ -1643,6 +1721,40 @@ class Mind:
             out["stocks"] = {"regime": now["regime"], "infl36": now["infl36"], "per_point": r["per_point"], "t": r["t"], "move": round(r["per_point"] * out["d10"] * 100, 6)}
         return out
 
+    def decision(self, text: str) -> dict | None:
+        """A question about what the book should do, the regime, or a what-if on the decision engine's inputs ("what if
+        the odds of a stressed regime were 50%?", "with a forecast of -5%?", "at a risk aversion of 5?"): today's call and,
+        when an input is named, the call recomputed with it (decide.what_if; dxlive.js in the page)."""
+        from . import decide
+        D = self.G.get("decision")
+        if not D:
+            return None
+        low = text.lower()
+        ps = re.search(RX_PSTRESS, low)
+        r12 = re.search(RX_R12, low)
+        ga = re.search(RX_GAMMA, low)
+        if not (re.search(RX_DECIDE, low) or ps or ga or (r12 and re.search(r"\b(?:stocks?|exposure|book|decision|engine)\b", low))):
+            return None
+        kw: dict = {}
+        if ps:
+            kw["p_stress"] = min(1.0, float(ps.group(1) or ps.group(2)) / 100)
+        if r12:
+            kw["r12"] = float(r12.group(1).replace("\u2212", "-")) / 100
+        if ga:
+            kw["gamma"] = max(0.5, min(30.0, float(ga.group(1))))
+        base = decide.what_if(D)
+        out = {"exposure": D["exposure"], "optimum": base["optimum"], "gate": D["gate"]["value"], "t": D["gate"]["t"], "n_tried": D["gate"]["n_tried"],
+               "p_stress": D["regime"]["next"][D["regime"]["worst"]], "changepoint": D["changepoint"]["recent"], "hedge": D["hedge"], "stacked": D["forecasts"]["stacked"]}
+        if kw:
+            w = decide.what_if(D, **kw)
+            out["whatif"] = {**{k: round(v, 6) for k, v in kw.items()}, "optimum": w["optimum"], "decision": w["decision"], "capped": w["capped"]}
+        if D.get("portfolio"):
+            p = D["portfolio"]
+            cur = max(range(len(p["next"])), key=lambda i: p["next"][i])
+            out["portfolio"] = {"decision": p["decision"], "optimum": p["optimum"], "gate_policy": p["gate_policy"], "state": p["states"][cur]["name"],
+                                "p_state": p["next"][cur], "corr_sb": p["states"][cur]["corr_sb"]}
+        return out
+
     def history(self, text: str) -> dict | None:
         """A question about a month, a year, an episode or 'months like now': the chronicle node and what it links to
         (the episodes a year sits in, a month's analogs and what followed them)."""
@@ -1690,6 +1802,9 @@ class Mind:
         b = self.bonds(text)
         if b:
             res["bonds"] = b
+        d = self.decision(text)
+        if d:
+            res["engine"] = d
         return res
 
     def _think_all(self, text: str) -> dict:
@@ -1803,7 +1918,8 @@ def compact(G: dict) -> dict:
                 d[k] = n[k]
         nodes.append(d)
     return {"nodes": nodes, "edges": G["edges"], "causal": G["causal"], "signals": G["signals"], "axes": G["axes"], "types": G["types"],
-            "groups": G["groups"], "params": G["params"], "net": G["net"], **({"bonds": G["bonds"]} if G.get("bonds") else {})}
+            "groups": G["groups"], "params": G["params"], "net": G["net"], **({"bonds": G["bonds"]} if G.get("bonds") else {}),
+            **({"decision": G["decision"]} if G.get("decision") else {})}
 
 
 def build_from_dir(out: Path | str) -> dict:

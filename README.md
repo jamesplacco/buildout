@@ -3,6 +3,26 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.20 widens the decision from a stock weight to a portfolio and adds a layer that chooses between whole
+decision processes (`portfolio.py`, desk "Portfolio", `python -m buildout portfolio`, MCP tool `portfolio_engine`). Real
+monthly returns on stocks, 10-year Treasuries (Shiller's long rate spliced with the GS10 series to 2026) and gold feed a
+hidden Markov model of all three together (`infer.mvhmm_*`: full covariance, warm-started refits, states by BIC), so each
+regime carries its own stock-bond correlation. Mixes on a grid are chosen by expected CRRA utility, integrated exactly on
+343 Gauss-Hermite nodes per state, inside the 12% expected-shortfall budget. Eight policies are walked forward since 1940
+with costs (hold, 60/40, risk parity, the trend rule, the regime allocation, its stock-only twin, the gated engine and a
+Hedge learner over six of them with a learning rate fixed in advance). Results: timing the three assets by regime earned a
+Sharpe of 0.50 (worst drawdown 62%) against 0.64 for holding stocks (52%) and 0.65 for 60/40 (37%); the learner reached
+0.66 with a worst drawdown of 41%. Deflated for the nine policies tried, the chance the best has a real edge over holding
+is 1%, so the decision stays at all stocks. Next month is most likely the calm-bull state (94%), where stocks and
+Treasuries have moved together (correlation +0.15). A regime-switching bootstrap simulates ten years 5,000 times from
+today's odds with real historical months: all stocks reach a median 2.12x real (5% to 95%: 0.93x to 4.60x) with a 38%
+chance of a drawdown deeper than 30%; 60/40 1.75x (1.05x to 2.90x) with 8%. Today's mixes are replayed through eight
+drawdowns since 1929. The decision engine also runs in the page (`site/src/dxlive.js`, checked against
+`decide.what_if` to 1e-12): sliders for the stressed regime's odds, the 12-month forecast, risk aversion, the risk budget
+and the evidence behind the gate. The mind answers "what should the book do", "what regime are we in" and what-ifs on
+them in Python and in the page. Under the hood is now a code reader (taller, wrapped, highlighted, a definition jump
+list, copy, full screen), and a reviewer agent's 25 findings across all 41 desks were worked through.
+
 Version 0.19 turns the harness into a decision engine: one pipeline from data to a sized, explained decision, walked
 forward from 1940 (`decide.py`, desk "Decision engine", `python -m buildout decide`, MCP tool `decision_engine`).
 Data: 1,868 months of US stocks with the 10-year yield and a 10-year bond's return built from it. Features: the ML lab's
@@ -489,6 +509,7 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `nn.py` | Multi-layer perceptrons and deep ensembles in numpy: gradient-checked backpropagation, dropout, weight decay, Adam, early stopping on the newest data, mse, pinball and logistic losses, purged walk-forward |
 | | `infer.py` | Gaussian hidden Markov model (Baum-Welch, filter, smoother, Viterbi, BIC), Bayesian online changepoint detection, Kalman time-varying regression, stacking, mixture risk |
 | | `decide.py` | The decision engine: walked-forward regimes and forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
+| | `portfolio.py` | The portfolio engine: three-asset regimes, utility-optimal mixes in a risk budget, eight policies walked forward, the Hedge learner, a regime-switching bootstrap and stress replays |
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
 | | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |
 | | `damodaran.py` | Implied equity risk premium; narrative-to-numbers DCF with fading growth, target margin, sales-to-capital reinvestment and failure odds |

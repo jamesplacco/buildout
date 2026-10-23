@@ -64,6 +64,14 @@
     return t;
   }
   const boxWidth = (box) => Math.max(300, box.clientWidth || 0);
+  // a chart drawn while its desk is hidden gets the 300px fallback width and would be scaled up later; redraw it once
+  // the box has a real width
+  function redrawWhenSized(box, fn) {
+    if (!box || box.clientWidth || typeof ResizeObserver !== "function" || box._sizedWait) return;
+    const ro = new ResizeObserver(() => { if (box.clientWidth) { ro.disconnect(); box._sizedWait = null; fn(); } });
+    box._sizedWait = ro;
+    ro.observe(box);
+  }
 
   /* ---------- tooltip: values lead, labels follow ---------- */
   const tip = $("#tip");
@@ -95,7 +103,16 @@
     head.forEach((c, i) => tr.append(h("th", i >= leftCols ? "r" : null, c)));
     thead.append(tr);
     const tb = h("tbody");
-    rows.forEach((r) => { const row = h("tr"); r.forEach((c, i) => row.append(h("td", i >= leftCols ? "r" : null, c))); tb.append(row); });
+    rows.forEach((r) => {
+      const row = h("tr");
+      r.forEach((c, i) => {
+        const na = c === "n/a" || c === "NaN" || c === "undefined" || c === "null";
+        const td = h("td", (i >= leftCols ? "r" : "") + (na ? " na" : "") || null, na ? "\u2013" : c);
+        if (na) td.title = "Not available in this data";
+        row.append(td);
+      });
+      tb.append(row);
+    });
     table.append(thead, tb);
   }
   function tableBlock(head, rows, leftCols = 1) {
@@ -113,6 +130,7 @@
   /* ---------- generic XY chart with crosshair ---------- */
   function xyChart(box, cfg) {
     if (!box) return;
+    redrawWhenSized(box, () => xyChart(box, cfg));
     const W = boxWidth(box), H = cfg.height || 240, padL = cfg.padL || 48, padR = cfg.padR || 18, top = 14, bottom = 30;
     const series = cfg.series.filter((s) => s.pts.length);
     if (!series.length) return;
@@ -132,9 +150,13 @@
       svg("line", { x1: padL, x2: W - padR, y1: sy(t), y2: sy(t), class: cfg.zero && t === 0 ? "baseline" : "gridline" }, s);
       text(s, padL - 8, sy(t) + 4, cfg.yfmt ? cfg.yfmt(t) : String(t), "ax", "end");
     });
+    let lastR = -Infinity;                                   // skip a tick label that would collide with the one before it
     (cfg.xticks || []).forEach(([x, label]) => {
       if (x < x0 - 1e-9 || x > x1 + 1e-9) return;
-      text(s, sx(x), H - 9, label, "ax", "middle");
+      const half = String(label).length * 3.3 + 4, X = sx(x);
+      if (X - half < lastR) return;
+      text(s, X, H - 9, label, "ax", "middle");
+      lastR = X + half;
     });
     (cfg.vmarks || []).forEach((m) => {
       svg("line", { x1: sx(m.x), x2: sx(m.x), y1: top, y2: H - bottom, class: "crosshair", opacity: 0.5 }, s);
@@ -204,6 +226,7 @@
   /* ---------- v0.5: generic bar charts. One scale per chart, recessive grid, labels in ink tokens ---------- */
   // horizontal bars; values may cross zero (diverging); rows: { label, v, color, tip: () => rows, lbl: "value label" }
   function barsH(box, rows, cfg = {}) {
+    redrawWhenSized(box, () => barsH(box, rows, cfg));
     if (!box || !box.clientWidth || !rows.length) return;
     if (!rows.some((r) => fin(r.v) && (!cfg.log || r.v > 0))) { noData(box); return; }
     const W = boxWidth(box), rowH = cfg.rowH || 30, top = 4, bottom = 24;

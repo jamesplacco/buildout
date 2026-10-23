@@ -144,6 +144,9 @@ def main(argv: list[str] | None = None) -> None:
     hs.add_argument("query")
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
+    pfp = sub.add_parser("portfolio", help="the portfolio engine: stocks, Treasuries, gold and cash from regimes, a learner over policies, ten simulated years")
+    pfp.add_argument("--out", default="out")
+    pfp.add_argument("--quick", action="store_true")
     dc = sub.add_parser("decide", help="the decision engine: data, features, models, inference, decision, walked forward from 1940")
     dc.add_argument("--out", default="out")
     dc.add_argument("--quick", action="store_true", help="coarser refits, for a fast look")
@@ -414,6 +417,19 @@ def main(argv: list[str] | None = None) -> None:
         print(h["name"], "\n ", h["text"])
         for r in h["related"]:
             print(f"  [{r['type']}] {r['name']}" + (f": next 12 months {r['ret_next']:+.0%}" if r.get("ret_next") is not None else ""))
+        return
+    if a.cmd == "portfolio":
+        from . import atlas, labs, portfolio
+        from .jsonout import write
+        o = portfolio.build(labs.download(), atlas.download(fred=False)["raw"], quick=a.quick)
+        path = write(o, a.out, "portfolio.json")
+        n = o["now"]
+        print(f"decision {portfolio._mix(n['decision'])} (regime optimum {portfolio._mix(n['optimum'])}; gate {n['gate']:.0%} toward {n['gate_policy']})")
+        for k, p in o["perf"].items():
+            print(f"  {k:14s} Sharpe {p['sharpe']:.2f}  real growth {p['cagr']:+.1%}  worst {p['maxdd']:.0%}  utility t {p['utility_t']:+.1f}")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
         return
     if a.cmd == "decide":
         from . import decide, labs, mind

@@ -150,7 +150,7 @@ def engine() -> list:
 def page() -> list:
     out = []
     src = ROOT / "site" / "src"
-    need = ["snap14.js", "snap15.js", "snap16.js", "snap17.js", "snap19.js"]
+    need = ["snap14.js", "snap15.js", "snap16.js", "snap17.js", "snap19.js", "snap20.js"]
     miss = [n for n in need if not (src / n).exists()]
     out.append(_ok("snapshots", ", ".join(need)) if not miss else _fail("snapshots", "missing " + ", ".join(miss)))
     try:

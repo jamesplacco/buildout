@@ -86,7 +86,8 @@
     height: 230, yDomain: [0, 1], yfmt: (v) => pct(v, 0, false), xfmt: (v) => String(Math.floor(v)), xticks: dxTicks(dts[0], dts[dts.length - 1], 25), label: "Probability of the stressed regime, 1871 to now, two-year average" });
     legendLines($("#dx-reg-leg"), [["var(--s2)", "Smoothed (uses the whole history)"], ["var(--s1)", "Filtered (only data up to each month)"]]);
     const ch = N.changepoint.history, cd = yr(ch.dates);
-    xyChart($("#dx-cp"), { series: [{ name: "New regime in the last 6 months", pts: cd.map((x, i) => [x, ch.recent[i]]), color: "var(--s4)", width: 1.4, area: true }],
+    xyChart($("#dx-cp"), { series: [{ name: "New regime in the last 6 months", pts: cd.map((x, i) => [x, ch.recent[i]]), color: "var(--s4)", width: 1.2, area: true }],
+      hlines: [{ y: 0.5, color: "var(--muted)", label: "alarm" }],
       height: 170, yDomain: [0, 1], yfmt: (v) => pct(v, 0, false), xfmt: (v) => String(Math.floor(v)), xticks: dxTicks(cd[0], cd[cd.length - 1], 25), label: "Changepoint probability" });
     const C = O.curve, xd = yr(C.dates);
     const l10 = (a) => a.map((v) => v / Math.LN10);                     // log growth on a base-10 scale: 1x, 10x, 100x
@@ -95,7 +96,10 @@
     height: 260, yTicks: 4, yfmt: (v) => { const m = Math.pow(10, v); return (m >= 10 ? Math.round(m).toLocaleString("en-US") : fx(m, 1)) + "x"; }, xfmt: (v) => String(Math.floor(v)), xticks: dxTicks(xd[0], xd[xd.length - 1], 10), label: "Growth of one real dollar since " + O.start.slice(0, 4) });
     legendLines($("#dx-curve-leg"), [["var(--s1)", "The engine"], ["var(--s3)", "Gated by its own evidence"], ["var(--muted)", "Hold 1x"], ["var(--s2)", "10-month trend rule"]]);
     const X = O.exposure_hist;
-    xyChart($("#dx-exp"), { series: [{ name: "Engine's optimum", pts: xd.map((x, i) => [x, X.x[i]]), color: "var(--s1)", width: 1.2 }, { name: "After the gate", pts: xd.map((x, i) => [x, X.gated[i]]), color: "var(--s3)", width: 2 }],
+    // the optimum flips month to month; a two-year average shows where it leaned, the gated line what reached the book
+    const ma = (a, n = 4) => a.map((_, i) => { const w = a.slice(Math.max(0, i - n + 1), i + 1); return w.reduce((p, q) => p + q, 0) / w.length; });
+    xyChart($("#dx-exp"), { series: [{ name: "Engine's optimum, two-year average", pts: xd.map((x, i) => [x, ma(X.x)[i]]), color: "var(--s1)", width: 1.6 },
+      { name: "After the gate", pts: xd.map((x, i) => [x, X.gated[i]]), color: "var(--s3)", width: 2.2, area: true }], hlines: [{ y: 1, color: "var(--muted)" }],
       height: 170, yDomain: [0, 1.5], yfmt: (v) => fx(v, 1) + "x", xfmt: (v) => String(Math.floor(v)), xticks: dxTicks(xd[0], xd[xd.length - 1], 10), label: "Exposure through history" });
     const FL = N.flip.curve;
     xyChart($("#dx-flipc"), { series: [{ name: "Engine's optimum", pts: FL.r12.map((r, i) => [r, FL.x[i]]), color: "var(--s1)", width: 2.2, dots: true }],

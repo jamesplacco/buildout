@@ -239,3 +239,148 @@ def gauss_hermite_log_growth(x: np.ndarray, mean: float, sd: float, n: int = 40)
     R = mean + sd * z
     v = 1 + np.outer(np.asarray(x, float), R)
     return (np.log(np.maximum(v, 0.01)) * w[None, :]).sum(1)
+
+
+# ---------------------------------------------------------------- multivariate regimes
+def _mv_logpdf(X: np.ndarray, mu: np.ndarray, S: np.ndarray) -> np.ndarray:
+    """log N(x; mu_k, S_k) for every row and state: [T, K]."""
+    T, d = X.shape
+    K = len(mu)
+    out = np.empty((T, K))
+    for k in range(K):
+        L = np.linalg.cholesky(S[k])
+        z = np.linalg.solve(L, (X - mu[k]).T)
+        out[:, k] = -0.5 * (z * z).sum(0) - np.log(np.diag(L)).sum() - 0.5 * d * LOG2PI
+    return out
+
+
+def _scaled(lB: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    m = lB.max(1, keepdims=True)
+    return np.exp(lB - m), m[:, 0]
+
+
+def _regularize(S: np.ndarray, floor: float, shrink: float) -> np.ndarray:
+    d = S.shape[-1]
+    diag = np.einsum("...ii->...i", S)
+    target = np.zeros_like(S)
+    idx = np.arange(d)
+    target[..., idx, idx] = diag
+    S = (1 - shrink) * S + shrink * target
+    S[..., idx, idx] += floor
+    return S
+
+
+def mvhmm_fit(X: np.ndarray, K: int = 2, iters: int = 150, starts: int = 3, seed: int = 7, tol: float = 1e-6, init: dict | None = None,
+              floor: float = 1e-6, shrink: float = 0.05, order_by: int = 0) -> dict:
+    """Baum-Welch for a K-state HMM with full-covariance normal emissions (several assets at once, so the regime also
+    describes how they move together). Covariances are shrunk 5% toward their diagonal and floored. `init` warm-starts
+    from an earlier fit (refits then take a few iterations, and the states keep their meaning). States are ordered by
+    the mean of column `order_by` (state 0 the worst)."""
+    X = np.asarray(X, float)
+    T, d = X.shape
+    rng = np.random.default_rng(seed)
+    best = None
+    tries = ([init] if init is not None and init["K"] == K else []) + [None] * (starts if init is None or init["K"] != K else 1)
+    for s, ini in enumerate(tries):
+        if ini is not None:
+            pi, A, mu, S = ini["pi"].copy(), ini["A"].copy(), ini["mu"].copy(), ini["S"].copy()
+        else:
+            if s == 0:
+                q = np.argsort(X[:, order_by])
+                mu = np.array([X[q[int(len(q) * (k + 0.5) / K)]] for k in range(K)])
+            else:
+                mu = X[rng.choice(T, K, replace=False)]
+            S = np.repeat(np.cov(X.T)[None], K, 0) * (0.6 + 0.8 * rng.random(K))[:, None, None] if s else np.repeat(np.cov(X.T)[None], K, 0)
+            S = _regularize(S, floor, shrink)
+            A = np.full((K, K), 0.05 / max(1, K - 1))
+            np.fill_diagonal(A, 0.95)
+            if K == 1:
+                A = np.ones((1, 1))
+            pi = np.full(K, 1.0 / K)
+        ll_old = -np.inf
+        ll = -np.inf
+        for _ in range(iters):
+            B, mx = _scaled(_mv_logpdf(X, mu, S))
+            alpha, c = _forward(B, pi, A)
+            beta = _backward(B, A, c)
+            g = alpha * beta
+            g /= g.sum(1, keepdims=True)
+            xi = A * (alpha[:-1].T @ (B[1:] * beta[1:] / c[1:, None]))
+            pi = g[0]
+            A = xi / np.maximum(xi.sum(1, keepdims=True), 1e-300)
+            w = g.sum(0) + 1e-12
+            mu = (g.T @ X) / w[:, None]
+            S = np.stack([((X - mu[k]) * g[:, k:k + 1]).T @ (X - mu[k]) / w[k] for k in range(K)])
+            S = _regularize(S, floor, shrink)
+            ll = float(np.log(c).sum() + mx.sum())
+            if ll - ll_old < tol * abs(ll):
+                break
+            ll_old = ll
+        if best is None or ll > best["loglik"]:
+            o = np.argsort(mu[:, order_by])
+            best = {"K": K, "d": d, "pi": pi[o], "A": A[np.ix_(o, o)], "mu": mu[o], "S": S[o], "loglik": ll}
+    p = K * (K - 1) + K * d + K * d * (d + 1) // 2 + (K - 1)
+    best["bic"] = -2 * best["loglik"] + p * math.log(T)
+    return best
+
+
+def mvhmm_select(X: np.ndarray, Ks=(1, 2, 3), init: dict | None = None, **kw) -> dict:
+    fits = {K: mvhmm_fit(X, K, init=init if init is not None and init.get("K") == K else None, **kw) for K in Ks}
+    best = min(fits.values(), key=lambda m: m["bic"])
+    return {"best": best, "bic": {K: m["bic"] for K, m in fits.items()}, "fits": fits}
+
+
+def mvhmm_filter(X: np.ndarray, m: dict) -> np.ndarray:
+    B, _ = _scaled(_mv_logpdf(np.asarray(X, float), m["mu"], m["S"]))
+    alpha, _ = _forward(B, m["pi"], m["A"])
+    return alpha
+
+
+def mvhmm_smooth(X: np.ndarray, m: dict) -> np.ndarray:
+    B, _ = _scaled(_mv_logpdf(np.asarray(X, float), m["mu"], m["S"]))
+    alpha, c = _forward(B, m["pi"], m["A"])
+    beta = _backward(B, m["A"], c)
+    g = alpha * beta
+    return g / g.sum(1, keepdims=True)
+
+
+def mvviterbi(X: np.ndarray, m: dict) -> np.ndarray:
+    lB = _mv_logpdf(np.asarray(X, float), m["mu"], m["S"])
+    lA = np.log(m["A"] + 1e-300)
+    T, K = lB.shape
+    dd = np.log(m["pi"] + 1e-300) + lB[0]
+    bp = np.zeros((T, K), int)
+    for t in range(1, T):
+        s = dd[:, None] + lA
+        bp[t] = s.argmax(0)
+        dd = s.max(0) + lB[t]
+    path = np.zeros(T, int)
+    path[-1] = int(dd.argmax())
+    for t in range(T - 1, 0, -1):
+        path[t - 1] = bp[t, path[t]]
+    return path
+
+
+def stationary(A: np.ndarray) -> np.ndarray:
+    w, v = np.linalg.eig(A.T)
+    p = np.real(v[:, np.argmin(np.abs(w - 1))])
+    p = np.abs(p)
+    return p / p.sum()
+
+
+# ---------------------------------------------------------------- online learning over policies
+def hedge_weights(losses: np.ndarray, eta: float, prior: np.ndarray | None = None) -> np.ndarray:
+    """Exponential weights (Freund and Schapire's Hedge) after each round: losses [T, N], the weight row t uses only
+    rounds before t. Regret against the best single policy in hindsight is at most ln(N)/eta + eta T L^2 / 8 for
+    losses bounded by L."""
+    T, N = losses.shape
+    w = np.full(N, 1.0 / N) if prior is None else np.asarray(prior, float) / np.sum(prior)
+    lw = np.log(w)
+    out = np.zeros((T, N))
+    for t in range(T):
+        z = lw - lw.max()
+        out[t] = np.exp(z) / np.exp(z).sum()
+        lt = losses[t]
+        if np.isfinite(lt).all():
+            lw = lw - eta * lt
+    return out

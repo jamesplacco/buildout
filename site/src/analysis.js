@@ -83,7 +83,13 @@
   }
   function anConnections() {
     fillTable($("#an-conn"), ["Source", "What", "Cost", "Key", "Reachable from the build workspace", "Note"],
-      CONN_SNAP.map((r) => [r.source, r.what, r.cost, r.credential == null ? "none needed" : r.credential ? "set" : "not set", r.reachable ? `yes (${r.ms} ms)` : "no", r.note || ""]), 2);
+      CONN_SNAP.map((r) => {
+        // the build workspace reaches only package registries; an exception's name is for the log, not the reader
+        const raw = String(r.note || ""), clean = raw.replace(/;?\s*[A-Za-z]*(?:Error|Exception)\b.*$/, "").trim();
+        const note = h("span", "hint", clean || (r.reachable ? "" : "Not reachable from the build workspace; the daily run reaches it"));
+        if (raw && raw !== clean) note.title = raw;
+        return [r.source, r.what, r.cost, r.credential == null ? "none needed" : r.credential ? "set" : "not set", r.reachable ? `yes (${r.ms} ms)` : "no", note];
+      }), 2);
   }
   /* ---------- your broker's export, read in this browser only ---------- */
   function brokerCsv(text) {

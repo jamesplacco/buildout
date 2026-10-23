@@ -264,10 +264,40 @@
     const rel = nb.slice(0, 12).map(([n, w, typ]) => ({ id: n.id, name: n.n, kind: n.k, type: typ, text: n.t, ret_next: n.ret_next == null ? null : n.ret_next }));
     return { id: nid, name: me.n, kind: me.k, text: me.t, related: rel };
   }
+  /* a question about what the book should do, the regime, or a what-if on the decision engine (mind.Mind.decision) */
+  function mindEngine(text) {
+    const D = MD.decision;
+    if (!D || !MP.rx_decide || typeof dxlDecide !== "function") return null;
+    const low = String(text).toLowerCase();
+    const ps = low.match(new RegExp(MP.rx_pstress)), r12 = low.match(new RegExp(MP.rx_r12)), ga = low.match(new RegExp(MP.rx_gamma));
+    if (!(new RegExp(MP.rx_decide).test(low) || ps || ga || (r12 && /\b(?:stocks?|exposure|book|decision|engine)\b/.test(low)))) return null;
+    const kw = {}, r6 = (v) => Math.round(v * 1e6) / 1e6;
+    if (ps) kw.p_stress = Math.min(1, Number(ps[1] || ps[2]) / 100);
+    if (r12) kw.r12 = Number(r12[1].replace("\u2212", "-")) / 100;
+    if (ga) kw.gamma = Math.max(0.5, Math.min(30, Number(ga[1])));
+    const base = dxlDecide(D, {});
+    const out = { exposure: D.exposure, optimum: base.x, gate: D.gate.value, t: D.gate.t, n_tried: D.gate.n_tried, p_stress: D.regime.next[D.regime.worst],
+      changepoint: D.changepoint.recent, hedge: D.hedge, stacked: D.forecasts.stacked };
+    if (Object.keys(kw).length) {
+      const w = dxlDecide(D, { pStress: kw.p_stress, r12: kw.r12, gamma: kw.gamma });
+      out.whatif = {};
+      Object.keys(kw).forEach((k) => { out.whatif[k] = r6(kw[k]); });
+      Object.assign(out.whatif, { optimum: w.x, decision: Math.round(w.decision * 100) / 100, capped: w.capped });
+    }
+    if (D.portfolio) {
+      const p = D.portfolio;
+      let cur = 0;
+      p.next.forEach((v, i) => { if (v > p.next[cur]) cur = i; });
+      out.portfolio = { decision: p.decision, optimum: p.optimum, gate_policy: p.gate_policy, state: p.states[cur].name, p_state: p.next[cur], corr_sb: p.states[cur].corr_sb };
+    }
+    return out;
+  }
   function mindThink(text, opts = {}) {
     const hh = new RegExp(MP.rx_whatif, "i").test(String(text).trim()) ? null : mindHistory(text);
     const res = hh ? { query: text, found: false, mode: "history", history: hh, note: "" } : mindThinkAll(text, opts), b = mindBonds(text);
     if (b) res.bonds = b;
+    const e = mindEngine(text);
+    if (e) res.engine = e;
     return res;
   }
   function mindThinkAll(text, opts = {}) {
@@ -555,7 +585,7 @@
   }
 
   /* ---------- the argument map ---------- */
-  const MM_EX = ["Is the stock market overvalued?", "If the 10-year and 30-year both go to 4%, what is TLT?", "What if oil spikes, what happens to bonds?", "If AI capex slows, what happens to the book?", "Can I trust quant models?", "Does machine learning predict returns?", "What is BowTied Bull?", "Does the 200-day moving average work?", "Is AI a bubble?", "Will oil keep rising?", "Is RSI useful?", "Should I use leverage?",
+  const MM_EX = ["Is the stock market overvalued?", "If the 10-year and 30-year both go to 4%, what is TLT?", "What if oil spikes, what happens to bonds?", "If AI capex slows, what happens to the book?", "Can I trust quant models?", "Does machine learning predict returns?", "What is BowTied Bull?", "Does the 200-day moving average work?", "Is AI a bubble?", "Will oil keep rising?", "Is RSI useful?", "Should I use leverage?", "What should the book do?", "What if the odds of a stressed regime were 50%?",
     "Are private credit marks too generous?", "Do active managers beat the index?", "Is gold a good hedge now?", "Sell in May and go away?", "Should I buy long bonds?", "What if the 10-year goes to 6%?", "What happened in 1974?", "Months like now",
     "Should I make the first offer when haggling?", "Is Kelly betting too aggressive?", "Will inflation come back?"];
   const pctMind = (p) => `${Math.round(p * 100)}%`;
@@ -603,12 +633,29 @@
     }
     return d;
   }
+  function mEngineBlock(e) {
+    const d = h("div", "m-bonds m-engine"), x = (v) => fx(v, 2) + "x";
+    const mix = (a) => [["stocks", a[0]], ["Treasuries", a[1]], ["gold", a[2]]].filter(([, v]) => v > 1e-9).map(([k, v]) => Math.round(v * 100) + "% " + k).join(", ") || "all cash";
+    d.append(h("span", "panel-title", `The decision engine: ${x(e.exposure)} stocks for the model book`));
+    d.append(h("p", null, `Its own optimum is ${x(e.optimum)}; the evidence gate passes ${Math.round(e.gate * 100)}% of any move from 1x (utility t ${fx(e.t, 1)} since 1940, against what luck gives the best of ${e.n_tried} strategies). Stressed regime next month ${Math.round(e.p_stress * 100)}%; a new regime in the last six months ${Math.round(e.changepoint * 100)}%. Hedge: ${e.hedge.name.toLowerCase()} (${e.hedge.context}).`));
+    if (e.whatif) {
+      const w = e.whatif, parts = [];
+      if (w.p_stress != null) parts.push(`stressed odds of ${Math.round(w.p_stress * 100)}%`);
+      if (w.r12 != null) parts.push(`a 12-month forecast of ${w.r12 >= 0 ? "+" : MINUS}${Math.abs(w.r12 * 100).toFixed(1)}%`);
+      if (w.gamma != null) parts.push(`a risk aversion of ${fx(w.gamma, 1)}`);
+      d.append(h("p", "m-whatif", `With ${parts.join(" and ")}: the optimum becomes ${x(w.optimum)}${w.capped ? " (held by the risk budget)" : ""}, and the book ${x(w.decision)}.`));
+    }
+    if (e.portfolio) d.append(h("p", "hint", `Across stocks, Treasuries and gold: ${mix(e.portfolio.decision)} (regime optimum ${mix(e.portfolio.optimum)}). Next month is most likely ${e.portfolio.state.toLowerCase()} (${Math.round(e.portfolio.p_state * 100)}%), where stocks and Treasuries have moved with a correlation of ${e.portfolio.corr_sb >= 0 ? "+" : MINUS}${Math.abs(e.portfolio.corr_sb).toFixed(2)}.`));
+    const a = h("a", null, "Open the decision engine"); a.href = "#decision"; d.append(h("p", "hint", a));
+    return d;
+  }
   function mVerdictBlock(res, compact) {
     const box = h("div", "m-verdict");
+    if (res.engine) box.append(mEngineBlock(res.engine));
     if (res.history) box.append(mHistoryBlock(res.history));
     if (res.bonds) box.append(mBondsBlock(res.bonds));
     if (res.history && !res.found) return box;
-    if (!res.found) { if (!res.bonds) box.append(h("p", "hint", res.note)); return box; }
+    if (!res.found) { if (!res.bonds && !res.engine) box.append(h("p", "hint", res.note)); return box; }
     const head = h("div", "m-claim");
     head.append(h("span", "eyebrow", `${res.axis_title} · ${{ weigh: "weighed", explain: "explained", whatif: "what-if" }[res.mode] || res.mode}`), h("p", "m-claim-t", `“${res.claim}”`));
     if (res.define) {
@@ -864,7 +911,8 @@
       const q = mNorm($("#md-cl-q").value).trim();
       const list = MIND_SNAP.nodes.filter((n) => n.k === "concept" && (MDK.cl === "all" || n.g === MDK.cl) && (!q || mNorm(n.n + " " + (n.a || []).join(" ") + " " + n.t).includes(q)));
       list.sort((a, b) => a.n.localeCompare(b.n));
-      list.slice(0, 400).forEach((n) => {
+      const cap = q || MDK.clAll ? 400 : 24;
+      list.slice(0, cap).forEach((n) => {
         const d = h("details", "m-cl-i");
         const s = h("summary"); s.append(h("b", null, n.n), h("span", "hint", " · " + (MD.groups[n.g] || n.g)));
         d.append(s, h("p", null, n.t));
@@ -874,6 +922,7 @@
         d.append(b);
         box.append(d);
       });
+      if (list.length > cap && cap < 400) { const more = h("button", "pill m-more", `Show ${Math.min(400, list.length)} of ${list.length.toLocaleString("en-US")}`); more.type = "button"; more.addEventListener("click", () => { MDK.clAll = true; draw(); }); box.append(more); }
       $("#md-cl-n").textContent = `${list.length} of ${MIND_SNAP.nodes.filter((n) => n.k === "concept").length} concepts`;
     };
     [["all", "All"], ...cl.map((g) => [g, MD.groups[g]])].forEach(([c, name]) => { const b = h("button", null, name); b.type = "button"; b.dataset.c = c; b.addEventListener("click", () => { MDK.cl = c; draw(); }); seg.append(b); });
@@ -891,13 +940,15 @@
       const q = mNorm($("#md-ev-q").value).trim();
       const list = items.filter((n) => (MDK.ev === "all" || (MDK.ev === "paper" ? n.k === "paper" : n.k === "fact" && n.g === MDK.ev)) && (!q || mNorm(n.n + " " + n.t).includes(q)));
       list.sort((a, b) => String(b.as_of || "").localeCompare(String(a.as_of || "")) || a.n.localeCompare(b.n));
-      list.forEach((n) => {
+      const cap = q || MDK.evAll ? list.length : 24;
+      list.slice(0, cap).forEach((n) => {
         const d = h("div", "m-ev-i");
         const top = h("p", "m-ev-h"); top.append(h("b", null, n.n), h("span", "hint", ` · ${n.as_of || ""}${n.authors ? " · " + n.authors : ""}`));
         const src = h("p", "hint"); src.append(`${n.primary ? "Primary" : "Secondary"} · `, mRefLink(n.id) || "", n.checked && /corrected/.test(n.checked) ? " · corrected by the checker" : " · confirmed by the checker");
         d.append(top, h("p", null, n.t), src);
         box.append(d);
       });
+      if (list.length > cap) { const more = h("button", "pill m-more", `Show all ${list.length.toLocaleString("en-US")}`); more.type = "button"; more.addEventListener("click", () => { MDK.evAll = true; draw(); }); box.append(more); }
       $("#md-ev-n").textContent = `${list.length} of ${items.length} items`;
     };
     [["all", "All"], ...gs.map((g) => [g, MD.groups[g] || g]), ["paper", "Papers only"]].forEach(([c, name]) => { const b = h("button", null, name); b.type = "button"; b.dataset.c = c; b.addEventListener("click", () => { MDK.ev = c; draw(); }); seg.append(b); });
@@ -920,26 +971,125 @@
         list.append(b);
       });
       $("#cd-find").addEventListener("input", () => cdShow(CD.file, $("#cd-find").value));
+      cdWire();
       cdShow(0);
     }
+  }
+  /* a small highlighter for the engine's own languages: comments, strings (Python's triple quotes span lines), keywords,
+     numbers, decorators and the names being defined. It colours; it never changes a character. */
+  const CD_KW = { py: new Set("False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield self".split(" ")),
+    js: new Set("const let var function return if else for while do break continue new typeof instanceof in of class extends super this null undefined true false try catch finally throw switch case default async await yield import export from".split(" ")) };
+  function cdLang(path) { return /\.py$/.test(path) ? "py" : /\.(js|mjs)$/.test(path) ? "js" : /\.el$/.test(path) ? "el" : /\.vim$/.test(path) ? "vim" : "txt"; }
+  function cdTokens(line, lang, st) {
+    const out = [], push = (c, t) => { if (t) out.push([c, t]); };
+    let i = 0;
+    if (st.tq) {                                              // inside a Python triple-quoted string
+      const e = line.indexOf(st.tq);
+      if (e < 0) { push("tk-s", line); return [out, st]; }
+      push("tk-s", line.slice(0, e + 3)); i = e + 3; st = {};
+    }
+    const com = lang === "py" ? "#" : lang === "js" ? "//" : lang === "el" ? ";" : lang === "vim" ? '"' : null;
+    let prevWord = "";
+    while (i < line.length) {
+      const ch = line[i], rest = line.slice(i);
+      if (com && rest.startsWith(com) && !(lang === "vim" && /\S/.test(line.slice(0, i)))) { push("tk-c", rest); break; }
+      if (lang === "py" && (rest.startsWith('"""') || rest.startsWith("'''"))) {
+        const q = rest.slice(0, 3), e = rest.indexOf(q, 3);
+        if (e < 0) { push("tk-s", rest); return [out, { tq: q }]; }
+        push("tk-s", rest.slice(0, e + 3)); i += e + 3; continue;
+      }
+      if ((ch === '"' || ch === "'" || (lang === "js" && ch === "`")) && !(lang === "vim" && ch === '"')) {
+        let j = i + 1;
+        while (j < line.length && line[j] !== ch) j += line[j] === "\\" ? 2 : 1;
+        push("tk-s", line.slice(i, j + 1)); i = j + 1; continue;
+      }
+      if (lang === "py" && ch === "@" && /^\s*$/.test(line.slice(0, i))) { const m = rest.match(/^@[\w.]*/); push("tk-d", m[0]); i += Math.max(1, m[0].length); continue; }
+      const m = rest.match(/^[A-Za-z_$][\w$]*/);
+      if (m) {
+        const w = m[0], kws = CD_KW[lang];
+        push(kws && kws.has(w) ? "tk-k" : ((prevWord === "def" || prevWord === "class" || prevWord === "function") ? "tk-f" : ""), w);
+        prevWord = w; i += w.length; continue;
+      }
+      const n = rest.match(/^\d[\d_]*(?:\.\d+)?(?:e[+-]?\d+)?/i);
+      if (n) { push("tk-n", n[0]); i += n[0].length; continue; }
+      push("", ch); if (!/\s/.test(ch)) prevWord = ""; i += 1;
+    }
+    return [out, st];
+  }
+  function cdSymbols(lines, lang) {
+    const rx = lang === "py" ? /^(\s*)(?:async\s+)?(def|class)\s+([A-Za-z_]\w*)/ : lang === "js" ? /^(\s*)(?:async\s+)?(function)\s+([A-Za-z_$][\w$]*)/ : null;
+    if (!rx) return [];
+    const out = [];
+    lines.forEach((ln, k) => { const m = ln.match(rx); if (m && m[1].length <= 4) out.push({ line: k, name: (m[1].length ? "  " : "") + (m[2] === "class" ? "class " : "") + m[3] }); });
+    return out;
   }
   function cdShow(i, find = "") {
     const f = CODE_SNAP[i];
     if (!f) return;
+    const changed = CD.file !== i;
     CD.file = i;
     document.querySelectorAll("#cd-list .cd-item").forEach((b, k) => b.setAttribute("aria-current", k === i ? "true" : "false"));
     $("#cd-path").textContent = f.path;
     $("#cd-doc").textContent = f.doc;
-    const pre = $("#cd-src"), lines = f.src.split("\n"), q = String(find || "").trim().toLowerCase();
+    const pre = $("#cd-src"), lines = f.src.split("\n"), q = String(find || "").trim().toLowerCase(), lang = cdLang(f.path);
+    const meta = $("#cd-meta");
+    if (meta) meta.textContent = `${lines.length.toLocaleString("en-US")} lines · ${{ py: "Python", js: "JavaScript", el: "Emacs Lisp", vim: "Vim script" }[lang] || "text"}`;
     pre.replaceChildren();
-    let first = null;
+    let first = null, hits = 0, st = {};
     const frag = document.createDocumentFragment();
     lines.forEach((ln, k) => {
-      const row = h("span", "cd-ln" + (q && ln.toLowerCase().includes(q) ? " hit" : ""));
-      row.append(h("i", null, String(k + 1)), document.createTextNode(ln + "\n"));
-      if (q && !first && ln.toLowerCase().includes(q)) first = row;
+      const hit = q && ln.toLowerCase().includes(q);
+      const row = h("span", "cd-ln" + (hit ? " hit" : ""));
+      row.id = "cd-l" + (k + 1);
+      const code = h("span");
+      const r = cdTokens(ln, lang, st);
+      st = r[1];
+      r[0].forEach(([c, t]) => code.append(c ? h("span", c, t) : document.createTextNode(t)));
+      code.append(document.createTextNode("\n"));
+      row.append(h("i", null, String(k + 1)), code);
+      if (hit) { hits++; if (!first) first = row; }
       frag.append(row);
     });
     pre.append(frag);
-    if (first) pre.scrollTop = first.offsetTop - 40; else pre.scrollTop = 0;
+    const hc = $("#cd-hits");
+    if (hc) hc.textContent = q ? `${hits.toLocaleString("en-US")} line${hits === 1 ? "" : "s"}` : "";
+    if (changed) {
+      const sel = $("#cd-sym");
+      if (sel) {
+        sel.replaceChildren();
+        const syms = cdSymbols(lines, lang);
+        const o0 = h("option", null, syms.length ? `Jump to a definition (${syms.length})` : "No definitions to jump to"); o0.value = ""; sel.append(o0);
+        syms.forEach((s) => { const o = h("option", null, s.name); o.value = String(s.line); sel.append(o); });
+        sel.disabled = !syms.length;
+      }
+    }
+    if (first) pre.scrollTop = first.offsetTop - 40; else if (changed) pre.scrollTop = 0;
   }
+  function cdWire() {
+    const pre = $("#cd-src"), view = $("#cd-view");
+    if (!pre || !view) return;
+    const wrap = $("#cd-wrap"), setWrap = () => pre.classList.toggle("wrap", !!(wrap && wrap.checked));
+    if (wrap) {
+      try { wrap.checked = localStorage.getItem("cd-wrap") !== "0"; } catch (e) { wrap.checked = true; }
+      wrap.addEventListener("change", () => { try { localStorage.setItem("cd-wrap", wrap.checked ? "1" : "0"); } catch (e) { /* storage blocked: the choice lasts this visit */ } setWrap(); });
+    }
+    setWrap();
+    const sel = $("#cd-sym");
+    if (sel) sel.addEventListener("change", () => {
+      if (sel.value === "") return;
+      const row = document.getElementById("cd-l" + (Number(sel.value) + 1));
+      if (row) { pre.querySelectorAll(".cd-ln.at").forEach((x) => x.classList.remove("at")); row.classList.add("at"); pre.scrollTop = row.offsetTop - 24; }
+    });
+    const copy = $("#cd-copy");
+    if (copy) copy.addEventListener("click", () => {
+      const f = CODE_SNAP[CD.file];
+      const done = (ok) => { copy.textContent = ok ? "Copied" : "Selected: press copy"; setTimeout(() => { copy.textContent = "Copy"; }, 1800); };
+      const select = () => { const rg = document.createRange(); rg.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); done(false); };
+      try { navigator.clipboard.writeText(f.src).then(() => done(true), select); } catch (e) { select(); }
+    });
+    const full = $("#cd-full");
+    const setFull = (on) => { view.classList.toggle("full", on); full.setAttribute("aria-pressed", on ? "true" : "false"); full.textContent = on ? "Close" : "Expand"; document.body.style.overflow = on ? "hidden" : ""; };
+    if (full) full.addEventListener("click", () => setFull(!view.classList.contains("full")));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && view.classList.contains("full")) setFull(false); });
+  }
+

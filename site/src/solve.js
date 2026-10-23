@@ -207,6 +207,7 @@
   function renderBoundary() {
     const box = $("#rz-bnd");
     if (!box || !RZ_LAST) return;
+    redrawWhenSized(box, renderBoundary);
     const R = RZ_LAST, grid = rzBoundary(R.post.posterior, RZ_SCENARIOS, R.P, BND_TILTS, BND_LOSSES), opt = R.alts.optimal;
     let agree = 0, tot = 0;
     grid.forEach((row) => row.forEach((c) => { if (c) { tot += 1; if (opt && Math.abs(c.port[0] - opt.port[0]) <= 0.1 + 1e-9) agree += 1; } }));

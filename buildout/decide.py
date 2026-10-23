@@ -96,21 +96,24 @@ _Z, _W = np.polynomial.hermite_e.hermegauss(32)
 _W = _W / _W.sum()
 
 
-def utility(w: np.ndarray, mu: np.ndarray, sd: np.ndarray, gamma: float, grid: np.ndarray = GRID) -> np.ndarray:
+def utility(w: np.ndarray, mu: np.ndarray, sd: np.ndarray, gamma: float, grid: np.ndarray = GRID, z: np.ndarray | None = None, wq: np.ndarray | None = None,
+            borrow: float = BORROW) -> np.ndarray:
     """Expected CRRA utility of 1 + x R - borrowing for each exposure x on the grid, R a mixture of normals."""
-    R = mu[:, None] + sd[:, None] * _Z[None, :]                                  # [k, q]
-    v = 1 + grid[:, None, None] * R[None] - np.maximum(grid - 1, 0)[:, None, None] * BORROW
+    z = _Z if z is None else z
+    wq = _W if wq is None else wq
+    R = mu[:, None] + sd[:, None] * z[None, :]                                   # [k, q]
+    v = 1 + grid[:, None, None] * R[None] - np.maximum(grid - 1, 0)[:, None, None] * borrow
     v = np.maximum(v, 0.02)
     u = np.log(v) if abs(gamma - 1) < 1e-9 else (v ** (1 - gamma) - 1) / (1 - gamma)
-    return (u * _W[None, None, :]).sum(2) @ w                                    # [x]
+    return (u * wq[None, None, :]).sum(2) @ w                                    # [x]
 
 
 def certainty_equivalent(u: float, gamma: float) -> float:
     return math.exp(u) - 1 if abs(gamma - 1) < 1e-9 else (1 + (1 - gamma) * u) ** (1 / (1 - gamma)) - 1
 
 
-def choose(w, mu, sd, gamma, es_limit=ES_LIMIT) -> tuple[float, dict]:
-    u = utility(w, mu, sd, gamma)
+def choose(w, mu, sd, gamma, es_limit=ES_LIMIT, z=None, wq=None, borrow=BORROW) -> tuple[float, dict]:
+    u = utility(w, mu, sd, gamma, GRID, z, wq, borrow)
     info = {}
     allowed = np.ones(len(GRID), bool)
     if es_limit is not None:
@@ -649,6 +652,8 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
         "models": {"weights": {k: float(wm[i]) for i, k in enumerate(MODELS)}, "names": MODEL_NAMES},
         "forecasts": {"now": now_f, "weights": {k: float(wf[i]) for i, k in enumerate(FORECASTS)}, "stacked": stacked, "nn_sd": nn_sd, "nn_epistemic_sd": nn_epistemic, "nn_members": nn_members, "names": FORECAST_NAMES},
         "drivers": drivers, "flip": flip, "evpi": evpi, "gamma": gamma, "es_limit": ES_LIMIT,
+        "mixture": {k: {"w": [float(v) for v in comps[k][0]], "mu": [float(v) for v in comps[k][1]], "sd": [float(v) for v in comps[k][2]]} for k in MODELS},
+        "tilt": tilt, "gh": {"z": _Z.tolist(), "w": _W.tolist()}, "grid": GRID.tolist(), "borrow": BORROW,
         "hedge": {"choice": hedge["names"][hi], "name": HEDGE_NAMES[hedge["names"][hi]], "context": hedge["ctx_label"], "as_of": hedge["as_of"], **hp,
                   "names": [HEDGE_NAMES[k] for k in hedge["names"]]},
     }
@@ -826,3 +831,32 @@ def summary(o: dict) -> list[str]:
                       (", yet the gate is shut: the model's confidence in its regimes has not shown up in results, which is the gap between a model's value and its record."
                        if n["gate"]["value"] == 0 else ", and the gate lets part of it through.")))
     return out
+
+
+# ---------------------------------------------------------------- what if (the page's sliders and the mind's answers)
+def what_if(n: dict, p_stress: float | None = None, r12: float | None = None, gamma: float | None = None, es: float | None | str = "default",
+            t: float | None = None) -> dict:
+    """Today's decision recomputed with one or more inputs changed: the stressed regime's odds for next month (the other
+    states keep their proportions), the stacked 12-month real return forecast, the risk aversion, the risk budget (None
+    turns it off) and the evidence t behind the gate. site/src/dxlive.js is the same function in the page."""
+    M = n["mixture"]
+    mw = [n["models"]["weights"][k] for k in MODELS]
+    tilt = n["tilt"] if r12 is None else (r12 - n["forecasts"]["now"]["mean"]) / ml.H
+    W, MU, SD = [], [], []
+    for j, k in enumerate(MODELS):
+        cw = list(M[k]["w"])
+        if k == "hmm" and p_stress is not None:
+            wk = n["regime"]["worst"]
+            rest = 1 - cw[wk]
+            cw = [p_stress if i == wk else (v / rest * (1 - p_stress) if rest > 1e-12 else (1 - p_stress) / (len(cw) - 1)) for i, v in enumerate(cw)]
+        for i, v in enumerate(cw):
+            W.append(mw[j] * v)
+            MU.append(M[k]["mu"][i] + tilt)
+            SD.append(M[k]["sd"][i])
+    g_ = n["gamma"] if gamma is None else gamma
+    es_ = n["es_limit"] if es == "default" else es
+    gh = n.get("gh") or {}
+    x, info = choose(np.array(W), np.array(MU), np.array(SD), g_, es_, np.array(gh["z"]) if gh else None, np.array(gh["w"]) if gh else None, n.get("borrow", BORROW))
+    gate = n["gate"]["value"] if t is None else gate_from_t(t, n["gate"]["n_tried"])
+    return {"optimum": x, "capped": info["capped"], "es_1x": info.get("es_1x"), "gate": gate, "decision": round(float(round((1 + gate * (x - 1)) / 0.05) * 0.05), 2),
+            "tilt": tilt, "gamma": g_, "ce": [certainty_equivalent(float(u), g_) for u in info["u"]]}

@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.19</span>
+      Buildout <span class="ver">v0.20</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -362,6 +362,25 @@
         <span class="panel-title">Optimum against the stressed regime's odds</span><div class="svgbox" id="dx-stressc"></div></div>
     </div>
   </section>
+  <section class="section" aria-labelledby="dxw-title">
+    <div class="section-head"><p class="eyebrow">What if</p><h2 id="dxw-title">Move the inputs; the engine decides again, here</h2>
+      <p class="prose">The page runs the same mixture, utility, risk budget and gate as the engine (checked against it in the tests), so each slider asks the engine, not a picture of it.</p></div>
+    <div class="dxw panel">
+      <div class="dxw-ctl">
+        <label class="bd-sl"><span>Stressed regime, next month <b id="dxw-p-v"></b></span><input type="range" id="dxw-p" min="0" max="1" step="0.01"></label>
+        <label class="bd-sl"><span>Stacked 12-month real return forecast <b id="dxw-r-v"></b></span><input type="range" id="dxw-r" min="-0.2" max="0.2" step="0.005"></label>
+        <label class="bd-sl"><span>Risk aversion <b id="dxw-g-v"></b></span><input type="range" id="dxw-g" min="1" max="10" step="0.05"></label>
+        <label class="bd-sl"><span>Risk budget, worst month in twenty <b id="dxw-es-v"></b></span><input type="range" id="dxw-es" min="0.04" max="0.3" step="0.01"></label>
+        <label class="bd-sl"><span>Evidence behind the gate (t) <b id="dxw-t-v"></b></span><input type="range" id="dxw-t" min="-2" max="5" step="0.05"></label>
+        <button type="button" class="btn" id="dxw-reset">Back to today</button>
+      </div>
+      <div class="dxw-res" id="dxw-out">
+        <div class="dxw-big"><span class="dx-k">The book</span><b id="dxw-x"></b><span class="dx-sub">engine optimum <b id="dxw-opt"></b> · gate <b id="dxw-gate"></b></span></div>
+        <p class="prose" id="dxw-why"></p>
+        <div class="svgbox" id="dxw-chart"></div>
+      </div>
+    </div>
+  </section>
   <section class="section" aria-labelledby="dx-bt-title">
     <div class="section-head"><p class="eyebrow">Walked forward</p><h2 id="dx-bt-title">The whole engine, run month by month since 1940</h2>
       <p class="prose">Every decision uses data known two months earlier (Shiller's prices are monthly averages), pays 10 basis points per unit traded and 2% a year to borrow above 1x, and is compared with holding, the trend rule and two reinforcement-learning agents. Each part is removed in turn to see what it adds.</p></div>
@@ -380,6 +399,43 @@
     <div class="section-head"><p class="eyebrow">Findings</p><h2 id="dx-f-title">What the engine concludes</h2></div>
     <ol class="dx-find" id="dx-find"></ol>
     <p class="hint">Code: buildout/decide.py (the pipeline), buildout/infer.py (regimes, changepoints, Kalman, stacking), buildout/nn.py (the networks, gradient-checked). Run it: python -m buildout decide. Agents: the decision_engine tool. The MODEL book, not personal positions; research only, never an order.</p>
+  </section>
+</section>
+<section class="view" id="view-portfolio" hidden aria-labelledby="pf-title">
+  <div class="vhead"><p class="eyebrow">Portfolio engine · stocks, Treasuries, gold and cash</p><h1 id="pf-title">Decide the mix, not only the stock weight, and let the record choose the process</h1>
+    <p class="lede" id="pf-bluf"></p></div>
+  <div class="dx-top">
+    <div class="dx-card" id="pf-card"></div>
+    <div class="panel"><span class="panel-title">The regimes, three assets at once</span><div class="tablewrap"><table id="pf-states"></table></div>
+      <p class="hint">A hidden Markov model of real monthly returns on stocks, 10-year Treasuries and gold together, 1871 to today, full covariance, the number of states by BIC. Means are shrunk toward the long run with 120 months of prior. Each state carries its own stock-bond correlation: the question behind the TLT hedge.</p>
+      <span class="panel-title">Odds of the stressed state</span><div class="svgbox" id="pf-reg"></div></div>
+  </div>
+  <div class="at-tiles" id="pf-tiles"></div>
+  <section class="section" aria-labelledby="pf-pol-title">
+    <div class="section-head"><p class="eyebrow">Policies</p><h2 id="pf-pol-title">Eight ways to run the money, run month by month since 1940</h2>
+      <p class="prose">Each policy decides with data known two months earlier and pays 10 basis points per unit traded and 2% a year to borrow above 1x. Gold enters a decision only from 1976, five years after its price was freed. The learner holds a weighted mix of six policies and moves weight toward the ones whose log growth has been better (Hedge, exponential weights): it does not predict markets, it predicts which process to trust.</p></div>
+    <div class="panel"><span class="panel-title">Growth of one real dollar</span><div class="svgbox" id="pf-curve"></div><div class="legend" id="pf-curve-leg"></div></div>
+    <div class="panel"><span class="panel-title">Every policy, same months</span><div class="tablewrap"><table id="pf-perf"></table></div><p class="hint" id="pf-dsr"></p></div>
+    <div class="panel"><span class="panel-title">Where the learner put its weight</span><div class="svgbox" id="pf-meta"></div><div class="legend" id="pf-meta-leg"></div></div>
+  </section>
+  <section class="section" aria-labelledby="pf-sim-title">
+    <div class="section-head"><p class="eyebrow">Simulated</p><h2 id="pf-sim-title">The next ten years, five thousand times</h2>
+      <p class="prose">A regime-switching bootstrap: each path starts from today's regime odds and moves between states by the fitted chain; each month's three returns are a real historical month drawn from the months the model put in that state. Fat tails and the way the assets move together come from history, not from a bell curve.</p></div>
+    <div class="panel"><span class="panel-title">Real wealth, all stocks against 60/40</span><div class="svgbox" id="pf-fan"></div><div class="legend" id="pf-fan-leg"></div>
+      <div class="tablewrap"><table id="pf-sim"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="pf-str-title">
+    <div class="section-head"><p class="eyebrow">Stress</p><h2 id="pf-str-title">Today's mixes, replayed through eight drawdowns</h2></div>
+    <div class="panel"><span class="panel-title">Real return through each episode</span><div class="tablewrap"><table id="pf-stress"></table></div><p class="hint">Gold traded at a fixed price before 1971, so its earlier returns are inflation's.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">The optimum against the stressed state's odds</span><div class="svgbox" id="pf-sp"></div><div class="legend" id="pf-sp-leg"></div></div>
+      <div class="panel"><span class="panel-title">What would change the optimum</span><div class="tablewrap"><table id="pf-drv"></table></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="pf-f-title">
+    <div class="section-head"><p class="eyebrow">Findings</p><h2 id="pf-f-title">What the portfolio engine concludes</h2></div>
+    <ol class="dx-find" id="pf-find"></ol>
+    <p class="hint">Code: buildout/portfolio.py, buildout/infer.py (the multivariate regime model and Hedge). Run it: python -m buildout portfolio. Agents: the portfolio_engine tool. The MODEL book, not personal positions; research only, never an order.</p>
   </section>
 </section>
 <section class="view" id="view-noteworthy" hidden aria-labelledby="nw-title">
@@ -2737,7 +2793,7 @@
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
       <li><b>Know.</b> ontology.py and concepts17.json define 4,295 concepts and their relations; knowledge.json holds 601 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 8,618 nodes and about 34,700 typed links, with 4,295 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 8,634 nodes and about 34,700 typed links, with 4,295 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
       <li><b>Decide.</b> ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
       <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
@@ -2750,7 +2806,12 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
   <section class="section" aria-labelledby="cd-files-t">
     <div class="section-head"><p class="eyebrow">The files</p><h2 id="cd-files-t">Read any module</h2><p class="prose" id="cd-sum"></p></div>
     <div class="cd-grid"><div class="cd-list" id="cd-list" role="list"></div>
-      <div class="cd-view"><div class="cd-head"><b id="cd-path"></b><span class="hint" id="cd-doc"></span><div class="field"><label for="cd-find">Find in file</label><input id="cd-find" type="search" placeholder="def think" autocomplete="off"></div></div><pre class="cd-src" id="cd-src" tabindex="0"></pre></div></div>
+      <div class="cd-view" id="cd-view"><div class="cd-head"><div class="cd-title"><b id="cd-path"></b><span class="hint" id="cd-meta"></span></div><span class="hint" id="cd-doc"></span>
+        <div class="cd-tools"><label class="sr-only" for="cd-find">Find in file</label><input id="cd-find" type="search" placeholder="Find in file: def think" autocomplete="off"><span class="hint" id="cd-hits"></span>
+          <label class="sr-only" for="cd-sym">Jump to a definition</label><select id="cd-sym"></select>
+          <label class="cd-chk"><input type="checkbox" id="cd-wrap" checked> Wrap</label>
+          <button type="button" class="btn ghost" id="cd-copy">Copy</button><button type="button" class="btn ghost" id="cd-full" aria-pressed="false">Expand</button></div></div>
+        <pre class="cd-src" id="cd-src" tabindex="0" aria-label="Source code"></pre></div></div>
   </section>
 </section>
 
@@ -2769,6 +2830,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v20-t">
+    <div class="section-head"><p class="eyebrow">v0.20</p><h2 id="ag-v20-t">This release, in numbers</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>41</b><span>Desks reviewed by an agent</span><small>at three widths and both themes; 25 findings, most fixed here</small></div>
+      <div class="at-kpi"><b>8</b><span>Policies walked forward</span><small>plus a learner over six of them, since 1940</small></div>
+      <div class="at-kpi"><b>5,000</b><span>Simulated decades</span><small>from today's regime odds, with real historical months</small></div>
+      <div class="at-kpi"><b>1e-12</b><span>Page against Python</span><small>the decision engine recomputed in the browser</small></div></div>
+    <p class="prose">A reviewer agent opened every desk at 1366 and 390 pixels in light and dark, measured overflow, overlap, empty panels, unreadable charts and the code viewer, and reported 25 issues with the selectors it verified. The lead built the portfolio engine, the multivariate regime model and the learner, the decision engine in the page, the mind's decision answers and the new code reader, and fixed the review's findings: a chart drawn at the wrong size, raw exception names, unreadable spiky series, stretched panels, a see-through header, wrapping navigation, a dock that covered content, the mind's 577-item list.</p>
   </section>
   <section class="section" aria-labelledby="ag-v19-t">
     <div class="section-head"><p class="eyebrow">v0.19</p><h2 id="ag-v19-t">This release, in numbers</h2></div>

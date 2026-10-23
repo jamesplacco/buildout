@@ -991,6 +991,35 @@ def decision_engine(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, backtest, flip, forecasts")
 
 
+def portfolio_engine(ctx: Context, args: dict) -> dict:
+    o = ctx.load("portfolio") or _snap("snap20.js", "SNAP20", "portfolio")
+    if not o:
+        raise ToolError("no portfolio run yet; run `python -m buildout portfolio`")
+    part = args.get("part", "summary")
+    n = o["now"]
+    if part == "summary":
+        return {"findings": o["findings"], "decision": n["decision"], "optimum": n["optimum"], "gate": n["gate"], "gate_policy": n["gate_policy"], "next": n["next"],
+                "states": n["states"], "meta_mix": n["meta_mix"], "assets": ["stocks", "bonds", "gold"],
+                "note": "Weights of stocks, 10-year Treasuries and gold; the rest is cash (negative is borrowing). The MODEL book; research only, never an order."}
+    if part == "policies":
+        return {"perf": o["perf"], "deflated": o["deflated"], "meta": {k: o["meta"][k] for k in ("eta", "bound", "names")}}
+    if part == "simulation":
+        sim = {k: {kk: v[kk] for kk in ("horizons", "p_dd30", "p_dd50", "dd_median", "es_month")} for k, v in o["simulation"].items() if k != "_meta"}
+        return {"simulation": sim, "meta": o["simulation"]["_meta"]}
+    if part == "stress":
+        return {"stress": o["stress"], "allocs": o["allocs"]}
+    raise ToolError("part is one of summary, policies, simulation, stress")
+
+
+def _snap(fname: str, const: str, part: str):
+    p = Path(__file__).resolve().parents[1] / "site" / "src" / fname
+    txt = p.read_text() if p.exists() else ""
+    i = txt.find(f"const {const} = ")
+    if i < 0:
+        return None
+    return json.loads(txt[i + len(f"const {const} = "):txt.index(";\n", i)].replace("<\\/", "</")).get(part)
+
+
 def bond_scenario(ctx: Context, args: dict) -> dict:
     from . import bondlab
     try:
@@ -1103,6 +1132,10 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                         "the engine, regime probabilities (hidden Markov), changepoint odds, model-averaging weights, stacked forecasts including a neural-network "
                         "ensemble, what drives and what would flip the decision, and its walk-forward record since 1940. Research only; never places orders.",
                         _obj({"part": {"type": "string", "enum": ["summary", "backtest", "flip", "forecasts"]}}), {"readOnlyHint": True, "openWorldHint": False}),
+    "portfolio_engine": (portfolio_engine, "The portfolio engine for the MODEL book: today's mix of stocks, 10-year Treasuries, gold and cash; the regimes of the three "
+                         "assets together with each one's stock-bond correlation; eight policies walked forward since 1940 and a learner over them; ten years simulated "
+                         "from today's regime odds; and today's mixes replayed through eight drawdowns. Research only; never places orders.",
+                         _obj({"part": {"type": "string", "enum": ["summary", "policies", "simulation", "stress"]}}), {"readOnlyHint": True, "openWorldHint": False}),
     "bond_scenario": (bond_scenario, "Every Treasury ETF (SHY, IEI, IEF, TLH, TLT, EDV, ZROZ) repriced bond by bond at a 10-year and 30-year yield you set, on today's Treasury "
                       "par curve: price, instant change, 12-month total return with income and roll, and the break-even yield rise. Research only.",
                       _obj({"y10": {**NUM, "description": "10-year yield in percent, e.g. 4"}, "y30": {**NUM, "description": "30-year yield in percent; omit to move it with the 10-year"},
