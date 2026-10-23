@@ -25,7 +25,6 @@ from __future__ import annotations
 import functools
 import hashlib
 import importlib
-import io
 import os
 import pickle
 import time
@@ -229,7 +228,3 @@ def clear() -> int:
         n += 1
     return n
 
-
-def _selftest() -> bool:                                # used by `doctor`
-    buf = io.BytesIO(pickle.dumps({"a": 1}))
-    return pickle.load(buf) == {"a": 1}

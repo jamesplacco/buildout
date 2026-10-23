@@ -1,11 +1,11 @@
   /* =====================================================================================
-     boot.js (v0.6): seven groups, their desks, the math toggle, deep links, live data, boot
+     boot.js (v0.6, regrouped in v0.18): five groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {   // v0.18: each group reads from the answer to the method, start-here desks first
     today: { name: "Today", views: ["desk", "decision", "portfolio", "ooda", "mind", "noteworthy", "atlas"] },
     decide: { name: "Decide", views: ["decide", "solve", "positions", "swans", "journal", "brain", "games", "cardroom"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "making", "prop"] },
-    research: { name: "Research", views: ["findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "legends", "lenses", "lab"] },
+    research: { name: "Research", views: ["findings", "geometry", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "legends", "lenses", "lab"] },
     reference: { name: "Methods", views: ["engine", "engines", "matrix", "appendix", "code", "agents"] },
   };
   const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
@@ -33,6 +33,7 @@
     decision: () => { guard("Decision engine", renderDecision, $("#dx-card")); guard("What if", renderWhatIf, $("#dxw-out")); },
     portfolio: () => guard("Portfolio engine", renderPortfolio, $("#pf-card")),
     matrix: () => guard("The shortcut", renderMatrix, $("#mx-tiles")),
+    geometry: () => guard("The shape of the market", renderGeometry, $("#geo-tiles")),
     rates: () => { guard("Curve chart", renderCurve, $("#curve-chart")); guard("Forward curve", renderForward, $("#fw-chart")); guard("Live rates", drawRatesLive); guard("Liquidity charts", drawLiquidity); },
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
@@ -180,10 +181,20 @@
   function lazyFlushAll() { VIEWS.forEach((v) => lazyFlush(v)); }
   const idle = (fn) => (typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 40));
   const LAZY_ON_OPEN = new Set(["solve"]);   // heavy desks (the solver searches thousands of portfolios) build only when opened
-  function lazyDrain() {
-    const v = Object.keys(LAZY.byView).find((k) => !LAZY_ON_OPEN.has(k));
-    if (v) { lazyFlush(v); idle(lazyDrain); return; }
-    idle(() => guard("Glossary links", () => linkTerms()));
+  // build the unopened desks one piece at a time while the browser is idle, yielding whenever a frame is due, so a
+  // click or a scroll during the background build is answered at once instead of after a whole desk
+  function lazyDrain(deadline) {
+    const left = () => (deadline && typeof deadline.timeRemaining === "function" ? deadline.timeRemaining() : 8);
+    do {
+      const v = Object.keys(LAZY.byView).find((k) => !LAZY_ON_OPEN.has(k));
+      if (!v) { idle(() => guard("Glossary links", () => linkTerms())); return; }
+      const q = LAZY.byView[v];
+      const [n, f, b] = q.shift();
+      LAZY.pending--;
+      guard(n, f, b ? $(b) : null);
+      if (!q.length) { delete LAZY.byView[v]; guard("Glossary links", () => linkTerms([v])); }
+    } while (left() > 6);
+    idle(lazyDrain);
   }
   const BOOT_VIEW = (() => { try { return resolve(decodeURIComponent(location.hash.slice(1))).view; } catch (e) { return "desk"; } })();
   [["The mark", placeMarks], ["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],

@@ -109,6 +109,18 @@ jobs:
         continue-on-error: true
         run: python -m buildout ml --out site/data
 
+      - name: Decision engine (stacked forecasts, regimes, changepoints, geometric analogs, model averaging, an evidence gate)
+        continue-on-error: true
+        run: python -m buildout decide --out site/data
+
+      - name: Portfolio engine (stocks, Treasuries, gold and cash from regimes, a learner over policies)
+        continue-on-error: true
+        run: python -m buildout portfolio --out site/data
+
+      - name: The shape of the market (covariance geometry, random matrices, topology, transport, every claim tested)
+        continue-on-error: true
+        run: python -m buildout geometry --out site/data
+
       - name: Reality check (every model's assumptions, breakpoints, kappa, fragility, stressed worlds)
         continue-on-error: true
         run: python -m buildout reality --out site/data

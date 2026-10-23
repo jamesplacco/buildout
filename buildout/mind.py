@@ -143,7 +143,7 @@ COUNTRIES = [
     ("KAZ", "Kazakhstan", None, ["a:uranium", "a:brent"], "The largest uranium miner."), ("UKR", "Ukraine", None, ["a:wheat", "a:maize", "a:sunflower"], "Wheat, maize and sunflower oil."),
 ]
 
-TOOL_MODULES = {"get_research_snapshot": ["research"], "get_portfolio_risk": ["pipeline"], "analyze_positions": ["valuation", "pipeline"],
+TOOL_MODULES = {"geometry_engine": ["geometry"], "get_research_snapshot": ["research"], "get_portfolio_risk": ["pipeline"], "analyze_positions": ["valuation", "pipeline"],
                 "decision_loop": ["ooda"], "position_valuation": ["valuation"], "hedge_book": ["hedgebook"], "investor_voices": ["voices"],
                 "atlas_trace": ["atlas"], "brain_selfcheck": ["brain_robust"], "run_hedge_scenario": ["policy"], "evaluate_trade": ["reasoner"],
                 "create_order_proposal": ["mcp_server"], "review_decision": ["decisions"], "compare_explanations": ["field"],
@@ -315,10 +315,6 @@ def load_countries(path: Path | None = None) -> dict:
     if not p.exists():
         return {}
     return json.loads(p.read_text())["countries"]
-
-
-def _fmt(x, d=1):
-    return f"{x:,.{d}f}"
 
 
 # ---------------------------------------------------------------- signals: evidence with a direction
@@ -678,6 +674,9 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("geometry", "The shape of the market", "156 years of stocks, Treasuries and gold as points on the curved space of covariance matrices: an era map, today's nearest analogs and a placebo that tests them, the eigenvalues of the world's markets against pure noise, the topology of their correlations, transport between whole distributions, the Levy area of stocks against bonds, long memory and the geometry of compounding, every claim corrected for testing many.",
+     ["c:riemannian-geometry", "c:affine-invariant-metric", "c:random-matrix-theory", "c:marchenko-pastur", "c:persistent-homology", "c:wasserstein-distance", "c:levy-area",
+      "c:hurst-exponent", "c:volatility-drag", "c:analog-forecasting", "c:absorption-ratio"]),
     ("matrix", "The shortcut", "How the engine runs on matrix multiplication: the mind's question as a vector and its knowledge as a matrix, many questions thought at once, the filter as a scan of matrix products, the graph in 64 numbers per node, and Pearl, where the same matrix math mines a blockchain.",
      ["c:matrix-multiplication", "c:parallel-prefix-scan", "c:personalized-pagerank", "c:proof-of-useful-work", "c:gpu", "c:embedding", "c:proof-of-work"]),
     ("portfolio", "Portfolio engine", "Stocks, 10-year Treasuries, gold and cash decided together: regimes with their stock-bond correlation, eight policies since 1940, a learner over them, ten simulated years and eight replayed drawdowns.",
@@ -833,6 +832,64 @@ def v20_nodes(node, edge, pf) -> None:
     for cid in ("c:strategic-asset-allocation", "c:tactical-asset-allocation", "c:risk-parity", "c:sixty-forty", "c:gold", "c:stock-bond-correlation", "c:monte-carlo",
                 "c:minimax-regret", "c:diversification", "c:model-stress-test"):
         edge("x:portfolio", cid, "related", 0.5)
+
+
+GEO_CONCEPTS = ("c:riemannian-geometry", "c:affine-invariant-metric", "c:log-euclidean-metric", "c:frechet-mean", "c:multidimensional-scaling", "c:random-matrix-theory",
+                "c:marchenko-pastur", "c:absorption-ratio", "c:persistent-homology", "c:vietoris-rips-complex", "c:minimum-spanning-tree", "c:optimal-transport",
+                "c:wasserstein-distance", "c:sliced-wasserstein", "c:bures-metric", "c:path-signature", "c:levy-area", "c:detrended-fluctuation-analysis", "c:hurst-exponent",
+                "c:volatility-drag", "c:geometric-vs-arithmetic-mean", "c:analog-forecasting", "c:placebo-test", "c:benjamini-hochberg", "c:mixture-of-normals")
+
+
+def v22_nodes(node, edge, geo) -> None:
+    """v0.22: the shape of the market. The geometric study, its tests and today's analogs."""
+    if not geo:
+        return
+    cv, em = geo["covariance"], geo["engine_model"]
+    n = cv["now"]
+    surv = [t["test"] for t in geo["tests"] if t["q"] <= 0.10]
+    node("x:geometry", "model", "The shape of the market", "core",
+         f"Stocks, Treasuries and gold over 36-month windows as points on the space of covariance matrices since 1871. Today: stocks {n['vol'][0]:.0%} volatility, Treasuries "
+         f"{n['vol'][1]:.0%}, gold {n['vol'][2]:.0%}, stock-bond correlation {n['corr'][0][1]:+.2f}; nearest past structures {', '.join(a['date'] for a in n['analogs'][:4])}. "
+         f"Of {len(geo['tests'])} geometric claims tested, {len(surv)} survive a 10% false-discovery rate. The engine's analog model beats the long-run average's log score "
+         f"(t {em['t']:.1f}) but random windows do as well (geometry over random t {em['placebo']['geometry_t']:.1f}): the gain is the mixture, not the resemblance.",
+         ["shape of the market", "market geometry", "geometric analogs", "historical analogs", "covariance geometry", "what period is today like", "analog years"])
+    edge("x:geometry", "e:geometry", "implemented_by", 0.9)
+    edge("x:geometry", "x:decision", "related", 0.7)
+    edge("x:geometry", "x:portfolio", "related", 0.6)
+    edge("d:geometry", "x:geometry", "routes", 0.8)
+    for a in n["analogs"]:
+        node(f"geo:an:{a['date']}", "finding", f"Geometric analog: {a['date']}", "core",
+             f"The 36 months to {a['date']} had stocks {a['vol'][0]:.0%} volatility, Treasuries {a['vol'][1]:.0%}, gold {a['vol'][2]:.0%} and stock-bond correlation {a['corr_sb']:+.2f}, "
+             f"distance {a['distance']:.2f} from today's structure; the next 12 months returned "
+             + (f"{a['next12_stocks']:+.1%} real for stocks." if a.get("next12_stocks") is not None else "an unknown amount."), [f"analog {a['date']}"])
+        edge(f"geo:an:{a['date']}", "x:geometry", "part_of", 0.6)
+    for t in geo["tests"]:
+        node(f"geo:test:{t['test'][:40]}", "finding", t["test"], "core", f"{t['test']}: p {t['p']:.3f}, false-discovery q {t['q']:.3f}. " + ("Survives." if t["q"] <= 0.10 else "Does not survive."), [])
+        edge(f"geo:test:{t['test'][:40]}", "x:geometry", "part_of", 0.6)
+    for i, f in enumerate(geo["findings"]):
+        node(f"geo:{i}", "finding", f[:80], "core", f, [])
+        edge(f"geo:{i}", "x:geometry", "related", 0.7)
+    for cid in GEO_CONCEPTS:
+        edge("x:geometry", cid, "related", 0.5)
+
+
+def v22_signals(K: dict, geo: dict | None) -> list[dict]:
+    if not geo:
+        return []
+    em, sp = geo["engine_model"], geo.get("spectrum")
+    pl = em["placebo"]
+    S = [{"id": "s:geo-placebo", "axis": "edge:ml", "sign": 1 if pl["geometry_t"] > 2 else -1, "s": 0.5, "rel": 0.8, "group": "geometry",
+          "text": f"Historical analogs chosen by the geometry of covariance matrices improve next month's predictive log score over the long-run average (t {em['t']:.1f}), "
+                  f"but analogs chosen at random improve it as much (t {pl['random_t']:.1f}; geometry over random t {pl['geometry_t']:.1f}): what helps is mixing several pasts, "
+                  "which fattens the tails, not finding the past that looks like today.",
+          "refs": ["e:geometry", "x:geometry"], "flip": "Nearest analogs beating random ones by more than two standard errors.", "targets": ["c:analog-forecasting", "c:placebo-test"]}]
+    if sp:
+        S.append({"id": "s:geo-ar", "axis": "market_valuation", "sign": -1 if (sp["now"].get("shift") or 0) > 1 else 1, "s": 0.15, "rel": 0.3, "group": "geometry",
+                  "text": f"The absorption ratio of {sp['now']['N']} world markets is {sp['now']['ar']:.0%} (the share of their variance the top fifth of eigenvectors carries), "
+                          f"{(sp['now'].get('shift') or 0):+.1f} standard deviations from its recent level; jumps above one have preceded a 10% fall within a year "
+                          f"{sp['test']['p_fall_after_jump']:.0%} of the time against {sp['test']['p_fall_otherwise']:.0%} otherwise, not significant (p {sp['test']['p']:.2f}).",
+                  "refs": ["e:geometry"], "flip": "The absorption ratio jumping more than one standard deviation.", "targets": ["c:absorption-ratio"]})
+    return S
 
 
 def v20_signals(K: dict, pf: dict | None) -> list[dict]:
@@ -1124,7 +1181,8 @@ def propagate(net: dict, fixed: dict | None = None) -> list[float]:
 def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None = None, labs_L: dict | None = None,
           research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
           positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None,
-          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None, dec: dict | None = None, pf: dict | None = None) -> dict:
+          chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None, dec: dict | None = None, pf: dict | None = None,
+          geo: dict | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -1338,12 +1396,13 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     v17_nodes(node, edge, nodes, idx, chron, bonds, cx)
     v19_nodes(node, edge, dec)
     v20_nodes(node, edge, pf)
+    v22_nodes(node, edge, geo)
     # signals
     K = {it["id"]: it for it in know}
     cape_pct = None
     if labs_L and labs_L["valuation"]["cape"].get("now_source") == "research":
         cape_pct = labs_L["valuation"]["cape"]["percentile"]
-    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx) + v19_signals(K, dec) + v20_signals(K, pf)
+    sigs = signals(K, labs_L, research_latest, cape_pct) + more_signals(K, mlo, aso, positions) + v16_signals(K, rlo, tech) + v17_signals(K, bonds, cx) + v19_signals(K, dec) + v20_signals(K, pf) + v22_signals(K, geo)
     for s in sigs:
         ax = s["axis"]
         title = voices.TOPICS[ax]["title"] if ax in voices.TOPICS else EDGE_AXES[ax]["title"]

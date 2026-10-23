@@ -613,7 +613,8 @@
       const f = Math.exp(-ev.deltaY * 0.0015), s1 = clamp(S.zoom.s * f, 0.8, 8), k = s1 / S.zoom.s;
       S.zoom.tx = mx - S.L.cx - (mx - S.L.cx - S.zoom.tx) * k; S.zoom.ty = my - S.L.cy - (my - S.L.cy - S.zoom.ty) * k; S.zoom.s = s1;
     }, { passive: false });
-    window.addEventListener("resize", () => { mLayout(S); });
+    let mrq = 0;
+    window.addEventListener("resize", () => { cancelAnimationFrame(mrq); mrq = requestAnimationFrame(() => mLayout(S)); }, { passive: true });
   }
   function mRun(S, text) {
     const res = mindThink(text, { keep: true });
@@ -849,7 +850,8 @@
       S.onIdle = () => { MH.idle = (MH.idle + 1) % MM_EX.length; think(MM_EX[MH.idle]); };
       const st = MIND_SNAP.nodes.length;
       $("#mh-count").textContent = `${st.toLocaleString()} nodes and ${MIND_SNAP.edges.length.toLocaleString()} links: ${SNAP14.stats.kinds.concept.toLocaleString()} concepts, ${(SNAP14.stats.kinds.month || 0).toLocaleString()} months of history, ${SNAP14.stats.kinds.series} measured series, ${(SNAP14.stats.kinds.fact || 0) + (SNAP14.stats.kinds.paper || 0)} sourced facts and papers, ${SNAP14.stats.kinds.quote} quotes, ${SNAP14.stats.kinds.engine + SNAP14.stats.kinds.method + SNAP14.stats.kinds.tool} engine parts, ${SNAP14.stats.kinds.country} economies and ${SNAP14.stats.kinds.signal} signals.`;
-      requestAnimationFrame(() => setTimeout(() => { if (!S.res) think(MM_EX[0]); }, 0));   // paint the page first, then think
+      // paint the page first, then index the graph, then think: two short tasks instead of one long one
+      requestAnimationFrame(() => setTimeout(() => { mindInit(); setTimeout(() => { if (!S.res) think(MM_EX[0]); }, 0); }, 0));
     }
     mLoop(S);
   }
@@ -1074,22 +1076,34 @@
     const meta = $("#cd-meta");
     if (meta) meta.textContent = `${lines.length.toLocaleString("en-US")} lines · ${{ py: "Python", js: "JavaScript", el: "Emacs Lisp", vim: "Vim script" }[lang] || "text"}`;
     pre.replaceChildren();
-    let first = null, hits = 0, st = {};
-    const frag = document.createDocumentFragment();
-    lines.forEach((ln, k) => {
-      const hit = q && ln.toLowerCase().includes(q);
-      const row = h("span", "cd-ln" + (hit ? " hit" : ""));
-      row.id = "cd-l" + (k + 1);
-      const code = h("span");
-      const r = cdTokens(ln, lang, st);
-      st = r[1];
-      r[0].forEach(([c, t]) => code.append(c ? h("span", c, t) : document.createTextNode(t)));
-      code.append(document.createTextNode("\n"));
-      row.append(h("i", null, String(k + 1)), code);
-      if (hit) { hits++; if (!first) first = row; }
-      frag.append(row);
-    });
-    pre.append(frag);
+    // the first screenful (and the first match) is drawn now; the rest of a long file follows in idle slices, so
+    // opening the desk or switching files never freezes the page
+    const gen = (CD.gen = (CD.gen || 0) + 1);
+    let first = null, st = {}, k = 0;
+    const hits = q ? lines.reduce((n, ln) => n + (ln.toLowerCase().includes(q) ? 1 : 0), 0) : 0;
+    const firstHit = q ? lines.findIndex((ln) => ln.toLowerCase().includes(q)) : -1;
+    const draw = (upto) => {
+      const frag = document.createDocumentFragment();
+      for (; k < Math.min(upto, lines.length); k++) {
+        const ln = lines[k], hit = q && ln.toLowerCase().includes(q);
+        const row = h("span", "cd-ln" + (hit ? " hit" : ""));
+        row.id = "cd-l" + (k + 1);
+        const code = h("span");
+        const r = cdTokens(ln, lang, st);
+        st = r[1];
+        r[0].forEach(([c, t]) => code.append(c ? h("span", c, t) : document.createTextNode(t)));
+        code.append(document.createTextNode("\n"));
+        row.append(h("i", null, String(k + 1)), code);
+        if (hit && !first) first = row;
+        frag.append(row);
+      }
+      pre.append(frag);
+    };
+    draw(Math.max(260, firstHit + 60));
+    CD.flush = () => { if (CD.gen === gen) draw(lines.length); };
+    const later = typeof requestIdleCallback === "function" ? (f) => requestIdleCallback(f, { timeout: 200 }) : (f) => setTimeout(f, 16);
+    const more = () => { if (CD.gen !== gen || k >= lines.length) return; draw(k + 400); later(more); };
+    if (k < lines.length) later(more);
     const hc = $("#cd-hits");
     if (hc) hc.textContent = q ? `${hits.toLocaleString("en-US")} line${hits === 1 ? "" : "s"}` : "";
     if (changed) {
@@ -1116,6 +1130,7 @@
     const sel = $("#cd-sym");
     if (sel) sel.addEventListener("change", () => {
       if (sel.value === "") return;
+      if (CD.flush) CD.flush();
       const row = document.getElementById("cd-l" + (Number(sel.value) + 1));
       if (row) { pre.querySelectorAll(".cd-ln.at").forEach((x) => x.classList.remove("at")); row.classList.add("at"); pre.scrollTop = row.offsetTop - 24; }
     });

@@ -3,6 +3,27 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.22 asks whether the shape of the market says anything (`geometry.py`, desk "Geometry", `python -m buildout
+geometry`, MCP tool `geometry_engine`). Every 36 months of stocks, 10-year Treasuries and gold is a covariance matrix, a
+point on the curved space of positive-definite matrices: rolling covariances for all windows at once from cumulative
+sums of outer products, matrix logarithms through batched eigendecompositions, every pairwise log-Euclidean distance from
+one Gram matrix, affine-invariant distances (which ignore units and mixing of the assets) from batched eigenvalues, a
+classical multidimensional-scaling map of 150 years, and Frechet means by era. Random matrix theory on the atlas's 27
+world-market series finds 2 eigenvalues above the Marchenko-Pastur noise edge (the dollar, then oil and rates);
+persistent homology of their correlation geometry (H0 from the minimum spanning tree, H1 by reducing the Vietoris-Rips
+boundary matrix over the two-element field) and the absorption ratio are tested as warnings of 10% falls; sliced
+Wasserstein distances compare whole distributions; the Levy area of the stock-bond path measures who moved first;
+detrended fluctuation analysis gives the Hurst exponent by era; and the volatility drag is measured decade by decade.
+Every claim is walked forward and its p-value corrected with the others (Benjamini-Hochberg). The decision engine gains
+a fourth return-density model, geometric analogs (`decide.geo_walk`), and its bonds now run to 2026 with the GS10
+splice. Results: of 8 claims, 1 survives a 10% false-discovery rate: the analog model beats the long-run average's
+predictive log score (t 4.0) and model averaging gives it 12% of the weight, but a placebo of 8 windows drawn at random
+does as well (geometry over random t -0.2): the gain is the fatter tails of a mixture, not the resemblance, so analog
+point forecasts (skill -15% for returns, -26% by whole distributions) are not used. The book stays at 1.00x. Also in
+this version: a Games desk bug fixed (two top-level functions shared a name; the assembler now refuses that), stale
+counts and dates refreshed across the page, the code viewer and background desk building made incremental, and dead
+code and CSS removed.
+
 Version 0.21 rebuilds the heaviest parts of the engine around matrix multiplication, the operation AI hardware is built
 for (prompted by DeFi Education's note on Pearl, a blockchain whose proof of work is that same math). The regime filter,
 which carried odds forward one month at a time, is now a scan of matrix products (`infer._scan`, `forward_backward`):
@@ -12,7 +33,7 @@ fit runs in the same batch. The five-network ensemble trains its members side by
 written by a subagent, identical to sequential training bit for bit). Measured on the build machine: the decision
 engine rebuilds in 33 seconds instead of 93 and the portfolio engine in 9 instead of 24, with the same findings to the
 last digit; the forward-backward pass is about 3x faster and agrees with the loop to about 1e-14. The mind's graph is
-one sparse 8,644 by 8,644 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
+one sparse 8,693 by 8,693 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
 questions (`spread_many`, `think_many`), which gives the board: the mind's verdict on all 27 claims it weighs in one
 pass (`python -m buildout board`, MCP tool `mind_board`, and live in the page). A 64-eigenvector map of the graph is
 about 9x faster per question but changes half of the top twenty answers, so it is used only to find related ideas
@@ -525,7 +546,8 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `rl.py` | Fitted Q iteration sizing agent over 54 market states and the last action, walk-forward, bootstrap and deflated Sharpe |
 | | `nn.py` | Multi-layer perceptrons and deep ensembles in numpy: gradient-checked backpropagation, dropout, weight decay, Adam, early stopping on the newest data, mse, pinball and logistic losses, purged walk-forward |
 | | `infer.py` | Hidden Markov models (one asset or several, full covariance) fit by EM with the forward-backward pass as a scan of matrix products and every start batched; Bayesian online changepoints; Kalman regression; stacking; mixture risk; exponential weights |
-| | `decide.py` | The decision engine: walked-forward regimes and forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
+| | `decide.py` | The decision engine: walked-forward regimes, changepoints and geometric analogs, forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
+| | `geometry.py` | The shape of the market: covariance matrices on a curved space (affine-invariant analogs, an MDS era map, Frechet means), random matrix theory, persistent homology, optimal transport, the Levy area, DFA and volatility drag, every claim walked forward with a placebo and a false-discovery correction |
 | | `portfolio.py` | The portfolio engine: three-asset regimes, utility-optimal mixes in a risk budget, eight policies walked forward, the Hedge learner, a regime-switching bootstrap and stress replays |
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
 | | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |

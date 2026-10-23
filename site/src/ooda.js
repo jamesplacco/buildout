@@ -273,8 +273,8 @@
     if (fl.children.length) return;
     [["Sources", "FRED, Treasury, SEC XBRL, Databento, public long-history datasets, feeds; every source registered with its licence (sources.json)."],
       ["Data engines", "macro, research, brain, book, fundamentals: dated JSON, raw data never enters the repository."],
-      ["Reasoning engines", "the brain (inference, counterfactuals, structure learning, robust links), the solver (Bayes, robust to the odds), games, valuation and accounting, causal statistics, the hedge book."],
-      ["Decision engine", "the loop: observe, orient, decide, act, one record per position and hedge, with the frameworks and kill criteria."],
+      ["Reasoning engines", "the brain (inference, counterfactuals, structure learning, robust links), the solver (Bayes, robust to the odds), games, valuation and accounting, causal statistics, the hedge book, the shape of the market (geometry.py)."],
+      ["Decision engines", "decide.py sizes the stock exposure (stacked forecasts, the neural ensemble in nn.py, regimes and changepoints in infer.py, model averaging, a risk budget, an evidence gate); portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns both into one record per position and hedge, with frameworks and kill criteria."],
       ["Harnesses", "this page renders the files; the MCP server answers any assistant with the same engines; the journal scores the decisions."]].forEach(([k, v], i) => {
       const li = h("li"); li.append(h("span", "oo-n", String(i + 1)), h("b", null, k), h("p", null, v)); fl.append(li);
     });

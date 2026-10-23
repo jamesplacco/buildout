@@ -115,9 +115,9 @@
     barsH($("#dx-dist"), D.hist.map((n, i) => ({ label: fx(i * 0.1, 1) + "x", v: n, lbl: pct(n / D.hist.reduce((a, b) => a + b, 0), 0, false), color: "var(--s1)",
       tip: () => [[String(n), `draws whose optimum is near ${fx(i * 0.1, 1)}x`]] })).filter((r) => r.v > 0), { fmt: (v) => String(Math.round(v)) });
     const MW = O.model_weights_hist, md = yr(MW.dates);
-    xyChart($("#dx-mwh"), { series: Object.keys(N.models.names).map((k, j) => ({ name: N.models.names[k], pts: md.map((x, i) => [x, MW[k][i]]), color: ["var(--s1)", "var(--s4)", "var(--muted)"][j], width: 1.8 })),
+    xyChart($("#dx-mwh"), { series: Object.keys(N.models.names).map((k, j) => ({ name: N.models.names[k], pts: md.map((x, i) => [x, MW[k][i]]), color: ["var(--s1)", "var(--s4)", "var(--muted)", "var(--s3)"][j], width: 1.8 })),
       height: 190, yDomain: [0, 1], yfmt: (v) => pct(v, 0, false), xfmt: (v) => String(Math.floor(v)), xticks: dxTicks(md[0], md[md.length - 1], 10), label: "Model-averaging weights through history" });
-    legendLines($("#dx-mwh-leg"), Object.keys(N.models.names).map((k, j) => [["var(--s1)", "var(--s4)", "var(--muted)"][j], N.models.names[k]]));
+    legendLines($("#dx-mwh-leg"), Object.keys(N.models.names).map((k, j) => [["var(--s1)", "var(--s4)", "var(--muted)", "var(--s3)"][j], N.models.names[k]]));
     const K0 = O.kalman, k0 = K0.dates.findIndex((d) => Number(d.slice(0, 4)) >= 1891);   // the filter's first 20 years are its burn-in
     const K = { beta: K0.beta.slice(k0), se: K0.se.slice(k0), now: K0.now, now_se: K0.now_se, as_of: K0.as_of }, kd = yr(K0.dates.slice(k0));
     xyChart($("#dx-kal"), { series: [{ name: "Stock return per point of 10-year yield", pts: kd.map((x, i) => [x, K.beta[i]]), color: "var(--s1)", width: 1.8 }],

@@ -382,4 +382,4 @@ def test_page_states_the_mind_counts_it_ships():
     n = len(snap["nodes"])
     concepts = sum(1 for x in snap["nodes"] if x["k"] == "concept")
     assert f"{n:,} nodes" in page and f"{concepts:,} concepts" in page
-    assert abs(len(snap["edges"]) - 34700) < 1500 and "34,700 typed links" in page
+    assert abs(len(snap["edges"]) - 35000) < 1500 and "35,000 typed links" in page

@@ -103,4 +103,7 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    # run alone, this writes the v0.14 mind over the current one; the chain starts at the newest snapshot script
+    if "--force-v14" not in sys.argv:
+        raise SystemExit("snapshot_v14.py is a library for the later snapshots; run scripts/snapshot_v22.py (or pass --force-v14)")
+    raise SystemExit(main([a for a in sys.argv[1:] if a != "--force-v14"]))

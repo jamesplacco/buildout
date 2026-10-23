@@ -148,6 +148,8 @@ def main(argv: list[str] | None = None) -> None:
     bo.add_argument("--json", action="store_true")
     rel = sub.add_parser("related", help="nodes nearest a node in the mind's 64-number spectral map")
     rel.add_argument("node", help="a node id such as c:kalman, or a name")
+    gmp = sub.add_parser("geometry", help="the shape of the market: covariance geometry, random matrices, topology, transport, paths, long memory, each claim tested")
+    gmp.add_argument("--out", default="out")
     pfp = sub.add_parser("portfolio", help="the portfolio engine: stocks, Treasuries, gold and cash from regimes, a learner over policies, ten simulated years")
     pfp.add_argument("--out", default="out")
     pfp.add_argument("--quick", action="store_true")
@@ -444,6 +446,18 @@ def main(argv: list[str] | None = None) -> None:
         for r in M.related(nid, 12):
             print(f"  {r['similarity']:.3f}  {r['name']}  [{r['kind']}]")
         return
+    if a.cmd == "geometry":
+        from . import atlas, geometry, labs
+        from .jsonout import write
+        adl = atlas.download(fred=False)
+        o = geometry.build(labs.download(), adl["raw"], atlas_dl=adl)
+        path = write(o, a.out, "geometry.json")
+        for t in o["tests"]:
+            print(f"  q {t['q']:.3f}  p {t['p']:.3f}  {t['test']}")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
     if a.cmd == "portfolio":
         from . import atlas, labs, portfolio
         from .jsonout import write
@@ -462,7 +476,12 @@ def main(argv: list[str] | None = None) -> None:
         from .jsonout import write
         K = {k["id"]: k for k in mind.load_knowledge()}
         cape = (K.get("val-cape-2026-10-20") or {}).get("value")
-        o = decide.build(labs.download(), cape_now=cape, y10_now=5.13, quick=a.quick)
+        try:
+            from . import atlas
+            gh = atlas.download(fred=False)["raw"]          # carries the 10-year yield past where Shiller's series stops
+        except Exception:  # noqa: BLE001
+            gh = None
+        o = decide.build(labs.download(), cape_now=cape, y10_now=5.13, quick=a.quick, gh=gh)
         path = write(o, a.out, "decision.json")
         if a.json:
             print(json.dumps(o["now"], default=float, indent=1))

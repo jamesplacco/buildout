@@ -75,7 +75,7 @@
   }
   // the engine's mixture under a what-if: stressed odds p (the other states keep their proportions), a 12-month forecast
   function dxlMixture(N, opt) {
-    const M = N.mixture, R = N.regime, names = ["hmm", "bocpd", "uncond"];
+    const M = N.mixture, R = N.regime, names = Object.keys(N.mixture).filter((k) => N.models.weights[k] != null);
     const mw = names.map((k) => N.models.weights[k]);
     const W = [], MU = [], SD = [];
     const tilt = opt.r12 == null ? N.tilt : (opt.r12 - N.forecasts.now.mean) / 12;

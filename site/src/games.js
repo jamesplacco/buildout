@@ -81,7 +81,7 @@
       note: "Rock, paper, scissors: no pure equilibrium; the only equilibrium mixes all three evenly." },
   };
   function gameNow() { return GM.custom || GAME_PRESETS[GM.preset]; }
-  function renderMatrix() {
+  function renderGameMatrix() {
     const box = $("#gt-matrix");
     if (!box) return;
     const g = gameNow(), m = g.rows.length, n = g.cols.length;
@@ -206,10 +206,10 @@
       sel.dataset.wired = "1";
       Object.entries(GAME_PRESETS).forEach(([k, g]) => { const o = h("option", null, g.name); o.value = k; sel.append(o); });
       sel.value = GM.preset;
-      sel.addEventListener("change", () => { GM.preset = sel.value; GM.custom = null; renderMatrix(); });
+      sel.addEventListener("change", () => { GM.preset = sel.value; GM.custom = null; renderGameMatrix(); });
     }
     const lr = $("#gt-ladder-reset");
     if (lr && !lr.dataset.wired) { lr.dataset.wired = "1"; lr.addEventListener("click", () => { GM.ladder = null; renderLadder(); }); }
-    renderCapexGame(); renderKyle(); renderMatrix(); renderLadder(); renderFill();
+    renderCapexGame(); renderKyle(); renderGameMatrix(); renderLadder(); renderFill();
   }
   function drawGames() { guard("Crowded exit", renderExit, $("#gt-exit-chart")); guard("Ladder", renderLadderResult, $("#gt-pmf")); fixChartRoles($("#view-games")); }

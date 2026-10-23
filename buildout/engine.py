@@ -116,7 +116,7 @@ REGISTRY: list[Engine] = [
     Engine("labs", "The labs", [], ["labs.json"], "labs.py", False,
            "Trading claims on 156 years: trend rules with a bootstrap, max test and deflated Sharpe; oscillators; valuation out of sample; Markov regimes; GARCH; cointegration; multiple testing"),
     Engine("ml", "Machine-learning lab", [], ["ml.json"], "ml.py", False,
-           "Six models forecast 12-month returns and 15% falls since 1940: purged walk-forward, Diebold-Mariano, CPCV and overfitting odds, conformal intervals, analogs, novelty"),
+           "Seven models and two ensembles forecast 12-month returns and 15% falls since 1940: purged walk-forward, Diebold-Mariano, CPCV and overfitting odds, conformal intervals, analogs, novelty"),
     Engine("reality", "Reality check", ["labs.json"], ["reality.json"], "assumptions.py", False,
            "Every model's assumptions tested: tails, dependence, stability, correlation regimes, breakpoints, kappa, fragility, 400 stressed worlds"),
     Engine("connect", "Data connections", [], ["connections.json"], "datahub.py", False, "Credential and reachability check for every data source"),
@@ -126,6 +126,9 @@ REGISTRY: list[Engine] = [
     Engine("portfolio", "Portfolio engine", [], ["portfolio.json"], "portfolio.py", False,
            "Stocks, Treasuries, gold and cash from a three-asset regime model, utility-optimal mixes in a risk budget, eight policies walked forward, "
            "a learner over policies, a regime-switching bootstrap of ten years and eight replayed drawdowns"),
+    Engine("geometry", "The shape of the market", [], ["geometry.json"], "geometry.py", False,
+           "Covariance matrices as points on a curved space (affine-invariant analogs, an era map, Frechet means), random matrix theory, persistent homology, "
+           "optimal transport, the Levy area, long memory and volatility drag, every claim walked forward and corrected for testing many"),
     Engine("decide", "Decision engine", [], ["decision.json"], "decide.py", False,
            "Data to decision: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, a Kalman stock-bond beta, "
            "dynamic model averaging, utility-optimal exposure inside a risk budget, an evidence gate, a hedge selector and a conservative RL check, walked forward from 1940"),

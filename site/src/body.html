@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.21</span>
+      Buildout <span class="ver">v0.22</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -33,7 +33,7 @@
 <section class="view" id="view-desk" aria-labelledby="desk-title">
   <div class="t7" id="today7">
     <div class="t7-head">
-      <div class="t7-brand"><span class="hero-mark" aria-hidden="true"><svg class="lotus" viewBox="0 0 330 330"><use href="#lotus"></use></svg></span><p class="eyebrow">Buildout · Today · October 21, 2026 · Jamie Placco</p></div>
+      <div class="t7-brand"><span class="hero-mark" aria-hidden="true"><svg class="lotus" viewBox="0 0 330 330"><use href="#lotus"></use></svg></span><p class="eyebrow">Buildout · Today · October 22, 2026 · Jamie Placco</p></div>
       <h1 id="desk-title">How reliable is your bond hedge in this regime?</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
@@ -151,11 +151,11 @@
     </div>
     <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
     <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 322 of 322 pass</span></span>
+        <span class="chip"><span class="dot good"></span><span id="chip-tests">Engine and page tests: 469 of 469 pass</span></span>
         <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run: GitHub Actions</span></span>
         <span class="chip"><span class="dot warn"></span>Databento: waiting for the API key</span>
-        <span class="chip"><span class="dot good"></span><span id="chip-sources">91 data sources</span></span>
-        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 21, 2026</span>
+        <span class="chip"><span class="dot good"></span><span id="chip-sources">99 data sources</span></span>
+        <span class="chip"><span class="dot idle"></span>Snapshot: Oct 22, 2026</span>
       </div>
   </div>
 
@@ -282,9 +282,9 @@
       <p class="prose">Computed every weekday morning on GitHub Actions. The market panel runs on free FRED data; the book panel switches on once the Databento key is in place.</p>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Waiting for the first daily run</span></div>
+      <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Live panel: fills from the daily run</span></div>
       <div id="macro-body" class="section">
-        <div class="empty"><strong>First daily run pending.</strong><span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
+        <div class="empty"><strong>Live panel.</strong><span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
       </div>
     </div>
     <div class="panel">
@@ -301,7 +301,6 @@
       <h2 id="cal-title">What could move it next</h2>
     </div>
     <ul class="cal">
-      <li><b>Oct 21</b><span>Meta Q3 results after the close. Q2 free cash flow was $0.8B against $8.6B a year earlier, and the stock fell about 10% between Oct 13 and Oct 19. <a class="src" href="https://vantagemarkets.com/market-analysis/meta-stock-price-today-q3-earnings-ahead-october-20-2026">Vantage Markets</a></span></li>
       <li><b>Oct 22</b><span>AI stocks fell after Meta's and Lam Research's results (QQQ −2.65% at 1:15 p.m. ET, Meta −6.0%) while the 10-year yield fell 11bp to 5.02% and TLT rose 1.73%: on a growth and earnings scare, long bonds hedged. <a href="#bonds">Bonds, simply</a> reprices every Treasury ETF at any 10-year and 30-year yield. <a class="src" href="https://stockanalysis.com/etf/qqq/">StockAnalysis (QQQ)</a> · <a class="src" href="https://stockanalysis.com/etf/tlt/">StockAnalysis (TLT)</a> · <a class="src" href="https://finance.yahoo.com/markets/live/stock-market-today-thursday-october-22-dow-sp-500-nasdaq-tesla-meta-112217857.html">Yahoo Finance</a></span></li>
       <li><b>Oct 27–28</b><span>FOMC. Market odds of a second straight hike fell from 70% on Sep 28 to 19% on Oct 8, then rose to about 33% by Oct 16. UOB expects hikes in December and early 2027 to a 4.50% upper bound. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a> · <a class="src" href="https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026">ROIC (Reuters)</a></span></li>
       <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">FXStreet</a></span></li>
@@ -345,7 +344,7 @@
   </section>
   <section class="section" aria-labelledby="dx-mod-title">
     <div class="section-head"><p class="eyebrow">Models</p><h2 id="dx-mod-title">Who gets the weight, and why</h2>
-      <p class="prose">Two layers of averaging, both scored only on what was already known. The return density for next month averages the regime model, the changepoint model and the long-run average by their recent predictive likelihood (2% forgetting a month). The 12-month view stacks four forecasters with non-negative weights fit on their earlier out-of-sample errors; it tilts the monthly mean.</p></div>
+      <p class="prose">Two layers of averaging, both scored only on what was already known. The return density for next month averages the regime model, the changepoint model, the long-run average and (since v0.22) the geometric-analog model by their recent predictive likelihood (2% forgetting a month). The analog model reads the 12 months after the 8 past windows whose stock-bond covariance is nearest today's; a placebo on the Geometry desk shows its gain comes from mixing several pasts, not from the resemblance. The 12-month view stacks four forecasters with non-negative weights fit on their earlier out-of-sample errors; it tilts the monthly mean.</p></div>
     <div class="grid2 dx-g2">
       <div class="panel"><span class="panel-title">Return-density models, weight today</span><div class="svgbox" id="dx-mw"></div>
         <span class="panel-title">Their weights through history</span><div class="svgbox" id="dx-mwh"></div><div class="legend" id="dx-mwh-leg"></div></div>
@@ -444,10 +443,10 @@
   <div class="at-tiles" id="mx-tiles"></div>
   <section class="section" aria-labelledby="mx-how-title">
     <div class="section-head"><p class="eyebrow">How the mind multiplies</p><h2 id="mx-how-title">A question becomes a vector; the knowledge is a matrix</h2>
-      <p class="prose">The mind's 8,644 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
+      <p class="prose">The mind's 8,693 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
     <div class="mx-eq panel">
-      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,644, forty times</small></div>
-      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,644 by Q, forty times</small></div>
+      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,693, forty times</small></div>
+      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,693 by Q, forty times</small></div>
       <div><span class="dx-k">A neural network layer</span><code>h = f(W x + b)</code><small>the same product, learned weights W</small></div>
     </div>
   </section>
@@ -486,6 +485,67 @@
           <li><b>What would change the view.</b> Paying inference demand on Pearl at scale, or a verification failure. Neither is in the engine's data yet; this is a thesis to watch, not a signal.</li>
         </ul></div>
     </div>
+  </section>
+</section>
+<section class="view" id="view-geometry" hidden aria-labelledby="geo-title">
+  <div class="vhead"><p class="eyebrow">The shape of the market · geometry, topology, transport</p><h1 id="geo-title">Markets have a shape. It describes risk well and predicts returns badly</h1>
+    <p class="lede" id="geo-bluf"></p></div>
+  <div class="at-tiles" id="geo-tiles"></div>
+  <section class="section" aria-labelledby="geo-map-title">
+    <div class="section-head"><p class="eyebrow">Covariance geometry</p><h2 id="geo-map-title">150 years of risk structure on one page</h2>
+      <p class="prose">Every 36 months of stocks, 10-year Treasuries and gold has a covariance matrix: three volatilities and three correlations. Those matrices are not points on a flat sheet; they live on a curved space where the honest distance between two of them (the affine-invariant distance, the size of the logarithm of A<sup>&minus;1/2</sup> B A<sup>&minus;1/2</sup>) asks how much one era's risk must be stretched to become another's, whatever the units. Flatten that space with the matrix logarithm, measure every year against every other year at once (one Gram matrix), and draw the result with classical multidimensional scaling: each dot is a year, and dots close together had risk that looked alike.</p></div>
+    <div class="panel"><div class="svgbox" id="geo-map"></div><div class="legend" id="geo-map-leg"></div><p class="hint" id="geo-map-n"></p></div>
+  </section>
+  <section class="section" aria-labelledby="geo-an-title">
+    <div class="section-head"><p class="eyebrow">Analogs, and the placebo that tests them</p><h2 id="geo-an-title">The eight pasts that look most like today, and why resemblance is not the edge</h2>
+      <p class="prose" id="geo-now"></p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">Nearest past windows by the shape of their risk (none overlapping today's, 36 months apart)</span><div class="tablewrap"><table id="geo-an"></table></div></div>
+      <div class="panel"><span class="panel-title">The decision engine's analog model against its placebos</span><div class="svgbox" id="geo-placebo"></div><p class="hint" id="geo-placebo-n"></p>
+        <p class="prose">The engine's new return-density model reads next month from the year after each of the eight nearest windows. It scores better than the long-run average, but so do eight windows drawn at random: a mixture of several pasts has fatter tails than one bell curve, and that is the whole gain. The engine keeps the model for its tails and shrinks each analog's mean three quarters of the way to the long run.</p></div>
+    </div>
+    <div class="panel"><span class="panel-title">Nearest by whole distribution: sliced Wasserstein distance over 64 random directions</span><div class="tablewrap"><table id="geo-tr"></table></div>
+      <p class="hint">Optimal transport compares the full joint distribution of the three returns, tails included, not only their covariance. Every window's projections are sorted once and compared in one broadcast.</p></div>
+  </section>
+  <section class="section" aria-labelledby="geo-spec-title">
+    <div class="section-head"><p class="eyebrow">Random matrix theory</p><h2 id="geo-spec-title">How many real forces move the world's markets? About two</h2>
+      <p class="prose">A correlation matrix of N series estimated from T months is noisy even when nothing is related: its eigenvalues spread out in a band whose edges Marchenko and Pastur derived from N/T alone. Eigenvalues that rise above the band are real common factors; the rest is the noise of a finite sample. The absorption ratio, the share of all variance the top fifth of eigenvectors carries, measures how tightly markets move as one.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">Eigenvalues today (bars) against the noise density (curve)</span><div class="svgbox" id="geo-spec"></div><p class="hint" id="geo-spec-n"></p><ul class="geo-f" id="geo-factors"></ul></div>
+      <div class="panel"><span class="panel-title">Absorption ratio, rolling five years</span><div class="svgbox" id="geo-ar"></div>
+        <p class="hint">A jump of more than one standard deviation above its recent level has preceded a 10% fall within a year more often than not jumping has, but not by enough to rule out luck once the overlapping years are permuted in blocks (see the tests below).</p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="geo-tda-title">
+    <div class="section-head"><p class="eyebrow">Persistent homology</p><h2 id="geo-tda-title">The topology of correlation: what joins, and which loops form</h2>
+      <p class="prose">Treat each market as a point, with distance &radic;(2(1 &minus; &rho;)) from its correlation &rho; to every other, and grow a ball around every point. As the balls grow, markets join into clusters (H0, recorded by the minimum spanning tree) and rings appear and fill in (H1, found by reducing the boundary matrix of the Vietoris-Rips complex over the two-element field). Features that last across many scales are structure; flickers are noise.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">Barcode today</span><div class="svgbox" id="geo-bars"></div><p class="hint" id="geo-bars-n"></p></div>
+      <div class="panel"><span class="panel-title">Total persistence of loops through time</span><div class="svgbox" id="geo-tda"></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="geo-levy-title">
+    <div class="section-head"><p class="eyebrow">Path signatures</p><h2 id="geo-levy-title">Who moved first: the Levy area of stocks against bonds</h2>
+      <p class="prose">Plot cumulative stock returns against cumulative bond returns and the market traces a path. The signed area between the path and its straight chord, the second level of the path's signature, is positive when moves in stocks tend to come before moves in bonds and negative when bonds lead. Correlation cannot see order; the area can.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">The last 36 months as a path</span><div class="svgbox" id="geo-levy"></div><p class="hint" id="geo-levy-n"></p></div>
+      <div class="panel"><span class="panel-title">Levy area through 150 years</span><div class="svgbox" id="geo-area"></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="geo-mem-title">
+    <div class="section-head"><p class="eyebrow">Memory and compounding</p><h2 id="geo-mem-title">Returns barely remember; volatility does, and it taxes growth</h2>
+      <p class="prose">Detrended fluctuation analysis measures how a series' wiggle grows with the time scale: a Hurst exponent of 0.5 is a random walk. Shiller's monthly prices are averages of daily closes, which smooths returns and lifts the exponent, so read the eras against each other more than against 0.5. The compounding table is the other geometry of returns: what a holder earns is the average log return, which falls short of the average return by about half the variance.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel"><span class="panel-title">Hurst exponent by twenty-year era (line at 0.5)</span><div class="svgbox" id="geo-hurst"></div></div>
+      <div class="panel"><span class="panel-title">Arithmetic against geometric, a year, by decade</span><div class="tablewrap"><table id="geo-comp"></table></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="geo-t-title">
+    <div class="section-head"><p class="eyebrow">Every claim, tested</p><h2 id="geo-t-title">What survives correction for testing many</h2>
+      <p class="prose">Each claim is walked forward with only what was known at the time, scored against a simple benchmark with errors that respect overlapping years, and its p-value is adjusted with the others by the Benjamini-Hochberg procedure. A q below 0.10 means fewer than one in ten such survivors should be flukes.</p></div>
+    <div class="panel"><div class="tablewrap"><table id="geo-tests"></table></div></div>
+    <div class="panel"><span class="panel-title">Findings</span><ul class="geo-find" id="geo-find"></ul>
+      <p class="dx-note">The MODEL book, not personal positions. Research only: the engine never places orders.</p></div>
   </section>
 </section>
 <section class="view" id="view-noteworthy" hidden aria-labelledby="nw-title">
@@ -632,7 +692,7 @@
 
   <section class="section" id="rates-live-sec" aria-labelledby="rlive-title">
     <div class="section-head"><p class="eyebrow">Live data</p><h2 id="rlive-title">Curve and spreads from the daily run</h2></div>
-    <div id="rates-live"><div class="empty"><strong>Waiting for the first daily run.</strong><span>The run adds today's FRED curve against a year ago, 2s10s and 3m10y since 2000, real yields and breakevens, the 10-year term premium, and credit spreads.</span></div></div>
+    <div id="rates-live"><div class="empty"><strong>Live panel: fills from the daily run.</strong><span>The run adds today's FRED curve against a year ago, 2s10s and 3m10y since 2000, real yields and breakevens, the 10-year term premium, and credit spreads.</span></div></div>
   </section>
 
   <section class="section" aria-labelledby="bc-title">
@@ -1295,7 +1355,7 @@
   </section>
   <section class="section" id="capex-live-sec" aria-labelledby="cxl-title">
     <div class="section-head"><p class="eyebrow">Live data</p><h2 id="cxl-title">Capex against cash flow, from SEC filings</h2><p class="prose">Quarterly operating cash flow and capital spending from each company's XBRL filings, pulled by the daily run. Above 100%, capex exceeds the cash the business generates, and cash on hand or new debt fills the gap.</p></div>
-    <div id="capex-live"><div class="empty"><strong>Waiting for the SEC step of the daily run.</strong><span>Set the SEC_USER_AGENT repository variable to a name and email address (the SEC requires one) and the run adds twelve quarters of capex, operating cash flow, debt and cash for GOOGL, MSFT, AMZN, META, ORCL, TSLA and SPCX.</span></div></div>
+    <div id="capex-live"><div class="empty"><strong>Live panel: fills from the SEC step of the daily run.</strong><span>Set the SEC_USER_AGENT repository variable to a name and email address (the SEC requires one) and the run adds twelve quarters of capex, operating cash flow, debt and cash for GOOGL, MSFT, AMZN, META, ORCL, TSLA and SPCX.</span></div></div>
   </section>
   <section class="section" aria-label="Theses">
     <div class="thesis-grid" id="thesis-grid"></div>
@@ -2338,11 +2398,11 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">The engine behind the desk.</h1>
-    <p class="lede">Python, about 20,000 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 30,000 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
-    <li><h3>Data</h3><p>91 sources: FRED curve, credit, volatility, oil, inflation, jobs, sentiment and financial conditions daily; feeds from Substack, Telegram, X, Reddit and the wires; SEC 10-K and 10-Q facts; 156 years of public data monthly; Databento bars with split and dividend factors; Kalshi odds.</p></li>
+    <li><h3>Data</h3><p>99 sources: FRED curve, credit, volatility, oil, inflation, jobs, sentiment and financial conditions daily; feeds from Substack, Telegram, X, Reddit and the wires; SEC 10-K and 10-Q facts; 156 years of public data monthly; Databento bars with split and dividend factors; Kalshi odds.</p></li>
     <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
     <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
     <li><h3>Hedge &amp; size</h3><p>Min-variance TLT ratio when the regime allows it. Vol target and drawdown cap set gross; Kelly checks the edge.</p></li>
@@ -2363,7 +2423,7 @@
 
   <section class="section" id="status" aria-labelledby="st-title">
     <div class="section-head"><p class="eyebrow">Operations</p><h2 id="st-title">System status</h2><p class="prose">Written by the last step of every daily run: what ran, how fresh each output is, and the checks it passed. A stale or failed check shows here and on the Desk.</p></div>
-    <div class="panel" id="status-body"><div class="empty"><strong>No run status yet.</strong><span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
+    <div class="panel" id="status-body"><div class="empty"><strong>Live panel: no run status in this copy.</strong><span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
   </section>
   <div class="grid2">
     <div class="panel">
@@ -2842,9 +2902,9 @@
     <ol class="cd-flow">
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
-      <li><b>Know.</b> ontology.py and concepts17.json define 4,299 concepts and their relations; knowledge.json holds 601 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 8,644 nodes and about 34,700 typed links, with 4,295 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
-      <li><b>Decide.</b> ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
+      <li><b>Know.</b> ontology.py and concepts17.json define 4,318 concepts and their relations; knowledge.json holds 605 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 8,693 nodes and about 35,000 typed links, with 4,318 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Decide.</b> decide.py sizes the stock exposure from stacked forecasts (nn.py's neural ensemble), regimes and changepoints (infer.py), model averaging that now includes geometric analogs (geometry.py), a risk budget and an evidence gate; portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
       <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
     </ol>
@@ -2880,6 +2940,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v22-t">
+    <div class="section-head"><p class="eyebrow">v0.22</p><h2 id="ag-v22-t">This release, in numbers</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>40</b><span>Stale items found by an auditor agent</span><small>a real bug, old counts and dates, dead code and CSS; most fixed here</small></div>
+      <div class="at-kpi"><b>1 of 8</b><span>Geometric claims that survive</span><small>walked forward, corrected for testing many</small></div>
+      <div class="at-kpi"><b>&minus;0.2</b><span>The placebo's t</span><small>nearest analogs against random ones</small></div>
+      <div class="at-kpi"><b>19</b><span>New concepts in the mind</span><small>Riemannian geometry to Benjamini-Hochberg</small></div></div>
+    <p class="prose">An auditor agent read every desk and source file without editing anything and returned a ranked list: a Games desk left empty by two functions sharing a name, status chips and FAQ answers still carrying older counts, an Engine room registry missing half its engines, the decision engine's bonds stopping in 2023, unread snapshot payloads and dead code. The lead fixed most of them, added a build check that makes the name clash impossible, and built the geometry engine, its tests on planted data (a circle has one loop, pure noise stays inside the Marchenko-Pastur edges, the distance ignores units) and the placebo that decided how the decision engine uses it.</p>
   </section>
   <section class="section" aria-labelledby="ag-v21-t">
     <div class="section-head"><p class="eyebrow">v0.21</p><h2 id="ag-v21-t">This release, in numbers</h2></div>

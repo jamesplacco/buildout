@@ -231,7 +231,7 @@
     const r = LIVE.report && LIVE.report.roll_spread_bps;
     if (!r || typeof r !== "object" || !Object.values(r).some(fin)) {
       const e = h("div", "empty");
-      e.append(h("strong", null, "Waiting for the book run."), h("span", null, "With the Databento key in place, the engine estimates each name's effective spread from its daily closes (Roll) and adds it here."));
+      e.append(h("strong", null, "Live panel: fills from the book run."), h("span", null, "With the Databento key in place, the engine estimates each name's effective spread from its daily closes (Roll) and adds it here."));
       box.replaceChildren(e);
       return;
     }

@@ -1023,6 +1023,21 @@ def portfolio_engine(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, policies, simulation, stress")
 
 
+def geometry_engine(ctx: Context, args: dict) -> dict:
+    o = ctx.load("geometry") or _snap("snap22.js", "SNAP22", "geometry")
+    if not o:
+        raise ToolError("no geometry run yet; run `python -m buildout geometry`")
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"findings": o["findings"], "tests": o["tests"], "analogs": o["covariance"]["now"]["analogs"], "engine_model": o["engine_model"],
+                "note": "Every claim walked forward and corrected for testing many (Benjamini-Hochberg q). Research only, never an order."}
+    if part in ("covariance", "spectrum", "topology", "transport", "paths", "scaling", "compounding"):
+        if part not in o:
+            raise ToolError(f"{part} is not in this run")
+        return {part: o[part]}
+    raise ToolError("part is one of summary, covariance, spectrum, topology, transport, paths, scaling, compounding")
+
+
 def _snap(fname: str, const: str, part: str):
     p = Path(__file__).resolve().parents[1] / "site" / "src" / fname
     txt = p.read_text() if p.exists() else ""
@@ -1148,6 +1163,11 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                    "claim is true, its range, its number of signals and what it hinges on. With related: a node id, the nodes nearest it in the mind's 64-number "
                    "spectral map instead.", _obj({"related": {"type": "string"}, "limit": {**NUM, "description": "how many related nodes, default 10"}}),
                    {"readOnlyHint": True, "openWorldHint": False}),
+    "geometry_engine": (geometry_engine, "The shape of the market: 156 years of stocks, Treasuries and gold as covariance matrices on a curved space (today's "
+                        "nearest analogs, an era map, Frechet means), random matrix theory and persistent homology on the atlas's world markets, Wasserstein "
+                        "analogs, the Levy area of stocks against bonds, long memory and volatility drag, with every claim walked forward and corrected for testing many.",
+                        _obj({"part": {"type": "string", "enum": ["summary", "covariance", "spectrum", "topology", "transport", "paths", "scaling", "compounding"]}}),
+                        {"readOnlyHint": True, "openWorldHint": False}),
     "portfolio_engine": (portfolio_engine, "The portfolio engine for the MODEL book: today's mix of stocks, 10-year Treasuries, gold and cash; the regimes of the three "
                          "assets together with each one's stock-bond correlation; eight policies walked forward since 1940 and a learner over them; ten years simulated "
                          "from today's regime odds; and today's mixes replayed through eight drawdowns. Research only; never places orders.",

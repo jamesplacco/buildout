@@ -196,7 +196,7 @@ def test_mcp_handshake_and_tool_list_over_stdio():
     assert [o.get("id") for o in out] == [1, 2, None, 3]              # the notification gets no reply
     assert out[0]["result"]["protocolVersion"] == "2024-11-05" and out[0]["result"]["serverInfo"]["version"] == __import__("buildout").__version__
     names = [t["name"] for t in out[1]["result"]["tools"]]
-    assert names == ["get_research_snapshot", "get_portfolio_risk", "analyze_positions", "decision_loop", "position_valuation", "hedge_book", "reason", "labs_lookup", "game_math", "ml_forecast", "reality_check", "triage_backtest", "damodaran_value", "technical_analysis", "fundamental_analysis", "rl_policy", "decision_engine", "mind_board", "portfolio_engine", "bond_scenario", "market_history", "data_connections", "investor_voices", "atlas_trace", "brain_selfcheck", "run_hedge_scenario", "evaluate_trade", "create_order_proposal",
+    assert names == ["get_research_snapshot", "get_portfolio_risk", "analyze_positions", "decision_loop", "position_valuation", "hedge_book", "reason", "labs_lookup", "game_math", "ml_forecast", "reality_check", "triage_backtest", "damodaran_value", "technical_analysis", "fundamental_analysis", "rl_policy", "decision_engine", "mind_board", "geometry_engine", "portfolio_engine", "bond_scenario", "market_history", "data_connections", "investor_voices", "atlas_trace", "brain_selfcheck", "run_hedge_scenario", "evaluate_trade", "create_order_proposal",
                      "review_decision", "compare_explanations", "learned_structure", "trace_exposure"]
     assert all(t["annotations"]["readOnlyHint"] for t in out[1]["result"]["tools"])
     assert out[2]["error"]["code"] == -32700 and out[3]["error"]["code"] == -32601

@@ -25,7 +25,7 @@
     BD.ready = true;
     const C = BONDS17.curve, cs = BONDS17.cases, T = (k) => cs[k].funds.TLT, tlt = BONDS17.funds.TLT, fa = (BONDS17.facts || {}).TLT || {};
     $("#bd-lede").textContent = `If the 10-year and 30-year both go to 4%, TLT is worth about ${bdUsd(T("both_4").price)} (${pct(T("both_4").change)}) from ${bdUsd(tlt.price)}; at 6%, about ${bdUsd(T("both_6").price)} (${pct(T("both_6").change)}). `
-      + `Today's curve (${BONDS17.curve_meta ? BONDS17.curve_meta.as_of : ""}) has the 10-year at ${bdP(C["10y"])} and the 30-year at ${bdP(C["30y"])}. A Treasury ETF never matures, so it trades like a stock whose price is the yield moves times its duration, with convexity on top; set the yields below and every fund reprices bond by bond.`;
+      + `The latest closing curve (${BONDS17.curve_meta ? BONDS17.curve_meta.as_of : ""}) has the 10-year at ${bdP(C["10y"])} and the 30-year at ${bdP(C["30y"])}. A Treasury ETF never matures, so it trades like a stock whose price is the yield moves times its duration, with convexity on top; set the yields below and every fund reprices bond by bond.`;
     [[bdUsd(T("both_4").price), "TLT if both go to 4%", pct(T("both_4").change) + " now, " + pct(T("both_4").total) + " over 12 months with income"],
       [bdUsd(T("both_6").price), "TLT if both go to 6%", pct(T("both_6").change) + " now, " + pct(T("both_6").total) + " over 12 months with income"],
       [fx((fa.duration || tlt.duration), 2) + " yrs", "TLT duration", `reported by iShares (${fa.duration_as_of || "model"}); 1bp is about ${fx((fa.duration || tlt.duration) * (tlt.price || 0) / 1e4, 3)} dollars a share`],

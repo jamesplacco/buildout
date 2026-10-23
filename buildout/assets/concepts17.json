@@ -33022,6 +33022,177 @@
 "rel": "is_a:proof-of-work; related:matrix-multiplication,inference,gpu",
 "formula": "",
 "aliases": "PoUW,useful proof of work,Pearl"
+},
+{
+"id": "riemannian-geometry",
+"name": "Riemannian geometry",
+"cluster": "stats",
+"def": "The geometry of curved spaces, where distance is measured along the space itself rather than in a straight line through it. Covariance matrices live on such a space: an average of two of them computed entry by entry can describe a risk structure neither had.",
+"rel": "related:covariance-matrix,affine-invariant-metric,frechet-mean",
+"formula": "",
+"aliases": "curved space,manifold geometry"
+},
+{
+"id": "affine-invariant-metric",
+"name": "Affine-invariant distance",
+"cluster": "stats",
+"def": "A distance between two covariance matrices, the norm of the logarithm of A^-1/2 B A^-1/2, that does not change when every asset is rescaled or the assets are mixed. It compares the shape of risk rather than its units, so a quiet era and a loud era with the same structure sit close together only if their structure matches.",
+"rel": "is_a:riemannian-geometry; related:covariance-matrix,log-euclidean-metric",
+"formula": "d(A,B) = || log(A^-1/2 B A^-1/2) ||_F",
+"aliases": "affine-invariant Riemannian metric,AIRM"
+},
+{
+"id": "log-euclidean-metric",
+"name": "Log-Euclidean distance",
+"cluster": "stats",
+"def": "A distance between covariance matrices taken after mapping each through the matrix logarithm, which flattens the curved space so ordinary averages and distances apply. Cheaper than the affine-invariant distance and close to it when the matrices are near each other.",
+"rel": "related:affine-invariant-metric,frechet-mean,multidimensional-scaling",
+"formula": "d(A,B) = || log A - log B ||_F",
+"aliases": "log-Euclidean metric"
+},
+{
+"id": "frechet-mean",
+"name": "Frechet mean",
+"cluster": "stats",
+"def": "The point that minimizes the average squared distance to a set of points in a curved space: the right notion of an average where adding and dividing do not apply. The typical risk structure of an era is the Frechet mean of its covariance matrices.",
+"rel": "related:riemannian-geometry,log-euclidean-metric",
+"formula": "",
+"aliases": "Karcher mean,geometric mean of matrices"
+},
+{
+"id": "multidimensional-scaling",
+"name": "Multidimensional scaling",
+"cluster": "stats",
+"def": "A way to draw points on a page so their distances match a table of distances as closely as possible. Classical scaling takes the top eigenvectors of the double-centred squared distances; the share of the structure each axis carries says how faithful the drawing is.",
+"rel": "related:pca,log-euclidean-metric",
+"formula": "B = -1/2 J D^2 J",
+"aliases": "MDS,classical scaling,principal coordinates"
+},
+{
+"id": "persistent-homology",
+"name": "Persistent homology",
+"cluster": "stats",
+"def": "Topological data analysis: grow a ball around every point and record when connected pieces merge (H0) and when loops appear and fill in (H1). Features that persist across many scales are structure; ones that flicker are noise. Applied to the correlation distances between markets, it measures how tangled their co-movement is.",
+"rel": "related:vietoris-rips-complex,minimum-spanning-tree,correlation",
+"formula": "",
+"aliases": "TDA,topological data analysis,barcode"
+},
+{
+"id": "vietoris-rips-complex",
+"name": "Vietoris-Rips complex",
+"cluster": "stats",
+"def": "The shape built from points by joining every pair closer than a scale r and filling every triangle whose three sides are all joined. Raising r from 0 traces a filtration whose changes persistent homology records.",
+"rel": "related:persistent-homology",
+"formula": "",
+"aliases": "Rips complex"
+},
+{
+"id": "minimum-spanning-tree",
+"name": "Minimum spanning tree",
+"cluster": "stats",
+"def": "The cheapest set of links that connects every point. In a correlation network it keeps each market's closest relation and shows the backbone of co-movement; its edge lengths are exactly when the pieces of the Rips filtration merge.",
+"rel": "related:persistent-homology,correlation",
+"formula": "",
+"aliases": "MST"
+},
+{
+"id": "optimal-transport",
+"name": "Optimal transport",
+"cluster": "stats",
+"def": "The cheapest way to move one distribution of mass into another. Its cost, the Wasserstein distance, compares whole distributions, tails included, where mean and variance compare only two numbers.",
+"rel": "related:wasserstein-distance,bures-metric",
+"formula": "",
+"aliases": "Monge-Kantorovich,earth mover"
+},
+{
+"id": "wasserstein-distance",
+"name": "Wasserstein distance",
+"cluster": "stats",
+"def": "The optimal-transport cost between two distributions. In one dimension it is the average gap between their sorted samples; in several, the sliced version averages one-dimensional distances over random directions.",
+"rel": "is_a:optimal-transport; related:sliced-wasserstein",
+"formula": "W1 = mean | sort(x) - sort(y) |",
+"aliases": "earth mover's distance,EMD,W1"
+},
+{
+"id": "sliced-wasserstein",
+"name": "Sliced Wasserstein distance",
+"cluster": "stats",
+"def": "The Wasserstein distance between multivariate samples estimated by projecting both onto many random directions, sorting, and averaging the one-dimensional distances: transport between distributions in several dimensions at the price of a sort.",
+"rel": "is_a:wasserstein-distance",
+"formula": "",
+"aliases": "sliced W"
+},
+{
+"id": "bures-metric",
+"name": "Bures distance",
+"cluster": "stats",
+"def": "The 2-Wasserstein distance between two normal distributions, which has a closed form in their means and covariances. It is how far apart two regimes are as whole distributions.",
+"rel": "is_a:optimal-transport; related:covariance-matrix",
+"formula": "W2^2 = |m1 - m2|^2 + tr(S1 + S2 - 2 (S2^1/2 S1 S2^1/2)^1/2)",
+"aliases": "Bures-Wasserstein"
+},
+{
+"id": "path-signature",
+"name": "Path signature",
+"cluster": "stats",
+"def": "The sequence of iterated integrals that summarizes a path: its increments, then the areas it sweeps, then higher terms. Signatures turn a time series into features that capture order of events, not only their sizes.",
+"rel": "related:levy-area,lead-lag",
+"formula": "",
+"aliases": "signature transform,rough paths"
+},
+{
+"id": "levy-area",
+"name": "Levy area",
+"cluster": "stats",
+"def": "The signed area between a two-dimensional path and the straight chord joining its ends, the second level of the path signature. For cumulative stock and bond returns it is positive when stock moves tend to come before bond moves.",
+"rel": "is_a:path-signature; related:lead-lag",
+"formula": "A = 1/2 integral (x dy - y dx)",
+"aliases": "Lévy area"
+},
+{
+"id": "detrended-fluctuation-analysis",
+"name": "Detrended fluctuation analysis",
+"cluster": "stats",
+"def": "A way to estimate long memory: integrate the series, remove a line in boxes of each size, and see how the leftover wiggle grows with box size. The slope is the Hurst exponent, about 0.5 for a random walk's steps.",
+"rel": "related:hurst-exponent,autocorrelation",
+"formula": "F(n) ~ n^H",
+"aliases": "DFA"
+},
+{
+"id": "analog-forecasting",
+"name": "Analog forecasting",
+"cluster": "stats",
+"def": "Predicting by finding the past moments that looked most like today and reading what followed them. It is the market historian's oldest tool; tested honestly, with a placebo of randomly chosen moments, its edge usually comes from averaging several pasts rather than from the resemblance.",
+"rel": "related:k-nearest-neighbors,placebo-test,knn-analogs",
+"formula": "",
+"aliases": "nearest-neighbour forecast,historical analogs,method of analogues"
+},
+{
+"id": "k-nearest-neighbors",
+"name": "Nearest neighbours",
+"cluster": "ml",
+"def": "A rule that predicts from the k past cases closest to the present by some distance. Its quality depends almost entirely on whether the distance measures what matters.",
+"rel": "related:analog-forecasting",
+"formula": "",
+"aliases": "kNN,k-nearest neighbors"
+},
+{
+"id": "benjamini-hochberg",
+"name": "Benjamini-Hochberg procedure",
+"cluster": "stats",
+"def": "A correction for testing many claims at once that controls the false-discovery rate: the expected share of claims called significant that are flukes. Sort the p-values and keep those under their rank times the target over the number of tests.",
+"rel": "related:multiple-testing,data-snooping",
+"formula": "p_(k) <= k q / m",
+"aliases": "false discovery rate,FDR,BH"
+},
+{
+"id": "mixture-of-normals",
+"name": "Mixture of normals",
+"cluster": "stats",
+"def": "A distribution built by drawing from one of several normal distributions with given weights. Mixing normals of different widths fattens the tails and sharpens the peak, which is how real monthly returns look.",
+"rel": "related:fat-tails,kurtosis,regime",
+"formula": "f(x) = sum w_k N(x; mu_k, s_k)",
+"aliases": "Gaussian mixture,normal mixture"
 }
 ]
 }

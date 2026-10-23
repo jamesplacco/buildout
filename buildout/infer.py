@@ -29,28 +29,6 @@ def _norm_pdf(x: np.ndarray, mu: np.ndarray, sd: np.ndarray) -> np.ndarray:
     return np.exp(-0.5 * z * z) / (sd[None, :] * math.sqrt(2 * math.pi))
 
 
-def _forward(B: np.ndarray, pi: np.ndarray, A: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    T, K = B.shape
-    alpha = np.zeros((T, K))
-    c = np.zeros(T)
-    a = pi * B[0]
-    c[0] = a.sum() or 1e-300
-    alpha[0] = a / c[0]
-    for t in range(1, T):
-        a = (alpha[t - 1] @ A) * B[t]
-        c[t] = a.sum() or 1e-300
-        alpha[t] = a / c[t]
-    return alpha, c
-
-
-def _backward(B: np.ndarray, A: np.ndarray, c: np.ndarray) -> np.ndarray:
-    T, K = B.shape
-    beta = np.ones((T, K))
-    for t in range(T - 2, -1, -1):
-        beta[t] = (A @ (B[t + 1] * beta[t + 1])) / c[t + 1]
-    return beta
-
-
 # ---------------------------------------------------------------- the forward-backward pass as matrix products
 # The forward recursion a_t = a_(t-1) A diag(b_t) is a product of matrices, and matrix multiplication is associative, so
 # every prefix product can be formed by doubling: in round r each partial product is multiplied by the one 2^r steps

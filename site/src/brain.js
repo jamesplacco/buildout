@@ -404,7 +404,6 @@
     });
     return { values: out, src };
   }
-  const nodeList = (ids) => ids.map((i) => BR_NODES[i].s).join(", ");
   function brTrace(th, ob, W) {
     const steps = [], ex = th.explanations, ab = th.abduce, pr = th.predict, cr = th.criticize, obsIdx = ab.obs;
     const name = (i) => BR_NODES[i].n, hyp = (r) => (r.root == null ? "nothing unusual (noise)" : name(r.root));

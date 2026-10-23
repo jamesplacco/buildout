@@ -47,8 +47,9 @@ SEED = 19
 HEDGES = {"stocks": (1.0, 0.0, 0.0), "bonds": (0.7, 0.3, 0.0), "cash": (0.7, 0.0, 0.3)}
 HEDGE_NAMES = {"stocks": "All stocks", "bonds": "70% stocks, 30% 10-year Treasuries", "cash": "70% stocks, 30% cash"}
 CONFIGS = {"engine": {}, "no_forecasts": {"tilt": False}, "no_risk_budget": {"es": None}, "regimes_only": {"models": ("hmm",)}}
-MODELS = ("hmm", "bocpd", "uncond")
-MODEL_NAMES = {"hmm": "Hidden Markov regimes", "bocpd": "Changepoint-aware (BOCPD)", "uncond": "Long-run average"}
+MODELS = ("hmm", "bocpd", "uncond", "geo")
+MODEL_NAMES = {"hmm": "Hidden Markov regimes", "bocpd": "Changepoint-aware (BOCPD)", "uncond": "Long-run average", "geo": "Geometric analogs"}
+GEO_W, GEO_K, GEO_N0 = 36, 8, 36   # analog windows of 36 months, the 8 nearest, each one's mean shrunk with 36 pseudo-months
 FORECASTS = ("mean", "ridge", "combo", "nn")
 FORECAST_NAMES = {"mean": "Historical mean", "ridge": "Ridge regression", "combo": "Restricted combination", "nn": "Neural-network ensemble"}
 
@@ -69,8 +70,14 @@ def bond_returns(S: pd.DataFrame) -> pd.Series:
     return real.where(y1.notna() & y0.notna())
 
 
-def data(S: pd.DataFrame) -> pd.DataFrame:
+def data(S: pd.DataFrame, gh: dict | None = None) -> pd.DataFrame:
+    """Stock and bond returns. Shiller's long rate stops a few years before the present; with the GitHub mirror of the
+    10-year yield (gh) it is carried on to the latest month, as on the portfolio desk."""
     r, px, _ = labs.total_return_index(S)
+    if gh and "y10" in gh:
+        from . import portfolio
+        g10 = portfolio._gh_month(gh["y10"], "Rate").reindex(S.index)
+        S = S.assign(y10=S["y10"].where(S["y10"].notna(), g10))
     D = pd.DataFrame({"r": r, "b": bond_returns(S).reindex(r.index), "dy": (S["y10"].diff() / 100).reindex(r.index)})
     ma = pd.Series(labs.sma(px.reindex(r.index).to_numpy(), 10), index=r.index)
     D["trend"] = (px.reindex(r.index) > ma).astype(float)
@@ -166,12 +173,53 @@ def regime_walk(r: np.ndarray, start: int, refit: int = REFIT_HMM, Ks=(2, 3)) ->
     return out
 
 
+def geo_walk(D: pd.DataFrame, start: int) -> dict:
+    """The geometric-analog model: the covariance matrix of the last 36 months of stock and bond returns (known by
+    t - LAG) is a point on the curved space of positive-definite matrices; the 8 past windows nearest it by the
+    affine-invariant distance, ending at least 36 months earlier and 36 months apart, each contribute an equal-weight
+    normal built from the 12 months that followed them (mean shrunk toward the long-run mean, variance half its own,
+    half the long run's). Months before the bond series starts, or where it is missing, fall back to the long run."""
+    from . import geometry
+    r = D["r"].to_numpy()
+    X = D[["r", "b"]].to_numpy()
+    T = len(r)
+    ok_row = np.isfinite(X).all(1)
+    C = geometry.rolling_cov(np.nan_to_num(X), GEO_W)
+    good = np.zeros(T, bool)
+    run = np.convolve(ok_row.astype(float), np.ones(GEO_W), "full")[:T]
+    good[GEO_W - 1:] = run[GEO_W - 1:] >= GEO_W - 1e-9
+    C[good] += np.eye(2)[None] * 1e-10
+    def at(e: int):
+        past = r[:e + 1]
+        m0, v0 = float(past.mean()), float(past.var())
+        if not good[e]:                                                     # the bond series can end a month or two early
+            g = np.flatnonzero(good[max(e - 3, 0):e + 1])
+            e = e - 3 + int(g[-1]) if len(g) and e >= 3 else e
+        cand = np.flatnonzero(good[:max(e - GEO_W + 1, 0)])                # windows ending before today's begins
+        cand = cand[cand + 12 <= e]
+        if not good[e] or len(cand) < GEO_K * 3:
+            return np.ones(1), np.array([m0]), np.array([math.sqrt(v0)]), None
+        d = np.full(T, np.inf)
+        d[cand] = geometry.affine_invariant(C[e], C[cand])
+        an = geometry.analogs(d, e, int(cand[-1]), k=GEO_K, gap=GEO_W)
+        nxt = np.array([r[j + 1:j + 13] for j in an])
+        lam = 12 / (12 + GEO_N0)
+        return np.full(len(an), 1 / len(an)), m0 + lam * (nxt.mean(1) - m0), np.sqrt(0.5 * nxt.var(1) + 0.5 * v0), an
+
+    out = {"w": [None] * T, "mu": [None] * T, "sd": [None] * T, "analogs": [None] * T}
+    for t in range(start, T):
+        out["w"][t], out["mu"][t], out["sd"][t], out["analogs"][t] = at(t - LAG)          # today's window ends at t - LAG
+    out["now"] = at(T - 1)
+    return out
+
+
 def predictive(D: pd.DataFrame, start_i: int) -> dict:
     """Each model's predictive for every month from start_i, and its log score once the month is known."""
     r = D["r"].to_numpy()
     T = len(r)
     reg = regime_walk(r, start_i)
     bo = infer.bocpd(r, hazard=1 / 120)
+    geo = geo_walk(D, start_i)
     out = {k: {"mu": [None] * T, "sd": [None] * T, "w": [None] * T, "ll": np.full(T, np.nan)} for k in MODELS}
     for t in range(start_i, T):
         m = reg["model"][t]
@@ -179,11 +227,13 @@ def predictive(D: pd.DataFrame, start_i: int) -> dict:
         out["bocpd"]["w"][t], out["bocpd"]["mu"][t], out["bocpd"]["sd"][t] = np.ones(1), np.array([bo["pred_mean"][t - LAG]]), np.array([bo["pred_sd"][t - LAG]])
         past = r[:t - LAG + 1]
         out["uncond"]["w"][t], out["uncond"]["mu"][t], out["uncond"]["sd"][t] = np.ones(1), np.array([past.mean()]), np.array([past.std()])
+        out["geo"]["w"][t], out["geo"]["mu"][t], out["geo"]["sd"][t] = geo["w"][t], geo["mu"][t], geo["sd"][t]
         for k in MODELS:
             o = out[k]
             dens = float((o["w"][t] * np.exp(-0.5 * ((r[t] - o["mu"][t]) / o["sd"][t]) ** 2) / (o["sd"][t] * math.sqrt(2 * math.pi))).sum())
             o["ll"][t] = math.log(max(dens, 1e-300))
-    return {"models": out, "regime_fits": reg["fits"], "bocpd": bo}
+    return {"models": out, "regime_fits": reg["fits"], "bocpd": bo, "geo_now": geo["now"],
+            "geo_analogs": [D.index[j].strftime("%Y-%m") for j in (geo["now"][3] or [])]}
 
 
 def averaging_weights(ll: dict, t: int, models=MODELS, forget: float = FORGET) -> np.ndarray:
@@ -191,7 +241,7 @@ def averaging_weights(ll: dict, t: int, models=MODELS, forget: float = FORGET) -
     whose outcome was known by t - LAG."""
     s = []
     for k in models:
-        x = ll[k][:t - LAG + 1]
+        x = np.asarray(ll[k], float)[:t - LAG + 1] if k in ll else np.full(0, np.nan)    # a model not scored has no record
         ok = np.isfinite(x)
         if not ok.any():
             s.append(-np.inf)                                  # a model with no record gets no weight
@@ -455,7 +505,7 @@ def timing_alpha(dev: np.ndarray, r: np.ndarray) -> tuple[float, float, int]:
     return float(b[0]), float(b[0] / math.sqrt(max(cov[0, 0], 1e-18))), n
 
 
-N_TRIED = len(CONFIGS) + 3          # configurations of this engine tried, plus the two RL agents and the trend rule
+N_TRIED = len(CONFIGS) + 4          # configurations of this engine tried, the two RL agents, the trend rule, and (v0.22) the geometric-analog model
 
 
 def utility_gain(ret: np.ndarray, hold: np.ndarray, gamma: float) -> tuple[float, float, int]:
@@ -530,7 +580,7 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
     ll = {k: np.concatenate([M[k]["ll"], [np.nan]]) for k in MODELS}
     wm = averaging_weights(ll, t + LAG - 1)                    # every known score counts
     comps = {"hmm": (w_hmm, mu_s, sd_s), "bocpd": (np.ones(1), np.array([bo["pred_mean"][-1]]), np.array([bo["pred_sd"][-1]])),
-             "uncond": (np.ones(1), np.array([r.mean()]), np.array([r.std()]))}
+             "uncond": (np.ones(1), np.array([r.mean()]), np.array([r.std()])), "geo": pred["geo_now"][:3]}
     # forecasts on today's row, every model trained on all rows with a known outcome
     Dp = P.dropna(subset=ml.FEATURES + ["y_ret"])
     X, y = Dp[ml.FEATURES].to_numpy(), Dp["y_ret"].to_numpy()
@@ -649,7 +699,7 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
         "changepoint": {"recent": float(bo["recent"][-1]), "expected_run": float(bo["expected_run"][-1]), "map_run": int(bo["map_run"][-1]),
                         "history": {"dates": [d.strftime("%Y-%m") for d in D.index[::3]], "recent": [round(float(v), 3) for v in bo["recent"][::3]]},
                         "alarms": [D.index[i].strftime("%Y-%m") for i in range(1, T) if bo["recent"][i] > 0.5 >= bo["recent"][i - 1]]},
-        "models": {"weights": {k: float(wm[i]) for i, k in enumerate(MODELS)}, "names": MODEL_NAMES},
+        "models": {"weights": {k: float(wm[i]) for i, k in enumerate(MODELS)}, "names": MODEL_NAMES, "geo_analogs": pred.get("geo_analogs", [])},
         "forecasts": {"now": now_f, "weights": {k: float(wf[i]) for i, k in enumerate(FORECASTS)}, "stacked": stacked, "nn_sd": nn_sd, "nn_epistemic_sd": nn_epistemic, "nn_members": nn_members, "names": FORECAST_NAMES},
         "drivers": drivers, "flip": flip, "evpi": evpi, "gamma": gamma, "es_limit": ES_LIMIT,
         "mixture": {k: {"w": [float(v) for v in comps[k][0]], "mu": [float(v) for v in comps[k][1]], "sd": [float(v) for v in comps[k][2]]} for k in MODELS},
@@ -660,11 +710,11 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
 
 
 # ---------------------------------------------------------------- build
-@cache.memo("decide.build", deps=("buildout.infer", "buildout.nn", "buildout.ml", "buildout.rl", "buildout.labs"), require=("dl",))
-def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float | None = None, quick: bool = False) -> dict:
+@cache.memo("decide.build", deps=("buildout.infer", "buildout.nn", "buildout.ml", "buildout.rl", "buildout.labs", "buildout.geometry", "buildout.portfolio"), require=("dl",))
+def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float | None = None, quick: bool = False, gh: dict | None = None) -> dict:
     dl = dl or labs.download()
     S = labs.shiller(dl)
-    D = data(S)
+    D = data(S, gh)
     start_i = int(np.searchsorted(D.index.year, START))
     gamma = calibrate_gamma(D["r"].to_numpy()[:start_i])
     pred = predictive(D, start_i)

@@ -43,6 +43,8 @@ CONTRACTS: dict[str, C] = {
     "rl.json": C(required=["configs", "best", "hold"]),
     "portfolio.json": C(required=["now", "perf", "simulation", "stress", "findings"], nonempty=["findings", "stress"],
                         finite=["now.gate", "gamma"], ranges={"now.gate": (0.0, 1.0), "gamma": (0.5, 30.0)}),
+    "geometry.json": C(required=["covariance", "transport", "paths", "scaling", "compounding", "engine_model", "tests", "findings"], nonempty=["tests", "findings"],
+                       finite=["engine_model.t", "scaling.all"], ranges={"scaling.all": (0.0, 1.5)}),
     "decision.json": C(required=["now", "pipeline", "configs", "hold", "findings"], nonempty=["pipeline", "findings"],
                        finite=["now.exposure", "now.engine_exposure", "now.gate.value", "gamma"],
                        ranges={"now.exposure": (0.0, 1.5), "now.engine_exposure": (0.0, 1.5), "now.gate.value": (0.0, 1.0), "gamma": (0.5, 30.0)}),

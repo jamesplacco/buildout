@@ -63,8 +63,8 @@ def main(argv: list[str]) -> int:
     finally:
         mind.build = orig
     tape = [{k: x.get(k) for k in TAPE_KEEP if x.get(k) is not None} for x in know if x.get("cluster") == "tape"]
-    bfacts = [{k: x.get(k) for k in TAPE_KEEP if x.get(k) is not None} for x in know if x.get("cluster") == "bonds"]
-    snap = {"bonds": bonds, "tape": tape, "bond_facts": bfacts, "complexity": cx, "chronicle": {"now": chron["now"], "episodes": [
+    # the bond facts reach the page through the mind, so they are not shipped twice
+    snap = {"bonds": bonds, "tape": tape, "complexity": cx, "chronicle": {"now": chron["now"], "episodes": [
         {"id": n["id"], "name": n["n"], "start": n["start"], "end": n["end"], "dd": n["dd"], "dy": n["dy"], "text": n["t"]} for n in chron["nodes"] if n["k"] == "episode"],
         "months": len([n for n in chron["nodes"] if n["k"] == "month"])}}
     snap = S14._clean(snap)

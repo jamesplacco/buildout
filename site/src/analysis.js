@@ -74,7 +74,7 @@
     const p = c.piotroski;
     const sc = h("div", "an-scores");
     const tile = (k, v, s) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); return d; };
-    sc.append(tile("Piotroski F", `${p.score} of ${p.known}`, p.known < 9 ? `${9 - p.known} tests need tags the fixture lacks` : "all nine tests run"),
+    sc.append(tile("Piotroski F", `${p.score} of ${p.known}`, p.known < 9 ? `${9 - p.known} tests need tags the shipped filing extract lacks` : "all nine tests run"),
       tile("Altman Z''", c.altman_z2 ? fx(c.altman_z2.z, 2) : "n/a", c.altman_z2 ? c.altman_z2.zone : "needs current assets and liabilities"),
       tile("Beneish M", c.beneish && c.beneish.m != null ? fx(c.beneish.m, 2) : "n/a", !c.beneish ? "needs two years of revenue" : c.beneish.m == null ? `${c.beneish.neutral_filled.length} of 8 inputs missing; not scored` : c.beneish.neutral_filled.length ? `${c.beneish.neutral_filled.length} of 8 inputs neutral-filled` : "all inputs filed"));
     $("#an-co-scores").replaceChildren(sc);

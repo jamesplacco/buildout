@@ -1,17 +1,17 @@
 """Assemble site/page.html, the single-file page, from the sources in site/src.
 
 head.html and body.html are the markup. The scripts are concatenated in SCRIPTS order inside one strict-mode
-function scope, so nothing leaks into the global scope: math.js (pure functions), ui.js (DOM and charts),
-data.js and reference.js (v0.4 desk content and the appendix), research.js (v0.5 data: filings, findings,
-swans, legends, assumptions, chains), views.js (the v0.4 desks), decide.js, journal.js, desks.js, wisdom.js
-and lab.js (the v0.5 desks), snap6.js (the generated v0.6 engine snapshot), brain.js, noteworthy.js, trading.js,
-buyside6.js and pulse.js (the v0.6 desks), and boot.js (navigation, live data and boot, last).
+function scope, so nothing leaks into the global scope: pure math and the chart helpers first, then each version's
+desks with the generated snapshots (snapN.js, written by scripts/snapshot_vN.py) just before the desks that read them,
+and boot.js (navigation, live data and boot) last. Because the scope is shared, a second top-level function with the
+same name would silently replace the first, so assembly stops if it finds one.
 
     python scripts/assemble_page.py           # write site/page.html
     python scripts/assemble_page.py --check   # exit 1 if site/page.html is out of date
 """
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "site" / "src"
 OUT = ROOT / "site" / "page.html"
 SCRIPTS = ["math.js", "engine7.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js",
-           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "snap19.js", "dx.js", "dxlive.js", "snap20.js", "pf.js", "snap21.js", "mx.js", "guide.js", "keys.js", "today7.js",
+           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "snap19.js", "dx.js", "dxlive.js", "snap20.js", "pf.js", "snap21.js", "mx.js", "snap22.js", "geo.js", "guide.js", "keys.js", "today7.js",
            "boot.js"]
 
 
@@ -33,7 +33,16 @@ def assemble(src: Path = SRC) -> str:
     if (src / "favicon.svg").exists():
         from urllib.parse import quote
         head = head.replace("</title>", '</title>\n<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,' + quote((src / "favicon.svg").read_text().strip(), safe=" =:/,") + '">', 1)
-    js = "\n\n".join((src / name).read_text().rstrip() for name in SCRIPTS)
+    texts = {name: (src / name).read_text().rstrip() for name in SCRIPTS}
+    # every file shares one function scope, so a second top-level function of the same name silently replaces the
+    # first (v0.21's renderMatrix emptied the Games desk this way); refuse to build with one
+    seen: dict[str, str] = {}
+    for name, t in texts.items():
+        for fn in re.findall(r"^  function ([A-Za-z_$][\w$]*)\s*\(", t, flags=re.M):
+            if fn in seen:
+                raise SystemExit(f"duplicate top-level function {fn} in {seen[fn]} and {name}")
+            seen[fn] = name
+    js = "\n\n".join(texts.values())
     return f'{head}\n{body}\n<script>\n(() => {{\n  "use strict";\n{js}\n}})();\n</script>\n'
 
 
