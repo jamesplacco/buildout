@@ -18,14 +18,14 @@
     if (!top.children.length) {
       const surv = O.tests.filter((t) => t.q <= 0.10);
       const near = Object.entries(C.eras).sort((a, b) => a[1].distance_now - b[1].distance_now)[0];
-      $("#geo-bluf").textContent = `The shape of risk describes the market well and predicts it badly. Of ${O.tests.length} geometric claims tested walked forward, ${surv.length} ${surv.length === 1 ? "survives" : "survive"} a 10% false-discovery rate, and the one that does is a lesson rather than a signal: the decision engine's new analog model beats the long-run average (t ${fx(E.t, 1)}), but analogs drawn at random do as well (geometry over random t ${fx(PL.geometry_t, 1)}). Mixing several pasts fattens the tails a bell curve misses; finding the past that looks like today adds nothing. So the engine keeps the mixture, the book keeps 1.00x, and the geometry earns its place as a map.`;
+      $("#geo-bluf").textContent = `Recommendation: no change to the 1.00x exposure. Covariance structure is informative about risk but not about returns. Of ${O.tests.length} geometric hypotheses tested out of sample, ${surv.length} ${surv.length === 1 ? "survives" : "survive"} a 10% false-discovery rate. The survivor, the decision engine's new analog model, outperforms the long-run average (t ${fx(E.t, 1)}), but a placebo of randomly selected windows performs equally well (nearest versus random, t ${fx(PL.geometry_t, 1)}). The improvement comes from the fatter tails of a mixture of historical periods, not from similarity to today. The engine therefore retains the model for tail shape only, and the geometry serves as a descriptive map rather than a signal.`;
       dxKpis(top, [
         [`${surv.length} of ${O.tests.length}`, "Claims that survive", "Benjamini-Hochberg, 10% false-discovery rate"],
         [fx(E.t, 1), "Analog model over the long run", `log score +${fx(E.mean_gain, 3)} a month since 1940`],
-        [fx(PL.geometry_t, 1), "Nearest over random analogs", "the placebo: the geometry itself adds nothing"],
+        [fx(PL.geometry_t, 1), "Nearest over random analogs", "placebo: similarity adds no measurable value"],
         ...(SP ? [[String(SP.now.above), "Real factors in world markets", `${SP.now.N} series, eigenvalues above the noise edge of ${fx(SP.now.edges[1], 2)}`]] : []),
         [near[0].replace("-", " to "), "Today's nearest era", `distance ${fx(near[1].distance_now, 2)} to its Frechet mean`],
-        [fx(SC.all, 2), "Hurst exponent of returns", `shuffled: ${fx(SC.null_q05, 2)} to ${fx(SC.null_q95, 2)}; Shiller's averaging smooths`]]);
+        [fx(SC.all, 2), "Hurst exponent of returns", `shuffled range ${fx(SC.null_q05, 2)} to ${fx(SC.null_q95, 2)}; partly an averaging artifact`]]);
       const ul = $("#geo-find");
       O.findings.forEach((f) => ul.append(h("li", null, f)));
       geoAnalogs();

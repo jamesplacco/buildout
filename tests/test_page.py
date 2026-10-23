@@ -112,7 +112,7 @@ def test_headline_and_snapshots_agree():
     and the research snapshot carries its validation (status, bootstrap band, holdout)."""
     res, body = (SRC / "research.js").read_text(), (SRC / "body.html").read_text()
     F, R = _json_const(res, "FINDINGS"), _json_const(res, "ROC_SNAP")
-    assert "How reliable is your bond hedge in this regime?" in body
+    assert "Bond hedge reliability in the current regime" in body
     assert abs(F["hedge"]["latest"]["infl_avg"] * 100 - R["cpi"]["avg36"]) < 0.005
     assert abs(F["spells"]["latest"] * 100 - R["cpi"]["value"]) < 0.005
     assert F["hedge"]["latest"]["month"] == R["cpi"]["date"][:7] == F["spells"]["month"]

@@ -15,7 +15,7 @@
     const O = DX19, N = O.now, R = N.regime, G = N.gate, Fc = N.forecasts, E = O.configs.engine, Hd = O.hold;
     if (!card.children.length) {
       const worst = R.next[R.worst];
-      $("#dx-bluf").textContent = `Hold ${dxX(N.exposure)} stocks. The engine's own optimum is ${dxX(N.engine_exposure)}, driven by a calm regime, but walked forward since ${O.start.slice(0, 4)} its departures from 1x left a risk-averse investor no better off than holding (Sharpe ${fx(E.perf.sharpe, 2)} against ${fx(Hd.sharpe, 2)}), so its evidence gate moves ${pct(G.value, 0, false)} of the way. It acts when its own record earns the right.`;
+      $("#dx-bluf").textContent = `Recommendation: hold ${dxX(N.exposure)} equity exposure. The engine's unconstrained optimum is ${dxX(N.engine_exposure)}, driven by a calm regime, but walked forward since ${O.start.slice(0, 4)} its departures from 1x left a risk-averse investor no better off than holding (Sharpe ${fx(E.perf.sharpe, 2)} against ${fx(Hd.sharpe, 2)}), so its evidence gate moves ${pct(G.value, 0, false)} of the way toward that optimum. The engine departs from the baseline only when its own record supports doing so.`;
       // the recommendation
       const big = h("div", "dx-big");
       big.append(h("span", "dx-k", "Model-book exposure"), h("b", "dx-x", dxX(N.exposure)), h("span", "dx-sub", "stocks, against a 1.00x baseline"));
