@@ -29,7 +29,7 @@ def main(argv: list[str]) -> int:
     if dec is None:
         dl = get("--labs-cache") or labs.download()
         K = {k["id"]: k for k in mind.load_knowledge()}
-        dec = decide.build(dl, cape_now=(K.get("val-cape-2026-10-20") or {}).get("value"), y10_now=5.13)
+        dec = decide.build(dl, cape_now=(K.get("val-cape-2026-10-20") or {}).get("value"), y10_now=5.00)
     dec["findings"] = decide.summary(dec)                   # the wording follows the code, the numbers the run
     dec = S14._clean(dec)
     orig = mind.build

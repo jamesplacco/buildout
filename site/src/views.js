@@ -3,6 +3,24 @@
      ===================================================================================== */
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
+  // The one governing size: the decision engine's gated equity exposure (snap19). Every other size on the site is a
+  // cross-check and says so beside this number (audit v0.24, blocker 1).
+  function govSize() {
+    try {
+      const D = typeof DX19 !== "undefined" ? DX19 : null, N = D && D.now;
+      if (!N || !fin(N.exposure)) return null;
+      const hedge = N.hedge && N.hedge.choice === "bonds" ? "with a 30% Treasury sleeve" : N.hedge && N.hedge.choice === "cash" ? "with a 30% cash sleeve" : "with no bond sleeve";
+      return { x: N.exposure, max: 1.5, date: N.date, hedge, words: `${xx(N.exposure)} equity ${hedge}` };
+    } catch (e) { return null; }
+  }
+  // "Governing size 1.00x equity (decision engine, gated). <what> is a cross-check, not the call."
+  function govNote(what, x) {
+    const G = govSize();
+    if (!G) return "";
+    const same = fin(x) && Math.abs(x - G.x) < 0.005;
+    return `Governing size: ${G.words}, the decision engine's gated call (${typeof monthNice === "function" ? monthNice(G.date + "-01") : G.date} data). ${what} is a cross-check, not the call${same ? "" : fin(x) ? `; it differs from the governing size by ${(x - G.x) >= 0 ? "+" : ""}${fx(x - G.x, 2)}x` : ""}.`;
+  }
+
   // Guilloche rosette: overlapping hypotrochoids, the engraving pattern on a bond certificate.
   let rosetteDrawn = false, rosetteAnimating = false;
   function drawRosette(animate) {
@@ -343,7 +361,7 @@
     const series = CURVES.dates.map((d, i) => ({ name: d.label, color: QCOL[i], width: i === CURVES.dates.length - 1 ? 2.75 : 1.5,
       dots: i === CURVES.dates.length - 1, pts: d.y.map((y, j) => [j, y]) }));
     xyChart(box, { series, xticks: CURVES.tenors.map((t, j) => [j, t]), xfmt: (j) => CURVES.tenors[j], yfmt: (v) => fx(v, 2) + "%",
-      label: "Treasury par yield curve on six dates in 2026", height: 280, yTicks: 5, snapXs: CURVES.tenors.map((_, j) => j) });
+      label: "Treasury par yield curve on seven dates in 2026", height: 280, yTicks: 5, snapXs: CURVES.tenors.map((_, j) => j) });
   }
   function buildRatesStatic() {
     legendLines($("#curve-legend"), CURVES.dates.map((d, i) => [QCOL[i], d.label]));
@@ -387,7 +405,7 @@
       return [n, tick, y.toFixed(2) + "%", dur.toFixed(2), money(dur * 100000 * 1e-4, 2), role];
     });
     out.push(["Long zero-coupon", "ZROZ, EDV", "near the 30-year", "about 25", "about $250", "Most duration per dollar"]);
-    out.push(["10-year TIPS", "Direct; TIP and SCHP run shorter", "2.91% real (Oct 7)", "about 9", "about $90", "Real-return anchor"]);
+    out.push(["10-year TIPS", "Direct; TIP and SCHP run shorter", "2.66% real (Oct 23)", "about 9", "about $90", "Real-return anchor"]);
     fillTable($("#duration-table"), ["Instrument", "Access", "Yield", "Duration", "DV01 per $100k", "Role"], out, 2);
     $("#duration-table").querySelectorAll("tr").forEach((tr) => { tr.lastChild.className = ""; });
   }
@@ -634,8 +652,9 @@
     const rows = crashes.map((c) => ({ c, un: c, he: c + payoff(c) - yearly }));
     const mild = rows[0], big = rows.find((r) => r.c === -0.35);
     const mult = (x) => (yearly > 1e-6 ? `${fx(x / yearly, 1)}x` : "n/a");
+    const cap = POLICY7.limits.maxPremium, fitN = yearly > 1e-6 ? n * cap / yearly : NaN;
     $("#tb-out").textContent = (yearly > 1e-6
-      ? `A year of puts costs ${pctPlain(yearly, 2)} of NAV. One −35% quarter pays ${pctPlain(payoff(-0.35), 1)}, ${fx(payoff(-0.35) / yearly, 1)} times that, and leaves the book at ${pct(big.he, 1)} net instead of −35%. `
+      ? `A year of puts costs ${pctPlain(yearly, 2)} of NAV${yearly > cap + 1e-9 ? `, above the policy cap of ${pctPlain(cap, 0)} a year: at this strike and tenor the cap fits about ${Math.round(fitN * 100)}% of the book` : `, within the policy cap of ${pctPlain(cap, 0)} a year`}. One −35% quarter pays ${pctPlain(payoff(-0.35), 1)}, ${fx(payoff(-0.35) / yearly, 1)} times that, and leaves the book at ${pct(big.he, 1)} net instead of −35%. `
       : `At this strike and volatility the puts cost almost nothing, and pay ${pctPlain(payoff(-0.35), 1)} in a −35% quarter. `) +
       (payoff(mild.c) > 0 ? `Even a −${pctPlain(-mild.c, 0)} quarter pays ${pctPlain(payoff(mild.c), 1)}.` : `A −${pctPlain(-mild.c, 0)} quarter pays nothing, and the book ends at ${pct(mild.he, 1)} after a year of premium: the price of the tail.`);
     fillTable($("#tb-table"), ["Quarter's move", "Unhedged", "Hedged, net of a year's premium", "Payout ÷ yearly budget"],
@@ -858,7 +877,8 @@
     const fname = st.f === 1 ? "full" : st.f === 0.5 ? "half" : "quarter", e = $("#z-edge");
     e.className = "sentence " + (need > have ? "warn" : "ok");
     e.textContent = `Running ${xx(run)} at ${fname} Kelly assumes about ${pctPlain(need, 1)} a year over cash. Your inputs give ${pctPlain(Math.max(have, 0), 1)}. ` +
-      (need > have ? `At this Kelly fraction the return assumption supports ${xx(kelly)}. Size above that rests on the risk limits alone.` : "The return assumption supports this size.");
+      (need > have ? `At this Kelly fraction the return assumption supports ${xx(kelly)}. Size above that rests on the risk limits alone.` : "The return assumption supports this size.") +
+      (govNote("This lab's size", run) ? " " + govNote("This lab's size", run) : "");
     $("#dd-title").textContent = `One-year max drawdown at ${Math.round(st.q * 100)}% confidence, by gross exposure`;
     const xs = Array.from({ length: 21 }, (_, i) => i * 0.1), ys = xs.map((L) => ddQuantile(st.mu, st.sig, L, st.q, st.r, st.sp));
     lastCurve = { xs, ys, st, cap, run };
@@ -1023,6 +1043,13 @@
       const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (items) => { const u = h("ul"); items.forEach((x) => u.append(h("li", null, x))); return u; };
       left.append(h("p", "stance", t.stance), sec("Evidence", ul(t.ev)));
+      // v0.24: this week's checked items that bear on the thesis, from the research digest, each linked to its source
+      const wk = (typeof DIGEST24 !== "undefined" && DIGEST24 && Array.isArray(DIGEST24.items) && Array.isArray(t.wk)) ? t.wk.map((id) => dgFind(DIGEST24, id)).filter(Boolean) : [];
+      if (wk.length) {
+        const u = h("ul", "thesis-wk");
+        wk.forEach((x) => { const li = h("li"); const a = h("a", "src", `${x.publisher || "Source"}, ${isoNice(x.as_of)}`); a.href = x.source_url; a.target = "_blank"; a.rel = "noopener"; li.append(document.createTextNode(x.text + " "), a); u.append(li); });
+        left.append(sec("This week's evidence", u));
+      }
       if (BEAR[t.id]) left.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
       right.append(sec("Expression", h("p", "prose", t.ex)), sec("Hedge", h("p", "prose", t.hd)), sec("What would change the desk's mind", ul(t.kill)), sec("Data the engine tracks", ul(t.data)));
       c.append(head, left, right);
@@ -1105,7 +1132,7 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { parameters: "Parameters", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
+  const TAB_NAME = { explained: "How it works", parameters: "Parameters", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
     noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", decision: "Decision engine", portfolio: "Portfolio", matrix: "The shortcut", geometry: "Geometry", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", analysis: "Analysis", bonds: "Bonds", ml: "ML lab", reality: "Reality check", edge: "Edge", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
@@ -1431,7 +1458,7 @@
     const wrap = $("#fw-dates");
     wrap.replaceChildren();
     const sets = curveSets();
-    if (!fwPick || !sets.some((x) => x.label === fwPick)) fwPick = (sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 21") || sets[sets.length - 1]).label;
+    if (!fwPick || !sets.some((x) => x.label === fwPick)) fwPick = (sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 23") || sets[sets.length - 1]).label;
     sets.forEach((x) => {
       const b = h("button", null, x.label);
       b.type = "button";
@@ -1527,13 +1554,13 @@
     }
   }
   function updateFutures() {
-    const book = readNum($("#fu-book"), 1e4, 1e10, 1e6), beta = readNum($("#fu-beta"), 0, 3, 1.25), ndx = readNum($("#fu-ndx"), 1000, 2e5, 29529);
+    const book = readNum($("#fu-book"), 1e4, 1e10, 1e6), beta = readNum($("#fu-beta"), 0, 3, 1.25), ndx = readNum($("#fu-ndx"), 1000, 2e5, 28959);
     const share = Number($("#fu-share").value) / 100, tlt = Number($("#fu-tlt").value) / 100;
     $("#fu-share-o").textContent = Math.round(share * 100) + "%";
     $("#fu-tlt-o").textContent = Math.round(tlt * 100) + "%";
     $("#fu-eq").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === fuEq ? "true" : "false"));
     $("#fu-rt").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === fuRt ? "true" : "false"));
-    const sets = curveSets(), set = sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 21");
+    const sets = curveSets(), set = sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 23");
     const betaUsd = book * beta * share, perContract = ndx * EQ_MULT[fuEq], nEq = betaUsd / perContract;
     const notional = book * tlt, dv = notional * TLT_DUR * 1e-4, all = Object.keys(FUT).map((k) => futuresDV01(set.years, set.y, k)), f = all.find((x) => x.key === fuRt), nRt = dv / f.dv01;
     $("#fu-bd").textContent = money(betaUsd);
@@ -1701,14 +1728,14 @@
     const lv = LIVE.macro && LIVE.macro.rates && LIVE.macro.rates.levels && LIVE.macro.rates.levels.vix;
     return lv && fin(lv.value) && isoOk(lv.date) ? { v: lv.value, date: niceDate(lv.date) } : { v: STATIC_VOL.vix[0], date: STATIC_VOL.vix[1] };
   }
-  function curveNowSet() { const sets = curveSets(); return sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 21") || sets[sets.length - 1]; }
+  function curveNowSet() { const sets = curveSets(); return sets.find((x) => x.live) || sets.find((x) => x.label === "Oct 23") || sets[sets.length - 1]; }
   function curveYield(tenor) { const set = curveNowSet(); return parAt(set.years, set.y, { "3M": 0.25, "2Y": 2, "10Y": 10, "30Y": 30 }[tenor]); }
   function examples() {
     const set = curveNowSet(), on = set.label, y = (t) => parAt(set.years, set.y, t), repo = y(0.25), out = [];
     const vxl = LIVE.macro && LIVE.macro.vol && LIVE.macro.vol.latest && LIVE.macro.vol.latest.ndx;
     const vxn = vxl && fin(vxl.implied) && isoOk(vxl.date) ? { v: vxl.implied, d: niceDate(vxl.date) } : { v: STATIC_VOL.vxn[0], d: STATIC_VOL.vxn[1] };
     const lat = LIVE.macro && LIVE.macro.latest;
-    const ndx = lat && fin(lat.NASDAQ100) ? { v: lat.NASDAQ100, d: niceDate(lat.NASDAQ100_date || lat.as_of) } : { v: 29529.34, d: "Oct 19" };
+    const ndx = lat && fin(lat.NASDAQ100) ? { v: lat.NASDAQ100, d: niceDate(lat.NASDAQ100_date || lat.as_of) } : { v: 28958.69, d: "Oct 22" };
     {
       const yy = y(10), dc = durCvx(yy, 10, yy), dv = dc.dur * 1e6 * 1e-4;
       out.push({ id: "dv01", q: "What is a basis point worth on $1 million of 10-year notes?", link: ["bc-title", "Bond calculator"],

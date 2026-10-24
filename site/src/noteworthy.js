@@ -199,7 +199,7 @@
     if (box) {
       box.replaceChildren();
       const items = f && Array.isArray(f.items) ? f.items.slice(0, 30) : [];
-      if (!items.length) { const e = h("div", "empty"); e.append(h("strong", null, "Live panel: no feed items in this copy."), h("span", null, "The daily run reads every source in feeds.toml and writes data/feeds.json; X needs the X_BEARER_TOKEN secret.")); box.append(e); }
+      if (!items.length) { const e = h("div", "empty"); e.append(h("strong", null, "Live panel: no feed items in this copy."), document.createTextNode(" "), h("span", null, "The daily run reads every source in feeds.toml and writes data/feeds.json; X needs the X_BEARER_TOKEN secret.")); box.append(e); }
       items.forEach((it) => {
         const row = h("div", "nw-row"), u = safeUrl(it.url);
         const title = u ? Object.assign(h("a", null, String(it.title || "").slice(0, 180)), { href: u, rel: "noopener nofollow" }) : h("span", null, String(it.title || "").slice(0, 180));

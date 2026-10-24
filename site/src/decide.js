@@ -23,7 +23,8 @@
   }
   function inputs() {
     const m = LIVE.macro, ms = m && m.macro_state, lv = m && m.rates && m.rates.levels, R = ROC_SNAP;
-    const lvl = (k) => (lv && lv[k] && fin(lv[k].value) && isoOk(lv[k].date) ? { v: lv[k].value, d: lv[k].date, live: true } : null);
+    // live from the daily run, else the dated static level store (data.js LEVELS), else the rate-of-change snapshot
+    const lvl = (k) => (lv && lv[k] && fin(lv[k].value) && isoOk(lv[k].date) ? { v: lv[k].value, d: lv[k].date, live: true } : (typeof levelStatic === "function" ? levelStatic(k) : null));
     const li = liveInflation();
     const infl = li ? { avg36: li.avg36 * 100, yoy: li.yoy * 100, d: li.date, live: true, months: li.months_to_line_at_2pct, v3: fin(li.avg36_v3) ? li.avg36_v3 * 100 : NaN }
       : { avg36: R.cpi.avg36, yoy: R.cpi.value, d: R.cpi.date, live: false, months: R.cpi.months_to_line, v3: R.cpi.avg36_v3 };
@@ -32,9 +33,9 @@
       ? { v: m.latest.corr63, d: m.latest.as_of, live: true, what: "Nasdaq-100 against the 20-year Treasury, 63-day half-life" }
       : { v: readF().hedge.latest.corr, d: readF().hedge.latest.month + "-01", live: false, what: "S&P 500 against the 10-year Treasury, 36 months (Findings)" };
     const vol = m && m.vol && m.vol.latest ? m.vol.latest : null;
-    const vxn = vol && vol.ndx && fin(vol.ndx.implied) && isoOk(vol.ndx.date) ? { v: vol.ndx.implied, d: vol.ndx.date, live: true } : lvl("vxn") || { v: STATIC_VOL.vxn[0], d: "2026-10-19", live: false };
+    const vxn = vol && vol.ndx && fin(vol.ndx.implied) && isoOk(vol.ndx.date) ? { v: vol.ndx.implied, d: vol.ndx.date, live: true } : lvl("vxn") || { v: STATIC_VOL.vxn[0], d: "2026-10-23", live: false };
     const term = vol && vol.term && fin(vol.term.ratio) && isoOk(vol.term.date) ? { v: vol.term.ratio, d: vol.term.date, live: true }
-      : { v: STATIC_VOL.vix[0] / STATIC_VOL.vix3m[0], d: "2026-10-16", live: false };     // one date for both legs
+      : { v: STATIC_VOL.term.vix / STATIC_VOL.term.vix3m, d: STATIC_VOL.term.date, live: false };     // one date for both legs
     const liq = m && m.liquidity && m.liquidity.latest;
     const funding = liq && liq.funding && fin(liq.funding.gap_5d_bp) && isoOk(liq.funding.date) ? { v: liq.funding.gap_5d_bp, d: liq.funding.date, live: true } : { v: R.funding.value, d: R.funding.date, live: false };
     const rrp = liq && liq.net && fin(liq.net.rrp) && isoOk(liq.net.date) ? { v: liq.net.rrp, d: liq.net.date, live: true } : { v: STATIC_LIQ.rrp[0], d: "2026-10-19", live: false };
@@ -72,13 +73,13 @@
     // 1. gross
     const bookVol = 1.1 * I.vxn.v, byVol = Math.min(0.2 / (bookVol / 100), 1.5), g = I.gross ? I.gross.v : byVol;
     const vxnAt1 = (0.2 / 1.1) * 100;
-    out.push({ id: "d-gross", n: "How big?", q: "Gross exposure for the model book", level: g < 0.75 ? 2 : g < 1 ? 1 : 0,
+    out.push({ id: "d-gross", n: "How big?", q: "Gross exposure for the model book", level: g < 0.75 ? 2 : g < 1 ? 1 : 0, vol: g,
       ins: [["Nasdaq-100 implied volatility (VXN)", fx(I.vxn.v, 2), `${isoNice(I.vxn.d)} · ${liveTag(I.vxn)}`],
         ["Book volatility forecast, 1.1 times VXN", fx(bookVol, 1) + "%", "assumption: the book runs hotter than the index"],
         ["Volatility target", "20%", "config.toml; gross capped at 1.5x"],
         I.gross ? ["Engine's size to run", xx(I.gross.v), `${isoNice(I.gross.d)}: ${sizeBindingTxt()}`] : ["Bond hedge available?", hedgeOn ? "Yes" : "No", "decision 2: options carry the hedge"]],
       rule: "Policy size.equity.v2: equity scale = the smallest of 20% target volatility ÷ forecast volatility, the 25% one-year drawdown cap and 1.5x. Quarter Kelly is not a size input: it reports the excess return this size would need.",
-      act: `Run ${xx(g)} gross`, sub: I.gross ? `From the engine's sizing stack; ${sizeBindingTxt()}.` : "By the volatility rule alone; the daily run adds the drawdown cap and the Kelly check.",
+      act: govSize() ? `Governing size ${xx(govSize().x)}; volatility rule ${xx(g)}` : `Run ${xx(g)} gross`, sub: `${govNote("The volatility rule's size", g)} ${I.gross ? `From the engine's sizing stack; ${sizeBindingTxt()}.` : "The daily run adds the drawdown cap and the Kelly check."}`,
       flip: `Gross reaches 1.00x when VXN falls to <strong>${fx(vxnAt1, 1)}</strong>, ${fx(Math.max(0, I.vxn.v - vxnAt1), 1)} points below today.`, as: ["a-beta", "a-vrp", "a-hygiene"], link: "size",
       math: `<var>g</var> = min(0.20 &divide; (1.1 &times; ${fx(I.vxn.v / 100, 4)}), 1.5) = ${fx(byVol, 2)}${I.gross ? `; engine ${fx(I.gross.v, 2)}` : ""}` });
 
@@ -89,6 +90,7 @@
       : `not applied (${TD.gates.inflation.status.replace(/_/g, " ")})`;
     out.push({ id: "d-duration", n: "Hold the TLT hedge?", q: "Long Treasuries as the book's hedge", level: TD.status !== "ok" ? 1 : hedgeOn ? 0 : 2,
       ins: [["Stock-bond state", TD.gates.state.value || "n/a", `correlation ${sgn2(I.corr.v)} · ${I.corr.what} · ${I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d)}`],
+        ["Measure in force", I.corr.live ? "Policy measure" : "Stand-in", I.corr.live ? "the policy's 63-day exponentially weighted correlation, from the daily run" : "the policy's 63-day exponentially weighted measure is not computed in this copy; the 36-month monthly correlation stands in. The Fed's one-year +0.21 (Jul 31) and Geometry's real-return figure are context"],
         ["Inflation gate", TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "Passes" : "Fails") : "Not applied", `${pctPts(I.infl.avg36)} over 36 months · ${monthNice(I.infl.d)} · ${liveTag(I.infl)}`],
         ["Where the line could be", HL.band ? `${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : "n/a", `bootstrap of the threshold choice, ${HL.boot ? HL.boot.independent_windows : "n/a"} independent 3-year windows`],
         [`Since 1871 at ${b ? b.bucket : "this"} inflation, bonds hedged in`, b ? `${Math.round(b.share_hedging * 100)}% of months` : "n/a", `${b ? b.months.toLocaleString("en-US") : "n/a"} months (Findings)`]],
@@ -116,7 +118,7 @@
     const tail = t >= 1 || vx >= 30 ? ["Monetize puts in stages", 2] : t >= 0.95 ? ["Buy put spreads before the curve inverts", 1] : vx >= 20 ? ["Hold hedges; do not chase", 1] : ["Buy 3- to 6-month put spreads: protection is cheap", 0];
     out.push({ id: "d-tail", n: "Buy insurance?", q: "Index puts and put spreads", level: tail[1],
       ins: [["VIX", fx(vx, 2), `${isoNice(I.vix.d)} · ${liveTag(I.vix)}`], ["VIX over 3-month VIX", fx(t, 3), `${isoNice(I.term.d)} · below 0.95 normal, above 1 inverted`],
-        ["VXN", fx(I.vxn.v, 2), "Nasdaq-100 implied"], ["Budget", "1.5% of NAV a year", "Options desk, tail budget"]],
+        ["VXN", fx(I.vxn.v, 2), "Nasdaq-100 implied"], ["Budget", `${fx(POLICY7.limits.maxPremium * 100, 1)}% of NAV a year`, "the policy cap (limits.portfolio.v1); the Options desk prices what it buys"]],
       rule: "Buy convexity while it is cheap (VIX below 20, curve in contango). When the front of the curve flattens toward 1, buy before it inverts. Once it inverts or VIX tops 30, monetize in stages.",
       act: tail[0], sub: "Put spreads beat outright puts when skew is steep: the far tail is sold off.",
       flip: `The curve inverts at 1.00, <strong>${fx(Math.max(0, 1 - t), 3)}</strong> away; VIX reaches 30 in ${fx(Math.max(0, 30 - vx), 2)} points.`, as: ["a-vrp", "a-mech"], link: "tb-title",
@@ -207,15 +209,12 @@
     const g = ds[0], dur = ds[1], read = $("#dec-read");
     read.replaceChildren();
     const s1 = h("p");
-    s1.append(h("strong", null, `${g.act}, ${dur.level === 2 ? "with no bond hedge" : "with the bond hedge on"}. `),
-      document.createTextNode(`${ds.filter((d) => d.level === 2).length} of ${ds.length} calls are defensive and ${ds.filter((d) => d.level === 1).length} adjusted. Weakest link: `));
+    const G = govSize();
+    s1.append(h("strong", null, G ? `Hold ${G.words}: the decision engine's gated call governs. ` : `${g.act}, ${dur.level === 2 ? "with no bond hedge" : "with the bond hedge on"}. `),
+      document.createTextNode(`${G ? `The cards below are rule-based cross-checks: the volatility rule reads ${xx(ds[0].vol)} and the bond rule says ${dur.level === 2 ? "no bond hedge" : "bond hedge on"}. ` : ""}${ds.filter((d) => d.level === 2).length} of ${ds.length} calls are defensive and ${ds.filter((d) => d.level === 1).length} adjusted. Weakest link: `));
     const a = h("a", null, weakest.n.replace("?", ""));
     a.href = "#" + weakest.id;
     s1.append(a, document.createTextNode(`, at ${Math.round(decConf(weakest.as) * 100)}% confidence because it rests on ${weakest.as.length} uncertain assumptions at once.`));
-    try {
-      const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null;
-      if (N && fin(N.exposure)) s1.append(document.createTextNode(` The gross here is the volatility rule's; the governing equity size is the decision engine's gated call, ${xx(N.exposure)}.`));
-    } catch (e) { /* the decision engine is optional here */ }
     read.append(s1);
     const I = inputs();
     $("#dec-sub").textContent = `Inputs dated ${isoNice(I.real.d)}${I.real.live ? ", from the daily run" : " (as shipped; the daily run replaces them)"}. Each card: the data, the rule, today's action, the confidence its assumptions allow, and the distance to a flip.`;
@@ -225,7 +224,7 @@
   // risk +1: a rise is the risk; each line is [level, state above it, state below it]
   const ROC_ROWS = [
     { k: "infl36", n: "Inflation, 36-month average", unit: "pp", freq: "m", risk: 1,
-      lines: [[() => hedgeLineInfo().lo * 100, "Above 2.75%: bonds hedged in a minority of months", "Below 2.75%: bonds hedged most months"], [() => (fin(hedgeLineInfo().line) ? hedgeLineInfo().line * 100 : NaN), "Above the validated line: the TLT gate fails", "Below the validated line"], [4.0, "Bonds hedged 1 month in 8", "Back to the 3 to 4% bucket"]] },
+      lines: [[() => hedgeLineInfo().lo * 100, "Above 2.75%: bonds hedged in a minority of months", "Below 2.75%: bonds hedged most months"], [() => (fin(hedgeLineInfo().line) ? hedgeLineInfo().line * 100 : NaN), "Above the validated line: the TLT gate fails", "Below the validated line"], ] },
     { k: "cpi", n: "Inflation, past year", unit: "pp", freq: "m", risk: 1, lines: [[3, "Above 3%", "Below 3%"], [5, "A 5% spell: median 29 months to undo", "Below 5%"]] },
     { k: "real", move: "real10", n: "10-year real yield", unit: "pp", risk: 1, lines: [[2.0, "Tight", "Easy"], [2.5, "Restrictive", "Tight"]] },
     { k: "be", move: "be10", n: "10-year breakeven", unit: "pp", risk: 1, lines: [[2.5, "Rising", "Anchored"], [3.0, "Unanchored", "Rising"]] },
@@ -240,9 +239,19 @@
   const rocLines = (row) => row.lines.map(([at, up, down]) => [typeof at === "function" ? at() : at, up, down]).filter(([at]) => fin(at));
   const fmtRocLevel = (row, v) => (!fin(v) ? "n/a" : row.unit === "bp" ? fx(v, 0) + "bp" : row.unit === "$" ? "$" + fx(v, 2) : row.unit === "idx" ? fx(v, 3) : row.unit === "pts" ? fx(v, 2) : pctPts(v));
   // velocities in level units per week (v13, v4, a13); vm: the per-month pair that monthly rows display
+  // the dated static level store, when it is newer than the rate-of-change snapshot's level for this row
+  function rocNewerLevel(row, S) {
+    if (typeof levelStatic !== "function") return null;
+    const map = { real: "real10", be: "breakeven10", vix: "vix", oil: "brent", hy: "hy_oas", ccc: "ccc_oas", y30: "y30" };
+    let st = null;
+    if (row.k === "curve") { const a = levelStatic("y10"), b = levelStatic("y2"); st = a && b && a.d === b.d ? { v: (a.v - b.v) * 100, d: a.d } : null; }
+    else if (map[row.k]) st = levelStatic(map[row.k]);
+    return st && fin(st.v) && (!S.date || st.d > S.date) ? st : null;
+  }
   function rocValues(row) {
     const S = ROC_SNAP[row.k === "infl36" ? "cpi" : row.k] || {};
     const mv = row.move ? liveMove(row.move) : null;
+    const nl = rocNewerLevel(row, S), paced = (how) => (nl ? `level ${isoNice(nl.d)} from the key levels; pace to ${isoNice(S.date)}, ${how}` : how);
     if (mv && fin(mv.v13)) {
       // the engine quotes rates in bp per week, VIX in points per week and prices in log percent per week
       let level = mv.value, k = 1;
@@ -267,11 +276,11 @@
     if (row.k === "ccc" || row.k === "hy") {
       const w = (Date.parse(S.wk_dates[1]) - Date.parse(S.wk_dates[0])) / WEEK_MS;
       const v13 = row.k === "ccc" ? (S.value - S.from) / ((Date.parse(S.date) - Date.parse(S.from_date)) / WEEK_MS) : NaN;
-      return { level: S.value, date: S.date, v13, v4: (S.wk[1] - S.wk[0]) / w, a13: NaN, live: false, w13: row.k === "ccc" ? "since Jul 2025" : null, w4: "last week only",
-        how: row.k === "ccc" ? `as shipped: the average pace since ${isoNice(S.from_date)}, and the last week; the daily run replaces both with 13- and 4-week slopes` : "as shipped: the last week only; the daily run replaces it with 13- and 4-week slopes" };
+      return { level: nl ? nl.v : S.value, date: nl ? nl.d : S.date, v13, v4: (S.wk[1] - S.wk[0]) / w, a13: NaN, live: false, w13: row.k === "ccc" ? "since Jul 2025" : null, w4: "last week only",
+        how: paced(row.k === "ccc" ? `as shipped: the average pace since ${isoNice(S.from_date)}, and the last week; the daily run replaces both with 13- and 4-week slopes` : "as shipped: the last week only; the daily run replaces it with 13- and 4-week slopes") };
     }
     const k = row.unit === "pp" ? 1 / 100 : 1;                    // snapshot slopes are in bp per week for rates
-    return { level: S.value, date: S.date, v13: S.v13 * k, v4: S.v4 * k, a13: S.a13 * k, live: false, how: "as shipped: 13- and 4-week least-squares slopes, computed with the engine's code" };
+    return { level: nl ? nl.v : S.value, date: nl ? nl.d : S.date, v13: S.v13 * k, v4: S.v4 * k, a13: S.a13 * k, live: false, how: paced("as shipped: 13- and 4-week least-squares slopes, computed with the engine's code") };
   }
   // the rule line the market is heading toward at pace v, and how long it takes
   function lineAhead(row, level, v) {
@@ -350,7 +359,9 @@
     const tbl = $("#as-table");
     if (!tbl) return;
     const rows = ASSUMPTIONS.map((a) => ({ a, p: asP(a.id) })).map((x) => ({ ...x, frag: (1 - x.p) * x.a.imp })).sort((x, y) => y.frag - x.frag);
-    const names = Object.fromEntries(decisions().map((d) => [d.id, d.n.replace("?", "")]));
+    const DS = decisions(), names = Object.fromEntries(DS.map((d) => [d.id, d.n.replace("?", "")]));
+    // the Feeds column is derived from the cards' own "rests on" lists, so the two can never disagree (audit v0.24, major 27)
+    const feedsOf = (aid) => DS.filter((d) => Array.isArray(d.as) && d.as.includes(aid)).map((d) => d.id);
     const thead = h("thead"), hr = h("tr"), tb = h("tbody");
     [["Assumption", ""], ["Kind", ""], ["Probability it holds", ""], ["Impact (1 to 5)", "r"], ["Fragility", ""], ["What would falsify it", ""], ["Feeds", ""]]
       .forEach(([t, c]) => { const th = h("th", c || null, t); th.scope = "col"; hr.append(th); });
@@ -379,7 +390,8 @@
       bar.style.width = Math.max(4, Math.round(frag * 40)) + "px";
       fr.append(bar, document.createTextNode(" " + fx(frag, 2)));
       const feeds = h("td");
-      a.dec.forEach((id, i) => { const l = h("a", null, names[id] || id); l.href = "#" + id; if (i) feeds.append(document.createTextNode("; ")); feeds.append(l); });
+      const fed = feedsOf(a.id).length ? feedsOf(a.id) : a.dec;
+      fed.forEach((id, i) => { const l = h("a", null, names[id] || id); l.href = "#" + id; if (i) feeds.append(document.createTextNode("; ")); feeds.append(l); });
       tr.append(td, k, pc, h("td", "r", String(a.imp)), fr, h("td", null, a.test), feeds);
       tb.append(tr);
     });
@@ -474,7 +486,7 @@
     const above = I.infl.avg36 >= I.lineAt, TD = tltNow(I);
     box.append(
       (typeof DX19 !== "undefined" && DX19 && DX19.now
-        ? cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call; the volatility rule's ${lower(g.act)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")
+        ? cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call governs; the volatility rule's ${xx(g.vol)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")
         : cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")),
       cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds won't hedge: stocks and bonds move together (${sgn2(I.corr.v)}).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
         above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `At 2% inflation from here, the 36-month average stays above 2.75% for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),

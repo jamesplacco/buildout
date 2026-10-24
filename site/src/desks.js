@@ -37,7 +37,7 @@
       st.append(h("span", "stage mk " + (r.stage || ""), r.coverage === "interest_uncovered" ? "Interest not covered" : r.coverage === "funding_gap" ? `Funding gap ${B$(r.funding_gap, 0)}` : r.coverage === "self_funded" ? "Self-funded" : "n/a"));
       if (r.refreshed) st.append(h("small", null, ` new filing to ${isoNice(r.quarter_end)}`));
       if (fin(r.gap_cover_years)) st.title = `Cash on hand covers ${fx(r.gap_cover_years, 1)} years of the gap at this rate; debt maturities are not modelled.`;
-      tr.append(th, td(B$(r.revenue)), td(B$(r.ocf)), td(B$(r.capex)), td(B$(r.fcf), r.fcf < 0), td(pct0(r.capex_to_ocf), r.capex_to_ocf > 1), g, td(pct0(r.nonop_share), r.nonop_share > 0.3), td(B$(r.net_cash), r.net_cash < 0), st);
+      tr.append(th, td(B$(r.revenue)), td(B$(r.ocf)), td(B$(r.capex)), td(B$(r.fcf), r.fcf < 0), td(pct0(r.capex_to_ocf), r.capex_to_ocf > 1), g, td(pct0(r.nonop_share), r.nonop_share > 0.3), (() => { const c = td(B$(r.net_cash), r.net_cash < 0); if (r.debt_secondary) { c.append(h("small", "ttl", " secondary")); c.title = r.debt_secondary; } else if (r.debt_date && r.cash_date && r.debt_date !== r.cash_date) { c.append(h("small", "ttl", ` debt ${isoNice(r.debt_date)}`)); c.title = `Debt as of ${isoNice(r.debt_date)} against cash as of ${isoNice(r.cash_date)}: mixed dates.`; } return c; })(), st);
       tb.append(tr);
     });
     tbl.replaceChildren(thead, tb);
@@ -45,7 +45,7 @@
     const nv = fundRow("NVDA"), ts = fundRow("TSLA"), ms = fundRow("MSFT"), oc = fundRow("ORCL"), cw = fundRow("CRWV");
     const note = $("#fu-note");
     note.replaceChildren();
-    note.append(document.createTextNode(`The five builders: capex ${B$(cx, 0)} against operating cash flow of ${B$(ocf, 0)} (${pct0(cx / ocf)}); next-year guidance adds up to about ${B$(guide, 0)}. Microsoft also took on ${B$(ms.leases)} of finance leases, which are capex by another name. Nvidia, the main supplier, spends ${pct0(nv.capex_to_ocf)} of its ${B$(nv.ocf, 0)} cash flow; Tesla ${pct0(ts.capex_to_ocf)}. Supplements the standard tags miss: ${oc.notes} ${cw.notes} `));
+    note.append(document.createTextNode(`The five builders: capex ${B$(cx, 0)} against operating cash flow of ${B$(ocf, 0)} (${pct0(cx / ocf)}); next-fiscal-year guidance adds up to about ${B$(guide, 0)} (a mixed basis: Microsoft's fiscal 2027 to June and Oracle's to May beside three calendar-2026 guides; the four hyperscalers' calendar-2026 guides alone are about $725B). Microsoft also took on ${B$(ms.leases)} of finance leases, which are capex by another name. Nvidia, the main supplier, spends ${pct0(nv.capex_to_ocf)} of its ${B$(nv.ocf, 0)} cash flow; Tesla ${pct0(ts.capex_to_ocf)}. Supplements the standard tags miss: ${oc.notes} ${cw.notes} `));
     const s = srcLink(SRC5.secapi), c = srcLink(SRC5.crwv), e = srcLink(SRC5.sec);
     [e, s, c].forEach((x, i) => { if (i) note.append(document.createTextNode(" · ")); note.append(x); });
     const newer = FUND.rows.filter((r) => r.refreshed);
@@ -207,10 +207,11 @@
   function drawFundamentals() {
     guard("Paper profits", renderPaper, $("#fu-paper"));
     guard("Depreciation wave", renderDepr, $("#dw-chart"));
+    guard("Latest quarter", renderFundLatest, $("#fu-latest"));
   }
 
   /* ============================== PHYSICS ============================== */
-  const PH = { capex: 800, cost: 45, load: 0.8 };
+  const PH = { capex: 770, cost: 45, load: 0.8 };   // capex: the five builders' latest reported quarter, annualised (Fundamentals desk)
   function buildPhysics() {
     const bind = (id, k) => { const el = $(id); if (!el) return; el.value = String(PH[k]); el.addEventListener("input", () => { PH[k] = Number(el.value); guard("Watts calculator", updatePhysics, $("#ph-out")); }); };
     bind("#ph-capex", "capex"); bind("#ph-cost", "cost"); bind("#ph-load", "load");
@@ -318,7 +319,7 @@
     const below = H.rows.filter((r) => ["Deflation", "0 to 2%", "2 to 3%"].includes(r.bucket)), above = H.rows.filter((r) => !["Deflation", "0 to 2%", "2 to 3%"].includes(r.bucket));
     const wavg = (rs) => rs.reduce((s, r) => s + r.share_hedging * r.months, 0) / rs.reduce((s, r) => s + r.months, 0);
     const cards = [
-      findingCard("fi-hedge", "Above about 3% inflation, bonds have mostly stopped hedging stocks; the exact line is uncertain",
+      findingCard("fi-hedge", "Above the validated 4.25% inflation line bonds have mostly stopped hedging stocks; the gate on that line adds nothing the correlation rule does not already catch",
         H.split ? `Across ${F.panel.months.toLocaleString("en-US")} months since ${F.panel.start.slice(0, 4)}, the stock-bond correlation was negative (bonds hedged) in ${pct0(H.split.below)} of months when three-year inflation was below ${pctPts(H.split.cut * 100)}, and in ${pct0(H.split.above)} when it was above.`
           : `Across ${F.panel.months.toLocaleString("en-US")} months since ${F.panel.start.slice(0, 4)}, bonds hedged in ${pct0(wavg(below))} of months with three-year inflation below 3%, and ${pct0(wavg(above))} above.`,
         pctPts(H.latest.infl_avg * 100), `three-year inflation now (${monthNice(H.latest.month + "-01")}); ${fin(H.line) ? `the validated line is ${pctPts(H.line * 100)}` : `no line validated (${String(H.status || "unavailable").replace(/_/g, " ")})`}`,
@@ -328,7 +329,7 @@
           ["Today", `Correlation ${sgn2(H.latest.corr)} over 36 months. At 2% inflation from here, the average stays above 2.75% for about ${ROC_SNAP.cpi.months_to_line} months: base effects keep it there.`]],
         "Share of months bonds hedged, by three-year inflation",
         (box) => barsV(box, H.rows.map((r) => ({ label: r.bucket.replace(" to ", "–"), v: r.share_hedging * 100, lbl: pct0(r.share_hedging), color: ["3 to 4%", "4 to 6%", "Above 6%"].includes(r.bucket) ? "var(--bad)" : "var(--s1)", tip: () => [[pct0(r.share_hedging) + " of months", `${r.bucket} · ${r.months} months · mean correlation ${sgn2(r.mean_corr)}`]] })), { label: "Share of months with a negative stock-bond correlation, by inflation bucket", yfmt: (t) => t + "%", max: 70 }),
-        "The TLT hedge waits for the stock-bond state; options, gold and energy carry the hedge meanwhile.", ["d-duration", "Decision 2"]),
+        `The correlation state decides the TLT hedge; the inflation gate is a mandate rule the engine's own test (${H.experiment && H.experiment.inflation_adds_value === false ? "inflation adds no value out of sample" : "see above"}) does not support, kept only as a belt beside the braces and never the reason for today's call. Two lines, two jobs: the validated ${fin(H.line) ? pctPts(H.line * 100) : "n/a"} gates the bond hedge; the ${pctPts((H.line60 || 0.0275) * 100)} low edge of the uncertain band triggers the inflation sleeve.`, ["d-duration", "Decision 2"]),
       findingCard("fi-tails", "Crashes are thousands of times more common than a bell curve allows",
         `Monthly stock returns since 1871 had ${T.rows[3].obs} six-sigma down months; a normal distribution with the same volatility expects one every ${fx(T.rows[3].every / 1e6, 1)} million years.`,
         "α " + fx(T.alpha, 2), "tail index (Hill, worst 5% of months): moments of order α and above do not exist, so kurtosis is infinite",

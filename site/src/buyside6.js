@@ -55,13 +55,14 @@
     const [lo, hi, why] = grossScaler(1, real10);
     const maxG = 1.5, volG = inp.gross && fin(inp.gross.v) ? inp.gross.v : Math.min(0.2 / (1.1 * inp.vxn.v / 100), maxG);
     const tiles = $("#bs-reg-tiles");
-    tiles.replaceChildren(
+    tiles.replaceChildren(...[
       tile("Regime", label, `Inflation ${fx(L.cpi_3m_ann * 100, 2)}% annualized over three months (${monthNice(L.month + "-01")}); Brent ${fx(L.brent_vs_5y, 2)}x its five-year average; Fed hiking.`),
       tile("Rule 7a.1 gross", `${fx(lo * maxG, 2)}x to ${fx(hi * maxG, 2)}x`, `${why}: ${Math.round(lo * 100)} to ${Math.round(hi * 100)}% of the ${fx(maxG, 1)}x maximum.`),
       tile("Volatility rule gross", xx(volG), "Decision 1: 20% target over 1.1 times VXN."),
+      govSize() ? tile("Governing size", xx(govSize().x), govNote("Rule 7a.1", lo * maxG).replace(/^Governing size: /, "")) : null,
       tile("Binding constraint", volG <= lo * maxG ? "Volatility" : "Regime", volG <= lo * maxG ? `The volatility rule (${xx(volG)}) is already below the regime band: it binds.` : "The regime band is tighter than the volatility rule: cut to its top."),
       (() => { const T = tltNow(inputs()); return tile("Long bonds in the stack?", T.status !== "ok" ? "Unavailable" : T.on ? "Yes" : "No", `Policy hedge.tlt.v2, the same rule as Decision 2: the stock-bond state is ${T.gates.state.value || "n/a"}; inflation gate ${T.gates.inflation.status === "ok" ? (T.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`); })(),
-      tile("Oil rule on futures", `${fx(fut, 2)}x`, `Spot reads ${fx(L.brent_vs_5y, 2)}x; front futures (about $107, IEA Oct 14) read ${fx(fut, 2)}x, under the 1.3x supply line. The inflation leg keeps the sleeve.`));
+      tile("Oil rule on futures", `${fx(fut, 2)}x`, `Spot reads ${fx(L.brent_vs_5y, 2)}x; front futures (about $107, IEA Oct 14) read ${fx(fut, 2)}x, under the 1.3x supply line. The inflation leg keeps the sleeve.`)].filter(Boolean));
   }
   function signalNow(id) {
     const s = LIVE.sigStates && LIVE.sigStates[id];

@@ -19,11 +19,12 @@
   // the numbers the rings and the visit diff read, from live data where it exists
   function pulseNow() {
     const I = inputs(), st = LIVE.sigStates || {};
-    const gross = I.gross && fin(I.gross.v) ? I.gross.v : Math.min(0.2 / (1.1 * I.vxn.v / 100), 1.5);
+    const G = govSize(), volRule = I.gross && fin(I.gross.v) ? I.gross.v : Math.min(0.2 / (1.1 * I.vxn.v / 100), 1.5), gross = G ? G.x : volRule;
+    const N = (typeof DX19 !== "undefined" && DX19 && DX19.now) || null, pStocks = N && N.hedge && Array.isArray(N.hedge.p_best) ? N.hedge.p_best[0] : null;
     const levels = Object.values(st).filter((x) => x.level != null);
     const v = (id) => (st[id] && fin(st[id].v) ? st[id].v : null);
     return {
-      gross, maxGross: 1.5, calm: levels.length ? levels.filter((x) => x.level === 0).length / levels.length : null, nSig: levels.length,
+      gross, volRule, governing: !!G, pStocks, maxGross: 1.5, calm: levels.length ? levels.filter((x) => x.level === 0).length / levels.length : null, nSig: levels.length,
       corr: I.corr.v, infl36: I.infl.avg36, vix: v("vix"), ccc: v("ccc"), real: v("real"), oil: v("oil"),
       acts: Object.fromEntries((LIVE.decisions || decisions()).map((d) => [d.id, d.act])),
     };
@@ -33,9 +34,10 @@
     if (!box || !key) return;
     const P = pulseNow();
     const rings = [
-      { k: "Risk budget in use", v: Math.min(1, P.gross / P.maxGross), lbl: `${xx(P.gross)} of ${xx(P.maxGross)} gross`, c: "var(--s1)", href: "#d-gross" },
+      { k: "Risk budget in use", v: Math.min(1, P.gross / P.maxGross), lbl: `${xx(P.gross)} of ${xx(P.maxGross)} equity${P.governing ? ", the governing size" : ", volatility rule"}`, c: "var(--s1)", href: "#d-gross" },
       { k: "Signals calm", v: P.calm ?? 0, lbl: P.calm == null ? "n/a" : `${Math.round(P.calm * P.nSig)} of ${P.nSig} green`, c: "var(--s3)", href: "#signals" },
-      { k: "Bond hedge health", v: Math.max(0, Math.min(1, (1 - P.corr) / 2)), lbl: `correlation ${sgn2(P.corr)}`, c: "var(--s2)", href: "#d-duration" },
+      P.pStocks != null ? { k: "Selector: no bond sleeve", v: Math.max(0, Math.min(1, P.pStocks)), lbl: `${Math.round(P.pStocks * 100)}% odds all-stocks is best; correlation ${sgn2(P.corr)}`, c: "var(--s2)", href: "#d-duration" }
+        : { k: "Bond hedge available", v: P.corr < -0.1 ? 1 : 0, lbl: `correlation ${sgn2(P.corr)} against a -0.10 line`, c: "var(--s2)", href: "#d-duration" },
     ];
     const S = 168, cx = S / 2, cy = S / 2;
     box.replaceChildren();

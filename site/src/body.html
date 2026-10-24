@@ -5,13 +5,13 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.23</span>
+      Buildout <span class="ver">v0.24</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
-      <a href="#parameters" data-group="engine">Engine</a>
+      <a href="#explained" data-group="engine">Engine</a>
       <a href="#bonds" data-group="markets">Markets</a>
-      <a href="#findings" data-group="research">Research</a>
+      <a href="#digest" data-group="research">Research</a>
       <a href="#games" data-group="workshop">Workshop</a>
       <a href="#engine" data-group="reference">Methods</a>
     </nav>
@@ -34,13 +34,15 @@
 <section class="view" id="view-desk" aria-labelledby="desk-title">
   <div class="t7" id="today7">
     <div class="t7-head">
-      <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Oct 21, 2026</p>
-      <h1 id="desk-title">Hold equity at 1.00x with no bond hedge; cut to 0.50x if the 10-month trend breaks.</h1>
+      <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Oct 23, 2026</p>
+      <h1 id="desk-title">Hold equity at 1.00x with no bond hedge; no trend overlay after it failed its walk-forward test.</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
     </div>
     <div class="call-board" id="call-board" role="list" aria-label="The call in numbers"></div>
     <p class="t7-sizing" id="t7-sizing"></p>
+    <p class="t7-sizing" id="t7-impl"></p>
+    <div class="t7-limits" id="t7-limits" aria-label="Limits and breaches"></div>
     <div class="brief" id="brief"></div>
   </div>
 
@@ -48,9 +50,10 @@
     <div class="section-head">
       <p class="eyebrow">How the engine thinks</p>
       <h2 id="flow-title">From 156 years of data to one sized call, in six stages</h2>
-      <p class="prose">One system. Each stage is a fitted object with a stated optimiser, walked forward since 1940 with a two-month lag, and each feeds the next. The numbers are today's.</p>
+      <p class="prose">Every month the engine reads 156 years of data, works out what kind of market this is, estimates what the next year is likely to pay, chooses how much stock a cautious investor would hold, and trusts that answer only as far as its record since 1940 has earned. Each stage is a fitted object with a stated optimiser; the numbers are today's.</p>
     </div>
     <ol class="flow" id="flow" aria-label="The engine's stages"></ol>
+    <div class="hood-links"><a class="more-link" href="#explained">The same six stages in plain English, with any month since 1940 replayed →</a></div>
   </section>
 
   <section class="section" id="theta-sec" aria-labelledby="theta-title">
@@ -72,11 +75,11 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 483 of 483</span></span>
-      <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run on GitHub Actions</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 493 of 493</span></span>
+      <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot warn"></span><span>Databento key pending</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
-      <span class="chip"><span class="dot good"></span><span id="chip-asof">Data as of Oct 22, 2026</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-asof">Data as of Oct 23, 2026</span></span>
     </div>
     <div class="hood-links"><a class="more-link" href="#code">Read the source →</a><a class="more-link" href="#agents">How it was built, with agents →</a><a class="more-link" href="#engines">Engine room: inputs, outputs, hashes →</a></div>
   </section>
@@ -87,7 +90,7 @@
       <h2 id="fund-title">Where this plugs in, and what it produces on day one</h2>
       <p class="prose">The engine is built to sit beside a portfolio manager and a risk function, not to replace either. It reads the book, states its rules in advance, sizes against a loss limit, grades every figure by its evidence and leaves the trade to a person.</p>
     </div>
-    <div class="fund" id="fund">
+    <div class="fundgrid" id="fund">
       <div class="panel fund-cell">
         <span class="panel-title">It consumes</span>
         <ul class="m-learn-l">
@@ -110,6 +113,7 @@
           <li>Frame the question as a decision under a loss limit, not a forecast: what size, what hedge, and what evidence would change it.</li>
           <li>Write the rule before looking at the outcome; test it on 156 years, walked forward, against the best of n useless strategies; let the record set how far to trust it.</li>
           <li>Publish the parameters and the code. A number nobody can trace is not a number the book should act on.</li>
+          <li>Where this sits in a team: between the portfolio manager and risk, turning stated rules into tested code and keeping the record. These desks are the working method, not a demo.</li>
         </ul>
       </div>
       <div class="panel fund-cell">
@@ -117,7 +121,7 @@
         <ul class="m-learn-l">
           <li>Week one: the fund's book and limits into the private config; the daily record starts, with the fund's own hedges in the hedge selector.</li>
           <li>Weeks two to three: the fund's standing rules (trend, volatility, valuation) through the labs harness, so each carries a p-value corrected for the variants tried.</li>
-          <li>Week four: the gate and the overlay calibrated to the fund's history; the parameters desk becomes the risk function's audit page.</li>
+          <li>Week four: the gate calibrated to the fund's own record, with every rule the fund already runs counted among the strategies tried; the parameters desk becomes the risk function's audit page.</li>
         </ul>
       </div>
     </div>
@@ -126,14 +130,14 @@
   <section class="section" id="t7-cards-sec" aria-labelledby="t7-cards-title">
     <h2 class="sr-only" id="t7-cards-title">What changed, what would reverse the call, and how far to trust it</h2>
     <div class="t7-grid">
-      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet"></p><ol class="t7-changes" id="t7-changes"></ol></section>
+      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet"></p><ol class="t7-changes" id="t7-changes"></ol><a class="more-link" href="#digest">This week's evidence, checked twice →</a></section>
       <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">Reversal conditions</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decision">What would flip the call →</a></section>
       <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#reality">Reality check →</a></section>
       <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
         <ul class="cal cal-compact">
-          <li><b>Oct 27–28</b><span>FOMC. Market odds of a second straight hike fell from 70% on Sep 28 to 19% on Oct 8, then rose to about 33% by Oct 16. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">FXStreet</a></span></li>
+          <li><b>Oct 27–28</b><span>FOMC meeting; statement Oct 28. Markets price about 91% odds of a hold and a December hike around 76% (Oct 23); the September minutes had most participants expecting another increase by year end. <a class="src" href="https://tradingeconomics.com/united-states/government-bond-yield/news/594660">Trading Economics</a></span></li>
           <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets.</span></li>
-          <li><b>Nov 10</b><span>October CPI. September printed 3.7% for the year; three-year inflation (3.06%) sits inside the 2.75% to 4.25% band where bonds stop hedging. <a class="src" href="https://www.bls.gov/news.release/CPI.htm">BLS</a></span></li>
+          <li><b>Nov 10</b><span>October CPI. September printed 3.7% headline and 2.6% core, energy up 20.4% on the year; the Cleveland Fed nowcasts 3.75% for October. Three-year inflation (3.06%) sits inside the 2.75% to 4.25% band where bonds stop hedging. <a class="src" href="https://www.bls.gov/news.release/CPI.htm">BLS</a></span></li>
           <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
         </ul>
       </section>
@@ -273,10 +277,10 @@
   <div class="at-tiles" id="mx-tiles"></div>
   <section class="section" aria-labelledby="mx-how-title">
     <div class="section-head"><p class="eyebrow">How the mind multiplies</p><h2 id="mx-how-title">Queries as vectors, knowledge as a matrix</h2>
-      <p class="prose">The mind's 8,728 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
+      <p class="prose">The mind's 8,949 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
     <div class="mx-eq panel">
-      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,728, forty times</small></div>
-      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,728 by Q, forty times</small></div>
+      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,949, forty times</small></div>
+      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,949 by Q, forty times</small></div>
       <div><span class="dx-k">A neural network layer</span><code>h = f(W x + b)</code><small>the same product, learned weights W</small></div>
     </div>
   </section>
@@ -460,19 +464,19 @@
   <div class="vhead">
     <p class="eyebrow">Rates &amp; curves</p>
     <h1 id="rates-title">A parallel rise in the curve, led by real yields</h1>
-    <p class="lede">Every Treasury yield from one month to 30 years is 35 to 135bp higher than on Jan 2, led by the 2- and 3-year notes as the Fed turned to hikes. Since spring the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp. That is a real-rate squeeze, the regime in which long bonds stop hedging stocks.</p>
+    <p class="lede">Every Treasury yield from one month to 30 years is 39 to 122bp higher than on Jan 2 (Oct 23 close), led by the 2- and 3-year notes as the Fed turned to hikes. Since spring the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp. That is a real-rate squeeze, the regime in which long bonds stop hedging stocks.</p>
   </div>
 
   <section class="section" aria-label="Treasury curve">
     <div class="panel">
-      <div class="chart-head"><span class="chart-title">US Treasury par yield curve, six dates in 2026</span><span class="legend" id="curve-legend"></span></div>
+      <div class="chart-head"><span class="chart-title">US Treasury par yield curve, seven dates in 2026</span><span class="legend" id="curve-legend"></span></div>
       <div class="svgbox" id="curve-chart"></div>
       <span class="src">Source: <a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/2026/all?type=daily_treasury_yield_curve">US Treasury, daily par yield curve rates</a></span>
       <details class="tableview"><summary>Show as table, with change since Jan 2</summary><div class="tablewrap"><table id="curve-table"></table></div></details>
     </div>
     <div class="grid2">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title">Curve spreads, Oct 21 vs Jan 2</span></div>
+        <div class="panel-head"><span class="panel-title">Curve spreads, Oct 23 vs Jan 2</span></div>
         <div class="tiles compact" id="spread-tiles"></div>
         <p class="hint">2s10s and 10s30s flattened as the front end priced hikes; 3m10y steepened because 2-year and longer yields rose more than bills. 20s30s went from +5bp to −5bp: the 20-year again yields more than the 30-year, the old kink from thin demand for 20-year bonds.</p>
       </div>
@@ -522,7 +526,7 @@
 
   <section class="section" id="rates-live-sec" aria-labelledby="rlive-title">
     <div class="section-head"><p class="eyebrow">Live data</p><h2 id="rlive-title">Curve and spreads from the daily run</h2></div>
-    <div id="rates-live"><div class="empty"><strong>Live panel: fills from the daily run.</strong><span>The run adds today's FRED curve against a year ago, 2s10s and 3m10y since 2000, real yields and breakevens, the 10-year term premium, and credit spreads.</span></div></div>
+    <div id="rates-live"><div class="empty"><strong>Live panel: fills from the daily run.</strong> <span>The run adds today's FRED curve against a year ago, 2s10s and 3m10y since 2000, real yields and breakevens, the 10-year term premium, and credit spreads.</span></div></div>
   </section>
 
   <section class="section" aria-labelledby="bc-title">
@@ -573,7 +577,7 @@
   </section>
 
   <section class="section" aria-labelledby="dm-title">
-    <div class="section-head"><p class="eyebrow">Reference</p><h2 id="dm-title">Implementation choices for duration</h2><p class="prose">Par-bond approximation at Oct 21 yields. DV01 is the dollar change per basis point on $100,000.</p></div>
+    <div class="section-head"><p class="eyebrow">Reference</p><h2 id="dm-title">Implementation choices for duration</h2><p class="prose">Par-bond approximation at Oct 23 yields. DV01 is the dollar change per basis point on $100,000.</p></div>
     <div class="panel"><div class="tablewrap"><table id="duration-table"></table></div></div>
   </section>
   <section class="section" id="moves" aria-labelledby="mv-title">
@@ -792,7 +796,7 @@
         <div class="field"><label for="fu-book">Book value, $</label><input type="number" id="fu-book" value="1000000" step="50000" min="10000" max="10000000000"></div>
         <div class="inline2">
           <div class="field"><label for="fu-beta">Book beta to the Nasdaq-100</label><input type="number" id="fu-beta" value="1.15" step="0.05" min="0" max="3"></div>
-          <div class="field"><label for="fu-ndx">Nasdaq-100 level</label><input type="number" id="fu-ndx" value="29529" step="10" min="1000" max="200000"></div>
+          <div class="field"><label for="fu-ndx">Nasdaq-100 level</label><input type="number" id="fu-ndx" value="28959" step="10" min="1000" max="200000"></div>
         </div>
         <div class="field"><div class="field-top"><label for="fu-share">Share of beta to hedge</label><output id="fu-share-o" for="fu-share"></output></div><input type="range" id="fu-share" min="0" max="100" step="5" value="50"></div>
         <div class="field"><span class="flabel" id="fu-eq-l">Equity contract</span><div class="seg" role="group" aria-labelledby="fu-eq-l" id="fu-eq"><button type="button" data-v="NQ" aria-pressed="false">NQ, $20 a point</button><button type="button" data-v="MNQ" aria-pressed="true">MNQ, $2 a point</button></div></div>
@@ -826,7 +830,7 @@
         <details class="more"><summary>Financing</summary><div class="inner">
           <div class="field"><div class="field-top"><label for="s-r">Cash rate</label><output id="s-r-o" for="s-r"></output></div><input type="range" id="s-r" min="0" max="7" step="0.05" value="4.25"></div>
           <div class="field"><div class="field-top"><label for="s-sp">Borrow spread over cash</label><output id="s-sp-o" for="s-sp"></output></div><input type="range" id="s-sp" min="0" max="3" step="0.05" value="1"></div>
-          <p class="hint">Cash default is near the 3-month bill (4.25% on Oct 21).</p>
+          <p class="hint">Cash default is near the 3-month bill (4.22% on Oct 23).</p>
         </div></details>
       </form>
       <div class="panel" aria-live="polite">
@@ -1212,7 +1216,7 @@
   </section>
   <section class="section" id="capex-live-sec" aria-labelledby="cxl-title">
     <div class="section-head"><p class="eyebrow">Live data</p><h2 id="cxl-title">Capex against cash flow, from SEC filings</h2><p class="prose">Quarterly operating cash flow and capital spending from each company's XBRL filings, pulled by the daily run. Above 100%, capex exceeds the cash the business generates, and cash on hand or new debt fills the gap.</p></div>
-    <div id="capex-live"><div class="empty"><strong>Live panel: fills from the SEC step of the daily run.</strong><span>Set the SEC_USER_AGENT repository variable to a name and email address (the SEC requires one) and the run adds twelve quarters of capex, operating cash flow, debt and cash for GOOGL, MSFT, AMZN, META, ORCL, TSLA and SPCX.</span></div></div>
+    <div id="capex-live"><div class="empty"><strong>Live panel: fills from the SEC step of the daily run.</strong> <span>Set the SEC_USER_AGENT repository variable to a name and email address (the SEC requires one) and the run adds twelve quarters of capex, operating cash flow, debt and cash for GOOGL, MSFT, AMZN, META, ORCL, TSLA and SPCX.</span></div></div>
   </section>
   <section class="section" aria-label="Theses">
     <div class="thesis-grid" id="thesis-grid"></div>
@@ -1338,7 +1342,7 @@
     <div class="lab">
       <form class="panel controls" aria-label="Limits and the current book">
         <div class="field"><div class="field-top"><label for="rz-loss">Loss limit, worst scenario over 3 months</label><output id="rz-loss-o" for="rz-loss"></output></div><input type="range" id="rz-loss" min="5" max="35" step="1" value="15"></div>
-        <div class="field"><div class="field-top"><label for="rz-prem">Option premium budget, % of NAV</label><output id="rz-prem-o" for="rz-prem"></output></div><input type="range" id="rz-prem" min="0" max="2" step="0.25" value="2"></div>
+        <div class="field"><div class="field-top"><label for="rz-prem">Option premium budget, % of NAV per three months (0.50 is the policy's 2% a year)</label><output id="rz-prem-o" for="rz-prem"></output></div><input type="range" id="rz-prem" min="0" max="2" step="0.25" value="0.5"></div>
         <div class="field"><div class="field-top"><label for="rz-eq">Current equity, x NAV</label><output id="rz-eq-o" for="rz-eq"></output></div><input type="range" id="rz-eq" min="0" max="1.5" step="0.05" value="1"></div>
         <div class="field"><div class="field-top"><label for="rz-h">Current TLT hedge, x equity</label><output id="rz-h-o" for="rz-h"></output></div><input type="range" id="rz-h" min="0" max="1" step="0.1" value="0"></div>
         <button class="btn ghost" id="rz-reset" type="button">Clear my what-ifs</button>
@@ -1771,7 +1775,7 @@
           </div>
           <div class="quad-x">Growth rising →</div>
         </div>
-        <p class="hint">Asset placement is the desk's synthesis of Bridgewater's All Weather framework. Growth read: the Fed's September statement (solid expansion, steady unemployment). Inflation read: energy-led CPI of 4.2% in May and Brent at $125 on Oct 7. "Edging left": the Nasdaq's worst week since June and AI credit stress.</p>
+        <p class="hint">Asset placement is the desk's synthesis of Bridgewater's All Weather framework. Growth read: the Fed's September statement (solid expansion, steady unemployment). Inflation read: September CPI 3.7% (core 2.6%, energy up 20.4% on the year) and Brent at $116.93 on Oct 23 (December futures). "Edging left": the Nasdaq's worst week since June and AI credit stress.</p>
       </div>
       <figure class="panel chart" style="margin:0">
         <div class="chart-head"><span class="chart-title">Are bonds hedging stocks?</span><span class="src">Stock-bond return correlation, one-year window</span></div>
@@ -1781,6 +1785,7 @@
           <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
           <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
           <dt>Engine rule</dt><dd>Hold the long-bond hedge only after the correlation (63-day half-life) falls below −0.10, and drop it once it turns positive.</dd>
+          <dt>Measure in force</dt><dd>The policy's 63-day exponentially weighted correlation needs the daily price feed and is computed by the daily run; it is not computed in this copy. Until it is, the Decide desk reads the 36-month correlation of monthly S&amp;P 500 and 10-year Treasury returns from the Findings desk and says so beside the number. The Fed's one-year figure here and the Geometry desk's real-return figure are context, not inputs.</dd>
         </dl>
         <p class="sentence" id="gauge-live" hidden></p>
       </figure>
@@ -1861,13 +1866,13 @@
     <div class="panel">
       <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Live panel: fills from the daily run</span></div>
       <div id="macro-body" class="section">
-        <div class="empty"><strong>Live panel.</strong><span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
+        <div class="empty"><strong>Live panel.</strong> <span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
       </div>
     </div>
     <div class="panel">
       <div class="panel-head"><span class="panel-title">Model book</span><span class="src" id="book-asof">Needs the Databento key</span></div>
       <div id="book-body" class="section">
-        <div class="empty"><strong>Book analytics start with the Databento key.</strong><span>Once the key is saved as a repository secret, each daily run adds the book's own regime, the hedge ratio it implies, a four-policy backtest with deflated Sharpe ratios, factor exposures, and the size to run.</span></div>
+        <div class="empty"><strong>Book analytics start with the Databento key.</strong> <span>Once the key is saved as a repository secret, each daily run adds the book's own regime, the hedge ratio it implies, a four-policy backtest with deflated Sharpe ratios, factor exposures, and the size to run.</span></div>
       </div>
     </div>
   </section>
@@ -1975,8 +1980,12 @@
   </div>
   <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#fu-t-title">The table</a><a href="#mi-title">Cash coverage</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
   <section class="section" aria-labelledby="fu-t-title">
-    <div class="section-head"><p class="eyebrow">Last twelve months</p><h2 id="fu-t-title">The builders: filing-based overview</h2><p class="prose" id="fu-t-sub">$ billions, trailing twelve months to each company's latest quarter. Every figure is a sum of discrete quarters recovered from the SEC's XBRL facts; the engine refreshes it daily once the SEC contact is set.</p></div>
+    <div class="section-head"><p class="eyebrow">Last twelve months</p><h2 id="fu-t-title">The builders: filing-based overview</h2><p class="prose" id="fu-t-sub">$ billions, trailing twelve months to each company's latest quarter. Every figure is a sum of discrete quarters recovered from the SEC's XBRL facts, except where a cell is marked secondary (a figure the XBRL tags do not carry, taken from a named secondary source and dated); the engine refreshes it daily once the SEC contact is set.</p></div>
     <div class="panel"><div class="tablewrap"><table class="fund" id="fund-table"></table></div><p class="hint" id="fu-note"></p></div>
+  </section>
+  <section class="section" id="fu-latest-sec" aria-labelledby="fu-latest-title">
+    <div class="section-head"><p class="eyebrow">Latest quarter</p><h2 id="fu-latest-title">What the most recent releases say, company by company</h2><p class="prose">The quarter each builder reported most recently, from its own release or filing, checked twice; the trailing-twelve-month table above moves when the daily run reads the filings. Meta and Tesla reported Q3 on Oct 21; SpaceX on Oct 20; Microsoft and Alphabet report Oct 28, Amazon Oct 29.</p></div>
+    <div class="dg-items" id="fu-latest"></div>
   </section>
   <section class="section" aria-labelledby="mi-title">
     <div class="section-head"><p class="eyebrow">Coverage, from the filings</p><h2 id="mi-title">Internal versus external funding of capital expenditure</h2><p class="prose">Descriptive coverage categories from one year of filings (the Minsky framing, without the verdict): cash flow against capex and interest. Capex above cash flow is a funding gap, not proof of distress; cash, asset sales, discretionary spending and debt maturities all matter, and maturities are not modelled here.</p></div>
@@ -2195,7 +2204,7 @@
     <div class="section-head"><p class="eyebrow">Calculator</p><h2 id="dw2-title">Converting capital expenditure to power demand</h2><p class="prose">What a year of AI capex asks of the grid, at today's cost per gigawatt.</p></div>
     <div class="lab">
       <form class="panel controls" id="ph-form">
-        <div class="field"><div class="field-top"><label for="ph-capex">AI capex per year ($B)</label><output id="ph-capex-o" for="ph-capex"></output></div><input type="range" id="ph-capex" min="100" max="1500" step="10" value="800"></div>
+        <div class="field"><div class="field-top"><label for="ph-capex">AI capex per year ($B; default: the five builders' latest quarter annualised)</label><output id="ph-capex-o" for="ph-capex"></output></div><input type="range" id="ph-capex" min="100" max="1500" step="10" value="770"></div>
         <div class="field"><div class="field-top"><label for="ph-cost">All-in cost per gigawatt ($B)</label><output id="ph-cost-o" for="ph-cost"></output></div><input type="range" id="ph-cost" min="25" max="80" step="1" value="45"></div>
         <div class="field"><div class="field-top"><label for="ph-load">Average load (utilization)</label><output id="ph-load-o" for="ph-load"></output></div><input type="range" id="ph-load" min="0.4" max="0.95" step="0.05" value="0.8"></div>
         <p class="hint">Cost per gigawatt: about $41B (Brookings, 2025) to about $50B (Nvidia, 2025). Some capex (warehouses, offices) is not AI; treat the result as an upper bound.</p>
@@ -2224,6 +2233,22 @@
     <div class="grid2"><figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Out of 1,000 big projects</span></div><div class="svgbox" id="ph-flyv"></div></figure><div class="panel"><ul class="facts" id="ph-flyv-read"></ul></div></div>
   </section>
   <footer class="foot"><p>Physical conversions are approximations stated with their inputs. Sources are linked on each figure.</p></footer>
+</section>
+
+<!-- ======================= RESEARCH DIGEST ======================= -->
+<section class="view" id="view-digest" hidden aria-labelledby="dg-title">
+  <div class="vhead"><p class="eyebrow">Research · this week's evidence</p><h1 id="dg-title">What the evidence says this week, by the question it bears on</h1>
+    <p class="lede" id="dg-sub">Every item was found on its source page by a research agent and re-checked on the same page by an independent checker. Each is dated and linked; the engine reads the ones that move its signals, and the rest are context for the desks that cite them.</p></div>
+  <div class="at-tiles" id="dg-tiles"></div>
+  <div class="pm-filter" id="dg-filter" role="group" aria-label="Filter by question"></div>
+  <div class="dg-list" id="dg-list"></div>
+  <section class="section" aria-labelledby="dg-how-t">
+    <div class="section-head"><p class="eyebrow">Method</p><h2 id="dg-how-t">How an item gets in</h2></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Found, then checked</span><p class="prose">A research agent is given one question and the standard: every figure and quoted phrase must appear on the page it cites, with the date the fact is about. A second agent, which cannot see the first agent's notes, opens the same page and marks the item confirmed, corrected (with the fix) or failed. Failed and unreachable items never enter the store. The store's note records this for every item.</p></div>
+      <div class="panel"><span class="panel-title">What the engine does with it</span><p class="prose">Items join the knowledge graph as nodes, so a question to the mind can cite them. Tape items feed the bond lab's check of the model against the day's moves. The signals the decision desks read (inflation, the stock-bond correlation, the capex ratio, spreads, oil, the curve) come from the engine's data feeds, not from these items; the items are the evidence a reader checks the signals against.</p></div>
+    </div>
+  </section>
 </section>
 
 <!-- ======================= FINDINGS ======================= -->
@@ -2388,7 +2413,7 @@
 
   <section class="section" id="status" aria-labelledby="st-title">
     <div class="section-head"><p class="eyebrow">Operations</p><h2 id="st-title">System status</h2><p class="prose">Written by the last step of every daily run: what ran, how fresh each output is, and the checks it passed. A stale or failed check shows here and on the Desk.</p></div>
-    <div class="panel" id="status-body"><div class="empty"><strong>Live panel: no run status in this copy.</strong><span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
+    <div class="panel" id="status-body"><div class="empty"><strong>Live panel: no run status in this copy.</strong> <span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
   </section>
   <div class="grid2">
     <div class="panel">
@@ -2417,7 +2442,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, sixteen tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 34 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2468,11 +2493,11 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Ticker</th><th class="r">Weight</th><th>Role</th></tr></thead>
         <tbody>
-          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler</td></tr>
-          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler</td></tr>
-          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2</td></tr>
+          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler; reports Oct 28</td></tr>
+          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler; reports Oct 29</td></tr>
+          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2; reports Oct 28</td></tr>
           <tr><td>NVDA</td><td class="r">14%</td><td>Compute</td></tr>
-          <tr><td>META</td><td class="r">12%</td><td>Hyperscaler; reports Oct 21</td></tr>
+          <tr><td>META</td><td class="r">12%</td><td>Hyperscaler; free cash flow negative in Q3 (Oct 21)</td></tr>
           <tr><td>TSLA</td><td class="r">10%</td><td>Autonomy, robotics</td></tr>
           <tr><td>AVGO</td><td class="r">8%</td><td>Custom silicon, networking</td></tr>
           <tr><td>SPCX</td><td class="r">8%</td><td>IPO Jun 12, 2026 at $135; short history</td></tr>
@@ -2505,6 +2530,77 @@
     </ol>
   </section>
   <footer class="foot"><p>Built by Jamie Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
+</section>
+
+<!-- ======================= HOW IT WORKS ======================= -->
+<section class="view" id="view-explained" hidden aria-labelledby="hw-title">
+  <div class="vhead"><p class="eyebrow">The engine · in plain English</p><h1 id="hw-title">How the engine decides, in one sentence, one paragraph and one page</h1>
+    <p class="lede">No jargon on this desk. Every term the other desks use is defined here in a line, and any month since 1940 can be replayed to watch the engine make its call from the data it had at the time.</p></div>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#hw-one-title">One sentence</a><a href="#hw-para-title">One paragraph</a><a href="#hw-stages-title">Six stages</a><a href="#hw-replay-title">Replay a month</a><a href="#hw-words-title">The words</a><a href="#hw-not-title">What it is not</a></nav>
+
+  <section class="section" aria-labelledby="hw-one-title">
+    <div class="section-head"><p class="eyebrow">In one sentence</p><h2 id="hw-one-title">What the engine does every month</h2></div>
+    <p class="hw-one" id="hw-one">Every month the engine reads 156 years of market data, works out what kind of market this is, estimates what the next year is likely to pay, chooses how much stock a cautious investor would hold given that, and then trusts its own answer only as far as its track record since 1940 has earned.</p>
+  </section>
+
+  <section class="section" aria-labelledby="hw-para-title">
+    <div class="section-head"><p class="eyebrow">In one paragraph</p><h2 id="hw-para-title">The same thing, with the moving parts named</h2></div>
+    <div class="hw-para">
+      <p class="prose">The engine is a set of numbers learned from history, with the rules that update them written down in advance. It starts from monthly US stock returns since 1871 and a handful of things known at the time: how expensive stocks are, where bond yields and inflation stand, how the market has been trending, how volatile it has been and how far it sits below its last high. From these it keeps two kinds of belief up to date. One is about the <b>state</b> of the market: a few regimes (calm, turbulent, stressed), each with its own typical return and risk, and the odds of being in each this month. The other is about the <b>next year</b>: four simple forecasters, combined by how well each has actually done.</p>
+      <p class="prose">It then asks one question. For an investor who dislikes losses about as much as the average long-run investor must have (the dislike is set so that holding exactly one times capital is the neutral answer), what exposure to stocks makes the next month's expected outcome best, provided the worst month in twenty costs no more than <span id="hw-es">12%</span> of capital? That number is the engine's <b>optimum</b>, <span id="hw-opt">1.50x</span> today.</p>
+      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the book holds <span id="hw-x">1.00x</span>. Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hw-stages-title">
+    <div class="section-head"><p class="eyebrow">Six stages</p><h2 id="hw-stages-title">The engine as a weather service</h2><p class="prose">A weather service does not promise tomorrow's rain. It reads its instruments, names the season, publishes an outlook with its uncertainty, and tells you whether to carry an umbrella. The engine has the same six jobs.</p></div>
+    <div class="hw-stages" id="hw-stages">
+      <div class="panel hw-stage"><span class="hw-n">1</span><span class="panel-title">Data: the instruments</span><p class="hw-what">156 years of monthly readings, each dated. A value for month t uses data through t minus two, so nothing is used before it could have been known.</p><p class="hw-why">What can go wrong: a stale feed. The engine says which date each number carries and marks anything older than its schedule.</p><a href="#engines">Engine room →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">2</span><span class="panel-title">Regimes: the season</span><p class="hw-what">Not "will it rain tomorrow" but "is this a stormy season": the odds of calm, turbulent and stressed markets this month, from a model refit every five years, plus a check for whether a new season has just begun.</p><p class="hw-why">What can go wrong: regimes are labels fitted after the fact. The engine averages four different views of the next month by how well each has recently predicted it, so no single label decides.</p><a href="#dx-states">The states today →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">3</span><span class="panel-title">Forecasts: the outlook</span><p class="hw-what">Four forecasters of the next year's return, each refit every two years and combined by their record. The outlook carries its own uncertainty, which is wide.</p><p class="hw-why">What can go wrong: forecasting returns is barely possible. Out of sample, the best forecaster only edges the long-run average; the engine's edge is in the budget and the discipline, not the forecast.</p><a href="#ml">The forecasters' record →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">4</span><span class="panel-title">Allocation: the umbrella</span><p class="hw-what">How much stock to carry: the exposure with the best expected outcome for a cautious investor, inside a budget of 12% of capital for the worst month in twenty.</p><p class="hw-why">What can go wrong: the budget binds in a storm and the engine cuts exposure late. That is accepted; the budget is a mandate's limit, not a forecast.</p><a href="#solve">The sizing math →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">5</span><span class="panel-title">Gate: how far to trust the forecaster</span><p class="hw-what">A forecaster who has not beaten "assume tomorrow looks like today" gets little say. The gate scales the move from holding toward the optimum by the strength of the engine's own record, discounted for every version tried.</p><p class="hw-why">What can go wrong: a gate that someone can tune. This one cannot: it is a fixed function of the record's t statistic and the count of strategies tried.</p><a href="#dx-gate">The gate today →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">6</span><span class="panel-title">Hedge and overlay: the standing guards</span><p class="hw-what">What to hold beside the stocks (all stocks, a Treasury sleeve or cash, chosen by recent record in the current regime), and the rule that scales exposure when the trend breaks.</p><p class="hw-why">What can go wrong: bonds stop hedging when inflation is high, which is the case now, and a rule that looks free on the full record can fail when re-chosen year by year, which is what happened to the trend overlay. The selector holds no bond sleeve and the overlay is not applied.</p><a href="#dx-overlay">The overlay study →</a></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hw-replay-title">
+    <div class="section-head"><p class="eyebrow">Replay</p><h2 id="hw-replay-title">Any month since 1940: what the engine saw, what it did, what came next</h2><p class="prose">Drag through history. Every number is the engine's own output for that date, computed from data available at the time; nothing is rebuilt with hindsight. The record is kept at half-year steps.</p></div>
+    <div class="panel hw-replay">
+      <div class="hw-scrub"><label for="hw-when">Month</label><input type="range" id="hw-when" min="0" max="173" value="173" step="1" aria-valuetext="2026-07"><output id="hw-when-out" for="hw-when">2026-07</output></div>
+      <div class="hw-read" id="hw-read" role="list" aria-label="The engine at the chosen month"></div>
+      <p class="sentence" id="hw-story"></p>
+      <div class="grid2">
+        <div><span class="panel-title">Exposure, before and after the gate</span><div class="svgbox" id="hw-exp"></div></div>
+        <div><span class="panel-title">Growth of one real dollar since 1940</span><div class="svgbox" id="hw-growth"></div></div>
+      </div>
+      <p class="hint">Engine: the optimum each month. Gated: what the book would have held. Holding: all stocks, 1.00x. Trend: out of stocks below the 10-month average. Costs and borrowing included.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hw-words-title">
+    <div class="section-head"><p class="eyebrow">The words</p><h2 id="hw-words-title">Eight terms the other desks use, one line each</h2></div>
+    <dl class="hw-words">
+      <div><dt>Regime</dt><dd>A stretch of months that share a typical return and risk. The engine fits a few and keeps the odds of being in each.</dd></div>
+      <div><dt>Forecast</dt><dd>A guess at the next year's real return, with its uncertainty. Four of them, combined by record.</dd></div>
+      <div><dt>Risk aversion</dt><dd>How much more a loss hurts than a gain helps. Set so that holding one times capital is the neutral answer; not tuned.</dd></div>
+      <div><dt>Expected shortfall</dt><dd>The average loss in the worst month in twenty. The engine keeps it under 12% of capital.</dd></div>
+      <div><dt>Optimum</dt><dd>The exposure with the best expected outcome for that risk aversion inside that budget. Today 1.50x.</dd></div>
+      <div><dt>Gate</dt><dd>The share of the move from holding toward the optimum that reaches the book, from the strength of the record. Today 0%.</dd></div>
+      <div><dt>Overlay</dt><dd>A scaling of exposure when the market is below its 10-month average. Adopted only if it keeps a cautious investor's expected utility walked forward; today none is.</dd></div>
+      <div><dt>Walked forward</dt><dd>Every number for a past month was computed only from data available then, so the record is a fair test, not a fit.</dd></div>
+    </dl>
+  </section>
+
+  <section class="section" aria-labelledby="hw-not-title">
+    <div class="section-head"><p class="eyebrow">Limits</p><h2 id="hw-not-title">What the engine is not</h2></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Not a price predictor</span><p class="prose">Its forecasters barely beat the long-run average out of sample, and it says so. The value is in the risk budget, the regime odds, the gate and the written-down rules, not in calling the market.</p></div>
+      <div class="panel"><span class="panel-title">Not an order system</span><p class="prose">Nothing on this site or in the code places, routes or cancels a trade. It writes proposals a person approves; the MCP server has no order tool.</p></div>
+      <div class="panel"><span class="panel-title">Not tuned</span><p class="prose">Eleven constants are set by hand and listed with reasons; the gate is a fixed function of the record once the count of strategies tried is fixed; the overlay factor was chosen by a rule stated before the result and then rejected by that rule's own walk-forward. There is no dial that makes the backtest look better.</p></div>
+      <div class="panel"><span class="panel-title">Not a black box</span><p class="prose">Twenty-two learned objects, 2,850 numbers in the decision core, each with its shape and its optimiser on the <a href="#parameters">Parameters desk</a>; the source is on the <a href="#code">source desk</a>; the daily record is the Engine room.</p></div>
+    </div>
+  </section>
 </section>
 
 <!-- ======================= PARAMETERS ======================= -->
@@ -2992,8 +3088,8 @@
     <ol class="cd-flow">
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
-      <li><b>Know.</b> ontology.py and concepts17.json define 4,318 concepts and their relations; knowledge.json holds 605 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 8,728 nodes and about 35,000 typed links, with 4,318 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Know.</b> ontology.py and concepts17.json define 4,318 concepts and their relations; knowledge.json holds 780 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 302 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 8,949 nodes and about 35,000 typed links, with 4,318 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
       <li><b>Count.</b> parameters.py inventories every matrix, vector and scalar the engine learns (22 objects, about 598,000 numbers) with its shape, the optimiser and objective that shaped it, its data, its refit schedule and the desks it feeds, read from the engines' own outputs; the constants set by hand are listed apart with reasons.</li>
       <li><b>Decide.</b> decide.py sizes the stock exposure from stacked forecasts (nn.py's neural ensemble), regimes and changepoints (infer.py), model averaging that now includes geometric analogs (geometry.py), a risk budget and an evidence gate; portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
@@ -3032,10 +3128,18 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
   </section>
+  <section class="section" aria-labelledby="ag-v24-t">
+    <div class="section-head"><p class="eyebrow">v0.24</p><h2 id="ag-v24-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>217</b><span>Research checks by independent agents</span><small>175 facts and 35 quotes, plus 7 reopened; 20 corrected, 1 failed and dropped</small></div>
+      <div class="at-kpi"><b>70</b><span>Audit findings, read like a PM</span><small>5 blockers and 25 majors; the blockers and most majors fixed here</small></div>
+      <div class="at-kpi"><b>0.50 &rarr; none</b><span>Trend overlay withdrawn</span><small>walked forward, the rule's own choice cost utility (t &minus;2.29)</small></div>
+      <div class="at-kpi"><b>2</b><span>New desks</span><small>How it works, with a replay since 1940; the research Digest</small></div></div>
+    <p class="prose">Five research agents each gathered 35 dated, linked items on one question (the tape, capex and earnings, AI credit, the Fed and inflation, power), a sixth gathered 35 verbatim quotes, and a separate checker per file reopened every source without seeing the researcher's reasoning: 20 items came back corrected and 1 failed. An auditor agent then read every desk as a portfolio manager would and returned 70 ranked findings. The first major finding was the engine's own: the trend overlay's factor had been chosen on the full record, with the factors tried left out of the deflation. Walked forward (a 10-year burn-in, the factor re-chosen every twelve months on the record to date), the same rule averaged a 0.56 scaling, changed 18 times and cost a risk-averse investor expected utility against holding (t &minus;2.29), so the overlay is withdrawn, its four scalings now count among the strategies the gate discounts (12, so t0 1.38), and the trend rule runs through one code path everywhere.</p>
+  </section>
   <section class="section" aria-labelledby="ag-v23-t">
     <div class="section-head"><p class="eyebrow">v0.23</p><h2 id="ag-v23-t">Release metrics</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>22</b><span>Parameter objects inventoried</span><small>shape, optimiser, objective, data, refit, destination</small></div>
-      <div class="at-kpi"><b>0.50</b><span>Trend overlay adopted</span><small>of five factors tried, by a rule written first</small></div>
+      <div class="at-kpi"><b>0.50</b><span>Trend overlay chosen, then rejected</span><small>chosen by a rule written first; withdrawn in v0.24 when the rule failed walked forward</small></div>
       <div class="at-kpi"><b>14 to 5</b><span>Screens on Today</span><small>one call, six stages, the counts, the fund block</small></div>
       <div class="at-kpi"><b>6</b><span>Navigation groups</span><small>Engine and Workshop added; the Decide group dispersed into Today, Markets, Engine and Workshop</small></div></div>
     <p class="prose">The lead agent took the review's structural findings (a fourteen-screen landing page, five navigation layers, a trend rule that beat holding on Sharpe and drawdown while the gate benchmarked against holding) and resolved each on the record rather than by taste: the overlay factor is chosen by a rule stated before the result, the landing page became the call and the engine's stages, and every parameter the engine learns was inventoried from the engines' own outputs so the page cannot disagree with the run. No subagents were used for this release; the checks were the test suite, the stress harness and screenshots at three widths in both themes.</p>

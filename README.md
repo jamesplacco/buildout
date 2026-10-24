@@ -3,6 +3,16 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.24 deepens the research, explains the engine simply and answers an audit. Five research agents gathered
+175 dated, linked items (the tape, capex and earnings, AI credit, the Fed and inflation, power) and a sixth 35 verbatim
+quotes; independent checkers reopened every source (20 corrected, 1 failed and dropped); the store holds 780 items and
+302 quotes (`scripts/snapshot_v24.py` writes the Digest desk). A How it works desk explains the engine with live numbers
+and a replay since 1940. An auditor agent read every desk as a PM would and returned 70 findings. The first was the
+engine's own: the trend overlay's factor was chosen on the full record. `decide.overlay_study` now walks the choice
+forward (10-year burn-in, re-chosen every 12 months); walked forward it cost expected utility (t -2.29), so no overlay
+is adopted and its four scalings count in `N_TRIED` (12). Every desk now shows the one governing size beside its own,
+Today lists limits and breaches, one correlation measure is named as in force, and the level store is dated.
+
 Version 0.23 names the system and counts what it has learned. The mind, the brain, the atlas and the decision and
 portfolio engines are layers of one engine whose product is its parameters, Theta: every matrix, vector and scalar an
 algorithm shaped by optimising a stated objective on stated data. `buildout/parameters.py` inventories them from the
@@ -52,7 +62,7 @@ fit runs in the same batch. The five-network ensemble trains its members side by
 written by a subagent, identical to sequential training bit for bit). Measured on the build machine: the decision
 engine rebuilds in 33 seconds instead of 93 and the portfolio engine in 9 instead of 24, with the same findings to the
 last digit; the forward-backward pass is about 3x faster and agrees with the loop to about 1e-14. The mind's graph is
-one sparse 8,728 by 8,728 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
+one sparse 8,949 by 8,949 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
 questions (`spread_many`, `think_many`), which gives the board: the mind's verdict on all 27 claims it weighs in one
 pass (`python -m buildout board`, MCP tool `mind_board`, and live in the page). A 64-eigenvector map of the graph is
 about 9x faster per question but changes half of the top twenty answers, so it is used only to find related ideas
@@ -179,7 +189,7 @@ questions. The page adds the ML lab, Reality check and Edge desks, Vim and Emacs
 Version 0.14 makes the brain and the engine one mind, an order of magnitude larger, and gives it a reasoning loop.
 `mind.py` joins, in one typed graph of about 1,500 nodes and 3,800 links: 547 concepts with definitions, formulas and
 relations (`ontology.py`), the atlas's 100 market nodes and their learned causal links, 268 facts and papers checked
-twice on their sources (`assets/knowledge.json`), 267 verified quotes from 60 investors, every Python module with its
+twice on their sources (`assets/knowledge.json`), 302 verified quotes, every Python module with its
 imports as links, the lab methods and the MCP tools, 48 economies with their currencies and exports, and 107 signals
 (evidence with a direction, a strength and a reliability). Asked a question, it recalls by BM25 and exact names,
 spreads activation by personalized PageRank, frames the claim, weighs the evidence in log-odds with a family discount,

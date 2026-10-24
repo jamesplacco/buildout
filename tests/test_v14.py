@@ -58,7 +58,7 @@ def test_knowledge_items_are_checked_sourced_and_clean():
     for it in items:
         assert it["source_url"].startswith("https://"), it["id"]
         assert it["checked"].startswith(("confirmed", "corrected")), it["id"]
-        assert len(it["text"].split()) <= 70, it["id"]
+        assert len(it["text"].split()) <= 170, it["id"]       # v0.24: research items carry the figures and the quoted sentence; the digest shows them in full
         assert not any(b in json.dumps(it, ensure_ascii=False).lower() for b in banned), it["id"]
         if it["kind"] == "paper":
             assert it.get("authors"), it["id"]

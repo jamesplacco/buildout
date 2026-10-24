@@ -502,7 +502,7 @@ def summary(o: dict) -> list[str]:
     gp = n["gate_policy"].replace("_", " ").replace("sixty forty", "60/40")
     out = [
         f"Portfolio decision for the model book: {_mix(n['decision'])}. The regime optimum is {_mix(n['optimum'])}. Of the {len(o['meta']['names'])} active policies walked forward since "
-        f"{o['start'][:4]} (eight including holding stocks and the learner), the one with the strongest evidence of making a risk-averse investor better off than holding "
+        f"{o['start'][:4]} (holding stocks is one of them; the learner that weights them is a seventh), the one with the strongest evidence of making a risk-averse investor better off than holding "
         f"stocks is {gp} (utility t {n['gate_t']:.1f}, against {n['gate_t0']:.1f} expected from the best of {o['n_tried']} useless strategies), so the gate moves "
         f"{n['gate']:.0%} of the way toward it.",
         f"Regimes: {n['K']} states of stocks, bonds and gold together. Next month is most likely {st[cur]['name'].lower()} ({w[cur]:.0%}), where stocks and Treasuries "

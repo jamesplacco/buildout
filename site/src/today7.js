@@ -39,7 +39,7 @@
     const ds = [];
     const I = inputs();
     [I.vix, I.corr, I.hy, I.oil, I.real].forEach((o) => { if (o && o.live && isoOk(o.d)) ds.push(o.d); });
-    return ds.length ? ds.sort().slice(-1)[0] : "2026-10-21";
+    return ds.length ? ds.sort().slice(-1)[0] : "2026-10-23";
   }
   function todayChanges(I, TD) {
     const HL = I.HL, out = [];
@@ -87,11 +87,12 @@
     // the answer to the headline question
     const st = TD.gates.state.value, ans = $("#t7-answer");
     ans.replaceChildren();
-    const lead = TD.status !== "ok" ? "Unknown today." : TD.on ? "Reliable enough to hold." : st === "amplifying" ? "Not in this regime." : "Unproven.";
+    const lead = TD.status !== "ok" ? "Would bonds hedge the book? Unknown today." : TD.on ? "Would bonds hedge the book? Reliable enough to hold." : st === "amplifying" ? "Would bonds hedge the book? Not in this regime." : "Would bonds hedge the book? Unproven.";
+    const H = readF().hedge || {}, gateAdds = H.experiment ? H.experiment.inflation_adds_value === true : null;
     ans.append(h("strong", null, lead + " "),
-      document.createTextNode(st === "amplifying" ? `Stocks and bonds are moving together (36-month correlation ${sgn2(I.corr.v)}), so long bonds would add to a sell-off. `
-        : st === "hedging" ? `Stocks and bonds are moving opposite (36-month correlation ${sgn2(I.corr.v)}). ` : `The 36-month correlation (${sgn2(I.corr.v)}) sits between the lines. `),
-      evTag("obs"), document.createTextNode(` Inflation of ${pctPts(I.infl.avg36)} over three years sits ${HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1] ? "inside" : "outside"} the ${HL.band ? `${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""} band where the data cannot pin the line. `), evTag("est"));
+      document.createTextNode(st === "amplifying" ? `Stocks and bonds are moving together (36-month correlation ${sgn2(I.corr.v)}), so long bonds would add to a sell-off `
+        : st === "hedging" ? `Stocks and bonds are moving opposite (36-month correlation ${sgn2(I.corr.v)}) ` : `The 36-month correlation (${sgn2(I.corr.v)}) sits between the lines `),
+      evTag("obs"), document.createTextNode(`. The correlation state alone decides this: three-year inflation of ${pctPts(I.infl.avg36)} is ${fin(HL.line) ? (I.infl.avg36 / 100 < HL.line ? "below" : "above") + ` the validated ${fx(HL.line * 100, 2)}% line` : "unlined"}, and by the engine's own out-of-sample test the inflation gate ${gateAdds === false ? "adds nothing the correlation rule does not catch" : gateAdds ? "adds a little" : "is untested"} `), evTag("est"), document.createTextNode("."));
     // the latest day's tape, where it bears on the call: a growth scare is the one selloff long bonds do cushion
     try {
       const T = (typeof TAPE17 !== "undefined" && Array.isArray(TAPE17)) ? Object.fromEntries(TAPE17.map((x) => [x.id, x])) : {};
@@ -100,7 +101,7 @@
         ans.append(document.createTextNode(` The regime describes the average month, not every day: on Oct 22, a growth and earnings scare, TLT rose ${fx(tl.value, 2)}% while QQQ fell ${fx(Math.abs(qq.value), 2)}%. `), evTag("obs"));
       }
     } catch (e) { /* the tape is optional */ }
-    $("#t7-status").textContent = `Model book, not personal positions · Data to ${isoNice(latestDataDate())}, tape to Oct 22 · Policies: TLT hedge v2, equity sizing v2${LIVE.status && Array.isArray(LIVE.status.checks) ? ` · ${LIVE.status.checks.filter((c) => c.ok).length} of ${LIVE.status.checks.length} data checks pass` : ""}`;
+    $("#t7-status").textContent = `Model book, not personal positions · Data to ${isoNice(latestDataDate())}, tape to Oct 23 · Policies: TLT hedge v2, equity sizing v2${LIVE.status && Array.isArray(LIVE.status.checks) ? ` · ${LIVE.status.checks.filter((c) => c.ok).length} of ${LIVE.status.checks.length} data checks pass` : ""}`;
     // one governing size, and the other rules named as cross-checks so the desks cannot seem to disagree
     const sz = $("#t7-sizing");
     if (sz) {
@@ -113,7 +114,9 @@
           const cross = [`volatility rule ${xx(byVol)}`];
           if (opt) cross.push(`scenario solver ${xx(opt.port[0])}${fin(R0.robust_share) ? ` (optimal in ${pct0(R0.robust_share)} of assumption pairs)` : ""}`);
           if (N.hedge && /trend (on|off)/.test(N.hedge.context)) cross.push(`10-month trend rule ${/trend on/.test(N.hedge.context) ? "on" : "off"}`);
+          const bb = typeof bookBeta === "function" ? bookBeta() : NaN;
           sz.append(h("strong", null, "Cross-checks, not the call: "), document.createTextNode(cross.join("; ") + `. The call is the decision engine's gated output; the other rules are shown so no desk can seem to disagree with it.`));
+          if (fin(bb)) sz.append(document.createTextNode(` In book terms: the engine sizes the index, and the model book's weighted beta is about ${fx(bb, 2)} on assumed five-year betas, so ${xx(N.exposure)} of the book is about ${fx(bb * N.exposure, 1)}x market beta plus an unsized AI factor (the Fundamentals desk measures the factor betas when the book run has data). `), evTag("est"));
         }
       } catch (e) { /* the sizing line is optional */ }
     }
@@ -143,7 +146,7 @@
     // can I trust it
     const tr = $("#t7-trust");
     tr.replaceChildren();
-    const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 21, 2026"], ["Research", `${readF().panel.end}, line ${HL.status.replace(/_/g, " ")}`],
+    const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 23, 2026"], ["Research", `${readF().panel.end}, line ${HL.status.replace(/_/g, " ")}`],
       ["Filings", FUND.note || FUND.as_of], ["Book", LIVE.report && LIVE.report.summary ? `engine run ${isoNice(LIVE.report.summary.as_of)}${adjTxt(LIVE.report.summary.adjustments)}` : "model book, as shipped"]];
     fresh.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); tr.append(li); });
     if (typeof renderLanding === "function") renderLanding();   // the call board, the stages and the counts read the same inputs

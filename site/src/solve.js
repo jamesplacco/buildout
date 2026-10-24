@@ -29,7 +29,7 @@
   }
 
   /* ---------- state: overrides and parameters live in this browser only ---------- */
-  const RZS = { over: LS.get("bo-rz-over", {}), loss: 15, prem: 2, eq: null, h: null, regime: "inflation", busy: false };
+  const RZS = { over: LS.get("bo-rz-over", {}), loss: 15, prem: 0.5, eq: null, h: null, regime: "inflation", busy: false };   // prem: per three months; 0.50 is the policy's 2% a year
   if (!RZS.over || typeof RZS.over !== "object") RZS.over = {};
   function rzParams() {
     const I = inputs();
@@ -121,7 +121,7 @@
     // 1. the answer
     const top = R.post.posterior.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]);
     $("#rz-answer").textContent = opt
-      ? `Hold ${portTxt(opt.port)}. Expected log growth over three months ${sPct(opt.ce, 1)}; worst scenario ${sPct(opt.worst, 1)} against a ${RZS.loss}% limit. The book as it stands (${portTxt(R.cur)}) ${keep.feasible ? "meets" : "breaks"} the limit: worst case ${sPct(keep.worst, 1)}.`
+      ? `Hold ${portTxt(opt.port)}. Expected log growth over three months ${sPct(opt.ce, 1)}; worst scenario ${sPct(opt.worst, 1)} against a ${RZS.loss}% limit. The book as it stands (${portTxt(R.cur)}) ${keep.feasible ? "meets" : "breaks"} this desk's ${RZS.loss}% three-month scenario limit: worst case ${sPct(keep.worst, 1)}. ${govNote("The solver's allocation", opt.port[0])}`
       : "No portfolio on the grid meets the loss limit; loosen the limit or the premium budget.";
     $("#rz-top").textContent = `${RZ_SCENARIOS[top[0][1]].name} ${pct0(top[0][0])} · ${RZ_SCENARIOS[top[1][1]].name} ${pct0(top[1][0])}`;
     // 2. the evidence ledger

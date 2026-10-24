@@ -85,7 +85,7 @@
     fillTable($("#geo-an"), ["Window ending", "Distance", "Stock vol", "Bond vol", "Gold vol", "Stock-bond corr", "Next 12 months, stocks"], N.analogs.map((a) => [
       a.date, fx(a.distance, 2), pct(a.vol[0], 0, false), pct(a.vol[1], 0, false), pct(a.vol[2], 0, false), geoSgn(a.corr_sb), a.next12_stocks == null ? "n/a" : pct(a.next12_stocks, 1)]), 1);
     const now = $("#geo-now");
-    if (now) now.textContent = `Today (36 months to ${N.date}): stocks ${pct(N.vol[0], 0, false)} volatility, Treasuries ${pct(N.vol[1], 0, false)}, gold ${pct(N.vol[2], 0, false)}; stock-bond correlation ${geoSgn(N.corr[0][1])}, stock-gold ${geoSgn(N.corr[0][2])}. The eight analogs averaged ${pct(N.analog_next12, 1)} over the next year against ${pct(N.uncond_next12, 1)} for every month since 1871.`;
+    if (now) now.textContent = `Correlations on this desk are of real monthly returns of stocks, 10-year Treasuries and gold; the Decide desk's 36-month stock-bond reading uses nominal returns one month later, so the two differ. Today (36 months to ${N.date}): stocks ${pct(N.vol[0], 0, false)} volatility, Treasuries ${pct(N.vol[1], 0, false)}, gold ${pct(N.vol[2], 0, false)}; stock-bond correlation ${geoSgn(N.corr[0][1])}, stock-gold ${geoSgn(N.corr[0][2])}. The eight analogs averaged ${pct(N.analog_next12, 1)} over the next year against ${pct(N.uncond_next12, 1)} for every month since 1871.`;
     const tr = $("#geo-tr");
     if (tr) fillTable(tr, ["Window ending", "Sliced Wasserstein distance", "Next 12 months, stocks"], T.now.analogs.map((a) => [a.date, fx(a.distance, 3), a.next12_stocks == null ? "n/a" : pct(a.next12_stocks, 1)]), 1);
   }

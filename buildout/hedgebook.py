@@ -35,7 +35,7 @@ HEDGES = [
      "protects": ["termprem", "digest", "stagfl", "crash"], "nodes": ["eq", "vix"], "door": "two-way", "note": "Pays between 5% and 15% falls; nothing beyond."},
     {"id": "collar", "name": "Collar 90/110", "param": "share", "default": 0.5, "range": [0.0, 1.0], "unit": "of equity",
      "protects": ["digest", "stagfl", "crash"], "nodes": ["eq"], "door": "two-way", "note": "Close to free; gives up gains above 10% in a melt-up."},
-    {"id": "gold", "name": "Gold sleeve", "param": "weight", "default": 0.05, "range": [0.0, 0.2], "unit": "of NAV",
+    {"id": "gold", "name": "Gold sleeve", "param": "weight", "default": 0.04, "range": [0.0, 0.2], "unit": "of NAV",
      "protects": ["termprem", "stagfl"], "nodes": ["gold", "dollar"], "door": "two-way", "note": "Hedges inflation and policy shocks; can fall in a liquidity crash."},
     {"id": "vix_calls", "name": "VIX call spread 25/40", "param": "premium", "default": 0.005, "range": [0.0, 0.02], "unit": "of NAV",
      "protects": ["crash", "digest"], "nodes": ["vix"], "door": "two-way", "note": "Convex in a crash; decays in calm quarters."},

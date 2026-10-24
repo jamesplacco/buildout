@@ -38,7 +38,7 @@ import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
-         "parameters", "decision", "portfolio", "matrix", "geometry"]
+         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -245,7 +245,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if not (on and off):
         fail(f"{label}: M did not toggle the math")
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
-                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
+                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("explained", "explained"), ("hw-replay-title", "explained"), ("digest", "digest"), ("dg-how-t", "digest"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),

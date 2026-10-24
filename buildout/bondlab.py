@@ -318,8 +318,8 @@ def from_knowledge(know: list[dict]) -> tuple[dict, dict, dict]:
         px = next((K[k] for k in sorted(K, reverse=True) if k.startswith(f"tp-{lo}-close-")), None) or g("close-price") or g("nav")
         if px and px.get("value") is not None:
             v = px["value"]
-            if px["id"].startswith("tp-"):                          # the tape item's value is the % move; the close is in the text
-                import re
+            if px["id"].startswith("tp-") and str(px.get("unit", "")).lower() not in ("usd", "usd per share"):
+                import re                                           # an older tape item's value is the % move; the close is in the text
                 m = re.search(r"\$(\d+(?:\.\d+)?)", px["text"])
                 v = float(m.group(1)) if m else None
             if v is not None:

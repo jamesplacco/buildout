@@ -23,6 +23,8 @@ NAMES = {"MSFT": "Microsoft", "GOOGL": "Alphabet", "AMZN": "Amazon", "META": "Me
 CIK = {"MSFT": "789019", "GOOGL": "1652044", "AMZN": "1018724", "META": "1326801", "ORCL": "1341439", "NVDA": "1045810",
        "TSLA": "1318605", "CRWV": "1769628"}
 SUPPLEMENTS = {
+    "GOOGL": {"debt": 100.164, "debt_date": "2026-06-30", "_override": ("debt", "debt_date"),
+              "debt_secondary": "total debt at Jun 30, 2026 from stockanalysis.com (the XBRL debt tag ends Dec 31, 2025: $49.1B); excludes leases"},
     "ORCL": {"debt": 125.34, "debt_date": "2026-08-31", "interest": 5.10, "da": 7.623, "op_income": 20.606,
              "leases_not_commenced": 288.0, "notes": "Debt, interest and leases not yet commenced from the Q1 FY27 10-Q (sec-api.io, Oct 8 2026); depreciation and operating income are fiscal 2026 (to May 31)."},
     "CRWV": {"debt": 35.068, "debt_date": "2026-06-30", "interest_lq": 0.640, "op_income_lq": -0.049, "rpo": 104.0, "rpo_date": "2026-06-30",

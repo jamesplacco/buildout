@@ -3,9 +3,9 @@
      ===================================================================================== */
   const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
     today: { name: "Today", views: ["desk", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
-    engine: { name: "Engine", views: ["parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
+    engine: { name: "Engine", views: ["explained", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "positions", "swans"] },
-    research: { name: "Research", views: ["findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
+    research: { name: "Research", views: ["digest", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
     workshop: { name: "Workshop", views: ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"] },
     reference: { name: "Methods", views: ["engine", "engines", "appendix"] },
   };
@@ -31,6 +31,8 @@
     agents: () => {},
     desk: () => { guard("Today", renderToday7, $("#today7")); guard("Landing", renderLanding, $("#call-board")); guard("Rosette", () => drawRosette(true)); },
     parameters: () => guard("The parameters", renderParameters, $("#pm-tiles")),
+    explained: () => guard("How it works", renderExplained, $("#hw-read")),
+    digest: () => guard("Research digest", renderDigest, $("#dg-tiles")),
     bonds: () => guard("Bonds, simply", renderBonds, $("#bd-tiles")),
     decision: () => { guard("Decision engine", renderDecision, $("#dx-card")); guard("What if", renderWhatIf, $("#dxw-out")); },
     portfolio: () => guard("Portfolio engine", renderPortfolio, $("#pf-card")),

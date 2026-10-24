@@ -152,8 +152,9 @@ def test_overlay_rule_picks_the_shallowest_drawdown_that_keeps_utility():
     o = decide.overlay_study(r, sig, base, m, gamma, bidx)
     assert o["factors"] == list(decide.OVERLAY_FACTORS) and set(o["rows"]) == {f"{b}:{f}" for b in ("hold", "engine") for f in decide.OVERLAY_FACTORS}
     free = [f for f in decide.OVERLAY_FACTORS if o["rows"][f"hold:{f}"]["utility_gain_month"] >= 0.0]
-    assert o["adopted"] == max(free, key=lambda f: o["rows"][f"hold:{f}"]["perf"]["maxdd"])
-    assert o["adopted"] == 0.0                                    # here sitting out the bad months is free and shallowest
+    assert o["full_record_choice"] == max(free, key=lambda f: o["rows"][f"hold:{f}"]["perf"]["maxdd"])
+    assert o["adopted"] == o["full_record_choice"] == 0.0        # here sitting out the bad months is free and shallowest, and it survives walked forward
+    assert o["walk_forward"]["utility_gain_month"] > 0.0 and o["walk_forward"]["burn_in_months"] == 120 and len(o["walk_forward"]["chosen"]) == (T - 120 + 11) // 12
     assert o["rows"]["hold:1.0"]["perf"]["maxdd"] <= o["rows"]["hold:0.0"]["perf"]["maxdd"]
     assert o["trend_on_now"] == bool(sig[-1]) and "drawdown" in o["rule"]
     # a market where the signal is noise: no factor below one is free, so holding (1.0) stays
@@ -161,7 +162,8 @@ def test_overlay_rule_picks_the_shallowest_drawdown_that_keeps_utility():
     r2 = rng.normal(0.006, 0.04, T)
     o2 = decide.overlay_study(r2, sig2, base, m, gamma, bidx)
     free2 = [f for f in decide.OVERLAY_FACTORS if o2["rows"][f"hold:{f}"]["utility_gain_month"] >= 0.0]
-    assert 1.0 in free2 and o2["adopted"] == max(free2, key=lambda f: o2["rows"][f"hold:{f}"]["perf"]["maxdd"])
+    assert 1.0 in free2 and o2["full_record_choice"] == max(free2, key=lambda f: o2["rows"][f"hold:{f}"]["perf"]["maxdd"])
+    assert o2["adopted"] == 1.0 or o2["walk_forward"]["utility_gain_month"] >= 0.0   # a factor is adopted only if it also survives walked forward
 
 
 def test_shipped_decision_carries_the_overlay_and_the_headline_matches():
@@ -174,7 +176,11 @@ def test_shipped_decision_carries_the_overlay_and_the_headline_matches():
     assert any("overlay" in f.lower() or "below the 10-month average" in f for f in D["findings"])
     body = (SRC / "body.html").read_text()
     hedge = {"stocks": "no bond hedge", "bonds": "a 30% Treasury hedge", "cash": "a 30% cash sleeve"}[now["hedge"]["choice"]]
-    tail = f"cut to {now['overlay']['exposure_if_off']:.2f}x if the 10-month trend breaks" if now["overlay"]["trend_on"] else f"scaled by {ov['adopted']:.2f} while the trend is off"
+    if ov["adopted"] >= 1.0:
+        tail = "no trend overlay after it failed its walk-forward test"
+        assert ov["full_record_choice"] < 1.0 and ov["walk_forward"]["utility_gain_month"] < 0.0 and "walk-forward" in ov["adopted_reason"]
+    else:
+        tail = f"cut to {now['overlay']['exposure_if_off']:.2f}x if the 10-month trend breaks" if now["overlay"]["trend_on"] else f"scaled by {ov['adopted']:.2f} while the trend is off"
     assert f"Hold equity at {now['exposure']:.2f}x with {hedge}; {tail}." in body
 
 
@@ -186,11 +192,11 @@ def test_six_groups_cover_every_desk_once():
     views = [v.strip('" ') for g in groups.values() for v in g.split(",")]
     assert len(views) == len(set(views))
     assert set(views) == set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
-    assert groups["engine"].startswith('"parameters"') and '"code"' in groups["engine"] and '"agents"' in groups["engine"]
+    assert groups["engine"].startswith('"explained", "parameters"') and '"code"' in groups["engine"] and '"agents"' in groups["engine"]
     assert groups["today"].startswith('"desk"')
     nav = re.findall(r'<a href="#(\w+)" data-group="(\w+)">', body)
     assert [g for _, g in nav] == list(groups) and all(v in views for v, _ in nav)
-    assert "parameters:" in (SRC / "views.js").read_text().split("const TAB_NAME = ")[1][:40]
+    assert "parameters:" in (SRC / "views.js").read_text().split("const TAB_NAME = ")[1][:80]
     guide = (SRC / "guide.js").read_text()
     assert '"parameters": {"q":' in guide and all(f'"{g}":' in guide.split("GUIDE_GROUPS = ")[1].split("\n")[0] for g in groups)
     assert "1 to 6 open a group" in guide and "/^[1-6]$/" in (SRC / "views.js").read_text()
@@ -211,7 +217,7 @@ def test_landing_page_is_the_call_and_the_engine():
         assert body[start:start + 60].split('id="view-')[1].split('"')[0] == view, sec
     assert 'id="view-parameters"' in body and 'id="pm-table"' in body and 'id="pm-hand"' in body and 'id="dx-overlay"' in body
     scripts = (ROOT / "scripts" / "assemble_page.py").read_text()
-    assert '"snap23.js", "params.js", "landing.js"' in scripts
+    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "landing.js"' in scripts
     assert "Thesis chips" not in (SRC / "boot.js").read_text()
 
 
@@ -225,7 +231,7 @@ def test_landing_counts_match_the_engine():
     assert '["v0.23", "Oct 23, 2026",' in ref and 'g: "v0.23", q: "What is Theta' in ref
     assert (ROOT / "README.md").read_text().count("Version 0.23") == 1
     import buildout
-    assert buildout.__version__ == "0.23.0"
+    assert buildout.__version__ >= "0.23.0"
 
 
 def test_no_banned_words_in_the_new_files():

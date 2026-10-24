@@ -125,7 +125,7 @@
         [fx(V.cape.now, 1), "CAPE", `${lPct(V.cape.percentile)} of months were cheaper; source ${V.cape.now_source === "research" ? "multpl (secondary)" : "computed"}`],
         [lPct(V.cape.implied_10y_real, 1), "Implied ten-year real return", `80% range ${lPct(V.cape.range80[0])} to ${lPct(V.cape.range80[1])}`],
         [lPct(LB.regimes.p_now[1]), "Chance of the turbulent regime", "Hamilton Markov switching"],
-        [`${MT.bh_5pct} of ${MT.n}`, "Tests that survive", `after the false discovery rate; ${MT.holm_5pct} after Holm`]].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
+        (() => { const sv = MT.rows.filter((r) => r.bh < 0.05), diag = (r) => /VIX|Variance ratio|cointegrat/i.test(r.test), tr = sv.filter((r) => !diag(r)).length; return [`${tr} of ${MT.n}`, "Tradeable tests that survive", `after the false discovery rate; ${sv.length - tr} more survive on the VIX index or as diagnostics, which no book can hold; ${MT.holm_5pct} of all ${MT.n} after Holm`]; })()].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
       $("#lb-sum").textContent = (LB.findings || []).join(" ");
       lReadings();
       lTables();

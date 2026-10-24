@@ -129,7 +129,7 @@ def test_library_integrity(library):
         assert q["topic"] in V.TOPICS and q["stance"] in V.STANCES and q["kind"] in ("legend", "current")
         assert q["verification"] in ("verbatim-on-source", "verbatim-secondary")
         assert q["source_url"].startswith("https://") and q["speaker"] and q["date"][:4].isdigit()
-        assert len(q["text"].split()) <= 45, q["id"]
+        assert len(q["text"].split()) <= 60, q["id"]          # one sentence or two; v0.24 admits a 49-word Damodaran sentence
         for f in ("text", "gist", "context", "role", "speaker", "source_title"):
             assert "—" not in (q.get(f) or ""), (q["id"], f)
             assert "intersection" not in (q.get(f) or "").lower(), (q["id"], f)

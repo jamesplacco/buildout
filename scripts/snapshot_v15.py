@@ -22,7 +22,7 @@ import snapshot_v14 as S14  # noqa: E402
 
 BANNED = S14.BANNED
 EXTRA_CODE = ["buildout/ml.py", "buildout/assumptions.py", "buildout/damodaran.py", "scripts/snapshot_v15.py", "editors/buildout.vim", "editors/buildout.el"]
-Y10_NOW = 0.0513   # 10-year Treasury, Oct 21 2026 (treasury.gov par yield curve), the same reading the reasoner uses
+Y10_NOW = 0.0500   # 10-year Treasury, Oct 23 2026 (treasury.gov par yield curve), the same reading the reasoner uses
 
 
 def _arg(argv, k):

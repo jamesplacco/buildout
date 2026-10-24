@@ -33,7 +33,13 @@
     return { on, sizes, e: ok && fin(st.e) ? clamp(st.e, 0.2, 1.5) : 1.0, wired: false };
   })();
   const hbSave = () => LS.set("bo-hedges", { on: HBS.on, sizes: HBS.sizes, e: HBS.e });
-  function hbPost() { const p = oodaData().decide.posterior, ids = scenIds(); const v = ids.map((k) => Number(p[k])); return v.every(fin) ? v : RZ_SCENARIOS.map((s) => s.prior); }
+  // the scenario odds: the Solve desk's live posterior (one solver, one set of odds), else the shipped run, else the priors
+  function liveSolver() { try { return typeof runReasoner === "function" ? ((typeof RZ_LAST !== "undefined" && RZ_LAST) || runReasoner(false)) : null; } catch (e) { return null; } }
+  function hbPost() {
+    const R = liveSolver();
+    if (R && R.post && Array.isArray(R.post.posterior) && R.post.posterior.length === RZ_SCENARIOS.length) return R.post.posterior.slice();
+    const p = oodaData().decide.posterior, ids = scenIds(); const v = ids.map((k) => Number(p[k])); return v.every(fin) ? v : RZ_SCENARIOS.map((s) => s.prior);
+  }
   const hbFmtSize = (x, v) => (x.unit === "x equity" ? fx(v, 2) + "x" : x.unit.startsWith("of NAV") ? fx(v * 100, 2).replace(/\.?0+$/, "") + "% of NAV" : Math.round(v * 100) + "% " + x.unit.replace(/^of /, "of "));
   function buildHedgeBook() {
     const box = $("#hb-list");
@@ -122,7 +128,10 @@
     const el = $("#oo-expl");
     el.replaceChildren();
     const ex = o.orient.explanations || [], shown = ex.reduce((a, r) => a + (fin(r.p) ? r.p : 0), 0);
-    ex.forEach((r) => { const li = h("li"); li.append(h("span", null, r.cause === "noise only" ? "Nothing unusual" : nodeNm(r.cause)), h("b", "num", pct0(r.p))); el.append(li); });
+    // causes the map cannot tell apart (identical odds: one shock reaching the book through two nodes) are shown as one line
+    const groups = [];
+    ex.forEach((r) => { const g = groups.find((x) => fin(r.p) && Math.abs(x.p - r.p) < 5e-4 && r.cause !== "noise only" && x.causes[0] !== "noise only"); if (g) g.causes.push(r.cause); else groups.push({ p: r.p, causes: [r.cause] }); });
+    groups.forEach((g) => { const li = h("li"); li.append(h("span", null, g.causes[0] === "noise only" ? "Nothing unusual" : g.causes.map(nodeNm).join(" or ") + (g.causes.length > 1 ? " (one shock, two nodes: the map cannot tell them apart)" : "")), h("b", "num", pct0(g.p))); el.append(li); });
     if (ex.length && shown < 0.995) { const li = h("li"); li.append(h("span", null, "Other single causes, each under the list"), h("b", "num", pct0(1 - shown))); el.append(li); }
     const kl = o.orient.key_link && o.orient.key_link.regimes, ki = kl && kl.inflation, ko = kl && kl.low_inflation;
     $("#oo-link").textContent = ki && fin(ki.ols) ? `The link the bond hedge rests on (10-year to stocks) reads ${sg(ki.ols, 2)} since 2022 with a Newey-West t of ${fx(ki.hac_t, 1)}${ki.months_to_flip ? ` and reverses on ${ki.months_to_flip} months` : ""}; ${ko && fin(ko.ols) ? `${sg(ko.ols, 2)} before 2022.` : ""} Treat its sign as a hypothesis.` : "";
@@ -141,8 +150,18 @@
     Object.values(P).forEach((p) => { const c = (p.verdict || {}).code || "insufficient"; counts[c] = (counts[c] || 0) + 1; });
     $("#oo-ori-t").textContent = `${counts.extreme || 0} of ${Object.keys(P).length} positions are priced for growth fewer than 1 in 100 companies of their size achieved, ${counts.exuberant || 0} for growth fewer than 1 in 20 achieved, and ${counts.within || 0} within the base rates${counts.pessimistic ? `; ${counts.pessimistic} priced for decline` : ""}${counts.insufficient ? `; ${counts.insufficient} without enough data to judge` : ""}. ${(o.orient.explanations || [])[0] ? `The leading explanation of today's readings: ${o.orient.explanations[0].cause === "noise only" ? "nothing unusual" : nodeNm(o.orient.explanations[0].cause)}.` : ""}`;
     // decide
-    const S = o.decide.solver || {}, nom = S.nominal, rob = S["robust_rho_0.05"];
-    $("#oo-dec-t").textContent = nom && rob ? `The solver's choice is ${xx(nom.port[0])} equity (growth ${sPct(nom.ce, 2)} a quarter on its own odds); allowing modest doubt about those odds (KL 0.05) it chooses ${xx(rob.port[0])} equity (${sPct(rob.ce, 2)} guaranteed). The positions below come from what each price requires.` : "";
+    const S = o.decide.solver || {};
+    let nom = S.nominal, rob = S["robust_rho_0.05"], liveTxt = "the shipped run";
+    try {
+      const R = liveSolver();
+      if (R && R.alts && R.alts.optimal) {
+        nom = { port: R.alts.optimal.port, ce: R.alts.optimal.ce };
+        const sr = typeof rzSolveRobust === "function" ? rzSolveRobust(R.post.posterior, RZ_SCENARIOS, R.P, 0.05) : null;
+        if (sr && sr.port) rob = { port: sr.port, ce: sr.ce };
+        liveTxt = "the Solve desk's live solver, the same object that desk shows";
+      }
+    } catch (e) { /* the shipped run stands */ }
+    $("#oo-dec-t").textContent = nom && rob ? `The solver's choice is ${xx(nom.port[0])} equity (growth ${sPct(nom.ce, 2)} a quarter on its own odds); allowing modest doubt about those odds (KL 0.05) it chooses ${xx(rob.port[0])} equity (${sPct(rob.ce, 2)} guaranteed). Read from ${liveTxt}. ${govNote("The solver's choice", nom.port[0])} The positions below come from what each price requires.` : "";
     renderHedgeBook();
     fillTable($("#oo-actions"), ["Position", "Action", "Confidence", "Kill criterion", "Weight"], o.decide.positions.map((a) => [a.ticker, ACTION_TXT[a.action] || a.action, a.confidence,
       (a.frameworks || {}).kill_criteria || "", Math.abs(a.target - a.weight) > 1e-9 ? `${pct0(a.weight)} → ${fx(a.target * 100, 1)}%` : pct0(a.weight)]), 4);
@@ -266,9 +285,11 @@
     const live = LIVE.engines && Array.isArray(LIVE.engines.engines) ? LIVE.engines : null;
     const str = (v) => (typeof v === "string" ? v : "");
     const list = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string").join(", ") : "");
-    const rows = (live ? live.engines : ENGINES_SNAP).filter((e) => e && typeof e === "object").map((e) => [str(e.title) || str(e.name) || "Unnamed", e.offline ? "offline" : "network or key", list(e.reads) || "sources", list(e.writes) || "n/a",
-      live ? `${str(e.status) || "n/a"}${fin(e.seconds) ? ` · ${fx(e.seconds, 2)}s` : ""}` : "registered", str(e.does)]);
-    fillTable(t, ["Engine", "Runs", "Reads", "Writes", "Last run", "Does"], rows, 1);
+    const rows = (live ? live.engines : ENGINES_SNAP).filter((e) => e && typeof e === "object").map((e) => live
+      ? [str(e.title) || str(e.name) || "Unnamed", str(e.does), e.offline ? "offline" : "network or key", list(e.reads) || "sources", list(e.writes) || "n/a", `${str(e.status) || "n/a"}${fin(e.seconds) ? ` · ${fx(e.seconds, 2)}s` : ""}`]
+      : [str(e.title) || str(e.name) || "Unnamed", str(e.does), e.offline ? "offline" : "network or key", list(e.reads) || "sources", list(e.writes) || "n/a"]);
+    fillTable(t, live ? ["Engine", "Does", "Runs", "Reads", "Writes", "Last run"] : ["Engine", "Does", "Runs", "Reads", "Writes"], rows, 1);
+    t.classList.add("engines");
     const okN = live ? live.engines.filter((e) => e && e.status === "ok").length : 0, failN = live ? live.engines.filter((e) => e && e.status === "failed").length : 0;
     const ran = live && /^\d{4}-\d{2}-\d{2}/.test(String(live.run_at || "")) ? ` of ${isoNice(String(live.run_at).slice(0, 10))}` : "";
     const ver = live && typeof live.version === "string" && /^[\d.]+$/.test(live.version) ? `, version ${live.version}` : "";
