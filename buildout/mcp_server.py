@@ -1098,6 +1098,28 @@ def reasoning_engine(ctx: Context, args: dict) -> dict:
     return o[part]
 
 
+def edge_lab(ctx: Context, args: dict) -> dict:
+    """v0.26: the edge lab from the shipped run: the funnel against its placebos, the surviving edges with their test
+    years and mechanisms, the families, the edge book and the unusual data with their publication lags. Research only."""
+    from . import discovery
+    S = _snap("snap26.js", "SNAP26", "discovery")
+    if not S:
+        raise ToolError("no v0.26 snapshot: run python scripts/snapshot_v26.py")
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"findings": discovery.summary(S), "funnel": S["funnel"]}
+    if part == "edges":
+        tested = args.get("tested_only", False)          # tested: most of the edge's markets traded in its untouched test years
+        pool = S["edges"] + [{**e, "calendar": "early"} for e in ((S.get("early") or {}).get("edges") or [])]
+        rows = [e for e in pool if not tested or (e.get("test") or {}).get("tested")]
+        return {"edges": rows, "n": len(rows)}
+    if part == "unusual":
+        return _snap("snap26.js", "SNAP26", "unusual")
+    if part in ("book", "families", "placebo", "early", "data_notes", "universe"):
+        return S[part]
+    raise ToolError("part is one of summary, edges, book, families, placebo, early, data_notes, universe, unusual")
+
+
 def forecast_verification(ctx: Context, args: dict) -> dict:
     """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
     coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
@@ -1246,6 +1268,12 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                                "facts": {"type": "object", "description": "for part=proof: any of corr36, infl36, hedge_line, gate, engine_exposure, es_1x, es_limit, trend_on, overlay_factor, selector_choice, prev_state"},
                                "verdict": {"type": "string", "enum": ["supported", "one era only", "reversed", "no evidence"]}}),
                          {"readOnlyHint": True, "openWorldHint": False}),
+    "edge_lab": (edge_lab, "The edge lab: tens of thousands of candidate trading edges invented from market data and unusual data (climate, oceans, the sun, storms, "
+                 "shipping, the calendar) across about 70 world markets, the gauntlet (multiple testing, breadth, validation, costs, an untouched test) with "
+                 "placebo signals run through the same pipeline, the surviving edges with mechanisms, and the edge book. Research only; never an order.",
+                 _obj({"part": {"type": "string", "enum": ["summary", "edges", "book", "families", "placebo", "early", "data_notes", "universe", "unusual"]},
+                       "tested_only": {"type": "boolean", "description": "for part=edges: only edges tested on untouched years (most of their markets trading), including the early-split ones"}}),
+                 {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
                               "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "
                               "probabilities, and every borrowed upgrade tried on the decision core with its verdict.",

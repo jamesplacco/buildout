@@ -676,6 +676,8 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("edges", "Edge lab", "The hypothesis factory: tens of thousands of candidate edges from market data and unusual data (climate, oceans, the sun, storms, shipping, the calendar) across world markets, the gauntlet calibrated on fake markets and fake signals, the independent audit, the surviving edges and their out-of-sample test.",
+     ["c:alt-data", "c:time-series-momentum", "c:benjamini-hochberg", "c:placebo-test", "c:seasonality"]),
     ("reasoning", "Reasoning", "Deduction with proofs, induction walked forward, abduction and invented concepts; today's call derived as a proof; Taleb's and the legendary traders' principles tested on 156 years of data.",
      ["c:walk-forward", "c:benjamini-hochberg", "c:abduction", "c:regime", "c:fat-tails"]),
     ("methods", "Every method", "Every method the engine runs with its formula, today's numbers, its field of origin and its out-of-sample test.",

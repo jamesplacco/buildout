@@ -156,6 +156,9 @@ def main(argv: list[str] | None = None) -> None:
     rsp = sub.add_parser("reasoning", help="v0.25: deduction with proofs, induction walked forward, abduction, invented concepts, and the legends' rules tested since 1871")
     rsp.add_argument("--out", default="out")
     rsp.add_argument("--quick", action="store_true", help="skip the decade-by-decade rediscovery")
+    edp = sub.add_parser("edges", help="v0.26: the edge lab: tens of thousands of candidate edges from market and unusual data across world markets, the gauntlet, the placebos, the survivors and the edge book")
+    edp.add_argument("--out", default="out")
+    edp.add_argument("--quick", action="store_true")
     vfp = sub.add_parser("verify", help="v0.25: the engine's forecast scored like a weather forecast, its tail backtested like an actuarial reserve, ruin, and each borrowed upgrade tested")
     vfp.add_argument("--out", default="out")
     pfp = sub.add_parser("portfolio", help="the portfolio engine: stocks, Treasuries, gold and cash from regimes, a learner over policies, ten simulated years")
@@ -468,6 +471,22 @@ def main(argv: list[str] | None = None) -> None:
         o = reason.build(labs.shiller(labs.download()), adl["raw"], rules_paths=[str(rules)] if rules.exists() else (), do_rolling=not a.quick)
         path = write(o, a.out, "reason.json")
         for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "edges":
+        import pandas as _pd
+        from . import atlas, discovery, labs, unusual
+        from .jsonout import write
+        adl = atlas.download(fred=False)
+        P, meta = atlas.panel(adl)
+        dl = labs.download()
+        udl = unusual.download()
+        um = unusual.meta()
+        o = discovery.build(P, meta, S=labs.shiller(dl), unusual=unusual.monthly(udl), unusual_meta=um, computed_meta=um, computed_signals=unusual.computed,
+                            daily={"brent": labs.daily(dl, "brent"), "wti": labs.daily(dl, "wti"), "natgas": labs.daily(dl, "gas")}, quick=a.quick)
+        path = write(o, a.out, "edges.json")
+        for f in discovery.summary(o):
             print(" ", f)
         print("wrote", path)
         return

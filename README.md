@@ -3,6 +3,20 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.26 adds an edge lab (`buildout/discovery.py` part two, `buildout/unusual.py`, an Edge lab desk, MCP tool
+`edge_lab`, `python -m buildout edges`): a hypothesis factory in the spirit of "weird edges all over the world, from
+unusual data". It invents 43,247 candidate edges from 70 world markets, their own histories, every other market and 89
+unusual and computed series (climate, oceans, the sun, storms, shipping, the calendar), each lagged to when it was
+knowable. Then it tries to kill them. Each candidate is run beside 129,741 hypotheses on fake markets (the whole rule
+library on block-shuffled returns) and 300 fake signals. Its p-values are calibrated on those fakes before
+Benjamini-Hochberg, and composites must beat their own parts. It must also pass breadth, validation and costs, and an
+edge counts as tested only if most of its markets trade in the test years. 5 distinct edges survive, against fewer
+than 1 expected by luck. None can be tested after 2017 because their IMF markets end then. The search replayed with
+data through 2010 gives 6 survivors, and all 6 made money in 2011 to mid-2017: book Sharpe 1.61 after costs, about 3
+independent bets, on spot research prices rather than tradeable futures. That is a replay, not an independent test,
+because those years were the main search's validation years. An independent audit and a second pass before release
+cut the first run's 65 survivors (and its 0.59 book Sharpe) to these numbers, and the desk shows the before and after.
+
 Version 0.25 makes the engine reason and lets other fields grade it. `buildout/reason.py` deduces with proofs over the
 mind's typed links and over the decision policy (today's call is derived with every flip point), induces rules on data
 before 1961 and tests them after (4 of 30 survive), abduces, and invents regimes and predicates (none beat the mean out
@@ -72,7 +86,7 @@ fit runs in the same batch. The five-network ensemble trains its members side by
 written by a subagent, identical to sequential training bit for bit). Measured on the build machine: the decision
 engine rebuilds in 33 seconds instead of 93 and the portfolio engine in 9 instead of 24, with the same findings to the
 last digit; the forward-backward pass is about 3x faster and agrees with the loop to about 1e-14. The mind's graph is
-one sparse 9,423 by 9,423 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
+one sparse 9,426 by 9,426 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
 questions (`spread_many`, `think_many`), which gives the board: the mind's verdict on all 27 claims it weighs in one
 pass (`python -m buildout board`, MCP tool `mind_board`, and live in the page). A 64-eigenvector map of the graph is
 about 9x faster per question but changes half of the top twenty answers, so it is used only to find related ideas

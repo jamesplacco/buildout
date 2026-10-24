@@ -104,7 +104,7 @@ def test_every_borrowed_upgrade_is_listed_with_a_verdict_and_counted_by_the_gate
 def test_methods_group_is_visible_and_the_math_is_on_by_default():
     boot, body, head = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text(), (SRC / "head.html").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["reference"].startswith('"methods", "crossfield"') and groups["engine"].startswith('"explained", "reasoning"')
+    assert groups["reference"].startswith('"methods", "crossfield"') and groups["engine"].startswith('"explained", "edges", "reasoning"')
     assert '<a href="#methods" data-group="reference">Methods</a>' in body
     assert "LS.get(\"bo-math25\", true) !== false" in boot and ":root.math-off .math { display: none; }" in head and ".math { display: block; }" in head
     assert re.search(r"@media \(max-width: 640px\) \{\s*\.tabs \{ grid-template-columns: repeat\(3", head)       # six tabs, two rows, never a scroll
