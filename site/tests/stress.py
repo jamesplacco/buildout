@@ -37,7 +37,8 @@ from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
-         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents"]
+         "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
+         "parameters", "decision", "portfolio", "matrix", "geometry"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -218,6 +219,10 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("document.getElementById('keys').hidden"):
         fail(f"{label}: '?' did not open shortcuts")
     await page.keyboard.press("Escape")
+    await page.evaluate("location.hash = 'insurers'")
+    await settle(page, "view-insurers")
+    await page.evaluate("location.hash = 'desk'")
+    await settle(page, "view-desk")
     await page.keyboard.press("3")
     await page.wait_for_timeout(300)
     if await page.evaluate("location.hash") != "#insurers":            # the last Markets desk the reader opened
@@ -240,11 +245,11 @@ async def keyboard_and_links(page, label: str) -> None:
     if not (on and off):
         fail(f"{label}: M did not toggle the math")
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
-                        ("sig-vix", "desk"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"),
+                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
-                        ("hero", "desk"), ("voices", "desk"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("mind", "mind"), ("md-how-title", "mind"), ("lb-mt-title", "labs"), ("cr-y-t", "cardroom"), ("cd-files-t", "code"), ("ag-v14-t", "agents"), ("ag-v15-t", "agents"), ("ag-v16-t", "agents"), ("an-fa-title", "analysis"), ("rl-title", "ml"), ("ed-dist-title", "edge"), ("ml-cv-title", "ml"), ("rt-triage-title", "reality"), ("ed-dcf-title", "edge"), ("md-net-title", "mind"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
+                        ("hero", "mind"), ("voices", "legends"), ("atlas", "atlas"), ("atv-sys-title", "atlas"), ("mind", "mind"), ("md-how-title", "mind"), ("lb-mt-title", "labs"), ("cr-y-t", "cardroom"), ("cd-files-t", "code"), ("ag-v14-t", "agents"), ("ag-v15-t", "agents"), ("ag-v16-t", "agents"), ("an-fa-title", "analysis"), ("rl-title", "ml"), ("ed-dist-title", "edge"), ("ml-cv-title", "ml"), ("rt-triage-title", "reality"), ("ed-dcf-title", "edge"), ("md-net-title", "mind"), ("g-neumann", "appendix"), ("brr-title", "brain"), ("g-conformal", "appendix"),
                         ("oo-title", "ooda"), ("oo-dec-title", "ooda"), ("ps-title", "positions"), ("en-title", "engines"), ("ooda", "ooda"),
                         ("rzd-title", "solve"), ("bra-title", "brain"), ("brf-title", "brain"), ("brl-title", "brain"), ("g-lingam", "appendix"), ("g-counterfactual", "appendix"),
                         ("fd-title", "field"), ("fdm-title", "field"), ("brt-title", "brain"), ("field", "field"), ("g-abduction", "appendix"),
@@ -645,8 +650,8 @@ async def filing_propagation(page, label: str) -> None:
 async def voices_and_hero(page, label: str) -> None:
     """v0.12: the landing brain steps, pauses and takes a custom shock; voices answers, walks the spectrum by click and
     key, survives hostile input, and every quote shown links to an https source."""
-    await page.evaluate("location.hash = 'desk'")
-    await page.wait_for_timeout(600)
+    await page.evaluate("location.hash = 'mind'")          # v0.23: the landing brain lives on the Mind desk
+    await page.wait_for_timeout(900)
     await page.click("#hero-which button[data-w=full]")
     await page.wait_for_timeout(400)
     st = await page.evaluate("({ cv: !!document.getElementById('at-hero-cv') && document.getElementById('at-hero-cv').height > 100, scn: document.getElementById('ah-scn').textContent })")
@@ -697,6 +702,8 @@ async def voices_and_hero(page, label: str) -> None:
     txt = await page.evaluate("document.getElementById('hero').innerText")
     if any(x in txt for x in BAD_TEXT):
         fail(f"{label}: the landing brain shows bad text")
+    await page.evaluate("location.hash = 'legends'")       # v0.23: voices live on the Legends desk
+    await page.wait_for_timeout(700)
     async def ask(q):
         await page.fill("#vo-q", q)
         await page.click("#vo-form button[type=submit]")
@@ -732,8 +739,8 @@ async def voices_and_hero(page, label: str) -> None:
 async def mind_flow(page, label: str) -> None:
     """v0.14: the landing mind draws and thinks, survives hostile and unknown questions; the Mind desk weighs a claim,
     searches and explores nodes, filters the libraries; the labs fill every table; the code appendix opens files."""
-    await page.evaluate("location.hash = 'desk'")
-    await page.wait_for_timeout(800)
+    await page.evaluate("location.hash = 'mind'")
+    await page.wait_for_timeout(900)
     await page.click("#hero-which button[data-w=mind]")
     await page.wait_for_timeout(600)
     st = await page.evaluate("({ cv: document.getElementById('mind-hero-cv').height > 100, out: document.getElementById('mh-out').innerText })")
@@ -806,8 +813,8 @@ async def no_injection(page, label: str) -> None:
 
 
 async def stale_check(page, label: str) -> None:
-    await page.evaluate("location.hash = 'desk'")
-    await page.wait_for_timeout(200)
+    await page.evaluate("location.hash = 'rates'")         # v0.23: the key levels live on the Rates desk
+    await page.wait_for_timeout(600)
     n = await page.evaluate("document.querySelectorAll('.badge.stale').length")
     if n == 0:
         fail(f"{label}: no stale badges for data six weeks old")

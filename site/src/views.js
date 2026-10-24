@@ -136,16 +136,6 @@
     });
   }
 
-  function renderThesisChips() {
-    const box = $("#thesis-chips");
-    THESES.forEach((t) => {
-      const a = h("a", "tchip");
-      a.href = "#" + t.id;
-      a.append(h("span", "dot " + (t.st === "active" ? "good" : t.st === "watch" ? "warn" : "bad")), document.createTextNode(t.t));
-      box.append(a);
-    });
-  }
-
   /* ---------- live readout (data/macro.json and data/report.json) ---------- */
   const LIVE = { macro: null, report: null, btSeries: null, capex: null, capexPick: null, status: null, problems: [] };
   // fetch with a timeout; a missing, slow or malformed file yields null and a note, never an exception
@@ -1115,7 +1105,7 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
+  const TAB_NAME = { parameters: "Parameters", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
     noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", decision: "Decision engine", portfolio: "Portfolio", matrix: "The shortcut", geometry: "Geometry", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", analysis: "Analysis", bonds: "Bonds", ml: "ML lab", reality: "Reality check", edge: "Edge", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
@@ -1989,7 +1979,7 @@
       if (typing || e.metaKey || e.ctrlKey || e.altKey || !$("#palette").hidden) return;
       if (e.key === "/") { e.preventDefault(); openPalette(); }
       else if (e.key === "?") { e.preventDefault(); palReturn = document.activeElement; $("#keys").hidden = false; $("#keys-close").focus(); }
-      else if (/^[1-5]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
+      else if (/^[1-6]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
       else if ((e.key === "m" || e.key === "M") && $("#keys").hidden) toggleMath();
     });
     $("#keys").addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); $("#keys-close").focus(); } });

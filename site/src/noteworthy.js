@@ -207,17 +207,4 @@
         box.append(row);
       });
     }
-    renderNwTeaser();
-  }
-  // the Today desk's strip: the three trends most worth a look
-  function renderNwTeaser() {
-    const box = $("#nw-teaser");
-    if (!box) return;
-    box.replaceChildren();
-    NW.filter((t) => t.stage <= 1).slice(0, 3).forEach((t) => {
-      const a = h("a", "nw-tease");
-      a.href = "#nw-" + t.id;
-      a.append(h("span", "eyebrow", NW_STAGES[t.stage] + " · noteworthy"), h("strong", null, t.n), h("span", null, t.bluf.split(". ")[0] + "."));
-      box.append(a);
-    });
   }

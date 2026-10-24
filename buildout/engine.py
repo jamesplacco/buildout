@@ -100,6 +100,11 @@ def _voices(out: Path) -> None:
     _write(out, "voices.json", {"quotes": lib.quotes, "topics": {k: {"title": v["title"], "bull": v["bull"], "bear": v["bear"]} for k, v in voices.TOPICS.items()}})
 
 
+def _parameters(out: Path) -> None:
+    from . import parameters
+    _write(out, "parameters.json", parameters.build(**parameters.load_outputs(out)))
+
+
 def _status(out: Path) -> None:
     from .status import build_status
     _write(out, "status.json", build_status(out))
@@ -147,6 +152,8 @@ REGISTRY: list[Engine] = [
     Engine("mind", "The mind", ["atlas.json", "labs.json", "research.json", "ml.json", "reality.json"], ["mind.json"], "mind.py", True,
            "One graph of the brain and the engine: concepts, markets, checked evidence, voices, engine modules, economies and signals", _mind),
     Engine("voices", "Investor voices", [], ["voices.json"], "voices.py", True, "Verified quotes, extreme bear to extreme bull; integrity checked on every run", _voices),
+    Engine("parameters", "The parameters", ["decision.json", "portfolio.json", "rl.json", "ml.json", "geometry.json", "atlas.json", "mind.json"], ["parameters.json"], "parameters.py", True,
+           "Theta: every matrix the engine learns, its shape, the algorithm and objective that shaped it, its data, refit schedule and the desks it feeds", _parameters),
     Engine("status", "Run status", ["*"], ["status.json"], "status.py", True, "Freshness and sanity checks on every output", _status),
 ]
 

@@ -1,14 +1,15 @@
   /* =====================================================================================
-     boot.js (v0.6, regrouped in v0.18): five groups, their desks, the math toggle, deep links, live data, boot
+     boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
-  const GROUPS = {   // v0.18: each group reads from the answer to the method, start-here desks first
-    today: { name: "Today", views: ["desk", "decision", "portfolio", "ooda", "mind", "noteworthy", "atlas"] },
-    decide: { name: "Decide", views: ["decide", "solve", "positions", "swans", "journal", "brain", "games", "cardroom"] },
-    markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "making", "prop"] },
-    research: { name: "Research", views: ["findings", "geometry", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "legends", "lenses", "lab"] },
-    reference: { name: "Methods", views: ["engine", "engines", "matrix", "appendix", "code", "agents"] },
+  const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
+    today: { name: "Today", views: ["desk", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
+    engine: { name: "Engine", views: ["parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
+    markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "positions", "swans"] },
+    research: { name: "Research", views: ["findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
+    workshop: { name: "Workshop", views: ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"] },
+    reference: { name: "Methods", views: ["engine", "engines", "appendix"] },
   };
-  const GROUP_ORDER = ["today", "decide", "markets", "research", "reference"];
+  const GROUP_ORDER = ["today", "engine", "markets", "research", "workshop", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
@@ -19,7 +20,7 @@
   }
   const RENDER = {
     atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
-    mind: () => guard("The mind", renderMindDesk, $("#md-tiles")),
+    mind: () => { guard("The mind", renderMindDesk, $("#md-tiles")); guard("Which brain", wireHeroWhich, $("#hero")); },
     labs: () => guard("The labs", renderLabsDesk, $("#lb-tiles")),
     analysis: () => guard("Technicals and fundamentals", renderAnalysisDesk, $("#an-tiles")),
     ml: () => { guard("The machine-learning lab", renderMlDesk, $("#ml-tiles")); guard("Complexity", renderComplexity, $("#cmx-tiles")); guard("The RL agent", renderRlBlock, $("#rl-tiles")); },
@@ -28,7 +29,8 @@
     cardroom: () => { guard("The labs", renderLabsDesk, $("#lb-tiles")); guard("The card room", drawYale, $("#cr-yale")); },
     code: () => guard("Under the hood", renderCodeDesk, $("#cd-list")),
     agents: () => {},
-    desk: () => { guard("Which brain", wireHeroWhich, $("#hero")); guard("Voices", wireVoices, $("#voices")); guard("Today", renderToday7, $("#today7")); guard("Rosette", () => drawRosette(true)); guard("Correlation gauge", renderGauge, $("#gauge")); guard("System map", renderMap, $("#map-box")); guard("Market charts", drawMacroCharts); guard("Book charts", drawBookCharts); },
+    desk: () => { guard("Today", renderToday7, $("#today7")); guard("Landing", renderLanding, $("#call-board")); guard("Rosette", () => drawRosette(true)); },
+    parameters: () => guard("The parameters", renderParameters, $("#pm-tiles")),
     bonds: () => guard("Bonds, simply", renderBonds, $("#bd-tiles")),
     decision: () => { guard("Decision engine", renderDecision, $("#dx-card")); guard("What if", renderWhatIf, $("#dxw-out")); },
     portfolio: () => guard("Portfolio engine", renderPortfolio, $("#pf-card")),
@@ -38,7 +40,7 @@
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
     securities: () => guard("Risk drivers", renderDrivers, $("#drv-chart")),
-    insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {}, decide: () => {}, legends: () => {},
+    insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {}, decide: () => {}, legends: () => guard("Voices", wireVoices, $("#voices")),
     theses: () => { guard("Alphabet chart", renderGoog, $("#goog-chart")); guard("Guidance chart", renderGuide, $("#guide-chart")); guard("Capex panel", drawCapex); },
     journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
@@ -48,11 +50,11 @@
       // the boundary sweep (90 solves) and the robust sweep follow once the desk is on screen, so opening it never stalls
       idle(() => { guard("Decision boundary", renderBoundary, $("#rz-bnd")); guard("Robust solver", renderDRO, $("#rz-dro")); });
     }, games: drawGames,
-    brain: () => { guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); guard("Causal statistics", renderCausalPanel, $("#brl-crisis")); guard("Brain self-checks", renderRobustBrain, $("#brr-cov")); },
+    brain: () => { guard("System map", renderMap, $("#map-box")); guard("The brain", updateBrain, $("#br-svg-box")); guard("Learning from the data", renderLearned, $("#brl-order")); guard("Ask the brain", wireAsk, $("#bra-form")); guard("Causal statistics", renderCausalPanel, $("#brl-crisis")); guard("Brain self-checks", renderRobustBrain, $("#brr-cov")); },
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
-    ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); },
+    ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); guard("Correlation gauge", renderGauge, $("#gauge")); },
     positions: () => guard("Positions", renderPositions, $("#ps-grid")),
-    engines: () => guard("Engine room", renderEngines, $("#en-table")),
+    engines: () => { guard("Engine room", renderEngines, $("#en-table")); guard("Market charts", drawMacroCharts, $("#corr-chart")); guard("Book charts", drawBookCharts, $("#bt-chart")); },
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
     making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },
   };
@@ -201,7 +203,7 @@
     idle(lazyDrain);
   }
   const BOOT_VIEW = (() => { try { return resolve(decodeURIComponent(location.hash.slice(1))).view; } catch (e) { return "desk"; } })();
-  [["The mark", placeMarks], ["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Thesis chips", renderThesisChips], ["Rates tables", buildRatesStatic],
+  [["The mark", placeMarks], ["Effective fundamentals", applyEffectiveFund], ["Key levels", () => renderLevels(null), "#levels"], ["What moved", renderMoves, "#mv-table"], ["Signals", renderSignals, "#signals-grid"], ["Insurance", renderInsurance, "#iv-tiles"], ["Liquidity", renderLiquidity, "#liq-tiles"], ["Rates tables", buildRatesStatic],
    ["Forward dates", buildForwardDates], ["Curve trade", buildCurveTrade], ["Payoff builder", buildPayoff], ["Hedge matrix", buildMatrix, "#matrix-m"], ["Playbooks", buildPlaybooks, "#pb-grid"],
    ["Hedge lab", buildHedgeLab], ["Futures", buildFutures], ["Securities", buildSecurities, "#sec-grid"], ["Theses", buildTheses, "#thesis-grid"], ["Lenses", buildLenses, "#lens-grid"],
    ["Decide", buildDecide], ["Fundamentals", buildFundamentals], ["Physics", buildPhysics], ["Findings", buildFindings, "#fi-list"], ["Swans", buildSwans, "#sw-grid"], ["Legends", buildLegends, "#lg-grid"], ["Math lab", buildLab, "#lab-list"],

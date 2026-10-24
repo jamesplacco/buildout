@@ -143,7 +143,7 @@ COUNTRIES = [
     ("KAZ", "Kazakhstan", None, ["a:uranium", "a:brent"], "The largest uranium miner."), ("UKR", "Ukraine", None, ["a:wheat", "a:maize", "a:sunflower"], "Wheat, maize and sunflower oil."),
 ]
 
-TOOL_MODULES = {"geometry_engine": ["geometry"], "get_research_snapshot": ["research"], "get_portfolio_risk": ["pipeline"], "analyze_positions": ["valuation", "pipeline"],
+TOOL_MODULES = {"parameter_inventory": ["parameters"], "geometry_engine": ["geometry"], "get_research_snapshot": ["research"], "get_portfolio_risk": ["pipeline"], "analyze_positions": ["valuation", "pipeline"],
                 "decision_loop": ["ooda"], "position_valuation": ["valuation"], "hedge_book": ["hedgebook"], "investor_voices": ["voices"],
                 "atlas_trace": ["atlas"], "brain_selfcheck": ["brain_robust"], "run_hedge_scenario": ["policy"], "evaluate_trade": ["reasoner"],
                 "create_order_proposal": ["mcp_server"], "review_decision": ["decisions"], "compare_explanations": ["field"],
@@ -674,6 +674,8 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("parameters", "The parameters", "Theta: every matrix, vector and scalar the engine learns, with its shape, the algorithm that shaped it, its objective, its data, its refit schedule and the desks it feeds; the constants set by hand listed apart with reasons.",
+     ["c:parameters", "c:optimization", "c:maximum-likelihood", "c:expectation-maximization", "c:walk-forward", "c:neural-network", "c:hidden-markov-model"]),
     ("geometry", "The shape of the market", "156 years of stocks, Treasuries and gold as points on the curved space of covariance matrices: an era map, today's nearest analogs and a placebo that tests them, the eigenvalues of the world's markets against pure noise, the topology of their correlations, transport between whole distributions, the Levy area of stocks against bonds, long memory and the geometry of compounding, every claim corrected for testing many.",
      ["c:riemannian-geometry", "c:affine-invariant-metric", "c:random-matrix-theory", "c:marchenko-pastur", "c:persistent-homology", "c:wasserstein-distance", "c:levy-area",
       "c:hurst-exponent", "c:volatility-drag", "c:analog-forecasting", "c:absorption-ratio"]),
@@ -838,6 +840,34 @@ GEO_CONCEPTS = ("c:riemannian-geometry", "c:affine-invariant-metric", "c:log-euc
                 "c:marchenko-pastur", "c:absorption-ratio", "c:persistent-homology", "c:vietoris-rips-complex", "c:minimum-spanning-tree", "c:optimal-transport",
                 "c:wasserstein-distance", "c:sliced-wasserstein", "c:bures-metric", "c:path-signature", "c:levy-area", "c:detrended-fluctuation-analysis", "c:hurst-exponent",
                 "c:volatility-drag", "c:geometric-vs-arithmetic-mean", "c:analog-forecasting", "c:placebo-test", "c:benjamini-hochberg", "c:mixture-of-normals")
+
+
+def v23_nodes(node, edge, params) -> None:
+    """v0.23: the engine's parameters. One node for Theta, one per layer, one per learned object, each tied to the engine module that fits it."""
+    if not params:
+        return
+    node("x:parameters", "model", "The engine's parameters (Theta)", "core",
+         f"{len(params['entries'])} learned objects across {len(params['layers'])} layers; the decision core is {params['core']:,} numbers, and the knowledge graph's spectral map is the largest object. "
+         f"Each object carries its shape, the optimisation that shaped it, its objective, its data, its refit schedule and the desks it feeds; {len(params['set_by_hand'])} constants set by hand are listed with reasons.",
+         ["parameters", "weights and biases", "theta", "what the engine learned", "fitted matrices", "how many parameters", "model weights"])
+    edge("x:parameters", "e:parameters", "implemented_by", 0.9)
+    edge("d:parameters", "x:parameters", "routes", 0.8)
+    edge("x:parameters", "x:decision", "related", 0.7)
+    edge("x:parameters", "x:portfolio", "related", 0.6)
+    for L in params["layers"]:
+        node(f"th:layer:{L['id']}", "method", f"Parameter layer: {L['name'].lower()}", "core", L["role"], [L["name"].lower() + " parameters"])
+        edge(f"th:layer:{L['id']}", "x:parameters", "part_of", 0.7)
+    for e in params["entries"]:
+        shp = " by ".join(str(x) for x in (e.get("shape") or [])) if not e.get("parts") else f"{len(e['parts'])} arrays"
+        node(f"th:{e['id']}", "method", e["name"], "core",
+             f"{e['name']}: {shp}, {e['count']:,} numbers. Fit by {e['algorithm'][0].lower() + e['algorithm'][1:]}. Objective: {e['objective'][0].lower() + e['objective'][1:]}. "
+             f"Data: {e['data']}. Refit {e['refit']}.", [e["id"].replace("_", " "), e["name"].lower()])
+        edge(f"th:{e['id']}", f"th:layer:{e['layer']}", "part_of", 0.7)
+        mod = e["module"].split(",")[0].strip().split(".")
+        if len(mod) >= 2 and mod[0] == "buildout":
+            edge(f"th:{e['id']}", "e:" + mod[1], "implemented_by", 0.7)
+        for d in e["feeds"]:
+            edge(f"th:{e['id']}", f"d:{d}", "routes", 0.4)
 
 
 def v22_nodes(node, edge, geo) -> None:
@@ -1182,7 +1212,7 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
           research_latest: dict | None = None, layout: bool = True, mlo: dict | None = None, aso: dict | None = None,
           positions: dict | None = None, companies: list[dict] | None = None, rlo: dict | None = None, tech: dict | None = None,
           chron: dict | None = None, bonds: dict | None = None, cx: dict | None = None, dec: dict | None = None, pf: dict | None = None,
-          geo: dict | None = None) -> dict:
+          geo: dict | None = None, theta: dict | None = None) -> dict:
     nodes: list[dict] = []
     idx: dict[str, int] = {}
     edges: dict[tuple, list] = {}
@@ -1397,6 +1427,7 @@ def build(atlas: dict, quotes: list[dict], know: list[dict], world: dict | None 
     v19_nodes(node, edge, dec)
     v20_nodes(node, edge, pf)
     v22_nodes(node, edge, geo)
+    v23_nodes(node, edge, theta)
     # signals
     K = {it["id"]: it for it in know}
     cape_pct = None

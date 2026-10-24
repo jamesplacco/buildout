@@ -110,11 +110,10 @@
         const R0 = RZ_LAST || runReasoner(false), opt = R0 && R0.alts && R0.alts.optimal;
         const byVol = Math.min(0.2 / ((1.1 * I.vxn.v) / 100), 1.5);
         if (N) {
-          sz.append(h("strong", null, `Equity ${xx(N.exposure)}. `), document.createTextNode(`The decision engine's gated call (its own optimum ${xx(N.engine_exposure)}; evidence gate ${pct0(N.gate.value)}, utility t ${fx(N.gate.t, 1)} since ${DX19.start.slice(0, 4)}). `));
           const cross = [`volatility rule ${xx(byVol)}`];
           if (opt) cross.push(`scenario solver ${xx(opt.port[0])}${fin(R0.robust_share) ? ` (optimal in ${pct0(R0.robust_share)} of assumption pairs)` : ""}`);
           if (N.hedge && /trend (on|off)/.test(N.hedge.context)) cross.push(`10-month trend rule ${/trend on/.test(N.hedge.context) ? "on" : "off"}`);
-          sz.append(h("span", null, "Cross-checks, not the call: " + cross.join("; ") + "."));
+          sz.append(h("strong", null, "Cross-checks, not the call: "), document.createTextNode(cross.join("; ") + `. The call is the decision engine's gated output; the other rules are shown so no desk can seem to disagree with it.`));
         }
       } catch (e) { /* the sizing line is optional */ }
     }
@@ -132,16 +131,7 @@
     });
     const q = $("#t7-quiet");
     if (q) q.textContent = cmp.note;
-    // the choices, from the reasoner (no value-of-information pass: that runs on the Solve desk)
-    const R = RZ_LAST || runReasoner(false), cl = $("#t7-choices");
-    cl.replaceChildren();
-    [["keep", "Keep"], ["reduce", "Reduce"], ["hedge", "Hedge"], ["optimal", "Best on the grid"]].forEach(([k, n]) => {
-      const a = R.alts[k];
-      if (!a) return;
-      const li = h("li");
-      li.append(h("b", null, n), h("span", "num", portTxt(a.port)), h("span", "t7-m num", `worst ${sPct(a.worst, 1)} · growth ${sPct(a.ce, 1)}${a.feasible ? "" : " · breaks the limit"}`));
-      cl.append(li);
-    });
+    const R = RZ_LAST || runReasoner(false);
     // what would reverse it
     const rv = $("#t7-reverse");
     rv.replaceChildren();
@@ -156,6 +146,7 @@
     const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 21, 2026"], ["Research", `${readF().panel.end}, line ${HL.status.replace(/_/g, " ")}`],
       ["Filings", FUND.note || FUND.as_of], ["Book", LIVE.report && LIVE.report.summary ? `engine run ${isoNice(LIVE.report.summary.as_of)}${adjTxt(LIVE.report.summary.adjustments)}` : "model book, as shipped"]];
     fresh.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); tr.append(li); });
+    if (typeof renderLanding === "function") renderLanding();   // the call board, the stages and the counts read the same inputs
   }
 
   // how corporate actions were handled: the vendor's factors, or the free public table with estimated bond income

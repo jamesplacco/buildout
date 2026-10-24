@@ -1038,6 +1038,30 @@ def geometry_engine(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, covariance, spectrum, topology, transport, paths, scaling, compounding")
 
 
+def parameter_inventory(ctx: Context, args: dict) -> dict:
+    """Theta: every matrix the engine learns, with its shape, algorithm, objective, data, refit schedule and the desks it feeds."""
+    from . import parameters
+    o = _snap("snap23.js", "SNAP23", "parameters")
+    if not o:
+        o = parameters.build(**parameters.load_outputs(ctx.data_dir))
+    layer = args.get("layer")
+    if layer:
+        ids = {L["id"] for L in o["layers"]}
+        if layer not in ids:
+            raise ToolError("layer is one of " + ", ".join(sorted(ids)))
+        return {"layer": next(L for L in o["layers"] if L["id"] == layer), "entries": [e for e in o["entries"] if e["layer"] == layer],
+                "by_layer": o["by_layer"][layer]}
+    pid = args.get("id")
+    if pid:
+        for e in o["entries"]:
+            if e["id"] == pid:
+                return {"entry": e}
+        raise ToolError("id is one of " + ", ".join(e["id"] for e in o["entries"]))
+    brief = [{k: e[k] for k in ("id", "layer", "name", "shape", "count", "algorithm", "refit", "feeds")} for e in o["entries"]]
+    return {"as_of": o["as_of"], "total": o["total"], "core": o["core"], "by_layer": o["by_layer"], "entries": brief, "set_by_hand": o["set_by_hand"],
+            "summary": o["summary"], "note": "Counts are the numbers the engine learns and uses; constants chosen by judgment are listed apart, each with its reason."}
+
+
 def _snap(fname: str, const: str, part: str):
     p = Path(__file__).resolve().parents[1] / "site" / "src" / fname
     txt = p.read_text() if p.exists() else ""
@@ -1168,6 +1192,12 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                         "analogs, the Levy area of stocks against bonds, long memory and volatility drag, with every claim walked forward and corrected for testing many.",
                         _obj({"part": {"type": "string", "enum": ["summary", "covariance", "spectrum", "topology", "transport", "paths", "scaling", "compounding"]}}),
                         {"readOnlyHint": True, "openWorldHint": False}),
+    "parameter_inventory": (parameter_inventory, "The engine's parameters, Theta: every fitted matrix, vector and scalar (regime transition matrices, ridge and network "
+                            "weights, stacking weights, the Q-table, the causal map, the knowledge graph's spectral map) with its shape, the optimisation that shaped "
+                            "it, its objective, its data, its refit schedule and the desks it feeds; the constants set by hand are listed apart with reasons.",
+                            _obj({"layer": {"type": "string", "enum": ["regimes", "forecasts", "allocation", "portfolio", "learning", "causal", "knowledge", "geometry"]},
+                                  "id": {"type": "string", "description": "one parameter object, e.g. hmm_stocks, deep_ensemble, q_table, mind_spectral"}}),
+                            {"readOnlyHint": True, "openWorldHint": False}),
     "portfolio_engine": (portfolio_engine, "The portfolio engine for the MODEL book: today's mix of stocks, 10-year Treasuries, gold and cash; the regimes of the three "
                          "assets together with each one's stock-bond correlation; eight policies walked forward since 1940 and a learner over them; ten years simulated "
                          "from today's regime odds; and today's mixes replayed through eight drawdowns. Research only; never places orders.",

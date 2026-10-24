@@ -562,6 +562,40 @@ def perf(x: np.ndarray) -> dict:
     return {k: (float(v) if isinstance(v, (float, np.floating)) else v) for k, v in p.items()}
 
 
+OVERLAY_FACTORS = (0.0, 0.25, 0.5, 0.75, 1.0)
+
+
+def overlay_study(r: np.ndarray, trend_sig: np.ndarray, gated_x: np.ndarray, m: np.ndarray, gamma: float, bidx: np.ndarray) -> dict:
+    """The trend rule as a risk overlay, decided by the engine's own objective. Below the 10-month average, exposure is
+    scaled by a factor f (0 is the classic rule, 1 is no overlay). For each f, on holding and on the gated engine,
+    walked forward with costs: Sharpe, worst drawdown, real growth, the CRRA utility gain over holding with its
+    Newey-West t, and bootstrap ranges of the Sharpe and drawdown differences. The rule, fixed before the result: the
+    adopted factor is the deepest drawdown cut among the factors whose walk-forward CRRA utility is at least holding's
+    (a drawdown limit is a mandate's constraint, so the overlay must be free in expected utility); f = 1 is no overlay."""
+    hold = r[m]
+    sig = trend_sig[m] > 0
+    rows = {}
+    for f in OVERLAY_FACTORS:
+        for base, bx in (("hold", np.ones(int(m.sum()))), ("engine", gated_x[m])):
+            x = np.where(sig, bx, bx * f)
+            ret = x * hold - COST * np.abs(np.diff(np.concatenate([[1.0], x]))) - np.maximum(0.0, x - 1) * BORROW
+            ug, t, _ = utility_gain(ret, hold, gamma)
+            d_sh = np.array([labs.sharpe(ret[i]) - labs.sharpe(hold[i]) for i in bidx])
+            d_dd = np.array([labs.perf(pd.Series(ret[i]))["maxdd"] - labs.perf(pd.Series(hold[i]))["maxdd"] for i in bidx])
+            rows[f"{base}:{f}"] = {"base": base, "factor": f, "perf": perf(ret), "utility_gain_month": ug, "utility_t": t,
+                                   "switches": int(np.sum(np.abs(np.diff(x)) > 1e-9)), "avg_exposure": float(x.mean()),
+                                   "sharpe_vs_hold": {"est": float(labs.sharpe(ret) - labs.sharpe(hold)), "lo": float(np.quantile(d_sh, 0.05)), "hi": float(np.quantile(d_sh, 0.95))},
+                                   "maxdd_vs_hold": {"est": float(perf(ret)["maxdd"] - perf(hold)["maxdd"]), "lo": float(np.quantile(d_dd, 0.05)), "hi": float(np.quantile(d_dd, 0.95))}}
+    # the rule: the deepest cut in the worst drawdown among the factors that cost a risk-averse investor nothing in
+    # expected utility (a mandate's drawdown limit is a constraint, not a preference, so the overlay must be free)
+    free = [f for f in OVERLAY_FACTORS if rows[f"hold:{f}"]["utility_gain_month"] >= 0.0]
+    best = max(free, key=lambda f: rows[f"hold:{f}"]["perf"]["maxdd"]) if free else 1.0       # maxdd is negative: the largest is the shallowest
+    return {"factors": list(OVERLAY_FACTORS), "rows": rows, "adopted": float(best), "adopted_reason": (
+        "no overlay: every factor tried costs expected utility against holding" if best == 1.0 else
+        f"below the 10-month average, exposure is scaled by {best:.2f}: the deepest drawdown cut among the factors that keep holding's expected utility"),
+        "rule": "largest drawdown reduction among factors whose walk-forward CRRA utility is at least holding's", "trend_on_now": bool(sig[-1])}
+
+
 # ---------------------------------------------------------------- today
 def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED) -> dict:
     """Today's decision, its distribution, drivers, flip points and the value of knowing the regime."""
@@ -784,6 +818,7 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
     hedge["ctx_label"] = ("stressed" if hedge["ctx_now"] >= 2 else "calm") + " regime, trend " + ("on" if hedge["ctx_now"] % 2 else "off")
     hedge["as_of"] = D.index[last_h].strftime("%Y-%m")
     now = today(D, pred, F, P, row, gamma, hedge)
+    overlay = overlay_study(r, trend_sig, runs["gated"]["x"], m, gamma, bidx)
     dev = runs["engine"]["ret"] - D["r"].to_numpy()
     a_all, ta_all, n_all = timing_alpha(dev[start_i:], D["r"].to_numpy()[start_i:])
     ug, t_all, _ = utility_gain(runs["engine"]["ret"][start_i:], D["r"].to_numpy()[start_i:], gamma)
@@ -793,6 +828,11 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
     now["gate"] = {"value": g_now, "t": t_all, "t0": float(_st.norm.ppf(1 - 1 / N_TRIED)), "n_tried": N_TRIED, "utility_gain_month": ug,
                    "alpha_annual": a_all * 12, "alpha_t": ta_all, "months": n_all}
     now["exposure"] = float(round((1 + g_now * (now["engine_exposure"] - 1)) / 0.05) * 0.05)
+    # the trend overlay, if the study adopted one: the gated size times the factor when the trend is off
+    now["overlay"] = {"factor": overlay["adopted"], "trend_on": overlay["trend_on_now"], "reason": overlay["adopted_reason"],
+                      "exposure_if_off": float(round(now["exposure"] * overlay["adopted"] / 0.05) * 0.05)}
+    if not overlay["trend_on_now"]:
+        now["exposure"] = now["overlay"]["exposure_if_off"]
     now["rl"] = {"v16": float(rl.ACTIONS[rl.act(rl.fit(rl.encode(Ds, len(Ds)), Ds["r"].to_numpy(), **{k: rl.CONFIGS["risk_averse_cautious_prior"][k] for k in ("gamma", "penalty", "prior")}),
                                                  int(rl.encode(Ds, len(Ds))[-1]), 2)]),
                  "conservative": rl2["now"]}
@@ -826,7 +866,7 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
         "regime_fits": [{"at": D.index[f["at"]].strftime("%Y-%m"), "K": f["K"], "mu": tc(f["mu"]), "sd": tc(f["sd"])} for f in pred["regime_fits"]],
         "configs": configs, "deflated_excess": {k: (v if isinstance(v, str) else float(v)) for k, v in dsr.items()},
         "gate_hist": {"dates": curve_dates, "g": [round(float(v), 3) for v in runs["gated"]["gate"][m][::step]]},
-        "hold": perf(hold), "trend": perf(trend),
+        "hold": perf(hold), "trend": perf(trend), "overlay": overlay,
         "rl": {"v16": perf(rl1r), "conservative": perf(rl2r), "hold_same": perf(hold[ci]), "months": len(common), "conservative_avg_exposure": float(np.mean(rl2["act"]))},
         "curve": {"dates": curve_dates, "engine": lg(runs["engine"]["ret"][m]), "gated": lg(runs["gated"]["ret"][m]), "hold": lg(hold), "trend": lg(trend)},
         "exposure_hist": {"dates": curve_dates, "x": [float(v) for v in runs["engine"]["x"][m][::step]], "gated": [float(v) for v in runs["gated"]["x"][m][::step]]},
@@ -837,6 +877,24 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
     }
     out["findings"] = summary(out)
     return out
+
+
+def _overlay_line(o: dict) -> str:
+    """The trend rule, confronted as a baseline: what it earns, what it cuts, and what the engine adopts from it."""
+    ov = o["overlay"]
+    full, adopted = ov["rows"]["hold:0.0"], ov["rows"][f"hold:{ov['adopted']}"]
+    hold = o["hold"]
+    head = (f"The 10-month trend rule is the strongest simple baseline: Sharpe {full['perf']['sharpe']:.2f} against {hold['sharpe']:.2f} for holding and a worst drawdown of "
+            f"{full['perf']['maxdd']:.0%} against {hold['maxdd']:.0%}, but it gives up real growth ({full['perf']['cagr']:.1%} against {hold['cagr']:.1%} a year), so a risk-averse "
+            f"investor is no better off in expected utility (t {full['utility_t']:+.1f}); its Sharpe edge is not significant (90% range {full['sharpe_vs_hold']['lo']:+.2f} to "
+            f"{full['sharpe_vs_hold']['hi']:+.2f}) while its drawdown cut is ({full['maxdd_vs_hold']['lo']:+.0%} to {full['maxdd_vs_hold']['hi']:+.0%}). ")
+    if ov["adopted"] >= 1.0:
+        return head + "No factor of the overlay kept holding's expected utility, so the engine adopts none of it."
+    return head + (f"The engine therefore adopts the rule as a risk overlay at a factor of {ov['adopted']:.2f}: below the 10-month average the gated size is scaled by "
+                   f"{ov['adopted']:.2f}, which keeps holding's expected utility (t {adopted['utility_t']:+.2f}), lifts the Sharpe ratio to {adopted['perf']['sharpe']:.2f} "
+                   f"(90% range of the gain {adopted['sharpe_vs_hold']['lo']:+.2f} to {adopted['sharpe_vs_hold']['hi']:+.2f}) and cuts the worst drawdown to "
+                   f"{adopted['perf']['maxdd']:.0%}. The trend is {'on' if ov['trend_on_now'] else 'off'} today, so the overlay "
+                   f"{'leaves the size unchanged' if ov['trend_on_now'] else 'applies'}.")
 
 
 def summary(o: dict) -> list[str]:
@@ -859,6 +917,7 @@ def summary(o: dict) -> list[str]:
         f"(gain over holding {sv['est']:+.2f}, 90% range {sv['lo']:+.2f} to {sv['hi']:+.2f}); worst drawdown {e['perf']['maxdd']:.0%} against {h['maxdd']:.0%}. "
         f"Gated by its own evidence, Sharpe {o['configs']['gated']['perf']['sharpe']:.2f}. Deflated for the {o['now']['gate']['n_tried']} strategies tried, the chance the best one's "
         f"timing alpha is real is {o['deflated_excess']['dsr']:.0%}.",
+        _overlay_line(o),
         f"Forecasts out of sample: the neural-network ensemble's skill against the historical mean is {fs['nn']['skill']:+.1%} (Diebold-Mariano t {fs['nn']['dm']['t']:.1f}), "
         f"ridge {fs['ridge']['skill']:+.1%}, the restricted combination {fs['combo']['skill']:+.1%}, the stack {fs['stacked']['skill']:+.1%}; "
         f"the ensemble's 80% bands covered {fs['nn']['coverage80']:.0%} of outcomes.",

@@ -5,13 +5,14 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.22</span>
+      Buildout <span class="ver">v0.23</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
-      <a href="#solve" data-group="decide">Decide</a>
+      <a href="#parameters" data-group="engine">Engine</a>
       <a href="#bonds" data-group="markets">Markets</a>
-      <a href="#fundamentals" data-group="research">Research</a>
+      <a href="#findings" data-group="research">Research</a>
+      <a href="#games" data-group="workshop">Workshop</a>
       <a href="#engine" data-group="reference">Methods</a>
     </nav>
     <div class="tools">
@@ -33,298 +34,118 @@
 <section class="view" id="view-desk" aria-labelledby="desk-title">
   <div class="t7" id="today7">
     <div class="t7-head">
-      <div class="t7-brand"><span class="hero-mark" aria-hidden="true"><svg class="lotus" viewBox="0 0 330 330"><use href="#lotus"></use></svg></span><p class="eyebrow">Buildout · Today · October 22, 2026 · Jamie Placco</p></div>
-      <h1 id="desk-title">Bond hedge reliability in the current regime</h1>
+      <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Oct 21, 2026</p>
+      <h1 id="desk-title">Hold equity at 1.00x with no bond hedge; cut to 0.50x if the 10-month trend breaks.</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
-      <p class="t7-sizing" id="t7-sizing"></p>
-      <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
     </div>
-    <section class="hero-brain" id="hero" aria-labelledby="hero-title">
-      <div class="hero-head"><p class="eyebrow">The mind · live</p><h2 id="hero-title">Query the knowledge graph</h2>
-        <p class="prose">The mind is the brain and the engine as one graph: every concept an investor needs, every measured market, every sourced fact and paper, every verified quote, every part of the engine and the world economy. Type a question and it recalls what matches, spreads activation through the links, frames the claim, weighs the evidence for and against in log-odds, tests how fragile the verdict is, traces the causal chain to the book and proposes an action it never executes. The whole brain and the core map show a shock travelling the markets themselves.</p>
-        <div class="seg hero-which" id="hero-which" role="group" aria-label="Which view of the brain"><button type="button" data-w="mind" aria-pressed="true">The mind</button><button type="button" data-w="full" aria-pressed="false">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 34 nodes</button></div></div>
-      <div id="hero-mind">
-        <div class="hero-grid">
-          <div class="hero-stage">
-            <canvas id="mind-hero-cv" role="img" aria-label="The mind: every node of the brain and the engine, lit by the current question"></canvas>
-            <div class="hero-ctl"><span class="hint">Hover to identify a node; click to query it. Gold marks activation spreading from the question.</span></div>
-          </div>
-          <aside class="hero-math" aria-labelledby="mh-t">
-            <span class="panel-title" id="mh-t">Think</span>
-            <div class="m-ask"><label class="sr-only" for="mh-q">Question or claim</label><input id="mh-q" type="text" maxlength="300" placeholder="Is the stock market overvalued?" autocomplete="off"><button class="btn" type="button" id="mh-go">Think</button></div>
-            <div class="m-ex" id="mh-ex" role="group" aria-label="Example questions"></div>
-            <div id="mh-out" aria-live="polite"></div>
-            <p class="hint" id="mh-count"></p>
-          </aside>
-        </div>
-      </div>
-      <div id="hero-full" hidden>
-        <div class="hero-grid">
-          <div class="hero-stage">
-            <div class="hero-presets" id="ah-presets" role="group" aria-label="Scenarios"></div>
-            <canvas id="at-hero-cv" role="img" aria-label="The whole brain"></canvas>
-            <div class="hero-ctl">
-              <button class="pill" type="button" id="ah-prev" aria-label="Previous month">←</button>
-              <button class="pill" type="button" id="ah-play" aria-pressed="true">Pause</button>
-              <button class="pill" type="button" id="ah-next" aria-label="Next month">→</button>
-              <span class="hero-k" id="ah-k">h = 0</span>
-              <span class="hint">Hover a node to name it; click to shock it (shift-click for a fall).</span>
-            </div>
-            <div class="hero-own"><label for="ah-node">Shock</label><select id="ah-node"></select><label for="ah-size">by σ</label><input type="number" id="ah-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="ah-go">Run it</button><label for="ah-target">Watch</label><select id="ah-target"></select></div>
-          </div>
-          <aside class="hero-math" aria-labelledby="ah-math-t">
-            <span class="panel-title" id="ah-math-t">The math, live</span>
-            <p class="hero-scn" id="ah-scn"></p>
-            <p class="hero-eq">y<sub>t</sub> = W y<sub>t</sub> + A y<sub>t−1</sub> + e<sub>t</sub> &nbsp;·&nbsp; x<sub>0</sub> = (I − W)<sup>−1</sup>e &nbsp;·&nbsp; x<sub>h</sub> = (I − W)<sup>−1</sup>A x<sub>h−1</sub></p>
-            <p class="hint" id="ah-count"></p>
-            <p class="hero-steph" id="ah-step"></p>
-            <ol class="br-list" id="ah-flows"></ol>
-            <p class="sentence" id="ah-arrive"></p>
-            <span class="panel-title">Cumulative response, with the doubt</span>
-            <div class="svgbox" id="ah-fan"></div>
-            <p class="hint" id="ah-mc"></p>
-            <span class="panel-title">How it was learned</span>
-            <ul class="br-list" id="ah-trust"></ul>
-            <a class="more-link" href="#atlas">Explore the atlas: every node, link and test →</a>
-          </aside>
-        </div>
-      </div>
-      <div id="hero-core" hidden>
-      <div class="hero-grid">
-        <div class="hero-stage">
-          <div class="hero-presets" id="hero-presets" role="group" aria-label="Scenarios"></div>
-          <canvas id="hero-cv" role="img" aria-label="The brain"></canvas>
-          <div class="hero-ctl">
-            <button class="pill" type="button" id="hero-prev" aria-label="Previous order">←</button>
-            <button class="pill" type="button" id="hero-play" aria-pressed="true">Pause</button>
-            <button class="pill" type="button" id="hero-next" aria-label="Next order">→</button>
-            <span class="hero-k" id="hero-k">k = 0</span>
-            <div class="seg" id="hero-mode" role="group" aria-label="Draw it as"><button type="button" data-m="graph" aria-pressed="true">Graph</button><button type="button" data-m="matrix" aria-pressed="false">Matrix</button></div>
-            <div class="seg" id="hero-regime" role="group" aria-label="Which measured links"><button type="button" data-b="1" aria-pressed="true">Links since 2022</button><button type="button" data-b="0" aria-pressed="false">1990 to 2021</button></div>
-          </div>
-          <div class="hero-own"><label for="hero-node">Shock</label><select id="hero-node"></select><label for="hero-size">by σ</label><input type="number" id="hero-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="hero-go">Run it</button><span class="hint">or click any node (shift-click for a fall)</span></div>
-        </div>
-        <aside class="hero-math" aria-labelledby="hero-math-t">
-          <span class="panel-title" id="hero-math-t">The math, live</span>
-          <p class="hero-scn" id="hero-scn"></p>
-          <p class="hero-eq">x<sub>k</sub> = W′x<sub>k−1</sub> &nbsp;·&nbsp; S<sub>K</sub> = x<sub>1</sub> + … + x<sub>K</sub> &nbsp;→&nbsp; S<sub>∞</sub> = ((I − W′)<sup>−1</sup> − I)x<sub>0</sub></p>
-          <p class="hint" id="hero-x0"></p>
-          <p class="hero-steph" id="hero-step"></p>
-          <ol class="br-list" id="hero-flows"></ol>
-          <p class="sentence" id="hero-arrive"></p>
-          <span class="panel-title">The book's running sum, order by order</span>
-          <div class="svgbox" id="hero-conv"></div>
-          <p class="hint" id="hero-rho"></p><p class="hint" id="hero-lim"></p>
-          <span class="panel-title">300 worlds of doubt</span>
-          <canvas id="hero-hist" aria-hidden="true"></canvas>
-          <span class="panel-title">Can the brain be trusted?</span>
-          <ul class="br-list" id="hero-trust"></ul>
-          <a class="more-link" href="#brr-title">How the brain checks itself →</a>
-          <p class="sr-only" id="hero-live" aria-live="polite"></p>
-        </aside>
-      </div>
-      </div>
-    </section>
-
-    <section class="voices" id="voices" aria-labelledby="vo-title">
-      <div class="hero-head"><p class="eyebrow">Voices · extreme bear to extreme bull</p><h2 id="vo-title">Investor views by topic</h2>
-        <p class="prose">Type a question or a claim, then move along the spectrum. Every quote is verbatim, dated and linked to where it was said; the stance is judged per quote, not per person.</p><p class="hint" id="vo-count"></p></div>
-      <form class="vo-form" id="vo-form" role="search" aria-label="Find investor voices"><label for="vo-q" class="sr-only">Question or statement</label><input type="search" id="vo-q" maxlength="300" autocomplete="off" placeholder="Is bitcoin digital gold?"><button class="btn" type="submit">Find the voices</button></form>
-      <div class="vo-examples" id="vo-examples" role="group" aria-label="Example questions"></div>
-      <div class="vo-out" id="vo-out" hidden>
-        <div class="vo-head"><h3 class="h3" id="vo-topic"></h3><div class="vo-related" id="vo-related"></div></div>
-        <p class="sentence" id="vo-read"></p>
-        <div class="vo-spec" id="vo-spec" role="group" aria-label="The spectrum, extreme bear to extreme bull"></div>
-        <article class="vo-card" id="vo-card" aria-live="polite"></article>
-        <div class="vo-nav" id="vo-nav"></div>
-        <div class="vo-claude-row"><button class="pill" type="button" id="vo-claude" hidden>Ask Claude to rank these for the exact question</button><span class="hint" id="vo-claude-out" aria-live="polite"></span></div>
-        <details class="tableview" id="vo-all" hidden><summary id="vo-all-sum">Every voice</summary><ol class="vo-all" id="vo-all-list"></ol></details>
-        <p class="hint">Keys: ← and → move along the spectrum; N shows another voice. Quotes are short excerpts with links to the full source. The library is curated, so its lean is not a poll.</p>
-      </div>
-    </section>
-
-    <div class="t7-grid">
-      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet" aria-live="polite"></p><ol class="t7-changes" id="t7-changes"></ol></section>
-      <section class="t7-card" aria-labelledby="t7o-title"><h2 id="t7o-title">Decision options</h2><ul class="t7-list" id="t7-choices"></ul><a class="more-link" href="#solve">Solve it with explicit limits →</a></section>
-      <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">Reversal conditions</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decide">The decision board →</a></section>
-      <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#engine">Methods and tests →</a></section>
-    </div>
-    <p class="lede t7-lede">Buildout is a decision desk for one concentrated idea, the AI buildout, and one question: what protects it when the regime turns. Every number carries its date and an evidence label; every decision names the policy that made it; a missing input blocks a decision instead of defaulting.</p>
-    <div class="chips" aria-label="Status">
-        <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 469 of 469</span></span>
-        <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run on GitHub Actions</span></span>
-        <span class="chip"><span class="dot warn"></span>Databento key pending</span>
-        <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
-        <span class="chip"><span class="dot idle"></span>Data as of Oct 22, 2026</span>
-      </div>
+    <div class="call-board" id="call-board" role="list" aria-label="The call in numbers"></div>
+    <p class="t7-sizing" id="t7-sizing"></p>
+    <div class="brief" id="brief"></div>
   </div>
 
-  <section class="section pulse" id="pulse" aria-labelledby="pulse-title">
-    <h2 class="sr-only" id="pulse-title">Current readings</h2>
-    <div class="pulse-grid">
-      <div class="panel rings-panel"><div class="rings" id="rings" role="img" aria-label="Risk rings"></div><ul class="ring-key" id="ring-key"></ul></div>
-      <div class="panel since-panel"><span class="panel-title">Since the last visit</span><div id="since"></div></div>
-      <div class="panel checkin-panel"><div class="panel-head"><span class="panel-title">Daily checklist</span><span class="streak" id="streak"></span></div><ul class="checkin" id="checkin"></ul><p class="hint">Saved in this browser; resets each weekday.</p></div>
-    </div>
-  </section>
-
-  <section class="section" id="nw-tease-sec" aria-labelledby="nwt-title">
-    <div class="section-head"><p class="eyebrow">Noteworthy</p><h2 id="nwt-title">Early signals</h2></div>
-    <div class="nw-teaser" id="nw-teaser"></div>
-    <a class="more-link" href="#noteworthy">All ten trends, with live feeds from X, Telegram and Substack →</a>
-  </section>
-
-  <section class="section" id="brief-sec" aria-labelledby="brief-title">
-    <h2 class="sr-only" id="brief-title">Summary</h2>
-    <div class="brief" id="brief"></div>
-  </section>
-
-  <section class="section" id="miss" aria-labelledby="miss-title">
+  <section class="section" id="flow-sec" aria-labelledby="flow-title">
     <div class="section-head">
-      <p class="eyebrow">Connections</p>
-      <h2 id="miss-title">Six current exposures most portfolios overlook</h2>
-      <p class="prose">Each is a link between two parts of the system, measured, with the evidence one click away.</p>
+      <p class="eyebrow">How the engine thinks</p>
+      <h2 id="flow-title">From 156 years of data to one sized call, in six stages</h2>
+      <p class="prose">One system. Each stage is a fitted object with a stated optimiser, walked forward since 1940 with a two-month lag, and each feeds the next. The numbers are today's.</p>
     </div>
-    <div class="cards3" id="miss-list"></div>
+    <ol class="flow" id="flow" aria-label="The engine's stages"></ol>
   </section>
 
-  <nav class="start" aria-label="Start here">
-    <a class="start-card" href="#size"><span class="eyebrow">Question 1</span><strong>How big?</strong><span>Risk limits set the size; Kelly checks the edge.</span></a>
-    <a class="start-card" href="#hedge"><span class="eyebrow">Question 2</span><strong>How much hedge?</strong><span>Price a TLT hedge against five AI scenarios.</span></a>
-    <a class="start-card" href="#regime-title"><span class="eyebrow">Question 3</span><strong>When does the hedge stop working?</strong><span>The stock-bond regime, read every day.</span></a>
-    <a class="start-card" href="#pb-title"><span class="eyebrow">Playbooks</span><strong>What do I do when it happens?</strong><span>Signals, first moves and the all-clear for six scenarios.</span></a>
-  </nav>
-
-  <section class="section" id="signals" aria-labelledby="sig-title">
+  <section class="section" id="theta-sec" aria-labelledby="theta-title">
     <div class="section-head">
-      <p class="eyebrow">Signals</p>
-      <h2 id="sig-title">Monitoring priorities</h2>
-      <p class="prose" id="sig-sub">Twelve signals, each with a rule and an action. Each carries its date; the daily run replaces it with the latest value.</p>
+      <p class="eyebrow">The parameters</p>
+      <h2 id="theta-title">Θ: what the engine has learned, counted</h2>
+      <p class="prose">The product is the parameters: numerical matrices shaped by optimisation, each with its shape, its objective, its data and its refit schedule. The decision core is small enough to print; the knowledge graph is the one large object.</p>
     </div>
-    <div class="read" id="desk-read" aria-live="polite"></div>
-    <div class="signals" id="signals-grid"></div>
-    <p class="hint">Thresholds are the desk's working rules, not laws, and each can be tuned. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
+    <div class="theta" id="theta"></div>
+    <div class="theta-layers" id="theta-layers" aria-label="Parameters by layer"></div>
+    <a class="more-link" href="#parameters">Every matrix, its shape and the algorithm that shaped it →</a>
   </section>
 
-  <section class="section" id="sysmap" aria-labelledby="map-title">
+  <section class="section" id="hood-sec" aria-labelledby="hood-title">
     <div class="section-head">
-      <p class="eyebrow">System map</p>
-      <h2 id="map-title">Current transmission between drivers</h2>
-      <p class="prose">Each box is a part of the financial system this book depends on, outlined by its signals' state; each line is a transmission channel, red where it is carrying stress today. Select a box to open its desk.</p>
+      <p class="eyebrow">Under the hood</p>
+      <h2 id="hood-title">A rigorous, tested, inspectable codebase</h2>
+      <p class="prose">Pure functions of dated files, run daily on GitHub Actions, isolated so one failure never stops the rest, and shipped with the page so every module can be read. Nothing executes an order.</p>
     </div>
-    <div class="panel"><div class="sysmap" id="map-box"></div><div class="sysmap-key"><span><i></i>Channel</span><span><i class="hot"></i>Carrying stress now</span><span>Outline: green calm, amber watch, red act</span></div></div>
+    <div class="hood" id="hood" role="list"></div>
+    <div class="chips" id="chips" aria-label="System status">
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 483 of 483</span></span>
+      <span class="chip" id="chip-run"><span class="dot good"></span><span>Daily run on GitHub Actions</span></span>
+      <span class="chip" id="chip-data"><span class="dot warn"></span><span>Databento key pending</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-asof">Data as of Oct 22, 2026</span></span>
+    </div>
+    <div class="hood-links"><a class="more-link" href="#code">Read the source →</a><a class="more-link" href="#agents">How it was built, with agents →</a><a class="more-link" href="#engines">Engine room: inputs, outputs, hashes →</a></div>
   </section>
 
-  <section class="section" id="moves" aria-labelledby="mv-title">
+  <section class="section" id="fund-sec" aria-labelledby="fund-title">
     <div class="section-head">
-      <p class="eyebrow">This week</p>
-      <h2 id="mv-title">Market moves</h2>
-      <p class="prose" id="mv-sub">Fifteen markets the desk reads, from FRED. The daily run adds day, month, year-to-date and one-year changes, and flags any weekly move that is unusual against the past three years.</p>
+      <p class="eyebrow">In a fund</p>
+      <h2 id="fund-title">Where this plugs in, and what it produces on day one</h2>
+      <p class="prose">The engine is built to sit beside a portfolio manager and a risk function, not to replace either. It reads the book, states its rules in advance, sizes against a loss limit, grades every figure by its evidence and leaves the trade to a person.</p>
     </div>
-    <div class="panel"><div class="tablewrap"><table class="moves" id="mv-table"></table></div><p class="hint" id="mv-note"></p></div>
-  </section>
-
-  <section class="section" aria-labelledby="levels-title">
-    <div class="section-head">
-      <p class="eyebrow">Market</p>
-      <h2 id="levels-title">Key levels</h2>
-      <p class="prose" id="levels-sub">Dated readings from official and market sources. Tiles marked live refresh from the daily run.</p>
-    </div>
-    <div class="tiles" id="levels"></div>
-  </section>
-
-  <section class="section" aria-labelledby="regime-title">
-    <div class="section-head">
-      <p class="eyebrow">Regime</p>
-      <h2 id="regime-title">Current position</h2>
-      <p class="prose">Ray Dalio's four economic environments, mapped to today. Growth is still holding up and inflation is rising with oil. That corner rewards commodities and inflation-linked assets and punishes nominal bonds and long-duration growth stocks.</p>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <div class="quad-wrap">
-          <div class="quad-y">Inflation rising ↑</div>
-          <div class="quad">
-            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h3>Stagflation</h3><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
-            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h3>Inflationary boom</h3><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
-            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h3>Deflationary bust</h3><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
-            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h3>Goldilocks</h3><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
-          </div>
-          <div class="quad-x">Growth rising →</div>
-        </div>
-        <p class="hint">Asset placement is the desk's synthesis of Bridgewater's All Weather framework. Growth read: the Fed's September statement (solid expansion, steady unemployment). Inflation read: energy-led CPI of 4.2% in May and Brent at $125 on Oct 7. "Edging left": the Nasdaq's worst week since June and AI credit stress.</p>
+    <div class="fund" id="fund">
+      <div class="panel fund-cell">
+        <span class="panel-title">It consumes</span>
+        <ul class="m-learn-l">
+          <li>Public data: FRED, SEC XBRL filings, Treasury par yields, Shiller's long history; Databento for the tape under a secret key.</li>
+          <li>The fund's own book and limits, kept in a private, git-ignored file the page never sees. Here the book is a model, not personal positions.</li>
+          <li>Stated rules: the loss budget (expected shortfall, worst month in twenty), the lag, the refit schedule, the risk aversion. All listed, with reasons, on the Parameters desk.</li>
+        </ul>
       </div>
-      <figure class="panel chart" style="margin:0">
-        <div class="chart-head"><span class="chart-title">Are bonds hedging stocks?</span><span class="src">Stock-bond return correlation, one-year window</span></div>
-        <div class="svgbox" id="gauge" role="img" aria-label="Stock-bond return correlation: about -0.6 in 2020, about +0.05 on average after 2021, +0.21 on July 31, 2026."></div>
-        <p class="hint">S&amp;P 500 against the 10-year Treasury. The Fed reports stock returns against yield changes; the sign is flipped so that negative means bonds rose when stocks fell. Source: <a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve, FEDS Notes, Oct 16, 2026</a>.</p>
-        <dl class="dlist glist">
-          <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
-          <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
-          <dt>Engine rule</dt><dd>Hold the long-bond hedge only after the correlation (63-day half-life) falls below −0.10, and drop it once it turns positive.</dd>
-        </dl>
-        <p class="sentence" id="gauge-live" hidden></p>
-      </figure>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><span class="panel-title">What protects the book in this regime</span><a class="src" href="#hedges">Full hedge matrix</a></div>
-      <div class="grid3">
-        <div><p><strong>Convexity first.</strong></p><p class="prose">Index put spreads pay in any fast drawdown, whatever the cause. Their cost is known on day one.</p></div>
-        <div><p><strong>Cover the oil lane.</strong></p><p class="prose">Energy and inflation-linked exposure rise in the one scenario where bonds and stocks fall together.</p></div>
-        <div><p><strong>Duration on a leash.</strong></p><p class="prose">Hold long Treasuries only while the engine's correlation says they hedge. Credit protection covers an AI financing break.</p></div>
+      <div class="panel fund-cell">
+        <span class="panel-title">It produces</span>
+        <ul class="m-learn-l">
+          <li>A dated decision record each day: inputs with sources, the regime, the forecasts, the sized call, the gate, what would flip it, and anything blocked.</li>
+          <li>Proposals, never orders: a person approves every trade. The MCP server exposes <span id="fund-tools">34</span> tools, none of which can place, route or cancel an order, so the fund's own agents and risk systems query the same engine.</li>
+          <li>Evidence-graded figures (observed, estimated, assumed, hypothesis) and a journal that scores past calls for skill against luck.</li>
+        </ul>
+      </div>
+      <div class="panel fund-cell">
+        <span class="panel-title">How I work</span>
+        <ul class="m-learn-l">
+          <li>Frame the question as a decision under a loss limit, not a forecast: what size, what hedge, and what evidence would change it.</li>
+          <li>Write the rule before looking at the outcome; test it on 156 years, walked forward, against the best of n useless strategies; let the record set how far to trust it.</li>
+          <li>Publish the parameters and the code. A number nobody can trace is not a number the book should act on.</li>
+        </ul>
+      </div>
+      <div class="panel fund-cell">
+        <span class="panel-title">First thirty days</span>
+        <ul class="m-learn-l">
+          <li>Week one: the fund's book and limits into the private config; the daily record starts, with the fund's own hedges in the hedge selector.</li>
+          <li>Weeks two to three: the fund's standing rules (trend, volatility, valuation) through the labs harness, so each carries a p-value corrected for the variants tried.</li>
+          <li>Week four: the gate and the overlay calibrated to the fund's history; the parameters desk becomes the risk function's audit page.</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="section" id="live" aria-labelledby="live-title">
-    <div class="section-head">
-      <p class="eyebrow">Live data</p>
-      <h2 id="live-title">Engine readout</h2>
-      <p class="prose">Computed every weekday morning on GitHub Actions. The market panel runs on free FRED data; the book panel switches on once the Databento key is in place.</p>
+  <section class="section" id="t7-cards-sec" aria-labelledby="t7-cards-title">
+    <h2 class="sr-only" id="t7-cards-title">What changed, what would reverse the call, and how far to trust it</h2>
+    <div class="t7-grid">
+      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet"></p><ol class="t7-changes" id="t7-changes"></ol></section>
+      <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">Reversal conditions</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decision">What would flip the call →</a></section>
+      <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#reality">Reality check →</a></section>
+      <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
+        <ul class="cal cal-compact">
+          <li><b>Oct 27–28</b><span>FOMC. Market odds of a second straight hike fell from 70% on Sep 28 to 19% on Oct 8, then rose to about 33% by Oct 16. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">FXStreet</a></span></li>
+          <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets.</span></li>
+          <li><b>Nov 10</b><span>October CPI. September printed 3.7% for the year; three-year inflation (3.06%) sits inside the 2.75% to 4.25% band where bonds stop hedging. <a class="src" href="https://www.bls.gov/news.release/CPI.htm">BLS</a></span></li>
+          <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
+        </ul>
+      </section>
     </div>
-    <div class="panel">
-      <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Live panel: fills from the daily run</span></div>
-      <div id="macro-body" class="section">
-        <div class="empty"><strong>Live panel.</strong><span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><span class="panel-title">Model book</span><span class="src" id="book-asof">Needs the Databento key</span></div>
-      <div id="book-body" class="section">
-        <div class="empty"><strong>Book analytics start with the Databento key.</strong><span>Once the key is saved as a repository secret, each daily run adds the book's own regime, the hedge ratio it implies, a four-policy backtest with deflated Sharpe ratios, factor exposures, and the size to run.</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" aria-labelledby="cal-title">
-    <div class="section-head">
-      <p class="eyebrow">Calendar</p>
-      <h2 id="cal-title">Upcoming catalysts</h2>
-    </div>
-    <ul class="cal">
-      <li><b>Oct 22</b><span>AI stocks fell after Meta's and Lam Research's results (QQQ −2.65% at 1:15 p.m. ET, Meta −6.0%) while the 10-year yield fell 11bp to 5.02% and TLT rose 1.73%: on a growth and earnings scare, long bonds hedged. <a href="#bonds">Bonds, simply</a> reprices every Treasury ETF at any 10-year and 30-year yield. <a class="src" href="https://stockanalysis.com/etf/qqq/">StockAnalysis (QQQ)</a> · <a class="src" href="https://stockanalysis.com/etf/tlt/">StockAnalysis (TLT)</a> · <a class="src" href="https://finance.yahoo.com/markets/live/stock-market-today-thursday-october-22-dow-sp-500-nasdaq-tesla-meta-112217857.html">Yahoo Finance</a></span></li>
-      <li><b>Oct 27–28</b><span>FOMC. Market odds of a second straight hike fell from 70% on Sep 28 to 19% on Oct 8, then rose to about 33% by Oct 16. UOB expects hikes in December and early 2027 to a 4.50% upper bound. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a> · <a class="src" href="https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026">ROIC (Reuters)</a></span></li>
-      <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets. <a class="src" href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">FXStreet</a></span></li>
-      <li><b>Nov 10</b><span>October CPI. September printed 3.7% for the year; three-year inflation (3.06%) sits inside the 2.75% to 4.25% band where bonds stop hedging; the validated line is 4.25%. <a class="src" href="https://www.bls.gov/news.release/CPI.htm">BLS</a></span></li>
-      <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. The founder's 6.4 billion shares stay locked to Jun 12, 2027. <a class="src" href="https://www.webull.com/news/15414125170107392">Webull, citing Reuters</a></span></li>
-      <li><b>Now</b><span>AI credit: credit default swaps on CoreWeave traded at distress levels on Oct 15, and the Nasdaq posted its worst week since June on Oct 16 on AI selling and oil. <a class="src" href="https://vantagemarkets.com/market-analysis/meta-stock-price-today-q3-earnings-ahead-october-20-2026">Vantage (citing CNBC)</a> · <a class="src" href="https://www.cnbc.com/2026/10/15/stock-market-today-live-updates.html">CNBC</a></span></li>
-    </ul>
-  </section>
-
-  <section class="section" aria-labelledby="tq-title">
-    <div class="section-head">
-      <p class="eyebrow">Theses</p>
-      <h2 id="tq-title">Working theses</h2>
-      <p class="prose">Each one has evidence, an expression, a hedge, and the data that would change the desk's mind.</p>
-    </div>
-    <div class="tchips" id="thesis-chips"></div>
+    <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
   </section>
 
   <div class="rosette-end"><div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout</span></div></div>
   <footer class="foot"><p>Research desk, not investment advice. The model book is illustrative. Scenario sizes and tool inputs are assumptions; every market figure links to its source and date.</p></footer>
 </section>
 
-<!-- ======================= NOTEWORTHY ======================= -->
+<!-- ======================= DECISION ENGINE ======================= -->
 <section class="view" id="view-decision" hidden aria-labelledby="dx-title">
   <div class="vhead"><p class="eyebrow">Decision engine</p><h1 id="dx-title">From 156 years of data to a sized exposure, gated by its own record</h1>
     <p class="lede" id="dx-bluf"></p></div>
@@ -391,6 +212,14 @@
       <div class="panel"><span class="panel-title">The hedge selector</span><div class="tablewrap"><table id="dx-hedge"></table></div><p class="hint" id="dx-hedge-note"></p></div>
     </div>
   </section>
+  <section class="section" id="dx-overlay" aria-labelledby="dx-ov-title">
+    <div class="section-head"><p class="eyebrow">Trust and overlay</p><h2 id="dx-ov-title">The evidence gate, and the trend overlay chosen by the record</h2>
+      <p class="prose">Two rules sit between the engine's optimum and the book. The gate scales the move toward the optimum by how conclusive the engine's own record is; the overlay scales exposure when the 10-month trend is off, by a factor chosen on the walk-forward record rather than set by hand.</p></div>
+    <div class="grid2 dx-g2">
+      <div class="panel" id="dx-gate"><span class="panel-title">The evidence gate today</span><p class="prose" id="dx-gate-note"></p></div>
+      <div class="panel"><span class="panel-title">Exposure below the 10-month average, scaled by a factor</span><div class="tablewrap"><table id="dx-ov"></table></div><p class="hint" id="dx-ov-note"></p></div>
+    </div>
+  </section>
   <section class="section" aria-labelledby="dx-kal-title">
     <div class="section-head"><p class="eyebrow">Drift</p><h2 id="dx-kal-title">The stock-bond relationship varies by regime</h2></div>
     <div class="panel"><span class="panel-title">Real stock return per point of 10-year yield, Kalman filtered, 90% band</span><div class="svgbox" id="dx-kal"></div><p class="prose" id="dx-kal-note"></p></div>
@@ -444,10 +273,10 @@
   <div class="at-tiles" id="mx-tiles"></div>
   <section class="section" aria-labelledby="mx-how-title">
     <div class="section-head"><p class="eyebrow">How the mind multiplies</p><h2 id="mx-how-title">Queries as vectors, knowledge as a matrix</h2>
-      <p class="prose">The mind's 8,693 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
+      <p class="prose">The mind's 8,728 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
     <div class="mx-eq panel">
-      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,693, forty times</small></div>
-      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,693 by Q, forty times</small></div>
+      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,728, forty times</small></div>
+      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,728 by Q, forty times</small></div>
       <div><span class="dx-k">A neural network layer</span><code>h = f(W x + b)</code><small>the same product, learned weights W</small></div>
     </div>
   </section>
@@ -747,6 +576,24 @@
     <div class="section-head"><p class="eyebrow">Reference</p><h2 id="dm-title">Implementation choices for duration</h2><p class="prose">Par-bond approximation at Oct 21 yields. DV01 is the dollar change per basis point on $100,000.</p></div>
     <div class="panel"><div class="tablewrap"><table id="duration-table"></table></div></div>
   </section>
+  <section class="section" id="moves" aria-labelledby="mv-title">
+    <div class="section-head">
+      <p class="eyebrow">This week</p>
+      <h2 id="mv-title">Market moves</h2>
+      <p class="prose" id="mv-sub">Fifteen markets the desk reads, from FRED. The daily run adds day, month, year-to-date and one-year changes, and flags any weekly move that is unusual against the past three years.</p>
+    </div>
+    <div class="panel"><div class="tablewrap"><table class="moves" id="mv-table"></table></div><p class="hint" id="mv-note"></p></div>
+  </section>
+
+  <section class="section" aria-labelledby="levels-title">
+    <div class="section-head">
+      <p class="eyebrow">Market</p>
+      <h2 id="levels-title">Key levels</h2>
+      <p class="prose" id="levels-sub">Dated readings from official and market sources. Tiles marked live refresh from the daily run.</p>
+    </div>
+    <div class="tiles" id="levels"></div>
+  </section>
+
 </section>
 
 <!-- ======================= OPTIONS ======================= -->
@@ -1337,6 +1184,15 @@
     <h1 id="th-title">Eight working theses, each with stated disconfirming evidence</h1>
     <p class="lede">A thesis earns capital only with evidence, an expression, a hedge, and data that would change the desk's mind. These are research positions for the engine to test, not recommendations.</p>
   </div>
+
+  <section class="section" id="miss" aria-labelledby="miss-title">
+    <div class="section-head">
+      <p class="eyebrow">Connections</p>
+      <h2 id="miss-title">Six current exposures most portfolios overlook</h2>
+      <p class="prose">Each is a link between two parts of the system, measured, with the evidence one click away.</p>
+    </div>
+    <div class="cards3" id="miss-list"></div>
+  </section>
   <section class="section" aria-labelledby="bn-title">
     <div class="section-head"><p class="eyebrow">Evidence</p><h2 id="bn-title">The buildout by the numbers</h2></div>
     <div class="grid2">
@@ -1392,6 +1248,17 @@
     <p class="lede">Each card shows the inputs with their source and date, the rule written down in advance, the action it produces today, how confident the desk can be given the assumptions underneath, and how far the data is from flipping the call. Toggle <strong>Show the math</strong> in the top band to see every formula.</p>
   </div>
   <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#dec-title">Decisions</a><a href="#roc-title">Rates of change</a><a href="#as-title">Assumptions</a><a href="#kk-title">Knowns and unknowns</a><a href="#ch-title">2nd to 4th order</a></nav>
+
+  <section class="section" id="signals" aria-labelledby="sig-title">
+    <div class="section-head">
+      <p class="eyebrow">Signals</p>
+      <h2 id="sig-title">Monitoring priorities</h2>
+      <p class="prose" id="sig-sub">Twelve signals, each with a rule and an action. Each carries its date; the daily run replaces it with the latest value.</p>
+    </div>
+    <div class="read" id="desk-read" aria-live="polite"></div>
+    <div class="signals" id="signals-grid"></div>
+    <p class="hint">Thresholds are the desk's working rules, not laws, and each can be tuned. Each card links to the playbook or thesis it feeds. The desk read adds up which playbook the red and amber signals argue for.</p>
+  </section>
 
   <section class="section" id="decisions" aria-labelledby="dec-title">
     <div class="section-head">
@@ -1805,6 +1672,15 @@
     <details class="tableview"><summary>Show every node's response as a table</summary><div class="tablewrap"><table id="br-table"></table></div></details>
     <div class="math"><span class="mlabel">The arithmetic</span>Order <var>k</var>: <var>x</var><sub>k</sub> = <var>W</var>&#8868;<var>x</var><sub>k&minus;1</sub>, with <var>x</var><sub>0</sub> the shock. Total over <var>K</var> orders = &sum;<sub>k=1..K</sub> <var>x</var><sub>k</sub>, which tends to the Leontief inverse [(<var>I</var> &minus; <var>W</var>&#8868;)<sup>&minus;1</sup> &minus; <var>I</var>] <var>x</var><sub>0</sub> when the spectral radius &rho;(<var>W</var>) is below 1 (estimated by Gelfand's formula, &rho; = lim &#8214;<var>W</var><sup>n</sup>&#8214;<sup>1/n</sup>). Measured links: recursive regressions of standardized monthly changes in the order oil, CPI, 10-year, stocks, VIX, gold, per regime; the slider blends the two sets. Robustness: 400 draws with every weight ~ N(<var>w</var>, <var>sd</var>), sd = the regression's standard error or half a judged weight. Inverse: the minimum-norm driver shock <var>s</var> = <var>y</var> &middot; <var>m</var> &divide; &#8214;<var>m</var>&#8214;<sup>2</sup>, where <var>m</var><sub>i</sub> is the total effect of driver <var>i</var> on the target.</div>
   </section>
+  <section class="section" id="sysmap" aria-labelledby="map-title">
+    <div class="section-head">
+      <p class="eyebrow">System map</p>
+      <h2 id="map-title">Current transmission between drivers</h2>
+      <p class="prose">Each box is a part of the financial system this book depends on, outlined by its signals' state; each line is a transmission channel, red where it is carrying stress today. Select a box to open its desk.</p>
+    </div>
+    <div class="panel"><div class="sysmap" id="map-box"></div><div class="sysmap-key"><span><i></i>Channel</span><span><i class="hot"></i>Carrying stress now</span><span>Outline: green calm, amber watch, red act</span></div></div>
+  </section>
+
 </section>
 
 <!-- ======================= OODA ======================= -->
@@ -1877,6 +1753,48 @@
     <div class="panel"><span class="panel-title">What each price requires, against the base rates</span><div class="tablewrap"><table class="rz" id="oo-pos"></table></div>
       <p class="hint">Implied growth: the ten-year revenue growth a reverse DCF needs to justify today's enterprise value. Base rate: the share of US companies of the same size that achieved it, 1950 to 2015, real. Full workings on the <a href="#positions">Positions</a> desk.</p></div>
   </section>
+  <section class="section" aria-labelledby="regime-title">
+    <div class="section-head">
+      <p class="eyebrow">Regime</p>
+      <h2 id="regime-title">Current position</h2>
+      <p class="prose">Ray Dalio's four economic environments, mapped to today. Growth is still holding up and inflation is rising with oil. That corner rewards commodities and inflation-linked assets and punishes nominal bonds and long-duration growth stocks.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="quad-wrap">
+          <div class="quad-y">Inflation rising ↑</div>
+          <div class="quad">
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↑</span><h3>Stagflation</h3><p>Works: inflation-linked bonds, commodities, gold, cash. Hurts: equities and nominal bonds together.</p></div>
+            <div class="qcell now"><span class="eyebrow">Growth ↑ · Inflation ↑</span><h3>Inflationary boom</h3><p>Works: commodities, energy, value equities, inflation-linked bonds. Hurts: nominal bonds, long-duration growth.</p><span class="qmark">We are here, edging left</span></div>
+            <div class="qcell"><span class="eyebrow">Growth ↓ · Inflation ↓</span><h3>Deflationary bust</h3><p>Works: nominal bonds, cash, quality equities. Hurts: credit, commodities, cyclicals.</p></div>
+            <div class="qcell"><span class="eyebrow">Growth ↑ · Inflation ↓</span><h3>Goldilocks</h3><p>Works: equities, corporate credit, nominal bonds. Hurts: commodities and gold, relatively.</p></div>
+          </div>
+          <div class="quad-x">Growth rising →</div>
+        </div>
+        <p class="hint">Asset placement is the desk's synthesis of Bridgewater's All Weather framework. Growth read: the Fed's September statement (solid expansion, steady unemployment). Inflation read: energy-led CPI of 4.2% in May and Brent at $125 on Oct 7. "Edging left": the Nasdaq's worst week since June and AI credit stress.</p>
+      </div>
+      <figure class="panel chart" style="margin:0">
+        <div class="chart-head"><span class="chart-title">Are bonds hedging stocks?</span><span class="src">Stock-bond return correlation, one-year window</span></div>
+        <div class="svgbox" id="gauge" role="img" aria-label="Stock-bond return correlation: about -0.6 in 2020, about +0.05 on average after 2021, +0.21 on July 31, 2026."></div>
+        <p class="hint">S&amp;P 500 against the 10-year Treasury. The Fed reports stock returns against yield changes; the sign is flipped so that negative means bonds rose when stocks fell. Source: <a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve, FEDS Notes, Oct 16, 2026</a>.</p>
+        <dl class="dlist glist">
+          <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
+          <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
+          <dt>Engine rule</dt><dd>Hold the long-bond hedge only after the correlation (63-day half-life) falls below −0.10, and drop it once it turns positive.</dd>
+        </dl>
+        <p class="sentence" id="gauge-live" hidden></p>
+      </figure>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">What protects the book in this regime</span><a class="src" href="#hedges">Full hedge matrix</a></div>
+      <div class="grid3">
+        <div><p><strong>Convexity first.</strong></p><p class="prose">Index put spreads pay in any fast drawdown, whatever the cause. Their cost is known on day one.</p></div>
+        <div><p><strong>Cover the oil lane.</strong></p><p class="prose">Energy and inflation-linked exposure rise in the one scenario where bonds and stocks fall together.</p></div>
+        <div><p><strong>Duration on a leash.</strong></p><p class="prose">Hold long Treasuries only while the engine's correlation says they hedge. Credit protection covers an AI financing break.</p></div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="oo-dec-sec" aria-labelledby="oo-dec-title">
     <div class="section-head"><p class="eyebrow">Decide</p><h2 id="oo-dec-title">Decide: allocation, hedges and positions</h2><p class="prose" id="oo-dec-t"></p></div>
     <div class="panel hb">
@@ -1934,6 +1852,26 @@
     <div class="section-head"><p class="eyebrow">Flow</p><h2 id="en-flow-title">Data lineage</h2></div>
     <ol class="en-flow" id="en-flow"></ol>
   </section>
+  <section class="section" id="live" aria-labelledby="live-title">
+    <div class="section-head">
+      <p class="eyebrow">Live data</p>
+      <h2 id="live-title">Engine readout</h2>
+      <p class="prose">Computed every weekday morning on GitHub Actions. The market panel runs on free FRED data; the book panel switches on once the Databento key is in place.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Live panel: fills from the daily run</span></div>
+      <div id="macro-body" class="section">
+        <div class="empty"><strong>Live panel.</strong><span>This panel will show today's Nasdaq-100 versus long-Treasury correlation and regime, the correlation in every year since 1994, and what long bonds did on the worst Nasdaq days in each era.</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Model book</span><span class="src" id="book-asof">Needs the Databento key</span></div>
+      <div id="book-body" class="section">
+        <div class="empty"><strong>Book analytics start with the Databento key.</strong><span>Once the key is saved as a repository secret, each daily run adds the book's own regime, the hedge ratio it implies, a four-policy backtest with deflated Sharpe ratios, factor exposures, and the size to run.</span></div>
+      </div>
+    </div>
+  </section>
+
 </section>
 
 <!-- ======================= JOURNAL ======================= -->
@@ -1943,6 +1881,15 @@
     <h1 id="jr-title">Decision journal: forecasts recorded before outcomes</h1>
     <p class="lede">A hypothesis, the data behind it, the assumptions with their odds, the kill line, the size and the pre-mortem, locked in before the outcome. On close, the journal separates the market's contribution from the decision's and scores calibration as forecasters are scored.</p>
   </div>
+
+  <section class="section pulse" id="pulse" aria-labelledby="pulse-title">
+    <h2 class="sr-only" id="pulse-title">Current readings</h2>
+    <div class="pulse-grid">
+      <div class="panel rings-panel"><div class="rings" id="rings" role="img" aria-label="Risk rings"></div><ul class="ring-key" id="ring-key"></ul></div>
+      <div class="panel since-panel"><span class="panel-title">Since the last visit</span><div id="since"></div></div>
+      <div class="panel checkin-panel"><div class="panel-head"><span class="panel-title">Daily checklist</span><span class="streak" id="streak"></span></div><ul class="checkin" id="checkin"></ul><p class="hint">Saved in this browser; resets each weekday.</p></div>
+    </div>
+  </section>
   <div class="panel">
     <div class="panel-head"><span class="panel-title">Decisions</span><span class="jr-store" id="jr-store">Saved in this browser</span></div>
     <div class="jr-bar">
@@ -2298,6 +2245,23 @@
     <h1 id="lg-title">Twenty investor frameworks applied to current conditions</h1>
     <p class="lede">From Bagehot in 1873 to Griffin and Spitznagel, each legend's core idea in plain words, the rule it adds to the engine, and what their lens says about today's data. Then the sections most desks skip.</p>
   </div>
+
+  <section class="voices" id="voices" aria-labelledby="vo-title">
+    <div class="hero-head"><p class="eyebrow">Voices · extreme bear to extreme bull</p><h2 id="vo-title">Investor views by topic</h2>
+      <p class="prose">Type a question or a claim, then move along the spectrum. Every quote is verbatim, dated and linked to where it was said; the stance is judged per quote, not per person.</p><p class="hint" id="vo-count"></p></div>
+    <form class="vo-form" id="vo-form" role="search" aria-label="Find investor voices"><label for="vo-q" class="sr-only">Question or statement</label><input type="search" id="vo-q" maxlength="300" autocomplete="off" placeholder="Is bitcoin digital gold?"><button class="btn" type="submit">Find the voices</button></form>
+    <div class="vo-examples" id="vo-examples" role="group" aria-label="Example questions"></div>
+    <div class="vo-out" id="vo-out" hidden>
+      <div class="vo-head"><h3 class="h3" id="vo-topic"></h3><div class="vo-related" id="vo-related"></div></div>
+      <p class="sentence" id="vo-read"></p>
+      <div class="vo-spec" id="vo-spec" role="group" aria-label="The spectrum, extreme bear to extreme bull"></div>
+      <article class="vo-card" id="vo-card" aria-live="polite"></article>
+      <div class="vo-nav" id="vo-nav"></div>
+      <div class="vo-claude-row"><button class="pill" type="button" id="vo-claude" hidden>Ask Claude to rank these for the exact question</button><span class="hint" id="vo-claude-out" aria-live="polite"></span></div>
+      <details class="tableview" id="vo-all" hidden><summary id="vo-all-sum">Every voice</summary><ol class="vo-all" id="vo-all-list"></ol></details>
+      <p class="hint">Keys: ← and → move along the spectrum; N shows another voice. Quotes are short excerpts with links to the full source. The library is curated, so its lean is not a poll.</p>
+    </div>
+  </section>
   <section class="section" aria-labelledby="cv-title">
     <div class="section-head"><p class="eyebrow">The vote</p><h2 id="cv-title">Current consensus across frameworks</h2><p class="prose" id="cv-sub"></p></div>
     <div class="tally" id="lg-tally" role="img" aria-label="Council vote"></div>
@@ -2543,11 +2507,136 @@
   <footer class="foot"><p>Built by Jamie Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
 </section>
 
+<!-- ======================= PARAMETERS ======================= -->
+<section class="view" id="view-parameters" hidden aria-labelledby="pm-title">
+  <div class="vhead"><p class="eyebrow">The engine · parameters</p><h1 id="pm-title">Θ: every matrix the engine learns, and what shaped it</h1>
+    <p class="lede">The engine is one system whose parameters are numerical matrices, vectors and scalars shaped by optimisation: transition matrices by expectation-maximisation, regression weights by penalised least squares, network weights by Adam with early stopping, a Q-table by fitted Q-iteration, model weights by discounted Bayesian updating, a causal skeleton by a graphical lasso, and a knowledge graph compressed to 64 numbers a node by an eigendecomposition. This desk is the inventory: what has been learned, how much, by which algorithm against which objective, on what data, refit how often, and feeding which desks. The few constants chosen by judgment are listed apart, each with its reason.</p></div>
+  <div class="at-tiles" id="pm-tiles"></div>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#pm-flow-title">The layers</a><a href="#pm-inv-title">The inventory</a><a href="#pm-hand-title">Set by hand</a><a href="#pm-read-title">How to read it</a></nav>
+
+  <section class="section" aria-labelledby="pm-flow-title">
+    <div class="section-head"><p class="eyebrow">The layers</p><h2 id="pm-flow-title">Eight layers, in the order data flows through them</h2><p class="prose" id="pm-flow-sub"></p></div>
+    <ol class="pm-layers" id="pm-layers" aria-label="The engine's layers"></ol>
+  </section>
+
+  <section class="section" aria-labelledby="pm-inv-title">
+    <div class="section-head"><p class="eyebrow">The inventory</p><h2 id="pm-inv-title">Every learned object: shape, count, optimiser, objective, data, refit, destination</h2><p class="prose">Select a row for its data, its as-of date, today's values and the module that fits it. Counts are the numbers the engine multiplies, not free parameters: a 3 by 3 transition matrix counts nine although six are free.</p></div>
+    <div class="pm-filter" id="pm-filter" role="group" aria-label="Filter by layer"></div>
+    <div class="tablewrap"><table class="rz pm-table" id="pm-table"></table></div>
+  </section>
+
+  <section class="section" aria-labelledby="pm-hand-title">
+    <div class="section-head"><p class="eyebrow">Set by hand</p><h2 id="pm-hand-title">Constants chosen by judgment, with their reasons</h2><p class="prose">Not fitted to outcomes. Each one is a choice a reviewer can disagree with, so each carries the reason it was made and where it acts. Changing one reruns the engine; nothing else on the site hides a dial.</p></div>
+    <div class="tablewrap"><table class="rz pm-hand" id="pm-hand"></table></div>
+  </section>
+
+  <section class="section" aria-labelledby="pm-read-title">
+    <div class="section-head"><p class="eyebrow">How to read it</p><h2 id="pm-read-title">Why the decision core is small, and why that is the point</h2></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Learned against set</span>
+        <p class="prose">A parameter is learned when an algorithm chose its value to optimise a stated objective on stated data; it is set when a person chose it. The engine keeps the two apart because they fail differently: a learned value drifts with the data and is caught by the refit schedule and the walk-forward record; a set value is a judgment and is caught only by a reader who disagrees. Every row above says which it is.</p></div>
+      <div class="panel"><span class="panel-title">Why so few numbers decide</span>
+        <p class="prose">The decision core is a few thousand numbers because the targets are noisy and the history, though long, is one history. Each forecaster is refit every two years on a few hundred effective observations; a model with many more parameters than that would fit the noise, which is what the machine-learning lab finds when it tries. The one large object, the knowledge graph's spectral map, is not a forecast: it compresses what the system knows so that every question becomes a matrix product, and it is judged by retrieval, not by returns.</p></div>
+      <div class="panel"><span class="panel-title">Walked forward, with a lag</span>
+        <p class="prose">A value used at month t was fit on data through t minus two. The refit schedule is part of the parameter: the regime models refit every five years (eighteen fits since 1940), the forecasters every two, the recursive objects every month. The gate then decides how much of the engine's optimum reaches the book, from the t statistic of its record against the best of eight useless strategies.</p></div>
+      <div class="panel"><span class="panel-title">Where to look</span>
+        <p class="prose">The inventory is produced by <code>buildout/parameters.py</code> from the engines' own outputs, so it cannot disagree with the run. <code>python -m buildout parameters</code> prints it; the MCP tool <code>parameter_inventory</code> serves it by layer or by object; the <a href="#code">source desk</a> shows every module named in the table. The <a href="#mind">mind</a> carries each object as a node, so a question about the engine's weights is answered from the same inventory.</p></div>
+    </div>
+  </section>
+</section>
+
 <!-- ======================= v0.14: THE MIND ======================= -->
 <section class="view" id="view-mind" hidden aria-labelledby="md-title">
   <div class="vhead"><p class="eyebrow">The mind</p><h1 id="md-title">A single knowledge graph for retrieval, measurement and inference</h1>
     <p class="lede">Every concept an investor needs, every market the engine measures, every sourced fact and paper, every verified quote, every module of the engine and every economy, joined by typed links. Ask a question and the mind shows its work: what it recalled, how activation spread, which claim it weighed, the evidence on each side with its weight and its source, how fragile the verdict is, the causal chain to the book and what it would do.</p></div>
   <div class="at-tiles" id="md-tiles"></div>
+
+  <section class="hero-brain" id="hero" aria-labelledby="hero-title">
+    <div class="hero-head"><p class="eyebrow">The mind · live</p><h2 id="hero-title">Query the knowledge graph</h2>
+      <p class="prose">The knowledge graph is one layer of the engine, and the causal map (the brain) is another: every concept an investor needs, every measured market, every sourced fact and paper, every verified quote, every module and parameter object of the engine, and the world economy, in one graph. Type a question and it recalls what matches, spreads activation through the links, frames the claim, weighs the evidence for and against in log-odds, tests how fragile the verdict is, traces the causal chain to the book and proposes an action it never executes. The whole brain and the core map show a shock travelling the markets themselves.</p>
+      <div class="seg hero-which" id="hero-which" role="group" aria-label="Which view of the brain"><button type="button" data-w="mind" aria-pressed="true">The mind</button><button type="button" data-w="full" aria-pressed="false">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 34 nodes</button></div></div>
+    <div id="hero-mind">
+      <div class="hero-grid">
+        <div class="hero-stage">
+          <canvas id="mind-hero-cv" role="img" aria-label="The mind: every node of the brain and the engine, lit by the current question"></canvas>
+          <div class="hero-ctl"><span class="hint">Hover to identify a node; click to query it. Gold marks activation spreading from the question.</span></div>
+        </div>
+        <aside class="hero-math" aria-labelledby="mh-t">
+          <span class="panel-title" id="mh-t">Think</span>
+          <div class="m-ask"><label class="sr-only" for="mh-q">Question or claim</label><input id="mh-q" type="text" maxlength="300" placeholder="Is the stock market overvalued?" autocomplete="off"><button class="btn" type="button" id="mh-go">Think</button></div>
+          <div class="m-ex" id="mh-ex" role="group" aria-label="Example questions"></div>
+          <div id="mh-out" aria-live="polite"></div>
+          <p class="hint" id="mh-count"></p>
+        </aside>
+      </div>
+    </div>
+    <div id="hero-full" hidden>
+      <div class="hero-grid">
+        <div class="hero-stage">
+          <div class="hero-presets" id="ah-presets" role="group" aria-label="Scenarios"></div>
+          <canvas id="at-hero-cv" role="img" aria-label="The whole brain"></canvas>
+          <div class="hero-ctl">
+            <button class="pill" type="button" id="ah-prev" aria-label="Previous month">←</button>
+            <button class="pill" type="button" id="ah-play" aria-pressed="true">Pause</button>
+            <button class="pill" type="button" id="ah-next" aria-label="Next month">→</button>
+            <span class="hero-k" id="ah-k">h = 0</span>
+            <span class="hint">Hover a node to name it; click to shock it (shift-click for a fall).</span>
+          </div>
+          <div class="hero-own"><label for="ah-node">Shock</label><select id="ah-node"></select><label for="ah-size">by σ</label><input type="number" id="ah-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="ah-go">Run it</button><label for="ah-target">Watch</label><select id="ah-target"></select></div>
+        </div>
+        <aside class="hero-math" aria-labelledby="ah-math-t">
+          <span class="panel-title" id="ah-math-t">The math, live</span>
+          <p class="hero-scn" id="ah-scn"></p>
+          <p class="hero-eq">y<sub>t</sub> = W y<sub>t</sub> + A y<sub>t−1</sub> + e<sub>t</sub> &nbsp;·&nbsp; x<sub>0</sub> = (I − W)<sup>−1</sup>e &nbsp;·&nbsp; x<sub>h</sub> = (I − W)<sup>−1</sup>A x<sub>h−1</sub></p>
+          <p class="hint" id="ah-count"></p>
+          <p class="hero-steph" id="ah-step"></p>
+          <ol class="br-list" id="ah-flows"></ol>
+          <p class="sentence" id="ah-arrive"></p>
+          <span class="panel-title">Cumulative response, with the doubt</span>
+          <div class="svgbox" id="ah-fan"></div>
+          <p class="hint" id="ah-mc"></p>
+          <span class="panel-title">How it was learned</span>
+          <ul class="br-list" id="ah-trust"></ul>
+          <a class="more-link" href="#atlas">Explore the atlas: every node, link and test →</a>
+        </aside>
+      </div>
+    </div>
+    <div id="hero-core" hidden>
+    <div class="hero-grid">
+      <div class="hero-stage">
+        <div class="hero-presets" id="hero-presets" role="group" aria-label="Scenarios"></div>
+        <canvas id="hero-cv" role="img" aria-label="The brain"></canvas>
+        <div class="hero-ctl">
+          <button class="pill" type="button" id="hero-prev" aria-label="Previous order">←</button>
+          <button class="pill" type="button" id="hero-play" aria-pressed="true">Pause</button>
+          <button class="pill" type="button" id="hero-next" aria-label="Next order">→</button>
+          <span class="hero-k" id="hero-k">k = 0</span>
+          <div class="seg" id="hero-mode" role="group" aria-label="Draw it as"><button type="button" data-m="graph" aria-pressed="true">Graph</button><button type="button" data-m="matrix" aria-pressed="false">Matrix</button></div>
+          <div class="seg" id="hero-regime" role="group" aria-label="Which measured links"><button type="button" data-b="1" aria-pressed="true">Links since 2022</button><button type="button" data-b="0" aria-pressed="false">1990 to 2021</button></div>
+        </div>
+        <div class="hero-own"><label for="hero-node">Shock</label><select id="hero-node"></select><label for="hero-size">by σ</label><input type="number" id="hero-size" min="-3" max="3" step="0.5" value="1"><button class="pill" type="button" id="hero-go">Run it</button><span class="hint">or click any node (shift-click for a fall)</span></div>
+      </div>
+      <aside class="hero-math" aria-labelledby="hero-math-t">
+        <span class="panel-title" id="hero-math-t">The math, live</span>
+        <p class="hero-scn" id="hero-scn"></p>
+        <p class="hero-eq">x<sub>k</sub> = W′x<sub>k−1</sub> &nbsp;·&nbsp; S<sub>K</sub> = x<sub>1</sub> + … + x<sub>K</sub> &nbsp;→&nbsp; S<sub>∞</sub> = ((I − W′)<sup>−1</sup> − I)x<sub>0</sub></p>
+        <p class="hint" id="hero-x0"></p>
+        <p class="hero-steph" id="hero-step"></p>
+        <ol class="br-list" id="hero-flows"></ol>
+        <p class="sentence" id="hero-arrive"></p>
+        <span class="panel-title">The book's running sum, order by order</span>
+        <div class="svgbox" id="hero-conv"></div>
+        <p class="hint" id="hero-rho"></p><p class="hint" id="hero-lim"></p>
+        <span class="panel-title">300 worlds of doubt</span>
+        <canvas id="hero-hist" aria-hidden="true"></canvas>
+        <span class="panel-title">Can the brain be trusted?</span>
+        <ul class="br-list" id="hero-trust"></ul>
+        <a class="more-link" href="#brr-title">How the brain checks itself →</a>
+        <p class="sr-only" id="hero-live" aria-live="polite"></p>
+      </aside>
+    </div>
+    </div>
+  </section>
   <section class="section" aria-labelledby="md-think-title">
     <div class="section-head"><p class="eyebrow">Think</p><h2 id="md-think-title">Query</h2><p class="prose">Ctrl or ⌘ and scroll to zoom, drag to pan. Click any star to think about it and read its links.</p></div>
     <div class="m-ask m-ask-lg"><label class="sr-only" for="md-q">Question or claim</label><input id="md-q" type="text" maxlength="300" placeholder="Does the 200-day moving average work?" autocomplete="off"><button class="btn" type="button" id="md-go">Think</button></div>
@@ -2904,7 +2993,8 @@
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
       <li><b>Know.</b> ontology.py and concepts17.json define 4,318 concepts and their relations; knowledge.json holds 605 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 267 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 8,693 nodes and about 35,000 typed links, with 4,318 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 8,728 nodes and about 35,000 typed links, with 4,318 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Count.</b> parameters.py inventories every matrix, vector and scalar the engine learns (22 objects, about 598,000 numbers) with its shape, the optimiser and objective that shaped it, its data, its refit schedule and the desks it feeds, read from the engines' own outputs; the constants set by hand are listed apart with reasons.</li>
       <li><b>Decide.</b> decide.py sizes the stock exposure from stacked forecasts (nn.py's neural ensemble), regimes and changepoints (infer.py), model averaging that now includes geometric analogs (geometry.py), a risk budget and an evidence gate; portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
       <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
@@ -2941,6 +3031,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v23-t">
+    <div class="section-head"><p class="eyebrow">v0.23</p><h2 id="ag-v23-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>22</b><span>Parameter objects inventoried</span><small>shape, optimiser, objective, data, refit, destination</small></div>
+      <div class="at-kpi"><b>0.50</b><span>Trend overlay adopted</span><small>of five factors tried, by a rule written first</small></div>
+      <div class="at-kpi"><b>14 to 5</b><span>Screens on Today</span><small>one call, six stages, the counts, the fund block</small></div>
+      <div class="at-kpi"><b>6</b><span>Navigation groups</span><small>Engine and Workshop added; the Decide group dispersed into Today, Markets, Engine and Workshop</small></div></div>
+    <p class="prose">The lead agent took the review's structural findings (a fourteen-screen landing page, five navigation layers, a trend rule that beat holding on Sharpe and drawdown while the gate benchmarked against holding) and resolved each on the record rather than by taste: the overlay factor is chosen by a rule stated before the result, the landing page became the call and the engine's stages, and every parameter the engine learns was inventoried from the engines' own outputs so the page cannot disagree with the run. No subagents were used for this release; the checks were the test suite, the stress harness and screenshots at three widths in both themes.</p>
   </section>
   <section class="section" aria-labelledby="ag-v22-t">
     <div class="section-head"><p class="eyebrow">v0.22</p><h2 id="ag-v22-t">Release metrics</h2></div>
@@ -3113,7 +3211,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <h2 id="keys-title">Keyboard shortcuts</h2>
     <dl class="dlist">
       <dt>/ or Ctrl K</dt><dd>Search everything: tools, terms, securities, theses, episodes, questions</dd>
-      <dt>1 to 5</dt><dd>Jump to a section: Today, Decide, Markets, Research, Methods</dd><dt>=</dt><dd>In search, type arithmetic (= 2bn / 3m, bsput(100, 95, 0.25, 22%)) for an exact answer</dd><dt>M</dt><dd>Show or hide the math</dd>
+      <dt>1 to 6</dt><dd>Jump to a section: Today, Engine, Markets, Research, Workshop, Methods</dd><dt>=</dt><dd>In search, type arithmetic (= 2bn / 3m, bsput(100, 95, 0.25, 22%)) for an exact answer</dd><dt>M</dt><dd>Show or hide the math</dd>
       <dt>← →</dt><dd>Step through a focused chart</dd>
       <dt>?</dt><dd>This list</dd>
       <dt>:</dt><dd>Command line: think &lt;question&gt;, whatif &lt;condition&gt;, go &lt;desk&gt;, triage 1.2 8 40, erp 3.5 6, set keys=vim, math, help (Tab completes, ↑ recalls)</dd>

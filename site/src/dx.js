@@ -69,6 +69,16 @@
         .concat(Object.keys(O.hedges.names).map((k) => [O.hedges.names[k], fx(HP[k].sharpe, 2), pct(HP[k].cagr, 1), pct(HP[k].maxdd, 0), pct(O.hedges.share[k], 0, false)])), 1);
       $("#dx-hedge-note").textContent = `${O.hedges.start.slice(0, 4)} to ${O.hedges.end}, where Shiller's 10-year yield ends. Every hedge's return is seen every month, so this is an experts problem, not a bandit: each context (stressed or calm, trend on or off) keeps a discounted posterior of each hedge's log growth. Today, in a ${N.hedge.context}, the odds each is best: ${N.hedge.names.map((n, i) => `${n.toLowerCase()} ${pct(N.hedge.p_best[i], 0, false)}`).join(", ")}.`;
       $("#dx-dsr").textContent = `Deflated for the ${G.n_tried} strategies tried, the chance the best configuration's timing alpha is real is ${pct(O.deflated_excess.dsr, 0, false)}; its gain in Sharpe over holding has a 90% bootstrap range of ${fx(E.sharpe_vs_hold.lo, 2)} to ${fx(E.sharpe_vs_hold.hi, 2)}. Timing alpha is what the engine's departures from 1x earned beyond carrying more or less market; a risk-averse investor also pays for the extra swings, which is what the gate measures.`;
+      // v0.23: the gate in words, and the overlay study
+      const gn = $("#dx-gate-note");
+      if (gn) gn.textContent = `g = max(0, 2Φ(t − t0) − 1). The engine's monthly utility gain over holding since ${O.start.slice(0, 4)} has t ${fx(G.t, 1)}; the best of ${G.n_tried} useless strategies would show t ${fx(G.t0, 2)} (Φ⁻¹(1 − 1/${G.n_tried})), so the gate is ${pct(G.value, 0, false)} and the book holds ${dxX(N.exposure)} against the engine's ${dxX(N.engine_exposure)}. The gate rises toward 1 only as the record becomes conclusive; it cannot be tuned.`;
+      const OV = O.overlay;
+      if (OV && $("#dx-ov")) {
+        const rows = OV.factors.map((f) => { const r = OV.rows[`hold:${f}`] || OV.rows[`hold:${f.toFixed(1)}`] || OV.rows[`hold:${f.toFixed(2)}`]; return r ? [fx(f, 2) + (f === OV.adopted ? " · adopted" : ""), fx(r.perf.sharpe, 2), pct(r.perf.cagr, 1), pct(r.perf.maxdd, 0),
+          `${fx(r.sharpe_vs_hold.lo, 2)} to ${fx(r.sharpe_vs_hold.hi, 2)}`, `${pct(r.maxdd_vs_hold.lo, 0)} to ${pct(r.maxdd_vs_hold.hi, 0)}`, fx(r.utility_t, 2)] : null; }).filter(Boolean);
+        fillTable($("#dx-ov"), ["Factor", "Sharpe", "Real growth", "Worst drawdown", "Sharpe gain over holding, 90% range", "Drawdown shallower than holding, 90% range", "Utility t vs holding"], rows, 1);
+        $("#dx-ov-note").textContent = `Rule: ${OV.rule}. Factor 1.00 is holding; 0.00 is the classic trend rule (out of stocks below the average). Adopted: ${OV.adopted_reason}. Today the trend is ${OV.trend_on_now ? "on, so the overlay is armed and the book holds the gated call" : "off, so the gated call is scaled by " + fx(OV.adopted, 2)}.`;
+      }
       const ol = $("#dx-find");
       O.findings.forEach((f) => ol.append(h("li", null, f)));
     }

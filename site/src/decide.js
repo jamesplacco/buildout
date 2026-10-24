@@ -473,7 +473,9 @@
     const lower = (s) => s.charAt(0).toLowerCase() + s.slice(1);
     const above = I.infl.avg36 >= I.lineAt, TD = tltNow(I);
     box.append(
-      cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions"),
+      (typeof DX19 !== "undefined" && DX19 && DX19.now
+        ? cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call; the volatility rule's ${lower(g.act)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")
+        : cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")),
       cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds won't hedge: stocks and bonds move together (${sgn2(I.corr.v)}).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
         above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `At 2% inflation from here, the 36-month average stays above 2.75% for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),
       near.length ? cell("Watch", near.map((x) => `${x.row.n}: ${fmtRocLevel(x.row, x.at13.at)} in ${durTxt(x.at13.weeks)}`).join("; ") + ".",

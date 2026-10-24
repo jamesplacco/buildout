@@ -150,6 +150,9 @@ def main(argv: list[str] | None = None) -> None:
     rel.add_argument("node", help="a node id such as c:kalman, or a name")
     gmp = sub.add_parser("geometry", help="the shape of the market: covariance geometry, random matrices, topology, transport, paths, long memory, each claim tested")
     gmp.add_argument("--out", default="out")
+    prm = sub.add_parser("parameters", help="Theta: every matrix the engine learns, its shape, the algorithm that shaped it, its objective, data, refit schedule and the desks it feeds")
+    prm.add_argument("--data", default="out", help="a run folder with the engines' JSON outputs; shapes come from the modules' constants where a file is missing")
+    prm.add_argument("--json", action="store_true")
     pfp = sub.add_parser("portfolio", help="the portfolio engine: stocks, Treasuries, gold and cash from regimes, a learner over policies, ten simulated years")
     pfp.add_argument("--out", default="out")
     pfp.add_argument("--quick", action="store_true")
@@ -445,6 +448,11 @@ def main(argv: list[str] | None = None) -> None:
             return
         for r in M.related(nid, 12):
             print(f"  {r['similarity']:.3f}  {r['name']}  [{r['kind']}]")
+        return
+    if a.cmd == "parameters":
+        from . import parameters
+        o = parameters.build(**parameters.load_outputs(a.data))
+        print(json.dumps(o, indent=1) if a.json else parameters.table(o))
         return
     if a.cmd == "geometry":
         from . import atlas, geometry, labs

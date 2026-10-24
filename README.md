@@ -3,6 +3,22 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.23 names the system and counts what it has learned. The mind, the brain, the atlas and the decision and
+portfolio engines are layers of one engine whose product is its parameters, Theta: every matrix, vector and scalar an
+algorithm shaped by optimising a stated objective on stated data. `buildout/parameters.py` inventories them from the
+engines' own outputs (desk "Parameters", `python -m buildout parameters`, MCP tool `parameter_inventory`, a daily
+`parameters` engine): 22 objects and about 598,000 numbers, each with its shape, optimiser, objective, data, refit
+schedule and the desks it feeds; the decision core (regimes, forecasters, allocation, portfolio, learner) is 2,850
+numbers and the rest is the knowledge graph's 64-eigenvector spectral map. The eleven constants set by hand are listed
+apart with their reasons. The trend rule, which beat holding on Sharpe and drawdown while the gate benchmarked against
+holding, is resolved on the record (`decide.overlay_study`): of five scalings of exposure below the 10-month average,
+0.50 is the deepest drawdown cut that keeps holding's expected utility (worst drawdown 36% against 52%, Sharpe gain 90%
+range +0.02 to +0.17), adopted as an overlay on the gated call; the trend is on today, so the call stays at 1.00x and
+would fall to 0.50x if it broke. The landing page is one screen: the sized call as the headline, a six-number call
+board, the engine's six stages with today's values, the parameters and the codebase counted, and where the engine plugs
+into a fund; its other sections moved to the desks that own them. Navigation is six groups (Today, Engine, Markets,
+Research, Workshop, Methods), and the mind carries a node for every parameter object (8,728 nodes).
+
 Version 0.22 asks whether the shape of the market says anything (`geometry.py`, desk "Geometry", `python -m buildout
 geometry`, MCP tool `geometry_engine`). Every 36 months of stocks, 10-year Treasuries and gold is a covariance matrix, a
 point on the curved space of positive-definite matrices: rolling covariances for all windows at once from cumulative
@@ -36,7 +52,7 @@ fit runs in the same batch. The five-network ensemble trains its members side by
 written by a subagent, identical to sequential training bit for bit). Measured on the build machine: the decision
 engine rebuilds in 33 seconds instead of 93 and the portfolio engine in 9 instead of 24, with the same findings to the
 last digit; the forward-backward pass is about 3x faster and agrees with the loop to about 1e-14. The mind's graph is
-one sparse 8,693 by 8,693 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
+one sparse 8,728 by 8,728 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
 questions (`spread_many`, `think_many`), which gives the board: the mind's verdict on all 27 claims it weighs in one
 pass (`python -m buildout board`, MCP tool `mind_board`, and live in the page). A 64-eigenvector map of the graph is
 about 9x faster per question but changes half of the top twenty answers, so it is used only to find related ideas
@@ -551,6 +567,7 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `infer.py` | Hidden Markov models (one asset or several, full covariance) fit by EM with the forward-backward pass as a scan of matrix products and every start batched; Bayesian online changepoints; Kalman regression; stacking; mixture risk; exponential weights |
 | | `decide.py` | The decision engine: walked-forward regimes, changepoints and geometric analogs, forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
 | | `geometry.py` | The shape of the market: covariance matrices on a curved space (affine-invariant analogs, an MDS era map, Frechet means), random matrix theory, persistent homology, optimal transport, the Levy area, DFA and volatility drag, every claim walked forward with a placebo and a false-discovery correction |
+| | `parameters.py` | Theta: the inventory of every matrix, vector and scalar the engine learns, read from the engines' outputs (shape, count, optimiser, objective, data, refit schedule, desks fed); the constants set by hand with their reasons |
 | | `portfolio.py` | The portfolio engine: three-asset regimes, utility-optimal mixes in a risk budget, eight policies walked forward, the Hedge learner, a regime-switching bootstrap and stress replays |
 | v0.15 | `ml.py` | Purged walk-forward forecasts since 1940, Diebold-Mariano, CPCV and PBO, split-conformal intervals, calibration, permutation importance, analogs, novelty |
 | | `assumptions.py` | Model register and assumption tests, breakpoints, Taleb's kappa, fragility heuristic, stressed worlds, backtest triage (deflated Sharpe, minimum backtest length, decay, costs) |
