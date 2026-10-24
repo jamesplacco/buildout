@@ -505,7 +505,9 @@ def timing_alpha(dev: np.ndarray, r: np.ndarray) -> tuple[float, float, int]:
     return float(b[0]), float(b[0] / math.sqrt(max(cov[0, 0], 1e-18))), n
 
 
-N_TRIED = len(CONFIGS) + 4 + 4      # configurations of this engine tried, the two RL agents, the trend rule, the geometric-analog model (v0.22), and the overlay's four scalings of the trend rule (v0.24)
+N_TRIED = len(CONFIGS) + 4 + 4 + 5 + 11   # configurations of this engine tried, the two RL agents, the trend rule, the geometric-analog model (v0.22), the overlay's four scalings
+                                          # of the trend rule (v0.24), the five borrowed upgrades tried on the core (EMOS, textbook EMOS, BMA, credibility n0, an EVT floor) and
+                                          # the eleven RL variants of v0.25 (the pooled-state agent and its ten rejected siblings): every sizing strategy tried, counted once (v0.24)
 
 
 def utility_gain(ret: np.ndarray, hold: np.ndarray, gamma: float) -> tuple[float, float, int]:

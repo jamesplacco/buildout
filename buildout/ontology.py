@@ -683,10 +683,12 @@ def _extra() -> list[tuple]:
     """v0.17: the concept writers' batches, merged by scripts/merge_concepts.py into assets/concepts17.json."""
     import json
     from pathlib import Path
-    p = Path(__file__).resolve().parent / "assets" / "concepts17.json"
-    if not p.exists():
-        return []
-    return [(c["id"], c["name"], c["cluster"], c["def"], c["rel"], c.get("formula"), c.get("aliases")) for c in json.loads(p.read_text())["concepts"]]
+    out = []
+    for name in ("concepts17.json", "concepts25.json"):          # v0.25: Taleb, traders, actuarial, weather, big data
+        p = Path(__file__).resolve().parent / "assets" / name
+        if p.exists():
+            out += [(c["id"], c["name"], c["cluster"], c["def"], c["rel"], c.get("formula"), c.get("aliases")) for c in json.loads(p.read_text())["concepts"]]
+    return out
 
 
 def concepts(extra: bool = True) -> list[dict]:

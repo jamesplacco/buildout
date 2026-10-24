@@ -1,0 +1,1080 @@
+{
+ "schema": 1,
+ "note": "v0.25: principles translated into tests on monthly US data since 1871; tested by buildout/reason.py.",
+ "rules": [
+  {
+   "id": "rule-taleb-calm-not-safe-crash",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "A calm market does not mean low tail risk, so crash risk after low volatility is not lower than after high volatility.",
+   "source_url": "https://www.edge.org/conversation/nassim_nicholas_taleb-the-fourth-quadrant-a-map-of-the-limits-of-statistics",
+   "source_title": "The Fourth Quadrant: A Map of the Limits of Statistics (Edge, Sep 14, 2008)",
+   "quote": "Do not confuse absence of volatility with absence of risks.",
+   "if": [
+    [
+     "vol12",
+     "<",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Direct test of the claim; volatility clustering predicts the opposite, so this rule is likely to fail and its failure size is the informative part.",
+   "checked": "confirmed by a second checker: Quote verbatim; principle is a fair reading and the note explains the test.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-calm-not-safe-maxdd",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Worst drawdowns after quiet periods are as deep as after turbulent ones because tail risk accumulates in calm.",
+   "source_url": "https://www.edge.org/conversation/nassim_nicholas_taleb-the-fourth-quadrant-a-map-of-the-limits-of-statistics",
+   "source_title": "The Fourth Quadrant: A Map of the Limits of Statistics (Edge, Sep 14, 2008)",
+   "quote": "Do not confuse absence of volatility with absence of risks.",
+   "if": [
+    [
+     "vol12",
+     "<",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "the same months without the condition",
+   "note": "maxdd12 is negative, so lower means deeper; the honest reading is that Taleb predicts no improvement, a strictly deeper drawdown is the strong version and likely fails.",
+   "checked": "confirmed by a second checker: Quote verbatim; accumulation-in-calm wording goes past the page but the note frames it as the strong version.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-calm-and-stretched",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Calm combined with prices far above trend is the fragile configuration in which a shock does the most damage.",
+   "source_url": "https://www.edge.org/conversation/nassim_nicholas_taleb-the-fourth-quadrant-a-map-of-the-limits-of-statistics",
+   "source_title": "The Fourth Quadrant: A Map of the Limits of Statistics (Edge, Sep 14, 2008)",
+   "quote": "Do not confuse absence of volatility with absence of risks.",
+   "if": [
+    [
+     "vol12",
+     "<",
+     0.12
+    ],
+    [
+     "trend_gap",
+     ">",
+     0.05
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Loose translation joining the low-volatility warning with distance above trend; thresholds are round numbers, not fitted.",
+   "checked": "confirmed by a second checker: Quote verbatim; note flags the loose translation.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-expensive-fragile",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "High valuations after an era of easy money make the market fragile, so the worst drawdown ahead is deeper.",
+   "source_url": "https://fortune.com/2023/02/01/black-swan-author-nassim-taleb-stock-market-economy-inflation",
+   "source_title": "'Disneyland is over': 'The Black Swan' author says the easy money era is over and compares Bitcoin to a 'tumor' (Fortune, Feb 1, 2023)",
+   "quote": "All these years, assets were inflating like crazy",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.9
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "the same months without the condition",
+   "note": "Uses CAPE percentile as the measurable stand-in for asset inflation; lower maxdd12 means a deeper fall.",
+   "checked": "corrected by a second checker: Quote verbatim; easy-money asset inflation supports a loose fragility reading as the note says; headline differs.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-low-rates-expensive-fragile",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Low rates that inflated assets leave expensive markets exposed to large drawdowns.",
+   "source_url": "https://fortune.com/2023/02/01/black-swan-author-nassim-taleb-stock-market-economy-inflation",
+   "source_title": "'Disneyland is over': 'The Black Swan' author says the easy money era is over and compares Bitcoin to a 'tumor' (Fortune, Feb 1, 2023)",
+   "quote": "It's not going to be as smooth as it was the last 15 years.",
+   "if": [
+    [
+     "y10",
+     "<",
+     0.03
+    ],
+    [
+     "cape_pct",
+     ">",
+     0.8
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "the same months without the condition",
+   "note": "Translates the free-money argument into low yields plus high valuation; few pre-2000 months qualify, so the sample is thin.",
+   "checked": "corrected by a second checker: Quote verbatim; article ties zero rates to inflated assets; note flags the translation; headline differs.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-past-crash-no-signal",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Past Black Swans do not predict future ones, so a recent large drawdown should not change crash odds.",
+   "source_url": "https://www.edge.org/conversation/nassim_nicholas_taleb-the-fourth-quadrant-a-map-of-the-limits-of-statistics",
+   "source_title": "The Fourth Quadrant: A Map of the Limits of Statistics (Edge, Sep 14, 2008)",
+   "quote": "past Black Swans do not predict future Black Swans",
+   "if": [
+    [
+     "drawdown",
+     "<",
+     -0.2
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Taleb predicts no difference; the rule is stated as higher so that a significant result in either direction counts against his claim.",
+   "checked": "confirmed by a second checker: Quote verbatim (40 years of data sentence); note explains the null-hypothesis framing.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-bigger-after-shock",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "After a sharp selloff in an expensive market, a further fall two or three times larger is in line with fat tails.",
+   "source_url": "https://fortune.com/2025/02/02/black-swan-author-nassim-selloff-stock-market-crash-outlook-deepseek-shock-fragile-economy",
+   "source_title": "The Black Swan author warns future selloffs could be 2-3 times worse than DeepSeek shock (Fortune, Feb 2, 2025)",
+   "quote": "or two three times bigger even",
+   "if": [
+    [
+     "drawdown",
+     "<",
+     -0.1
+    ],
+    [
+     "cape_pct",
+     ">",
+     0.8
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Uses a 10% real drawdown from peak with high CAPE as the analog of the Jan 2025 shock; loose.",
+   "checked": "confirmed by a second checker: Quote verbatim; page has no valuation angle but the note flags the CAPE analog as loose.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-tail-underpriced-momentum",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Tail risk is structurally underpriced during strong rallies, so crashes are more likely after big momentum.",
+   "source_url": "https://finance.yahoo.com/news/black-swan-author-warns-investors-163811356.html",
+   "source_title": "Black Swan author warns investors (TheStreet via Yahoo Finance, Feb 25, 2026)",
+   "quote": "Tail-risk across sectors is structurally underpriced.",
+   "if": [
+    [
+     "mom12_1",
+     ">",
+     0.2
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "No option prices exist back to 1871, so underpricing is proxied by a strong trailing rally; momentum evidence makes failure likely.",
+   "checked": "confirmed by a second checker: Quote verbatim; note flags momentum as a proxy for underpricing.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-ruin-survivor-rebound",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Investors who avoid ruin and stay in the game capture the rebound after deep drawdowns.",
+   "source_url": "https://medium.com/incerto/the-logic-of-risk-taking-107bf41029d3",
+   "source_title": "The Logic of Risk Taking (Taleb, Incerto on Medium)",
+   "quote": "no person can get the returns of the market unless he has infinite pockets and no uncle points.",
+   "if": [
+    [
+     "drawdown",
+     "<",
+     -0.3
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Tests the cost of an uncle point: if returns after deep drawdowns are higher, forced exits there destroy wealth.",
+   "checked": "confirmed by a second checker: Quote verbatim; staying in the game is the page's point and the note explains the test.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-spitznagel-blowoff-continues",
+   "person": "Mark Spitznagel",
+   "principle": "Expensive markets can rise much further in a euphoric blow-off before the crash.",
+   "source_url": "https://www.kitco.com/news/off-the-wire/2025-09-23/us-stocks-may-surge-another-20-historic-crash-says-black-swan-fund",
+   "source_title": "US stocks may surge another 20% before historic crash, says Black Swan fund (Reuters via Kitco, Sep 23, 2025)",
+   "quote": "only after a massive, euphoric, historic blow off rally",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.9
+    ],
+    [
+     "mom12_1",
+     ">",
+     0.15
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Tests the blow-off half of the thesis: high valuation plus strong momentum should still earn above-average next-year returns.",
+   "checked": "confirmed by a second checker: Quote verbatim; blow-off-then-crash thesis supports the higher ret12 test.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-spitznagel-bubble-crash",
+   "person": "Mark Spitznagel",
+   "principle": "The largest bubbles end in crashes, so the most expensive markets have lower forward returns.",
+   "source_url": "https://fortune.com/2025/04/01/black-swan-investor-mark-spitznagel-stock-market-outlook-euphoric-high-largest-bubble-bursting-crash",
+   "source_title": "Black Swan investor sees 'euphoric high' ahead, then an 80% crash (Fortune, Apr 1, 2025)",
+   "quote": "the largest bubble in human history popping",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.95
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "lower"
+   },
+   "vs": "the same months without the condition",
+   "note": "Uses the top 5% of CAPE history as the bubble state; 12-month horizon is short for a valuation signal.",
+   "checked": "corrected by a second checker: Quote verbatim; note flags the short horizon; headline differs.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-spitznagel-easy-fed-hard-landing",
+   "person": "Mark Spitznagel",
+   "principle": "Easing into an expensive market precedes the hard landing and crash.",
+   "source_url": "https://fortune.com/2025/04/01/black-swan-investor-mark-spitznagel-stock-market-outlook-euphoric-high-largest-bubble-bursting-crash",
+   "source_title": "Black Swan investor sees 'euphoric high' ahead, then an 80% crash (Fortune, Apr 1, 2025)",
+   "quote": "hard landing, panicking Fed. And that's a crash.",
+   "if": [
+    [
+     "dy12",
+     "<",
+     -0.01
+    ],
+    [
+     "cape_pct",
+     ">",
+     0.8
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Loose: a fall of more than 100 bp in the 10-year yield over 12 months proxies Fed easing; the policy rate is not in the variable set.",
+   "checked": "corrected by a second checker: Quote verbatim; page has easing then panicking Fed then crash, note flags the proxy; headline differs.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-fat-tails-vol-not-stable",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Volatility is not a stable quantity under fat tails, so quiet years are followed by more volatility than they show.",
+   "source_url": "https://www.edge.org/conversation/nassim_nicholas_taleb-the-fourth-quadrant-a-map-of-the-limits-of-statistics",
+   "source_title": "The Fourth Quadrant: A Map of the Limits of Statistics (Edge, Sep 14, 2008)",
+   "quote": "Words like \"standard deviation\" are not stable",
+   "if": [
+    [
+     "vol12",
+     "<",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "vol_next12",
+    "direction": "higher"
+   },
+   "vs": "the same months without the condition",
+   "note": "Compared with the complement this almost surely fails, since volatility persists; it is kept to measure how strongly calm persists against Taleb's instability claim.",
+   "checked": "confirmed by a second checker: Quote verbatim; note concedes the translation is a stretch test.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-taleb-earnings-boom-fragile",
+   "person": "Nassim Nicholas Taleb",
+   "principle": "Fast earnings growth at high valuations reflects optimization without redundancy and precedes deeper drawdowns.",
+   "source_url": "https://www.edge.org/conversation/nassim_nicholas_taleb-the-fourth-quadrant-a-map-of-the-limits-of-statistics",
+   "source_title": "The Fourth Quadrant: A Map of the Limits of Statistics (Edge, Sep 14, 2008)",
+   "quote": "Avoid Optimization, Learn to Love Redundancy.",
+   "if": [
+    [
+     "earn_g12",
+     ">",
+     0.2
+    ],
+    [
+     "cape_pct",
+     ">",
+     0.8
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "the same months without the condition",
+   "note": "Loose translation of over-optimization into an earnings boom at high valuation; likely to fail if earnings momentum dominates.",
+   "checked": "confirmed by a second checker: Quote verbatim; note flags the loose translation.",
+   "domain": "taleb"
+  },
+  {
+   "id": "rule-tudorjones-200day-drawdown",
+   "person": "Paul Tudor Jones",
+   "principle": "Get out of anything that falls below its 200-day moving average, because downtrends carry the large losses.",
+   "source_url": "https://25iq.com/2015/07/25/a-dozen-things-ive-learned-from-paul-tudor-jones-about-investing-and-trading/",
+   "source_title": "25iq, A Dozen Things I've Learned from Paul Tudor Jones",
+   "quote": "get out of anything that falls below the 200-day moving average",
+   "if": [
+    [
+     "trend_gap",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "months with trend_gap >= 0",
+   "note": "The 200-day daily average is translated to the 10-month average of monthly prices (about 210 trading days); maxdd12 lower means a deeper worst drawdown ahead.",
+   "checked": "confirmed by a second checker: Quote verbatim on 25iq; 10-month translation of the 200-day rule is fair and disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-tudorjones-200day-crash",
+   "person": "Paul Tudor Jones",
+   "principle": "Below the 200-day average the odds of a large fall are higher, so defense comes first.",
+   "source_url": "https://25iq.com/2015/07/25/a-dozen-things-ive-learned-from-paul-tudor-jones-about-investing-and-trading/",
+   "source_title": "25iq, A Dozen Things I've Learned from Paul Tudor Jones",
+   "quote": "My guiding philosophy is playing great defense.",
+   "if": [
+    [
+     "trend_gap",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "months with trend_gap >= 0",
+   "note": "Same 10-month translation of the 200-day rule, tested on the crash indicator rather than return; a fair test of the defensive claim.",
+   "checked": "confirmed by a second checker: Quote verbatim on 25iq ('My guiding philosophy is playing great defense.'); fair translation.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-livermore-line-of-least-resistance",
+   "person": "Jesse Livermore",
+   "principle": "Prices move along the line of least resistance, so the next move tends to continue the current trend.",
+   "source_url": "https://www.advisorperspectives.com/commentaries/2017/02/27/jesse-livermore",
+   "source_title": "Advisor Perspectives, Jesse Livermore (Feb 27, 2017)",
+   "quote": "Prices, like everything else, move along the line of least resistance.",
+   "if": [
+    [
+     "trend_gap",
+     ">",
+     0
+    ],
+    [
+     "mom12_1",
+     ">",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "ret1",
+    "direction": "higher"
+   },
+   "vs": "months failing either condition",
+   "note": "Livermore traded swings of weeks to months; a one-month return after price above trend and positive 12-month momentum is a fair but coarse analog.",
+   "checked": "confirmed by a second checker: Quote verbatim on Advisor Perspectives; coarse monthly analog disclosed in note.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-livermore-sit-tight",
+   "person": "Jesse Livermore",
+   "principle": "The big money is made by sitting tight through the main movement, not trading the fluctuations.",
+   "source_url": "https://www.gutenberg.org/cache/epub/60979/pg60979.txt",
+   "source_title": "Edwin Lefevre, Reminiscences of a Stock Operator (1923)",
+   "quote": "It was always my sitting.",
+   "if": [
+    [
+     "mom12_1",
+     ">",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months with mom12_1 <= 0.1",
+   "note": "A strong 12-month advance stands for an established main movement; a 12-month holding outcome tests whether sitting tight pays at index level.",
+   "checked": "confirmed by a second checker: Quote verbatim in Gutenberg text; principle matches the main-movements passage.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-livermore-never-average-losses",
+   "person": "Jesse Livermore",
+   "principle": "Never average losses: adding to a market that is falling and below trend loses money.",
+   "source_url": "https://www.kitco.com/news/article/2023-05-02/jesse-livermore-worlds-greatest-trader",
+   "source_title": "Kitco, Jesse Livermore, world's greatest trader (May 2, 2023)",
+   "quote": "Never average losses.",
+   "if": [
+    [
+     "mom12_1",
+     "<",
+     0
+    ],
+    [
+     "trend_gap",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "lower"
+   },
+   "vs": "months failing either condition",
+   "note": "Loose: the rule concerns adding to one's own losing trade; here it is read as buying the index while it is in a confirmed decline.",
+   "checked": "confirmed by a second checker: 'Never average losses.' verbatim on Kitco; loose index reading disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-templeton-maximum-pessimism",
+   "person": "Sir John Templeton",
+   "principle": "The time of maximum pessimism is the best time to buy.",
+   "source_url": "https://www.ivey.uwo.ca/media/3775732/2012_lauren_templeton.pdf",
+   "source_title": "Lauren Templeton, Ivey Business School presentation (2012)",
+   "quote": "The time of maximum pessimism is the best time to buy",
+   "if": [
+    [
+     "drawdown",
+     "<",
+     -0.3
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months with drawdown >= -0.3",
+   "note": "A real drawdown beyond 30% from the prior peak is a price-based proxy for maximum pessimism; no sentiment series exists since 1871.",
+   "checked": "confirmed by a second checker: Quote verbatim in 2012 Templeton deck; price proxy for pessimism disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-templeton-dies-on-euphoria",
+   "person": "Sir John Templeton",
+   "principle": "Bull markets die on euphoria, so very rich valuations after a strong run precede weak returns.",
+   "source_url": "https://www.ivey.uwo.ca/media/3775732/2012_lauren_templeton.pdf",
+   "source_title": "Lauren Templeton, Ivey Business School presentation (2012)",
+   "quote": "mature on optimism and die on euphoria",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.95
+    ],
+    [
+     "mom12_1",
+     ">",
+     0.15
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "lower"
+   },
+   "vs": "months failing either condition",
+   "note": "Top-5% valuation plus a 15% momentum run is a proxy for euphoria; loose because euphoria is a sentiment state, not a price state.",
+   "checked": "confirmed by a second checker: Quote verbatim in 2012 deck; looseness disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-soros-boom-phase",
+   "person": "George Soros",
+   "principle": "In the acceleration phase of a boom the trend is reinforced by expectations, so riding it pays until the moment of truth.",
+   "source_url": "https://www.georgesoros.com/2014/01/13/fallibility-reflexivity-and-the-human-uncertainty-principle-2/",
+   "source_title": "George Soros, Fallibility, Reflexivity, and the Human Uncertainty Principle",
+   "quote": "the trend is recognized and reinforced by expectations",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.9
+    ],
+    [
+     "mom12_1",
+     ">",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "ret1",
+    "direction": "higher"
+   },
+   "vs": "months failing either condition",
+   "note": "High valuation with positive momentum marks a boom; the short ret1 horizon tests riding it, which differs from the valuation view that returns are low over 12 months.",
+   "checked": "confirmed by a second checker: Quote verbatim on georgesoros.com; translation fair and explained.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-soros-boom-crash-asymmetry",
+   "person": "George Soros",
+   "principle": "Booms are slow and busts abrupt, so a rich market whose trend has turned down faces elevated crash risk.",
+   "source_url": "https://www.georgesoros.com/2014/01/13/fallibility-reflexivity-and-the-human-uncertainty-principle-2/",
+   "source_title": "George Soros, Fallibility, Reflexivity, and the Human Uncertainty Principle",
+   "quote": "busts tend to be more abrupt",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.9
+    ],
+    [
+     "trend_gap",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "months failing either condition",
+   "note": "Rich valuation plus a broken 10-month trend approximates the twilight period and crossover point; a fair translation of the shape, not of the full sequence.",
+   "checked": "confirmed by a second checker: Quote verbatim on georgesoros.com; fair translation of the shape.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-druckenmiller-liquidity-tightening",
+   "person": "Stanley Druckenmiller",
+   "principle": "Liquidity, not earnings, moves the overall market, so tightening conditions hurt forward returns.",
+   "source_url": "https://www.livewiremarkets.com/wires/stanley-druckenmiller-the-two-things-my-mentor-taught-me",
+   "source_title": "Livewire, Stanley Druckenmiller: The two things my mentor taught me (Apr 14, 2015)",
+   "quote": "It's liquidity that moves markets.",
+   "if": [
+    [
+     "dy12",
+     ">",
+     0.01
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "lower"
+   },
+   "vs": "months with dy12 <= 0.01",
+   "note": "Loose: a 100bp rise in the 10-year yield over 12 months stands in for Fed tightening and draining liquidity; no policy-rate or balance-sheet series exists since 1871.",
+   "checked": "confirmed by a second checker: Quote verbatim on Livewire; yield proxy disclosed as loose.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-druckenmiller-earnings-dont-move",
+   "person": "Stanley Druckenmiller (contra test)",
+   "principle": "Earnings do not move the overall market, so strong trailing earnings growth should not predict higher index returns.",
+   "source_url": "https://www.livewiremarkets.com/wires/stanley-druckenmiller-the-two-things-my-mentor-taught-me",
+   "source_title": "Livewire, Stanley Druckenmiller: The two things my mentor taught me (Apr 14, 2015)",
+   "quote": "Earnings don't move the overall market.",
+   "if": [
+    [
+     "earn_g12",
+     ">",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months with earn_g12 <= 0.1",
+   "note": "This encodes the conventional view Druckenmiller rejects; if he is right the rule should FAIL the evidence gate.",
+   "checked": "confirmed by a second checker: Quote verbatim on Livewire; contra framing clearly disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-druckenmiller-eighteen-months",
+   "person": "Stanley Druckenmiller",
+   "principle": "Never invest in the present: buy when current earnings are poor but the trajectory is improving.",
+   "source_url": "https://www.livewiremarkets.com/wires/stanley-druckenmiller-the-two-things-my-mentor-taught-me",
+   "source_title": "Livewire, Stanley Druckenmiller: The two things my mentor taught me (Apr 14, 2015)",
+   "quote": "Never, ever invest in the present.",
+   "if": [
+    [
+     "earn_g12",
+     "<",
+     0
+    ],
+    [
+     "earn_accel",
+     ">",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months failing either condition",
+   "note": "Negative but accelerating earnings growth proxies for a world that will look better in 18 months; loose because his view is mostly about liquidity and policy.",
+   "checked": "confirmed by a second checker: Quote verbatim on Livewire; looseness disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-rogers-decade-low-bottom",
+   "person": "Jim Rogers",
+   "principle": "Real bottoms end at 10- or 15-year lows, so the cheapest valuations in history mark the best entry points.",
+   "source_url": "https://www.moomoo.com/us/learn/jim-rogers-invest-only-in-what-you-have-knowledge-about",
+   "source_title": "Moomoo Learn, Jim Rogers: Invest only in what you have knowledge about",
+   "quote": "they end with 10- or 15-year lows",
+   "if": [
+    [
+     "cape_pct",
+     "<",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months with cape_pct >= 0.1",
+   "note": "Loose: a bottom-decile CAPE percentile stands in for multi-year lows, since no 10-year price low variable is given.",
+   "checked": "confirmed by a second checker: Quote fragment verbatim on Moomoo ('they end with 10- or 15-year lows'); CAPE proxy disclosed as loose.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-baruch-no-bottom-picking",
+   "person": "Bernard Baruch",
+   "principle": "Do not try to buy at the bottom: a deep decline that is still falling keeps falling in the near term.",
+   "source_url": "https://25iq.com/2016/05/07/a-dozen-things-ive-learned-from-bernard-baruch-about-investing/",
+   "source_title": "25iq, A Dozen Things I've Learned from Bernard Baruch about Investing",
+   "quote": "Don't try to buy at the bottom and sell at the top.",
+   "if": [
+    [
+     "drawdown",
+     "<",
+     -0.2
+    ],
+    [
+     "trend_gap",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "ret1",
+    "direction": "lower"
+   },
+   "vs": "months failing either condition",
+   "note": "Loose: Baruch warns that exact bottoms cannot be timed, not that falling markets keep falling; this tests the near-term cost of buying a falling 20%-plus drawdown and competes directly with the Templeton maximum-pessimism rule.",
+   "checked": "corrected by a second checker: Quote verbatim on 25iq, but Baruch warns against timing exact turns; reading it as a forecast that deep falling drawdowns keep falling is loose and the note did not say so.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-robertson-irrational-market",
+   "person": "Julian Robertson",
+   "principle": "When price and earnings take a back seat to momentum, step aside because the eventual drawdown is large.",
+   "source_url": "https://aletteraday.substack.com/p/letter-78-julian-robertson-2000",
+   "source_title": "A Letter a Day, Letter #78: Julian Robertson (2000)",
+   "quote": "take a back seat to mouse clicks and momentum",
+   "if": [
+    [
+     "cape_pct",
+     ">",
+     0.95
+    ],
+    [
+     "mom12_1",
+     ">",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "months failing either condition",
+   "note": "Extreme valuation with strong momentum stands for a market driven by momentum over value; Robertson exited months before the 2000 top, so timing may fail at 12 months.",
+   "checked": "confirmed by a second checker: Quote fragment verbatim in the letter; translation fair with timing caveat.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-turtle-vol-persistence",
+   "person": "Richard Dennis and William Eckhardt (Turtles)",
+   "principle": "Size by recent volatility (N) because recent volatility predicts near-future volatility.",
+   "source_url": "https://hackernoon.com/huobi-quant-academy-3-220714ccde9f",
+   "source_title": "Hackernoon, Huobi Quant Academy (3): Turtle trading rules",
+   "quote": "each N represents 1% of the account equity",
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.2
+    ]
+   ],
+   "then": {
+    "outcome": "vol_next12",
+    "direction": "higher"
+   },
+   "vs": "months with vol12 <= 0.2",
+   "note": "The Turtles used 20-day true range; a 12-month realized volatility above 20% is a monthly analog. This tests the premise of N sizing, not the Turtle system.",
+   "checked": "confirmed by a second checker: Quote verbatim on Hackernoon; note states it tests the premise, not the system.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-turtle-vol-not-compensated",
+   "person": "Richard Dennis and William Eckhardt (Turtles)",
+   "principle": "Volatility-scaled sizing assumes high volatility is not paid for with higher return, so cutting size in volatile periods costs little.",
+   "source_url": "https://hackernoon.com/huobi-quant-academy-3-220714ccde9f",
+   "source_title": "Hackernoon, Huobi Quant Academy (3): Turtle trading rules",
+   "quote": null,
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.25
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "lower"
+   },
+   "vs": "months with vol12 <= 0.25",
+   "note": "Loose: the Turtle rules imply equal risk per trade, not a return forecast; the test checks whether high-volatility months reward holders enough to justify full size.",
+   "checked": "confirmed by a second checker: Page supports equal-risk volatility sizing; looseness disclosed; no quote given.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-turtle-breakout-near-high",
+   "person": "Richard Dennis (Turtles)",
+   "principle": "Enter on breakouts to new highs, since a market at its highs is in a trend that tends to continue.",
+   "source_url": "https://www.theinvestorspodcast.com/blog/book-review-of-market-wizards-interviews-with-top-traders/",
+   "source_title": "The Investor's Podcast, Book review of Market Wizards",
+   "quote": "The market being in a trend is the main thing that eventually gets us in a trade.",
+   "if": [
+    [
+     "drawdown",
+     ">",
+     -0.02
+    ],
+    [
+     "mom12_1",
+     ">",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months failing either condition",
+   "note": "Loose: Turtle breakouts were 20- and 55-day highs; within 2% of the prior real peak with positive momentum is the nearest monthly analog of a breakout.",
+   "checked": "confirmed by a second checker: Dennis quote verbatim on The Investor's Podcast; looseness disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-kovner-dont-get-caught",
+   "person": "Bruce Kovner",
+   "principle": "Do not get caught where you can lose a great deal: high volatility in a downtrend is where large losses come from.",
+   "source_url": "https://www.antoinebuteau.com/lessons-from-bruce-kovner/",
+   "source_title": "Antoine Buteau, Lessons from Bruce Kovner",
+   "quote": null,
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.2
+    ],
+    [
+     "trend_gap",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "months failing either condition",
+   "note": "Kovner's rule is about position structure; reading it as avoiding volatile downtrends at index level is loose but testable.",
+   "checked": "confirmed by a second checker: Page has 'don't get caught in a situation in which you can lose a great deal of money'; looseness disclosed.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-dalio-inflation-breaks-bond-hedge",
+   "person": "Ray Dalio",
+   "principle": "Balance must be built across inflation regimes because bonds and stocks fall together when inflation is high.",
+   "source_url": "https://www.bridgewater.com/research-and-insights/the-all-weather-story",
+   "source_title": "Bridgewater Associates, The All Weather Story (Jan 2012)",
+   "quote": "The key was to put equal risk on each scenario to achieve balance.",
+   "if": [
+    [
+     "infl12",
+     ">",
+     0.04
+    ]
+   ],
+   "then": {
+    "outcome": "bond_hedge12",
+    "direction": "lower"
+   },
+   "vs": "months with infl12 <= 0.04",
+   "note": "All Weather balances growth and inflation scenarios rather than forecasting; 12-month inflation above 4% marks the rising-inflation regime in which Treasuries are least likely to hedge equities, which bears directly on the TLT hedge.",
+   "checked": "confirmed by a second checker: Quote verbatim; page states rising inflation hurts both stocks and nominal bonds, so the inflation-regime test is fair.",
+   "domain": "traders"
+  },
+  {
+   "id": "rule-actuarial-gpd-vol-crash",
+   "person": "Alexander McNeil and Rudiger Frey",
+   "principle": "Tail losses scale with current volatility on top of a heavy GPD tail, so the chance of a large fall is higher when recent volatility is high.",
+   "source_url": "https://www.wu.ac.at/fileadmin/wu/d/i/statmath/Publications/Publications_Frey/Journal_Papers/evt-garch.pdf",
+   "source_title": "McNeil and Frey, Estimation of tail-related risk measures for heteroscedastic financial time series (2000)",
+   "quote": "models with normally distributed conditional return distribution yield very bad estimates of the expected shortfall",
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.2
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "months with vol12 <= 0.20",
+   "note": "Conditional EVT says the tail quantile is sigma_t times a fixed GPD quantile; vol12 stands in for sigma_t and crash12 for a tail exceedance. Fair, with vol12 a slow proxy for monthly GARCH sigma.",
+   "checked": "confirmed by a second checker: Quote is verbatim on the McNeil-Frey page; conditional quantile = sigma_t times residual quantile supports the principle; vol12 proxy noted.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-gpd-vol-maxdd",
+   "person": "Alexander McNeil and Rudiger Frey",
+   "principle": "Because conditional tail loss is volatility times a fixed heavy-tailed quantile, the worst drawdown over the next year is deeper after high-volatility years.",
+   "source_url": "https://www.wu.ac.at/fileadmin/wu/d/i/statmath/Publications/Publications_Frey/Journal_Papers/evt-garch.pdf",
+   "source_title": "McNeil and Frey, Estimation of tail-related risk measures for heteroscedastic financial time series (2000)",
+   "quote": null,
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.2
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "months with vol12 <= 0.20",
+   "note": "maxdd12 is negative, so lower means deeper. Same translation as the crash rule, scored on magnitude rather than frequency.",
+   "checked": "confirmed by a second checker: Same McNeil-Frey support; translation to deeper maxdd12 after high vol is fair and the note says so.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-experience-rating-vol",
+   "person": "Hans Buhlmann",
+   "principle": "Experience rating holds that a risk's own recent loss experience carries predictive weight for its next period, so a market's own recent volatility should predict its next-year volatility.",
+   "source_url": "https://ideas.repec.org/a/cup/astinb/v4y1967i03p199-207_00.html",
+   "source_title": "Buhlmann, Experience Rating and Credibility, ASTIN Bulletin 4(3), 1967",
+   "quote": "But is there a way to drop the condition of homogeneity (identical distribution)?",
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.2
+    ]
+   ],
+   "then": {
+    "outcome": "vol_next12",
+    "direction": "higher"
+   },
+   "vs": "months with vol12 <= 0.20",
+   "note": "Experience rating is about loss frequency and size, not volatility; the translation treats realized vol as the risk's loss experience. Expected to pass because of volatility clustering, so it calibrates how much credibility vol12 deserves.",
+   "checked": "confirmed by a second checker: Quote is verbatim in the RePEc abstract; the note flags that treating volatility as loss experience is loose.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-experience-rating-hedge",
+   "person": "Actuarial Standards Board (ASOP 25)",
+   "principle": "Subject experience has predictive value that should be blended with relevant experience, so a negative stock-bond correlation over the past 36 months should make a negative correlation over the next 36 months more likely.",
+   "source_url": "https://www.actuarialstandardsboard.org/asops/credibility-procedures/",
+   "source_title": "Actuarial Standards Board, ASOP No. 25 Credibility Procedures",
+   "quote": "A measure of the predictive value in a given application that the actuary attaches to a particular set of data",
+   "if": [
+    [
+     "corr36",
+     "<",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "bond_hedge12",
+    "direction": "higher"
+   },
+   "vs": "months with corr36 >= 0",
+   "note": "Direct experience-rating translation: past correlation is the subject experience, the 156-year base rate is the complement. Fair; the test measures how credible corr36 is for the Treasury hedge decision.",
+   "checked": "confirmed by a second checker: Quote is verbatim ASOP 25 sec 2.1; blending subject with relevant experience is sec 3.2; translation is fair.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-mean-excess-drawdown",
+   "person": "Davison and Smith (mean excess of the GPD)",
+   "principle": "Under a heavy GPD tail the expected overshoot beyond a threshold grows with the threshold, so once a market is already deep in loss, further losses are larger on average.",
+   "source_url": "https://www.rdocumentation.org/packages/VGAM/versions/1.1-14/topics/meplot",
+   "source_title": "VGAM documentation: meplot, Mean Excess Plot (Davison and Smith, 1990)",
+   "quote": "a diagnostic plot for the generalized Pareto distribution (GPD)",
+   "if": [
+    [
+     "drawdown",
+     "<=",
+     -0.2
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "months with drawdown > -0.20",
+   "note": "Loose: the mean excess property applies to iid exceedances, while drawdown is a path statistic with mean reversion. Likely to fail if bear-market bottoms rebound, which is itself informative.",
+   "checked": "confirmed by a second checker: Quote is verbatim on the VGAM page; for xi > 0 the mean excess rises with u (slope xi/(1-xi)); note flags the iid-vs-path looseness.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-symmetric-adjustment-rally",
+   "person": "European Parliament and Council (Solvency II Article 106)",
+   "principle": "The equity capital charge is raised when the equity index stands above its weighted average level, implying equity risk is higher after strong rallies.",
+   "source_url": "https://www.eiopa.europa.eu/rulebook/solvency-ii-single-rulebook/article-2192_en",
+   "source_title": "Solvency II Directive, Article 106 (EIOPA rulebook)",
+   "quote": "shall be based on a function of the current level of an appropriate equity index",
+   "if": [
+    [
+     "trend_gap",
+     ">",
+     0.1
+    ]
+   ],
+   "then": {
+    "outcome": "maxdd12",
+    "direction": "lower"
+   },
+   "vs": "months with trend_gap <= 0.10",
+   "note": "Loose: the directive uses a 36-month average and the engine's trend_gap uses 10 months; the rule's stated aim is countercyclical capital, not a return forecast. Likely to fail because of momentum.",
+   "checked": "confirmed by a second checker: Quote is verbatim Article 106(2); note flags the 36 vs 10 month mismatch and that the rule sets capital, not a forecast.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-symmetric-adjustment-fall",
+   "person": "European Parliament and Council (Solvency II Article 106)",
+   "principle": "The equity capital charge is lowered after an index falls below its weighted average level, implying the regulator expects equity risk per unit held to be lower after a fall.",
+   "source_url": "https://www.eiopa.europa.eu/rulebook/solvency-ii-single-rulebook/article-2192_en",
+   "source_title": "Solvency II Directive, Article 106 (EIOPA rulebook)",
+   "quote": null,
+   "if": [
+    [
+     "drawdown",
+     "<=",
+     -0.25
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "higher"
+   },
+   "vs": "months with drawdown > -0.25",
+   "note": "Loose: the article sets capital, not expected return; the translation reads a lower charge after falls as a higher reward per unit of risk. The 25% threshold is a round number for a deep fall.",
+   "checked": "confirmed by a second checker: Article 106 lowers the charge when the index is below its weighted average; note flags the loose reading as expected reward.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-heavy-tail-ruin-trend",
+   "person": "Embrechts and Veraverbeke (via Asmussen and Binswanger)",
+   "principle": "With heavy-tailed losses a positive drift does not make ruin exponentially unlikely, because ruin comes from one large loss, so a positive trend should not protect against crashes in a high-volatility market.",
+   "source_url": "https://www.casact.org/sites/default/files/database/astin_vol27no2_297.pdf",
+   "source_title": "Asmussen and Binswanger, Simulation of Ruin Probabilities for Subexponential Claims, ASTIN Bulletin 27(2), 1997",
+   "quote": null,
+   "if": [
+    [
+     "vol12",
+     ">",
+     0.25
+    ],
+    [
+     "mom12_1",
+     ">",
+     0
+    ]
+   ],
+   "then": {
+    "outcome": "crash12",
+    "direction": "higher"
+   },
+   "vs": "months not meeting both conditions",
+   "note": "Loose: positive momentum plays the safety loading and high vol the heavy tail. A pass says trend does not cancel high-vol crash risk; a fail supports trend filters.",
+   "checked": "confirmed by a second checker: Asmussen and Binswanger say for subexponential claims only the largest claim causes ruin and R does not exist; note flags the momentum-as-loading looseness.",
+   "domain": "actuarial"
+  },
+  {
+   "id": "rule-actuarial-credibility-earnings-shrink",
+   "person": "Hans Buhlmann; Efron and Morris",
+   "principle": "Extreme recent experience is partly noise and the best estimate shrinks toward the collective mean, so very high trailing earnings growth overstates the future and should precede lower returns.",
+   "source_url": "https://www.medicine.mcgill.ca/epidemiology/hanley/bios602/MultilevelData/EfronMorrisJASA1975.pdf",
+   "source_title": "Efron and Morris, Data Analysis Using Stein's Estimator and Its Generalizations, JASA 70(350), 1975",
+   "quote": "shrinking all Xi toward X, an idea suggested by Lindley",
+   "if": [
+    [
+     "earn_g12",
+     ">",
+     0.25
+    ]
+   ],
+   "then": {
+    "outcome": "ret12",
+    "direction": "lower"
+   },
+   "vs": "months with earn_g12 <= 0.25",
+   "note": "Loose: shrinkage is about estimating a mean, not about returns; this assumes prices extrapolate extreme earnings growth. Likely to fail because 25% earnings growth is common in recoveries, when returns are strong.",
+   "checked": "confirmed by a second checker: Quote 'shrinking all Xi toward X, an idea suggested by Lindley' is verbatim; note flags that the return translation is loose.",
+   "domain": "actuarial"
+  }
+ ]
+}

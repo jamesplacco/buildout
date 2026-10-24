@@ -1071,6 +1071,53 @@ def _snap(fname: str, const: str, part: str):
     return json.loads(txt[i + len(f"const {const} = "):txt.index(";\n", i)].replace("<\\/", "</")).get(part)
 
 
+def reasoning_engine(ctx: Context, args: dict) -> dict:
+    """v0.25: deduction (today's call as a proof, with flip points; or any facts you pass), induction (rules found before
+    1961 and tested after), the legends on trial, abduction and invented concepts, from the shipped run."""
+    from . import reason
+    part = args.get("part", "summary")
+    if part == "proof":
+        facts = args.get("facts") or {}
+        if not isinstance(facts, dict):
+            raise ToolError("facts is an object, e.g. {\"corr36\": -0.2, \"gate\": 0.5}")
+        bad = [k for k in facts if k not in reason.DEFAULT_FACTS]
+        if bad:
+            raise ToolError("unknown fact: " + ", ".join(bad) + "; known: " + ", ".join(reason.DEFAULT_FACTS))
+        return reason.decision_proof(facts)
+    o = _snap("snap25.js", "SNAP25", "reason")
+    if not o:
+        raise ToolError("no v0.25 snapshot: run python scripts/snapshot_v25.py")
+    if part == "summary":
+        return {"findings": reason.summary(o)}
+    if part == "legends":
+        v = args.get("verdict")
+        rows = [r for r in o.get("rules", []) if r.get("source") != "built-in example" and (not v or r.get("verdict") == v)]
+        return {"rules": rows, "n": len(rows)}
+    if part not in ("discover", "rolling", "abduce", "invent", "deduce", "today"):
+        raise ToolError("part is one of summary, proof, legends, discover, rolling, abduce, invent, deduce, today")
+    return o[part]
+
+
+def forecast_verification(ctx: Context, args: dict) -> dict:
+    """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
+    coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
+    upgrade tried on the decision core with its verdict."""
+    from . import crossfield
+    S = _snap("snap25.js", "SNAP25", "crossfield")
+    if not S:
+        raise ToolError("no v0.25 snapshot: run python scripts/snapshot_v25.py")
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"findings": crossfield.summary(S), "trials": _snap("snap25.js", "SNAP25", "trials")}
+    if part == "tail":
+        return S["tail"]
+    if part == "ruin":
+        return S["ruin"]
+    if part == "scores":
+        return {"as_is": {k: v for k, v in S["variants"]["as_is"].items() if k != "tail"}, "benchmarks": S["benchmarks"], "brier_down_month": S["brier_down_month"], "spread_skill": S["spread_skill"]}
+    raise ToolError("part is one of summary, scores, tail, ruin")
+
+
 def bond_scenario(ctx: Context, args: dict) -> dict:
     from . import bondlab
     try:
@@ -1192,6 +1239,17 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                         "analogs, the Levy area of stocks against bonds, long memory and volatility drag, with every claim walked forward and corrected for testing many.",
                         _obj({"part": {"type": "string", "enum": ["summary", "covariance", "spectrum", "topology", "transport", "paths", "scaling", "compounding"]}}),
                         {"readOnlyHint": True, "openWorldHint": False}),
+    "reasoning_engine": (reasoning_engine, "The engine's reasoning: today's call derived as a proof from its premises with the value at which each flips (or a proof from facts you pass), rules "
+                         "induced on data before 1961 and tested after, Taleb's and the legendary traders' principles tested on monthly data since 1871, abduction (what best "
+                         "explains a crash) and invented regimes with their out-of-sample test. Research only.",
+                         _obj({"part": {"type": "string", "enum": ["summary", "proof", "legends", "discover", "rolling", "abduce", "invent", "deduce", "today"]},
+                               "facts": {"type": "object", "description": "for part=proof: any of corr36, infl36, hedge_line, gate, engine_exposure, es_1x, es_limit, trend_on, overlay_factor, selector_choice, prev_state"},
+                               "verdict": {"type": "string", "enum": ["supported", "one era only", "reversed", "no evidence"]}}),
+                         {"readOnlyHint": True, "openWorldHint": False}),
+    "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
+                              "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "
+                              "probabilities, and every borrowed upgrade tried on the decision core with its verdict.",
+                              _obj({"part": {"type": "string", "enum": ["summary", "scores", "tail", "ruin"]}}), {"readOnlyHint": True, "openWorldHint": False}),
     "parameter_inventory": (parameter_inventory, "The engine's parameters, Theta: every fitted matrix, vector and scalar (regime transition matrices, ridge and network "
                             "weights, stacking weights, the Q-table, the causal map, the knowledge graph's spectral map) with its shape, the optimisation that shaped "
                             "it, its objective, its data, its refit schedule and the desks it feeds; the constants set by hand are listed apart with reasons.",

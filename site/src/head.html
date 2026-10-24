@@ -643,9 +643,9 @@ table.moves tr.hot td:nth-last-child(2) { font-weight: 700; color: var(--ink); }
 .tool-btn:hover { border-color: var(--accent); }
 .tool-btn .sym { font: 600 0.8rem/1 "Cambria Math", "STIX Two Math", Georgia, serif; }
 
-/* show the math: formulas stay out of the way until asked for */
-.math { display: none; }
-:root.math-on .math { display: block; }
+/* show the math (v0.25): every formula shows with today's numbers; the button hides them */
+.math { display: block; }
+:root.math-off .math { display: none; }
 .math { font: 400 0.92rem/1.7 "Cambria Math", "STIX Two Math", "Latin Modern Math", Georgia, serif; color: var(--ink); padding: 8px 12px; background: var(--paper); border: 1px dashed var(--rule); border-radius: 8px; overflow-x: auto; max-width: 100%; }
 .math var { font-style: italic; }
 .math .mlabel { display: block; font: 500 0.625rem/1.4 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
@@ -2087,4 +2087,52 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
 .dg-tags { color: var(--muted); }
 @media print { .dg-item, .hw-stage, table.limits tr { break-inside: avoid; } .dg-list, .dg-group, .dg-items { display: block; } .dg-group { margin-bottom: 24px; } .dg-group > * + * { margin-top: 10px; } .dg-group h2, .dg-group h3 { break-after: avoid; } }
 @media (max-width: 900px) { .dg-items { grid-template-columns: minmax(0, 1fr); } }
+/* v0.25: the six group tabs never scroll, so Methods is always in view; desk tabs wrap instead of scrolling */
+.tabs { overflow: visible; }
+@media (min-width: 1241px) {
+  .topbar-inner { grid-template-columns: auto max-content auto; justify-content: space-between; }
+  .tabs { width: max-content; max-width: none; }
+}
+@media (max-width: 1240px) {
+  .tabs { overflow: visible; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .tabs a { justify-content: center; min-width: 0; }
+}
+@media (max-width: 640px) {
+  .tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: 16px; gap: 3px; }
+  .tabs a { padding: 9px 4px; font-size: 0.95rem; }
+  .subtabs { flex-wrap: wrap; overflow-x: visible; justify-content: center; row-gap: 6px; }
+  .subtabs a { flex: 0 1 auto; }
+  .topbar { position: relative; top: auto; }          /* on a phone the full menu scrolls away; the bottom desk bar stays */
+}
+.t7-math { max-width: 100ch; }
+.math p { margin: 4px 0; }
+.math p b { font-family: var(--f-body); }
+/* v0.25: reasoning, methods and borrowed methods (rs-, mt-, cf-) */
+.rs-table td, .rs-table th { vertical-align: top; }
+.rs-table td { white-space: normal; min-width: 7ch; }
+.rs-table td:first-child { min-width: 16ch; }
+.rs-tree, .rs-tree ul { list-style: none; margin: 0; padding-left: 16px; }
+.rs-tree { padding-left: 0; font-size: var(--t-sm); line-height: 1.55; }
+.rs-tree ul { border-left: 1px dashed var(--rule); margin-left: 6px; }
+.rs-concl { font-weight: 600; color: var(--ink); }
+.rs-rule { color: var(--muted); font-family: var(--f-mono); font-size: 0.72rem; }
+.rs-fact { font-family: var(--f-mono); font-size: 0.78rem; color: var(--ink-2); }
+.rs-leaf small { color: var(--muted); }
+.rs-funnel { display: grid; gap: 4px; margin: 10px 0 14px; }
+.rs-step { width: var(--w); min-width: 150px; max-width: 100%; display: flex; gap: 10px; align-items: baseline; padding: 6px 10px; border-radius: 6px; background: var(--accent-wash); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--rule)); font-size: var(--t-sm); }
+.rs-step b { font-variant-numeric: tabular-nums; }
+.rs-v { font-size: var(--t-xs); letter-spacing: .04em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+.rs-v-supported { color: var(--good-ink); } .rs-v-reversed { color: var(--bad-ink); } .rs-v-one-era-only { color: var(--warn-ink); } .rs-v-no-evidence { color: var(--muted); }
+.mt-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.mt-card { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; overflow-wrap: anywhere; }
+.mt-top { display: grid; gap: 2px; }
+.mt-field { font: 600 0.625rem/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.mt-card h3 { font: 600 var(--t-md)/1.3 var(--f-display); color: var(--ink); margin: 0; }
+.mt-o { font-size: var(--t-xs); color: var(--muted); margin: 0; }
+.mt-ev, .mt-card p { font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); margin: 0; }
+.mt-now { font-family: var(--f-body); font-size: var(--t-sm); color: var(--accent); }
+.mt-dl { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin: 0; font-size: var(--t-sm); }
+.mt-dl dt { font-weight: 600; color: var(--ink); margin-top: 4px; } .mt-dl dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 900px) { .mt-list { grid-template-columns: minmax(0, 1fr); } }
+@media print { .mt-card { break-inside: avoid; } .mt-list { display: block; } .mt-list > .mt-card { margin-bottom: 10px; } }
 </style>

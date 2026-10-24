@@ -153,6 +153,11 @@ def main(argv: list[str] | None = None) -> None:
     prm = sub.add_parser("parameters", help="Theta: every matrix the engine learns, its shape, the algorithm that shaped it, its objective, data, refit schedule and the desks it feeds")
     prm.add_argument("--data", default="out", help="a run folder with the engines' JSON outputs; shapes come from the modules' constants where a file is missing")
     prm.add_argument("--json", action="store_true")
+    rsp = sub.add_parser("reasoning", help="v0.25: deduction with proofs, induction walked forward, abduction, invented concepts, and the legends' rules tested since 1871")
+    rsp.add_argument("--out", default="out")
+    rsp.add_argument("--quick", action="store_true", help="skip the decade-by-decade rediscovery")
+    vfp = sub.add_parser("verify", help="v0.25: the engine's forecast scored like a weather forecast, its tail backtested like an actuarial reserve, ruin, and each borrowed upgrade tested")
+    vfp.add_argument("--out", default="out")
     pfp = sub.add_parser("portfolio", help="the portfolio engine: stocks, Treasuries, gold and cash from regimes, a learner over policies, ten simulated years")
     pfp.add_argument("--out", default="out")
     pfp.add_argument("--quick", action="store_true")
@@ -453,6 +458,28 @@ def main(argv: list[str] | None = None) -> None:
         from . import parameters
         o = parameters.build(**parameters.load_outputs(a.data))
         print(json.dumps(o, indent=1) if a.json else parameters.table(o))
+        return
+    if a.cmd == "reasoning":
+        from pathlib import Path as _P
+        from . import atlas, labs, reason
+        from .jsonout import write
+        adl = atlas.download(fred=False)
+        rules = _P(__file__).resolve().parent / "assets" / "rules25.json"
+        o = reason.build(labs.shiller(labs.download()), adl["raw"], rules_paths=[str(rules)] if rules.exists() else (), do_rolling=not a.quick)
+        path = write(o, a.out, "reason.json")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "verify":
+        from . import atlas, crossfield, decide, labs
+        from .jsonout import write
+        adl = atlas.download(fred=False)
+        o = crossfield.evaluate_engine(decide.data(labs.shiller(labs.download()), adl["raw"]))
+        path = write(o, a.out, "verify.json")
+        for f in crossfield.summary(o):
+            print(" ", f)
+        print("wrote", path)
         return
     if a.cmd == "geometry":
         from . import atlas, geometry, labs

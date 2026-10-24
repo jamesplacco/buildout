@@ -192,11 +192,11 @@ def test_six_groups_cover_every_desk_once():
     views = [v.strip('" ') for g in groups.values() for v in g.split(",")]
     assert len(views) == len(set(views))
     assert set(views) == set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
-    assert groups["engine"].startswith('"explained", "parameters"') and '"code"' in groups["engine"] and '"agents"' in groups["engine"]
+    assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and '"code"' in groups["engine"] and '"agents"' in groups["engine"]
     assert groups["today"].startswith('"desk"')
     nav = re.findall(r'<a href="#(\w+)" data-group="(\w+)">', body)
     assert [g for _, g in nav] == list(groups) and all(v in views for v, _ in nav)
-    assert "parameters:" in (SRC / "views.js").read_text().split("const TAB_NAME = ")[1][:80]
+    assert "parameters:" in (SRC / "views.js").read_text().split("const TAB_NAME = ")[1][:200]
     guide = (SRC / "guide.js").read_text()
     assert '"parameters": {"q":' in guide and all(f'"{g}":' in guide.split("GUIDE_GROUPS = ")[1].split("\n")[0] for g in groups)
     assert "1 to 6 open a group" in guide and "/^[1-6]$/" in (SRC / "views.js").read_text()
@@ -217,14 +217,14 @@ def test_landing_page_is_the_call_and_the_engine():
         assert body[start:start + 60].split('id="view-')[1].split('"')[0] == view, sec
     assert 'id="view-parameters"' in body and 'id="pm-table"' in body and 'id="pm-hand"' in body and 'id="dx-overlay"' in body
     scripts = (ROOT / "scripts" / "assemble_page.py").read_text()
-    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "landing.js"' in scripts
+    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "landing.js"' in scripts
     assert "Thesis chips" not in (SRC / "boot.js").read_text()
 
 
 def test_landing_counts_match_the_engine():
     js = (SRC / "landing.js").read_text()
     assert int(re.search(r"const MCP_TOOLS = (\d+);", js).group(1)) == len(mcp_server.TOOLS)
-    assert "34 tools" in (SRC / "reference.js").read_text().split('q: "Can the MCP server trade?"')[1][:60]
+    assert f"{len(mcp_server.TOOLS)} tools" in (SRC / "reference.js").read_text().split('q: "Can the MCP server trade?"')[1][:60]
     agents = (SRC / "body.html").read_text()
     assert 'id="ag-v23-t"' in agents
     ref = (SRC / "reference.js").read_text()

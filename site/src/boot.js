@@ -3,11 +3,11 @@
      ===================================================================================== */
   const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
     today: { name: "Today", views: ["desk", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
-    engine: { name: "Engine", views: ["explained", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
+    engine: { name: "Engine", views: ["explained", "reasoning", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "positions", "swans"] },
     research: { name: "Research", views: ["digest", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
     workshop: { name: "Workshop", views: ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"] },
-    reference: { name: "Methods", views: ["engine", "engines", "appendix"] },
+    reference: { name: "Methods", views: ["methods", "crossfield", "engine", "engines", "appendix"] },
   };
   const GROUP_ORDER = ["today", "engine", "markets", "research", "workshop", "reference"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -33,6 +33,9 @@
     parameters: () => guard("The parameters", renderParameters, $("#pm-tiles")),
     explained: () => guard("How it works", renderExplained, $("#hw-read")),
     digest: () => guard("Research digest", renderDigest, $("#dg-tiles")),
+    reasoning: () => guard("Reasoning", renderReasoning, $("#rs-tiles")),
+    methods: () => guard("Methods", renderMethods, $("#mt-tiles")),
+    crossfield: () => guard("Borrowed methods", renderCrossfield, $("#cf-tiles")),
     bonds: () => guard("Bonds, simply", renderBonds, $("#bd-tiles")),
     decision: () => { guard("Decision engine", renderDecision, $("#dx-card")); guard("What if", renderWhatIf, $("#dxw-out")); },
     portfolio: () => guard("Portfolio engine", renderPortfolio, $("#pf-card")),
@@ -131,15 +134,16 @@
   /* ---------- show the math ---------- */
   function setMath(on) {
     document.documentElement.classList.toggle("math-on", on);
+    document.documentElement.classList.toggle("math-off", !on);
     const b = $("#math-toggle");
-    if (b) { b.setAttribute("aria-pressed", on ? "true" : "false"); b.title = on ? "Hide the formulas" : "Show every formula on the page"; }
-    LS.set("bo-math", on);
+    if (b) { b.setAttribute("aria-pressed", on ? "true" : "false"); b.title = on ? "Hide the formulas" : "Show every formula on the page"; const l = b.querySelector(".lab-t"); if (l) l.textContent = on ? "Hide the math" : "Show the math"; }
+    LS.set("bo-math25", on);
   }
   const toggleMath = () => setMath(!document.documentElement.classList.contains("math-on"));
   function wireMath() {
     const b = $("#math-toggle");
     if (b) b.addEventListener("click", toggleMath);
-    setMath(LS.get("bo-math", false) === true);
+    setMath(LS.get("bo-math25", true) !== false);          // v0.25: the math shows by default; the button hides it
   }
 
   /* ---------- search: the v0.5 desks join the index ---------- */

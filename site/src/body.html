@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.24</span>
+      Buildout <span class="ver">v0.25</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -13,7 +13,7 @@
       <a href="#bonds" data-group="markets">Markets</a>
       <a href="#digest" data-group="research">Research</a>
       <a href="#games" data-group="workshop">Workshop</a>
-      <a href="#engine" data-group="reference">Methods</a>
+      <a href="#methods" data-group="reference">Methods</a>
     </nav>
     <div class="tools">
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
@@ -21,7 +21,7 @@
       <span class="search-label">Search</span><kbd>/</kbd>
     </button>
     <button class="tool-btn" id="map-open" type="button" aria-haspopup="dialog" aria-controls="sitemap" aria-label="Map of every desk" title="Every desk, by the question it answers (press 0)"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M1.5 3.5l4-1.5 5 1.5 4-1.5v10.5l-4 1.5-5-1.5-4 1.5z M5.5 2v10.5 M10.5 3.5V14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg><span class="lab-t">Map</span></button>
-    <button class="tool-btn" id="math-toggle" type="button" aria-pressed="false" title="Show every formula on the page"><span class="sym" aria-hidden="true">&sum;</span><span class="lab-t">Show the math</span></button>
+    <button class="tool-btn" id="math-toggle" type="button" aria-pressed="true" title="Hide the formulas"><span class="sym" aria-hidden="true">&sum;</span><span class="lab-t">Show the math</span></button>
     </div>
   </div>
   <nav class="subtabs" id="subtabs" aria-label="Desks in this section"></nav>
@@ -40,6 +40,7 @@
       <p class="t7-status" id="t7-status"></p>
     </div>
     <div class="call-board" id="call-board" role="list" aria-label="The call in numbers"></div>
+    <div class="math t7-math" id="t7-math" aria-label="The call, derived"></div>
     <p class="t7-sizing" id="t7-sizing"></p>
     <p class="t7-sizing" id="t7-impl"></p>
     <div class="t7-limits" id="t7-limits" aria-label="Limits and breaches"></div>
@@ -75,7 +76,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 493 of 493</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 553 of 553</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot warn"></span><span>Databento key pending</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -277,10 +278,10 @@
   <div class="at-tiles" id="mx-tiles"></div>
   <section class="section" aria-labelledby="mx-how-title">
     <div class="section-head"><p class="eyebrow">How the mind multiplies</p><h2 id="mx-how-title">Queries as vectors, knowledge as a matrix</h2>
-      <p class="prose">The mind's 8,949 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
+      <p class="prose">The mind's 9,423 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
     <div class="mx-eq panel">
-      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 8,949, forty times</small></div>
-      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 8,949 by Q, forty times</small></div>
+      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 9,423, forty times</small></div>
+      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 9,423 by Q, forty times</small></div>
       <div><span class="dx-k">A neural network layer</span><code>h = f(W x + b)</code><small>the same product, learned weights W</small></div>
     </div>
   </section>
@@ -1843,6 +1844,48 @@
 </section>
 
 <!-- ======================= ENGINES ======================= -->
+<!-- ======================= METHODS AND BORROWED METHODS (v0.25) ======================= -->
+<section class="view" id="view-methods" hidden aria-labelledby="mt-title">
+  <div class="vhead"><p class="eyebrow">Methods · every method, its math and its test</p><h1 id="mt-title">Every method the engine runs, with its formula, today's number, where it came from and the test it passed or failed</h1>
+    <p class="lede">The engine borrows from statistics, control engineering, meteorology, actuarial science, physics, machine learning and decision theory. Each method is listed once with the formula it computes (shown with today's numbers where it has one) and its out-of-sample evidence.</p></div>
+  <div class="at-tiles" id="mt-tiles"></div>
+  <div class="pm-filter" id="mt-filter" role="group" aria-label="Filter by field"></div>
+  <div class="mt-list" id="mt-list"></div>
+</section>
+
+<section class="view" id="view-crossfield" hidden aria-labelledby="cf-title">
+  <div class="vhead"><p class="eyebrow">Methods · borrowed from other fields</p><h1 id="cf-title">What actuaries, weather services and big-data platforms know that markets can use, tested on the engine</h1>
+    <p class="lede" id="cf-sub">The three fields share one discipline: score forecasts with proper rules, calibrate before sharpening, shrink small samples toward the pool, respect the tail, and never let the test data leak. The engine was scored the way a weather service scores its forecasts and backtested the way an actuary backtests a reserve; every upgrade borrowed from them was tried and kept only if it beat the engine out of sample.</p></div>
+  <div class="at-tiles" id="cf-tiles"></div>
+  <section class="section" aria-labelledby="cf-overlap-t">
+    <div class="section-head"><p class="eyebrow">The overlap</p><h2 id="cf-overlap-t">Six ideas the fields share, and what each does in the engine</h2></div>
+    <div class="tablewrap"><table class="rs-table" id="cf-overlap"></table></div>
+  </section>
+  <section class="section" aria-labelledby="cf-verif-t">
+    <div class="section-head"><p class="eyebrow">Scored like a weather forecast</p><h2 id="cf-verif-t">The engine's monthly forecast, verified since 1950</h2><p class="prose" id="cf-verif-p"></p></div>
+    <div class="grid2"><figure class="panel chart"><div class="chart-head"><span class="chart-title">Probability integral transform: flat means calibrated</span></div><div class="svgbox" id="cf-pit"></div><p class="hint" id="cf-pit-n"></p></figure>
+      <div class="panel"><span class="panel-title">Scorecard</span><div class="tablewrap"><table class="rs-table" id="cf-score"></table></div></div></div>
+    <div class="math" id="cf-verif-math"></div>
+  </section>
+  <section class="section" aria-labelledby="cf-trials-t">
+    <div class="section-head"><p class="eyebrow">Upgrades tried on the decision core</p><h2 id="cf-trials-t">Every borrowed upgrade, its out-of-sample result and the verdict</h2><p class="prose" id="cf-trials-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="cf-trials"></table></div>
+  </section>
+  <section class="section" aria-labelledby="cf-tail-t">
+    <div class="section-head"><p class="eyebrow">Backtested like an actuary's reserve</p><h2 id="cf-tail-t">The tail: five estimators of the worst month, walked forward since 1940</h2><p class="prose" id="cf-tail-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="cf-tail"></table></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">The 12% loss budget under three estimators</span><div class="tablewrap"><table class="rs-table" id="cf-budget"></table></div></div>
+      <div class="panel"><span class="panel-title">Ruin: a 50% fall from a peak within ten years</span><div class="tablewrap"><table class="rs-table" id="cf-ruin"></table></div></div></div>
+    <div class="math" id="cf-tail-math"></div>
+  </section>
+  <section class="section" aria-labelledby="cf-cards-t">
+    <div class="section-head"><p class="eyebrow">The backlog</p><h2 id="cf-cards-t">Method cards: each borrowed method, its market analog and the test that would show it helps</h2></div>
+    <div class="pm-filter" id="cf-cards-filter" role="group" aria-label="Filter by field"></div>
+    <div class="mt-list" id="cf-cards"></div>
+  </section>
+  <p class="hint">Code: buildout/crossfield.py (CRPS and log scores for mixtures, PIT, Brier decomposition, EMOS, BMA by EM, generalized Pareto tails, Kupiec, Christoffersen and Acerbi-Szekely tests, ruin by bootstrap and Cramer-Lundberg, Buhlmann credibility), tests/test_crossfield.py (each against a known answer).</p>
+</section>
+
 <section class="view" id="view-engines" hidden aria-labelledby="en-title">
   <div class="vhead">
     <p class="eyebrow">Engine room · The data engine behind the page</p>
@@ -2442,7 +2485,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, every one of its 34 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 36 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2555,12 +2598,12 @@
   <section class="section" aria-labelledby="hw-stages-title">
     <div class="section-head"><p class="eyebrow">Six stages</p><h2 id="hw-stages-title">The engine as a weather service</h2><p class="prose">A weather service does not promise tomorrow's rain. It reads its instruments, names the season, publishes an outlook with its uncertainty, and tells you whether to carry an umbrella. The engine has the same six jobs.</p></div>
     <div class="hw-stages" id="hw-stages">
-      <div class="panel hw-stage"><span class="hw-n">1</span><span class="panel-title">Data: the instruments</span><p class="hw-what">156 years of monthly readings, each dated. A value for month t uses data through t minus two, so nothing is used before it could have been known.</p><p class="hw-why">What can go wrong: a stale feed. The engine says which date each number carries and marks anything older than its schedule.</p><a href="#engines">Engine room →</a></div>
-      <div class="panel hw-stage"><span class="hw-n">2</span><span class="panel-title">Regimes: the season</span><p class="hw-what">Not "will it rain tomorrow" but "is this a stormy season": the odds of calm, turbulent and stressed markets this month, from a model refit every five years, plus a check for whether a new season has just begun.</p><p class="hw-why">What can go wrong: regimes are labels fitted after the fact. The engine averages four different views of the next month by how well each has recently predicted it, so no single label decides.</p><a href="#dx-states">The states today →</a></div>
-      <div class="panel hw-stage"><span class="hw-n">3</span><span class="panel-title">Forecasts: the outlook</span><p class="hw-what">Four forecasters of the next year's return, each refit every two years and combined by their record. The outlook carries its own uncertainty, which is wide.</p><p class="hw-why">What can go wrong: forecasting returns is barely possible. Out of sample, the best forecaster only edges the long-run average; the engine's edge is in the budget and the discipline, not the forecast.</p><a href="#ml">The forecasters' record →</a></div>
-      <div class="panel hw-stage"><span class="hw-n">4</span><span class="panel-title">Allocation: the umbrella</span><p class="hw-what">How much stock to carry: the exposure with the best expected outcome for a cautious investor, inside a budget of 12% of capital for the worst month in twenty.</p><p class="hw-why">What can go wrong: the budget binds in a storm and the engine cuts exposure late. That is accepted; the budget is a mandate's limit, not a forecast.</p><a href="#solve">The sizing math →</a></div>
-      <div class="panel hw-stage"><span class="hw-n">5</span><span class="panel-title">Gate: how far to trust the forecaster</span><p class="hw-what">A forecaster who has not beaten "assume tomorrow looks like today" gets little say. The gate scales the move from holding toward the optimum by the strength of the engine's own record, discounted for every version tried.</p><p class="hw-why">What can go wrong: a gate that someone can tune. This one cannot: it is a fixed function of the record's t statistic and the count of strategies tried.</p><a href="#dx-gate">The gate today →</a></div>
-      <div class="panel hw-stage"><span class="hw-n">6</span><span class="panel-title">Hedge and overlay: the standing guards</span><p class="hw-what">What to hold beside the stocks (all stocks, a Treasury sleeve or cash, chosen by recent record in the current regime), and the rule that scales exposure when the trend breaks.</p><p class="hw-why">What can go wrong: bonds stop hedging when inflation is high, which is the case now, and a rule that looks free on the full record can fail when re-chosen year by year, which is what happened to the trend overlay. The selector holds no bond sleeve and the overlay is not applied.</p><a href="#dx-overlay">The overlay study →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">1</span><span class="panel-title">Data: the instruments</span><p class="hw-what">156 years of monthly readings, each dated. A value for month t uses data through t minus two, so nothing is used before it could have been known.</p><p class="hw-why">What can go wrong: a stale feed. The engine says which date each number carries and marks anything older than its schedule.</p><div class="math"><span class="mlabel">The rule</span>a value used in month <var>t</var> is fit on data through <var>t</var> &minus; 2 (LAG = 2); refits: regimes every 60 months, forecasters every 24, the learner every 12.</div><a href="#engines">Engine room →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">2</span><span class="panel-title">Regimes: the season</span><p class="hw-what">Not "will it rain tomorrow" but "is this a stormy season": the odds of calm, turbulent and stressed markets this month, from a model refit every five years, plus a check for whether a new season has just begun.</p><p class="hw-why">What can go wrong: regimes are labels fitted after the fact. The engine averages four different views of the next month by how well each has recently predicted it, so no single label decides.</p><div class="math"><span class="mlabel">The model</span><var>s</var><sub>t</sub> ~ Markov(<var>A</var>), <var>r</var><sub>t</sub> | <var>s</var><sub>t</sub> = <var>k</var> ~ N(&mu;<sub>k</sub>, &sigma;<sub>k</sub><sup>2</sup>); filter &alpha;<sub>t</sub> &prop; (&alpha;<sub>t&minus;1</sub><var>A</var>) &odot; <var>p</var>(<var>r</var><sub>t</sub> | <var>s</var>); state means shrunk: &mu;&#771;<sub>k</sub> = <var>r</var>&#772; + <var>n</var><sub>k</sub>/(<var>n</var><sub>k</sub> + <var>n</var><sub>0</sub>)(&mu;<sub>k</sub> &minus; <var>r</var>&#772;).</div><a href="#dx-states">The states today →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">3</span><span class="panel-title">Forecasts: the outlook</span><p class="hw-what">Four forecasters of the next year's return, each refit every two years and combined by their record. The outlook carries its own uncertainty, which is wide.</p><p class="hw-why">What can go wrong: forecasting returns is barely possible. Out of sample, the best forecaster only edges the long-run average; the engine's edge is in the budget and the discipline, not the forecast.</p><div class="math"><span class="mlabel">The combination</span><var>f</var> = &Sigma;<sub>j</sub> <var>v</var><sub>j</sub> <var>f</var><sub>j</sub>, <var>v</var> = argmin &Sigma;<sub>&tau; &lt; t&minus;12</sub> (<var>y</var><sub>&tau;</sub> &minus; &Sigma;<sub>j</sub> <var>v</var><sub>j</sub><var>f</var><sub>j,&tau;</sub>)<sup>2</sup>, <var>v</var> &ge; 0, &Sigma;<var>v</var> = 1 (stacking on forecasts whose outcomes were known).</div><a href="#ml">The forecasters' record →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">4</span><span class="panel-title">Allocation: the umbrella</span><p class="hw-what">How much stock to carry: the exposure with the best expected outcome for a cautious investor, inside a budget of 12% of capital for the worst month in twenty.</p><p class="hw-why">What can go wrong: the budget binds in a storm and the engine cuts exposure late. That is accepted; the budget is a mandate's limit, not a forecast.</p><div class="math"><span class="mlabel">The choice</span><var>x</var>* = argmax<sub>0 &le; <var>x</var> &le; 1.5</sub> E[(<var>v</var><sup>1&minus;&gamma;</sup> &minus; 1)/(1 &minus; &gamma;)], <var>v</var> = 1 + <var>xR</var> &minus; <var>b</var> max(<var>x</var> &minus; 1, 0), subject to <var>x</var>&middot;ES<sub>5%</sub>(<var>R</var>) &le; 12%.</div><a href="#solve">The sizing math →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">5</span><span class="panel-title">Gate: how far to trust the forecaster</span><p class="hw-what">A forecaster who has not beaten "assume tomorrow looks like today" gets little say. The gate scales the move from holding toward the optimum by the strength of the engine's own record, discounted for every version tried.</p><p class="hw-why">What can go wrong: a gate that someone can tune. This one cannot: it is a fixed function of the record's t statistic and the count of strategies tried.</p><div class="math"><span class="mlabel">The gate</span><var>g</var> = max(0, 2&Phi;(<var>t</var> &minus; <var>t</var><sub>0</sub>) &minus; 1), <var>t</var><sub>0</sub> = &Phi;<sup>&minus;1</sup>(1 &minus; 1/<var>n</var>), <var>x</var> = 1 + <var>g</var>(<var>x</var>* &minus; 1).</div><a href="#dx-gate">The gate today →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">6</span><span class="panel-title">Hedge and overlay: the standing guards</span><p class="hw-what">What to hold beside the stocks (all stocks, a Treasury sleeve or cash, chosen by recent record in the current regime), and the rule that scales exposure when the trend breaks.</p><p class="hw-why">What can go wrong: bonds stop hedging when inflation is high, which is the case now, and a rule that looks free on the full record can fail when re-chosen year by year, which is what happened to the trend overlay. The selector holds no bond sleeve and the overlay is not applied.</p><div class="math"><span class="mlabel">The selector</span>P(<var>h</var> best | context) estimated by Thompson draws from discounted outcome means (forgetting 0.995); the overlay factor <var>f</var> is kept only if, re-chosen each year on the record to date, E[<var>u</var>] is at least holding&rsquo;s.</div><a href="#dx-overlay">The overlay study →</a></div>
     </div>
   </section>
 
@@ -2601,6 +2644,50 @@
       <div class="panel"><span class="panel-title">Not a black box</span><p class="prose">Twenty-two learned objects, 2,850 numbers in the decision core, each with its shape and its optimiser on the <a href="#parameters">Parameters desk</a>; the source is on the <a href="#code">source desk</a>; the daily record is the Engine room.</p></div>
     </div>
   </section>
+</section>
+
+<!-- ======================= REASONING (v0.25) ======================= -->
+<section class="view" id="view-reasoning" hidden aria-labelledby="rs-title">
+  <div class="vhead"><p class="eyebrow">Engine · reasoning</p><h1 id="rs-title">The engine reasons in four ways: it deduces, induces, abduces and invents, and every conclusion is tested</h1>
+    <p class="lede" id="rs-sub">Deduction derives what must follow from what the mind holds, with a proof. Induction finds rules in 156 years of monthly data on one period and tests them on a later one it never saw. Abduction asks what best explains an outcome. Invention proposes new concepts and keeps them only if they forecast. Taleb's and the legendary traders' principles go on trial the same way.</p></div>
+  <div class="at-tiles" id="rs-tiles"></div>
+  <section class="section" aria-labelledby="rs-proof-t">
+    <div class="section-head"><p class="eyebrow">1 · Deduction</p><h2 id="rs-proof-t">Today's call, derived as a proof from its premises</h2><p class="prose">The policy written as rules; the call follows from today's facts by those rules alone. Each premise shows the value at which a conclusion would flip.</p></div>
+    <div class="grid2"><div class="panel"><span class="panel-title">The proof</span><div id="rs-proof" class="rs-proof"></div></div>
+      <div class="panel"><span class="panel-title">What would change it</span><div class="tablewrap"><table class="rs-table" id="rs-cf"></table></div></div></div>
+    <div class="math" id="rs-proof-math"></div>
+    <div class="panel"><span class="panel-title">Deduction over the mind</span><p class="prose" id="rs-ded"></p><div class="tablewrap"><table class="rs-table" id="rs-chains"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="rs-ind-t">
+    <div class="section-head"><p class="eyebrow">2 · Induction</p><h2 id="rs-ind-t">Rules found in the data before 1961, tested on what came after</h2><p class="prose" id="rs-ind-p"></p></div>
+    <div class="rs-funnel" id="rs-funnel"></div>
+    <div class="math" id="rs-ind-math"></div>
+    <div class="tablewrap"><table class="rs-table" id="rs-surv"></table></div>
+    <p class="hint" id="rs-roll"></p>
+  </section>
+  <section class="section" aria-labelledby="rs-legends-t">
+    <div class="section-head"><p class="eyebrow">3 · The legends on trial</p><h2 id="rs-legends-t">Taleb's and the great traders' principles, translated into tests and run on 156 years</h2><p class="prose" id="rs-leg-p"></p></div>
+    <div class="pm-filter" id="rs-leg-filter" role="group" aria-label="Filter by verdict"></div>
+    <div class="tablewrap"><table class="rs-table" id="rs-legends"></table></div>
+    <div class="math" id="rs-leg-math"></div>
+  </section>
+  <section class="section" aria-labelledby="rs-abd-t">
+    <div class="section-head"><p class="eyebrow">4 · Abduction</p><h2 id="rs-abd-t">What best explains an outcome, looking back</h2><p class="prose">Inference to the best explanation: each condition ranked by how much more often the outcome followed it than not. Retrospective, never a forecast.</p></div>
+    <div class="grid2"><div class="panel"><span class="panel-title" id="rs-abd1-t">Explaining a 15% fall within a year</span><div class="tablewrap"><table class="rs-table" id="rs-abd1"></table></div></div>
+      <div class="panel"><span class="panel-title" id="rs-abd2-t">Explaining bonds failing as a hedge</span><div class="tablewrap"><table class="rs-table" id="rs-abd2"></table></div></div></div>
+    <div class="math" id="rs-abd-math"></div>
+  </section>
+  <section class="section" aria-labelledby="rs-inv-t">
+    <div class="section-head"><p class="eyebrow">5 · Invention</p><h2 id="rs-inv-t">New concepts the engine proposed, and whether they forecast</h2><p class="prose" id="rs-inv-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="rs-inv"></table></div>
+    <div class="math" id="rs-inv-math"></div>
+  </section>
+  <section class="section" aria-labelledby="rs-now-t">
+    <div class="section-head"><p class="eyebrow">6 · Today</p><h2 id="rs-now-t">Which rules fire now, and what they add to the call</h2></div>
+    <p class="prose" id="rs-now"></p>
+    <div class="tablewrap"><table class="rs-table" id="rs-fire"></table></div>
+  </section>
+  <p class="hint">Code: buildout/reason.py (deduction, induction, abduction, invention), tests/test_reason.py (planted rules found, pure-noise data mostly rejected, proofs reproduced, no look-ahead). Run it: python -m buildout reasoning.</p>
 </section>
 
 <!-- ======================= PARAMETERS ======================= -->
@@ -3088,8 +3175,8 @@
     <ol class="cd-flow">
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
-      <li><b>Know.</b> ontology.py and concepts17.json define 4,318 concepts and their relations; knowledge.json holds 780 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 302 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 8,949 nodes and about 35,000 typed links, with 4,318 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Know.</b> ontology.py, concepts17.json and concepts25.json define 4,575 concepts and their relations; knowledge.json holds 903 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 371 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 9,423 nodes and about 38,000 typed links, with 4,575 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
       <li><b>Count.</b> parameters.py inventories every matrix, vector and scalar the engine learns (22 objects, about 598,000 numbers) with its shape, the optimiser and objective that shaped it, its data, its refit schedule and the desks it feeds, read from the engines' own outputs; the constants set by hand are listed apart with reasons.</li>
       <li><b>Decide.</b> decide.py sizes the stock exposure from stacked forecasts (nn.py's neural ensemble), regimes and changepoints (infer.py), model averaging that now includes geometric analogs (geometry.py), a risk budget and an evidence gate; portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
@@ -3127,6 +3214,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v25-t">
+    <div class="section-head"><p class="eyebrow">v0.25</p><h2 id="ag-v25-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>5 + 5</b><span>Research agents and independent checkers</span><small>Taleb, the legendary traders, actuarial science, weather forecasting, big data; 532 entries checked, 49 corrected, 5 failed</small></div>
+      <div class="at-kpi"><b>2 of 43</b><span>Legendary rules that hold in both halves</span><small>of 156 years, after testing for many; 3 hold in one era only, 1 reversed</small></div>
+      <div class="at-kpi"><b>0 of 5</b><span>Borrowed upgrades adopted by the core</span><small>EMOS, textbook EMOS, BMA, credibility, an EVT floor: none beat it cleanly</small></div>
+      <div class="at-kpi"><b>3</b><span>Engine upgrades adopted in the labs</span><small>ML returns -6.0% to +4.0% skill, crash Brier -11.6% to -2.8%, a pooled RL agent at Sharpe 0.74</small></div></div>
+    <p class="prose">Two builder agents wrote the reasoning engine (deduction with proofs, rule induction walked forward, abduction, concept invention) and the cross-field library (forecast verification, recalibration, model averaging, generalized Pareto tails, tail backtests, ruin, credibility), each with tests against known answers. A third iterated the ML and RL engines in its own copy of the repository and tried 29 variants, adopting three that cleared rules written first. Every sizing variant tried now counts in the evidence gate: 28 strategies, so the engine's record must reach t 1.80 before the book moves off 1x.</p>
   </section>
   <section class="section" aria-labelledby="ag-v24-t">
     <div class="section-head"><p class="eyebrow">v0.24</p><h2 id="ag-v24-t">Release metrics</h2></div>

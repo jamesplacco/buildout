@@ -94,7 +94,7 @@ def test_how_it_works_quotes_the_engine_and_replays_its_record():
 def test_navigation_has_the_two_new_desks_first_in_their_groups():
     boot = (SRC / "boot.js").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["engine"].startswith('"explained", "parameters"') and groups["research"].startswith('"digest", "findings"')
+    assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and groups["research"].startswith('"digest", "findings"')
     body = (SRC / "body.html").read_text()
     assert '<a href="#explained" data-group="engine">Engine</a>' in body and '<a href="#digest" data-group="research">Research</a>' in body
     views = set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
@@ -144,4 +144,4 @@ def test_the_level_store_is_dated_and_read_by_the_rules():
 
 
 def test_overlay_factors_count_in_the_deflation():
-    assert decide.N_TRIED == len(decide.CONFIGS) + 4 + 4 == 12
+    assert decide.N_TRIED == len(decide.CONFIGS) + 4 + 4 + 5 + 11 == 28          # v0.25 counts its borrowed and RL variants too

@@ -38,7 +38,7 @@ import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
-         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest"]
+         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -238,11 +238,12 @@ async def keyboard_and_links(page, label: str) -> None:
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
     if ["Options", "page"] not in sub or len(sub) != 8:
         fail(f"{label}: Markets subtabs wrong: {sub}")
+    pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")
-    on = await page.evaluate("document.documentElement.classList.contains('math-on') && document.getElementById('math-toggle').getAttribute('aria-pressed') === 'true'")
+    flipped = await page.evaluate("document.documentElement.classList.contains('math-on') === !%s && document.getElementById('math-toggle').getAttribute('aria-pressed') === '%s'" % ("true" if pre else "false", "false" if pre else "true"))
     await page.keyboard.press("M")
-    off = await page.evaluate("!document.documentElement.classList.contains('math-on')")
-    if not (on and off):
+    back = await page.evaluate("document.documentElement.classList.contains('math-on') === %s" % ("true" if pre else "false"))
+    if not (flipped and back):
         fail(f"{label}: M did not toggle the math")
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
                         ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("explained", "explained"), ("hw-replay-title", "explained"), ("digest", "digest"), ("dg-how-t", "digest"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),

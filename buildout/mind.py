@@ -7,7 +7,7 @@ One graph holds everything the engine knows and everything it does:
               atlas learned from data (graphical lasso, LiNGAM, structural VAR) as directed, signed causal edges
   evidence    about 400 sourced facts and papers (assets/knowledge.json, each checked on its page by a second agent) and
               the signals the engine derives from them and from its own tests (labs, atlas, research, ML, assumptions)
-  voices      18 topics, 69 investors and 302 verified quotes
+  voices      20 topics, 89 speakers and 371 verified quotes
   engine      every Python module (its imports are edges), the methods, the MCP tools, the ML models and the tested
               assumptions, each linked to the concepts it implements
   sources     the information sources the engine profiles (newsletters, Taleb, Damodaran, primary data), linked to the
@@ -78,7 +78,8 @@ GROUP_NAMES = {**{k: v for k, v in ontology.CLUSTERS.items()}, "markets": "Marke
 
 FACT_CLUSTER = {"bonds": "rates", "tape": "macro", "distribution": "ai", "edge_sources": "edge", "model_risk": "reality", "ml_finance": "ml", "private_markets": "private", "asset_management": "assetmgmt", "indicators_valuation": "valuation", "commodities": "commodities",
                 "games_negotiation_stats": "games", "trading_structure": "structure",
-                "capex_earnings": "ai", "ai_credit": "private", "fed_inflation": "macro", "power": "ai"}   # v0.24 research clusters
+                "capex_earnings": "ai", "ai_credit": "private", "fed_inflation": "macro", "power": "ai",   # v0.24 research clusters
+                "taleb": "reality", "traders": "edge", "actuarial": "risk", "weather": "stats", "bigdata": "edge"}   # v0.25 bodies of thought
 
 # ---------------------------------------------------------------- axes: the claims the mind can weigh
 EDGE_AXES = {
@@ -675,6 +676,12 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("reasoning", "Reasoning", "Deduction with proofs, induction walked forward, abduction and invented concepts; today's call derived as a proof; Taleb's and the legendary traders' principles tested on 156 years of data.",
+     ["c:walk-forward", "c:benjamini-hochberg", "c:abduction", "c:regime", "c:fat-tails"]),
+    ("methods", "Every method", "Every method the engine runs with its formula, today's numbers, its field of origin and its out-of-sample test.",
+     ["c:kalman", "c:expected-shortfall", "c:crra-utility", "c:hidden-markov-model", "c:bootstrap"]),
+    ("crossfield", "Borrowed methods", "What actuarial science, weather forecasting and big data teach a market engine: forecast verification, tail backtests, ruin, credibility, and every borrowed upgrade with its verdict.",
+     ["c:extreme-value-theory", "c:brier-score", "c:proper-scoring-rule", "c:ensemble", "c:risk-of-ruin"]),
     ("digest", "Research digest", "This week's evidence by the question it bears on: every checked knowledge item dated in the last fortnight, with its date, publisher and source, and the desk's read of each group.",
      ["c:primary-source", "c:evidence", "c:capex", "c:private-credit", "c:term-premium"]),
     ("explained", "How it works", "The engine in plain English: one sentence, one paragraph, the six stages as a weather service, every term defined in a line, and any half-year since 1940 replayed from the engine's own walk-forward record.",

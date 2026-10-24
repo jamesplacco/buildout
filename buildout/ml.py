@@ -22,6 +22,14 @@ Validation (what usually goes wrong, and the fix):
   false precision      conformal intervals from the model's own past errors, with their realised coverage
   extrapolation        adversarial validation (can a classifier tell recent months from history?) and each feature's
                        distance from its historical range; nearest historical analogs, with what followed
+
+v0.25, the ensemble (combine="v25"; combine="v24" restores the equal-weight mean):
+  return   each member's forecast truncated at zero (Campbell and Thompson 2008), averaged, then shrunk toward the
+           historical mean by a credibility weight: the discounted least-squares slope of realised excess outcomes on
+           the ensemble's excess forecasts, using only forecasts whose outcome was known (H months back), clipped to
+           [0, 1], and zero until 60 such outcomes exist
+  crash    the equal-weight probability shrunk toward the base rate by the same weight
+Every variant tried is scored walk-forward and listed in the build output under "v25_trials".
 """
 from __future__ import annotations
 
@@ -44,6 +52,9 @@ NAMES = {"log_cape": "Valuation (log CAPE)", "ecy": "Excess CAPE yield", "y10": 
          "mom12_1": "Momentum, 12 minus 1 months", "trend_gap": "Distance from the 10-month average", "vol12": "Volatility, 12 months",
          "drawdown": "Distance below the peak"}
 CRASH = -0.15
+COMBINE = "v25"                 # how the ensemble is formed (see combine())
+SHRINK_DELTA = 0.9 ** (1 / 12)  # the credibility weight's discount, the same as the accuracy-weighted ensemble's
+SHRINK_MIN = 60                 # known outcomes needed before the ensemble departs from the benchmark
 
 
 # ---------------------------------------------------------------- data
@@ -168,9 +179,11 @@ def _fit_predict(make, feats, Xtr, ytr, Xte, task):
 
 
 # ---------------------------------------------------------------- purged walk-forward
-def walk_forward(D: pd.DataFrame, task: str, start: int = START_OOS, refit: int = REFIT, permute: bool = True) -> dict:
+def walk_forward(D: pd.DataFrame, task: str, start: int = START_OOS, refit: int = REFIT, permute: bool = True, combine: str = COMBINE,
+                 shrink_delta: float | None = SHRINK_DELTA) -> dict:
     """Expanding-window forecasts made only with rows whose 12-month target had ended (plus an embargo) by the forecast
-    date; refit every `refit` months. Benchmark: the expanding mean (or base rate) of those same rows."""
+    date; refit every `refit` months. Benchmark: the expanding mean (or base rate) of those same rows. The ensemble
+    is formed by combine_forecasts(method=combine); "ensemble_v24" is always the equal-weight mean."""
     ycol = "y_ret" if task == "return" else "y_crash"
     D = D.dropna(subset=FEATURES + [ycol])
     idx = D.index
@@ -208,12 +221,158 @@ def walk_forward(D: pd.DataFrame, task: str, start: int = START_OOS, refit: int 
     with np.errstate(all="ignore"):
         stack = np.vstack([preds[k] for k in M if k != "cape_ols"])
         ens = np.where(np.isnan(stack).all(axis=0), np.nan, np.nanmean(np.where(np.isnan(stack), 0, stack), axis=0) * stack.shape[0] / np.maximum(1, (~np.isnan(stack)).sum(axis=0)))
-    preds["ensemble"] = ens
-    preds["dmspe"] = dmspe([preds[k] for k in M if k != "cape_ols"], y, ok)
+    members = [k for k in M if k != "cape_ols"]
+    preds["dmspe"] = dmspe([preds[k] for k in members], y, ok)
+    preds["ensemble_v24"] = ens
+    preds["ensemble"], wts = combine_forecasts([preds[k] for k in members], bench, y, ok, task, combine, shrink_delta)
     out = {"task": task, "dates": [d.strftime("%Y-%m") for d in idx[ok]], "y": y[ok].tolist(), "bench": bench[ok].tolist(),
-           "preds": {k: v[ok].tolist() for k, v in preds.items()}, "n": int(ok.sum()), "refits": len(blocks),
+           "preds": {k: v[ok].tolist() for k, v in preds.items()}, "n": int(ok.sum()), "refits": len(blocks), "combine": combine, "members": members,
+           "shrink_weight": None if wts is None else wts[ok].tolist(),
            "importance": {k: {f: (float(np.mean(v)) if v else None) for f, v in d.items()} for k, d in imp.items()}}
     return out
+
+
+# ---------------------------------------------------------------- v0.25: restrictions, credibility shrinkage, calibration
+def _known(pos: np.ndarray, a: int, i: int) -> np.ndarray:
+    """Earlier forecast rows whose 12-month outcome had been seen by forecast row i (the dmspe rule)."""
+    kj = pos[:a]
+    return kj[kj <= i - H - 1]
+
+
+def credibility_weight(d: np.ndarray, u: np.ndarray, disc: np.ndarray | None = None) -> float:
+    """The weight on a forecast's departure d from the benchmark that minimizes the (discounted) squared error of the
+    realised departure u: sum(w d u) / sum(w d^2), clipped to [0, 1]. Zero means the benchmark; one means the forecast."""
+    w = np.ones(len(d)) if disc is None else disc
+    den = float((w * d * d).sum())
+    return 0.0 if den <= 0 else min(1.0, max(0.0, float((w * d * u).sum()) / den))
+
+
+def credibility(p: np.ndarray, bench: np.ndarray, y: np.ndarray, ok: np.ndarray, delta: float | None = SHRINK_DELTA, min_known: int = SHRINK_MIN) -> tuple[np.ndarray, np.ndarray]:
+    """Shrink forecasts toward the benchmark, row by row, with a credibility weight estimated only from earlier
+    forecasts whose outcome was known; the benchmark until `min_known` such outcomes exist. delta None: no discount."""
+    p, bench, y = (np.asarray(v, float) for v in (p, bench, y))
+    out = np.full(len(p), np.nan)
+    wts = np.full(len(p), np.nan)
+    pos = np.where(ok)[0]
+    d, u = p - bench, y - bench
+    for a, i in enumerate(pos):
+        kj = _known(pos, a, i)
+        w = 0.0
+        if len(kj) >= min_known:
+            w = credibility_weight(d[kj], u[kj], None if delta is None else delta ** (i - 1 - kj))
+        wts[i] = w
+        out[i] = bench[i] + w * d[i]
+    return out, wts
+
+
+def _logit(p):
+    q = np.clip(np.asarray(p, float), 1e-4, 1 - 1e-4)
+    return np.log(q / (1 - q))
+
+
+def platt_fit(z: np.ndarray, y: np.ndarray) -> tuple[float, float]:
+    """Logistic regression of outcomes on a score, by maximum likelihood (L-BFGS from the identity map)."""
+    from scipy.optimize import minimize
+    X = np.column_stack([np.ones(len(z)), z])
+
+    def nll(th):
+        eta = np.clip(X @ th, -30, 30)
+        q = 1 / (1 + np.exp(-eta))
+        return float(-np.sum(y * np.log(np.clip(q, 1e-12, 1)) + (1 - y) * np.log(np.clip(1 - q, 1e-12, 1)))), X.T @ (q - y)
+    th = minimize(nll, np.array([0.0, 1.0]), jac=True, method="L-BFGS-B").x
+    return float(th[0]), float(th[1])
+
+
+def platt(p: np.ndarray, y: np.ndarray, ok: np.ndarray, fallback: np.ndarray, min_known: int = SHRINK_MIN) -> np.ndarray:
+    """Platt scaling walked forward: at each row, a logistic map of logit(p) fit on earlier rows with known outcomes."""
+    z = _logit(p)
+    out = np.array(fallback, float).copy()
+    pos = np.where(ok)[0]
+    for a, i in enumerate(pos):
+        kj = _known(pos, a, i)
+        if len(kj) < min_known or len(np.unique(y[kj])) < 2:
+            continue
+        a0, a1 = platt_fit(z[kj], np.asarray(y, float)[kj])
+        out[i] = 1 / (1 + math.exp(-min(30.0, max(-30.0, a0 + a1 * z[i]))))
+    return out
+
+
+def pav(x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Pool-adjacent-violators: the nondecreasing step function of x closest to y. Returns (right edges, levels)."""
+    o = np.argsort(x, kind="mergesort")
+    vals, wts, edge = [], [], []
+    for xx, v in zip(np.asarray(x, float)[o], np.asarray(y, float)[o]):
+        vals.append(v); wts.append(1.0); edge.append(xx)
+        while len(vals) > 1 and vals[-2] > vals[-1]:
+            w = wts[-2] + wts[-1]
+            vals[-2:] = [(vals[-2] * wts[-2] + vals[-1] * wts[-1]) / w]
+            wts[-2:] = [w]
+            edge[-2:] = [edge[-1]]
+    return np.array(edge), np.array(vals)
+
+
+def isotonic(p: np.ndarray, y: np.ndarray, ok: np.ndarray, fallback: np.ndarray, min_known: int = SHRINK_MIN) -> np.ndarray:
+    """Isotonic calibration walked forward: at each row, PAV fit on earlier rows with known outcomes."""
+    out = np.array(fallback, float).copy()
+    pos = np.where(ok)[0]
+    for a, i in enumerate(pos):
+        kj = _known(pos, a, i)
+        if len(kj) < min_known:
+            continue
+        e, v = pav(np.asarray(p)[kj], np.asarray(y)[kj])
+        out[i] = v[min(int(np.searchsorted(e, p[i])), len(v) - 1)]
+    return out
+
+
+def _mean_rows(P: np.ndarray) -> np.ndarray:
+    with np.errstate(all="ignore"):
+        return np.where(np.isnan(P).all(axis=0), np.nan, np.nanmean(np.where(np.isnan(P), 0, P), axis=0) * P.shape[0] / np.maximum(1, (~np.isnan(P)).sum(axis=0)))
+
+
+def combine_forecasts(P: list, bench: np.ndarray, y: np.ndarray, ok: np.ndarray, task: str, method: str = COMBINE, delta: float | None = SHRINK_DELTA) -> tuple[np.ndarray, np.ndarray | None]:
+    """The ensemble from member forecasts P. Methods: v24 (equal-weight mean), floor (members truncated at zero, return
+    only), shrink (mean shrunk toward the benchmark), floor_shrink, shrink_members, platt and isotonic (calibrated
+    mean, crash only); v25 is floor_shrink for returns and shrink for crashes. Returns (forecast, weights or None)."""
+    P = np.vstack(P).astype(float)
+    if method == "v25":
+        method = "floor_shrink" if task == "return" else "shrink"
+    if method in ("floor", "floor_shrink") and task == "return":
+        P = np.maximum(P, 0.0)
+    if method == "shrink_members":
+        return _mean_rows(np.vstack([credibility(p, bench, y, ok, delta)[0] for p in P])), None
+    m = _mean_rows(P)
+    if method in ("shrink", "floor_shrink"):
+        return credibility(m, bench, y, ok, delta)
+    if method == "platt":
+        return platt(m, y, ok, bench), None
+    if method == "isotonic":
+        return isotonic(m, y, ok, bench), None
+    if method in ("v24", "floor"):
+        return m, None
+    raise ValueError(f"unknown combine method {method}")
+
+
+def combine_now(now_members: list[float], bench_now: float, W: dict, task: str, method: str = COMBINE, delta: float | None = SHRINK_DELTA) -> tuple[float, float | None]:
+    """Today's ensemble: the same combination, with a credibility weight from every walked-forward forecast (all of
+    whose outcomes are known by today)."""
+    if method == "v25":
+        method = "floor_shrink" if task == "return" else "shrink"
+    v = np.array(now_members, float)
+    if method in ("floor", "floor_shrink") and task == "return":
+        v = np.maximum(v, 0.0)
+    raw = float(v.mean())
+    if method not in ("shrink", "floor_shrink"):
+        return raw, None
+    y, b = np.array(W["y"]), np.array(W["bench"])
+    Pm = np.vstack([np.array(W["preds"][k]) for k in W["members"]])
+    if method == "floor_shrink" and task == "return":
+        Pm = np.maximum(Pm, 0.0)
+    d = Pm.mean(axis=0) - b
+    if len(d) < SHRINK_MIN:
+        return bench_now, 0.0
+    age = np.arange(len(d))[::-1]
+    w = credibility_weight(d, y - b, None if delta is None else delta ** age)
+    return bench_now + w * (raw - bench_now), w
 
 
 def dmspe(P: list[np.ndarray], y: np.ndarray, ok: np.ndarray, delta: float = 0.9 ** (1 / 12), min_known: int = 24) -> np.ndarray:
@@ -303,6 +462,124 @@ def _auc(y: np.ndarray, p: np.ndarray) -> float | None:
         m = allv == v
         ranks[m] = ranks[m].mean()
     return float((ranks[:len(pos)].sum() - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)))
+
+
+# ---------------------------------------------------------------- v0.25 trials, every variant scored the same way
+def ece(p: np.ndarray, y: np.ndarray, bins=(0, 0.1, 0.2, 0.35, 1.01)) -> float:
+    """Expected calibration error over the calibration table's bins: the share-weighted gap between forecast and outcome."""
+    e = 0.0
+    for lo, hi in zip(bins[:-1], bins[1:]):
+        m = (p >= lo) & (p < hi)
+        if m.any():
+            e += float(m.mean()) * abs(float(p[m].mean()) - float(y[m].mean()))
+    return e
+
+
+def qra_interval(p: np.ndarray, y: np.ndarray, F: np.ndarray, level: float = 0.8, window: int = 360, min_known: int = SHRINK_MIN, refit: int = REFIT) -> tuple[np.ndarray, np.ndarray]:
+    """Quantile regression averaging (Nowotarski and Weron 2015) for the interval around p: the lower and upper
+    quantiles of the forecast error regressed on the member forecasts F (columns; none for an intercept only), fit
+    every `refit` rows on the last `window` errors already known."""
+    from scipy.optimize import linprog
+    a = (1 - level) / 2
+    n = len(y)
+    lo, hi = np.full(n, np.nan), np.full(n, np.nan)
+    cur = None
+
+    def qreg(X, v, tau):
+        m, k = X.shape
+        c = np.concatenate([np.zeros(k), tau * np.ones(m), (1 - tau) * np.ones(m)])
+        res = linprog(c, A_eq=np.hstack([X, np.eye(m), -np.eye(m)]), b_eq=v, bounds=[(None, None)] * k + [(0, None)] * (2 * m), method="highs")
+        return res.x[:k]
+    for i in range(n):
+        k = i - H - 1
+        if k + 1 < min_known:
+            continue
+        if cur is None or i % refit == 0:
+            j0 = max(0, k + 1 - window)
+            X = np.column_stack([np.ones(k + 1 - j0), F[j0:k + 1]])
+            e = y[j0:k + 1] - p[j0:k + 1]
+            cur = (qreg(X, e, a), qreg(X, e, 1 - a))
+        x = np.concatenate([[1.0], F[i]])
+        lo[i], hi[i] = p[i] + x @ cur[0], p[i] + x @ cur[1]
+    return lo, hi
+
+
+def conformal_path(p: np.ndarray, y: np.ndarray, level: float = 0.8, window: int = 360, min_known: int = SHRINK_MIN) -> tuple[np.ndarray, np.ndarray]:
+    """The symmetric conformal interval each row would have had, from the last `window` known absolute errors."""
+    e = np.abs(y - p)
+    lo, hi = np.full(len(y), np.nan), np.full(len(y), np.nan)
+    for i in range(len(y)):
+        k = i - H - 1
+        if k + 1 >= min_known:
+            q = float(np.quantile(e[max(0, k + 1 - window):k + 1], level))
+            lo[i], hi[i] = p[i] - q, p[i] + q
+    return lo, hi
+
+
+def winkler(lo: np.ndarray, hi: np.ndarray, y: np.ndarray, level: float = 0.8) -> np.ndarray:
+    a = 1 - level
+    return (hi - lo) + (2 / a) * np.maximum(lo - y, 0) + (2 / a) * np.maximum(y - hi, 0)
+
+
+def v25_trials(W: dict, task: str, adopted: str = COMBINE) -> list[dict]:
+    """Every v0.25 variant, scored on the same walked-forward months: skill against the benchmark before (the v0.24
+    equal-weight ensemble, or the named model) and after, the Diebold-Mariano t of after against before, and
+    calibration (interval coverage for returns, expected calibration error and AUC for crashes)."""
+    y, b = np.array(W["y"]), np.array(W["bench"])
+    P = {k: np.array(v) for k, v in W["preds"].items()}
+    mem = W["members"]
+    ok = np.ones(len(y), bool)
+    v24 = P["ensemble_v24"]
+    D_ = SHRINK_DELTA
+    sk = lambda p: 1 - float(np.sum((y - p) ** 2)) / float(np.sum((y - b) ** 2))
+    rows = []
+
+    def add(name, p, before=v24, before_name="v24 ensemble", is_adopted=False, extra=None):
+        row = {"variant": name, "metric": "skill against the " + ("historical mean" if task == "return" else "base rate") + f" (before: {before_name})",
+               "before": sk(before), "after": sk(p), "t": diebold_mariano(y - p, y - before)["t"], "t_vs_benchmark": diebold_mariano(y - p, y - b)["t"],
+               "adopted": is_adopted}
+        if task == "return":
+            row["coverage80"] = {"before": conformal(y - before)["coverage"], "after": conformal(y - p)["coverage"]}
+        else:
+            row["ece"] = {"before": ece(before, y), "after": ece(p, y)}
+            row["auc"] = {"before": _auc(y, before), "after": _auc(y, p)}
+        rows.append(row | (extra or {}))
+    Pm = np.vstack([P[k] for k in mem])
+    if task == "return":
+        fl = _mean_rows(np.maximum(Pm, 0.0))
+        add("shrink toward the mean, expanding weight", credibility(v24, b, y, ok, None)[0])
+        add("shrink toward the mean, discounted weight", credibility(v24, b, y, ok, D_)[0])
+        add("truncate the ensemble at zero", np.maximum(v24, 0.0))
+        add("shrink (expanding) then truncate", np.maximum(credibility(v24, b, y, ok, None)[0], 0.0))
+        add("truncate each member at zero, then average", fl)
+        if "combo" in P:
+            add("shrink the restricted combination", credibility(P["combo"], b, y, ok, None)[0], P["combo"], "restricted combination")
+        add("shrink the accuracy-weighted ensemble", credibility(P["dmspe"], b, y, ok, None)[0])
+        add("shrink each member (expanding), then average", _mean_rows(np.vstack([credibility(p, b, y, ok, None)[0] for p in Pm])))
+        add("truncate members, average, shrink (expanding)", credibility(fl, b, y, ok, None)[0])
+        add("truncate members, average, shrink (discounted)", credibility(fl, b, y, ok, D_)[0], is_adopted=adopted in ("v25", "floor_shrink"))
+        add("shrink (discounted) then truncate", np.maximum(credibility(v24, b, y, ok, D_)[0], 0.0))
+        # intervals around the adopted forecast: quantile regression averaging against the conformal interval
+        p = P["ensemble"]
+        l0, h0 = conformal_path(p, y)
+        for name, F in (("quantile regression averaging on the members", Pm.T), ("quantile regression, intercept only", np.zeros((len(y), 0)))):
+            l1, h1 = qra_interval(p, y, F)
+            m = np.isfinite(l0) & np.isfinite(l1)
+            w0, w1 = winkler(l0, h0, y)[m], winkler(l1, h1, y)[m]
+            d = w0 - w1
+            rows.append({"variant": name, "metric": "80% interval score (Winkler, lower is better; before: conformal)", "before": float(w0.mean()), "after": float(w1.mean()),
+                         "t": float(d.mean() / math.sqrt(nw_var(d, H))), "adopted": False,
+                         "coverage80": {"before": float(np.mean((y[m] >= l0[m]) & (y[m] <= h0[m]))), "after": float(np.mean((y[m] >= l1[m]) & (y[m] <= h1[m])))}})
+    else:
+        add("Platt scaling of the ensemble", platt(v24, y, ok, b))
+        add("isotonic calibration of the ensemble", isotonic(v24, y, ok, b))
+        add("shrink toward the base rate, expanding weight", credibility(v24, b, y, ok, None)[0])
+        add("shrink toward the base rate, discounted weight", credibility(v24, b, y, ok, D_)[0], is_adopted=adopted in ("v25", "shrink"))
+        if "logit" in P:
+            add("Platt scaling of the logistic regression", platt(P["logit"], y, ok, b))
+            add("shrink the logistic regression (expanding)", credibility(P["logit"], b, y, ok, None)[0])
+        add("Platt-scale each member, then average", _mean_rows(np.vstack([platt(p, y, ok, b) for p in Pm])))
+    return rows
 
 
 # ---------------------------------------------------------------- combinatorial purged CV and overfitting
@@ -438,14 +715,21 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
         for k2, (_, make, feats) in M.items():
             p, _ = _fit_predict(make, feats, Dt.iloc[:cut + 1], Dt[ycol].to_numpy(), row.to_frame().T.astype(float), task)
             now[k2] = float(p[0])
-        now["ensemble"] = float(np.mean([v for k2, v in now.items() if k2 != "cape_ols"]))
         ks = [k2 for k2 in M if k2 != "cape_ols"]
+        bench_now = float(Dt[ycol].mean())
+        now["ensemble_v24"] = float(np.mean([now[k2] for k2 in ks]))
+        now["ensemble"], w_now = combine_now([now[k2] for k2 in ks], bench_now, W, task)
         yy = np.array(W["y"])
         age = np.arange(len(yy))[::-1]
         wts = {k2: 1 / max(float((((np.array(W["preds"][k2]) - yy) ** 2) * (0.9 ** (1 / 12)) ** age)[~np.isnan(W["preds"][k2])].sum()), 1e-12) for k2 in ks}
         now["dmspe"] = float(sum(wts[k2] * now[k2] for k2 in ks) / sum(wts.values()))
-        now["benchmark"] = float(Dt[ycol].mean())
-        res = {"labels": {k2: M[k2][0] for k2 in M} | {"ensemble": "Equal-weight ensemble", "dmspe": "Accuracy-weighted ensemble"}, "scores": sc, "now": now, "n_oos": W["n"], "refits": W["refits"],
+        now["benchmark"] = bench_now
+        ens_label = {"return": "Ensemble, members truncated at zero and shrunk toward the mean", "crash": "Ensemble, shrunk toward the base rate"}[task] if COMBINE == "v25" else "Equal-weight ensemble"
+        res = {"labels": {k2: M[k2][0] for k2 in M} | {"ensemble": ens_label, "ensemble_v24": "Equal-weight ensemble (v0.24)", "dmspe": "Accuracy-weighted ensemble"},
+               "scores": sc, "now": now, "n_oos": W["n"], "refits": W["refits"], "combine": COMBINE,
+               "shrink": {"weight_now": w_now, "delta": SHRINK_DELTA, "min_known": SHRINK_MIN,
+                          "weight_mean": None if W["shrink_weight"] is None else float(np.mean(W["shrink_weight"])),
+                          "weight_series": None if W["shrink_weight"] is None else [round(v, 3) for v in W["shrink_weight"][::3]]},
                "importance": W["importance"], "series": {"dates": W["dates"][::3], "y": [round(v, 4) for v in W["y"][::3]], "bench": [round(v, 4) for v in W["bench"][::3]],
                                                           "ensemble": [round(v, 4) for v in W["preds"]["ensemble"][::3]]}}
         if task == "return":
@@ -460,7 +744,9 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
                     bins.append({"lo": lo, "hi": hi, "n": int(m.sum()), "forecast": float(p[m].mean()), "realized": float(y[m].mean())})
             res["calibration"] = bins
         res["cpcv"] = cpcv(D, task, groups=6 if quick else 8)
+        res["v25_trials"] = v25_trials(W, task)
         out[task] = res
+    out["v25_trials"] = [t | {"task": task} for task in ("return", "crash") for t in out[task]["v25_trials"]]
     out["analogs"] = analogs(D, row)
     out["shift"] = shift(D, row)
     out["findings"] = summary(out)
@@ -470,10 +756,18 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
 def summary(o: dict) -> list[str]:
     r, c = o["return"], o["crash"]
     sk = r["scores"]
-    best = max((k for k in sk if k != "ensemble"), key=lambda k: sk[k]["skill"])
+    best = max((k for k in sk if k not in ("ensemble", "ensemble_v24", "dmspe")), key=lambda k: sk[k]["skill"])
     f = [f"Twelve-month real return, judged out of sample from {o['start_oos']} with purged walk-forward refits: the ensemble's skill against the historical mean is "
          f"{sk['ensemble']['skill']:+.1%} (Diebold-Mariano t {sk['ensemble']['dm']['t']:.1f}); the best single model is {r['labels'][best].lower()} at {sk[best]['skill']:+.1%}. "
          f"Across {r['cpcv']['splits']} combinatorial purged splits the chance that picking the in-sample winner misleads is {r['cpcv']['pbo']:.0%}."]
+    if "ensemble_v24" in sk and r.get("combine") == "v25":
+        n_r = sum(1 for t in r.get("v25_trials", []) if t["metric"].startswith("skill"))
+        n_c = sum(1 for t in c.get("v25_trials", []) if t["metric"].startswith("skill"))
+        f.append(f"Since v0.25 the ensemble truncates each member's forecast at zero and shrinks the average toward the historical mean with a weight learned "
+                 f"only from forecasts whose outcome was known (today {r['shrink']['weight_now']:.2f}, average {r['shrink']['weight_mean']:.2f}); the equal-weight v0.24 "
+                 f"ensemble scored {sk['ensemble_v24']['skill']:+.1%}. The crash ensemble is shrunk toward the base rate the same way "
+                 f"(Brier skill {c['scores']['ensemble']['skill']:+.1%} against {c['scores']['ensemble_v24']['skill']:+.1%}). Each was chosen from the variants tried ({n_r} for returns, "
+                 f"{n_c} for crashes), so the margins are smaller than their t statistics suggest.")
     ens = r["now"]["ensemble"]
     f.append(f"Today the ensemble expects {math.expm1(ens):+.1%} real over the next year against a historical {math.expm1(r['now']['benchmark']):+.1%}, "
              f"with an 80% conformal interval of plus or minus {r['interval']['halfwidth']:.0%} in log terms (past intervals covered {r['interval']['coverage']:.0%}).")

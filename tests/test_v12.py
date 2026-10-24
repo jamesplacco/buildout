@@ -138,6 +138,9 @@ def test_library_integrity(library):
     for k in V.TOPICS:
         own = [q for q in library if q["topic"] == k]
         assert len(own) >= 8, k
+        if k == "tails_uncertainty":                         # v0.25: no checked voice defends the normal model; the topic stays one-sided rather than invent one
+            assert any(q["stance"] < 0 for q in own), k
+            continue
         assert any(q["stance"] < 0 for q in own) and any(q["stance"] > 0 for q in own), k
 
 

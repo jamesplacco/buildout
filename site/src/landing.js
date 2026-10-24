@@ -4,8 +4,8 @@
      codebase, counted) and the live counts in the fund block. Everything reads the shipped snapshots (DX19, THETA23,
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
-  const MCP_TOOLS = 34;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TESTS_PASSING = 493;     // the shipped test count (the chip and the hood tile read it)
+  const MCP_TOOLS = 36;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
+  const TESTS_PASSING = 553;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -89,6 +89,29 @@
   }
 
   // Limits and breaches: which loss limit governs the size, its horizon, today's reading and whether it is met (audit v0.24, blocker 2).
+  // v0.25: the call, derived step by step with today's numbers (shown by default; the Σ button hides every formula)
+  function renderCallMath(N, O) {
+    const el = $("#t7-math");
+    if (!el) return;
+    const G = N.gate, w = N.models.weights, nm = N.models.names, F = N.forecasts || {};
+    const wTxt = Object.keys(w).sort((a, b) => w[b] - w[a]).map((k) => `${fx(w[k], 3)} ${nm[k] ? nm[k].toLowerCase() : k}`).join(" + ");
+    const cap = O.es_limit / N.es_1x;
+    const phi = (t) => 0.5 * (1 + erfApprox(t / Math.SQRT2));
+    const raw = 2 * phi(G.t - G.t0) - 1;
+    el.innerHTML = `<span class="mlabel">The call, derived with today's numbers</span>`
+      + `<p><b>1. Belief.</b> Next month's real return <var>R</var> ~ &Sigma;<sub>m</sub> <var>w</var><sub>m</sub> &Sigma;<sub>s</sub> &pi;<sub>m,s</sub> N(&mu;<sub>m,s</sub>, &sigma;<sub>m,s</sub><sup>2</sup>), model weights <var>w</var><sub>m</sub> &prop; exp(&Sigma;<sub>&tau;</sub> 0.98<sup>age</sup> log <var>p</var><sub>m</sub>(<var>r</var><sub>&tau;</sub>)) = ${wTxt}.${fin(F.stacked) ? ` Forecast tilt from the stacked 12-month forecast: ${sPct(F.stacked, 1)} a year.` : ""}</p>`
+      + `<p><b>2. Optimum.</b> <var>x</var>* = argmax<sub><var>x</var></sub> E[<var>u</var>(1 + <var>x R</var> &minus; <var>b</var>&middot;max(<var>x</var> &minus; 1, 0))], <var>u</var>(<var>v</var>) = (<var>v</var><sup>1&minus;&gamma;</sup> &minus; 1)/(1 &minus; &gamma;), &gamma; = ${fx(O.gamma, 2)}, subject to <var>x</var>&middot;ES<sub>5%</sub>(<var>R</var>) &le; ${pct0(O.es_limit)}: ES<sub>5%</sub> = ${pctPlain(N.es_1x, 2)}, so <var>x</var> &le; ${fx(O.es_limit, 2)} &divide; ${fx(N.es_1x, 4)} = ${fx(cap, 2)}; on the grid of exposures from 0 to 1.5x (the gross cap), <var>x</var>* = ${xx(N.engine_exposure)}.</p>`
+      + `<p><b>3. Gate.</b> <var>t</var><sub>0</sub> = &Phi;<sup>&minus;1</sup>(1 &minus; 1/<var>n</var>) = &Phi;<sup>&minus;1</sup>(1 &minus; 1/${G.n_tried}) = ${fx(G.t0, 2)}; <var>g</var> = max(0, 2&Phi;(<var>t</var> &minus; <var>t</var><sub>0</sub>) &minus; 1) = max(0, 2&Phi;(${fx(G.t, 2)} &minus; ${fx(G.t0, 2)}) &minus; 1) = max(0, ${fx(raw, 2)}) = ${fx(G.value, 2)}.</p>`
+      + `<p><b>4. Size.</b> <var>x</var> = 1 + <var>g</var>(<var>x</var>* &minus; 1) = 1 + ${fx(G.value, 2)} &times; (${fx(N.engine_exposure, 2)} &minus; 1) = <b>${xx(N.exposure)}</b>; its worst-month cost: ${fx(N.exposure, 2)} &times; ${pctPlain(N.es_1x, 2)} = ${pctPlain(N.exposure * N.es_1x, 2)} of NAV against the ${pct0(O.es_limit)} budget.</p>`
+      + `<p><b>5. Hedge.</b> Selector: choose argmax<sub><var>h</var></sub> P(<var>h</var> best | context), posterior from discounted outcomes in the same context (${N.hedge.context}): ${N.hedge.names.map((n, i) => `${fx(N.hedge.p_best[i], 3)} ${n.toLowerCase()}`).join(", ")} &rArr; ${N.hedge.name.toLowerCase()}.</p>`;
+  }
+  // erf by Abramowitz and Stegun 7.1.26 (error under 1.5e-7), for the gate's normal CDF shown in the math
+  function erfApprox(x) {
+    const s = Math.sign(x), a = Math.abs(x), t = 1 / (1 + 0.3275911 * a);
+    const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a);
+    return s * y;
+  }
+
   function renderLimits(N, O) {
     const el = $("#t7-limits");
     if (!el) return;
@@ -104,6 +127,11 @@
       const R = typeof runReasoner === "function" ? (typeof RZ_LAST !== "undefined" && RZ_LAST) || runReasoner(false) : null, keep = R && R.alts && R.alts.keep;
       if (keep && fin(keep.worst)) rows.push(["Scenario loss limit", "the Solve desk, a stress test", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} for the book as it stands against a ${RZS.loss}% limit`, keep.feasible ? "within" : "breached on that desk's scenarios", "#solve"]);
     } catch (e) { /* the solver is optional here */ }
+    try {                                   // v0.25: the actuarial cross-checks (crossfield.py, walked forward since 1940)
+      const C = typeof SNAP25 !== "undefined" && SNAP25 && SNAP25.crossfield, tm = C && C.tail && C.tail.methods, ru = C && C.ruin && C.ruin["1.0"];
+      if (tm && tm.pot && tm.pot["0.05"]) rows.push(["Tail cross-check (generalized Pareto)", "an actuary's estimate of the same 5% ES", "one month, peaks over threshold since 1871", `${pctPlain(tm.pot["0.05"].es_last, 1)} at 1x, allowing up to ${xx(tm.pot["0.05"].max_exposure_now)} within the 12% budget`, tm.pot["0.05"].es_last * N.exposure <= O.es_limit ? "within" : "breached by the cross-check", "#crossfield"]);
+      if (ru) rows.push(["Ruin (a 50% fall from a peak)", "information: no limit is set on it", "ten years, block bootstrap of every month since 1871", `${pctPlain(ru.bootstrap_dd50_10y.p, 1)} at 1x; ${pctPlain(C.ruin["1.5"].bootstrap_dd50_10y.p, 1)} at the 1.5x cap`, "reported", "#crossfield"]);
+    } catch (e) { /* the v0.25 snapshot is optional here */ }
     const t = h("table", "limits");
     const thead = h("thead"), hr = h("tr");
     ["Limit", "Role", "Horizon", "Reading today", "Status"].forEach((x) => { const th = h("th", null, x); th.scope = "col"; hr.append(th); });
@@ -117,7 +145,7 @@
     });
     t.append(tb);
     const cap = h("p", "t7-sizing");
-    const crossBreaches = rows.slice(1).filter((r) => /breached/.test(r[4])).length;
+    const crossBreaches = rows.slice(1).filter((r) => /breached/.test(r[4]) && !/Tail cross-check/.test(r[0])).length;
     cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode(`The expected-shortfall budget, measured on the index the engine sizes, governs the size and is ${esNow <= O.es_limit ? "met" : "breached"}. ${crossBreaches ? `${crossBreaches === 1 ? "One cross-check limit reads" : `${["", "One", "Two", "Three"][crossBreaches] || crossBreaches} cross-check limits read`} breached, and a PM should weigh ${crossBreaches === 1 ? "it" : "them"}: they measure the AI book, which runs about 1.4 times the market's beta, against limits the index call does not see. That gap is why the volatility rule says ${xx(Math.min(0.2 / (1.1 * STATIC_VOL.vxn[0] / 100), 1.5))} and the Solve desk's stress test asks for hedges; closing it (sizing the book, not the index) is the first item on the roadmap. ` : ""}Breaches of the governing limit cut the size the same day; a stale input older than its schedule flags on the Decide desk and the engine holds the last call.`));
     const wrap = h("div", "tablewrap"); wrap.append(t);
     el.append(cap, wrap);
@@ -206,6 +234,7 @@
       guard("How the engine thinks", () => renderFlow(O.now, O), $("#flow"));
       guard("Implementation", () => renderImplementation(O.now, O), $("#t7-impl"));
       guard("Limits", () => renderLimits(O.now, O), $("#t7-limits"));
+      guard("The call, derived", () => renderCallMath(O.now, O), $("#t7-math"));
     }
     guard("The parameters", renderThetaStrip, $("#theta"));
     guard("Under the hood", renderHood, $("#hood"));
