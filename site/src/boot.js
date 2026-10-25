@@ -2,7 +2,7 @@
      boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
-    today: { name: "Today", views: ["desk", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
+    today: { name: "Today", views: ["desk", "nowcast", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "positions", "swans"] },
     research: { name: "Research", views: ["digest", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
@@ -29,11 +29,12 @@
     cardroom: () => { guard("The labs", renderLabsDesk, $("#lb-tiles")); guard("The card room", drawYale, $("#cr-yale")); },
     code: () => guard("Under the hood", renderCodeDesk, $("#cd-list")),
     agents: () => {},
-    desk: () => { guard("Today", renderToday7, $("#today7")); guard("Landing", renderLanding, $("#call-board")); guard("Edge lab today", renderEdgesToday, $("#t7-edges")); guard("Rosette", () => drawRosette(true)); },
+    desk: () => { guard("Today", renderToday7, $("#today7")); guard("Landing", renderLanding, $("#call-board")); guard("Nowcast today", renderNowcastToday, $("#t7-nowcast")); guard("Edge lab today", renderEdgesToday, $("#t7-edges")); guard("Rosette", () => drawRosette(true)); },
     parameters: () => guard("The parameters", renderParameters, $("#pm-tiles")),
     explained: () => guard("How it works", renderExplained, $("#hw-read")),
     digest: () => guard("Research digest", renderDigest, $("#dg-tiles")),
     reasoning: () => guard("Reasoning", renderReasoning, $("#rs-tiles")),
+    nowcast: () => guard("Nowcast", renderNowcast, $("#nc-tiles")),
     edges: () => guard("Edge lab", renderEdges, $("#ed2-tiles")),
     methods: () => guard("Methods", renderMethods, $("#mt-tiles")),
     crossfield: () => guard("Borrowed methods", renderCrossfield, $("#cf-tiles")),

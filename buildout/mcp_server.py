@@ -1120,6 +1120,28 @@ def edge_lab(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, edges, book, families, placebo, early, data_notes, universe, unusual")
 
 
+def nowcast(ctx: Context, args: dict) -> dict:
+    """v0.27: the nowcast from the shipped run: early-published facts (TSMC's monthly revenue, the hyperscalers'
+    capital spending, peers' reports) against the book's next quarterly reports, whether they forecast revenue, whether
+    the market had already priced them, and each holding's next report. Research only."""
+    from . import nowcast as nc
+    S = _snap("snap27.js", "SNAP27", "nowcast")
+    if not S:
+        raise ToolError("no v0.27 snapshot: run python scripts/snapshot_v27.py")
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"findings": nc.summary(S), "bh_cut": S["bh_cut"], "n_hypotheses": S["n_hypotheses"], "fakes": S["fakes"]}
+    if part == "today":
+        t = (args.get("ticker") or "").lower()
+        rows = [x for x in S["today"] if not t or x["ticker"] == t]
+        return {"today": rows, "note": "research only, never an order"}
+    if part == "tests":
+        return {"tests": [{k: v for k, v in x.items() if k != "strategy" or not isinstance(v, dict) or "curve" not in v} for x in S["tests"]], "bh_cut": S["bh_cut"]}
+    if part in ("events", "models", "tsmc_recent", "sources", "assumptions", "limitations"):
+        return {part: S[part]}
+    raise ToolError("part is one of summary, today, tests, events, models, tsmc_recent, sources, assumptions, limitations")
+
+
 def forecast_verification(ctx: Context, args: dict) -> dict:
     """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
     coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
@@ -1274,6 +1296,12 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                  _obj({"part": {"type": "string", "enum": ["summary", "edges", "book", "families", "placebo", "early", "data_notes", "universe", "unusual"]},
                        "tested_only": {"type": "boolean", "description": "for part=edges: only edges tested on untouched years (most of their markets trading), including the early-split ones"}}),
                  {"readOnlyHint": True, "openWorldHint": False}),
+    "nowcast": (nowcast, "The nowcast: early-published facts (TSMC's monthly revenue, the hyperscalers' capital spending, peers' reports) against the next "
+                "quarterly reports of the book and the AI supply chain: the walked-forward revenue nowcast against persistence, permutation tests of "
+                "whether the market had priced each signal by the report day, the drift after reports, and each holding's next report. Research only.",
+                _obj({"part": {"type": "string", "enum": ["summary", "today", "tests", "events", "models", "tsmc_recent", "sources", "assumptions", "limitations"]},
+                      "ticker": {"type": "string", "description": "for part=today: one ticker, e.g. nvda"}}),
+                {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
                               "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "
                               "probabilities, and every borrowed upgrade tried on the decision core with its verdict.",

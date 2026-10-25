@@ -156,6 +156,9 @@ def main(argv: list[str] | None = None) -> None:
     rsp = sub.add_parser("reasoning", help="v0.25: deduction with proofs, induction walked forward, abduction, invented concepts, and the legends' rules tested since 1871")
     rsp.add_argument("--out", default="out")
     rsp.add_argument("--quick", action="store_true", help="skip the decade-by-decade rediscovery")
+    ncp = sub.add_parser("nowcast", help="v0.27: early-published facts (TSMC monthly revenue, hyperscaler capex, peers) against the book's next quarterly reports, and whether the market had priced them")
+    ncp.add_argument("--out", default="out")
+    ncp.add_argument("--quick", action="store_true")
     edp = sub.add_parser("edges", help="v0.26: the edge lab: tens of thousands of candidate edges from market and unusual data across world markets, the gauntlet, the placebos, the survivors and the edge book")
     edp.add_argument("--out", default="out")
     edp.add_argument("--quick", action="store_true")
@@ -470,6 +473,15 @@ def main(argv: list[str] | None = None) -> None:
         rules = _P(__file__).resolve().parent / "assets" / "rules25.json"
         o = reason.build(labs.shiller(labs.download()), adl["raw"], rules_paths=[str(rules)] if rules.exists() else (), do_rolling=not a.quick)
         path = write(o, a.out, "reason.json")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "nowcast":
+        from . import nowcast as nc
+        from .jsonout import write
+        o = nc.build(nc.download(), n_perm=300 if a.quick else nc.N_PERM, n_fake=30 if a.quick else nc.N_FAKE)
+        path = write(o, a.out, "nowcast.json")
         for f in o["findings"]:
             print(" ", f)
         print("wrote", path)

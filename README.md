@@ -3,6 +3,20 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.27 adds a nowcast (`buildout/nowcast.py`, a Nowcast desk beside the call, MCP tool `nowcast`,
+`python -m buildout nowcast`). It goes where edges are usually found: facts published before the reports they predict,
+aimed at the book. Inputs are TSMC's monthly revenue (153 months read from TSMC's site, each checked against TSMC's printed
+growth), the hyperscalers' capital spending, and peers' reports. The tests cover 552 company quarters of the book and the AI
+supply chain since 2017, each dated by its earnings release (599 releases: SEC Form 8-K Item 2.02 dates plus 100 read from
+the companies' releases, a sample of 36 confirmed independently). Revenue nowcasts are walked forward against persistence.
+Permutation tests then ask whether the market had priced each signal by report day, within seasons (under three ways of
+drawing a season) and across quarters, with 240 placebo signals beside them. Nothing passes the multiple-testing cut
+across 51 hypotheses. The best lead: peers' recent reports cut the error of forecasting chip makers' revenue by 19% (t 2.4
+clustered by quarter). TSMC and capital spending add nothing beyond persistence, and the tests could only see
+correlations of about 0.2 or more. So the desk forecasts each holding's next report and does not call it a trade. Two
+independent audits reshaped it before release: they replaced volume-based report dating with the actual release dates,
+and showed that two strong-looking chip results depended on how a season was drawn.
+
 Version 0.26 adds an edge lab (`buildout/discovery.py` part two, `buildout/unusual.py`, an Edge lab desk, MCP tool
 `edge_lab`, `python -m buildout edges`): a hypothesis factory in the spirit of "weird edges all over the world, from
 unusual data". It invents 43,247 candidate edges from 70 world markets, their own histories, every other market and 89
@@ -86,7 +100,7 @@ fit runs in the same batch. The five-network ensemble trains its members side by
 written by a subagent, identical to sequential training bit for bit). Measured on the build machine: the decision
 engine rebuilds in 33 seconds instead of 93 and the portfolio engine in 9 instead of 24, with the same findings to the
 last digit; the forward-backward pass is about 3x faster and agrees with the loop to about 1e-14. The mind's graph is
-one sparse 9,426 by 9,426 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
+one sparse 9,429 by 9,429 matrix (`Mind.walk_matrix`); many questions think at once as one product with a matrix of
 questions (`spread_many`, `think_many`), which gives the board: the mind's verdict on all 27 claims it weighs in one
 pass (`python -m buildout board`, MCP tool `mind_board`, and live in the page). A 64-eigenvector map of the graph is
 about 9x faster per question but changes half of the top twenty answers, so it is used only to find related ideas
