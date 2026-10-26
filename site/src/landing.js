@@ -4,8 +4,8 @@
      codebase, counted) and the live counts in the fund block. Everything reads the shipped snapshots (DX19, THETA23,
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
-  const MCP_TOOLS = 38;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TESTS_PASSING = 592;     // the shipped test count (the chip and the hood tile read it)
+  const MCP_TOOLS = 39;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
+  const TESTS_PASSING = 610;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());

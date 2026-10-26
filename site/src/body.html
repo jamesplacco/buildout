@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.27</span>
+      Buildout <span class="ver">v0.28</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -78,7 +78,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 592 of 592</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 610 of 610</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot warn"></span><span>Databento key pending</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -280,10 +280,10 @@
   <div class="at-tiles" id="mx-tiles"></div>
   <section class="section" aria-labelledby="mx-how-title">
     <div class="section-head"><p class="eyebrow">How the mind multiplies</p><h2 id="mx-how-title">Queries as vectors, knowledge as a matrix</h2>
-      <p class="prose">The mind's 9,429 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
+      <p class="prose">The mind's 9,432 ideas, markets, facts and quotes are the rows and columns of one matrix P: entry (j, i) is how much of node i's attention flows to node j along their links. A question lights up a few nodes, a vector s. One step of thinking is one product, r = (1 - a) s + a P r, repeated forty times. Ask twenty-seven questions and they become the twenty-seven columns of a matrix S, and every step is one product P R for all of them: the same arithmetic, done side by side, as a graphics chip does for a neural network.</p></div>
     <div class="mx-eq panel">
-      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 9,429, forty times</small></div>
-      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 9,429 by Q, forty times</small></div>
+      <div><span class="dx-k">One question</span><code>r &larr; (1 &minus; a) s + a P r</code><small>a vector of 9,432, forty times</small></div>
+      <div><span class="dx-k">Many questions</span><code>R &larr; (1 &minus; a) S + a P R</code><small>a matrix of 9,432 by Q, forty times</small></div>
       <div><span class="dx-k">A neural network layer</span><code>h = f(W x + b)</code><small>the same product, learned weights W</small></div>
     </div>
   </section>
@@ -2487,7 +2487,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, every one of its 38 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 39 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2649,6 +2649,39 @@
 </section>
 
 <!-- ======================= EDGE LAB (v0.26) ======================= -->
+<section class="view" id="view-filings" hidden aria-labelledby="fl-title">
+  <div class="vhead"><p class="eyebrow">Research · filings</p><h1 id="fl-title">The filings engine: what companies and their insiders file, across every stock that has been in the S&amp;P 500</h1>
+    <p class="lede" id="fl-sub">The nowcast found big public signals on fifteen giant companies already priced, and its tests could only see big effects. Breadth is the remedy: about five hundred stocks a month since 2009, so that a small edge on each becomes measurable. Stocks move together by industry and factor, so the test is built to count that dependence rather than pretend every stock is a separate bet. The data are the SEC's own, free and time-stamped: insiders' purchases and sales, and every number in every 10-K and 10-Q, each used only once it could have been traded.</p></div>
+  <div class="at-tiles" id="fl-tiles"></div>
+  <section class="section" aria-labelledby="fl-status-t">
+    <div class="section-head"><p class="eyebrow">Status</p><h2 id="fl-status-t">Where the engine stands</h2><p class="prose" id="fl-status-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="fl-run"></table></div>
+  </section>
+  <section class="section" aria-labelledby="fl-sig-t">
+    <div class="section-head"><p class="eyebrow">Signals</p><h2 id="fl-sig-t">What it tests, and who found it first</h2><p class="prose" id="fl-sig-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="fl-sig"></table></div>
+  </section>
+  <section class="section" aria-labelledby="fl-res-t">
+    <div class="section-head"><p class="eyebrow">Results</p><h2 id="fl-res-t">Does it still work?</h2><p class="prose" id="fl-res-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="fl-res"></table></div>
+    <div class="math" id="fl-math"></div>
+  </section>
+  <section class="section" aria-labelledby="fl-val-t">
+    <div class="section-head"><p class="eyebrow">Validation</p><h2 id="fl-val-t">Proof the machine works: a planted edge on synthetic data</h2><p class="prose" id="fl-val-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="fl-val"></table></div>
+    <p class="prose" id="fl-cal-p"></p>
+    <div class="tablewrap"><table class="rs-table" id="fl-cal"></table></div>
+  </section>
+  <section class="section" aria-labelledby="fl-book-t">
+    <div class="section-head"><p class="eyebrow">The book</p><h2 id="fl-book-t">The book's companies on each signal</h2><p class="prose" id="fl-book-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="fl-book"></table></div>
+  </section>
+  <section class="section" aria-labelledby="fl-lim-t">
+    <div class="section-head"><p class="eyebrow">Limits</p><h2 id="fl-lim-t">What this cannot show</h2></div>
+    <ul class="prose" id="fl-limits"></ul>
+    <p class="hint">Run it: python -m buildout filings --ua "Your Name you@example.com" --out out.</p>
+  </section>
+</section>
 <section class="view" id="view-nowcast" hidden aria-labelledby="nc-title">
   <div class="vhead"><p class="eyebrow">Today · nowcast</p><h1 id="nc-title">The nowcast: facts published early, against the book's next reports</h1>
     <p class="lede" id="nc-sub">Taiwan reports monthly; American companies report a quarter at a time, weeks later. TSMC's revenue, the hyperscalers' capital spending and the reports of peers that go first are all public before NVIDIA, Broadcom or Microsoft report. This desk asks two questions of them: do they forecast the next report better than assuming growth simply continues, and had the market already priced them by report day? Every fact is used only after the date it became knowable.</p></div>
@@ -3246,7 +3279,7 @@
       <li><b>Data.</b> A daily GitHub Action runs the engines on public data (FRED, SEC filings, GitHub mirrors of public datasets, Databento with a secret key); only derived results are kept. engine.py records each engine's inputs, outputs, timing and status.</li>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
       <li><b>Know.</b> ontology.py, concepts17.json and concepts25.json define 4,575 concepts and their relations; knowledge.json holds 903 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 371 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
-      <li><b>Think.</b> mind.py joins all of it into one graph of 9,429 nodes and about 38,000 typed links, with 4,575 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
+      <li><b>Think.</b> mind.py joins all of it into one graph of 9,432 nodes and about 38,000 typed links, with 4,575 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
       <li><b>Count.</b> parameters.py inventories every matrix, vector and scalar the engine learns (22 objects, about 598,000 numbers) with its shape, the optimiser and objective that shaped it, its data, its refit schedule and the desks it feeds, read from the engines' own outputs; the constants set by hand are listed apart with reasons.</li>
       <li><b>Decide.</b> decide.py sizes the stock exposure from stacked forecasts (nn.py's neural ensemble), regimes and changepoints (infer.py), model averaging that now includes geometric analogs (geometry.py), a risk budget and an evidence gate; portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>

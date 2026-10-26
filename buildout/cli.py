@@ -156,6 +156,14 @@ def main(argv: list[str] | None = None) -> None:
     rsp = sub.add_parser("reasoning", help="v0.25: deduction with proofs, induction walked forward, abduction, invented concepts, and the legends' rules tested since 1871")
     rsp.add_argument("--out", default="out")
     rsp.add_argument("--quick", action="store_true", help="skip the decade-by-decade rediscovery")
+    flp = sub.add_parser("filings", help="v0.28: SEC insider data sets and XBRL company facts across every stock ever in the S&P 500, tested for what the market has not priced")
+    flp.add_argument("--ua", required=True, help="SEC contact, e.g. 'Jane Doe jane@example.com'")
+    flp.add_argument("--out", default="out")
+    flp.add_argument("--cache", default=".cache/filings")
+    flp.add_argument("--start", default="2006q1", help="first quarter of insider data")
+    flp.add_argument("--limit", type=int, default=None, help="only the first N tickers (a quick trial)")
+    flp.add_argument("--perms", type=int, default=None)
+    flp.add_argument("--text", action="store_true", help="also download every 10-K and test year-over-year text similarity (several GB)")
     ncp = sub.add_parser("nowcast", help="v0.27: early-published facts (TSMC monthly revenue, hyperscaler capex, peers) against the book's next quarterly reports, and whether the market had priced them")
     ncp.add_argument("--out", default="out")
     ncp.add_argument("--quick", action="store_true")
@@ -473,6 +481,21 @@ def main(argv: list[str] | None = None) -> None:
         rules = _P(__file__).resolve().parent / "assets" / "rules25.json"
         o = reason.build(labs.shiller(labs.download()), adl["raw"], rules_paths=[str(rules)] if rules.exists() else (), do_rolling=not a.quick)
         path = write(o, a.out, "reason.json")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "filings":
+        import pickle as _pk
+        from pathlib import Path as _P
+        from . import filings as fl
+        from .jsonout import write
+        data = fl.collect(a.ua, a.cache, a.start, limit=a.limit, text=a.text)
+        _P(a.cache).mkdir(parents=True, exist_ok=True)
+        (_P(a.cache) / "inputs.pkl").write_bytes(_pk.dumps(data))      # the run's inputs stay in the cache, never in git
+        o = fl.build(data["members"], data["cik_of"], data["ticker_of"], data["tx"], data["facts"], data["px"], text=data.get("text"),
+                     n_perm=a.perms or fl.N_PERM, meta=data["meta"], splits=data.get("splits"))
+        path = write(o, a.out, "filings.json")
         for f in o["findings"]:
             print(" ", f)
         print("wrote", path)

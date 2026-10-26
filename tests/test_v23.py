@@ -217,7 +217,7 @@ def test_landing_page_is_the_call_and_the_engine():
         assert body[start:start + 60].split('id="view-')[1].split('"')[0] == view, sec
     assert 'id="view-parameters"' in body and 'id="pm-table"' in body and 'id="pm-hand"' in body and 'id="dx-overlay"' in body
     scripts = (ROOT / "scripts" / "assemble_page.py").read_text()
-    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "landing.js"' in scripts
+    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "landing.js"' in scripts
     assert "Thesis chips" not in (SRC / "boot.js").read_text()
 
 

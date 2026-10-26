@@ -1142,6 +1142,31 @@ def nowcast(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, today, tests, events, models, tsmc_recent, sources, assumptions, limitations")
 
 
+def filings_engine(ctx: Context, args: dict) -> dict:
+    """v0.28: the filings engine from the shipped snapshot: insider and fundamental signals from SEC filings across
+    every stock ever in the S&P 500, their monthly rank ICs, p-values from the IC series, portfolios and the book's readings.
+    Before the first real run it returns the engine's design and its synthetic validation. Research only."""
+    from . import filings as fl
+    S = _snap("snap28.js", "SNAP28", "filings")
+    if not S:
+        raise ToolError("no v0.28 snapshot: run python scripts/snapshot_v28.py")
+    part = args.get("part", "summary")
+    run = S.get("run") or {}
+    if part == "summary":
+        return {"status": S.get("status"), "findings": run.get("findings") or [], "validation": S.get("validation", {}).get("findings")}
+    if part in ("tests", "today", "events", "coverage", "universe") and run:
+        return {part: run.get(part)}
+    if part == "signals":
+        return {"signals": S.get("signals")}
+    if part == "validation":
+        return S.get("validation")
+    if part == "calibration":
+        return (S.get("calibration") or {}).get("pooled") | {"sparse": (S.get("calibration") or {}).get("sparse")}
+    if part in ("tests", "today", "events", "coverage", "universe"):
+        return {"status": S.get("status"), "note": "the first real run has not happened yet"}
+    raise ToolError("part is one of summary, signals, validation, calibration, tests, today, events, coverage, universe")
+
+
 def forecast_verification(ctx: Context, args: dict) -> dict:
     """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
     coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
@@ -1302,6 +1327,13 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                 _obj({"part": {"type": "string", "enum": ["summary", "today", "tests", "events", "models", "tsmc_recent", "sources", "assumptions", "limitations"]},
                       "ticker": {"type": "string", "description": "for part=today: one ticker, e.g. nvda"}}),
                 {"readOnlyHint": True, "openWorldHint": False}),
+    "filings_engine": (filings_engine, "The filings engine: insider buying and selling (SEC Forms 4 and 5) and fundamentals from XBRL filings (accruals, gross "
+                       "profitability, asset growth, share issuance, earnings surprise, revenue acceleration) across every stock ever in the S&P 500, each "
+                       "value used only once it could have been traded, tested by monthly rank IC with p-values from the IC series (the equal-weighted "
+                       "cosine test), controls for size, momentum and value, both halves of the record and costs; its calibration on synthetic worlds with no "
+                       "edge; plus the book's current readings. Research only.",
+                       _obj({"part": {"type": "string", "enum": ["summary", "signals", "validation", "calibration", "tests", "today", "events", "coverage", "universe"]}}),
+                       {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
                               "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "
                               "probabilities, and every borrowed upgrade tried on the decision core with its verdict.",

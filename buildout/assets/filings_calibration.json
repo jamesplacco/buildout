@@ -1,0 +1,288 @@
+{
+ "schema": 1,
+ "worlds": [
+  {
+   "world": 0,
+   "tests": 20,
+   "tests_p_below_05": 0.1,
+   "tests_reassign_p_below_05": 0.05,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.1,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.1,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.094702,
+      "effective_n": 5.398632
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.5,
+      "mean_abs_corr": 0.651898,
+      "effective_n": 1.456223
+     }
+    }
+   }
+  },
+  {
+   "world": 1,
+   "tests": 20,
+   "tests_p_below_05": 0.0,
+   "tests_reassign_p_below_05": 0.0,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.1,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.1,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.082404,
+      "effective_n": 5.74173
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.5,
+      "mean_abs_corr": 0.532874,
+      "effective_n": 1.725369
+     }
+    }
+   }
+  },
+  {
+   "world": 2,
+   "tests": 20,
+   "tests_p_below_05": 0.0,
+   "tests_reassign_p_below_05": 0.0,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.1,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.1,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.093391,
+      "effective_n": 5.433244
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.4,
+      "mean_abs_corr": 0.440725,
+      "effective_n": 2.013481
+     }
+    }
+   }
+  },
+  {
+   "world": 3,
+   "tests": 20,
+   "tests_p_below_05": 0.0,
+   "tests_reassign_p_below_05": 0.0,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.0,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.086921,
+      "effective_n": 5.610763
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.2,
+      "mean_abs_corr": 0.603374,
+      "effective_n": 1.555121
+     }
+    }
+   }
+  },
+  {
+   "world": 4,
+   "tests": 20,
+   "tests_p_below_05": 0.15,
+   "tests_reassign_p_below_05": 0.15,
+   "tests_passing_cut": 2,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.0,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.077826,
+      "effective_n": 5.88084
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.8,
+      "mean_abs_corr": 0.574097,
+      "effective_n": 1.621567
+     }
+    }
+   }
+  },
+  {
+   "world": 5,
+   "tests": 20,
+   "tests_p_below_05": 0.1,
+   "tests_reassign_p_below_05": 0.0,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.0,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.080207,
+      "effective_n": 5.807661
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.6,
+      "mean_abs_corr": 0.728519,
+      "effective_n": 1.323334
+     }
+    }
+   }
+  },
+  {
+   "world": 6,
+   "tests": 20,
+   "tests_p_below_05": 0.1,
+   "tests_reassign_p_below_05": 0.05,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.1,
+    "share_p_below_01": 0.1,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.1,
+      "share_p_below_01": 0.1,
+      "mean_abs_corr": 0.076873,
+      "effective_n": 5.910652
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.7,
+      "mean_abs_corr": 0.662423,
+      "effective_n": 1.436409
+     }
+    }
+   }
+  },
+  {
+   "world": 7,
+   "tests": 20,
+   "tests_p_below_05": 0.0,
+   "tests_reassign_p_below_05": 0.1,
+   "tests_passing_cut": 0,
+   "fakes": {
+    "signals": 20,
+    "share_p_below_05": 0.1,
+    "share_p_below_01": 0.0,
+    "headline": "persistent noise",
+    "passed_at_cut": 0,
+    "by_kind": {
+     "persistent noise": {
+      "n": 10,
+      "share_p_below_05": 0.1,
+      "share_p_below_01": 0.0,
+      "mean_abs_corr": 0.089081,
+      "effective_n": 5.550233
+     },
+     "factor tilt": {
+      "n": 10,
+      "share_p_below_05": 0.0,
+      "share_p_below_01": 0.0,
+      "share_reassign_p_below_05": 0.1,
+      "mean_abs_corr": 0.581084,
+      "effective_n": 1.605199
+     }
+    }
+   }
+  }
+ ],
+ "sparse": [
+  {
+   "flag_rate": 0.03,
+   "sims": 300,
+   "tested": 279,
+   "share_p_below_05": 0.043010752688172046,
+   "share_p_below_01": 0.014336917562724014
+  },
+  {
+   "flag_rate": 0.08,
+   "sims": 300,
+   "tested": 300,
+   "share_p_below_05": 0.056666666666666664,
+   "share_p_below_01": 0.02
+  },
+  {
+   "flag_rate": 0.3,
+   "sims": 300,
+   "tested": 300,
+   "share_p_below_05": 0.056666666666666664,
+   "share_p_below_01": 0.01
+  }
+ ],
+ "pooled": {
+  "worlds": 8,
+  "tests": 160,
+  "tests_p_below_05": 0.05625,
+  "tests_reassign_p_below_05": 0.04375,
+  "tests_passing_cut": 2,
+  "factor_tilt_p_below_05": 0.0,
+  "factor_tilt_reassign_p_below_05": 0.475,
+  "factor_tilt_effective_n_per_world": 1.592087875,
+  "persistent_noise_p_below_05": 0.0625,
+  "random_signals": 160
+ }
+}

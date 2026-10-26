@@ -3,6 +3,24 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.28 adds the filings engine (`buildout/filings.py`, a Filings desk in Research, MCP tool `filings_engine`,
+`python -m buildout filings`, and a weekly `filings-run` workflow). It goes for breadth: every stock in the S&P 500 at
+each month end from 2009, about five hundred a month, including those that later left the index (two share classes of
+one company count once). Signals come from the SEC's own time-stamped data: insiders' open-market purchases and sales
+(the Insider Transactions Data Sets, Forms 4 and 5, since 2006), and accruals, gross profitability, asset growth, share
+issuance net of splits, earnings surprise and revenue acceleration from XBRL company facts, each value as first filed.
+10-K text similarity is opt-in. A value is used in a month only if it was filed before that month's last trading day.
+Each signal is tested by its monthly rank IC against the next one and three months' returns. Its p-value comes from the
+monthly IC series by the equal-weighted cosine test, which holds its size in short and autocorrelated series, because
+stocks share industries and factors. Then come the IC controlled for size, momentum and value, both halves of the record, a long-short portfolio in
+the published direction after costs, Benjamini-Hochberg, random signals (persistent noise and factor tilts) and an
+insider-purchase event study. An independent audit found that the first design's reassignment permutation called noise
+significant on factor-tilted signals, along with a dual-class crash, a weekend month-end look-ahead and split errors. A
+second audit of the fixes found an oversized p in short series, an event-study t that ran too large and a crash with no
+insider data; all are fixed, and `scripts/calibrate_filings.py` measures the result across synthetic worlds with no edge. The SEC is not
+reachable from the build workspace, so the first real run happens on a laptop or in the workflow (`SEC_USER_AGENT` must
+be set). Until then the desk shows the design, the validation and the calibration.
+
 Version 0.27 adds a nowcast (`buildout/nowcast.py`, a Nowcast desk beside the call, MCP tool `nowcast`,
 `python -m buildout nowcast`). It goes where edges are usually found: facts published before the reports they predict,
 aimed at the book. Inputs are TSMC's monthly revenue (153 months read from TSMC's site, each checked against TSMC's printed

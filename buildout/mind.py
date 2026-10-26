@@ -676,6 +676,8 @@ def v16_signals(K: dict, rlo: dict | None, tech: dict | None) -> list[dict]:
 
 ETF_LINKS = ["c:duration", "c:convexity", "c:yield-curve", "c:bond-etf", "c:yield-to-maturity", "c:tlt"]
 DESKS = [   # where on the site: the mind routes a question to the desk that answers it
+    ("filings", "Filings", "SEC filings across every stock ever in the S&P 500: insiders' purchases and sales and the fundamentals in each 10-K and 10-Q, each used after its filing, tested by monthly rank IC against random signals and factor tilts, with the book's readings.",
+     ["c:insider-trading-filings", "c:sloan-accrual-anomaly", "c:pead", "c:permutation-test", "c:benjamini-hochberg"]),
     ("nowcast", "Nowcast", "Facts published early (TSMC's monthly revenue, the hyperscalers' capital spending, peers that report first) against the book's next quarterly reports: the walked-forward revenue nowcast, whether the market had priced each signal by report day, and each holding's next report.",
      ["c:nowcasting", "c:alt-data", "c:earnings-surprise", "c:pead", "c:permutation-test"]),
     ("edges", "Edge lab", "The hypothesis factory: tens of thousands of candidate edges from market data and unusual data (climate, oceans, the sun, storms, shipping, the calendar) across world markets, the gauntlet calibrated on fake markets and fake signals, the independent audit, the surviving edges and their out-of-sample test.",
