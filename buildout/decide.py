@@ -491,6 +491,9 @@ def run_engine(D: pd.DataFrame, pred: dict, tilt: np.ndarray, gamma: float, star
     return {"x": x, "ret": ret, "m": m, "capped": capped}
 
 
+NW_LAGS = 12
+
+
 def timing_alpha(dev: np.ndarray, r: np.ndarray) -> tuple[float, float, int]:
     """The intercept of the deviation's return (engine minus holding) on the market's return, and its t statistic:
     what the engine's departures from 1x earned beyond simply carrying more or less market."""
@@ -501,7 +504,14 @@ def timing_alpha(dev: np.ndarray, r: np.ndarray) -> tuple[float, float, int]:
     X = np.column_stack([np.ones(n), r[ok]])
     b, *_ = np.linalg.lstsq(X, dev[ok], rcond=None)
     e = dev[ok] - X @ b
-    cov = np.linalg.inv(X.T @ X) * (e @ e) / (n - 2)
+    # v0.30: Newey-West standard errors with 12 lags (the deviations are serially correlated: the exposure persists)
+    XtXi = np.linalg.inv(X.T @ X)
+    g = X * e[:, None]
+    Sm = g.T @ g
+    for L in range(1, NW_LAGS + 1):
+        G = g[L:].T @ g[:-L]
+        Sm += (1 - L / (NW_LAGS + 1)) * (G + G.T)
+    cov = XtXi @ Sm @ XtXi * n / (n - 2)
     return float(b[0]), float(b[0] / math.sqrt(max(cov[0, 0], 1e-18))), n
 
 
@@ -724,8 +734,10 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
         ps = np.linspace(0, 1, 41)
         xs2 = []
         for p_ in ps:
-            ww = np.full(m["K"], (1 - p_) / (m["K"] - 1))
-            ww[worst] = p_
+            # v0.30: the other states keep their proportions, as in what_if and the page's slider (an equal split moved
+            # weight into the turbulent state and put the flip point at 20% where the slider reads 35%)
+            rest = 1 - w_hmm[worst]
+            ww = np.array([p_ if i == worst else (w_hmm[i] / rest * (1 - p_) if rest > 1e-12 else (1 - p_) / (m["K"] - 1)) for i in range(m["K"])])
             xs2.append(decide(hmm_w=ww)[0])
         cut = [float(p_) for p_, xx in zip(ps, xs2) if xx < x and p_ > w_hmm[worst]]
         flip["cut_if_stress_prob_above"] = min(cut) if cut else None
@@ -844,9 +856,12 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
         resid = dev - X[:, 1] * b[1]
         alphas[k] = {"alpha_annual": a * 12, "t": tt, "beta_extra": float(b[1]), "sr": float(resid.mean() / resid.std(ddof=1)), "series": resid}
         configs[k]["timing_alpha"] = {kk: v for kk, v in alphas[k].items() if kk != "series"}
-    best_k = max(alphas, key=lambda k: alphas[k]["sr"])
+    # v0.30: the gated configuration is derived from the others (and identical to holding while the gate is shut, so its
+    # ratio is 0/0); the deflation runs over the configurations actually tried, with a finite ratio
+    tried = [k for k in alphas if k != "gated" and np.isfinite(alphas[k]["sr"])]
+    best_k = max(tried, key=lambda k: alphas[k]["sr"])
     xb = alphas[best_k]["series"]
-    ex = np.array([alphas[k]["sr"] for k in alphas])
+    ex = np.array([alphas[k]["sr"] for k in tried])
     dsr = labs.deflated_sharpe(alphas[best_k]["sr"], N_TRIED, float(np.var(ex, ddof=1)), len(xb), float(stats.skew(xb)), float(stats.kurtosis(xb, fisher=False)))
     dsr["best"] = best_k
     # the model-averaging weights through history and their scores
@@ -951,6 +966,14 @@ def _overlay_line(o: dict) -> str:
                    f"{'leaves the size unchanged' if ov['trend_on_now'] else 'applies'}.")
 
 
+def _gate_line(o: dict) -> str:
+    g = np.asarray((o.get("gate_hist") or {}).get("g") or [], dtype=float)
+    if len(g) and not (g > 0).any():
+        return (f"The evidence gate has not opened in any month on record, so the gated engine is holding (Sharpe "
+                f"{o['configs']['gated']['perf']['sharpe']:.2f}, holding's own): the engine contributes the baseline, and the size is set by the risk limits.")
+    return f"Gated by its own evidence, Sharpe {o['configs']['gated']['perf']['sharpe']:.2f}."
+
+
 def summary(o: dict) -> list[str]:
     n, e, h, t = o["now"], o["configs"]["engine"], o["hold"], o["trend"]
     sv = e["sharpe_vs_hold"]
@@ -969,7 +992,7 @@ def summary(o: dict) -> list[str]:
         f"the chance a new regime began in the last six months is {n['changepoint']['recent']:.0%}.",
         f"Walked forward from {o['start'][:4]} with costs, the engine's Sharpe is {e['perf']['sharpe']:.2f} against {h['sharpe']:.2f} for holding and {t['sharpe']:.2f} for the trend rule "
         f"(gain over holding {sv['est']:+.2f}, 90% range {sv['lo']:+.2f} to {sv['hi']:+.2f}); worst drawdown {e['perf']['maxdd']:.0%} against {h['maxdd']:.0%}. "
-        f"Gated by its own evidence, Sharpe {o['configs']['gated']['perf']['sharpe']:.2f}. Deflated for the {o['now']['gate']['n_tried']} strategies tried, the chance the best one's "
+        + _gate_line(o) + f" Deflated for the {o['now']['gate']['n_tried']} strategies tried, the chance the best one's "
         f"timing alpha is real is {o['deflated_excess']['dsr']:.0%}.",
         _overlay_line(o),
         f"Forecasts out of sample: the neural-network ensemble's skill against the historical mean is {fs['nn']['skill']:+.1%} (Diebold-Mariano t {fs['nn']['dm']['t']:.1f}), "

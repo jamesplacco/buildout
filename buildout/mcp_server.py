@@ -1191,6 +1191,26 @@ def futures_engine(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, tests, book, signals, markets, validation, calibration, universe")
 
 
+def book_risk(ctx: Context, args: dict) -> dict:
+    """v0.30: the model book measured on its names' own daily prices, from the shipped snapshot: factor exposures,
+    ex-ante risk and its split, one-month expected shortfall three ways, the size each limit allows and the binding
+    one, the Nasdaq-100 hedge that keeps every name, hedges tested out of sample, stress, correlation, liquidity."""
+    from . import book as bk
+    S = _snap("snap30.js", "SNAP30", "book")
+    if not S:
+        raise ToolError("no v0.30 snapshot: run python scripts/snapshot_v30.py")
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"asof": S["asof"], "findings": bk.summary(S), "size": S["size"], "binding": S["binding"], "sizes": S["sizes"], "keep_names_hedge": S["keep_names_hedge"]}
+    if part == "exposures":
+        return {"exposure": S["exposure"], "betas": S["betas"], "factors": S["factors"], "factor_corr": S["factor_corr"]}
+    if part == "risk":
+        return {"risk": S["risk"], "tail": S["tail"], "var_backtest": S["var_backtest"], "at_full": S["at_full"], "limits": S["limits"]}
+    if part in ("hedges", "episodes", "scenarios", "worst_days", "correlation", "liquidity", "drawdowns", "validation", "limitations"):
+        return {part: S.get(part)}
+    raise ToolError("part is one of summary, exposures, risk, hedges, episodes, scenarios, worst_days, correlation, liquidity, drawdowns, validation, limitations")
+
+
 def forecast_verification(ctx: Context, args: dict) -> dict:
     """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
     coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
@@ -1365,6 +1385,13 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                        _obj({"part": {"type": "string", "enum": ["summary", "tests", "book", "signals", "markets", "validation", "calibration", "universe"]},
                              "source": {"type": "string", "enum": ["pysystemtrade", "databento"]}}),
                        {"readOnlyHint": True, "openWorldHint": False}),
+    "book_risk": (book_risk, "The model book measured on its nine names' own daily prices: betas to the Nasdaq-100, semis net of the market and a 20-year "
+                  "Treasury bond; ex-ante volatility and its split; one-month expected shortfall (historical, filtered, Student-t) and a backtested one-day VaR; "
+                  "the size each risk limit allows and the binding one; the Nasdaq-100 hedge that keeps every name inside every limit; hedges tested out of "
+                  "sample on the book's own days; episodes, scenarios, worst days, stock-bond correlation, liquidity. Research only.",
+                  _obj({"part": {"type": "string", "enum": ["summary", "exposures", "risk", "hedges", "episodes", "scenarios", "worst_days", "correlation",
+                                                            "liquidity", "drawdowns", "validation", "limitations"]}}),
+                  {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
                               "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "
                               "probabilities, and every borrowed upgrade tried on the decision core with its verdict.",

@@ -15,7 +15,7 @@
     const O = DX19, N = O.now, R = N.regime, G = N.gate, Fc = N.forecasts, E = O.configs.engine, Hd = O.hold;
     if (!card.children.length) {
       const worst = R.next[R.worst];
-      $("#dx-bluf").textContent = `Recommendation: hold ${dxX(N.exposure)} equity exposure. The engine's unconstrained optimum is ${dxX(N.engine_exposure)}, driven by a calm regime, but walked forward since ${O.start.slice(0, 4)} its departures from 1x left a risk-averse investor no better off than holding (Sharpe ${fx(E.perf.sharpe, 2)} against ${fx(Hd.sharpe, 2)}), so its evidence gate moves ${pct(G.value, 0, false)} of the way toward that optimum. The engine departs from the baseline only when its own record supports doing so.`;
+      $("#dx-bluf").textContent = `Recommendation: hold ${dxX(N.exposure)} equity exposure. The engine's optimum is ${dxX(N.engine_exposure)}${N.engine_exposure >= 1.5 - 1e-9 ? " (the top of its 0 to 1.5x grid, so a bound rather than an interior optimum)" : ""}, driven by a calm regime, but walked forward since ${O.start.slice(0, 4)} its departures from 1x left a risk-averse investor no better off than holding (Sharpe ${fx(E.perf.sharpe, 2)} against ${fx(Hd.sharpe, 2)}), so its evidence gate moves ${pct(G.value, 0, false)} of the way toward that optimum. The engine departs from the baseline only when its own record supports doing so; its gate has not opened in any month on record, so in practice it holds the baseline, and the book's own risk limits (the Book risk desk) set the size.`;
       // the recommendation
       const big = h("div", "dx-big");
       big.append(h("span", "dx-k", "Model-book exposure"), h("b", "dx-x", dxX(N.exposure)), h("span", "dx-sub", "stocks, against a 1.00x baseline"));
@@ -35,7 +35,7 @@
         [pct(Fc.stacked, 1), "Stacked 12-month real return", `historical mean ${pct(Fc.now.mean, 1)}`],
         [fx(E.perf.sharpe - Hd.sharpe, 2), "Engine Sharpe minus holding", `90% range ${fx(E.sharpe_vs_hold.lo, 2)} to ${fx(E.sharpe_vs_hold.hi, 2)}, since ${O.start.slice(0, 4)}`],
         [N.evpi ? Math.round(N.evpi.ce_month * 12e4) + " bp" : "n/a", "Worth of knowing the regime", "a year, certainty-equivalent"],
-        [fx(O.gamma, 2), "Risk aversion", "set on 1871 to 1939 so holding is optimal on average"]]);
+        [fx(O.gamma, 2), "Risk aversion", "the lower edge of the range set on 1871 to 1939 where holding is optimal on average"]]);
       // regimes table
       const ann = (m) => pct(m * 12, 1), annSd = (s) => pct(s * Math.sqrt(12), 0, false);
       const sdMax = R.sd.indexOf(Math.max(...R.sd)), muMax = R.mu.indexOf(Math.max(...R.mu));
@@ -71,7 +71,7 @@
       $("#dx-dsr").textContent = `Deflated for the ${G.n_tried} strategies tried, the chance that the best configuration's timing alpha is real (the best is ${String(O.deflated_excess.best || "n/a").replace(/_/g, " ")}, not the shipped engine) is ${pct(O.deflated_excess.dsr, 0, false)}; its gain in Sharpe over holding has a 90% bootstrap range of ${fx(E.sharpe_vs_hold.lo, 2)} to ${fx(E.sharpe_vs_hold.hi, 2)}. Timing alpha is what the engine's departures from 1x earned beyond carrying more or less market; a risk-averse investor also pays for the extra swings, which is what the gate measures.`;
       // v0.23: the gate in words, and the overlay study
       const gn = $("#dx-gate-note");
-      if (gn) gn.textContent = `g = max(0, 2Φ(t − t0) − 1). The engine's monthly utility gain over holding since ${O.start.slice(0, 4)} has t ${fx(G.t, 2)}; the best of ${G.n_tried} useless strategies would show t ${fx(G.t0, 2)} (Φ⁻¹(1 − 1/${G.n_tried})), so the gate is ${pct(G.value, 0, false)} and the book holds ${dxX(N.exposure)} against the engine's ${dxX(N.engine_exposure)}. The gate rises toward 1 only as the record becomes conclusive; once the count of strategies tried is fixed (it is set by hand and listed on the Parameters desk), nothing else in it can be tuned.`;
+      if (gn) gn.textContent = `g = max(0, 2Φ(t − t0) − 1). The engine's monthly utility gain over holding since ${O.start.slice(0, 4)} has t ${fx(G.t, 2)}; the best of ${G.n_tried} useless strategies would show t ${fx(G.t0, 2)} (Φ⁻¹(1 − 1/${G.n_tried})), so the gate is ${pct(G.value, 0, false)} and the book holds ${dxX(N.exposure)} against the engine's ${dxX(N.engine_exposure)}. The gate rises toward 1 only as the record becomes conclusive; the count of strategies tried is set by hand (listed on the Parameters desk) and counts the named configurations, not every design choice made along the way (the regime-model candidates, the forecast shrinkage, the risk budget, the grid's cap), so the bar it sets is, if anything, too low. Today that changes nothing: the gate would stay shut for any count of three or more.`;
       const OV = O.overlay;
       if (OV && $("#dx-ov")) {
         const rows = OV.factors.map((f) => { const r = OV.rows[`hold:${f}`] || OV.rows[`hold:${f.toFixed(1)}`] || OV.rows[`hold:${f.toFixed(2)}`]; return r ? [fx(f, 2) + (f === OV.adopted ? " · adopted" : ""), fx(r.perf.sharpe, 2), pct(r.perf.cagr, 1), pct(r.perf.maxdd, 0),

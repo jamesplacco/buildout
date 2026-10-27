@@ -90,9 +90,13 @@
     const lead = TD.status !== "ok" ? "Would bonds hedge the book? Unknown today." : TD.on ? "Would bonds hedge the book? Reliable enough to hold." : st === "amplifying" ? "Would bonds hedge the book? Not in this regime." : "Would bonds hedge the book? Unproven.";
     const H = readF().hedge || {}, gateAdds = H.experiment ? H.experiment.inflation_adds_value === true : null;
     ans.append(h("strong", null, lead + " "),
-      document.createTextNode(st === "amplifying" ? `Stocks and bonds are moving together (36-month correlation ${sgn2(I.corr.v)}), so long bonds would add to a sell-off `
-        : st === "hedging" ? `Stocks and bonds are moving opposite (36-month correlation ${sgn2(I.corr.v)}) ` : `The 36-month correlation (${sgn2(I.corr.v)}) sits between the lines `),
-      evTag("obs"), document.createTextNode(`. The correlation state alone decides this: three-year inflation of ${pctPts(I.infl.avg36)} is ${fin(HL.line) ? (I.infl.avg36 / 100 < HL.line ? "below" : "above") + ` the validated ${fx(HL.line * 100, 2)}% line` : "unlined"}, and by the engine's own out-of-sample test the inflation gate ${gateAdds === false ? "adds nothing the correlation rule does not catch" : gateAdds ? "adds a little" : "is untested"} `), evTag("est"), document.createTextNode("."));
+      document.createTextNode(st === "amplifying" ? `Stocks and bonds are moving together (S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}), so long bonds would add to a sell-off `
+        : st === "hedging" ? `Stocks and bonds are moving opposite (S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}) ` : `The S&P 500's 36-month correlation with the 10-year (${sgn2(I.corr.v)}) sits between the lines `),
+      evTag("obs"), document.createTextNode(`. The correlation state alone decides this: three-year inflation of ${pctPts(I.infl.avg36)} is ${fin(HL.line) ? (I.infl.avg36 / 100 < HL.line ? "below" : "above") + ` the validated ${fx(HL.line * 100, 2)}% line` : "unlined"}, and the engine's out-of-sample test ${gateAdds === false ? "cannot tell the inflation gate from the correlation rule (the difference is a few percent of the test's own noise), so it is kept as a guard, not dropped" : gateAdds ? "finds the inflation gate adds a little" : "has not tested the inflation gate"} `), evTag("est"), document.createTextNode("."));
+    try {                                    // v0.30: the same question on the book's own days
+      const B = typeof B30 === "function" ? B30() : null, P = B && B.hedges && B.hedges.policies, C = B && B.correlation;
+      if (P && C) ans.append(document.createTextNode(` On the book's own days since ${B.hedges.from.slice(0, 4)}, the long bond held only when its correlation said it hedged cut the book's variance ${pct0(P.bond_when_it_hedges.variance_cut)} and lost ${pctPlain(-P.bond_when_it_hedges.y2022 + P.none.y2022, 0)} more in 2022; a Nasdaq-100 short cut it ${pct0(P.nasdaq_beta.variance_cut)}. The book's 63-day correlation with a 20-year bond is ${sgn2(C.book_63d)}. `), evTag("obs"));
+    } catch (e) { /* the book run is optional here */ }
     // the latest day's tape, where it bears on the call: a growth scare is the one selloff long bonds do cushion
     try {
       const T = (typeof TAPE17 !== "undefined" && Array.isArray(TAPE17)) ? Object.fromEntries(TAPE17.map((x) => [x.id, x])) : {};
@@ -110,13 +114,22 @@
         const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null;
         const R0 = RZ_LAST || runReasoner(false), opt = R0 && R0.alts && R0.alts.optimal;
         const byVol = Math.min(0.2 / ((1.1 * I.vxn.v) / 100), 1.5);
-        if (N) {
+        const BC = N && typeof bookCall === "function" ? bookCall(N) : null;
+        if (BC) {
+          const S = BC.B.sizes;
+          sz.append(h("strong", null, `One call: ${xx(BC.size)}. `), document.createTextNode(`The decision engine holds the ${xx(N.exposure)} baseline (no evidence for any other size); the book's own limits, measured on its names' prices, allow ${xx(S.es_budget)} (expected shortfall), ${xx(S.vol_target)} (volatility) and ${xx(S.drawdown_cap)} (drawdown), and the smallest is the size. ${BC.keep != null ? `To keep every name at full size instead, short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}`));
+          const cross = [];
+          if (opt) cross.push(`scenario solver ${xx(opt.port[0])}${fin(R0.robust_share) ? ` (optimal in ${pct0(R0.robust_share)} of assumption pairs)` : ""}`);
+          if (N.hedge && /trend (on|off)/.test(N.hedge.context)) cross.push(`10-month trend rule ${/trend on/.test(N.hedge.context) ? "on" : "off"}`);
+          if (cross.length) sz.append(document.createTextNode(`Cross-checks: ${cross.join("; ")}. `));
+          sz.append(evTag("obs"));
+        } else if (N) {
           const cross = [`volatility rule ${xx(byVol)}`];
           if (opt) cross.push(`scenario solver ${xx(opt.port[0])}${fin(R0.robust_share) ? ` (optimal in ${pct0(R0.robust_share)} of assumption pairs)` : ""}`);
           if (N.hedge && /trend (on|off)/.test(N.hedge.context)) cross.push(`10-month trend rule ${/trend on/.test(N.hedge.context) ? "on" : "off"}`);
           const bb = typeof bookBeta === "function" ? bookBeta() : NaN;
           sz.append(h("strong", null, "Cross-checks, not the call: "), document.createTextNode(cross.join("; ") + `. The call is the decision engine's gated output; the other rules are shown so no desk can seem to disagree with it.`));
-          if (fin(bb)) sz.append(document.createTextNode(` In book terms: the engine sizes the index, and the model book's weighted beta is about ${fx(bb, 2)} on assumed five-year betas, so ${xx(N.exposure)} of the book is about ${fx(bb * N.exposure, 1)}x market beta plus an unsized AI factor (the Fundamentals desk measures the factor betas when the book run has data). `), evTag("est"));
+          if (fin(bb)) sz.append(document.createTextNode(` In book terms: the engine sizes the index, and the model book's weighted beta is about ${fx(bb, 2)} on measured betas, so ${xx(N.exposure)} of the book is about ${fx(bb * N.exposure, 1)}x market beta plus an unsized AI factor (the Fundamentals desk measures the factor betas when the book run has data). `), evTag("est"));
         }
       } catch (e) { /* the sizing line is optional */ }
     }

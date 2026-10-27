@@ -95,7 +95,7 @@ def test_today_is_research_only_and_honest_about_what_is_known():
 def test_the_desk_is_beside_the_call_and_in_the_tools():
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["today"].startswith('"desk", "nowcast"')
+    assert groups["today"].startswith('"desk", "book", "nowcast"')         # v0.30: Book risk sits right after the Desk
     assert 'id="view-nowcast"' in body and 'id="t7-nowcast"' in body and "renderNowcastToday" in boot
     assert any(d[0] == "nowcast" for d in mind.DESKS)
     assert '"snap27.js", "nowcast.js"' in (ROOT / "scripts" / "assemble_page.py").read_text()

@@ -1038,7 +1038,8 @@
       c.id = t.id;
       const head = h("div", "thesis-head");
       const label = t.st === "active" ? "Active" : t.st === "watch" ? "Watch" : "Risk";
-      head.append(h("h3", null, t.t), h("span", "status " + t.st, label));
+      const last = Array.isArray(t.sc) && t.sc.length ? t.sc[t.sc.length - 1].v : null;
+      head.append(h("h3", null, t.t), h("span", "status " + t.st, label + (last ? ` · ${last}` : "")));
       const left = h("div", "col"), right = h("div", "col");
       const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (items) => { const u = h("ul"); items.forEach((x) => u.append(h("li", null, x))); return u; };
@@ -1051,6 +1052,12 @@
         left.append(sec("This week's evidence", u));
       }
       if (BEAR[t.id]) left.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
+      // v0.30: the scorecard, one dated verdict a review, each with its source
+      if (Array.isArray(t.sc) && t.sc.length) {
+        const u = h("ul", "thesis-wk");
+        t.sc.forEach((x) => { const li = h("li"); li.append(h("strong", null, `${isoNice(x.d)}: ${x.v}. `), document.createTextNode(x.n + " ")); if (x.src) { const a = h("a", "src", "Source"); a.href = x.src; a.target = "_blank"; a.rel = "noopener"; li.append(a); } u.append(li); });
+        left.append(sec("Scorecard", u));
+      }
       right.append(sec("Expression", h("p", "prose", t.ex)), sec("Hedge", h("p", "prose", t.hd)), sec("What would change the desk's mind", ul(t.kill)), sec("Data the engine tracks", ul(t.data)));
       c.append(head, left, right);
       g.append(c);
@@ -1132,7 +1139,7 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
+  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
     noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", decision: "Decision engine", portfolio: "Portfolio", matrix: "The shortcut", geometry: "Geometry", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", analysis: "Analysis", bonds: "Bonds", ml: "ML lab", reality: "Reality check", edge: "Edge", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",

@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.29</span>
+      Buildout <span class="ver">v0.30</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -78,7 +78,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 628 of 628</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 646 of 646</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot warn"></span><span>Databento key pending</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -2462,7 +2462,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">322 of 322 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">646 of 646 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2487,7 +2487,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, every one of its 40 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 41 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2649,6 +2649,65 @@
 </section>
 
 <!-- ======================= EDGE LAB (v0.26) ======================= -->
+<section class="view" id="view-inventory" hidden aria-labelledby="inv-title">
+  <div class="vhead"><p class="eyebrow">Research · inventory</p><h1 id="inv-title">The research inventory: every edge the engine has tested, and what survived</h1>
+    <p class="lede">A fund's research is judged by what it threw away. This ledger joins every desk's own verdicts in one vocabulary: what was tested, how, the statistic, and the record's end.</p></div>
+  <div class="at-tiles" id="inv-tiles"></div>
+  <section class="section" aria-labelledby="inv-t">
+    <div class="section-head"><p class="eyebrow">The ledger</p><h2 id="inv-t">One row per test</h2><p class="prose" id="inv-p"></p></div>
+    <label class="hint" for="inv-filter">Show </label><select id="inv-filter" aria-label="Filter by verdict"></select>
+    <div class="tablewrap"><table class="rs-table" id="inv-table"></table></div>
+    <ul class="prose" id="inv-key"></ul>
+  </section>
+</section>
+<section class="view" id="view-book" hidden aria-labelledby="bk-title">
+  <div class="vhead"><p class="eyebrow">Today · the book</p><h1 id="bk-title">The book, sized and measured: nine names on their own prices, against their own limits</h1>
+    <p class="lede" id="bk-sub"></p></div>
+  <div class="at-tiles" id="bk-tiles"></div>
+  <section class="section" aria-labelledby="bk-size-t">
+    <div class="section-head"><p class="eyebrow">The size</p><h2 id="bk-size-t">What each limit allows, and which one binds</h2><p class="prose" id="bk-size-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-size"></table></div>
+    <p class="prose" id="bk-keep-p"></p>
+    <div class="math" id="bk-math"></div>
+  </section>
+  <section class="section" aria-labelledby="bk-exp-t">
+    <div class="section-head"><p class="eyebrow">Exposures</p><h2 id="bk-exp-t">What the book is a bet on, measured against outside factors</h2><p class="prose" id="bk-exp-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-exp"></table></div>
+  </section>
+  <section class="section" aria-labelledby="bk-tail-t">
+    <div class="section-head"><p class="eyebrow">Tail</p><h2 id="bk-tail-t">The worst month in twenty, three ways, and a VaR backtest on the book</h2><p class="prose" id="bk-tail-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-tail"></table></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-var"></table></div>
+  </section>
+  <section class="section" aria-labelledby="bk-hedge-t">
+    <div class="section-head"><p class="eyebrow">Hedges</p><h2 id="bk-hedge-t">Which hedge protected this book, tested out of sample on its own days</h2><p class="prose" id="bk-hedge-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-hedge"></table></div>
+  </section>
+  <section class="section" aria-labelledby="bk-stress-t">
+    <div class="section-head"><p class="eyebrow">Stress</p><h2 id="bk-stress-t">Episodes replayed, scenarios through the betas, the worst days</h2><p class="prose" id="bk-ep-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-ep"></table></div>
+    <p class="prose" id="bk-sc-p"></p>
+    <div class="tablewrap"><table class="rs-table" id="bk-sc"></table></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-wd"></table></div>
+  </section>
+  <section class="section" aria-labelledby="bk-corr-t">
+    <div class="section-head"><p class="eyebrow">Stocks and bonds</p><h2 id="bk-corr-t">The stock-bond correlation, under one stated definition</h2><p class="prose" id="bk-corr-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-corr"></table></div>
+  </section>
+  <section class="section" aria-labelledby="bk-rec-t">
+    <div class="section-head"><p class="eyebrow">Record</p><h2 id="bk-rec-t">The book at today's weights since 2017</h2></div>
+    <div class="panel"><span class="panel-title">Growth of one dollar (log scale), daily rebalanced to today's weights, before costs</span><div class="svgbox" id="bk-chart"></div><div class="legend" id="bk-chart-leg"></div></div>
+  </section>
+  <section class="section" aria-labelledby="bk-liq-t">
+    <div class="section-head"><p class="eyebrow">Liquidity</p><h2 id="bk-liq-t">How long it takes to get out</h2><p class="prose" id="bk-liq-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-liq"></table></div>
+  </section>
+  <section class="section" aria-labelledby="bk-val-t">
+    <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Proof the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p></div>
+    <ul class="prose" id="bk-limits"></ul>
+    <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
+  </section>
+</section>
 <section class="view" id="view-futures" hidden aria-labelledby="ft-title">
   <div class="vhead"><p class="eyebrow">Markets · futures</p><h1 id="ft-title">The futures engine: carry, trend and hedgers' positioning across CME futures, after costs</h1>
     <p class="lede" id="ft-sub">Stocks are one kind of bet. Futures add others: Treasuries, currencies, metals, energy, grains and livestock beside the equity indexes. Their best known premia, carry and trend, are said to have survived publication better than most stock anomalies, so this desk tests whether they still pay after costs, beyond simply holding the markets, within each asset class and since they were published. The book's hedge is a Treasury position, so it also reads what Treasury futures pay to hold and how they did when stocks fell.</p></div>

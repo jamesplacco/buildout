@@ -3,6 +3,24 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.30 sizes the book that is held, not an index (`buildout/book.py`, a Book risk desk second in Today, MCP tool
+`book_risk`, `python -m buildout book`). Five independent reviews of the whole system found the same gap: the Desk's call
+sized the S&P 500 while the book is nine AI names, and no risk number about those names came from their prices. The book
+engine runs the nine names' own daily total returns since 2017 (a public GitHub mirror, split-adjusted, dividends on their
+ex-dates) against three outside factors: the Nasdaq-100 (QQQ), semiconductors net of the market (SOXX less its
+walked-forward beta), and a 20-year par bond rebuilt from the Treasury's daily par yields (downloaded and cached, never
+committed). It reports exposures (exponentially weighted betas; SPCX shrinks toward TSLA), ex-ante volatility and its split,
+effective independent bets, one-month expected shortfall three ways (historical, filtered historical simulation,
+Student-t), a VaR backtest, the size each limit allows (shortfall budget, volatility target, drawdown cap) and the
+binding one, the Nasdaq-100 short that would keep every name inside every limit, hedges tested out of sample on the
+book's own days, the engine's episodes and scenarios, worst days, the stock-bond correlation under one stated definition,
+and liquidity. The Desk's call is now the decision engine's baseline cut to the binding book limit. The same audit fixed
+the decision engine's deflated Sharpe (it printed "nan%"), its stress flip point (20% shown, 33% by the page's own
+slider), its timing-alpha t (Newey-West, 1.51 to 1.07), Nasdaq-100 puts priced off the VIX instead of the VXN, a filtered
+VaR that zero-filled a name before its listing, betas that went silently NaN on short histories, and an AI factor built
+from the book itself. The theses carry dated scorecards, three candidate theses join them, and assumed betas give way to
+measured ones.
+
 Version 0.29 adds the futures engine (`buildout/futures.py`, a Futures desk in Markets, MCP tool `futures_engine`,
 `python -m buildout futures`, and a weekly `futures-run` workflow). It tests the best known futures premia across 39 liquid
 CME futures (equity indexes, Treasuries, short rates, currencies, metals, energy, grains, livestock): carry, trend over 1, 3

@@ -14,9 +14,12 @@ def equal_weight(returns: pd.DataFrame, cols: list[str]) -> pd.Series:
     return returns[cols].mean(axis=1, skipna=True)
 
 
-def factor_returns(returns: pd.DataFrame, market: str, ai_names: list[str], rates: str) -> pd.DataFrame:
-    """market = market proxy; ai = AI basket in excess of the market; rates = long-bond return."""
-    ai = equal_weight(returns, ai_names) - returns[market]
+def factor_returns(returns: pd.DataFrame, market: str, ai_names: list[str], rates: str, exclude: str | None = None) -> pd.DataFrame:
+    """market = market proxy; ai = AI basket in excess of the market; rates = long-bond return.
+
+    exclude: leave this name out of the AI basket (v0.30). A name regressed on a basket that contains it loads on its
+    own return; when the basket is the book, the book's AI exposure is then defined rather than measured."""
+    ai = equal_weight(returns, [c for c in ai_names if c != exclude]) - returns[market]
     return pd.DataFrame({"market": returns[market], "ai": ai, "rates": returns[rates]})
 
 

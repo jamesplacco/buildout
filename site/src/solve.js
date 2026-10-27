@@ -33,7 +33,7 @@
   if (!RZS.over || typeof RZS.over !== "object") RZS.over = {};
   function rzParams() {
     const I = inputs();
-    return Object.assign({}, RZ_DEFAULTS, { vix: fin(I.vix.v) ? I.vix.v : RZ_DEFAULTS.vix, rf: RZ_DEFAULTS.rf, max_loss: RZS.loss / 100, max_premium: RZS.prem / 100 });
+    return Object.assign({}, RZ_DEFAULTS, { beta_market: (() => { const B = typeof B30 === "function" ? B30() : null; return B && fin(B.exposure.market) ? B.exposure.market : RZ_DEFAULTS.beta_market; })(), vix: fin(I.vix.v) ? I.vix.v : RZ_DEFAULTS.vix, index_vol: fin(I.vxn.v) ? I.vxn.v : RZ_DEFAULTS.index_vol, rf: RZ_DEFAULTS.rf, max_loss: RZS.loss / 100, max_premium: RZS.prem / 100 });
   }
   function rzCurrent() {
     const S = LIVE.report && LIVE.report.summary;

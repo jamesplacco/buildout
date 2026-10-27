@@ -54,7 +54,7 @@ SIGNALS = [
     {"id": "curve", "name": "2s10s curve inverted", "cluster": "growth", "lik": [0.25, 0.35, 0.20, 0.20, 0.55, 0.45, 0.50]},
 ]
 DEFAULTS = {"beta_market": 1.15, "beta_ai": 1.0, "tlt_duration": 16.5, "tlt_convexity": 360.0, "y30": 0.0485, "rf": 0.042,
-            "borrow_spread": 0.01, "vix": 18.0, "skew_pts": 3.0, "horizon": 0.25,
+            "borrow_spread": 0.01, "vix": 18.0, "index_vol": 25.0, "skew_pts": 3.0, "horizon": 0.25,
             "max_loss": 0.15, "max_equity": 1.5, "max_gross": 2.0, "max_premium": 0.02}
 
 
@@ -129,7 +129,7 @@ def _elog(rets, w) -> float:
 def solve(post: Sequence[float], scen: Sequence[dict], P: dict, fix_equity: float | None = None, allow: str = "ehpg",
           loss_limit: bool = True) -> dict | None:
     """Exhaustive search of the grid; returns the feasible portfolio with the highest expected log growth."""
-    cost = put_spread_cost(P["vix"], P["horizon"], skew_pts=P["skew_pts"])
+    cost = put_spread_cost(P.get("index_vol") or P["vix"], P["horizon"], skew_pts=P["skew_pts"])
     best = None
     for port in _grid():
         e, h, prem, g = port
@@ -147,7 +147,7 @@ def solve(post: Sequence[float], scen: Sequence[dict], P: dict, fix_equity: floa
 
 
 def evaluate(port: Sequence[float], post: Sequence[float], scen: Sequence[dict], P: dict) -> dict:
-    cost = put_spread_cost(P["vix"], P["horizon"], skew_pts=P["skew_pts"])
+    cost = put_spread_cost(P.get("index_vol") or P["vix"], P["horizon"], skew_pts=P["skew_pts"])
     rets = scenario_returns(port, scen, P, cost)
     u = _elog(rets, post)
     return {"port": list(port), "rets": rets, "elog": u, "ce": math.expm1(u), "worst": min(rets),
@@ -206,7 +206,7 @@ def kl_worst(u, p, rho: float) -> dict:
 
 
 def _feasible_grid(scen, P):
-    cost = put_spread_cost(P["vix"], P["horizon"], skew_pts=P["skew_pts"])
+    cost = put_spread_cost(P.get("index_vol") or P["vix"], P["horizon"], skew_pts=P["skew_pts"])
     ports, R = [], []
     for port in _grid():
         rets = scenario_returns(port, scen, P, cost)
@@ -269,7 +269,7 @@ def _r20(x: float) -> int:
 def alternatives(post, scen, P, current: Sequence[float]) -> dict:
     """Keep the exposure, reduce it until the loss limit holds, hedge it at the same equity, or the free optimum."""
     keep = evaluate(current, post, scen, P)
-    cost = put_spread_cost(P["vix"], P["horizon"], skew_pts=P["skew_pts"])
+    cost = put_spread_cost(P.get("index_vol") or P["vix"], P["horizon"], skew_pts=P["skew_pts"])
     red = None
     for i in range(_r20(current[0]), -1, -1):                     # largest equity, no hedges, that meets the limit
         port = (i / 20, 0.0, 0.0, 0.0)
@@ -481,6 +481,10 @@ def build(folder) -> dict:
     P = {}
     try:
         P["vix"] = float(macro["rates"]["levels"]["vix"]["value"])
+    except (TypeError, KeyError):
+        pass
+    try:                                   # v0.30: Nasdaq-100 puts are priced off the Nasdaq-100's own implied vol (VXN), not the VIX
+        P["index_vol"] = float(macro["rates"]["levels"]["vxn"]["value"])
     except (TypeError, KeyError):
         pass
     out = run(obs, P, current, (brain or {}).get("factor_cov"))

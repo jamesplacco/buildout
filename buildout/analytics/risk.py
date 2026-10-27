@@ -73,5 +73,9 @@ def fhs_var(returns: pd.DataFrame, w: pd.Series, lam: float = 0.94, q: float = 0
     r = returns[w.index]
     vol = np.sqrt((r ** 2).ewm(alpha=1 - lam, min_periods=20).mean())
     z = r / vol.shift(1)
-    scen = (z * vol.iloc[-1]).dropna(how="all").fillna(0.0)
-    return historical_var(scen @ w, q)
+    scen = (z * vol.iloc[-1]).dropna(how="all")
+    # v0.30: a name without a scenario that day (before its listing) hands its weight to the others pro rata, as
+    # book_returns does, so the historical and the filtered VaR describe the same book (zero-filling understated it)
+    wt = scen.notna().mul(w, axis=1)
+    wt = wt.mul(w.sum() / wt.sum(axis=1).replace(0, np.nan), axis=0)
+    return historical_var((scen.fillna(0.0) * wt).sum(axis=1).dropna(), q)

@@ -173,6 +173,9 @@ def main(argv: list[str] | None = None) -> None:
     fup.add_argument("--max-cost", type=float, default=5.0, help="refuse a Databento pull estimated above this many dollars")
     fup.add_argument("--no-cot", action="store_true", help="skip the CFTC positions")
     fup.add_argument("--fakes", type=int, default=None)
+    bkp = sub.add_parser("book", help="v0.30: the book on its names' own daily prices: exposures, risk, tail, the size each limit allows, hedges tested out of sample, stress, liquidity")
+    bkp.add_argument("--out", default="out")
+    bkp.add_argument("--cache", default=".cache/book")
     ncp = sub.add_parser("nowcast", help="v0.27: early-published facts (TSMC monthly revenue, hyperscaler capex, peers) against the book's next quarterly reports, and whether the market had priced them")
     ncp.add_argument("--out", default="out")
     ncp.add_argument("--quick", action="store_true")
@@ -505,6 +508,16 @@ def main(argv: list[str] | None = None) -> None:
         o = fl.build(data["members"], data["cik_of"], data["ticker_of"], data["tx"], data["facts"], data["px"], text=data.get("text"),
                      n_perm=a.perms or fl.N_PERM, meta=data["meta"], splits=data.get("splits"))
         path = write(o, a.out, "filings.json")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "book":
+        from . import book as bk
+        from .jsonout import write
+        o = bk.build(bk.download(a.cache), meta={"source": "mirror download"})
+        o["findings"] = bk.summary(o)
+        path = write(o, a.out, "book.json")
         for f in o["findings"]:
             print(" ", f)
         print("wrote", path)

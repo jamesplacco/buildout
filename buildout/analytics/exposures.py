@@ -47,17 +47,26 @@ def shrink(beta: float, n_obs: float, prior: float, n0: float = 126.0) -> float:
 
 def latest_betas(returns: pd.DataFrame, factors: pd.DataFrame, names: list[str], halflife: int,
                  min_obs: int = 60, priors: dict[str, str] | None = None, n0: float = 126.0,
-                 full_history: int = 504) -> pd.DataFrame:
+                 full_history: int = 504, factor_fn=None) -> pd.DataFrame:
     """Current factor betas per name. Names with less than `full_history` days are shrunk toward a
-    proxy's betas (config priors) or the cross-sectional average of established names."""
+    proxy's betas (config priors) or the cross-sectional average of established names.
+
+    factor_fn(name) -> DataFrame gives each name its own factors (a leave-one-out basket, v0.30). With no established
+    name the prior is the average of every name that has an estimate; with none at all this raises, rather than
+    returning NaN betas that would silently turn every downstream risk number into NaN (v0.30)."""
     priors = priors or {}
     full = {}
     for name in names:
-        b = ewls_betas(returns[name], factors, halflife=halflife, min_obs=min(min_obs, 20)).dropna()
+        X = factor_fn(name) if factor_fn else factors
+        b = ewls_betas(returns[name], X, halflife=halflife, min_obs=min(min_obs, 20)).dropna()
         full[name] = b.iloc[-1] if len(b) else pd.Series(np.nan, index=b.columns)
     raw = pd.DataFrame(full).T
     established = raw[raw["n_obs"] >= full_history]
     xsec = established[factors.columns].mean()
+    if xsec.isna().any():
+        xsec = raw[factors.columns].mean()
+    if xsec.isna().any():
+        raise ValueError("no name has enough history to estimate betas; pass priors or a longer sample")
     rows = {}
     for name in names:
         r = raw.loc[name]

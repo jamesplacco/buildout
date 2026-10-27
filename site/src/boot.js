@@ -2,10 +2,10 @@
      boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
-    today: { name: "Today", views: ["desk", "nowcast", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
+    today: { name: "Today", views: ["desk", "book", "nowcast", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
     markets: { name: "Markets", views: ["bonds", "rates", "hedges", "futures", "options", "securities", "insurers", "positions", "swans"] },
-    research: { name: "Research", views: ["digest", "filings", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
+    research: { name: "Research", views: ["digest", "inventory", "filings", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
     workshop: { name: "Workshop", views: ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"] },
     reference: { name: "Methods", views: ["methods", "crossfield", "engine", "engines", "appendix"] },
   };
@@ -63,6 +63,8 @@
     field: () => guard("Field compare", renderFieldCompare, $("#fd-ev")),
     ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); guard("Correlation gauge", renderGauge, $("#gauge")); },
     positions: () => guard("Positions", renderPositions, $("#ps-grid")),
+    book: () => guard("Book risk", renderBookRisk, $("#bk-tiles")),
+    inventory: () => guard("Inventory", renderInventory, $("#inv-tiles")),
     engines: () => { guard("Engine room", renderEngines, $("#en-table")); guard("Market charts", drawMacroCharts, $("#corr-chart")); guard("Book charts", drawBookCharts, $("#bt-chart")); },
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
     making: () => { guard("Fill quality", renderFill, $("#fq-out")); guard("Market maker", updateAS, $("#as-chart")); guard("Adverse selection", updateGM, $("#gm-chart")); guard("Execution", updateExec, $("#ex-chart")); guard("Tape", renderTape, $("#mm-tape")); },

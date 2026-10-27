@@ -4,10 +4,10 @@
      ===================================================================================== */
   const HB_HEDGES = [
     { id: "tlt", name: "Long Treasuries (TLT)", param: "ratio", def: 0.3, range: [0, 1], step: 0.05, unit: "x equity", protects: ["soft", "digest"], nodes: ["y10", "tlt"], note: "Fails when stocks and bonds fall together (2022, term-premium shocks)." },
-    { id: "put_spread", name: "Index put spread 95/85", param: "premium", def: 0.01, range: [0, 0.03], step: 0.0025, unit: "of NAV", protects: ["termprem", "digest", "stagfl", "crash"], nodes: ["eq", "vix"], note: "Pays between 5% and 15% falls; nothing beyond." },
+    { id: "put_spread", name: "Index put spread 95/85", param: "premium", def: 0.01, range: [0, 0.03], step: 0.0025, unit: "of NAV", protects: ["termprem", "digest", "stagfl", "crash"], nodes: ["eq", "vix"], note: "Pays from a 5% fall, up to its 10-point maximum at a 15% fall; no more beyond." },
     { id: "collar", name: "Collar 90/110", param: "share", def: 0.5, range: [0, 1], step: 0.05, unit: "of equity", protects: ["digest", "stagfl", "crash"], nodes: ["eq"], note: "Close to free; gives up gains above 10% in a melt-up." },
     { id: "gold", name: "Gold sleeve", param: "weight", def: 0.04, range: [0, 0.2], step: 0.01, unit: "of NAV", protects: ["termprem", "stagfl"], nodes: ["gold", "dollar"], note: "Hedges inflation and policy shocks; can fall in a liquidity crash." },
-    { id: "vix_calls", name: "VIX call spread 25/40", param: "premium", def: 0.005, range: [0, 0.02], step: 0.0025, unit: "of NAV", protects: ["crash", "digest"], nodes: ["vix"], note: "Convex in a crash; decays in calm quarters." },
+    { id: "vix_calls", name: "VIX call spread 25/40", param: "premium", def: 0.005, range: [0, 0.02], step: 0.0025, unit: "of NAV", protects: ["crash", "digest"], nodes: ["vix"], note: "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters." },
     { id: "beta_short", name: "Short index futures", param: "share", def: 0.25, range: [0, 1], step: 0.05, unit: "of market beta", protects: ["termprem", "digest", "stagfl", "crash"], nodes: ["eq"], note: "Linear: costs upside one for one; keeps the AI bet." },
     { id: "ai_pair", name: "Short semiconductor basket", param: "weight", def: 0.15, range: [0, 0.5], step: 0.05, unit: "of NAV", protects: ["digest", "termprem"], nodes: ["aidemand", "capex", "NVDA", "AVGO"], note: "Hedges an AI-capex digestion; basis risk if the book's names diverge from the basket." },
     { id: "trend", name: "Trend cut", param: "cut", def: 0.5, range: [0, 1], step: 0.05, unit: "of equity", protects: ["digest", "stagfl", "crash"], nodes: ["eq"], note: "Cuts after an 8% fall and avoids about 60% of the rest; false signals cost about 1% a quarter (Assumed)." },
@@ -19,7 +19,7 @@
   const hbP = (P) => Object.assign({}, RZ_DEFAULTS, P || {});
   const hbVixEnd = (s, vix0) => Math.max(9, vix0 - HB_A.vix_per_market * s.market);
   function hbCosts(P) {
-    const v = P.vix / 100, T = P.horizon, pv = v + HB_A.put_skew / 100;
+    const v = (P.index_vol || P.vix) / 100, T = P.horizon, pv = v + HB_A.put_skew / 100;
     const put95 = bs(1, 0.95, T, 0, 0, pv, "put").price, put85 = bs(1, 0.85, T, 0, 0, pv, "put").price, put90 = bs(1, 0.90, T, 0, 0, pv, "put").price;
     const call110 = bs(1, 1.10, T, 0, 0, Math.max(0.05, v + HB_A.call_skew / 100), "call").price, F = P.vix + HB_A.vix_term;
     const vc = bs(F, 25, T, 0, 0, HB_A.vix_vol, "call").price - bs(F, 40, T, 0, 0, HB_A.vix_vol, "call").price;

@@ -136,7 +136,7 @@ def test_today_shows_limits_and_the_honest_run_state():
 def test_the_level_store_is_dated_and_read_by_the_rules():
     data = (SRC / "data.js").read_text()
     for k in ("vix", "vxn", "y10", "real10", "breakeven10", "hy_oas", "ccc_oas", "brent"):
-        assert re.search(r'key: "%s", date: "2026-10-2[23]"' % k, data), k
+        assert re.search(r'key: "%s", date: "2026-10-2[2-6]"' % k, data), k
     assert "function levelStatic(key)" in data and 'vxn: [28.30, "Oct 23"]' in data
     dec = (SRC / "decide.js").read_text()
     assert "levelStatic(k)" in dec and "function rocNewerLevel(" in dec

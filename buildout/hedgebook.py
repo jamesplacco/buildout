@@ -32,13 +32,13 @@ HEDGES = [
     {"id": "tlt", "name": "Long Treasuries (TLT)", "param": "ratio", "default": 0.3, "range": [0.0, 1.0], "unit": "x equity",
      "protects": ["soft", "digest"], "nodes": ["y10", "tlt"], "door": "two-way", "note": "Fails when stocks and bonds fall together (2022, term-premium shocks)."},
     {"id": "put_spread", "name": "Index put spread 95/85", "param": "premium", "default": 0.01, "range": [0.0, 0.03], "unit": "of NAV",
-     "protects": ["termprem", "digest", "stagfl", "crash"], "nodes": ["eq", "vix"], "door": "two-way", "note": "Pays between 5% and 15% falls; nothing beyond."},
+     "protects": ["termprem", "digest", "stagfl", "crash"], "nodes": ["eq", "vix"], "door": "two-way", "note": "Pays from a 5% fall, up to its 10-point maximum at a 15% fall; no more beyond."},
     {"id": "collar", "name": "Collar 90/110", "param": "share", "default": 0.5, "range": [0.0, 1.0], "unit": "of equity",
      "protects": ["digest", "stagfl", "crash"], "nodes": ["eq"], "door": "two-way", "note": "Close to free; gives up gains above 10% in a melt-up."},
     {"id": "gold", "name": "Gold sleeve", "param": "weight", "default": 0.04, "range": [0.0, 0.2], "unit": "of NAV",
      "protects": ["termprem", "stagfl"], "nodes": ["gold", "dollar"], "door": "two-way", "note": "Hedges inflation and policy shocks; can fall in a liquidity crash."},
     {"id": "vix_calls", "name": "VIX call spread 25/40", "param": "premium", "default": 0.005, "range": [0.0, 0.02], "unit": "of NAV",
-     "protects": ["crash", "digest"], "nodes": ["vix"], "door": "two-way", "note": "Convex in a crash; decays in calm quarters."},
+     "protects": ["crash", "digest"], "nodes": ["vix"], "door": "two-way", "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters."},
     {"id": "beta_short", "name": "Short index futures", "param": "share", "default": 0.25, "range": [0.0, 1.0], "unit": "of market beta",
      "protects": ["termprem", "digest", "stagfl", "crash"], "nodes": ["eq"], "door": "two-way", "note": "Linear: costs upside one for one; keeps the AI bet."},
     {"id": "ai_pair", "name": "Short semiconductor basket", "param": "weight", "default": 0.15, "range": [0.0, 0.5], "unit": "of NAV",
@@ -63,7 +63,9 @@ def vix_end(s: dict, vix0: float) -> float:
 
 
 def option_costs(P: dict) -> dict:
-    v = P["vix"] / 100
+    """Index puts and the collar are priced off the Nasdaq-100's implied vol (VXN, P["index_vol"]) since the book's
+    hedge pays on the Nasdaq-100's move; the VIX call spread off the VIX itself (v0.30: both were priced off the VIX)."""
+    v = (P.get("index_vol") or P["vix"]) / 100
     T = P["horizon"]
     put95 = bs(1.0, 0.95, T, 0.0, 0.0, v + ASSUMED["put_skew"] / 100, "put")["price"]
     put85 = bs(1.0, 0.85, T, 0.0, 0.0, v + ASSUMED["put_skew"] / 100, "put")["price"]

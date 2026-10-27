@@ -136,7 +136,9 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
                                                 rp.tail_quantile).iloc[0].to_dict()
 
     # 3. Exposures (short-history names shrink toward their prior)
-    betas = latest_betas(rets, fac, names, rp.beta_halflife, rp.min_obs, u.priors)
+    ai_names = u.ai_factor or names
+    betas = latest_betas(rets, fac, names, rp.beta_halflife, rp.min_obs, u.priors,
+                         factor_fn=lambda n: factor_returns(rets, u.market, ai_names, tlt, exclude=n))
 
     # 4. Volatility and sizing
     book_vol = float(vol.ewma_vol(book).iloc[-1])

@@ -134,7 +134,7 @@
     { id: "curve", name: "2s10s curve inverted", cluster: "growth", lik: [0.25, 0.35, 0.20, 0.20, 0.55, 0.45, 0.50] },
   ];
   const RZ_DEFAULTS = { beta_market: 1.15, beta_ai: 1.0, tlt_duration: 16.5, tlt_convexity: 360.0, y30: 0.0485, rf: 0.042, borrow_spread: 0.01,
-    vix: 18.0, skew_pts: 3.0, horizon: 0.25, max_loss: 0.15, max_equity: 1.5, max_gross: 2.0, max_premium: 0.02 };
+    vix: 18.0, index_vol: 25.0, skew_pts: 3.0, horizon: 0.25, max_loss: 0.15, max_equity: 1.5, max_gross: 2.0, max_premium: 0.02 };
 
   function rzPosterior(priors, signals, observed) {
     const tot = priors.reduce((a, b) => a + b, 0), p = priors.map((x) => x / tot);
@@ -172,7 +172,7 @@
   const rzElog = (rets, w) => rets.reduce((a, r, i) => a + w[i] * Math.log1p(Math.max(r, -0.999999)), 0);
   const r20 = (x) => Math.floor(Math.min(Math.max(x, 0), 1.5) * 20 + 0.5);
   function rzSolve(post, scen, P, fixEquity = null, allow = "ehpg", lossLimit = true) {
-    const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), PP = lossLimit ? P : Object.assign({}, P, { max_loss: 10 });
+    const cost = rzPutCost(P.index_vol || P.vix, P.horizon, 0.95, 0.85, P.skew_pts), PP = lossLimit ? P : Object.assign({}, P, { max_loss: 10 });
     let best = null;
     for (let i = 0; i < 31; i++) {
       const e = i / 20;
@@ -210,7 +210,7 @@
     return { value: val, lam, q: w.map((v) => v / z) };
   }
   function rzFeasibleGrid(scen, P) {
-    const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), ports = [], R = [];
+    const cost = rzPutCost(P.index_vol || P.vix, P.horizon, 0.95, 0.85, P.skew_pts), ports = [], R = [];
     for (let i = 0; i < 31; i++) for (let j = 0; j < 11; j++) for (let k = 0; k < 9; k++) for (let l = 0; l < 6; l++) {
       const port = [i / 20, j / 10, k / 400, l / 50], rets = rzReturns(port, scen, P, cost);
       if (rzFeasible(port, rets, P)) { ports.push(port); R.push(rets); }
@@ -244,11 +244,11 @@
     return { rows, first_change_rho: ch > 0 ? rows[ch].rho : null };
   }
   function rzEvaluate(port, post, scen, P) {
-    const cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts), rets = rzReturns(port, scen, P, cost), u = rzElog(rets, post);
+    const cost = rzPutCost(P.index_vol || P.vix, P.horizon, 0.95, 0.85, P.skew_pts), rets = rzReturns(port, scen, P, cost), u = rzElog(rets, post);
     return { port: port.slice(), rets, elog: u, ce: Math.expm1(u), worst: Math.min(...rets), mean: rets.reduce((a, r, i) => a + post[i] * r, 0), feasible: rzFeasible(port, rets, P) };
   }
   function rzAlternatives(post, scen, P, current) {
-    const keep = rzEvaluate(current, post, scen, P), cost = rzPutCost(P.vix, P.horizon, 0.95, 0.85, P.skew_pts);
+    const keep = rzEvaluate(current, post, scen, P), cost = rzPutCost(P.index_vol || P.vix, P.horizon, 0.95, 0.85, P.skew_pts);
     let red = null;
     for (let i = r20(current[0]); i >= 0; i--) {
       const port = [i / 20, 0, 0, 0];

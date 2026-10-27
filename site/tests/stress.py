@@ -38,7 +38,7 @@ import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
-         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures"]
+         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -236,7 +236,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("location.hash") != "#options":
         fail(f"{label}: the Markets group did not reopen the last desk read in it")
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
-    if ["Options", "page"] not in sub or len(sub) != 8:
+    if ["Options", "page"] not in sub or len(sub) != 9:                # nine Markets desks since v0.29 (Futures)
         fail(f"{label}: Markets subtabs wrong: {sub}")
     pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")
