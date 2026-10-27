@@ -1167,6 +1167,30 @@ def filings_engine(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, signals, validation, calibration, tests, today, events, coverage, universe")
 
 
+def futures_engine(ctx: Context, args: dict) -> dict:
+    """v0.29: the futures engine from the shipped snapshot: carry, trend, basis momentum and hedgers' positioning across
+    liquid CME futures, each tested after costs across markets and over time; the book's Treasury and equity index
+    futures readings. Research only."""
+    S = _snap("snap29.js", "SNAP29", "futures")
+    if not S:
+        raise ToolError("no v0.29 snapshot: run python scripts/snapshot_v29.py")
+    part = args.get("part", "summary")
+    runs = S.get("runs") or {}
+    src = args.get("source") or ("databento" if runs.get("databento") else "pysystemtrade")
+    run = runs.get(src) or {}
+    if part == "summary":
+        return {"source": src, "findings": run.get("findings") or [], "validation": (S.get("validation") or {}).get("findings"), "status": S.get("status")}
+    if part == "tests":
+        return {"source": src, "tests": [{k: v for k, v in t.items() if k != "curve"} for t in run.get("tests", [])], "untested": run.get("untested")}
+    if part == "book":
+        return {"source": src, "book": run.get("book")}
+    if part in ("signals", "markets", "validation", "calibration"):
+        return {part: S.get(part)}
+    if part == "universe":
+        return {"source": src, "universe": run.get("universe"), "fakes": run.get("fakes")}
+    raise ToolError("part is one of summary, tests, book, signals, markets, validation, calibration, universe")
+
+
 def forecast_verification(ctx: Context, args: dict) -> dict:
     """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
     coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
@@ -1333,6 +1357,13 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                        "cosine test), controls for size, momentum and value, both halves of the record and costs; its calibration on synthetic worlds with no "
                        "edge; plus the book's current readings. Research only.",
                        _obj({"part": {"type": "string", "enum": ["summary", "signals", "validation", "calibration", "tests", "today", "events", "coverage", "universe"]}}),
+                       {"readOnlyHint": True, "openWorldHint": False}),
+    "futures_engine": (futures_engine, "The futures engine: carry, trend (1, 3 and 12 months), basis momentum and hedgers' positioning (CFTC) across liquid CME "
+                       "futures (equity indexes, Treasuries, rates, currencies, metals, energy, grains, livestock), each tested after trading and roll costs "
+                       "across markets and over time, against random signals, a passive long portfolio and the record since publication; plus what the "
+                       "Treasury and equity index futures pay to hold today and how Treasury futures did when stocks fell. Research only.",
+                       _obj({"part": {"type": "string", "enum": ["summary", "tests", "book", "signals", "markets", "validation", "calibration", "universe"]},
+                             "source": {"type": "string", "enum": ["pysystemtrade", "databento"]}}),
                        {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
                               "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "

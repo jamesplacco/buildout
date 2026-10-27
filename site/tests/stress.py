@@ -38,7 +38,7 @@ import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
-         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings"]
+         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 

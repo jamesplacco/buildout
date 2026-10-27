@@ -164,6 +164,15 @@ def main(argv: list[str] | None = None) -> None:
     flp.add_argument("--limit", type=int, default=None, help="only the first N tickers (a quick trial)")
     flp.add_argument("--perms", type=int, default=None)
     flp.add_argument("--text", action="store_true", help="also download every 10-K and test year-over-year text similarity (several GB)")
+    fup = sub.add_parser("futures", help="v0.29: carry, trend, basis momentum and hedgers' positioning across liquid CME futures, tested after costs, and the book's Treasury hedge")
+    fup.add_argument("--source", choices=["pysystemtrade", "databento"], default="pysystemtrade",
+                     help="pysystemtrade: the published long record to March 2024, no key; databento: 2010 to now (DATABENTO_API_KEY)")
+    fup.add_argument("--out", default="out")
+    fup.add_argument("--cache", default=".cache/futures")
+    fup.add_argument("--start", default="2010-06-06", help="first day of Databento bars")
+    fup.add_argument("--max-cost", type=float, default=5.0, help="refuse a Databento pull estimated above this many dollars")
+    fup.add_argument("--no-cot", action="store_true", help="skip the CFTC positions")
+    fup.add_argument("--fakes", type=int, default=None)
     ncp = sub.add_parser("nowcast", help="v0.27: early-published facts (TSMC monthly revenue, hyperscaler capex, peers) against the book's next quarterly reports, and whether the market had priced them")
     ncp.add_argument("--out", default="out")
     ncp.add_argument("--quick", action="store_true")
@@ -496,6 +505,21 @@ def main(argv: list[str] | None = None) -> None:
         o = fl.build(data["members"], data["cik_of"], data["ticker_of"], data["tx"], data["facts"], data["px"], text=data.get("text"),
                      n_perm=a.perms or fl.N_PERM, meta=data["meta"], splits=data.get("splits"))
         path = write(o, a.out, "filings.json")
+        for f in o["findings"]:
+            print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "futures":
+        from . import futures as fu
+        from .jsonout import write
+        if a.source == "databento":
+            frames, failed = fu.databento_frames(a.start, max_cost_usd=a.max_cost)
+        else:
+            frames, failed = fu.carver_download(a.cache)
+        cot, checked = (None, {"skipped": True}) if a.no_cot else fu.cot_download()
+        o = fu.build(frames, cot if cot is not None and len(cot) else None, n_fake=a.fakes if a.fakes is not None else fu.N_FAKE,
+                     meta={"source": a.source, "failed": failed, "cot": checked})
+        path = write(o, a.out, "futures.json" if a.source == "databento" else "futures_pysystemtrade.json")
         for f in o["findings"]:
             print(" ", f)
         print("wrote", path)

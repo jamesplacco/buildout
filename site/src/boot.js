@@ -4,7 +4,7 @@
   const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
     today: { name: "Today", views: ["desk", "nowcast", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
-    markets: { name: "Markets", views: ["bonds", "rates", "hedges", "options", "securities", "insurers", "positions", "swans"] },
+    markets: { name: "Markets", views: ["bonds", "rates", "hedges", "futures", "options", "securities", "insurers", "positions", "swans"] },
     research: { name: "Research", views: ["digest", "filings", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
     workshop: { name: "Workshop", views: ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"] },
     reference: { name: "Methods", views: ["methods", "crossfield", "engine", "engines", "appendix"] },
@@ -35,6 +35,7 @@
     digest: () => guard("Research digest", renderDigest, $("#dg-tiles")),
     reasoning: () => guard("Reasoning", renderReasoning, $("#rs-tiles")),
     filings: () => guard("Filings", renderFilings, $("#fl-tiles")),
+    futures: () => guard("Futures", renderFutures, $("#ft-tiles")),
     nowcast: () => guard("Nowcast", renderNowcast, $("#nc-tiles")),
     edges: () => guard("Edge lab", renderEdges, $("#ed2-tiles")),
     methods: () => guard("Methods", renderMethods, $("#mt-tiles")),

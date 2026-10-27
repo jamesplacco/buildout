@@ -3,6 +3,18 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.29 adds the futures engine (`buildout/futures.py`, a Futures desk in Markets, MCP tool `futures_engine`,
+`python -m buildout futures`, and a weekly `futures-run` workflow). It tests the best known futures premia across 39 liquid
+CME futures (equity indexes, Treasuries, short rates, currencies, metals, energy, grains, livestock): carry, trend over 1, 3
+and 12 months, basis momentum and, where the CFTC is reachable, hedgers' positioning. Each signal is a portfolio across
+markets and one over time, net of trading and roll costs, with a roll never treated as a jump. A signal "still works" only
+if it passes Benjamini-Hochberg on the equal-weighted cosine test, beats a passive long portfolio of the same markets,
+holds in both halves of the record, holds within asset classes (for the across-markets portfolios) and has paid since it
+was published. The long record runs on pysystemtrade's published multiple prices (to March 2024, reachable from the
+build workspace); Databento's CME Globex bars with contract definitions bring it to now (`DATABENTO_API_KEY`; the pull
+refuses any estimate above $5). The two are run separately, not spliced. The desk also reads the book's hedge: what the
+Treasury futures pay to hold today and how they did in the S&P 500's worst months, with their correlation by decade.
+
 Version 0.28 adds the filings engine (`buildout/filings.py`, a Filings desk in Research, MCP tool `filings_engine`,
 `python -m buildout filings`, and a weekly `filings-run` workflow). It goes for breadth: every stock in the S&P 500 at
 each month end from 2009, about five hundred a month, including those that later left the index (two share classes of
