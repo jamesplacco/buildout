@@ -1400,6 +1400,24 @@ svg.lotus { color: var(--accent); overflow: visible; }
 .at-voice b { color: var(--ink); font-weight: 600; }
 .at-voice .vo-badge { margin-right: 6px; }
 .hero-which { margin-top: 6px; }
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 28px 32px; margin-block: 24px; }
+.lib-sec { min-width: 0; }
+.lib-sec h2 { font-size: 1.15rem; margin: 0 0 2px; }
+.lib-sub { color: var(--muted); margin: 0 0 10px; font-size: .92rem; }
+.lib-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lib-list li { display: grid; gap: 1px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.lib-list a { font-weight: 600; text-decoration: none; }
+.lib-list a:hover { text-decoration: underline; }
+.lib-list span { color: var(--muted); font-size: .9rem; }
+.dg-more { margin-top: 10px; }
+.dg-more > summary { cursor: pointer; color: var(--accent, inherit); font-weight: 600; padding: 6px 0; }
+.thesis-more { margin-top: 10px; grid-column: 1 / -1; }
+.thesis-more > summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+.ag-earlier { margin-block: 24px; }
+.ag-earlier > summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.desk-more { margin-block: 28px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.desk-more > summary { cursor: pointer; font-weight: 600; padding: 8px 0; list-style-position: outside; }
+.desk-more > summary small { font-weight: 400; color: var(--muted); margin-left: 6px; }
 .at-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 10px; margin-block: 18px; }
 .at-kpi { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 12px; display: grid; gap: 2px; min-width: 0; }
 .at-kpi b { font: 600 var(--t-xl)/1.1 var(--f-display); color: var(--ink); }

@@ -210,7 +210,7 @@
     read.replaceChildren();
     const s1 = h("p");
     const G = govSize();
-    s1.append(h("strong", null, G ? `Hold ${G.words}: the decision engine's gated call governs. ` : `${g.act}, ${dur.level === 2 ? "with no bond hedge" : "with the bond hedge on"}. `),
+    s1.append(h("strong", null, G ? `Hold ${G.words}: ${G.book ? `the book's ${G.book.bindingName.replace(/^the /, "")} sets the size` : "the decision engine's gated call governs"}. ` : `${g.act}, ${dur.level === 2 ? "with no bond hedge" : "with the bond hedge on"}. `),
       document.createTextNode(`${G ? `The cards below are rule-based cross-checks: the volatility rule reads ${xx(ds[0].vol)} and the bond rule says ${dur.level === 2 ? "no bond hedge" : "bond hedge on"}. ` : ""}${ds.filter((d) => d.level === 2).length} of ${ds.length} calls are defensive and ${ds.filter((d) => d.level === 1).length} adjusted. Weakest link: `));
     const a = h("a", null, weakest.n.replace("?", ""));
     a.href = "#" + weakest.id;
@@ -486,7 +486,9 @@
     const above = I.infl.avg36 >= I.lineAt, TD = tltNow(I);
     box.append(
       (typeof DX19 !== "undefined" && DX19 && DX19.now
-        ? cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call governs; the volatility rule's ${xx(g.vol)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")
+        ? (() => { const BC = typeof bookCall === "function" ? bookCall(DX19.now) : null;
+            return BC ? cell("Do", `Run the book at ${xx(BC.size)}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${BC.keep != null ? `Or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}${tail.act}; ${lower(cr.act)}.`, "#book", "Book risk")
+              : cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call governs; the volatility rule's ${xx(g.vol)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions"); })()
         : cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")),
       cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds won't hedge: stocks and bonds move together (${sgn2(I.corr.v)}).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
         above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `At 2% inflation from here, the 36-month average stays above 2.75% for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),

@@ -134,3 +134,30 @@
     }), 6);
     const ul = $("#inv-key"); if (ul) { ul.replaceChildren(); INV_ORDER.forEach((v) => ul.append(h("li", null, `${v}: ${(I.verdicts || {})[v] || ""}`))); }
   }
+
+  /* v0.31: THE LIBRARY. The desks moved off the main path, one index away, grouped by what they are for. */
+  const LIBRARY = [
+    ["Decision tools", "Other ways to reach and stress the call", ["portfolio", "decide", "solve", "noteworthy"]],
+    ["Models and maps", "How the parts of the system connect, and whether the models' assumptions hold", ["mind", "brain", "atlas", "geometry", "matrix", "reality"]],
+    ["Research", "Signals, data and tests behind the desk's views", ["analysis", "labs", "ml", "edge", "physics", "buyside", "field"]],
+    ["Markets reference", "What each security carries, and who funds the long end", ["securities", "insurers"]],
+    ["Workshop", "Games, market making, prop economics, the math lab, and the investors whose rules the engine borrows", ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"]],
+    ["Methods and reference", "How it runs each day, borrowed methods, definitions", ["crossfield", "engine", "engines", "appendix"]],
+  ];
+  function renderLibrary() {
+    const box = $("#lib-grid");
+    if (!box || box.childElementCount) return;
+    LIBRARY.forEach(([name, sub, views]) => {
+      const sec = h("section", "lib-sec");
+      sec.append(h("h2", null, name), h("p", "lib-sub", sub));
+      const ul = h("ul", "lib-list");
+      views.filter((v) => document.getElementById("view-" + v)).forEach((v) => {
+        const li = h("li"), a = h("a", null, TAB_NAME[v] || v);
+        a.href = "#" + v;
+        li.append(a, h("span", null, (typeof DESK_GUIDE === "object" && DESK_GUIDE[v] && DESK_GUIDE[v].q) || ""));
+        ul.append(li);
+      });
+      sec.append(ul);
+      box.append(sec);
+    });
+  }

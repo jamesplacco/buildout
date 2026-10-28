@@ -52,7 +52,7 @@ def test_build_never_touches_the_network():
 def test_the_desk_the_tools_and_the_weekly_run():
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert '"futures"' in groups["markets"] and 'id="view-futures"' in body and "renderFutures" in boot and any(d[0] == "futures" for d in mind.DESKS)
+    assert '"futures"' in groups["evidence"] and 'id="view-futures"' in body and "renderFutures" in boot and any(d[0] == "futures" for d in mind.DESKS)
     assert '"snap29.js", "futures.js"' in (ROOT / "scripts" / "assemble_page.py").read_text()
     assert "futures_engine" in mcp_server.TOOLS and not any(re.search(r"place|execute|submit|send_order", n) for n in mcp_server.TOOLS)
     wf = (ROOT / ".github" / "workflows" / "futures.yml").read_text()

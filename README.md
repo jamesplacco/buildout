@@ -3,6 +3,10 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.31 is the PM edition: five navigation groups (Today, Evidence, Markets, Engine, and a Library index for the
+other 30 desks), a Desk that leads with the call and its reason, and folded detail on the longest desks (the Digest, the
+theses, the release history). Nothing was deleted; deep links open folded sections.
+
 Version 0.30 sizes the book that is held, not an index (`buildout/book.py`, a Book risk desk second in Today, MCP tool
 `book_risk`, `python -m buildout book`). Five independent reviews of the whole system found the same gap: the Desk's call
 sized the S&P 500 while the book is nine AI names, and no risk number about those names came from their prices. The book

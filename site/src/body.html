@@ -5,15 +5,14 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.30</span>
+      Buildout <span class="ver">v0.31</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
+      <a href="#inventory" data-group="evidence">Evidence</a>
+      <a href="#hedges" data-group="markets">Markets</a>
       <a href="#explained" data-group="engine">Engine</a>
-      <a href="#bonds" data-group="markets">Markets</a>
-      <a href="#digest" data-group="research">Research</a>
-      <a href="#games" data-group="workshop">Workshop</a>
-      <a href="#methods" data-group="reference">Methods</a>
+      <a href="#library" data-group="library">Library</a>
     </nav>
     <div class="tools">
     <button class="search-btn" id="search-open" type="button" aria-haspopup="dialog" aria-controls="palette" aria-label="Search the desk (press /)">
@@ -35,19 +34,42 @@
   <div class="t7" id="today7">
     <div class="t7-head">
       <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Oct 23, 2026</p>
-      <h1 id="desk-title">Hold equity at 1.00x with no bond hedge; no trend overlay after it failed its walk-forward test.</h1>
+      <h1 id="desk-title">Run the book at 0.59x, or keep every name and short 86% of NAV in Nasdaq-100 futures; no bond hedge.</h1>
       <p class="t7-answer" id="t7-answer"></p>
       <p class="t7-status" id="t7-status"></p>
     </div>
+    <div class="brief" id="brief"></div>
     <div class="call-board" id="call-board" role="list" aria-label="The call in numbers"></div>
-    <div class="math t7-math" id="t7-math" aria-label="The call, derived"></div>
     <p class="t7-sizing" id="t7-sizing"></p>
-    <p class="t7-sizing" id="t7-impl"></p>
     <div class="t7-limits" id="t7-limits" aria-label="Limits and breaches"></div>
+  </div>
+
+  <section class="section" id="t7-cards-sec" aria-labelledby="t7-cards-title">
+    <h2 class="sr-only" id="t7-cards-title">What changed, what would reverse the call, and how far to trust it</h2>
+    <div class="t7-grid">
+      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet"></p><ol class="t7-changes" id="t7-changes"></ol><a class="more-link" href="#digest">This week's evidence, checked twice →</a></section>
+      <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">Reversal conditions</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decision">What would flip the call →</a></section>
+      <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#reality">Reality check →</a></section>
+      <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
+        <ul class="cal cal-compact">
+          <li><b>Oct 28</b><span>FOMC decision at 2:00 pm ET (a hold priced at about 90%, a December hike at about 75%); Microsoft and Alphabet report after the close.</span></li>
+          <li><b>Oct 29</b><span>Amazon reports after the close (2026 capex guided near $220B).</span></li>
+          <li><b>Nov 3</b><span>US midterm elections; reported US and Israeli strike plans on Iran are dated after the vote.</span></li>
+          <li><b>Nov 10</b><span>October CPI. September printed 3.7% headline and 2.6% core.</span></li>
+          <li><b>Nov 18</b><span>NVIDIA reports (about); the largest weight in the book with Microsoft, Amazon and Alphabet.</span></li>
+          <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
+        </ul>
+      </section>
+    </div>
+    <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
+  </section>
+
+  <details class="desk-more" id="desk-more">
+    <summary>How the call is derived, and what the engine is built from <small>the math, dollars per $100m, early data, the six stages, the parameters, the code, where it fits in a fund</small></summary>
+    <div class="math t7-math" id="t7-math" aria-label="The call, derived"></div>
+    <p class="t7-sizing" id="t7-impl"></p>
     <p class="t7-sizing t7-nowcast" id="t7-nowcast"></p>
     <p class="t7-sizing t7-edges" id="t7-edges"></p>
-    <div class="brief" id="brief"></div>
-  </div>
 
   <section class="section" id="flow-sec" aria-labelledby="flow-title">
     <div class="section-head">
@@ -80,7 +102,7 @@
     <div class="chips" id="chips" aria-label="System status">
       <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 646 of 646</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
-      <span class="chip" id="chip-data"><span class="dot warn"></span><span>Databento key pending</span></span>
+      <span class="chip" id="chip-data"><span class="dot good"></span><span>Databento key set in GitHub</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-asof">Data as of Oct 23, 2026</span></span>
     </div>
@@ -130,23 +152,7 @@
     </div>
   </section>
 
-  <section class="section" id="t7-cards-sec" aria-labelledby="t7-cards-title">
-    <h2 class="sr-only" id="t7-cards-title">What changed, what would reverse the call, and how far to trust it</h2>
-    <div class="t7-grid">
-      <section class="t7-card t7-wide" aria-labelledby="t7c-title"><h2 id="t7c-title">Changes since the last reading and their portfolio implications</h2><p class="t7-quiet" id="t7-quiet"></p><ol class="t7-changes" id="t7-changes"></ol><a class="more-link" href="#digest">This week's evidence, checked twice →</a></section>
-      <section class="t7-card" aria-labelledby="t7r-title"><h2 id="t7r-title">Reversal conditions</h2><ul class="t7-list" id="t7-reverse"></ul><a class="more-link" href="#decision">What would flip the call →</a></section>
-      <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#reality">Reality check →</a></section>
-      <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
-        <ul class="cal cal-compact">
-          <li><b>Oct 27–28</b><span>FOMC meeting; statement Oct 28. Markets price about 91% odds of a hold and a December hike around 76% (Oct 23); the September minutes had most participants expecting another increase by year end. <a class="src" href="https://tradingeconomics.com/united-states/government-bond-yield/news/594660">Trading Economics</a></span></li>
-          <li><b>Nov 3</b><span>US midterm elections, less than a week after the Fed meets.</span></li>
-          <li><b>Nov 10</b><span>October CPI. September printed 3.7% headline and 2.6% core, energy up 20.4% on the year; the Cleveland Fed nowcasts 3.75% for October. Three-year inflation (3.06%) sits inside the 2.75% to 4.25% band where bonds stop hedging. <a class="src" href="https://www.bls.gov/news.release/CPI.htm">BLS</a></span></li>
-          <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
-        </ul>
-      </section>
-    </div>
-    <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
-  </section>
+  </details>
 
   <div class="rosette-end"><div class="rosette" aria-hidden="true"><canvas id="rosette"></canvas><span class="plate">Buildout</span></div></div>
   <footer class="foot"><p>Research desk, not investment advice. The model book is illustrative. Scenario sizes and tool inputs are assumptions; every market figure links to its source and date.</p></footer>
@@ -2649,6 +2655,11 @@
 </section>
 
 <!-- ======================= EDGE LAB (v0.26) ======================= -->
+<section class="view" id="view-library" hidden aria-labelledby="lib-title">
+  <div class="vhead"><p class="eyebrow">Library</p><h1 id="lib-title">The library: every other desk, one index away</h1>
+    <p class="lede">The main path is four groups: Today, Evidence, Markets and Engine. Everything else lives here, grouped by what it is for. Nothing was deleted; each desk still works as before.</p></div>
+  <div class="lib-grid" id="lib-grid"></div>
+</section>
 <section class="view" id="view-inventory" hidden aria-labelledby="inv-title">
   <div class="vhead"><p class="eyebrow">Research · inventory</p><h1 id="inv-title">The research inventory: every edge the engine has tested, and what survived</h1>
     <p class="lede">A fund's research is judged by what it threw away. This ledger joins every desk's own verdicts in one vocabulary: what was tested, how, the statistic, and the record's end.</p></div>
@@ -3414,6 +3425,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
   </section>
+  <section class="section" aria-labelledby="ag-v31-t">
+    <div class="section-head"><p class="eyebrow">v0.31</p><h2 id="ag-v31-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>6 &rarr; 5</b><span>Navigation groups</span><small>Today, Evidence, Markets, Engine, and a Library index for the rest</small></div>
+      <div class="at-kpi"><b>26 + 30</b><span>Desks on the main path, and in the Library</span><small>nothing deleted; each still opens by link or search</small></div>
+      <div class="at-kpi"><b>16.5k &rarr; 7.2k</b><span>Characters on the Desk</span><small>the derivation folds under one line</small></div>
+      <div class="at-kpi"><b>71k &rarr; 20k</b><span>Characters on the Digest</span><small>three newest items per question; the rest fold</small></div></div>
+    <p class="prose">A pass for a reader with ten minutes: a portfolio manager, a managing director, an engineer. The lead agent measured every desk on the main path, cut what a decision does not need from the first screen, and folded it rather than deleting it. The governing size now comes from one function on every desk, so no desk can quote the old index call against the book's.</p>
+  </section>
   <section class="section" aria-labelledby="ag-v30-t">
     <div class="section-head"><p class="eyebrow">v0.30</p><h2 id="ag-v30-t">Release metrics</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>5</b><span>Independent reviews of the whole system</span><small>product, decision core, risk layer, research claims, news; the last two stopped early on a spend limit, the risk report already written</small></div>
@@ -3422,6 +3441,8 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
       <div class="at-kpi"><b>646</b><span>Tests passing</span><small>18 new; the browser harness passes with no failures</small></div></div>
     <p class="prose">Five reviewers read the system in parallel, each with a narrow brief and no view of the others' work. The product and risk reviews reached the same verdict separately: the harness was strong, but the Desk sized the S&amp;P 500 while the book is nine AI names, and no risk number about those names came from their prices. The lead agent built the book engine on the names' own daily prices, validated it on a synthetic world with planted betas, and rechecked the headline numbers with separate, simpler code. The decision-core review reproduced the shipped output to full precision before finding the deflated Sharpe that printed nan, a stress flip point at odds with the page's own slider and a timing-alpha t without autocorrelation-robust errors; all three are fixed. The research inventory joins every desk's verdicts in one vocabulary: of 48 tests, 5 work and 18 failed.</p>
   </section>
+  <details class="ag-earlier" id="ag-earlier">
+    <summary>Earlier releases, v0.14 to v0.29</summary>
   <section class="section" aria-labelledby="ag-v29-t">
     <div class="section-head"><p class="eyebrow">v0.29</p><h2 id="ag-v29-t">Release metrics</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>39</b><span>CME futures markets</span><small>37 in the long record, January 1990 to March 2024</small></div>
@@ -3563,6 +3584,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     </ol>
     <p class="prose">Earlier releases used the same pattern: in v0.12 independent agents re-checked all 267 investor quotes against their sources (11 corrected, none failed). Things the agents could not confirm stayed out, for example a retail-trading share from a primary source and a mislabelled World Bank inflation file, which the lead found matched the GDP deflator and left out.</p>
   </section>
+  </details>
   <section class="section" aria-labelledby="ag-run-t">
     <div class="section-head"><p class="eyebrow">At run time</p><h2 id="ag-run-t">Agents available at run time</h2></div>
     <ul class="m-learn-l">
