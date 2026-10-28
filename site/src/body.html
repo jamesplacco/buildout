@@ -3414,6 +3414,46 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
   </section>
+  <section class="section" aria-labelledby="ag-v30-t">
+    <div class="section-head"><p class="eyebrow">v0.30</p><h2 id="ag-v30-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>5</b><span>Independent reviews of the whole system</span><small>product, decision core, risk layer, research claims, news; the last two stopped early on a spend limit, the risk report already written</small></div>
+      <div class="at-kpi"><b>1.00x &rarr; 0.59x</b><span>The Desk's call, measured on the book</span><small>the book at 1.00x broke all three of its limits; the drawdown cap binds</small></div>
+      <div class="at-kpi"><b>90% vs 3%</b><span>Variance cut: index short against long bond</span><small>walked forward on the book's own days since 2017</small></div>
+      <div class="at-kpi"><b>646</b><span>Tests passing</span><small>18 new; the browser harness passes with no failures</small></div></div>
+    <p class="prose">Five reviewers read the system in parallel, each with a narrow brief and no view of the others' work. The product and risk reviews reached the same verdict separately: the harness was strong, but the Desk sized the S&amp;P 500 while the book is nine AI names, and no risk number about those names came from their prices. The lead agent built the book engine on the names' own daily prices, validated it on a synthetic world with planted betas, and rechecked the headline numbers with separate, simpler code. The decision-core review reproduced the shipped output to full precision before finding the deflated Sharpe that printed nan, a stress flip point at odds with the page's own slider and a timing-alpha t without autocorrelation-robust errors; all three are fixed. The research inventory joins every desk's verdicts in one vocabulary: of 48 tests, 5 work and 18 failed.</p>
+  </section>
+  <section class="section" aria-labelledby="ag-v29-t">
+    <div class="section-head"><p class="eyebrow">v0.29</p><h2 id="ag-v29-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>39</b><span>CME futures markets</span><small>37 in the long record, January 1990 to March 2024</small></div>
+      <div class="at-kpi"><b>3 of 12</b><span>Signal tests that still work</span><small>carry across markets, and the 12-month trend across markets and over time</small></div>
+      <div class="at-kpi"><b>0.4%</b><span>False alarms in worlds with no edge</span><small>240 signal tests in 20 synthetic worlds; 6.0% of 1,000 random-signal runs</small></div>
+      <div class="at-kpi"><b>628</b><span>Tests passing</span><small>14 for the engine, more for the wiring</small></div></div>
+    <p class="prose">The lead agent wrote the futures engine and validated it on synthetic markets with a planted carry edge before running it on pysystemtrade's published prices. An independent audit then found that a run starting in 2010 could never be judged on both halves against a fixed 2007 split, that basis momentum compared chains on different days, that stale deferred quotes produced carry, and that months when the CFTC was shut leaked positions forward. Each was fixed and tested; basis momentum fell to chance once the comparison used the same day.</p>
+  </section>
+  <section class="section" aria-labelledby="ag-v28-t">
+    <div class="section-head"><p class="eyebrow">v0.28</p><h2 id="ag-v28-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>~500</b><span>Stocks a month since 2009</span><small>every S&amp;P 500 member at each month end, including those that later left</small></div>
+      <div class="at-kpi"><b>2</b><span>Independent audits before the first run</span><small>the first found a test that called factor tilts significant; the second checked the fixes</small></div>
+      <div class="at-kpi"><b>47.5% &rarr; 0%</b><span>Factor tilts called significant</span><small>the old reassignment test against the equal-weighted cosine test, in synthetic worlds</small></div>
+      <div class="at-kpi"><b>610</b><span>Tests passing</span><small>15 for the engine</small></div></div>
+    <p class="prose">The filings engine was built for breadth: about five hundred stocks a month, so that a small edge on each becomes measurable. The first audit found a reassignment permutation that called factor-tilted noise significant almost half the time, a crash on two share classes, a look-ahead at weekend month ends and split errors; the second found an oversized p-value in short series and an event-study t that ran too large. The real run waits on the SEC, which the build workspace cannot reach, so the desk shows its validation and calibration until then.</p>
+  </section>
+  <section class="section" aria-labelledby="ag-v27-t">
+    <div class="section-head"><p class="eyebrow">v0.27</p><h2 id="ag-v27-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>552</b><span>Company quarters tested</span><small>the book and the AI supply chain since 2017</small></div>
+      <div class="at-kpi"><b>599</b><span>Earnings releases dated</span><small>SEC Form 8-K dates plus 100 read from the releases; 36 confirmed by hand</small></div>
+      <div class="at-kpi"><b>0 of 51</b><span>Hypotheses that pass</span><small>the best lead cuts forecast error 19% for chip makers, short of the cut</small></div>
+      <div class="at-kpi"><b>592</b><span>Tests passing</span><small></small></div></div>
+    <p class="prose">The nowcast asks whether facts published early (TSMC's monthly revenue, hyperscaler capital spending, peers that report first) forecast the book's next reports, and whether the market had priced them. Two independent audits replaced volume-based dating with release dates and removed two results that depended on how a season was drawn. Nothing passed, and the desk says so.</p>
+  </section>
+  <section class="section" aria-labelledby="ag-v26-t">
+    <div class="section-head"><p class="eyebrow">v0.26</p><h2 id="ag-v26-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>43,247</b><span>Candidate edges invented</span><small>70 world markets, every other market and 89 unusual series</small></div>
+      <div class="at-kpi"><b>129,741</b><span>Fake-market hypotheses</span><small>the calibration behind every p-value, with 300 fake signals</small></div>
+      <div class="at-kpi"><b>65 &rarr; 5</b><span>Survivors after the audit</span><small>against fewer than one expected by luck</small></div>
+      <div class="at-kpi"><b>585</b><span>Tests passing</span><small></small></div></div>
+    <p class="prose">A hypothesis factory invented tens of thousands of candidate edges and a gauntlet tried to kill each one, with p-values calibrated on fake markets run beside the real ones. An independent audit and a second pass before release cut the first run's 65 survivors to 5, and the desk shows the before and the after.</p>
+  </section>
   <section class="section" aria-labelledby="ag-v25-t">
     <div class="section-head"><p class="eyebrow">v0.25</p><h2 id="ag-v25-t">Release metrics</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>5 + 5</b><span>Research agents and independent checkers</span><small>Taleb, the legendary traders, actuarial science, weather forecasting, big data; 532 entries checked, 49 corrected, 5 failed</small></div>
