@@ -92,7 +92,10 @@
       sec.append(head);
       if (reads[id]) { const p = h("p", "dg-read"); p.append(h("b", null, "The desk's read. "), document.createTextNode(reads[id])); sec.append(p); }
       const ul = h("div", "dg-items");
-      D.items.filter((x) => x.cluster === id).forEach((x) => {
+      // v0.31: the three newest items show; the rest fold under one line, so a question reads in a glance
+      const all = D.items.filter((x) => x.cluster === id).slice().sort((a, b) => String(b.as_of).localeCompare(String(a.as_of)));
+      const rest = h("div", "dg-items");
+      all.forEach((x, i) => {
         const art = h("article", "dg-item");
         art.id = "dg-" + x.id;
         const top = h("div", "dg-top");
@@ -107,9 +110,14 @@
         foot.append(a);
         if (Array.isArray(x.concepts) && x.concepts.length) foot.append(h("span", "dg-tags", x.concepts.slice(0, 4).join(" · ")));
         art.append(top, t, txt, foot);
-        ul.append(art);
+        (i < 3 ? ul : rest).append(art);
       });
       sec.append(ul);
+      if (all.length > 3) {
+        const more = h("details", "dg-more"), sm = h("summary", null, `${all.length - 3} more items on this question`);
+        more.append(sm, rest);
+        sec.append(more);
+      }
       box.append(sec);
     });
   }

@@ -1,15 +1,14 @@
   /* =====================================================================================
      boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
-  const GROUPS = {   // v0.23: six groups. Today is one screen; the Engine group is the system itself, its parameters first; Workshop holds the games and toys
-    today: { name: "Today", views: ["desk", "book", "nowcast", "decision", "portfolio", "ooda", "decide", "solve", "journal", "noteworthy"] },
-    engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "mind", "brain", "atlas", "geometry", "matrix", "code", "agents"] },
-    markets: { name: "Markets", views: ["bonds", "rates", "hedges", "futures", "options", "securities", "insurers", "positions", "swans"] },
-    research: { name: "Research", views: ["digest", "inventory", "filings", "findings", "fundamentals", "analysis", "theses", "edge", "physics", "buyside", "labs", "ml", "reality", "field"] },
-    workshop: { name: "Workshop", views: ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"] },
-    reference: { name: "Methods", views: ["methods", "crossfield", "engine", "engines", "appendix"] },
+  const GROUPS = {   // v0.31: five groups for a reader with ten minutes. Today is the decision; Evidence is what has been proven; Library holds everything else, one index away
+    today: { name: "Today", views: ["desk", "book", "decision", "ooda", "journal"] },
+    evidence: { name: "Evidence", views: ["inventory", "theses", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
+    markets: { name: "Markets", views: ["hedges", "options", "rates", "bonds", "positions", "swans"] },
+    engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
+    library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
   };
-  const GROUP_ORDER = ["today", "engine", "markets", "research", "workshop", "reference"];
+  const GROUP_ORDER = ["today", "evidence", "markets", "engine", "library"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
@@ -64,6 +63,7 @@
     ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); guard("Correlation gauge", renderGauge, $("#gauge")); },
     positions: () => guard("Positions", renderPositions, $("#ps-grid")),
     book: () => guard("Book risk", renderBookRisk, $("#bk-tiles")),
+    library: () => guard("Library", renderLibrary, $("#lib-grid")),
     inventory: () => guard("Inventory", renderInventory, $("#inv-tiles")),
     engines: () => { guard("Engine room", renderEngines, $("#en-table")); guard("Market charts", drawMacroCharts, $("#corr-chart")); guard("Book charts", drawBookCharts, $("#bt-chart")); },
     prop: () => { guard("Edge calculator", updateEdge, $("#pe-chart")); guard("Challenge simulator", updateChallenge, $("#pc-chart")); guard("Pod economics", updatePods, $("#pp-chart")); },
@@ -94,8 +94,10 @@
     nav.replaceChildren();
     if (GROUPS[g].views.length < 2) return;
     nav.append(h("span", "sub-label", GROUPS[g].name));
-    GROUPS[g].views.forEach((v) => {
-      const a = h("a", null, TAB_NAME[v]);
+    // v0.31: the Library is reached through its index; its row shows the index and the desk being read, never all of them
+    const row = g === "library" ? ["library"].concat(view !== "library" ? [view] : []) : GROUPS[g].views;
+    row.forEach((v) => {
+      const a = h("a", null, g === "library" && v === "library" ? "Index" : TAB_NAME[v]);
       a.href = "#" + v;
       if (v === view) a.setAttribute("aria-current", "page");
       if (typeof DESK_GUIDE === "object" && DESK_GUIDE[v]) a.title = DESK_GUIDE[v].q;
@@ -119,7 +121,7 @@
   function showNow(token, scroll) {
     let t = token;
     try { t = decodeURIComponent(token); } catch (e) { t = ""; }
-    const { view, el } = resolve(t);
+    const R0v = resolve(t), view = R0v.view; let el = R0v.el;
     lazyFlush(view);
     VIEWS.forEach((v) => { $("#view-" + v).hidden = v !== view; });
     current = view;
@@ -129,10 +131,10 @@
     document.title = (view === "desk" ? "" : TAB_NAME[view] + " · ") + "Buildout Risk Engine";
     guard(TAB_NAME[view], RENDER[view]);
     hideTip();
+    if (el && el.id && !el.isConnected) el = document.getElementById(el.id) || el;     // v0.31: the desk re-rendered after the link resolved
     if (el) {
       if (el.tagName === "DETAILS") el.open = true;
-      const d = el.parentElement && el.parentElement.closest("details");
-      if (d) d.open = true;
+      for (let d = el.parentElement && el.parentElement.closest("details"); d; d = d.parentElement && d.parentElement.closest("details")) d.open = true;
       el.scrollIntoView({ block: "start" });
     } else if (scroll) window.scrollTo(0, 0);
   }

@@ -113,7 +113,10 @@ def test_headline_and_snapshots_agree():
     and the research snapshot carries its validation (status, bootstrap band, holdout)."""
     res, body = (SRC / "research.js").read_text(), (SRC / "body.html").read_text()
     F, R = _json_const(res, "FINDINGS"), _json_const(res, "ROC_SNAP")
-    assert "Hold equity at 1.00x with no bond hedge; no trend overlay after it failed its walk-forward test." in body
+    s30 = (SRC / "snap30.js").read_text()                 # v0.31: the headline is the book's call, shipped as the same sentence
+    B = json.loads(s30[s30.index("const SNAP30 = ") + 15:s30.index(";\n", s30.index("const SNAP30 = "))].replace("<\\/", "</"))["book"]
+    k = B["keep_names_hedge"]
+    assert f"Run the book at {B['size']:.2f}x, or keep every name and short {round(k['short_nasdaq_frac'] * 100)}% of NAV in Nasdaq-100 futures; no bond hedge." in body
     assert abs(F["hedge"]["latest"]["infl_avg"] * 100 - R["cpi"]["avg36"]) < 0.005
     assert abs(F["spells"]["latest"] * 100 - R["cpi"]["value"]) < 0.005
     assert F["hedge"]["latest"]["month"] == R["cpi"]["date"][:7] == F["spells"]["month"]

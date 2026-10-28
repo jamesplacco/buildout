@@ -219,24 +219,24 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("document.getElementById('keys').hidden"):
         fail(f"{label}: '?' did not open shortcuts")
     await page.keyboard.press("Escape")
-    await page.evaluate("location.hash = 'insurers'")
-    await settle(page, "view-insurers")
+    await page.evaluate("location.hash = 'positions'")
+    await settle(page, "view-positions")
     await page.evaluate("location.hash = 'desk'")
     await settle(page, "view-desk")
     await page.keyboard.press("3")
     await page.wait_for_timeout(300)
-    if await page.evaluate("location.hash") != "#insurers":            # the last Markets desk the reader opened
+    if await page.evaluate("location.hash") != "#positions":           # the last Markets desk the reader opened
         fail(f"{label}: key 3 did not reopen the Markets group where the reader left it: {await page.evaluate('location.hash')}")
     await page.evaluate("location.hash = 'options'")
     await page.wait_for_timeout(200)
     await page.keyboard.press("1")
     await page.wait_for_timeout(200)
     await page.keyboard.press("3")
-    await page.wait_for_timeout(300)
+    await page.wait_for_timeout(1000)                                   # v0.31: a group switch renders its desk, allow it a second
     if await page.evaluate("location.hash") != "#options":
         fail(f"{label}: the Markets group did not reopen the last desk read in it")
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
-    if ["Options", "page"] not in sub or len(sub) != 9:                # nine Markets desks since v0.29 (Futures)
+    if ["Options", "page"] not in sub or len(sub) != 6:                # six Markets desks since v0.31 (the rest in the Library)
         fail(f"{label}: Markets subtabs wrong: {sub}")
     pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")

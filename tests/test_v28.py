@@ -44,7 +44,7 @@ def test_build_never_touches_the_network():
 def test_the_desk_the_tools_and_the_weekly_run():
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["research"].startswith('"digest", "inventory", "filings"')         # v0.30: the Inventory after the Digest
+    assert groups["evidence"].startswith('"inventory"') and '"filings"' in groups["evidence"]         # v0.31: the Inventory opens Evidence
     assert 'id="view-filings"' in body and "renderFilings" in boot and any(d[0] == "filings" for d in mind.DESKS)
     assert '"snap28.js", "filings.js"' in (ROOT / "scripts" / "assemble_page.py").read_text()
     assert "filings_engine" in mcp_server.TOOLS and not any(re.search(r"place|execute|submit|send_order", n) for n in mcp_server.TOOLS)

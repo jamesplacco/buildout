@@ -141,7 +141,7 @@
       const R = typeof runReasoner === "function" ? (typeof RZ_LAST !== "undefined" && RZ_LAST) || runReasoner(false) : null, keep = R && R.alts && R.alts.keep;
       if (keep && fin(keep.worst)) rows.push(["Scenario loss limit", "the Solve desk, a stress test", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} for the book as it stands against a ${RZS.loss}% limit`, keep.feasible ? "within" : "breached on that desk's scenarios", "#solve"]);
     } catch (e) { /* the solver is optional here */ }
-    try {                                   // v0.25: the actuarial cross-checks (crossfield.py, walked forward since 1940)
+    if (!BC) try {                          // v0.25: the actuarial cross-checks (crossfield.py, walked forward since 1940); v0.31: on the Borrowed methods desk once the book is measured
       const C = typeof SNAP25 !== "undefined" && SNAP25 && SNAP25.crossfield, tm = C && C.tail && C.tail.methods, ru = C && C.ruin && C.ruin["1.0"];
       if (tm && tm.pot && tm.pot["0.05"]) rows.push(["Tail cross-check (generalized Pareto)", "an actuary's estimate of the same 5% ES", "one month, peaks over threshold since 1871", `${pctPlain(tm.pot["0.05"].es_last, 1)} at 1x, allowing up to ${xx(tm.pot["0.05"].max_exposure_now)} within the 12% budget`, tm.pot["0.05"].es_last * N.exposure <= O.es_limit ? "within" : "breached by the cross-check", "#crossfield"]);
       if (ru) rows.push(["Ruin (a 50% fall from a peak)", "information: no limit is set on it", "ten years, block bootstrap of every month since 1871", `${pctPlain(ru.bootstrap_dd50_10y.p, 1)} at 1x; ${pctPlain(C.ruin["1.5"].bootstrap_dd50_10y.p, 1)} at the 1.5x cap`, "reported", "#crossfield"]);
@@ -160,7 +160,7 @@
     t.append(tb);
     const cap = h("p", "t7-sizing");
     if (BC) {
-      cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode(`Measured on the nine names' own daily prices since ${BC.B.from.slice(0, 4)} (the Book risk desk), the book at 1.00x breaks ${BC.breaches === 3 ? "all three" : BC.breaches} of its limits; the tightest, ${BC.bindingName}, allows ${xx(BC.size)}, and that is the call. The decision engine finds no evidence for any size other than holding (its gate has stayed shut in every month on record), so it supplies the 1.00x baseline and the limits cut it. The index rows describe the S&P 500 the decision engine models, not the book; the stress and tail rows below are cross-checks. When the book run updates, the call follows the binding limit.`));
+      cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode(`Measured on the nine names' own daily prices since ${BC.B.from.slice(0, 4)} (the Book risk desk), the book at 1.00x breaks ${BC.breaches === 3 ? "all three" : BC.breaches} of its limits; the tightest, ${BC.bindingName}, allows ${xx(BC.size)}, and that is the call. The decision engine finds no evidence for any size other than holding (its gate has stayed shut in every month on record), so it supplies the 1.00x baseline and the limits cut it. The index row describes the S&P 500 the decision engine models, not the book, and the scenario row is the Solve desk's stress test. When the book run updates, the call follows the binding limit.`));
     } else {
       cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode("The book run is not in this build, so the size is the index call; the book's own limits are not measured."));
     }

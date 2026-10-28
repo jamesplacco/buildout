@@ -10,6 +10,9 @@
       const D = typeof DX19 !== "undefined" ? DX19 : null, N = D && D.now;
       if (!N || !fin(N.exposure)) return null;
       const hedge = N.hedge && N.hedge.choice === "bonds" ? "with a 30% Treasury sleeve" : N.hedge && N.hedge.choice === "cash" ? "with a 30% cash sleeve" : "with no bond sleeve";
+      // v0.31: the governing size is the book's: the decision engine's baseline cut to the binding book limit
+      const BC = typeof bookCall === "function" ? bookCall(N) : null;
+      if (BC) return { x: BC.size, max: 1.5, date: N.date, hedge, book: BC, words: `${xx(BC.size)} of the book ${hedge}` };
       return { x: N.exposure, max: 1.5, date: N.date, hedge, words: `${xx(N.exposure)} equity ${hedge}` };
     } catch (e) { return null; }
   }
@@ -18,7 +21,7 @@
     const G = govSize();
     if (!G) return "";
     const same = fin(x) && Math.abs(x - G.x) < 0.005;
-    return `Governing size: ${G.words}, the decision engine's gated call (${typeof monthNice === "function" ? monthNice(G.date + "-01") : G.date} data). ${what} is a cross-check, not the call${same ? "" : fin(x) ? `; it differs from the governing size by ${(x - G.x) >= 0 ? "+" : ""}${fx(x - G.x, 2)}x` : ""}.`;
+    return `Governing size: ${G.words}, ${G.book ? `the decision engine's baseline cut to ${G.book.bindingName}` : `the decision engine's gated call (${typeof monthNice === "function" ? monthNice(G.date + "-01") : G.date} data)`}. ${what} is a cross-check, not the call${same ? "" : fin(x) ? `; it differs from the governing size by ${(x - G.x) >= 0 ? "+" : ""}${fx(x - G.x, 2)}x` : ""}.`;
   }
 
   // Guilloche rosette: overlapping hypotrochoids, the engraving pattern on a bond certificate.
@@ -1043,23 +1046,30 @@
       const left = h("div", "col"), right = h("div", "col");
       const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (items) => { const u = h("ul"); items.forEach((x) => u.append(h("li", null, x))); return u; };
-      left.append(h("p", "stance", t.stance), sec("Evidence", ul(t.ev)));
-      // v0.24: this week's checked items that bear on the thesis, from the research digest, each linked to its source
+      // v0.31: the card shows the stance, the latest verdict, the trade and what would change it; the evidence folds below
+      left.append(h("p", "stance", t.stance));
+      if (Array.isArray(t.sc) && t.sc.length) {
+        const x = t.sc[t.sc.length - 1], p = h("p", "prose");
+        p.append(h("strong", null, `${isoNice(x.d)}: ${x.v}. `), document.createTextNode(x.n + " "));
+        if (x.src) { const a = h("a", "src", "Source"); a.href = x.src; a.target = "_blank"; a.rel = "noopener"; p.append(a); }
+        left.append(sec("Latest scorecard", p));
+      }
+      left.append(sec("Expression", h("p", "prose", t.ex)), sec("Hedge", h("p", "prose", t.hd)));
+      right.append(sec("What would change the desk's mind", ul(t.kill)));
+      const more = h("details", "thesis-more"), mbox = h("div", "col");
+      more.append(h("summary", null, "Evidence, sources and the case against"));
+      mbox.append(sec("Evidence", ul(t.ev)));
       const wk = (typeof DIGEST24 !== "undefined" && DIGEST24 && Array.isArray(DIGEST24.items) && Array.isArray(t.wk)) ? t.wk.map((id) => dgFind(DIGEST24, id)).filter(Boolean) : [];
       if (wk.length) {
         const u = h("ul", "thesis-wk");
         wk.forEach((x) => { const li = h("li"); const a = h("a", "src", `${x.publisher || "Source"}, ${isoNice(x.as_of)}`); a.href = x.source_url; a.target = "_blank"; a.rel = "noopener"; li.append(document.createTextNode(x.text + " "), a); u.append(li); });
-        left.append(sec("This week's evidence", u));
+        mbox.append(sec("This week's evidence", u));
       }
-      if (BEAR[t.id]) left.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
-      // v0.30: the scorecard, one dated verdict a review, each with its source
-      if (Array.isArray(t.sc) && t.sc.length) {
-        const u = h("ul", "thesis-wk");
-        t.sc.forEach((x) => { const li = h("li"); li.append(h("strong", null, `${isoNice(x.d)}: ${x.v}. `), document.createTextNode(x.n + " ")); if (x.src) { const a = h("a", "src", "Source"); a.href = x.src; a.target = "_blank"; a.rel = "noopener"; li.append(a); } u.append(li); });
-        left.append(sec("Scorecard", u));
-      }
-      right.append(sec("Expression", h("p", "prose", t.ex)), sec("Hedge", h("p", "prose", t.hd)), sec("What would change the desk's mind", ul(t.kill)), sec("Data the engine tracks", ul(t.data)));
-      c.append(head, left, right);
+      if (BEAR[t.id]) mbox.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
+      if (Array.isArray(t.sc) && t.sc.length > 1) mbox.append(sec("Earlier scorecards", ul(t.sc.slice(0, -1).map((x) => `${isoNice(x.d)}: ${x.v}. ${x.n}`))));
+      mbox.append(sec("Data the engine tracks", ul(t.data)));
+      more.append(mbox);
+      c.append(head, left, right, more);
       g.append(c);
     });
   }
@@ -1139,7 +1149,7 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
+  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", library: "Library", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
     noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", decision: "Decision engine", portfolio: "Portfolio", matrix: "The shortcut", geometry: "Geometry", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", analysis: "Analysis", bonds: "Bonds", ml: "ML lab", reality: "Reality check", edge: "Edge", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",

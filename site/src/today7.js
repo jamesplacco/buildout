@@ -87,24 +87,16 @@
     // the answer to the headline question
     const st = TD.gates.state.value, ans = $("#t7-answer");
     ans.replaceChildren();
-    const lead = TD.status !== "ok" ? "Would bonds hedge the book? Unknown today." : TD.on ? "Would bonds hedge the book? Reliable enough to hold." : st === "amplifying" ? "Would bonds hedge the book? Not in this regime." : "Would bonds hedge the book? Unproven.";
-    const H = readF().hedge || {}, gateAdds = H.experiment ? H.experiment.inflation_adds_value === true : null;
-    ans.append(h("strong", null, lead + " "),
-      document.createTextNode(st === "amplifying" ? `Stocks and bonds are moving together (S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}), so long bonds would add to a sell-off `
-        : st === "hedging" ? `Stocks and bonds are moving opposite (S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}) ` : `The S&P 500's 36-month correlation with the 10-year (${sgn2(I.corr.v)}) sits between the lines `),
-      evTag("obs"), document.createTextNode(`. The correlation state alone decides this: three-year inflation of ${pctPts(I.infl.avg36)} is ${fin(HL.line) ? (I.infl.avg36 / 100 < HL.line ? "below" : "above") + ` the validated ${fx(HL.line * 100, 2)}% line` : "unlined"}, and the engine's out-of-sample test ${gateAdds === false ? "cannot tell the inflation gate from the correlation rule (the difference is a few percent of the test's own noise), so it is kept as a guard, not dropped" : gateAdds ? "finds the inflation gate adds a little" : "has not tested the inflation gate"} `), evTag("est"), document.createTextNode("."));
-    try {                                    // v0.30: the same question on the book's own days
-      const B = typeof B30 === "function" ? B30() : null, P = B && B.hedges && B.hedges.policies, C = B && B.correlation;
-      if (P && C) ans.append(document.createTextNode(` On the book's own days since ${B.hedges.from.slice(0, 4)}, the long bond held only when its correlation said it hedged cut the book's variance ${pct0(P.bond_when_it_hedges.variance_cut)} and lost ${pctPlain(-P.bond_when_it_hedges.y2022 + P.none.y2022, 0)} more in 2022; a Nasdaq-100 short cut it ${pct0(P.nasdaq_beta.variance_cut)}. The book's 63-day correlation with a 20-year bond is ${sgn2(C.book_63d)}. `), evTag("obs"));
-    } catch (e) { /* the book run is optional here */ }
-    // the latest day's tape, where it bears on the call: a growth scare is the one selloff long bonds do cushion
-    try {
-      const T = (typeof TAPE17 !== "undefined" && Array.isArray(TAPE17)) ? Object.fromEntries(TAPE17.map((x) => [x.id, x])) : {};
-      const tl = T["tp-tlt-1022"], qq = T["tp-qqq-1022"];
-      if (st === "amplifying" && tl && qq && fin(tl.value) && fin(qq.value) && tl.value > 0 && qq.value < 0) {
-        ans.append(document.createTextNode(` The regime describes the average month, not every day: on Oct 22, a growth and earnings scare, TLT rose ${fx(tl.value, 2)}% while QQQ fell ${fx(Math.abs(qq.value), 2)}%. `), evTag("obs"));
-      }
-    } catch (e) { /* the tape is optional */ }
+    // v0.31: the answer leads with the decision and its one reason, then the hedge in one sentence; the rest lives on the desks behind it
+    const BC = typeof bookCall === "function" && typeof DX19 !== "undefined" && DX19 && DX19.now ? bookCall(DX19.now) : null;
+    if (BC) {
+      const B = BC.B, P = B.hedges && B.hedges.policies;
+      ans.append(h("strong", null, "Why. "), document.createTextNode(`Measured on the nine names' own prices, the book at full size breaks ${BC.breaches === 3 ? "all three" : BC.breaches} of its risk limits: its worst month in twenty is ${pctPlain(B.tail.es95.governing, 0)} against a ${pctPlain(B.limits.es_budget, 0)} budget. The tightest limit allows ${xx(BC.size)}. The decision engine finds no evidence for sizing away from holding, so the limits set the size. `), evTag("obs"));
+      ans.append(h("strong", null, " Hedge. "), document.createTextNode(`${st === "amplifying" ? "Bonds won't hedge it: stocks and bonds are moving together" : st === "hedging" ? "Bonds are hedging stocks at the moment" : "Whether bonds hedge is unproven"} (S&P 500 against the 10-year, 36 months: ${sgn2(I.corr.v)})${P ? `, and on the book's own days since ${B.hedges.from.slice(0, 4)} a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} against ${pct0(P.nasdaq_beta.variance_cut)} for a Nasdaq-100 short` : ""}. `), evTag("obs"));
+    } else {
+      const lead = TD.status !== "ok" ? "Would bonds hedge the book? Unknown today." : TD.on ? "Would bonds hedge the book? Reliable enough to hold." : st === "amplifying" ? "Would bonds hedge the book? Not in this regime." : "Would bonds hedge the book? Unproven.";
+      ans.append(h("strong", null, lead + " "), document.createTextNode(`S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}. `), evTag("obs"));
+    }
     $("#t7-status").textContent = `Model book, not personal positions · Data to ${isoNice(latestDataDate())}, tape to Oct 23 · Policies: TLT hedge v2, equity sizing v2${LIVE.status && Array.isArray(LIVE.status.checks) ? ` · ${LIVE.status.checks.filter((c) => c.ok).length} of ${LIVE.status.checks.length} data checks pass` : ""}`;
     // one governing size, and the other rules named as cross-checks so the desks cannot seem to disagree
     const sz = $("#t7-sizing");

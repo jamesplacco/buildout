@@ -94,9 +94,9 @@ def test_how_it_works_quotes_the_engine_and_replays_its_record():
 def test_navigation_has_the_two_new_desks_first_in_their_groups():
     boot = (SRC / "boot.js").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and groups["research"].startswith('"digest"') and '"findings"' in groups["research"]
+    assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and '"digest"' in groups["evidence"] and '"findings"' in groups["evidence"]
     body = (SRC / "body.html").read_text()
-    assert '<a href="#explained" data-group="engine">Engine</a>' in body and '<a href="#digest" data-group="research">Research</a>' in body
+    assert '<a href="#explained" data-group="engine">Engine</a>' in body and '<a href="#inventory" data-group="evidence">Evidence</a>' in body         # v0.31
     views = set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
     assert {"explained", "digest"} <= views
     guide = (SRC / "guide.js").read_text()

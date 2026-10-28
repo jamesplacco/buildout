@@ -181,14 +181,15 @@ def test_shipped_decision_carries_the_overlay_and_the_headline_matches():
         assert ov["full_record_choice"] < 1.0 and ov["walk_forward"]["utility_gain_month"] < 0.0 and "walk-forward" in ov["adopted_reason"]
     else:
         tail = f"cut to {now['overlay']['exposure_if_off']:.2f}x if the 10-month trend breaks" if now["overlay"]["trend_on"] else f"scaled by {ov['adopted']:.2f} while the trend is off"
-    assert f"Hold equity at {now['exposure']:.2f}x with {hedge}; {tail}." in body
+    # v0.31: the headline is the book's call (test_page checks its numbers); the decision engine's baseline sentence is the fallback in landing.js
+    assert f"; {hedge}." in body and "Hold equity at ${xx(N.exposure)}" in (SRC / "landing.js").read_text() and tail
 
 
 # ---------------------------------------------------------------- the page
 def test_six_groups_cover_every_desk_once():
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert list(groups) == ["today", "engine", "markets", "research", "workshop", "reference"]
+    assert list(groups) == ["today", "evidence", "markets", "engine", "library"]            # v0.31: five groups
     views = [v.strip('" ') for g in groups.values() for v in g.split(",")]
     assert len(views) == len(set(views))
     assert set(views) == set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
