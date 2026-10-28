@@ -425,7 +425,8 @@ def test_buyside_math_matches_the_engine():
          "gross": [[1, 2.74], [1, 1.0], [0, 2.0], [-1, 0.5]], "regime": [[3.63, 2.74, 1, 1.5], [2.0, 0.5, -1, 0.9], [3.5, 2.0, 0, 1.0]]}
     [g] = _node6([c])
     want = ac.depreciation_table(425)
-    assert [(r["life"], r["annual"], r["gap"]) for r in g["dep"]] == pytest.approx([(r["life"], r["annual"], r["gap"]) for r in want])
+    # flattened: pytest 9.2 no longer compares nested sequences with approx
+    assert [x for r in g["dep"] for x in (r["life"], r["annual"], r["gap"])] == pytest.approx([x for r in want for x in (r["life"], r["annual"], r["gap"])])
     assert g["ddb"] == pytest.approx(ac.ddb_first_year(425, 6))
     assert g["eps"] == pytest.approx(ac.cash_eps(*c["eps"]))
     assert g["dcf"] == pytest.approx(ac.dcf_value(*c["dcf"]), rel=1e-12)

@@ -19,9 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -33,6 +33,7 @@ jobs:
         run: pytest -q --ignore=tests/test_page.py   # page checks run in CI on every push; they never block data
 
       - name: Market regime (FRED, free)
+        continue-on-error: true   # v0.31: a FRED outage must not skip the Databento book run and every step after it
         run: python -m buildout macro --out site/data
 
       - name: Long-history research (public datasets on GitHub, free)
