@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.31</span>
+      Buildout <span class="ver">v0.32</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -100,7 +100,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 646 of 646</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 652 of 652</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot good"></span><span>Databento key set in GitHub</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -2468,7 +2468,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">646 of 646 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">652 of 652 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2680,6 +2680,16 @@
     <div class="tablewrap"><table class="rs-table" id="bk-size"></table></div>
     <p class="prose" id="bk-keep-p"></p>
     <div class="math" id="bk-math"></div>
+  </section>
+  <section class="section" aria-labelledby="bk-front-t">
+    <div class="section-head"><p class="eyebrow">The menu</p><h2 id="bk-front-t">Every size-and-hedge choice that meets the limits</h2><p class="prose" id="bk-front-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-front"></table></div>
+    <p class="prose" id="bk-front-read"></p>
+  </section>
+  <section class="section" aria-labelledby="bk-rule-t">
+    <div class="section-head"><p class="eyebrow">A rule tried</p><h2 id="bk-rule-t">Sizing by volatility: supported over two crashes, a reading beside the limits</h2><p class="prose" id="bk-rule-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="bk-rule"></table></div>
+    <div class="math" id="bk-rule-math"></div>
   </section>
   <section class="section" aria-labelledby="bk-exp-t">
     <div class="section-head"><p class="eyebrow">Exposures</p><h2 id="bk-exp-t">What the book is a bet on, measured against outside factors</h2><p class="prose" id="bk-exp-p"></p></div>
@@ -3424,6 +3434,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v32-t">
+    <div class="section-head"><p class="eyebrow">v0.32</p><h2 id="ag-v32-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>5</b><span>Size-and-hedge mixes that meet the limits</span><small>0.59x unhedged to 1.00x with an 85% short, all near 15% volatility</small></div>
+      <div class="at-kpi"><b>1.76 vs 1.66</b><span>The volatility rule's utility t against the bar</span><small>Nasdaq-100 future since 1999, best of 12 variants deflated for</small></div>
+      <div class="at-kpi"><b>0.89</b><span>The same t from 2003 on</span><small>the gain lives in the dot-com and 2008 crashes</small></div>
+      <div class="at-kpi"><b>1.01x</b><span>What the rule reads for the book today</span><small>so it does not change the call</small></div></div>
+    <p class="prose">The lead agent's own review of the v0.30 call found it more precise than its inputs (one point from a simulated drawdown) and silent on the real choice (the market, or these names against it). The menu makes the choice visible. The volatility rule went through the engine's standard test and a timing bug found by the new tests changed its verdict: with exposure set only at month ends, as published, it clears the bar on the long record. The sub-period and cost checks that qualify that verdict are on the desk beside it.</p>
   </section>
   <section class="section" aria-labelledby="ag-v31-t">
     <div class="section-head"><p class="eyebrow">v0.31</p><h2 id="ag-v31-t">Release metrics</h2></div>

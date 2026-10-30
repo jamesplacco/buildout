@@ -36,6 +36,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from . import sizing_rules
 from .analytics import exposures, regime, risk, sizing, stress
 from .analytics.bonds import constant_maturity_returns, duration_convexity
 
@@ -435,8 +436,15 @@ def drawdowns(rb: pd.Series, q: pd.Series) -> dict:
 
 
 # ---------------------------------------------------------------- the build
+def _slim(o: dict) -> dict:
+    """A rule test without the per-rule table's bulk: the headline, the best, the bar and every rule's t and Sharpe."""
+    return {"name": o["name"], "verdict": o["verdict"], "headline": o["headline"], "best": {"rule": o["best"]["rule"], "t": o["best"]["t"]},
+            "t_bar": o["t_bar"], "n_rules": o["n_rules"], "months": o["months"],
+            "rules": [{"rule": t["rule"], "t": t["t"], "sharpe_rule": t["sharpe_rule"], "maxdd_rule": t["maxdd_rule"]} for t in o["tests"]]}
+
+
 def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book: dict[str, float] = BOOK,
-          meta: dict | None = None) -> dict:
+          meta: dict | None = None, long_record: dict | None = None) -> dict:
     ust = treasury() if ust is None else ust
     w = pd.Series(book, dtype=float)
     P = panel(prices, ust, book)
@@ -485,6 +493,14 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
         "at_full": {"es95": tail["es95"]["governing"], "vol": sigma,
                     "drawdown95": sizing.drawdown_quantile(mu, sigma, 1.0, cash_rate=rf)},
         "keep_names_hedge": hedge_need,
+        "frontier": sizing_rules.frontier(rb, (E["QQQ"] - cash), fm, beta_vti,
+                                          float(pd.concat([E["QQQ"] - cash, E["VTI"]], axis=1).dropna().cov().iloc[0, 1] / E["VTI"].var()), rf,
+                                          {"es": ES_BUDGET, "vol": VOL_TARGET, "dd": MAX_DD}, lambda x, sig: tail_block(x, sig)["es95"]["governing"],
+                                          grosses=tuple(sorted({float(min(sizes.values()))} | {g for g in (0.6, 0.7, 0.8, 0.9, 1.0) if g > min(sizes.values()) + 0.02}))),
+        "vol_rule": {"book": _slim(sizing_rules.test_all(rb, cash.reindex(rb.index).fillna(0.0), "the book, 2017 on")),
+                     "nasdaq_2017": _slim(sizing_rules.test_all(E["QQQ"].dropna(), cash.reindex(E["QQQ"].dropna().index).fillna(0.0), "the Nasdaq-100 (QQQ), 2017 on")),
+                     "long_record": long_record, "rule": sizing_rules.HEADLINE, "n_rules": sizing_rules.N_RULES, "t_bar": sizing_rules.expected_max_t(sizing_rules.N_RULES),
+                     "gamma": sizing_rules.GAMMA},
         "hedges": hedge_tests(rb, F, E, cash), "episodes": episodes(rb, R, F, E),
         "scenarios": scenarios(fm, w, y20, hedge_need.get("best_short")),
         "worst_days": worst_days(rb, F, E), "correlation": correlation_block(rb, F),

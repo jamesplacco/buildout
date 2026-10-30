@@ -3,6 +3,12 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.32 turns the call into a menu (every size-and-hedge mix that meets the book's limits, with its record,
+on the Book risk desk) and tests a volatility-managed sizing rule (`buildout/sizing_rules.py`, Moreira and Muir 2017)
+the way the engine tests every rule: against the best of twelve variants, on the Nasdaq-100 future since 1999, on QQQ
+since 2017 and on the book's own days. It passed on the long record, with the gain in the two long crashes, and is
+adopted as a reading beside the limits, not as the size.
+
 Version 0.31 is the PM edition: five navigation groups (Today, Evidence, Markets, Engine, and a Library index for the
 other 30 desks), a Desk that leads with the call and its reason, and folded detail on the longest desks (the Digest, the
 theses, the release history). Nothing was deleted; deep links open folded sections.

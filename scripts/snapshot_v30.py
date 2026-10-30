@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import pickle
 import sys
+
+import pandas as pd
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,17 +25,31 @@ import snapshot_v14 as S14  # noqa: E402
 import snapshot_v15 as S15  # noqa: E402
 import snapshot_v29 as S29  # noqa: E402
 
-S15.EXTRA_CODE += ["buildout/book.py", "scripts/snapshot_v30.py"]
+S15.EXTRA_CODE += ["buildout/book.py", "buildout/sizing_rules.py", "scripts/snapshot_v30.py"]
+
+
+def long_record(argv: list[str]) -> dict | None:
+    """v0.32: the volatility rule on the Nasdaq-100 future since 1999 (the futures engine's cache, --carver-pickle),
+    the record that holds the dot-com crash, 2008 and 2020. Futures returns are already in excess of cash."""
+    from buildout import futures, sizing_rules
+    arg = lambda k: Path(argv[argv.index(k) + 1]) if k in argv else None
+    p = arg("--carver-pickle")
+    if not p or not p.exists():
+        return None
+    frames = pickle.load(open(p, "rb"))
+    nq = futures.front_returns(frames["NQ"]).dropna()
+    return book._slim(sizing_rules.test_all(nq, pd.Series(0.0, index=nq.index), "the Nasdaq-100 future, December 1999 to March 2024"))
 
 
 def book_run(argv: list[str]) -> dict:
     arg = lambda k: Path(argv[argv.index(k) + 1]) if k in argv else None
     if arg("--book-json"):
         return json.loads(arg("--book-json").read_text())
+    lr = long_record(argv)
     if arg("--mirror-pickle"):
         prices = pickle.load(open(arg("--mirror-pickle"), "rb"))["prices"]
-        return book.build(prices, meta={"source": "mirror download (pickled)"})
-    return book.build(book.download(arg("--book-cache") or ROOT / ".cache" / "book"), meta={"source": "mirror download"})
+        return book.build(prices, meta={"source": "mirror download (pickled)"}, long_record=lr)
+    return book.build(book.download(arg("--book-cache") or ROOT / ".cache" / "book"), meta={"source": "mirror download"}, long_record=lr)
 
 
 # ---------------------------------------------------------------- the inventory: every edge tested, one ledger
@@ -142,6 +158,15 @@ def inventory(book_run: dict) -> dict:
                     stat=f"{s['reference']}", p=None, verdict="untested", through="needs the SEC run")
     except Exception as exc:
         notes.append(f"filings: {type(exc).__name__}")
+    VR = book_run.get("vol_rule") or {}                 # v0.32: the volatility-managed sizing rule, three records
+    VV = {"supported": "works", "one_era": "faded", "chance": "failed", "reversed": "failed"}
+    for key, rec in (("long_record", VR.get("long_record")), ("nasdaq_2017", VR.get("nasdaq_2017")), ("book", VR.get("book"))):
+        if rec and rec.get("headline"):
+            hd = rec["headline"]
+            add(desk="Book risk", href="#bk-rule-t", family="Volatility-managed sizing", test=f"Scale exposure by target variance over realized variance (Moreira and Muir 2017), {rec['name']}",
+                method=f"monthly CRRA utility gain over holding, EWC t against the best of {rec['n_rules']} rules tried, both halves",
+                stat=f"utility t {hd['t']:.2f} against {rec['t_bar']:.2f} needed; Sharpe {hd['sharpe_rule']:.2f} against {hd['sharpe_hold']:.2f} holding",
+                p=hd.get("p"), verdict=VV.get(rec["verdict"], rec["verdict"]), through=hd["to"])
     H = (book_run.get("hedges") or {}).get("policies") or {}
     for k, name in (("nasdaq_beta", "Nasdaq-100 short at the measured beta"), ("nasdaq_and_semis", "Nasdaq-100 and semis short"),
                     ("bond_when_it_hedges", "Long bond when its correlation says it hedges"), ("bond_static_30", "Standing 30% long bond")):
