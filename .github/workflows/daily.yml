@@ -17,7 +17,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60       # v0.32: the two first runs were cancelled at 30 minutes with the full test suite inside the budget
     steps:
       - uses: actions/checkout@v5
 
@@ -29,8 +29,10 @@ jobs:
       - name: Install
         run: pip install -e ".[databento,dev]"
 
-      - name: Test the engine
-        run: pytest -q --ignore=tests/test_page.py   # page checks run in CI on every push; they never block data
+      - name: Smoke test the engine
+        # v0.32: the full suite runs in CI on every push (tests.yml); the data run keeps a two-minute smoke test so a
+        # broken install stops it, without spending its time budget on 600 tests
+        run: pytest -q -x -p no:cacheprovider tests/test_v08.py tests/test_v12.py tests/test_book.py tests/test_sizing_rules.py
 
       - name: Market regime (FRED, free)
         continue-on-error: true   # v0.31: a FRED outage must not skip the Databento book run and every step after it

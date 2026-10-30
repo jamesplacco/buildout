@@ -5,7 +5,7 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 41;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TESTS_PASSING = 646;     // the shipped test count (the chip and the hood tile read it)
+  const TESTS_PASSING = 652;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -45,8 +45,11 @@
     const tail = !ov ? "" : none ? "no trend overlay after it failed its walk-forward test" : (ov.trend_on ? `cut to ${xx(ov.exposure_if_off)} if the 10-month trend breaks` : `scaled by ${fx(ov.factor, 2)} while the trend is off`);
     const BC = typeof bookCall === "function" ? bookCall(N) : null;
     // v0.30: the call is about the book. The decision engine supplies the baseline; the book's own limits set the size.
+    // v0.32: the call is the menu's two ends, not a point: the limits allow a range of size-and-hedge mixes at the same risk
+    const M = BC && BC.menu;
     el.textContent = BC && BC.cut
-      ? `Run the book at ${xx(BC.size)}${BC.keep != null ? `, or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures` : ""}${hw ? "; " + hw : ""}.`
+      ? (M ? `Cut the book to about ${xx(M.lo.gross)}${M.lo.short ? ` with a ${pct0(M.lo.short)} Nasdaq-100 short` : ""}, or keep it at ${xx(M.hi.gross)} and short ${pct0(M.hi.short)} of NAV in Nasdaq-100 futures; ${hw || "no bond hedge"}.`
+        : `Run the book at ${xx(BC.size)}${BC.keep != null ? `, or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures` : ""}${hw ? "; " + hw : ""}.`)
       : `Hold equity at ${xx(N.exposure)}${hw ? " with " + hw : ""}${tail ? "; " + tail : ""}.`;
     const eb = $("#t7-eyebrow");
     if (eb) eb.textContent = `The engine's call · model book · data to ${isoNice(latestDataDate())}`;
