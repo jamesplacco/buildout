@@ -502,7 +502,18 @@ def main(argv: list[str] | None = None) -> None:
         from pathlib import Path as _P
         from . import filings as fl
         from .jsonout import write
-        data = fl.collect(a.ua, a.cache, a.start, limit=a.limit, text=a.text)
+        if "@" not in (a.ua or ""):                    # v0.33: say exactly what is wrong, in GitHub's error format
+            print("::error::SEC_USER_AGENT must be a name and an email, e.g. 'Jamie Placco you@example.com'; "
+                  f"it is set to {len(a.ua or '')} characters with no @ in them. Fix it under Settings > Secrets and variables > Actions > Variables.")
+            raise SystemExit(1)
+        try:
+            data = fl.collect(a.ua, a.cache, a.start, limit=a.limit, text=a.text)
+        except RuntimeError as exc:
+            msg = str(exc)
+            hint = (" The SEC refused this machine (HTTP 403): it blocks requests whose User-Agent lacks a real name and email, "
+                    "and sometimes whole cloud address ranges; check SEC_USER_AGENT, or run the engine on your own computer.") if "403" in msg else ""
+            print(f"::error::Filings download failed: {msg[:300]}.{hint}")
+            raise SystemExit(1)
         _P(a.cache).mkdir(parents=True, exist_ok=True)
         (_P(a.cache) / "inputs.pkl").write_bytes(_pk.dumps(data))      # the run's inputs stay in the cache, never in git
         o = fl.build(data["members"], data["cik_of"], data["ticker_of"], data["tx"], data["facts"], data["px"], text=data.get("text"),

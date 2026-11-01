@@ -17,7 +17,9 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 60       # v0.32: the two first runs were cancelled at 30 minutes with the full test suite inside the budget
+    env:
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}   # v0.33: optional; FRED's official API when set, its graph CSV otherwise
+    timeout-minutes: 120      # v0.33: every data step has its own limit; this is the backstop
     steps:
       - uses: actions/checkout@v5
 
@@ -35,29 +37,37 @@ jobs:
         run: pytest -q -x -p no:cacheprovider tests/test_v08.py tests/test_v12.py tests/test_book.py tests/test_sizing_rules.py
 
       - name: Market regime (FRED, free)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true   # v0.31: a FRED outage must not skip the Databento book run and every step after it
         run: python -m buildout macro --out site/data
 
       - name: Long-history research (public datasets on GitHub, free)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true   # a dataset mirror being down must never block the market data
         run: python -m buildout research --out site/data
 
       - name: Brain and field-manual engine (public datasets, free)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: |
           python -m buildout brain --out site/data
           python -m buildout buyside --out site/data
 
       - name: Noteworthy feeds (RSS, Substack, Telegram, Reddit, HN, news; X with a token)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true   # social sources come and go; they never block the market data
         env:
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
         run: python -m buildout feeds --out site/data
 
       - name: Source registry
+        continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         run: python -m buildout sources --out site/data
 
       - name: Book run (Databento)
+        continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
+        timeout-minutes: 20   # v0.33: one hung step can no longer use up the whole job
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
         run: |
@@ -69,6 +79,8 @@ jobs:
           python -m buildout run --config config.toml --out site/data
 
       - name: Fundamentals (SEC EDGAR)
+        continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
+        timeout-minutes: 15   # v0.33: one hung step can no longer use up the whole job
         env:
           SEC_UA: ${{ vars.SEC_USER_AGENT }}
         run: |
@@ -79,14 +91,17 @@ jobs:
           python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
 
       - name: The atlas (every monthly series, FRED and GitHub mirrors; learned structure)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout atlas --out site/data
 
       - name: The labs (156 years of public data; trend, oscillators, valuation, regimes, volatility, spreads)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout labs --out site/data
 
       - name: Data connections (which sources and credentials answer today)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
@@ -94,6 +109,7 @@ jobs:
         run: python -m buildout connect --out site/data
 
       - name: Technical and fundamental analysis (Databento, then Yahoo, then Stooq; SEC filings)
+        timeout-minutes: 20   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
@@ -101,38 +117,47 @@ jobs:
         run: python -m buildout market --out site/data
 
       - name: Reinforcement-learning sizing agent (fitted Q iteration, judged out of sample)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout rl --out site/data
 
       - name: Bonds, simply (every Treasury ETF repriced on today's Treasury curve)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout bonds --live --out site/data
 
       - name: Machine-learning lab (purged walk-forward, CPCV, conformal intervals, analogs)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout ml --out site/data
 
       - name: Decision engine (stacked forecasts, regimes, changepoints, geometric analogs, model averaging, an evidence gate)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout decide --out site/data
 
       - name: Portfolio engine (stocks, Treasuries, gold and cash from regimes, a learner over policies)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout portfolio --out site/data
 
       - name: The shape of the market (covariance geometry, random matrices, topology, transport, every claim tested)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout geometry --out site/data
 
       - name: Reality check (every model's assumptions, breakpoints, kappa, fragility, stressed worlds)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout reality --out site/data
 
       - name: Reasoner and games (reads the files above; no network)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout reason --out site/data
 
       - name: Decision engines and the manifest (valuation, causal statistics, hedge book, decision loop; no network)
+        timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout engine --out site/data --only valuation,causal,hedges,ooda
 
