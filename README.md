@@ -3,6 +3,9 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.33 makes the daily run reliable: a per-site circuit breaker in the downloader, a time limit on every data
+step, FRED's official API when `FRED_API_KEY` is set, and plain errors from the filings engine.
+
 Version 0.32 turns the call into a menu (every size-and-hedge mix that meets the book's limits, with its record,
 on the Book risk desk) and tests a volatility-managed sizing rule (`buildout/sizing_rules.py`, Moreira and Muir 2017)
 the way the engine tests every rule: against the best of twelve variants, on the Nasdaq-100 future since 1999, on QQQ

@@ -173,12 +173,12 @@ def download(fred: bool = True) -> dict:
             failed[k] = str(exc)[:160]
     raw["fred"] = {}
     if fred:
-        from .data.fred_source import FRED_CSV, parse_fred_csv
+        from .data.fred_source import fetch as fred_fetch
         for s in catalog():
             if not s.fred:
                 continue
             try:
-                raw["fred"][s.fred] = parse_fred_csv(http.get(FRED_CSV.format(sid=s.fred), retries=1, timeout=20).decode(), s.fred)
+                raw["fred"][s.fred] = fred_fetch(s.fred)
             except Exception as exc:
                 failed[s.fred] = str(exc)[:120]
                 if len(failed) > 8 and not raw["fred"]:   # FRED unreachable: stop asking
