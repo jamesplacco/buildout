@@ -5,7 +5,7 @@ Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity
 
 Version 0.35 adds the cohort to that lens: Apollo, HPS, Ares, Blackstone, Goldman and Golub through the same queue model
 (with the inversion checked on two funds that reported both the fill and the requests), and the listed peers ARCC and
-BXSL through the same marks and cover. Blue Owl is the outlier on the queue, the sector on marks, and first to cut.
+BXSL through the same marks and cover. Blue Owl is the outlier on the queue and the sector on marks; OBDC is the only listed fund in the cohort to have cut its dividend.
 
 Version 0.34 adds the private credit lens (`buildout/private_credit.py`, `python -m buildout credit`, MCP tool
 `private_credit`): Blue Owl's manager, listed BDC, non-traded funds and campus vehicles read from filings, with three
