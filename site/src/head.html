@@ -2153,4 +2153,9 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
 .mt-dl dt { font-weight: 600; color: var(--ink); margin-top: 4px; } .mt-dl dd { margin: 0; color: var(--ink-2); }
 @media (max-width: 900px) { .mt-list { grid-template-columns: minmax(0, 1fr); } }
 @media print { .mt-card { break-inside: avoid; } .mt-list { display: block; } .mt-list > .mt-card { margin-bottom: 10px; } }
+.pc-quotes { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); margin-top: 12px; }
+.pc-quote { margin: 0; padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 10px 10px 0; }
+.pc-quote p { margin: 0 0 6px; font: 500 var(--t-sm)/1.45 var(--f-body); color: var(--ink); }
+.pc-quote footer { font: 500 var(--t-xs)/1.3 var(--f-mono); color: var(--muted); }
+.prose.lead { font-size: var(--t-md); }
 </style>

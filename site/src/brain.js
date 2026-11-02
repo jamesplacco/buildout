@@ -22,7 +22,7 @@
     { id: "pods", n: "Pod crowding and de-grossing", s: "Pods", ring: 1, a: 54, d: "pr-pods-title", why: "Multi-manager AUM grew 175% from 2017 to 2023 (per the field manual); crowded longs unwind together." },
     { id: "liq", n: "Funding liquidity", s: "Liquidity", ring: 1, a: 100, d: "liq-title", why: "Reverse repo is empty ($0.33B), so drains hit bank reserves." },
     { id: "credit", n: "Credit spreads (HY and CCC)", s: "Credit", ring: 1, a: 144, d: "d-credit", why: "CCC 13.10% against high yield 3.29% on Oct 19: cracks at the bottom." },
-    { id: "pcredit", n: "Private credit stress", s: "Private credit", ring: 1, a: 180, d: "nw-private-credit", why: "BCRED capped redemptions for a third straight quarter; 10 of 16 non-traded BDCs hit the cap in Q2." },
+    { id: "pcredit", n: "Private credit stress", s: "Private credit", ring: 1, a: 180, d: "nw-private-credit", why: "BCRED capped redemptions for a third straight quarter; 10 of 16 non-traded BDCs hit the cap in Q2; Blue Owl's OCIC had 16.8% and OTIC 39% of shares asked out in Q3." },
     { id: "consumer", n: "Consumer spending", s: "Consumer", ring: 1, a: 214, d: "nw-consumer", why: "UMich sentiment 46.3 (Oct preliminary), near its record low." },
     { id: "dollar", n: "The dollar", s: "Dollar", ring: 1, a: 344, d: "rates-title", why: "Tighter Fed policy lifts the dollar; a strong dollar weighs on gold and on multinational earnings." },
     { id: "earn", n: "AI earnings revisions", s: "Earnings", ring: 1, a: 77, d: "fund-table", why: "Analysts' estimates for the builders and their suppliers: where demand, capex and depreciation meet the P&L." },

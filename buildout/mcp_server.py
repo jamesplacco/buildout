@@ -1211,6 +1211,22 @@ def book_risk(ctx: Context, args: dict) -> dict:
     raise ToolError("part is one of summary, exposures, risk, hedges, episodes, scenarios, worst_days, correlation, liquidity, drawdowns, validation, limitations")
 
 
+def private_credit(ctx: Context, args: dict) -> dict:
+    """v0.34: the private credit lens centred on Blue Owl: the manager's results, the listed BDC's marks and income
+    quality, the non-traded funds' repurchase queues (the pro-rata fill model against the reported fills), Fitch's
+    sector default rate and its mix, the scorecard, the transmission to the book's names, what would flip the lens
+    and the catalysts. Every figure dated and sourced; nothing here is a position."""
+    S = _snap("snappc.js", "SNAPPC", "credit")
+    if not S:
+        raise ToolError("no private credit snapshot: run python scripts/snapshot_pc.py")
+    part = args.get("part", "summary")
+    if part == "summary":
+        return {"asof": S["asof"], "latest_observation": S["latest_observation"], "headline": S["headline"], "findings": S["findings"], "reds": S["reds"], "scorecard": S["scorecard"]}
+    if part in ("stack", "liquidity", "marks", "income", "loss_gap", "net_yield", "manager", "template", "sector", "scorecard", "transmission", "chain", "flips", "catalysts", "sources", "limitations"):
+        return {part: S.get(part)}
+    raise ToolError("part is one of summary, stack, liquidity, marks, income, loss_gap, net_yield, manager, template, sector, scorecard, transmission, chain, flips, catalysts, sources, limitations")
+
+
 def forecast_verification(ctx: Context, args: dict) -> dict:
     """v0.25: the engine's monthly forecast scored the way weather services score theirs (log score, CRPS, PIT,
     coverage, skill against history), the tail backtested the way actuaries backtest a reserve, ruin, and every borrowed
@@ -1392,6 +1408,13 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                   _obj({"part": {"type": "string", "enum": ["summary", "exposures", "risk", "hedges", "episodes", "scenarios", "worst_days", "correlation",
                                                             "liquidity", "drawdowns", "validation", "limitations"]}}),
                   {"readOnlyHint": True, "openWorldHint": False}),
+    "private_credit": (private_credit, "The private credit lens (v0.34), Blue Owl at the centre: OWL's fee earnings and AUM; OBDC's NAV, discount, non-accruals, PIK and dividend "
+                       "cover; OCIC and OTIC repurchase queues with the pro-rata fill model (5% cap divided by requests reproduces the reported fills); Fitch's record "
+                       "default rate and its soft-restructuring mix by sector; a scorecard with thresholds; how the stress reaches the book's names; what would flip the "
+                       "lens; catalysts. Dated and sourced filings figures. Research only.",
+                       _obj({"part": {"type": "string", "enum": ["summary", "stack", "liquidity", "marks", "income", "loss_gap", "net_yield", "manager", "template", "sector",
+                                                                 "scorecard", "transmission", "chain", "flips", "catalysts", "sources", "limitations"]}}),
+                       {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
                               "persistence), its tail backtested like an actuarial reserve (normal, historical, generalized Pareto, filtered GPD, the engine), ruin "
                               "probabilities, and every borrowed upgrade tried on the decision core with its verdict.",

@@ -176,6 +176,9 @@ def main(argv: list[str] | None = None) -> None:
     bkp = sub.add_parser("book", help="v0.30: the book on its names' own daily prices: exposures, risk, tail, the size each limit allows, hedges tested out of sample, stress, liquidity")
     bkp.add_argument("--out", default="out")
     bkp.add_argument("--cache", default=".cache/book")
+    pcp = sub.add_parser("credit", help="v0.34: the private credit lens, Blue Owl at the centre: queues, marks, income quality, the sector's default rate, the scorecard and the book's exposure")
+    pcp.add_argument("--out", default="out")
+    pcp.add_argument("--part", default="summary")
     ncp = sub.add_parser("nowcast", help="v0.27: early-published facts (TSMC monthly revenue, hyperscaler capex, peers) against the book's next quarterly reports, and whether the market had priced them")
     ncp.add_argument("--out", default="out")
     ncp.add_argument("--quick", action="store_true")
@@ -531,6 +534,22 @@ def main(argv: list[str] | None = None) -> None:
         path = write(o, a.out, "book.json")
         for f in o["findings"]:
             print(" ", f)
+        print("wrote", path)
+        return
+    if a.cmd == "credit":
+        from . import private_credit as pc
+        from .jsonout import write
+        o = pc.report()
+        o["findings"] = pc.summary(o)
+        path = write(o, a.out, "private_credit.json")
+        if a.part == "summary":
+            for f in o["findings"]:
+                print(" ", f)
+            for r in o["scorecard"]:
+                v = r["value"]
+                print(f"  [{r['grade']:5s}] {r['label']}: {v:.1%}" if r["unit"] == "pct" else f"  [{r['grade']:5s}] {r['label']}: {v:.2f}")
+        else:
+            print(json.dumps(o.get(a.part), indent=1, default=str))
         print("wrote", path)
         return
     if a.cmd == "futures":

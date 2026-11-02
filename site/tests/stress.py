@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
-VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
+VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "credit", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
          "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
@@ -236,7 +236,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("location.hash") != "#options":
         fail(f"{label}: the Markets group did not reopen the last desk read in it")
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
-    if ["Options", "page"] not in sub or len(sub) != 6:                # six Markets desks since v0.31 (the rest in the Library)
+    if ["Options", "page"] not in sub or len(sub) != 7:                # seven Markets desks since v0.34 (the rest in the Library)
         fail(f"{label}: Markets subtabs wrong: {sub}")
     pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")
@@ -627,7 +627,7 @@ async def think_and_field(page, label: str) -> None:
         fail(f"{label}: a field note executed script")
     if await page.evaluate("document.querySelectorAll('#fd-notes tbody tr').length") != 1:
         fail(f"{label}: field notes did not survive a reload cleanly")
-    if await page.evaluate("document.querySelectorAll('#fd-ms li').length") != 7:
+    if await page.evaluate("document.querySelectorAll('#fd-ms li').length") != 8:
         fail(f"{label}: milestones after hostile storage: {await page.evaluate('document.querySelectorAll(\"#fd-ms li\").length')}")
     txt = await page.evaluate("document.querySelector('#view-field').innerText")
     if bad_text(txt):
