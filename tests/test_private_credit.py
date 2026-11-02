@@ -65,7 +65,7 @@ def test_income_and_loss_gap_arithmetic():
     g = PC.loss_gap()
     assert g["hard_default_rate"] == pytest.approx(0.063 * 0.12) and g["hard_loss_at_severity"] == pytest.approx(0.063 * 0.12 * 0.4)
     y = PC.net_yield_at_sector_default()
-    assert y["over_treasury"] < 0 < y["net"]                                 # the illiquidity premium is gone at 6.3%
+    assert y["over_y10"] < 0 < y["net"] and abs(y["over_bill3m"]) < 0.005   # at 6.3% the fund nets about the bill
     assert PC.fre_from_undeployed()["uplift"] == pytest.approx(400e6 / (427.5e6 * 4))
 
 

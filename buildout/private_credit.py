@@ -56,7 +56,7 @@ COHORT_QUEUES = [  # non-traded funds: requests as a share of shares where repor
     {"fund": "Apollo Debt Solutions (ADS)", "sponsor": "Apollo", "asof": "2026-09-14", "requests": 0.147, "fill": 0.34, "requests_basis": "reported (preliminary)", "net_assets": 14.00e9, "src": ["ads", "ntbdc"]},
     {"fund": "HPS Corporate Lending", "sponsor": "HPS (BlackRock)", "asof": "2026-06-08", "requests": None, "fill": 0.376, "requests_basis": "inferred from the fill", "net_assets": 12.05e9, "src": ["ntbdc"]},
     {"fund": "Ares Strategic Income (ASIF)", "sponsor": "Ares", "asof": "2026-09-18", "requests": None, "fill": 0.382, "requests_basis": "inferred from the fill", "net_assets": 10.21e9, "src": ["ntbdc"]},
-    {"fund": "Blackstone Private Credit (BCRED)", "sponsor": "Blackstone", "asof": "2026-09-03", "requests": 0.10, "fill": None, "requests_basis": "reported (about 10%)", "net_assets": 42.78e9, "src": ["bcred", "ntbdc"]},
+    {"fund": "Blackstone Private Credit (BCRED)", "sponsor": "Blackstone", "asof": "2026-09-03", "requests": 0.10, "fill": None, "requests_basis": "reported (about 10%); fill implied by the 5% cap", "net_assets": 42.78e9, "src": ["bcred", "ntbdc"]},
     {"fund": "Goldman Sachs Private Credit", "sponsor": "Goldman Sachs", "asof": "2026-09-22", "requests": None, "fill": 1.0, "requests_basis": "all requests met", "net_assets": 9.19e9, "src": ["ntbdc"]},
     {"fund": "Golub Capital Private Credit", "sponsor": "Golub", "asof": "2026-07-29", "requests": None, "fill": 1.0, "requests_basis": "all requests met", "net_assets": 4.47e9, "src": ["ntbdc"]},
 ]
@@ -68,7 +68,7 @@ COHORT_SECTOR = {"funds": 67, "prorated": 16, "prorated_share_of_net_assets": 0.
 COHORT_LISTED = [  # listed BDCs: the marks the funds book, and the dividend cover before any cut
     {"fund": "Blue Owl Capital Corp (OBDC)", "asof": "2026-06-30", "nav_ps": 14.26, "nav_ps_year_end": 14.81, "non_accrual_cost": 0.028, "non_accrual_fv": 0.008, "debt_to_equity": 1.11, "first_lien": 0.732,
      "earnings_ps": 0.36, "earnings_basis": "GAAP NII", "dividend_ps": 0.33, "dividend_note": "base cut from $0.37 to $0.31 in 2026", "price_to_nav": 0.774, "price_basis": "own June buybacks", "src": ["obdc_pr", "obdc_10q"]},
-    {"fund": "Ares Capital (ARCC)", "asof": "2026-09-30", "nav_ps": 19.31, "nav_ps_year_end": 19.94, "non_accrual_cost": 0.024, "non_accrual_fv": 0.014, "debt_to_equity": 1.11, "first_lien": 0.58,
+    {"fund": "Ares Capital (ARCC)", "asof": "2026-09-30", "nav_ps": 19.31, "nav_ps_year_end": 19.94, "non_accrual_cost": 0.024, "non_accrual_fv": 0.014, "debt_to_equity": 1.06, "first_lien": 0.58,
      "earnings_ps": 0.46, "earnings_basis": "core EPS", "dividend_ps": 0.48, "dividend_note": "unchanged; one small software loan on non-accrual", "price_to_nav": None, "price_basis": "no verified price", "src": ["arcc", "arcc_call"]},
     {"fund": "Blackstone Secured Lending (BXSL)", "asof": "2026-06-30", "nav_ps": 25.53, "nav_ps_year_end": None, "nav_ps_prior_q": 26.26, "non_accrual_cost": 0.036, "non_accrual_fv": 0.018, "debt_to_equity": 1.28, "first_lien": 0.968,
      "earnings_ps": 0.75, "earnings_basis": "NII", "dividend_ps": 0.77, "dividend_note": "unchanged", "price_to_nav": None, "price_basis": "no verified price", "src": ["bxsl"]},
@@ -96,10 +96,10 @@ OBS = {
         "nii_ps": 0.36, "nii_ps_adjusted": 0.34, "dividend_base": 0.31, "dividend_base_prior": 0.37, "dividend_supplemental": 0.02,
         "non_accrual_cost": 0.028, "non_accrual_fv": 0.008, "non_accrual_cost_usd": 428.7e6, "non_accrual_fv_usd": 126.4e6, "non_accrual_count": 7,
         "non_accrual_history": [("2025-09-30", 0.027, 0.013), ("2025-12-31", 0.023, 0.011), ("2026-03-31", 0.020, 0.010), ("2026-06-30", 0.028, 0.008)],
-        "pik_share_income_q": 0.107, "pik_share_income_h1": 0.112, "pik_usd_q": 31.6e6,
+        "pik_share_income_q": 31.6e6 / 401.3e6, "pik_share_income_mdna": 0.107, "pik_usd_q": 31.6e6, "total_investment_income_q": 401.3e6, "shares_out": 493.1e6,
         "portfolio_fv": 14.96e9, "companies": 229, "debt_principal": 8.02e9, "net_debt_to_equity": 1.11, "first_lien_share": 0.732,
         "software_share_mgmt": 0.18, "software_share_prior_q": 0.16, "software_alleged_economic": (0.20, 0.30),
-        "net_loss_q": 110.4e6, "net_loss_q_ps": 0.22, "repurchased_q_usd": 35e6,
+        "net_realized_unrealized_loss_q": 110.4e6, "net_increase_from_operations_q": 65.7e6, "repurchased_q_usd": 35e6,
         "buyback_prices": [("2026-03", 11.20), ("2026-05", 11.20), ("2026-06", 11.04)],
         "largest_non_accruals": [("National Dentex Labs", "healthcare", 167.0e6, 76.9e6), ("Loparex Midco", "industrial", 135.3e6, 8.3e6),
                                  ("Feradyne Outdoors", "consumer", 78.2e6, 34.7e6), ("Pluralsight", "software", 25.7e6, 2.3e6)],
@@ -109,7 +109,7 @@ OBS = {
         "requests_share": 0.168, "requests_share_prior": 0.188, "requests_usd": 3.1e9, "shares_tendered": 341.4e6, "shares_bought": 101.6e6, "paid_usd": 931.1e6,
         "fill_reported": 0.298, "fill_history": [("2026-03-31", 0.228), ("2026-06-30", 0.266), ("2026-09-30", 0.298)],
         "nav_ps": 9.17, "nav_total": 18e9, "investments_fv": 35.1e9, "companies": 328, "net_leverage": 0.91, "liquidity": 11.9e9,
-        "paid_with": "non-interest-bearing promissory notes", "third_party_tender_price": 7.31,
+        "paid_with": "non-interest-bearing promissory notes", "third_party_tender_price": 7.31, "third_party_nav_ref": 9.14, "third_party_nav_ref_date": "2026-08-31",
     },
     "otic": {  # the technology fund
         "name": "Blue Owl Technology Income Corp. (OTIC)", "asof": "2026-09-30", "reported": "2026-10-26", "src": ["tender", "requests"],
@@ -119,7 +119,7 @@ OBS = {
     },
     "fitch": {  # the sector
         "name": "Fitch US private credit default rate (PCDR), trailing twelve months", "asof": "2026-09-30", "reported": "2026-10-29", "src": ["fitch", "fitch2"],
-        "pcdr": 0.063, "pcdr_prior_q": 0.060, "record": True, "events_q": 27, "events_prior_q": 20, "unique_defaulters_ttm": 91,
+        "pcdr": 0.063, "pcdr_prior_q": 0.060, "record": True, "events_q": 27, "index_start": "2024-08", "rises": "every quarter since 3Q25 (5.6%, 5.7%, 6.0%, 6.3%)", "unique_defaulters_ttm": 91,
         "soft_share": 0.88, "mix": {"pik_or_deferral": 0.50, "maturity_extension": 0.38, "payment_default": 0.08, "bankruptcy_or_restructuring": 0.04},
         "sector": {"Technology software": 0.006, "Healthcare providers": 0.087, "Industrials and manufacturing": 0.097, "Consumer products and services": 0.097},
         "sector_prior": {"Technology software": 0.012, "Healthcare providers": 0.094},
@@ -127,7 +127,7 @@ OBS = {
     },
     "hyperion": {  # the template deal
         "name": "Meta Hyperion campus joint venture (Louisiana)", "asof": "2025-10-21", "src": ["hyperion"],
-        "debt_usd": 27e9, "asset_usd": 30e9, "blue_owl_share": 0.80, "ltv": 0.90, "dscr": 1.15, "residual_guarantee_years": 16,
+        "debt_usd": 27.3e9, "development_cost_usd": 27e9, "capital_raised_usd": 30e9, "blue_owl_share": 0.80, "blue_owl_cash_usd": 7e9, "meta_distribution_usd": 3e9, "initial_lease_years": 4, "residual_guarantee_years": 16, "ltv": None, "dscr": None, "dscr_unofficial": 1.12,
         "lender": "PIMCO and other bond investors, Morgan Stanley bookrunner",
     },
 }
@@ -171,10 +171,10 @@ def obdc_price_to_nav(o: dict = OBS["obdc"]) -> dict:
 
 # ---------------------------------------------------------------- 3. income quality
 def dividend_cover(o: dict = OBS["obdc"]) -> dict:
-    """NII against the declared dividend, and an estimate of cash cover with PIK taken out. Shares are estimated as
-    (portfolio at fair value less debt principal) / NAV per share, so the cash figure is an estimate, labelled."""
+    """NII against the declared dividend, and cash cover with PIK taken out: (NII x shares - PIK) / shares, over the
+    dividend, on the June 30 share count. Approximate, since PIK accrued is not all of the non-cash income."""
     div = o["dividend_base"] + o["dividend_supplemental"]
-    shares_est = (o["portfolio_fv"] - o["debt_principal"]) / o["nav_ps"]
+    shares_est = o["shares_out"]
     nii_usd_est = o["nii_ps"] * shares_est
     cash_nii_ps_est = (nii_usd_est - o["pik_usd_q"]) / shares_est
     return {"nii_ps": o["nii_ps"], "dividend": div, "cover": o["nii_ps"] / div, "dividend_cut": o["dividend_base"] / o["dividend_base_prior"] - 1,
@@ -184,19 +184,25 @@ def dividend_cover(o: dict = OBS["obdc"]) -> dict:
 
 def loss_gap(owl: dict = OBS["owl"], fitch: dict = OBS["fitch"], severity: float = 0.40) -> dict:
     """Both numbers are true: the manager's realized losses (12 bp) and the sector's record default rate (6.3%).
-    Hard defaults are the 12% of Fitch's events that are payment defaults or bankruptcies; at a 40% loss severity
-    they cost about 30 bp a year. The other 88% (PIK, deferrals, extensions) produce no realized loss until they do."""
+    Hard defaults are the 12% of Fitch's events that are payment defaults or bankruptcies; applying that event share to
+    the issuer rate (an approximation) and a 40% loss severity, they cost about 30 bp a year. The other 88% (PIK, deferrals, extensions) produce no realized loss until they do."""
     hard = fitch["pcdr"] * (fitch["mix"]["payment_default"] + fitch["mix"]["bankruptcy_or_restructuring"])
     return {"realized_loss_manager": owl["direct_lending_realized_loss_ann"], "pcdr": fitch["pcdr"], "hard_default_rate": hard,
             "hard_loss_at_severity": hard * severity, "severity": severity, "soft_share": fitch["soft_share"],
             "ratio_pcdr_to_realized": fitch["pcdr"] / owl["direct_lending_realized_loss_ann"]}
 
 
+RATES = {"bill3m": 0.0422, "y10": 0.0500, "asof": "2026-10-23", "src": "US Treasury daily par yield curve (site LEVELS)"}
+
+
 def net_yield_at_sector_default(default_rate: float | None = None, recovery: float = 0.5) -> dict:
-    """The page's unlevered direct-lending fund (base 3.9%, spread 5.5%, 1.25% and 12.5% fees) at the sector's default rate."""
+    """The page's unlevered direct-lending fund (base 3.9%, spread 5.5%, 1.25% and 12.5% fees) at the sector's default
+    rate, against the dated 3-month bill (the floating-rate comparison) and the dated 10-year."""
     d = OBS["fitch"]["pcdr"] if default_rate is None else default_rate
-    r = accounting.credit_stress(0.039, 0.055, d, recovery)
-    r["default_rate"], r["recovery"] = d, recovery
+    r = accounting.credit_stress(0.039, 0.055, d, recovery, treasury=RATES["y10"])
+    r["over_bill3m"] = r["net"] - RATES["bill3m"]
+    r["over_y10"] = r.pop("over_treasury")
+    r["default_rate"], r["recovery"], r["rates"] = d, recovery, RATES
     return r
 
 
@@ -208,9 +214,11 @@ def fre_from_undeployed(owl: dict = OBS["owl"]) -> dict:
 
 
 def jv_cushion(hy: dict = OBS["hyperion"]) -> dict:
-    """The template deal's cushions: the value fall that exhausts the equity (1 - LTV) and the rent fall that breaks
-    debt service (1 - 1/DSCR)."""
-    return {"equity_cushion": 1 - hy["ltv"], "rent_cushion": 1 - 1 / hy["dscr"], "debt_usd": hy["debt_usd"], "asset_usd": hy["asset_usd"]}
+    """The template deal's structure as disclosed. Loan to value and debt service cover were not disclosed (a private
+    offering); debt is about the size of the development cost, so the debt is underwritten on Meta's lease and residual
+    value guarantee, not on a cushion of equity value."""
+    return {"debt_usd": hy["debt_usd"], "development_cost_usd": hy["development_cost_usd"], "capital_raised_usd": hy["capital_raised_usd"],
+            "debt_to_cost": hy["debt_usd"] / hy["development_cost_usd"], "ltv_disclosed": False, "dscr_unofficial": hy["dscr_unofficial"]}
 
 
 # ---------------------------------------------------------------- the cohort
@@ -269,14 +277,14 @@ def scorecard() -> list[dict]:
 
 # ---------------------------------------------------------------- the book
 TRANSMISSION = [  # name, channel, exposure, watch
-    ("META", "Lessee of the Hyperion campus: Blue Owl funds own 80% of a vehicle that borrowed about $27B against a roughly $30B asset; Meta guarantees the residual value for 16 years.", "direct",
-     "Whether the next campus is financed the same way or on Meta's balance sheet (its $35B equity raise of Oct 26 says the template is already strained)."),
+    ("META", "Lessee of the Hyperion campus: Blue Owl funds own 80% of a joint venture that sold about $27.3B of bonds against about $27B of development cost; Meta has a four-year initial lease with extensions and guarantees the residual value for 16 years.", "direct",
+     "Whether the next campus is financed the same way or on Meta's balance sheet (on Oct 26 it also launched about $35B of equity for AI infrastructure)."),
     ("MSFT", "Named by Blue Owl's CFO as a tenant whose credit the data-center funds carry; investment-grade lessee.", "direct", "Lease terms and residual guarantees in Blue Owl's net-lease disclosures."),
     ("AMZN", "Named by Blue Owl's CFO as a tenant whose credit the data-center funds carry; investment-grade lessee.", "direct", "Same."),
-    ("SPCX", "Chip financing: Blue Owl did GPU deals with SpaceX (originally xAI); Apollo leads a $40B GPU finance lease (thesis t1).", "direct", "The lease rate on the next chip financing; a gated wealth channel raises it."),
+    ("SPCX", "Chip financing: Blue Owl did GPU deals with SpaceX (originally xAI); an Apollo-managed entity is lessor on a $40B GPU finance lease, co-led with Goldman Sachs (Oct 26; thesis t1).", "direct", "The lease rate on the next chip financing; a gated wealth channel raises it."),
     ("NVDA", "Its GPUs are the collateral in chip leases; a lessor's loss is a residual-value loss on NVDA hardware.", "indirect", "Secondary GPU prices and lease residuals in lessor filings."),
-    ("ORCL", "Not named by Blue Owl's management (Oracle came up only in an analyst question); Oracle's campuses are financed by other lenders.", "indirect", "Oracle's own lease commitments in its 10-Q."),
-    ("GOOGL", "No direct Blue Owl channel found; finances capex from cash flow.", "none", "Nothing specific; the sector channel only."),
+    ("ORCL", "Blue Owl, Crusoe and Primary Digital formed the $15B joint venture that owns the Abilene, Texas campus leased to Oracle; Blue Owl walked away from financing Oracle's Michigan site in Dec 2025. Oracle came up on the Q3 call only in an analyst's question.", "direct", "Oracle's own lease commitments in its 10-Q."),
+    ("GOOGL", "No direct Blue Owl channel found; Alphabet funds capex from cash flow and bonds (February and August 2026 issues).", "none", "Nothing specific; the sector channel only."),
     ("AVGO", "No direct channel; sells into the campuses the funds finance.", "indirect", "Hyperscaler capex guidance."),
     ("TSLA", "No direct channel.", "none", "Nothing specific."),
 ]
@@ -293,7 +301,7 @@ FLIPS = [  # what moves the lens, in each direction
     {"direction": "worse", "trigger": "OBDC non-accruals above 4% at cost, or PIK above 15% of income", "now": "2.8% at cost; PIK 10.7%"},
     {"direction": "worse", "trigger": "A Blue Owl data-center vehicle's bonds below 90 cents, or a tenant exercising a lease break", "now": "no such print found; Hyperion bonds placed privately"},
     {"direction": "better", "trigger": "OCIC and OTIC requests back under the 5% cap (no queue)", "now": "16.8% and 39%"},
-    {"direction": "better", "trigger": "Fitch's default rate below 3% (the thesis's kill condition)", "now": "6.3%, a record, rising six quarters"},
+    {"direction": "better", "trigger": "Fitch's default rate below 3% (the thesis's kill condition)", "now": "6.3%, the highest since Fitch's index began in Aug 2024, up every quarter since 3Q25"},
     {"direction": "better", "trigger": "OBDC within 5% of NAV", "now": "about 77% of NAV on June buybacks"},
 ]
 
@@ -315,25 +323,25 @@ def report(today: str | None = None) -> dict:
     sc = scorecard()
     reds = [r for r in sc if r["grade"] == "red"]
     headline = (f"Blue Owl's wealth funds are in a slow run (OCIC {oc['requests_share']:.1%} and OTIC {ot['requests_share']:.0%} of shares asked out last quarter, "
-                f"paid 5% a quarter in notes), its listed BDC trades about {1 - p2n['price_to_nav']:.0%} below NAV (an asset markdown near {md['implied_asset_markdown']:.0%}, "
+                f"paid 5% a quarter in notes), its listed BDC bought back its own shares about {1 - p2n['price_to_nav']:.0%} below NAV in June (an asset markdown near {md['implied_asset_markdown']:.0%}, "
                 f"{md['multiple_of_non_accruals_fv']:.0f} times the non-accruals it books), and the sector's default rate is a record {fi['pcdr']:.1%}. "
-                f"The manager is fine (${ow['fre_q'] / 1e6:.0f}M of fee earnings, up {ow['fre_q'] / ow['fre_q_prior_year'] - 1:.0%}); the holders of its funds are not. "
+                f"The manager's fee earnings are up {ow['fre_q'] / ow['fre_q_prior_year'] - 1:.0%} (${ow['fre_q'] / 1e6:.0f}M in Q3) while the holders of its funds queue to leave. "
                 f"For the book this is a financing lens, not a position: watch it, do not own it.")
     return {
         "asof": today, "latest_observation": max(o["asof"] for o in OBS.values()), "headline": headline,
         "stack": {"manager": ow, "listed_bdc": ob, "flagship_fund": oc, "technology_fund": ot, "sector": fi, "template_deal": OBS["hyperion"]},
-        "liquidity": {"ocic": queue_check(oc), "otic": queue_check(ot), "cap": CAP, "third_party_tender_discount": 1 - oc["third_party_tender_price"] / oc["nav_ps"]},
+        "liquidity": {"ocic": queue_check(oc), "otic": queue_check(ot), "cap": CAP, "third_party_tender_discount": 1 - oc["third_party_tender_price"] / oc["third_party_nav_ref"]},
         "marks": {"obdc": {**p2n, **md}, "otic_nav_change_ytd": ot["nav_ps"] / ot["nav_ps_prior_year_end"] - 1},
         "income": cov, "loss_gap": loss_gap(), "net_yield": net_yield_at_sector_default(), "manager": fre_from_undeployed(), "template": jv_cushion(),
-        "sector": {"pcdr": fi["pcdr"], "prior": fi["pcdr_prior_q"], "events": [fi["events_prior_q"], fi["events_q"]], "soft_share": fi["soft_share"], "mix": fi["mix"], "by_sector": fi["sector"], "by_sector_prior": fi["sector_prior"]},
+        "sector": {"pcdr": fi["pcdr"], "prior": fi["pcdr_prior_q"], "events_q": fi["events_q"], "index_start": fi["index_start"], "rises": fi["rises"], "soft_share": fi["soft_share"], "mix": fi["mix"], "by_sector": fi["sector"], "by_sector_prior": fi["sector_prior"]},
         "cohort": cohort(), "scorecard": sc, "reds": len(reds), "transmission": [dict(zip(("name", "channel", "exposure", "watch"), t)) for t in TRANSMISSION], "chain": CHAIN, "flips": FLIPS,
         "catalysts": [dict(zip(("date", "event", "source"), c)) for c in CATALYSTS],
         "sources": {k: {"title": v[0], "url": v[1]} for k, v in SRC.items()},
         "limitations": ["OBDC's price is the fund's own June repurchase average; no live quote reaches the engine (the price mirror carries no BDC or alternative-manager tickers).",
-                        "The cash-cover estimate derives the share count from portfolio value less debt principal; the 10-Q's share count would replace it.",
+                        "Cash cover takes PIK interest out of NII; other non-cash income (PIK dividends, accretion) is not removed, so cover is if anything lower.",
                         "OWL management's 12 bp realized-loss figure and Fitch's 6.3% default rate measure different things; the loss gap reconciles them by construction, not by audit.",
                         "The queue model assumes the queue stays its current size; requests have fallen two quarters at OCIC and risen at OTIC.",
-                        "Hyperion's loan-to-value and debt-service cover are from the deal's reporting at signing, not a current valuation.",
+                        "Hyperion's loan to value and debt service cover were not disclosed (a private bond offering); an unofficial reconstruction of the rating agency's pre-sale puts debt service cover near 1.12x.", "OBDC's June buyback price is the only verified price; a secondary source puts its Oct 16 close near $10.23, about 72% of June NAV.",
                         "In the cohort, HPS's and Ares's request shares are inferred from their reported fills (cap divided by fill); the inversion is checked on two funds that reported both. The listed peers' prices are not verified, so their discounts are not shown."],
     }
 
@@ -343,9 +351,9 @@ def summary(r: dict) -> list[str]:
     return [
         r["headline"],
         f"The 5% cap divided by the queue gives the fill rate: {L['ocic']['fill']:.1%} at OCIC (reported {L['ocic']['fill_reported']:.1%}), {L['otic']['fill']:.1%} at OTIC (reported {L['otic']['fill_reported']:.1%}). A holder who keeps asking has 90% out in {L['ocic']['quarters_to_90pct_exit']:.1f} quarters at OCIC and {L['otic']['quarters_to_90pct_exit']:.1f} at OTIC.",
-        f"OBDC at {M['price_to_nav']:.0%} of NAV with {M['debt_to_equity']:.2f}x debt to equity implies an asset markdown of {M['implied_asset_markdown']:.1%}, against {OBS['obdc']['non_accrual_fv']:.1%} of the portfolio on non-accrual at fair value.",
-        f"NII covers the dividend {I['cover']:.2f} times; with PIK ({I['pik_share_income']:.1%} of income) taken out the estimated cash cover is {I['cash_cover_est']:.2f}. The base dividend was cut {-I['dividend_cut']:.0%} and NAV is {-I['nav_change_since_2024']:.1%} below its end-2024 level.",
-        f"Fitch's record {G['pcdr']:.1%} default rate is {G['soft_share']:.0%} soft restructurings; the hard defaults cost about {G['hard_loss_at_severity'] * 1e4:.0f} bp a year at a {G['severity']:.0%} severity, which is how a manager reports {G['realized_loss_manager'] * 1e4:.0f} bp of realized losses in the same market.",
+        f"OBDC's June buybacks at {M['price_to_nav']:.0%} of NAV, with {M['debt_to_equity']:.2f}x debt to equity implies an asset markdown of {M['implied_asset_markdown']:.1%}, against {OBS['obdc']['non_accrual_fv']:.1%} of the portfolio on non-accrual at fair value.",
+        f"NII covers the dividend {I['cover']:.2f} times; with PIK ({I['pik_share_income']:.1%} of total investment income) taken out the cash cover is about {I['cash_cover_est']:.2f}. The base dividend was cut {-I['dividend_cut']:.0%} and NAV is {-I['nav_change_since_2024']:.1%} below its end-2024 level.",
+        f"Fitch's record {G['pcdr']:.1%} default rate is {G['soft_share']:.0%} soft restructurings; the hard defaults cost about {G['hard_loss_at_severity'] * 1e4:.0f} bp a year at an assumed {G['severity']:.0%} severity, the same order as the {G['realized_loss_manager'] * 1e4:.0f} bp of realized losses Blue Owl reports in the same market.",
         f"Fitch's software default rate is {r['sector']['by_sector']['Technology software']:.1%}, the lowest sector; industrials and consumer run {r['sector']['by_sector']['Industrials and manufacturing']:.1%}. Three of OBDC's four largest non-accruals are a dental lab, a films maker and an outdoor-goods company, not software.",
-        f"The cohort: Blue Owl is the outlier on the queue (OTIC {C['read']['blue_owl_max_requests']:.0%} of shares against {C['read']['peers_range'][0]:.0%} to {C['read']['peers_range'][1]:.0%} at Apollo, HPS, Ares and Blackstone, and no queue at Goldman or Golub), the sector on marks (non-accruals {C['read']['non_accrual_cost_range'][0]:.1%} to {C['read']['non_accrual_cost_range'][1]:.1%} of cost across the listed peers), and first to cut: Ares and Blackstone's listed funds earn less than their dividends and have not cut.",
+        f"The cohort: Blue Owl is the outlier on the queue (OTIC {C['read']['blue_owl_max_requests']:.0%} of shares against {C['read']['peers_range'][0]:.0%} to {C['read']['peers_range'][1]:.0%} at Apollo, HPS, Ares and Blackstone, and no queue at Goldman or Golub), the sector on marks (non-accruals {C['read']['non_accrual_cost_range'][0]:.1%} to {C['read']['non_accrual_cost_range'][1]:.1%} of cost across the peers), and the first listed fund in the cohort to cut its dividend: Ares Capital and Blackstone Secured Lending earn less than their dividends and have not cut (BCRED, non-traded, has cut twice).",
     ]
