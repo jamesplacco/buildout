@@ -92,3 +92,24 @@ def test_house_style():
         src = open(p).read().lower()
         for b in (chr(0x2014), "inter" "section", "load" "-bearing"):
             assert b not in src, p
+
+
+def test_the_cohort_runs_the_same_model_and_its_inversions_check():
+    """v0.35: requests inferred as cap / fill where only the fill was reported; checked on two funds that reported both."""
+    K = PC.cohort()
+    assert all(c["matches"] for c in K["checks"]) and len(K["checks"]) == 2
+    for q in K["queues"]:
+        if q["queued"]:
+            assert abs(q["fill"] - PC.CAP / q["requests"]) < 0.02 or q["requests_basis"].startswith("reported"), q["fund"]
+            assert q["quarters_to_90pct_exit"] > 0
+        else:
+            assert q["fill"] == 1.0 and q["quarters_to_90pct_exit"] == 0.0
+        assert all(s in PC.SRC for s in q["src"]) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", q["asof"])
+    assert K["queues"][0]["sponsor"] == "Blue Owl" and K["read"]["blue_owl_max_requests"] > K["read"]["peers_max_requests"]
+    for l in K["listed"]:
+        assert all(s in PC.SRC for s in l["src"])
+        if l["cover"] is not None:
+            assert l["cover"] == pytest.approx(l["earnings_ps"] / l["dividend_ps"])
+    assert set(K["read"]["peers_cover_below_1"]) == {"Ares Capital (ARCC)", "Blackstone Secured Lending (BXSL)"}
+    S = _snap()
+    assert S["cohort"]["read"] == json.loads(json.dumps(K["read"]))

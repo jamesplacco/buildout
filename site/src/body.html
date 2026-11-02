@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.34</span>
+      Buildout <span class="ver">v0.35</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -100,7 +100,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 665 of 665</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 666 of 666</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot good"></span><span>Databento key set in GitHub</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -2468,7 +2468,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">665 of 665 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">666 of 666 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2732,7 +2732,7 @@
 <section class="view" id="view-credit" hidden aria-labelledby="credit-title">
   <div class="vhead"><p class="eyebrow">Markets · private credit</p><h1 id="credit-title">The private credit lens: Blue Owl, its funds, and the campuses they finance</h1>
     <p class="lede" id="pc-sub"></p></div>
-  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#pc-call-t">The call</a><a href="#pc-stack-t">The stack</a><a href="#pc-queue-t">Liquidity</a><a href="#pc-marks-t">Marks</a><a href="#pc-income-t">Income</a><a href="#pc-sector-t">The sector</a><a href="#pc-book-t">The book</a><a href="#pc-score-t">Scorecard</a><a href="#pc-flips-t">Flips and catalysts</a><a href="#pc-src-t">Sources</a></nav>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#pc-call-t">The call</a><a href="#pc-stack-t">The stack</a><a href="#pc-queue-t">Liquidity</a><a href="#pc-marks-t">Marks</a><a href="#pc-income-t">Income</a><a href="#pc-sector-t">The sector</a><a href="#pc-cohort-t">The cohort</a><a href="#pc-book-t">The book</a><a href="#pc-score-t">Scorecard</a><a href="#pc-flips-t">Flips and catalysts</a><a href="#pc-src-t">Sources</a></nav>
   <div class="at-tiles" id="pc-tiles"></div>
   <section class="section" aria-labelledby="pc-call-t">
     <div class="section-head"><p class="eyebrow">The call</p><h2 id="pc-call-t">Watch it, do not own it; hedge the financing lane</h2></div>
@@ -2765,6 +2765,15 @@
       <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Fitch US private credit default rate by sector, twelve months to Sept 30, 2026</span><span class="src">Fitch 3Q26 monitor</span></div><div class="svgbox" id="pc-sectors"></div></figure>
       <div class="panel"><div class="tablewrap"><table class="rs-table" id="pc-mix"></table></div></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="pc-cohort-t">
+    <div class="section-head"><p class="eyebrow">The cohort</p><h2 id="pc-cohort-t">Outlier or sector? The same gauges on Apollo, HPS, Ares, Blackstone, Goldman and Golub</h2><p class="prose" id="pc-cohort-p"></p></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Shares asked out in the latest tender, against the 5% cap</span><span class="src">Fund filings, Q2 and Q3 2026</span></div><div class="svgbox" id="pc-cohort-chart"></div></figure>
+      <div class="panel"><div class="tablewrap"><table class="rs-table" id="pc-cohort-check"></table></div><p class="hint" id="pc-cohort-sector"></p></div>
+    </div>
+    <div class="tablewrap"><table class="rs-table" id="pc-cohort-q"></table></div>
+    <div class="tablewrap"><table class="rs-table" id="pc-cohort-l"></table></div>
   </section>
   <section class="section" aria-labelledby="pc-book-t">
     <div class="section-head"><p class="eyebrow">The book</p><h2 id="pc-book-t">How the stress reaches the nine names</h2><p class="prose" id="pc-book-p"></p></div>
@@ -3494,6 +3503,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v35-t">
+    <div class="section-head"><p class="eyebrow">v0.35</p><h2 id="ag-v35-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>8 + 4</b><span>Funds through the same gauges</span><small>six sponsors' non-traded funds and the listed peers</small></div>
+      <div class="at-kpi"><b>2 of 2</b><span>Inversions that check</span><small>cap divided by fill equals the requests Apollo and Blue Owl reported</small></div>
+      <div class="at-kpi"><b>39% vs 10 to 15%</b><span>Blue Owl's queue against the peers'</span><small>none at Goldman or Golub</small></div>
+      <div class="at-kpi"><b>0.96x, 0.97x</b><span>ARCC's and BXSL's dividend cover, uncut</span><small>Blue Owl cut first; the peers earn less than they pay</small></div></div>
+    <p class="prose">The question a portfolio manager asks after v0.34 is whether the reading is one manager or the market. The lead agent put the cohort through the same arithmetic rather than new arithmetic, inferred what was not reported from what was (and said so in the table), and checked the inference where it could be checked. Blue Owl's queue is the outlier; its marks are the sector's.</p>
   </section>
   <section class="section" aria-labelledby="ag-v34-t">
     <div class="section-head"><p class="eyebrow">v0.34</p><h2 id="ag-v34-t">Release metrics</h2></div>

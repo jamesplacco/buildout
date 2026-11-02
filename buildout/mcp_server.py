@@ -1222,9 +1222,9 @@ def private_credit(ctx: Context, args: dict) -> dict:
     part = args.get("part", "summary")
     if part == "summary":
         return {"asof": S["asof"], "latest_observation": S["latest_observation"], "headline": S["headline"], "findings": S["findings"], "reds": S["reds"], "scorecard": S["scorecard"]}
-    if part in ("stack", "liquidity", "marks", "income", "loss_gap", "net_yield", "manager", "template", "sector", "scorecard", "transmission", "chain", "flips", "catalysts", "sources", "limitations"):
+    if part in ("stack", "liquidity", "marks", "income", "loss_gap", "net_yield", "manager", "template", "sector", "cohort", "scorecard", "transmission", "chain", "flips", "catalysts", "sources", "limitations"):
         return {part: S.get(part)}
-    raise ToolError("part is one of summary, stack, liquidity, marks, income, loss_gap, net_yield, manager, template, sector, scorecard, transmission, chain, flips, catalysts, sources, limitations")
+    raise ToolError("part is one of summary, stack, liquidity, marks, income, loss_gap, net_yield, manager, template, sector, cohort, scorecard, transmission, chain, flips, catalysts, sources, limitations")
 
 
 def forecast_verification(ctx: Context, args: dict) -> dict:
@@ -1410,9 +1410,9 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                   {"readOnlyHint": True, "openWorldHint": False}),
     "private_credit": (private_credit, "The private credit lens (v0.34), Blue Owl at the centre: OWL's fee earnings and AUM; OBDC's NAV, discount, non-accruals, PIK and dividend "
                        "cover; OCIC and OTIC repurchase queues with the pro-rata fill model (5% cap divided by requests reproduces the reported fills); Fitch's record "
-                       "default rate and its soft-restructuring mix by sector; a scorecard with thresholds; how the stress reaches the book's names; what would flip the "
+                       "default rate and its soft-restructuring mix by sector; the cohort (Apollo, HPS, Ares, Blackstone, Goldman, Golub, and the listed peers ARCC and BXSL) through the same gauges; a scorecard with thresholds; how the stress reaches the book's names; what would flip the "
                        "lens; catalysts. Dated and sourced filings figures. Research only.",
-                       _obj({"part": {"type": "string", "enum": ["summary", "stack", "liquidity", "marks", "income", "loss_gap", "net_yield", "manager", "template", "sector",
+                       _obj({"part": {"type": "string", "enum": ["summary", "stack", "liquidity", "marks", "income", "loss_gap", "net_yield", "manager", "template", "sector", "cohort",
                                                                  "scorecard", "transmission", "chain", "flips", "catalysts", "sources", "limitations"]}}),
                        {"readOnlyHint": True, "openWorldHint": False}),
     "forecast_verification": (forecast_verification, "The engine's monthly forecast verified like a weather forecast (log score, CRPS, PIT, coverage, skill against history and "
