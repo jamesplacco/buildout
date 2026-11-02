@@ -13,7 +13,9 @@ in a mark. This module reads those three places from filings and computes what t
   3. Income quality. Payment-in-kind interest is income that arrives as more loan. Net investment income less
      PIK against the dividend is the cash cover.
 
-Every figure here is dated and sourced (OBS); the functions are arithmetic on them. Nothing here is a position;
+Every figure here is dated and sourced (OBS, and the cohort tables); the functions are arithmetic on them. The
+cohort (v0.35) runs Apollo, HPS, Ares, Blackstone, Goldman and Golub through the same queue model, and the listed
+peers (ARCC, BXSL) through the same marks and cover, to say whether Blue Owl is the outlier or the sector. Nothing here is a position;
 the lens says what to watch and what would flip the thesis (data.js t6) in each direction.
 """
 from __future__ import annotations
@@ -39,7 +41,40 @@ SRC = {
     "fitch": ("Fitch, US Private Credit and Middle Market Performance Monitor 3Q26 (Oct 29, 2026), via Forbes Oct 29 and ABF Journal Oct 30", "https://www.forbes.com/sites/mayrarodriguezvalladares/2026/10/29/us-private-credit-defaults-hit-record-63-as-quiet-distress-grows/"),
     "fitch2": ("Fitch: US private credit default rate remains elevated in Q3 (ABF Journal, Oct 30, 2026)", "https://www.abfjournal.com/fitch-ratings-u-s-private-credit-default-rate-remains-elevated-in-q3/"),
     "hyperion": ("Meta and Blue Owl sign US$27 billion data centre campus deal (The Asset, Oct 2025)", "https://www.theasset.com/article/55209/meta-blue-owl-sign-us-27-billion-data-centre-campus-deal"),
+    "bcred": ("BCRED caps Q3 repurchases at 5% as requests hit $4.3B, about 10% of shares (AltsWire, letter of Sept 3, 2026)", "https://altswire.com/bcred-caps-q3-repurchases-at-5-as-requests-hit-4-3b-about-10-of-shares/"),
+    "ads": ("Apollo Debt Solutions caps third-quarter repurchases at $700M as requests reach 14.7% (Blue Vault, Sept 24, 2026)", "https://bluevaultpartners.com/apollo-debt-solutions-caps-third-quarter-repurchases-at-700-million-as-requests-reach-14-7/"),
+    "ntbdc": ("Non-traded BDC list 2026: 67 funds by net assets with latest tender results (Crowdfunded Wealth, June 30, 2026 net assets)", "https://www.crowdfundedwealth.com/articles/non-traded-bdc-list-2026"),
+    "arcc": ("Ares Capital, Sept 30, 2026 results (Oct 27, 2026)", "https://www.stocktitan.net/news/ARCC/ares-capital-corporation-announces-september-30-2026-financial-lrx7kfpu69zl.html"),
+    "arcc_call": ("Ares Capital Q3 2026 earnings call transcript, Oct 27, 2026 (Motley Fool)", "https://www.fool.com/earnings/call-transcripts/2026/10/27/ares-capital-arcc-q3-2026-earnings-call-transcript/"),
+    "bxsl": ("Blackstone Secured Lending Fund, June 30, 2026 results, 8-K exhibit 99.1 (Aug 6, 2026)", "https://www.sec.gov/Archives/edgar/data/1736035/000121390026085889/ea0300654-01_ex991.htm"),
 }
+
+# ---------------------------------------------------------------- the cohort (v0.35): is Blue Owl the outlier, or the sector?
+COHORT_QUEUES = [  # non-traded funds: requests as a share of shares where reported, else inferred from the fill (cap / fill)
+    {"fund": "Blue Owl Technology Income (OTIC)", "sponsor": "Blue Owl", "asof": "2026-09-30", "requests": 0.39, "fill": 0.128, "requests_basis": "reported", "net_assets": None, "src": ["tender"]},
+    {"fund": "Blue Owl Credit Income (OCIC)", "sponsor": "Blue Owl", "asof": "2026-09-30", "requests": 0.168, "fill": 0.298, "requests_basis": "reported", "net_assets": 18.43e9, "src": ["tender", "ntbdc"]},
+    {"fund": "Apollo Debt Solutions (ADS)", "sponsor": "Apollo", "asof": "2026-09-14", "requests": 0.147, "fill": 0.34, "requests_basis": "reported (preliminary)", "net_assets": 14.00e9, "src": ["ads", "ntbdc"]},
+    {"fund": "HPS Corporate Lending", "sponsor": "HPS (BlackRock)", "asof": "2026-06-08", "requests": None, "fill": 0.376, "requests_basis": "inferred from the fill", "net_assets": 12.05e9, "src": ["ntbdc"]},
+    {"fund": "Ares Strategic Income (ASIF)", "sponsor": "Ares", "asof": "2026-09-18", "requests": None, "fill": 0.382, "requests_basis": "inferred from the fill", "net_assets": 10.21e9, "src": ["ntbdc"]},
+    {"fund": "Blackstone Private Credit (BCRED)", "sponsor": "Blackstone", "asof": "2026-09-03", "requests": 0.10, "fill": None, "requests_basis": "reported (about 10%)", "net_assets": 42.78e9, "src": ["bcred", "ntbdc"]},
+    {"fund": "Goldman Sachs Private Credit", "sponsor": "Goldman Sachs", "asof": "2026-09-22", "requests": None, "fill": 1.0, "requests_basis": "all requests met", "net_assets": 9.19e9, "src": ["ntbdc"]},
+    {"fund": "Golub Capital Private Credit", "sponsor": "Golub", "asof": "2026-07-29", "requests": None, "fill": 1.0, "requests_basis": "all requests met", "net_assets": 4.47e9, "src": ["ntbdc"]},
+]
+COHORT_CHECKS = [  # the queue model inverted (requests = cap / fill) against a figure the fund reported separately
+    {"fund": "Apollo Debt Solutions, Q3 2026", "fill": 0.34, "requests_reported": 0.147, "src": "ads"},
+    {"fund": "Blue Owl Credit Income, Q2 2026", "fill": 0.266, "requests_reported": 0.188, "src": "ntbdc"},
+]
+COHORT_SECTOR = {"funds": 67, "prorated": 16, "prorated_share_of_net_assets": 0.650, "top5_all_prorated": True, "top5_share_of_net_assets": 0.551, "asof": "2026-06-30", "src": ["ntbdc"]}
+COHORT_LISTED = [  # listed BDCs: the marks the funds book, and the dividend cover before any cut
+    {"fund": "Blue Owl Capital Corp (OBDC)", "asof": "2026-06-30", "nav_ps": 14.26, "nav_ps_year_end": 14.81, "non_accrual_cost": 0.028, "non_accrual_fv": 0.008, "debt_to_equity": 1.11, "first_lien": 0.732,
+     "earnings_ps": 0.36, "earnings_basis": "GAAP NII", "dividend_ps": 0.33, "dividend_note": "base cut from $0.37 to $0.31 in 2026", "price_to_nav": 0.774, "price_basis": "own June buybacks", "src": ["obdc_pr", "obdc_10q"]},
+    {"fund": "Ares Capital (ARCC)", "asof": "2026-09-30", "nav_ps": 19.31, "nav_ps_year_end": 19.94, "non_accrual_cost": 0.024, "non_accrual_fv": 0.014, "debt_to_equity": 1.11, "first_lien": 0.58,
+     "earnings_ps": 0.46, "earnings_basis": "core EPS", "dividend_ps": 0.48, "dividend_note": "unchanged; one small software loan on non-accrual", "price_to_nav": None, "price_basis": "no verified price", "src": ["arcc", "arcc_call"]},
+    {"fund": "Blackstone Secured Lending (BXSL)", "asof": "2026-06-30", "nav_ps": 25.53, "nav_ps_year_end": None, "nav_ps_prior_q": 26.26, "non_accrual_cost": 0.036, "non_accrual_fv": 0.018, "debt_to_equity": 1.28, "first_lien": 0.968,
+     "earnings_ps": 0.75, "earnings_basis": "NII", "dividend_ps": 0.77, "dividend_note": "unchanged", "price_to_nav": None, "price_basis": "no verified price", "src": ["bxsl"]},
+    {"fund": "Blackstone Private Credit (BCRED), non-traded", "asof": "2026-06-30", "nav_ps": 23.65, "nav_ps_year_end": 24.79, "non_accrual_cost": 0.022, "non_accrual_fv": 0.011, "debt_to_equity": 0.80, "first_lien": None,
+     "earnings_ps": None, "earnings_basis": None, "dividend_ps": None, "dividend_note": "monthly distribution cut from $0.22 to $0.18 since Oct 2025", "price_to_nav": None, "price_basis": "not listed", "src": ["bcred"]},
+]
 
 OBS = {
     "owl": {  # the manager
@@ -178,6 +213,33 @@ def jv_cushion(hy: dict = OBS["hyperion"]) -> dict:
     return {"equity_cushion": 1 - hy["ltv"], "rent_cushion": 1 - 1 / hy["dscr"], "debt_usd": hy["debt_usd"], "asset_usd": hy["asset_usd"]}
 
 
+# ---------------------------------------------------------------- the cohort
+def cohort() -> dict:
+    """Every fund through the same queue model; requests inferred as cap / fill where only the fill was reported; the
+    inversion checked against two funds that reported both; the listed peers' marks and dividend cover."""
+    rows = []
+    for f in COHORT_QUEUES:
+        req = f["requests"] if f["requests"] is not None else (CAP / f["fill"] if f["fill"] and f["fill"] < 1 else None)
+        fill = f["fill"] if f["fill"] is not None else (CAP / req if req and req > CAP else 1.0)
+        q = queue(req) if req is not None else None
+        rows.append({**f, "requests": req, "fill": fill, "quarters_to_90pct_exit": q["quarters_to_90pct_exit"] if q else 0.0, "queued": bool(req and req > CAP)})
+    rows.sort(key=lambda r: -(r["requests"] or 0))
+    checks = [{**c, "requests_model": CAP / c["fill"], "matches": abs(CAP / c["fill"] - c["requests_reported"]) < 0.005} for c in COHORT_CHECKS]
+    listed = []
+    for f in COHORT_LISTED:
+        base = f.get("nav_ps_year_end") or f.get("nav_ps_prior_q")
+        listed.append({**f, "nav_change": (f["nav_ps"] / base - 1) if base else None, "nav_change_basis": "since year-end" if f.get("nav_ps_year_end") else "on the quarter",
+                       "cover": (f["earnings_ps"] / f["dividend_ps"]) if f.get("earnings_ps") and f.get("dividend_ps") else None,
+                       "implied_markdown": implied_markdown(f["price_to_nav"], f["debt_to_equity"])["implied_asset_markdown"] if f.get("price_to_nav") else None})
+    queued = [r for r in rows if r["queued"]]
+    owl = [r for r in queued if r["sponsor"] == "Blue Owl"]
+    others = [r for r in queued if r["sponsor"] != "Blue Owl"]
+    return {"queues": rows, "checks": checks, "sector": COHORT_SECTOR, "listed": listed,
+            "read": {"blue_owl_max_requests": max(r["requests"] for r in owl), "peers_max_requests": max(r["requests"] for r in others), "peers_range": [min(r["requests"] for r in others), max(r["requests"] for r in others)],
+                     "non_accrual_cost_range": [min(x["non_accrual_cost"] for x in listed), max(x["non_accrual_cost"] for x in listed)],
+                     "peers_cover_below_1": [x["fund"] for x in listed if x["cover"] is not None and x["cover"] < 1]}}
+
+
 # ---------------------------------------------------------------- the scorecard
 GAUGES = [  # id, label, read, unit, green, red (direction: "low" means lower is better)
     ("ocic_queue", "OCIC repurchase requests, share of shares", lambda: OBS["ocic"]["requests_share"], "pct", 0.05, 0.15, "low", "Above 15%: widen the haircut on every private mark (Buyside rule)."),
@@ -264,19 +326,20 @@ def report(today: str | None = None) -> dict:
         "marks": {"obdc": {**p2n, **md}, "otic_nav_change_ytd": ot["nav_ps"] / ot["nav_ps_prior_year_end"] - 1},
         "income": cov, "loss_gap": loss_gap(), "net_yield": net_yield_at_sector_default(), "manager": fre_from_undeployed(), "template": jv_cushion(),
         "sector": {"pcdr": fi["pcdr"], "prior": fi["pcdr_prior_q"], "events": [fi["events_prior_q"], fi["events_q"]], "soft_share": fi["soft_share"], "mix": fi["mix"], "by_sector": fi["sector"], "by_sector_prior": fi["sector_prior"]},
-        "scorecard": sc, "reds": len(reds), "transmission": [dict(zip(("name", "channel", "exposure", "watch"), t)) for t in TRANSMISSION], "chain": CHAIN, "flips": FLIPS,
+        "cohort": cohort(), "scorecard": sc, "reds": len(reds), "transmission": [dict(zip(("name", "channel", "exposure", "watch"), t)) for t in TRANSMISSION], "chain": CHAIN, "flips": FLIPS,
         "catalysts": [dict(zip(("date", "event", "source"), c)) for c in CATALYSTS],
         "sources": {k: {"title": v[0], "url": v[1]} for k, v in SRC.items()},
         "limitations": ["OBDC's price is the fund's own June repurchase average; no live quote reaches the engine (the price mirror carries no BDC or alternative-manager tickers).",
                         "The cash-cover estimate derives the share count from portfolio value less debt principal; the 10-Q's share count would replace it.",
                         "OWL management's 12 bp realized-loss figure and Fitch's 6.3% default rate measure different things; the loss gap reconciles them by construction, not by audit.",
                         "The queue model assumes the queue stays its current size; requests have fallen two quarters at OCIC and risen at OTIC.",
-                        "Hyperion's loan-to-value and debt-service cover are from the deal's reporting at signing, not a current valuation."],
+                        "Hyperion's loan-to-value and debt-service cover are from the deal's reporting at signing, not a current valuation.",
+                        "In the cohort, HPS's and Ares's request shares are inferred from their reported fills (cap divided by fill); the inversion is checked on two funds that reported both. The listed peers' prices are not verified, so their discounts are not shown."],
     }
 
 
 def summary(r: dict) -> list[str]:
-    L, M, I, G = r["liquidity"], r["marks"]["obdc"], r["income"], r["loss_gap"]
+    L, M, I, G, C = r["liquidity"], r["marks"]["obdc"], r["income"], r["loss_gap"], r["cohort"]
     return [
         r["headline"],
         f"The 5% cap divided by the queue gives the fill rate: {L['ocic']['fill']:.1%} at OCIC (reported {L['ocic']['fill_reported']:.1%}), {L['otic']['fill']:.1%} at OTIC (reported {L['otic']['fill_reported']:.1%}). A holder who keeps asking has 90% out in {L['ocic']['quarters_to_90pct_exit']:.1f} quarters at OCIC and {L['otic']['quarters_to_90pct_exit']:.1f} at OTIC.",
@@ -284,4 +347,5 @@ def summary(r: dict) -> list[str]:
         f"NII covers the dividend {I['cover']:.2f} times; with PIK ({I['pik_share_income']:.1%} of income) taken out the estimated cash cover is {I['cash_cover_est']:.2f}. The base dividend was cut {-I['dividend_cut']:.0%} and NAV is {-I['nav_change_since_2024']:.1%} below its end-2024 level.",
         f"Fitch's record {G['pcdr']:.1%} default rate is {G['soft_share']:.0%} soft restructurings; the hard defaults cost about {G['hard_loss_at_severity'] * 1e4:.0f} bp a year at a {G['severity']:.0%} severity, which is how a manager reports {G['realized_loss_manager'] * 1e4:.0f} bp of realized losses in the same market.",
         f"Fitch's software default rate is {r['sector']['by_sector']['Technology software']:.1%}, the lowest sector; industrials and consumer run {r['sector']['by_sector']['Industrials and manufacturing']:.1%}. Three of OBDC's four largest non-accruals are a dental lab, a films maker and an outdoor-goods company, not software.",
+        f"The cohort: Blue Owl is the outlier on the queue (OTIC {C['read']['blue_owl_max_requests']:.0%} of shares against {C['read']['peers_range'][0]:.0%} to {C['read']['peers_range'][1]:.0%} at Apollo, HPS, Ares and Blackstone, and no queue at Goldman or Golub), the sector on marks (non-accruals {C['read']['non_accrual_cost_range'][0]:.1%} to {C['read']['non_accrual_cost_range'][1]:.1%} of cost across the listed peers), and first to cut: Ares and Blackstone's listed funds earn less than their dividends and have not cut.",
     ]

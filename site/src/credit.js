@@ -60,6 +60,20 @@
     drawPcSectors(fi);
     fillTable($("#pc-mix"), ["Kind of default event", "Share of events, twelve months"], Object.entries(fi.mix).map(([k, v]) => [{ pik_or_deferral: "PIK introduced or interest deferred", maturity_extension: "Maturity extended under stress", payment_default: "Uncured payment default", bankruptcy_or_restructuring: "Bankruptcy, liquidation or out-of-court restructuring" }[k] || k, pcP(v, 0)]), 1);
     $("#pc-gap").textContent = `Both numbers are true. Blue Owl reports realized losses of ${fx(G.realized_loss_manager * 1e4, 0)} bp a year in direct lending; Fitch reports a record ${pcP(G.pcdr, 1)} default rate in the same market. The hard defaults (payment defaults and bankruptcies) are ${pcP(1 - G.soft_share, 0)} of Fitch's events, ${pcP(G.hard_default_rate, 2)} of issuers; at a ${pcP(G.severity, 0)} loss severity they cost about ${fx(G.hard_loss_at_severity * 1e4, 0)} bp a year. The other ${pcP(G.soft_share, 0)} produce no realized loss until they do. The page's unlevered direct-lending fund earns ${pcP(C.net_yield.net, 1)} net at the sector's default rate, ${pcP(-C.net_yield.over_treasury, 1)} below Treasuries: the illiquidity premium is gone at this default rate, which is why the holders queue.`;
+    // the cohort (v0.35)
+    const K = C.cohort;
+    if (K) {
+      const rd = K.read;
+      $("#pc-cohort-p").textContent = `Every fund through the same queue model, with requests inferred as the cap divided by the fill where only the fill was reported, and the inversion checked on two funds that reported both. Blue Owl is the outlier on the queue: ${pcP(rd.blue_owl_max_requests, 0)} of OTIC's shares asked out against ${pcP(rd.peers_range[0], 0)} to ${pcP(rd.peers_range[1], 0)} at Apollo, HPS, Ares and Blackstone, and no queue at Goldman or Golub. On marks it is the sector: non-accruals run ${pcP(rd.non_accrual_cost_range[0], 1)} to ${pcP(rd.non_accrual_cost_range[1], 1)} of cost across the listed peers. And it cut first: ${rd.peers_cover_below_1.join(" and ")} earn less than their dividends and have not cut.`;
+      fillTable($("#pc-cohort-check"), ["The inversion checked", "Fill reported", "Requests the model implies", "Requests reported", "Match"], K.checks.map((c) => [c.fund, pcP(c.fill, 1), pcP(c.requests_model, 1), pcP(c.requests_reported, 1), c.matches ? "yes" : "no"]), 1);
+      $("#pc-cohort-sector").textContent = `Across ${K.sector.funds} non-traded BDCs, ${K.sector.prorated} prorated their latest tender; they hold ${pcP(K.sector.prorated_share_of_net_assets, 0)} of the list's net assets, and all five of the largest prorated (${pcP(K.sector.top5_share_of_net_assets, 0)} of net assets). Net assets as of ${isoNice(K.sector.asof)}.`;
+      fillTable($("#pc-cohort-q"), ["Fund", "Sponsor", "Latest tender", "Asked out, share of shares", "Basis", "Filled", "Quarters to get 90% out", "Net assets"],
+        K.queues.map((q) => [q.fund, q.sponsor, isoNice(q.asof), q.requests == null ? "under the cap" : pcP(q.requests, 1), q.requests_basis, pcP(q.fill, 1), q.queued ? fx(q.quarters_to_90pct_exit, 1) : "none", q.net_assets ? pcUsd(q.net_assets) : "n/a"]), 3);
+      fillTable($("#pc-cohort-l"), ["Fund", "As of", "NAV a share", "NAV change", "Non-accruals, cost", "At fair value", "Debt to equity", "First lien", "Earnings vs dividend", "Cover", "Price to NAV", "Implied markdown"],
+        K.listed.map((l) => [l.fund, isoNice(l.asof), "$" + fx(l.nav_ps, 2), l.nav_change == null ? "n/a" : pct(l.nav_change, 1) + " " + l.nav_change_basis, pcP(l.non_accrual_cost, 1), pcP(l.non_accrual_fv, 1), fx(l.debt_to_equity, 2) + "x", l.first_lien == null ? "n/a" : pcP(l.first_lien, 0),
+          l.earnings_ps == null ? l.dividend_note : `$${fx(l.earnings_ps, 2)} ${l.earnings_basis} vs $${fx(l.dividend_ps, 2)}; ${l.dividend_note}`, l.cover == null ? "n/a" : fx(l.cover, 2) + "x", l.price_to_nav == null ? l.price_basis : pcP(l.price_to_nav, 0) + " (" + l.price_basis + ")", l.implied_markdown == null ? "n/a" : pcP(l.implied_markdown, 1)]), 2);
+      drawPcCohort(K);
+    }
     // the book
     const B = (typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book) ? SNAP30.book : null;
     const scn = B && (B.scenarios || []).find((s) => /financing/i.test(s.scenario));
@@ -90,6 +104,28 @@
     const mg = C.manager, tp = C.template;
     $("#pc-manager").textContent = `The manager's own arithmetic: ${pcUsd(ow.aum_not_yet_fee_paying)} of AUM is not yet paying fees, which management expects to add about ${pcUsd(mg.fees_from_undeployed)} a year (${pcP(mg.implied_fee_rate, 1)} of it), ${pcP(mg.uplift, 0)} on a run-rate FRE of ${pcUsd(mg.fre_run_rate)}. Credit raised ${pcUsd(ow.credit_raised_q)} in the quarter (${pcUsd(ow.credit_raised_split.investment_grade)} investment grade, ${pcUsd(ow.credit_raised_split.direct_lending)} direct lending); wealth equity ${pcUsd(ow.wealth_equity_raised_ttm)} over twelve months against ${pcUsd(ow.raised_ttm)} in total, so the queue is in the channel that supplies about a fifth of new money. In data centers: ${ow.data_centers} operational or under construction, about ${ow.gw_leased_or_owned} GW leased or owned, a ${ow.gw_pipeline} GW pipeline, a ${pcUsd(ow.next_digital_fund_target)} next fund; chip financings for ${ow.chip_financing.join(" and ")}. The template deal's cushions: a ${pcP(tp.equity_cushion, 0)} fall in the asset's value exhausts the equity, a ${pcP(tp.rent_cushion, 0)} fall in rent breaks debt service.`;
     const qs = $("#pc-quotes"); qs.replaceChildren(); ow.quotes.forEach(([who, what]) => { const b = h("blockquote", "pc-quote"); b.append(h("p", null, "“" + what + "”"), h("footer", null, who + ", Blue Owl, Oct 29, 2026")); qs.append(b); });
+  }
+
+  // the cohort's queues as bars against the 5% cap line; Blue Owl's funds in the accent, the others in its tint
+  function drawPcCohort(K) {
+    const box = $("#pc-cohort-chart");
+    if (!box) return;
+    box.replaceChildren();
+    const rows = K.queues.map((q) => [q.fund.replace(/ \(.*$/, ""), q.requests == null ? 0 : q.requests, q.sponsor === "Blue Owl", q.requests == null]);
+    const W = boxWidth(box), rowH = 30, padL = 215, padR = 70, top = 24, Hh = top + rows.length * rowH + 10;
+    const s = svg("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "group", "aria-label": "Shares asked out in each fund's latest tender against the 5% cap" }, box);
+    const xmax = Math.max(...rows.map((r) => r[1])) * 1.12, x = (v) => padL + (v / xmax) * (W - padL - padR);
+    svg("line", { x1: x(0.05), x2: x(0.05), y1: top - 4, y2: Hh - 10, stroke: "var(--ink-2)", "stroke-dasharray": "3 3" }, s);
+    svg("text", { x: x(0.05), y: 11, "text-anchor": "middle", class: "lbl", fill: "var(--ink-2)", "font-size": 11 }, s).textContent = "5% cap";
+    rows.forEach(([name, v, owl, none], i) => {
+      const y = top + i * rowH;
+      svg("text", { x: padL - 10, y: y + rowH / 2 + 4, "text-anchor": "end", class: "lbl", fill: "var(--ink-2)", "font-size": 12 }, s).textContent = name;
+      const bar = svg("rect", { x: padL, y: y + 7, width: Math.max(2, x(v) - padL), height: rowH - 14, rx: 3, fill: owl ? "var(--accent)" : "color-mix(in srgb, var(--accent) 45%, var(--surface))", tabindex: 0, "aria-label": `${name}: ${none ? "under the cap" : pctPlain(v, 1)}` }, s);
+      const q = K.queues[i];
+      bindTip(bar, () => [[none ? "under the cap" : pctPlain(v, 1), name + ", shares asked out"], [none ? "every request met" : pctPlain(q.fill, 1) + " filled", q.requests_basis]]);
+      svg("text", { x: x(v) + 6, y: y + rowH / 2 + 4, class: "lbl", fill: "var(--ink)", "font-size": 12, "font-weight": 600 }, s).textContent = none ? "under the cap" : pctPlain(v, 1);
+    });
+    redrawWhenSized(box, () => drawPcCohort(K));
   }
 
   // a single-hue bar chart: Fitch's default rate by sector, software marked as the lowest
