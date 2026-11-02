@@ -3,6 +3,12 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.34 adds the private credit lens (`buildout/private_credit.py`, `python -m buildout credit`, MCP tool
+`private_credit`): Blue Owl's manager, listed BDC, non-traded funds and campus vehicles read from filings, with three
+gauges (the repurchase queue, where 5% divided by requests reproduces the reported fills; the listed fund's discount as an
+asset markdown; the dividend's cash cover without PIK), Fitch's sector default rates, a scorecard, the transmission to
+the book's names, and what would flip the lens. Nothing in it is a position.
+
 Version 0.33 makes the daily run reliable: a per-site circuit breaker in the downloader, a time limit on every data
 step, FRED's official API when `FRED_API_KEY` is set, and plain errors from the filings engine.
 

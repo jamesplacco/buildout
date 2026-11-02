@@ -32,6 +32,7 @@
   const FIELD_MILESTONES = [
     { id: "fomc", t: "FOMC decision", due: "2026-10-28", lag: 0, node: "fed", ev: "Statement and rate decision; hike odds were 16 to 18% on Oct 9", src: "Federal Reserve calendar" },
     { id: "cpi-oct", t: "October CPI", due: "2026-11-10", lag: 0, node: "cpi", ev: "Whether 36-month inflation leaves the 2.75 to 4.25% band", src: "BLS release schedule, 8:30 ET" },
+    { id: "obdc", t: "OBDC Q3 results (NAV, non-accruals, PIK, buyback prices)", due: "2026-11-04", lag: 1, node: "pcredit", ev: "The listed Blue Owl fund's marks after the October credit scare", src: "OBDC 8-K, Nov 4 (Private credit desk)" },
     { id: "sloos", t: "Senior Loan Officer Survey (October)", due: "2026-11-09", lag: 7, node: "credit", ev: "Tightening standards for commercial and consumer loans", src: "Federal Reserve, expected early November" },
     { id: "nvda", t: "Nvidia quarterly results", due: "2026-11-18", lag: 7, node: "NVDA", ev: "Data-center revenue against the builders' capex", src: "Expected date; confirm on the company's calendar" },
     { id: "bcred", t: "Non-traded BDC tender results (Q4)", due: "2027-01-15", lag: 21, node: "pcredit", ev: "Requests against the 5% cap", src: "Fund filings, expected mid-January" },

@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.33</span>
+      Buildout <span class="ver">v0.34</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -100,7 +100,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 658 of 658</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 665 of 665</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot good"></span><span>Databento key set in GitHub</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -953,7 +953,7 @@
   <section class="section" aria-labelledby="pc-title">
     <div class="section-head"><p class="eyebrow">Risk</p><h2 id="pc-title">Private credit as the leading stress indicator</h2></div>
     <div class="tiles">
-      <article class="tile"><span class="label">US private credit default rate</span><span class="value">6.0%</span><span class="note">Record, April 2026 (Fitch).</span></article>
+      <article class="tile"><span class="label">US private credit default rate</span><span class="value">6.3%</span><span class="note">Record, twelve months to Sept 2026 (Fitch); 6.0% in April. The <a href="#credit">Private credit desk</a> reads Blue Owl.</span></article>
       <article class="tile"><span class="label">Insurers' share of private credit capital</span><span class="value">≈23%</span><span class="note">About $0.9 to $1.1 trillion of exposure.</span></article>
       <article class="tile"><span class="label">US life insurers' assets in private credit</span><span class="value">≈10%</span><span class="note">After 20%+ growth in 2025; above 15% at some PE-affiliated insurers.</span></article>
       <article class="tile"><span class="label">Bank credit lines to the sector</span><span class="value">≥$220B</span><span class="note">Per the Financial Stability Board; the US Treasury has a team assessing insurer exposure.</span></article>
@@ -2224,7 +2224,7 @@
     <div class="panel"><div class="tablewrap"><table>
       <thead><tr><th>Problem</th><th>Mechanism</th><th>History</th><th>The 2026 version</th><th>On this site</th></tr></thead>
       <tbody>
-        <tr><td>Liquidity mismatch</td><td>Liquid promises funded by illiquid assets</td><td>Money funds 2008; BREIT gated Nov 2022</td><td>Non-traded BDC requests at 13.6% of NAV in Q2; BCRED gated three quarters</td><td><a href="#nw-private-credit">Noteworthy</a></td></tr>
+        <tr><td>Liquidity mismatch</td><td>Liquid promises funded by illiquid assets</td><td>Money funds 2008; BREIT gated Nov 2022</td><td>Non-traded BDC requests at 13.6% of NAV in Q2; BCRED gated three quarters; Blue Owl's OTIC had 39% of shares asked out in Q3</td><td><a href="#nw-private-credit">Noteworthy</a></td></tr>
         <tr><td>Leverage plus fat tails</td><td>Normal models underprice 5σ moves</td><td>LTCM 1998; Archegos 2021</td><td>Back-leverage to private credit; tech bond supply pushing the 10-year up</td><td><a href="#bst-title">Fat tails</a></td></tr>
         <tr><td>Alpha decay and crowding</td><td>Capital floods an edge; crowded books unwind together</td><td>Quant quake, Aug 2007</td><td>Multi-manager AUM +175% from 2017 to 2023 (per the field manual)</td><td><a href="#pr-pods-title">Pod economics</a></td></tr>
         <tr><td>Agency and fee drag</td><td>Manager economics diverge from LP returns</td><td>Balyasny 2023: 15.2% gross, 2.8% net</td><td>Pass-throughs of 3 to 10% of NAV</td><td><a href="#pr-pods-title">Pod economics</a></td></tr>
@@ -2238,7 +2238,7 @@
       <li class="done"><div><strong>Regime module and hedge selector.</strong><span>Built: regime label, rule 7a.1 gross scaler, selector by shortfall per dollar of carry in each inflation regime; the book run repeats it on daily data. TLT tested against 2022 and the 2026 oil shock.</span></div></li>
       <li class="done"><div><strong>Risk engine with fat tails and replays.</strong><span>Built: Student-t and historical shortfall at 97.5%, five episode replays. The book run adds daily shortfall for the model book.</span></div></li>
       <li class="done"><div><strong>Accounting layer.</strong><span>Built for the nine builders: red flags, cash earnings bridge, reverse DCF, depreciation by life. Next: the top 20 S&amp;P 500 names.</span></div></li>
-      <li class="part"><div><strong>Credit and bottleneck layer.</strong><span>Built: private credit stress test, power and memory trackers on Noteworthy, BDC queue and PIK monitors. Next: BDC price to NAV and PIK share straight from 10-Q filings.</span></div></li>
+      <li class="part"><div><strong>Credit and bottleneck layer.</strong><span>Built: private credit stress test, power and memory trackers on Noteworthy, BDC queue and PIK monitors. v0.34: a Private credit desk reads Blue Owl's queues, OBDC's discount, non-accruals and PIK share from filings. Next: the same for Ares, Blackstone and Apollo vehicles.</span></div></li>
       <li class="part"><div><strong>Execution link.</strong><span>The Robinhood agent project: paper trading first, human approval for every live order. The Trading desks' sizing and execution tools are the inputs it would read.</span></div></li>
     </ol>
   </section>
@@ -2468,7 +2468,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">658 of 658 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">665 of 665 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2493,7 +2493,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, every one of its 41 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 42 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2727,6 +2727,66 @@
     <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Proof the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p></div>
     <ul class="prose" id="bk-limits"></ul>
     <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
+  </section>
+</section>
+<section class="view" id="view-credit" hidden aria-labelledby="credit-title">
+  <div class="vhead"><p class="eyebrow">Markets · private credit</p><h1 id="credit-title">The private credit lens: Blue Owl, its funds, and the campuses they finance</h1>
+    <p class="lede" id="pc-sub"></p></div>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#pc-call-t">The call</a><a href="#pc-stack-t">The stack</a><a href="#pc-queue-t">Liquidity</a><a href="#pc-marks-t">Marks</a><a href="#pc-income-t">Income</a><a href="#pc-sector-t">The sector</a><a href="#pc-book-t">The book</a><a href="#pc-score-t">Scorecard</a><a href="#pc-flips-t">Flips and catalysts</a><a href="#pc-src-t">Sources</a></nav>
+  <div class="at-tiles" id="pc-tiles"></div>
+  <section class="section" aria-labelledby="pc-call-t">
+    <div class="section-head"><p class="eyebrow">The call</p><h2 id="pc-call-t">Watch it, do not own it; hedge the financing lane</h2></div>
+    <p class="prose lead" id="pc-call"></p>
+    <p class="prose">A lens, not a position. The book holds no BDC, no Blue Owl stock and no private loan. What it holds are nine names whose capacity is increasingly built by vehicles like these, so the queue, the discount and the paid-in-kind share are early readings on the price of the next campus. The thesis this desk serves is <a href="#t6">t6</a>: private credit is where the AI cycle's losses surface first.</p>
+  </section>
+  <section class="section" aria-labelledby="pc-stack-t">
+    <div class="section-head"><p class="eyebrow">The stack</p><h2 id="pc-stack-t">Who owes what to whom</h2><p class="prose">The manager earns fees; the funds hold the loans and the campuses; the holders of the funds bear the marks. Each row is a filing, dated.</p></div>
+    <div class="tablewrap"><table class="rs-table" id="pc-stack"></table></div>
+    <p class="prose" id="pc-manager"></p>
+    <div class="pc-quotes" id="pc-quotes"></div>
+  </section>
+  <section class="section" aria-labelledby="pc-queue-t">
+    <div class="section-head"><p class="eyebrow">Gauge 1 · liquidity</p><h2 id="pc-queue-t">The repurchase queue: the 5% cap divided by the requests</h2><p class="prose" id="pc-queue-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="pc-queue"></table></div>
+    <div class="math"><span class="mlabel">The model</span>fill = min(1, cap / requests); position left after <var>n</var> quarters = (1 &minus; fill)<sup><var>n</var></sup>; quarters to 90% out = ln(0.1) / ln(1 &minus; fill). A third party's tender at price <var>P</var> against NAV <var>N</var> prices the wait at 1 &minus; <var>P</var>/<var>N</var>.</div>
+  </section>
+  <section class="section" aria-labelledby="pc-marks-t">
+    <div class="section-head"><p class="eyebrow">Gauge 2 · marks</p><h2 id="pc-marks-t">The listed fund's discount, as a markdown on the loans</h2><p class="prose">The only Blue Owl credit vehicle with a market price. The market's mark on the same kind of loans, once the fund's leverage is taken out, against the non-accruals the fund books.</p></div>
+    <div class="tablewrap"><table class="rs-table" id="pc-marks"></table></div>
+    <div class="math"><span class="mlabel">The arithmetic</span>assets <var>A</var> = <var>E</var> + <var>D</var>; the market prices the equity at (1 &minus; <var>d</var>)<var>E</var>; if the debt is whole, the assets are worth <var>A</var> &minus; <var>dE</var>, a markdown of <var>dE</var>/<var>A</var> = <var>d</var> / (1 + <var>D</var>/<var>E</var>).</div>
+  </section>
+  <section class="section" aria-labelledby="pc-income-t">
+    <div class="section-head"><p class="eyebrow">Gauge 3 · income quality</p><h2 id="pc-income-t">Paid in kind: the dividend's cash cover</h2><p class="prose" id="pc-income-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="pc-income"></table></div>
+  </section>
+  <section class="section" aria-labelledby="pc-sector-t">
+    <div class="section-head"><p class="eyebrow">The sector</p><h2 id="pc-sector-t">A record default rate, mostly soft, and not where the fear is</h2><p class="prose" id="pc-gap"></p></div>
+    <div class="grid2">
+      <figure class="panel chart" style="margin:0"><div class="chart-head"><span class="chart-title">Fitch US private credit default rate by sector, twelve months to Sept 30, 2026</span><span class="src">Fitch 3Q26 monitor</span></div><div class="svgbox" id="pc-sectors"></div></figure>
+      <div class="panel"><div class="tablewrap"><table class="rs-table" id="pc-mix"></table></div></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="pc-book-t">
+    <div class="section-head"><p class="eyebrow">The book</p><h2 id="pc-book-t">How the stress reaches the nine names</h2><p class="prose" id="pc-book-p"></p></div>
+    <ol class="prose" id="pc-chain"></ol>
+    <div class="tablewrap"><table class="rs-table" id="pc-book"></table></div>
+  </section>
+  <section class="section" aria-labelledby="pc-score-t">
+    <div class="section-head"><p class="eyebrow">Scorecard</p><h2 id="pc-score-t">Eight gauges against the desk's thresholds</h2><p class="prose" id="pc-score-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="pc-score"></table></div>
+  </section>
+  <section class="section" aria-labelledby="pc-flips-t">
+    <div class="section-head"><p class="eyebrow">Flips and catalysts</p><h2 id="pc-flips-t">What would change the lens, and when the next readings arrive</h2></div>
+    <div class="grid2">
+      <div class="tablewrap"><table class="rs-table" id="pc-flips"></table></div>
+      <div class="tablewrap"><table class="rs-table" id="pc-cat"></table></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="pc-src-t">
+    <div class="section-head"><p class="eyebrow">Sources and limits</p><h2 id="pc-src-t">Every figure's filing, and what the lens cannot see</h2></div>
+    <ul class="prose" id="pc-sources"></ul>
+    <ul class="prose" id="pc-limits"></ul>
+    <p class="hint">Run it: python -m buildout credit (no key; the figures are the module's dated observations and the arithmetic on them).</p>
   </section>
 </section>
 <section class="view" id="view-futures" hidden aria-labelledby="ft-title">
@@ -3434,6 +3494,21 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v34-t">
+    <div class="section-head"><p class="eyebrow">v0.34</p><h2 id="ag-v34-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>29.8% and 12.8%</b><span>Fill rates the queue model predicts</span><small>5% cap divided by requests; Blue Owl reported 29.8% and 12.8%</small></div>
+      <div class="at-kpi"><b>11% vs 0.8%</b><span>Market's markdown on OBDC's loans against its booked non-accruals</span><small>77% of NAV after 1.11x leverage</small></div>
+      <div class="at-kpi"><b>0.6%</b><span>Fitch's software default rate, the lowest sector</span><small>industrials and consumer 9.7%; the fear and the defaults are in different places</small></div>
+      <div class="at-kpi"><b>4 of 8</b><span>Gauges red on the scorecard</span><small>both queues, the discount, the default rate</small></div></div>
+    <p class="prose">A lens the user asked for by name. The lead agent fetched Blue Owl's Q3 results and call, OBDC's June results and 10-Q schedules, the funds' tender filings and Fitch's 3Q26 monitor, kept only figures with a date and a filing, and built the arithmetic on them: a queue model checked against the reported fills, a markdown identity, a cash-cover estimate labelled as one. Two things it could not get: a live OBDC price (the price mirror carries no BDC tickers, so the fund's own June buyback prices stand in) and the Hyperion deal's current valuation. Both are listed on the desk as limits.</p>
+  </section>
+  <section class="section" aria-labelledby="ag-v33-t">
+    <div class="section-head"><p class="eyebrow">v0.33</p><h2 id="ag-v33-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>&gt; 60 min &rarr; 20 s</b><span>A data step with a blocked site</span><small>the downloader stops asking a site after two failed files in a row</small></div>
+      <div class="at-kpi"><b>16</b><span>Data steps with their own time limit</span><small>none blocks the steps after it</small></div>
+      <div class="at-kpi"><b>1</b><span>Plain error for a bad SEC contact string</span><small>the filings run names it before downloading anything</small></div></div>
+    <p class="prose">The scheduled runs after v0.32 committed only their status file. The lead agent read the run logs the user sent, reproduced the hang (a site that never answers, three tries at 30 seconds, about 50 files) and fixed the cause rather than the symptom.</p>
   </section>
   <section class="section" aria-labelledby="ag-v32-t">
     <div class="section-head"><p class="eyebrow">v0.32</p><h2 id="ag-v32-t">Release metrics</h2></div>

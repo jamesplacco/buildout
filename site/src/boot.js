@@ -4,7 +4,7 @@
   const GROUPS = {   // v0.31: five groups for a reader with ten minutes. Today is the decision; Evidence is what has been proven; Library holds everything else, one index away
     today: { name: "Today", views: ["desk", "book", "decision", "ooda", "journal"] },
     evidence: { name: "Evidence", views: ["inventory", "theses", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
-    markets: { name: "Markets", views: ["hedges", "options", "rates", "bonds", "positions", "swans"] },
+    markets: { name: "Markets", views: ["hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
     library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
   };
@@ -63,6 +63,7 @@
     ooda: () => { guard("Decision loop", renderOODA, $("#oo-strip")); guard("Decision record", wireOODA); guard("Correlation gauge", renderGauge, $("#gauge")); },
     positions: () => guard("Positions", renderPositions, $("#ps-grid")),
     book: () => guard("Book risk", renderBookRisk, $("#bk-tiles")),
+    credit: () => guard("Private credit", renderCredit, $("#pc-tiles")),
     library: () => guard("Library", renderLibrary, $("#lib-grid")),
     inventory: () => guard("Inventory", renderInventory, $("#inv-tiles")),
     engines: () => { guard("Engine room", renderEngines, $("#en-table")); guard("Market charts", drawMacroCharts, $("#corr-chart")); guard("Book charts", drawBookCharts, $("#bt-chart")); },

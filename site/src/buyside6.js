@@ -202,7 +202,7 @@
       ["Sentiment and real spending", "UMich 46.3 (Oct prelim); real PCE from the daily run", "Real PCE down 2 months", "Sentiment above 55", "Watch", "Cut discretionary; favor staples and trade-down retailers", "warn"],
       ["Useful-life disclosures", "No reset yet", "Any shortening or SEC letter", "Capex up with FCF rising", "Calm", "Hedge neoclouds and GPU lenders; trim second-derivative suppliers", "good"],
       ["Memory contract prices", "Rising every quarter of 2026", "First sequential decline", "Continued rises", "Risk-on", "On the first decline, exit memory trades", "good"],
-      ["BDC redemption queue", "BCRED about 10% vs 5% cap; Blue Owl tech fund 38%", "Above 15% across the cohort", "Below 5%", "Watch", "Above 15%: widen the haircut on all private marks", "warn"],
+      ["BDC redemption queue", "BCRED about 10% vs 5% cap; Blue Owl OCIC 16.8%, OTIC 39% (Q3)", "Above 15% across the cohort", "Below 5%", "Watch", "Above 15%: widen the haircut on all private marks", "warn"],
       ["Amended PIK and non-accruals", "PIK about 11% of loans (Q2)", "Amended PIK up 2 quarters", "Falling", "Watch", "Underweight high-PIK lenders; buy discounted secondaries", "warn"],
     ];
     const box = $("#bs-board");
