@@ -17,6 +17,37 @@
     const v = lastInGroup[g] || GROUPS[g].views[0];
     if (location.hash === "#" + v) show(v, true); else location.hash = v;
   }
+  // v0.37: a desk opens with its first screen; the rest of its sections fold under one line, each still reachable by link.
+  // FOLD lists the sections (by aria-labelledby) that stay visible; everything after the first kept section folds.
+  const FOLD = {
+    book: ["bk-size-t", "bk-front-t", "bk-hedge-t"],
+    decision: ["dx-inf-title", "dx-dec-title", "dx-ov-title"],
+    ooda: ["oo-obs-title", "oo-ori-title", "oo-dec-title", "oo-act-title"],
+    futures: ["ft-status-t", "ft-res-t", "ft-book-t"],
+    nowcast: ["nc-next-t", "nc-acc-t"],
+    filings: ["fl-status-t", "fl-res-t", "fl-book-t"],
+    fundamentals: ["rq-title", "fu-t-title", "mi-title"],
+    credit: ["pc-call-t", "pc-queue-t", "pc-marks-t", "pc-income-t", "pc-sector-t", "pc-cohort-t", "pc-score-t"],
+    edges: ["ed2-funnel-t", "ed2-fam-t", "ed2-now-t"],
+    reasoning: ["rs-proof-t", "rs-now-t"],
+    parameters: ["pm-flow-title", "pm-read-title"],
+    swans: ["tails-title", "atlas-title", "tl-title"],
+    insurers: ["how-title", "chainf-title", "pc-title"],
+  };
+  function foldDesk(view) {
+    const keep = FOLD[view], root = $("#view-" + view);
+    if (!keep || !root || root.dataset.folded) return;
+    const secs = [...root.children].filter((e) => e.matches("section.section"));
+    const rest = secs.filter((s) => !keep.includes(s.getAttribute("aria-labelledby")));
+    if (!rest.length || rest.reduce((a, s) => a + s.innerText.length, 0) < 2500) { root.dataset.folded = "1"; return; }
+    const det = h("details", "desk-more"), sm = h("summary");
+    const titles = rest.map((s) => { const t = s.querySelector("h2"); return t ? t.textContent.replace(/[.:].*$/, "").trim() : "section"; });
+    sm.append(document.createTextNode(rest.length === 1 ? "More on this desk" : `More on this desk (${rest.length} sections)`), h("small", null, titles.join(" · ")));
+    det.append(sm);
+    rest[0].before(det);
+    rest.forEach((s) => det.append(s));
+    root.dataset.folded = "1";
+  }
   const RENDER = {
     atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
     mind: () => { guard("The mind", renderMindDesk, $("#md-tiles")); guard("Which brain", wireHeroWhich, $("#hero")); },
@@ -132,6 +163,7 @@
     guard("Guide", () => guideOnShow(view));
     document.title = (view === "desk" ? "" : TAB_NAME[view] + " · ") + "Buildout Risk Engine";
     guard(TAB_NAME[view], RENDER[view]);
+    guard("Fold", () => foldDesk(view));
     hideTip();
     if (el && el.id && !el.isConnected) el = document.getElementById(el.id) || el;     // v0.31: the desk re-rendered after the link resolved
     if (el) {
