@@ -194,7 +194,7 @@ def test_six_groups_cover_every_desk_once():
     assert len(views) == len(set(views))
     assert set(views) == set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
     assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and '"code"' in groups["engine"] and '"agents"' in groups["engine"]
-    assert groups["today"].startswith('"desk"')
+    assert groups["today"].startswith('"home", "desk"')                                     # v0.38: the home page first
     nav = re.findall(r'<a href="#(\w+)" data-group="(\w+)">', body)
     assert [g for _, g in nav] == list(groups) and all(v in views for v, _ in nav)
     assert "parameters:" in (SRC / "views.js").read_text().split("const TAB_NAME = ")[1][:200]
@@ -218,7 +218,7 @@ def test_landing_page_is_the_call_and_the_engine():
         assert body[start:start + 60].split('id="view-')[1].split('"')[0] == view, sec
     assert 'id="view-parameters"' in body and 'id="pm-table"' in body and 'id="pm-hand"' in body and 'id="dx-overlay"' in body
     scripts = (ROOT / "scripts" / "assemble_page.py").read_text()
-    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "snap29.js", "futures.js", "snap30.js", "book.js", "snappc.js", "credit.js", "sources.js", "reading.js", "landing.js"' in scripts
+    assert '"snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "snap29.js", "futures.js", "snap30.js", "book.js", "snappc.js", "credit.js", "sources.js", "reading.js", "snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "landing.js"' in scripts
     assert "Thesis chips" not in (SRC / "boot.js").read_text()
 
 

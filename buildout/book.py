@@ -527,9 +527,10 @@ def _clean(o):
 
 
 # ---------------------------------------------------------------- download and the synthetic world
-def download(cache: Path | None = None, book: dict[str, float] = BOOK) -> dict[str, pd.DataFrame]:
+def download(cache: Path | None = None, book: dict[str, float] = BOOK, validate: bool = True) -> dict[str, pd.DataFrame]:
     """The mirror's CSVs, one per name and ETF, cached for a day. One missing file raises: a book without a name is
-    a different book."""
+    a different book. Every pull is validated (buildout/data/validate.py: duplicates, order, non-positive closes,
+    staleness are fatal; gaps, unrecorded split-sized jumps are warnings)."""
     from .data import http
     files = sorted({FILE.get(k, k.lower()) for k in book} | set(FACTOR_ETF.values()))
     out = {}
@@ -543,7 +544,17 @@ def download(cache: Path | None = None, book: dict[str, float] = BOOK) -> dict[s
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text(text)
         out[f] = pd.read_csv(io.StringIO(text))
+    if validate:
+        from .data.validate import FATAL, validate_all
+        rep = validate_all(out)
+        LAST_VALIDATION.clear(); LAST_VALIDATION.update({k: v for k, v in rep.items() if k != "results"})
+        if not rep["ok"]:   # v0.38: a bad pull stops the run (and the daily job alerts) rather than sizing on it
+            bad = [r for r in rep["results"] if not r["ok"]]
+            raise ValueError("price validation failed: " + "; ".join(f"{r['name']}: " + ", ".join(i["kind"] for i in r["issues"] if i["kind"] in FATAL) for r in bad))
     return out
+
+
+LAST_VALIDATION: dict = {}
 
 
 def synthetic(seed: int = 30, days: int = 1500, beta: dict | None = None, ipo_days: int = 90) -> tuple[dict, pd.DataFrame, dict]:

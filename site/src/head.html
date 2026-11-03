@@ -2180,4 +2180,18 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
 .rr-picks li { margin-bottom: 6px; }
 .thesis-src li { margin-bottom: 6px; } .thesis-src em { color: var(--ink-2); font-style: normal; }
 .desk-more > summary small { display: block; margin: 4px 0 0; font-size: var(--t-xs); line-height: 1.4; }
+.hm-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); margin-top: 18px; }
+.hm-card { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.hm-card h2 { margin: 0; font: 600 var(--t-lg)/1.25 var(--f-display); }
+.hm-call { margin: 0; font: 600 var(--t-lg)/1.35 var(--f-body); color: var(--ink); }
+.hm-list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: var(--t-sm); line-height: 1.45; }
+.hm-dl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+.tr-week h3 { font: 600 var(--t-md)/1.3 var(--f-body); margin: 16px 0 6px; }
+.memo-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
+.memo { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.memo-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.memo-head h3 { margin: 0; font: 600 var(--t-md)/1.3 var(--f-body); flex: 1 1 100%; }
+.memo-since { font: 500 var(--t-xs)/1 var(--f-mono); color: var(--muted); }
+.memo-row h4 { margin: 0 0 2px; font: 600 var(--t-xs)/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+.memo-row p { margin: 0; font-size: var(--t-sm); line-height: 1.45; color: var(--ink); }
 </style>
