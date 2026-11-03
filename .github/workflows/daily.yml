@@ -95,12 +95,16 @@ jobs:
         continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
         timeout-minutes: 15   # v0.33: one hung step can no longer use up the whole job
         env:
-          SEC_UA: ${{ vars.SEC_USER_AGENT }}
+          SEC_UA: ${{ vars.SEC_USER_AGENT || secrets.SEC_USER_AGENT }}
         run: |
           if [ -z "$SEC_UA" ]; then
-            echo "::notice::SEC_USER_AGENT variable is not set; skipping fundamentals."
+            echo "::notice::SEC_USER_AGENT is not set; skipping fundamentals."
             exit 0
           fi
+          case "$SEC_UA" in
+            *@*) ;;
+            *) echo "::error::SEC_USER_AGENT must be a name and an email, e.g. 'Your Name you@example.com'."; exit 1 ;;
+          esac
           python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
 
       - name: The atlas (every monthly series, FRED and GitHub mirrors; learned structure)
@@ -121,7 +125,7 @@ jobs:
         continue-on-error: true
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
-          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT || secrets.SEC_USER_AGENT }}
         run: python -m buildout connect --out site/data
 
       - name: Technical and fundamental analysis (Databento, then Yahoo, then Stooq; SEC filings)
@@ -130,7 +134,7 @@ jobs:
         continue-on-error: true
         env:
           DATABENTO_API_KEY: ${{ secrets.DATABENTO_API_KEY }}
-          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT || secrets.SEC_USER_AGENT }}
         run: python -m buildout market --out site/data
 
       - name: Reinforcement-learning sizing agent (fitted Q iteration, judged out of sample)
@@ -249,7 +253,7 @@ jobs:
             commit|Commit results|${{ steps.commit.outcome }}
           # report.json and capex.json are only written once their credential is set; until then their absence is expected
           HAS_DATABENTO: ${{ secrets.DATABENTO_API_KEY != '' }}
-          HAS_SEC_UA: ${{ vars.SEC_USER_AGENT != '' }}
+          HAS_SEC_UA: ${{ vars.SEC_USER_AGENT != '' || secrets.SEC_USER_AGENT != '' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python - <<'PY'

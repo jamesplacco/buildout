@@ -38,10 +38,10 @@ jobs:
 
       - name: Filings engine (SEC insider data sets, company facts, prices)
         env:
-          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT || secrets.SEC_USER_AGENT }}
         run: |
           if [ -z "$SEC_USER_AGENT" ]; then
-            echo "::notice::SEC_USER_AGENT variable is not set; skipping the filings engine."
+            echo "::notice::SEC_USER_AGENT is not set; skipping the filings engine."
             exit 0
           fi
           python -m buildout filings --ua "$SEC_USER_AGENT" --out site/data --cache .cache/filings

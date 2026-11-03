@@ -518,8 +518,8 @@ def main(argv: list[str] | None = None) -> None:
         from . import filings as fl
         from .jsonout import write
         if "@" not in (a.ua or ""):                    # v0.33: say exactly what is wrong, in GitHub's error format
-            print("::error::SEC_USER_AGENT must be a name and an email, e.g. 'Jamie Placco you@example.com'; "
-                  f"it is set to {len(a.ua or '')} characters with no @ in them. Fix it under Settings > Secrets and variables > Actions > Variables.")
+            print("::error::SEC_USER_AGENT must be a name and an email, e.g. 'Your Name you@example.com'; "
+                  f"it is set to {len(a.ua or '')} characters with no @ in them. Set it under Settings > Secrets and variables > Actions, as a variable or a secret named SEC_USER_AGENT.")
             raise SystemExit(1)
         try:
             data = fl.collect(a.ua, a.cache, a.start, limit=a.limit, text=a.text)
