@@ -3,7 +3,7 @@
      ===================================================================================== */
   const GROUPS = {   // v0.31: five groups for a reader with ten minutes. Today is the decision; Evidence is what has been proven; Library holds everything else, one index away
     today: { name: "Today", views: ["desk", "book", "decision", "ooda", "journal"] },
-    evidence: { name: "Evidence", views: ["inventory", "theses", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
+    evidence: { name: "Evidence", views: ["inventory", "theses", "reading", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
     markets: { name: "Markets", views: ["hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
     library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
@@ -52,7 +52,7 @@
     theses: () => { guard("Alphabet chart", renderGoog, $("#goog-chart")); guard("Guidance chart", renderGuide, $("#guide-chart")); guard("Capex panel", drawCapex); },
     journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
-    fundamentals: drawFundamentals, physics: drawPhysics, findings: drawFindings, lab: drawLab,
+    fundamentals: () => { drawFundamentals(); guard("Railway test", bindRailway, $("#rq-tiles")); }, physics: drawPhysics, findings: drawFindings, lab: drawLab,
     noteworthy: () => {}, buyside: drawBuyside, solve: () => {
       guard("The solver", () => renderSolve(!RZ_LAST || !RZ_LAST.voi), $("#rz-ledger"));
       // the boundary sweep (90 solves) and the robust sweep follow once the desk is on screen, so opening it never stalls
@@ -64,6 +64,7 @@
     positions: () => guard("Positions", renderPositions, $("#ps-grid")),
     book: () => guard("Book risk", renderBookRisk, $("#bk-tiles")),
     credit: () => guard("Private credit", renderCredit, $("#pc-tiles")),
+    reading: () => guard("Reading room", renderReading, $("#rr-list")),
     library: () => guard("Library", renderLibrary, $("#lib-grid")),
     inventory: () => guard("Inventory", renderInventory, $("#inv-tiles")),
     engines: () => { guard("Engine room", renderEngines, $("#en-table")); guard("Market charts", drawMacroCharts, $("#corr-chart")); guard("Book charts", drawBookCharts, $("#bt-chart")); },

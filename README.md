@@ -3,6 +3,10 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.36 adds the Reading room (`buildout/assets/sources/*.json`, `scripts/snapshot_sources.py`): about 130 checked
+sources in four kinds, each mapped to the theses and desks it bears on and to what it changes; the railway test
+(`accounting.required_revenue`) on the Fundamentals desk; a rewritten Desk narrative; and a second accuracy pass.
+
 Version 0.35 adds the cohort to that lens: Apollo, HPS, Ares, Blackstone, Goldman and Golub through the same queue model
 (with the inversion checked on two funds that reported both the fill and the requests), and the listed peers ARCC and
 BXSL through the same marks and cover. Blue Owl is the outlier on the queue and the sector on marks; OBDC is the only listed fund in the cohort to have cut its dividend.

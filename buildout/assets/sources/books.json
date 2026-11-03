@@ -1,0 +1,533 @@
+[
+ {
+  "title": "Collective hallucinations and inefficient markets: The British Railway Mania of the 1840s",
+  "who": "Andrew Odlyzko (University of Minnesota)",
+  "date": "2010-01-15",
+  "type": "history",
+  "url": "https://www-users.cse.umn.edu/~odlyzko/doc/hallucinations.pdf",
+  "claim": "Investors in the 1840s had public traffic data showing demand could not support the lines being financed; share prices implied railway revenues of about 60 million pounds by 1850-52 against about 6 million in 1845, and actual 1852 revenue was about 15 million.",
+  "bears_on": [
+   "t1",
+   "t9",
+   "desk",
+   "nowcast",
+   "swans"
+  ],
+  "changes": "Back out the revenue that current AI capex and valuations imply for a target year and compare it with the observable usage trend each quarter; flag the book when implied revenue runs more than about 2x the trend line.",
+  "verified": "Fetched the PDF from Odlyzko's university page; figures read from the main text."
+ },
+ {
+  "title": "Internet growth: Myth and reality, use and abuse",
+  "who": "Andrew Odlyzko (AT&T Labs - Research)",
+  "date": "2001",
+  "type": "history",
+  "url": "https://www-users.cse.umn.edu/~odlyzko/doc/internet.growth.myth2.pdf",
+  "claim": "The claim that internet traffic doubled every three or four months (700 to 1,500 percent a year), used to justify the fiber build, was false; US backbone traffic was about doubling annually.",
+  "bears_on": [
+   "t1",
+   "t11",
+   "nowcast",
+   "edges"
+  ],
+  "changes": "Treat any vendor or company demand-growth figure (tokens, compute hours) as unverified until it is reconciled with an independent measurement, and size capex bets on the independent series.",
+  "verified": "Fetched the PDF from Odlyzko's university page; data in it runs to February 2001."
+ },
+ {
+  "title": "Technological Revolutions and Financial Capital: The Dynamics of Bubbles and Golden Ages",
+  "who": "Carlota Perez (Edward Elgar)",
+  "date": "2002",
+  "type": "book",
+  "url": "https://www.e-elgar.com/shop/technological-revolutions-and-financial-capital",
+  "claim": "Each of five technological revolutions since the 1770s was installed by financial capital running ahead of production capital, through a frenzy that decoupled finance from the technology's real capabilities, before a crash and a slower deployment phase.",
+  "bears_on": [
+   "t1",
+   "t9",
+   "desk",
+   "findings"
+  ],
+  "changes": "Add a phase tag to the desk view (installation, frenzy, turning point, deployment) with written criteria, and require the sizing call to state which phase it assumes.",
+  "verified": "Publisher listing at Edward Elgar; EH.net review describing the phase sequence; Wikipedia entry."
+ },
+ {
+  "title": "Railroaded: The Transcontinentals and the Making of Modern America",
+  "who": "Richard White (W.W. Norton)",
+  "date": "2011",
+  "type": "history",
+  "url": "https://history.stanford.edu/publications/railroaded-transcontinentals-and-making-modern-america",
+  "claim": "The transcontinental railroads were the first corporate giants, and their efforts to profit from growing debt and public support helped cause severe economic panics and new forms of political corruption.",
+  "bears_on": [
+   "t1",
+   "t6",
+   "credit",
+   "filings"
+  ],
+  "changes": "For each of the nine names, track how much of the buildout is funded by debt or public subsidy that sits off the parent's income statement, and treat rising reliance on it as a risk signal rather than a sign of strength.",
+  "verified": "Fetched Stanford History department publication page (year, publisher, argument)."
+ },
+ {
+  "title": "Devil Take the Hindmost: A History of Financial Speculation",
+  "who": "Edward Chancellor",
+  "date": "1999",
+  "type": "history",
+  "url": "https://www.edwardchancellor.com/books/devil-take-the-hindmost",
+  "claim": "A history of speculation from the 1630s tulip episode through the South Sea Bubble, the 1840s railway mania, the 1920s and Japan's bubble economy, arguing speculative behaviour has changed less than people expect.",
+  "bears_on": [
+   "t1",
+   "swans",
+   "findings"
+  ],
+  "changes": "Keep a written list of past-mania signatures (new issuance of vehicles that only own other vehicles, retail leverage, vendor financing) and score the current cycle against it once a quarter.",
+  "verified": "Fetched the author's book page (year, scope)."
+ },
+ {
+  "title": "The Price of Time: The Real Story of Interest",
+  "who": "Edward Chancellor (Atlantic Monthly Press; Grove paperback 2026)",
+  "date": "2022-08-16",
+  "type": "book",
+  "url": "https://groveatlantic.com/book/the-price-of-time/",
+  "claim": "Argues that rates held at historic lows after 2008 fed asset bubbles, weak productivity and excessive risk-taking by yield-starved investors, because interest is the price that allocates capital across time.",
+  "bears_on": [
+   "t2",
+   "t6",
+   "rates",
+   "credit"
+  ],
+  "changes": "When real rates rise, rerun the book's valuation and credit screens on the assumption that projects financed at zero-rate hurdle rates are the first to fail, and watch the private credit marks on those vintages.",
+  "verified": "Fetched Grove Atlantic book page (dates, argument)."
+ },
+ {
+  "title": "Boom and Bust: A Global History of Financial Bubbles",
+  "who": "William Quinn and John D. Turner (Cambridge University Press)",
+  "date": "2020",
+  "type": "history",
+  "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/69A0FE87E88998B0C2EF57167B4CF235/9781108421256c1_1-15.pdf/bubble_triangle.pdf",
+  "claim": "Bubbles over 300 years needed three sides at once (marketability of assets, cheap money and credit, speculative buying) plus a spark from new technology or government policy.",
+  "bears_on": [
+   "t1",
+   "t9",
+   "swans",
+   "desk"
+  ],
+  "changes": "Build a three-gauge bubble monitor (ease of trading the asset, credit availability, momentum-driven flows) and only raise bubble risk in the sizing engine when all three read high at once.",
+  "verified": "IMF Finance and Development review fetched (triangle and spark); Cambridge chapter PDF located."
+ },
+ {
+  "title": "The Great Crash, 1929",
+  "who": "John Kenneth Galbraith",
+  "date": "1955",
+  "type": "history",
+  "url": "https://novelinvestor.com/the-fall-of-the-goldman-sachs-trading-corp/",
+  "claim": "Goldman Sachs Trading Corporation, launched in December 1928, stacked Shenandoah and then Blue Ridge inside itself, funded largely with 6 percent convertible preference stock, and its shares later fell 97 percent from the 1929 high to 4 3/8.",
+  "bears_on": [
+   "t1",
+   "t9",
+   "credit",
+   "swans"
+  ],
+  "changes": "When vehicles that own other vehicles (SPVs, JV data-center holdcos, funds of BDCs) proliferate, compute the look-through leverage to the bottom asset and size exposure off that number, not the top-level ratio.",
+  "verified": "Fetched a summary page that cites The Great Crash 1929 as its source; the book is listed in the Library of America Galbraith volume (storyoftheweek.loa.org)."
+ },
+ {
+  "title": "The Merchant of Power: Sam Insull, Thomas Edison, and the Creation of the Modern Metropolis",
+  "who": "John F. Wasik (Palgrave Macmillan)",
+  "date": "2006",
+  "type": "history",
+  "url": "https://www.publishersweekly.com/9781403968845",
+  "claim": "Insull built a roughly 4 billion dollar pyramid of highly leveraged utility holding companies (he chaired 65 boards) that unravelled in 1932 when demand fell, leading Congress to pass the Public Utility Holding Company Act of 1935.",
+  "bears_on": [
+   "t4",
+   "t1",
+   "credit",
+   "swans"
+  ],
+  "changes": "For power and data-center names financed through layered holdcos, stress test a 10 to 20 percent fall in contracted demand and check whether the top entity's equity survives the debt service of the layers below.",
+  "verified": "Publishers Weekly listing for the book; EBSCO Research Starter on the Insull utilities collapse fetched for the figures."
+ },
+ {
+  "title": "Broadbandits: Inside the $750 Billion Telecom Heist",
+  "who": "Om Malik (Wiley)",
+  "date": "2003",
+  "type": "longform",
+  "url": "https://www.getabstract.com/en/summary/broadbandits/3185",
+  "claim": "WorldCom, Qwest, Lucent and Global Crossing spent heavily on fiber for broadband customers who did not arrive in time; when the bubble burst about 750 billion dollars of wealth disappeared and some 600,000 jobs were lost, while insiders sold stock.",
+  "bears_on": [
+   "t1",
+   "t11",
+   "filings",
+   "credit"
+  ],
+  "changes": "Pair every capex-heavy name with its insider selling and its supplier-financing disclosures in the filings desk, and treat heavy insider sales during peak capex guidance as a downgrade trigger.",
+  "verified": "getAbstract summary page fetched (publisher, year, figures); Wiley product page located."
+ },
+ {
+  "title": "Historical construction costs of global nuclear power reactors",
+  "who": "Jessica Lovering, Arthur Yip, Ted Nordhaus (Energy Policy vol. 91)",
+  "date": "2016",
+  "type": "paper",
+  "url": "https://econpapers.repec.org/RePEc:eee:enepol:v:91:y:2016:i:c:p:371-382",
+  "claim": "Using overnight construction costs for 349 reactors in seven countries (about 58 percent of reactors ever built), the authors find the rapid US cost escalation was not universal; some countries saw mild escalation or outright declines.",
+  "bears_on": [
+   "t4",
+   "book",
+   "findings"
+  ],
+  "changes": "When pricing firm-power and nuclear supply-chain names, model cost overruns by country and builder experience (serial builds versus first-of-a-kind) instead of applying one US-style escalation rate; also read the 2016 Koomey et al. reply that disputes the data.",
+  "verified": "Fetched RePEc abstract page; search also surfaced the published reply critiquing it."
+ },
+ {
+  "title": "The Grid: The Fraying Wires Between Americans and Our Energy Future",
+  "who": "Gretchen Bakke (Bloomsbury)",
+  "date": "2016",
+  "type": "book",
+  "url": "https://www.publishersweekly.com/9781608196104",
+  "claim": "A cultural and technical history of the US electric grid arguing it was built for large central plants and steady demand and is poorly suited to the variable supply and new loads now being added to it.",
+  "bears_on": [
+   "t4",
+   "nowcast"
+  ],
+  "changes": "Track interconnection queue times and transmission approvals as a leading indicator for data-center capacity coming online, and treat chip supply as secondary when those times lengthen.",
+  "verified": "Publishers Weekly listing and multiple library catalog records confirm title, author, publisher and year."
+ },
+ {
+  "title": "How the World Really Works",
+  "who": "Vaclav Smil (Viking)",
+  "date": "2022",
+  "type": "book",
+  "url": "https://reason.com/?p=8186955",
+  "claim": "Modern life rests on four materials (ammonia, cement, steel, plastics) that depend on fossil energy; for example Germany's fossil share of primary energy fell only from 84 to 78 percent after about 400 billion dollars on solar and wind.",
+  "bears_on": [
+   "t3",
+   "t4",
+   "swans"
+  ],
+  "changes": "Do not let energy-transition timelines reduce the oil-shock tail budget; size it on the assumption that hydrocarbon dependence persists for the life of the book.",
+  "verified": "Fetched Reason review dated 2022-05-25 (publisher, figures)."
+ },
+ {
+  "title": "Crude Volatility: The History and the Future of Boom-Bust Oil Prices",
+  "who": "Robert McNally (Columbia University Press)",
+  "date": "2017",
+  "type": "history",
+  "url": "https://lrb.co.uk/the-paper/v39/n11/tim-barker/buckle-up",
+  "claim": "Oil prices were stable only when a controller held spare capacity (Standard Oil, the Texas Railroad Commission, then OPEC); with no reliable swing producer, swings like 147.27 dollars in July 2008 to 30.28 dollars that December become the norm.",
+  "bears_on": [
+   "t3",
+   "swans",
+   "futures",
+   "hedges"
+  ],
+  "changes": "Make OPEC+ effective spare capacity an explicit input to the oil-shock hedge: when spare capacity is thin, raise the size of the standing upside oil protection.",
+  "verified": "Fetched London Review of Books review (argument, price figures); Columbia University Press blog and library records confirm publication."
+ },
+ {
+  "title": "The Prize: The Epic Quest for Oil, Money, and Power",
+  "who": "Daniel Yergin (Simon and Schuster)",
+  "date": "1991",
+  "type": "history",
+  "url": "https://www.pulitzer.org/winners/daniel-yergin",
+  "claim": "Pulitzer-winning history of oil from the 1850s to the Gulf War showing that supply disruptions from war, embargo and chokepoints repeatedly drove the largest economic shocks of the 20th century.",
+  "bears_on": [
+   "t3",
+   "t5",
+   "swans"
+  ],
+  "changes": "Keep a dated list of every major supply disruption in the book (1956 Suez, 1973, 1979, 1990) with size and duration, and calibrate the oil-shock scenario to the 75th percentile of that list rather than the most recent episode.",
+  "verified": "Pulitzer Prize winner page (1992 General Nonfiction) and Wikipedia entry."
+ },
+ {
+  "title": "The New Map: Energy, Climate, and the Clash of Nations",
+  "who": "Daniel Yergin (Penguin Press)",
+  "date": "2020",
+  "type": "book",
+  "url": "https://www.business-standard.com/article/beyond-business/the-future-of-energy-120092100014_1.html",
+  "claim": "US shale diversified world supply so that no single producer, including Russia or Saudi Arabia, controls the market, while Russia, China and the Saudi-Iran rivalry redraw energy geopolitics.",
+  "bears_on": [
+   "t3",
+   "t5"
+  ],
+  "changes": "Split the oil-shock scenario into a Gulf chokepoint case and a Russia sanctions case, and check whether US shale response time (months) is short enough to cap each.",
+  "verified": "Fetched Business Standard review (publisher, argument); library records confirm 2020 Penguin Press."
+ },
+ {
+  "title": "Chip War: The Fight for the World's Most Critical Technology",
+  "who": "Chris Miller (Scribner)",
+  "date": "2022-10",
+  "type": "book",
+  "url": "https://en.wikipedia.org/wiki/Chip_War",
+  "claim": "Shows the chip supply chain is concentrated near the Taiwan Strait, with Taiwan making the vast majority of advanced logic chips through TSMC; won the FT Business Book of the Year 2022.",
+  "bears_on": [
+   "t3",
+   "t5",
+   "book",
+   "swans"
+  ],
+  "changes": "Add a Taiwan supply-interruption scenario to the swans desk that hits all nine names at once, since the hedge between Nasdaq shorts and Treasuries will not diversify a single-point failure.",
+  "verified": "Fetched Wikipedia entry (date, publisher, awards, Taiwan concentration)."
+ },
+ {
+  "title": "The Infinity Machine: Demis Hassabis, DeepMind and the Quest for Superintelligence",
+  "who": "Sebastian Mallaby (Allen Lane / Penguin Press)",
+  "date": "2026-07-09",
+  "type": "book",
+  "url": "https://www.penguin.com.au/books/the-infinity-machine-9780241703564",
+  "claim": "Biography of DeepMind's co-founder built on hundreds of hours of interviews, placing Google's AI lab in the race with Silicon Valley rivals and its founder's science-first motive.",
+  "bears_on": [
+   "t1",
+   "book"
+  ],
+  "changes": "When sizing GOOGL, ask what DeepMind's research lead is worth on its own, separate from capex, and test whether the market is pricing Google as a capex spender or as a frontier lab owner.",
+  "verified": "Fetched Penguin Australia book page (title, date, imprint, summary); multiple retailer and library listings."
+ },
+ {
+  "title": "Bernoulli's Fallacy: Statistical Illogic and the Crisis of Modern Science",
+  "who": "Aubrey Clayton (Columbia University Press)",
+  "date": "2021",
+  "type": "book",
+  "url": "https://www.degruyterbrill.com/document/doi/10.7312/clay19994/html",
+  "claim": "Argues that frequentist significance testing confuses the probability of the data given a hypothesis with the probability of the hypothesis given the data, and that this error drives the replication crisis.",
+  "bears_on": [
+   "methods",
+   "edges",
+   "journal"
+  ],
+  "changes": "In the edges desk, report each signal test as a posterior probability under a stated prior (low for new anomalies) instead of a p-value pass or fail.",
+  "verified": "De Gruyter Brill publisher DOI page, MAA review and multiple library records found in search."
+ },
+ {
+  "title": "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting and Non-Normality",
+  "who": "David H. Bailey and Marcos Lopez de Prado (Journal of Portfolio Management 40(5))",
+  "date": "2014-07-31",
+  "type": "paper",
+  "url": "https://papers.ssrn.com/abstract=2460551",
+  "claim": "Testing many strategy variants and reporting the best inflates the Sharpe ratio; the deflated Sharpe ratio corrects for the number of trials and for non-normal returns.",
+  "bears_on": [
+   "methods",
+   "decision",
+   "edges"
+  ],
+  "changes": "Log every variant tried in the 1940-onward sizing engine and report the deflated Sharpe using that trial count; reject any rule whose deflated Sharpe is not significant.",
+  "verified": "Fetched SSRN abstract page."
+ },
+ {
+  "title": "Superforecasting: The Art and Science of Prediction",
+  "who": "Philip Tetlock and Dan Gardner (Crown)",
+  "date": "2015",
+  "type": "book",
+  "url": "https://en.wikipedia.org/wiki/Superforecaster",
+  "claim": "Top forecasters in the Good Judgment Project were about 30 percent more accurate than intelligence analysts with access to classified data, mainly through frequent small updates and teamwork.",
+  "bears_on": [
+   "journal",
+   "findings"
+  ],
+  "changes": "Score every journal forecast with a Brier score, require a written update whenever new data arrives, and compare the desk's accuracy with a simple base-rate forecaster.",
+  "verified": "Fetched Wikipedia Superforecaster entry for the 30 percent figure and practices."
+ },
+ {
+  "title": "Thinking in Bets: Making Smarter Decisions When You Don't Have All the Facts",
+  "who": "Annie Duke (Portfolio/Penguin)",
+  "date": "2018",
+  "type": "book",
+  "url": "https://research.tedneward.com/thinking/thinking-in-bets.html",
+  "claim": "Judging a decision by its outcome ('resulting') is a common error because good decisions can end badly; outcomes should be treated as evidence about luck and skill, with premortems and written plans guarding against hindsight bias.",
+  "bears_on": [
+   "journal",
+   "desk"
+  ],
+  "changes": "In the journal, record the reasoning and probability before each sizing call and grade decisions on process at review, separately from P and L.",
+  "verified": "Fetched notes page citing Portfolio/Penguin 2018, ISBN 9780735216365."
+ },
+ {
+  "title": "The Matter with Things: Our Brains, Our Delusions, and the Unmaking of the World",
+  "who": "Iain McGilchrist (Perspectiva Press)",
+  "date": "2021-11-09",
+  "type": "book",
+  "url": "https://en.wikipedia.org/wiki/The_Matter_with_Things",
+  "claim": "Argues that narrow, analytic, detail-first attention (which he links to the left hemisphere) makes a good servant but a poor master, and must be kept subordinate to broad, contextual judgment.",
+  "bears_on": [
+   "desk",
+   "methods"
+  ],
+  "changes": "Before acting on a model output, have one person state in plain words what the whole picture says without the model; if the two disagree, the model has to explain the gap before the trade.",
+  "verified": "Fetched Wikipedia entry (date, publisher, argument); author's site listing."
+ },
+ {
+  "title": "Efficiently Inefficient: How Smart Money Invests and Market Prices Are Determined",
+  "who": "Lasse Heje Pedersen (Princeton University Press)",
+  "date": "2015",
+  "type": "book",
+  "url": "https://econpapers.repec.org/RePEc:pup:pbooks:10441",
+  "claim": "Markets are inefficient enough to pay active managers for their costs of finding and holding edges, but efficient enough to deter more capital; the book covers equity, macro and arbitrage strategies with practitioner interviews.",
+  "bears_on": [
+   "edges",
+   "futures",
+   "methods"
+  ],
+  "changes": "For every signal in the edges desk, write down who is on the other side, why they keep paying, and what it costs to hold the trade; drop signals without an answer.",
+  "verified": "RePEc book listing and Copenhagen Business School announcement found in search."
+ },
+ {
+  "title": "Investing Amid Low Expected Returns: Making the Most When Markets Offer the Least",
+  "who": "Antti Ilmanen (Wiley)",
+  "date": "2022",
+  "type": "book",
+  "url": "https://spe.org.uk/reading-room/book-reviews/investing-amid-low-expected-returns/",
+  "claim": "Argues the coming decade's returns will be low after rich starting valuations, that the illiquidity premium from private assets deserves scepticism, and that tail hedges are worth considering only if priced sensibly.",
+  "bears_on": [
+   "t6",
+   "t8",
+   "credit",
+   "hedges"
+  ],
+  "changes": "Haircut the reported returns of private credit for smoothing before comparing them with public credit, and cap what the tail budget will pay for protection based on its long-run cost.",
+  "verified": "Fetched Society of Professional Economists review (2022-11-24); publisher and retailer listings."
+ },
+ {
+  "title": "Slapped by the Invisible Hand: The Panic of 2007",
+  "who": "Gary B. Gorton (Oxford University Press)",
+  "date": "2010",
+  "type": "book",
+  "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/2010/slapped-by-the-invisible-hand",
+  "claim": "The 2007 panic was a run on repo: securities treated as safe without scrutiny suddenly became information-sensitive, lenders raised haircuts, and funding for dealers drained.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "swans"
+  ],
+  "changes": "Watch for the moment AI-linked credit (data-center ABS, GPU-backed loans) shifts from no-questions-asked collateral to collateral that lenders start to haircut, and treat rising haircuts as the trigger to hedge.",
+  "verified": "Fetched CFA Institute Financial Analysts Journal review; author's Yale page lists the book."
+ },
+ {
+  "title": "BNP Paribas Investment Partners temporarily suspends the calculation of the net asset value of three funds",
+  "who": "BNP Paribas",
+  "date": "2007-08-09",
+  "type": "history",
+  "url": "https://group.bnpparibas/en/press-release/bnp-paribas-investment-partners-temporaly-suspends-calculation-net-asset-funds-parvest-dynamic-abs-bnp-paribas-abs-euribor-bnp-paribas-abs-eonia",
+  "claim": "BNP froze Parvest Dynamic ABS, BNP Paribas ABS Euribor and BNP Paribas ABS Eonia because 'the complete evaporation of liquidity' in US securitisation made it impossible to value certain assets fairly.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "swans"
+  ],
+  "changes": "Treat any suspension of NAV or redemption gate at a private credit or interval fund holding AI-linked loans as a regime signal for the whole sleeve, not an isolated event.",
+  "verified": "Fetched BNP Paribas group press release."
+ },
+ {
+  "title": "Bear Stearns hedge funds tapped out",
+  "who": "Bloomberg via InvestmentNews",
+  "date": "2007-07-18",
+  "type": "history",
+  "url": "https://investmentnews.com/alternatives/bear-stearns-hedge-funds-tapped-out/10244",
+  "claim": "The Bear Stearns High-Grade Structured Credit Strategies Enhanced Leverage Fund was left with no value and the sister fund lost more than 90 percent, a month after Bear gave it 1.6 billion dollars of emergency financing.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "swans"
+  ],
+  "changes": "When a sponsor injects its own balance sheet to support a fund (as Blue Owl or peers might for a vehicle), mark the fund's credit risk up, not down.",
+  "verified": "Fetched InvestmentNews article."
+ },
+ {
+  "title": "Lords of Finance: The Bankers Who Broke the World",
+  "who": "Liaquat Ahamed (Penguin Press)",
+  "date": "2009-01-22",
+  "type": "history",
+  "url": "https://www.pulitzer.org/winners/liaquat-ahamed",
+  "claim": "Pulitzer-winning account of Strong, Norman, Moreau and Schacht, who held to the gold standard and raised rates to defend reserves when their economies needed easing, deepening the Depression.",
+  "bears_on": [
+   "t2",
+   "t7",
+   "rates"
+  ],
+  "changes": "Ask of each central bank on the rates desk which rule it will defend even against its economy (today an inflation target), and model the cost of that rigidity in the growth-scare scenario.",
+  "verified": "Pulitzer winner page and Wikipedia entry fetched (publisher, date, thesis)."
+ },
+ {
+  "title": "Lombard Street: A Description of the Money Market",
+  "who": "Walter Bagehot",
+  "date": "1873",
+  "type": "history",
+  "url": "https://www.gutenberg.org/cache/epub/4359/pg4359.html",
+  "claim": "Sets out the lender-of-last-resort rule: in a panic the central bank should lend freely, at a high rate, against good collateral.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "rates"
+  ],
+  "changes": "For private credit, ask who the lender of last resort is; where there is none, assume gates and fire sales rather than a backstop when sizing the credit hedge.",
+  "verified": "Project Gutenberg full-text listing and Wikipedia entry found in search."
+ },
+ {
+  "title": "Dwarkesh Podcast: Satya Nadella, How Microsoft is preparing for AGI",
+  "who": "Dwarkesh Patel and Dylan Patel",
+  "date": "2025-11-12",
+  "type": "podcast",
+  "url": "https://www.dwarkesh.com/i/178688356/transcript",
+  "claim": "Nadella says Microsoft avoided building gigawatts for one chip generation or one customer, wants a fungible fleet, and paces each generation to demand to avoid being locked into four to five years of depreciation on one generation.",
+  "bears_on": [
+   "t1",
+   "t11",
+   "book",
+   "filings"
+  ],
+  "changes": "Compare each hyperscaler's stated server depreciation life with its chip-generation cadence, and treat a gap (six-year lives on a yearly cadence) as an earnings-quality flag.",
+  "verified": "Fetched Dwarkesh transcript page."
+ },
+ {
+  "title": "Acquired: TSMC (Remastered)",
+  "who": "Ben Gilbert and David Rosenthal",
+  "date": "2025-01-20",
+  "type": "podcast",
+  "url": "https://www.acquired.fm/episodes/tsmc-remastered",
+  "claim": "TSMC's pure-play foundry model funds ever larger capex from about 50 percent gross margins; in 2020 it reinvested about 17 billion dollars of capex on roughly 48 billion of revenue.",
+  "bears_on": [
+   "t3",
+   "t10",
+   "book"
+  ],
+  "changes": "Use TSMC capex guidance as a leading indicator of the chip supply the nine names can buy 18 to 24 months out, and cross-check hyperscaler capex plans against it.",
+  "verified": "Fetched Acquired episode page."
+ },
+ {
+  "title": "Odd Lots: What's Actually Going On With Private Credit",
+  "who": "Bloomberg (Tracy Alloway and Joe Weisenthal, with Osterweis Capital's John Sheehan and Craig Manchuck)",
+  "date": "2026-04-27",
+  "type": "podcast",
+  "url": "https://www.audioscrape.com/podcast/odd-lots/episode/whats-actually-going-on-with-private-credit-76800",
+  "claim": "Two public-credit portfolio managers discuss how private credit grew, by some estimates, larger than the junk bond market, its ties to private equity and insurers, and the chance of higher defaults.",
+  "bears_on": [
+   "t6",
+   "credit"
+  ],
+  "changes": "Add insurer exposure to private credit as a channel in the credit desk, since losses there could surface through insurance balance sheets rather than fund marks.",
+  "verified": "Fetched episode page; date confirmed on Podwise listing."
+ },
+ {
+  "title": "Odd Lots: Blackstone's Michael Zawadzki on How Private Credit Got So Big",
+  "who": "Bloomberg (Tracy Alloway and Joe Weisenthal)",
+  "date": "2026-01-23",
+  "type": "podcast",
+  "url": "https://omny.fm/shows/odd-lots/blackstones-michael-zawadzki-on-how-private-credit-got-so-big",
+  "claim": "Blackstone Credit and Insurance's global CIO explains the scale advantages of the largest private lenders and private credit's role in financing data centers.",
+  "bears_on": [
+   "t6",
+   "t9",
+   "credit"
+  ],
+  "changes": "Hear the bull case from the largest lender and list the conditions he says would break it, then track those conditions in the credit lens.",
+  "verified": "Fetched Omny episode page; date from brapodd.se listing."
+ },
+ {
+  "title": "Odd Lots: Travis Kavulla Explains Why Electric Bills Shot Up",
+  "who": "Bloomberg (Tracy Alloway and Joe Weisenthal, with NRG's Travis Kavulla)",
+  "date": "2025-12-01",
+  "type": "podcast",
+  "url": "https://www.audioscrape.com/podcast/odd-lots/episode/travis-kavulla-explains-why-electric-bills-shot-up-79600",
+  "claim": "A former Montana utility commissioner now at NRG discusses why power prices rose after years of flat demand as data centers connect, and who will pay for new generation.",
+  "bears_on": [
+   "t4",
+   "nowcast"
+  ],
+  "changes": "Track retail power price politics in data-center states as a risk to the power thesis: rising household bills can bring rules that make hyperscalers pay more for grid access.",
+  "verified": "Fetched episode page; date from Podwise listing."
+ }
+]

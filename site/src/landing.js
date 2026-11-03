@@ -5,7 +5,7 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 42;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TESTS_PASSING = 666;     // the shipped test count (the chip and the hood tile read it)
+  const TESTS_PASSING = 670;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -71,8 +71,8 @@
       (() => { const BC = typeof bookCall === "function" ? bookCall(N) : null;
         return BC ? cell(BC.cut ? "rule" : "model", "Book size", xx(BC.size), `The decision engine's baseline (${xx(N.exposure)}) cut to ${BC.bindingName}, measured on the nine names' own prices: at 1.00x the book breaks ${BC.breaches === 3 ? "all three" : `${BC.breaches} of its three`} limits.`, "#book", "Book risk")
           : cell("model", "Equity exposure", xx(N.exposure), `The gated call for the model book${N.capped ? ", capped by the risk budget" : ""}.`, "#decision", "Decision engine"); })(),
-      cell("model", "Engine optimum", xx(N.engine_exposure), `Before the evidence gate; CRRA γ ${fx(O.gamma, 2)}, worst-month loss budget ${pct0(O.es_limit)}${N.engine_exposure >= 1.5 - 1e-9 ? "; the top of its 0 to 1.5x grid, so a bound, not an interior optimum" : ""}.`, "#dx-gate", "The gate"),
-      cell("rule", "Evidence gate", pct0(N.gate.value), `Utility t ${fx(N.gate.t, 2)} since ${O.start.slice(0, 4)} against ${fx(N.gate.t0, 2)} needed after ${N.gate.n_tried} strategies tried.`, "#dx-gate", "Why so little"),
+      cell("model", "Engine optimum", xx(N.engine_exposure), `What the engine would hold if it trusted its own forecast${N.engine_exposure >= 1.5 - 1e-9 ? ": the top of its 0 to 1.5x range, a ceiling rather than a measured best" : ""}. Risk aversion γ ${fx(O.gamma, 2)}; worst-month budget ${pct0(O.es_limit)}.`, "#dx-gate", "The gate"),
+      cell("rule", "Evidence gate", pct0(N.gate.value), `How much of that the evidence lets through. The engine's edge over simply holding scores t = ${fx(N.gate.t, 2)} on monthly data since ${O.start.slice(0, 4)}; after ${N.gate.n_tried} strategies tried, it needs ${fx(N.gate.t0, 2)} to count.`, "#dx-gate", "Why so little"),
       cell("model", "Regime", `${rg.name} ${pct0(rg.p)}`, regimeWords(N, R, rg), "#dx-states", "The states"),
       cell(TD.on ? "on" : "off", "Bond hedge", TD.status !== "ok" ? "Unknown" : TD.on ? "On" : "Off", `${(() => { const B = typeof B30 === "function" ? B30() : null, P = B && B.hedges && B.hedges.policies; return P ? `On the book's own days a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} and an index short ${pct0(P.nasdaq_beta.variance_cut)}. ` : ""; })()}S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}; the selector's pick: ${N.hedge.name.toLowerCase()} (${pct0(N.hedge.p_best[Math.max(0, ["stocks", "bonds", "cash"].indexOf(N.hedge.choice))])} best).`, "#bonds", "Bonds"),
       (!fin(ov.factor) || ov.factor >= 1)
