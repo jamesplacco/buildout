@@ -28,6 +28,9 @@ def build(src: str = "site", out: str = "_site") -> Path:
     dest.mkdir(parents=True)
     (dest / "index.html").write_text(html)
     (dest / ".nojekyll").write_text("")
+    pdf = Path(src, "tearsheet.pdf")
+    if pdf.exists():                      # v0.38: the tear sheet the Home and Track record pages link to
+        shutil.copy(pdf, dest / "tearsheet.pdf")
     data = Path(src, "data")
     if data.exists():
         shutil.copytree(data, dest / "data")

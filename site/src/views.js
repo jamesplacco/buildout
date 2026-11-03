@@ -1879,7 +1879,7 @@
       if (after) after.after(nav);
     });
   }
-  const NO_LINK = "a, button, label, h1, h2, h3, h4, h5, h6, summary, svg, script, style, input, select, textarea, code, kbd, var, table, dt, .src, .eyebrow, .badge, .tip, .gloss, .methods, .term, .signals, #levels, .chart-title, .panel-title, .flabel, .tagline, .kind, .sig-state, .toc, .chips, .tchips, .sec, .readouts, .sentence";
+  const NO_LINK = "#view-home, a, button, label, h1, h2, h3, h4, h5, h6, summary, svg, script, style, input, select, textarea, code, kbd, var, table, dt, .src, .eyebrow, .badge, .tip, .gloss, .methods, .term, .signals, #levels, .chart-title, .panel-title, .flabel, .tagline, .kind, .sig-state, .toc, .chips, .tchips, .sec, .readouts, .sentence";
   const LINKED = new Set();
   function linkTerms(only) {
     const entries = [];

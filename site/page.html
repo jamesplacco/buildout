@@ -2188,12 +2188,67 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
 .rr-picks li { margin-bottom: 6px; }
 .thesis-src li { margin-bottom: 6px; } .thesis-src em { color: var(--ink-2); font-style: normal; }
 .desk-more > summary small { display: block; margin: 4px 0 0; font-size: var(--t-xs); line-height: 1.4; }
-.hm-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); margin-top: 18px; }
-.hm-card { display: grid; gap: 8px; align-content: start; min-width: 0; }
-.hm-card h2 { margin: 0; font: 600 var(--t-lg)/1.25 var(--f-display); }
-.hm-call { margin: 0; font: 600 var(--t-lg)/1.35 var(--f-body); color: var(--ink); }
-.hm-list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: var(--t-sm); line-height: 1.45; }
-.hm-dl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+/* v0.38.1: Home as a fund one-pager. Ruled bands, small-caps labels, lining figures, one accent. */
+#view-home { --hm-rule: var(--ink); }
+.hm-hero { display: grid; gap: 18px; padding-block: 8px 30px; border-bottom: 1px solid var(--rule); }
+.hm-kicker { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; font: 600 var(--t-xs)/1.4 var(--f-body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.hm-kicker .hm-who { color: var(--accent); }
+.hm-hero h1 { margin: 0; max-width: 21ch; font: 500 var(--t-hero)/1.04 var(--f-display); letter-spacing: -0.015em; color: var(--ink); text-wrap: balance; }
+.hm-hero h1 em { font-style: italic; color: var(--accent); }
+.hm-dek { margin: 0; max-width: 62ch; font: 400 var(--t-lg)/1.5 var(--f-body); color: var(--ink-2); }
+.hm-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.hm-cta .btn { text-decoration: none; padding: 10px 18px; border-radius: 2px; letter-spacing: 0.02em; }
+.hm-note { margin: 0; min-height: 1em; font-size: var(--t-sm); color: var(--muted); }
+.hm-label { margin: 0 0 14px; font: 600 var(--t-xs)/1.4 var(--f-body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.hm-band { padding-block: 26px 22px; border-bottom: 1px solid var(--rule); }
+.hm-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); margin: 0; border-top: 2px solid var(--hm-rule); }
+.hm-figs > div { padding: 14px 18px 12px 0; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.hm-figs > div + div { padding-left: 18px; border-left: 1px solid var(--rule); }
+.hm-figs dd { order: -1; margin: 0; font: 500 clamp(2rem, 3.6vw, 2.75rem)/1 var(--f-display); font-variant-numeric: lining-nums tabular-nums; color: var(--ink); }
+.hm-figs dt { font: 600 var(--t-sm)/1.3 var(--f-body); color: var(--ink); }
+.hm-figs p { margin: 0; font-size: var(--t-xs); line-height: 1.45; color: var(--muted); font-variant-numeric: lining-nums; }
+.hm-fine { margin: 12px 0 0; max-width: 90ch; font-size: var(--t-xs); line-height: 1.5; color: var(--muted); }
+.hm-pair { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 0; border-bottom: 1px solid var(--rule); }
+.hm-callbox, .hm-chartbox { padding-block: 26px; min-width: 0; }
+.hm-callbox { padding-right: 28px; display: grid; gap: 12px; align-content: start; }
+.hm-chartbox { padding-left: 28px; border-left: 1px solid var(--rule); }
+.hm-call { margin: 0; font: 500 var(--t-xl)/1.22 var(--f-display); color: var(--ink); text-wrap: balance; }
+.hm-why { margin: 0; font-size: var(--t-md); line-height: 1.5; color: var(--ink-2); }
+.hm-more, .hm-steps li > a, .hm-find li > a { font: 600 var(--t-sm)/1.3 var(--f-body); color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; justify-self: start; width: fit-content; }
+.hm-more::after, .hm-steps li > a::after, .hm-find li > a::after { content: " \2192"; }
+#view-home > * { margin-block: 0; }
+.hm-curve { min-height: 220px; }
+.hm-sect { padding-block: 26px; border-bottom: 1px solid var(--rule); }
+.hm-find { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 0; border-top: 2px solid var(--hm-rule); }
+.hm-find li { padding: 16px 22px 4px 0; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.hm-find li + li { padding-left: 22px; border-left: 1px solid var(--rule); }
+.hm-find .hm-big { font: 500 2.1rem/1 var(--f-display); font-variant-numeric: lining-nums; color: var(--accent); }
+.hm-find h3 { margin: 0; font: 600 var(--t-lg)/1.25 var(--f-display); color: var(--ink); text-wrap: balance; }
+.hm-find p { margin: 0; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
+.hm-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); border-top: 2px solid var(--hm-rule); }
+.hm-steps li { padding: 16px 20px 4px 0; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.hm-steps li + li { padding-left: 20px; border-left: 1px solid var(--rule); }
+.hm-n { font: 500 var(--t-sm)/1 var(--f-display); letter-spacing: 0.12em; color: var(--accent); font-variant-numeric: lining-nums; }
+.hm-steps h3 { margin: 0; font: 600 var(--t-xl)/1.1 var(--f-display); color: var(--ink); }
+.hm-steps p { margin: 0; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
+.hm-plug { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); border-top: 2px solid var(--hm-rule); }
+.hm-plug > div { padding: 14px 20px 4px 0; min-width: 0; }
+.hm-plug > div + div { padding-left: 20px; border-left: 1px solid var(--rule); }
+.hm-plug dt { font: 600 var(--t-md)/1.3 var(--f-display); color: var(--ink); margin-bottom: 6px; }
+.hm-plug dd { margin: 0; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
+.hm-sign { padding-block: 28px 8px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 18px 40px; align-items: end; }
+.hm-name { margin: 0; font: 500 var(--t-2xl)/1.05 var(--f-display); color: var(--ink); }
+.hm-sign p#hm-contact { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--t-md); }
+.hm-sign a { color: var(--accent); }
+@media (max-width: 760px) {
+  .hm-pair, .hm-sign { grid-template-columns: 1fr; }
+  .hm-callbox { padding-right: 0; }
+  .hm-chartbox { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }
+  .hm-figs > div + div, .hm-find li + li, .hm-steps li + li, .hm-plug > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }
+  .hm-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hm-figs > div:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--rule); }
+  .hm-figs > div:nth-child(2) { border-top: 0; }
+}
 .tr-week h3 { font: 600 var(--t-md)/1.3 var(--f-body); margin: 16px 0 6px; }
 .memo-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
 .memo { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
@@ -2208,9 +2263,9 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
 <a class="skip" href="#main" id="skip">Skip to content</a>
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="#desk">
+    <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.38</span>
+      Buildout <span class="ver">v0.38.1</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -4801,7 +4856,7 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
       <li><div><strong>Publish</strong><span>Make the repository public with GitHub Pages, and write a one-page case study on process and results.</span></div></li>
     </ol>
   </section>
-  <footer class="foot"><p>Built by Jamie Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
+  <footer class="foot"><p>Built by James Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
 </section>
 
 <!-- ======================= HOW IT WORKS ======================= -->
@@ -4950,25 +5005,63 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
     <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
   </section>
 </section>
-<section class="view" id="view-home" hidden aria-labelledby="hm-title">
-  <div class="vhead"><p class="eyebrow">Buildout · a research engine for an AI-buildout equity book</p><h1 id="hm-title">How much of the AI buildout to own, how to hedge it, and the record that says whether to believe it</h1>
-    <p class="lede">Buildout sizes and hedges a model book of nine AI-buildout names (Microsoft, Amazon, Alphabet, Meta, Nvidia, Broadcom, Tesla, SpaceX, Oracle) from their own risk, tests every rule out of sample before it may move the size, and logs each call before the market opens on it. It is a model book, not personal positions, and it places no orders.</p></div>
-  <div class="hm-grid">
-    <section class="panel hm-card" aria-labelledby="hm-what-t"><h2 id="hm-what-t">Today's call</h2><p class="hm-call" id="hm-call"></p><p class="prose">Why, in three steps, on the <a href="#desk">Desk</a>; the size each risk limit allows on <a href="#book">Book risk</a>.</p></section>
-    <section class="panel hm-card" aria-labelledby="hm-perf-t"><h2 id="hm-perf-t">The record</h2><div class="at-tiles compact" id="hm-perf"></div><p class="prose">Backtest, walk-forward and live paper, never mixed, with a downloadable tear sheet: <a href="#track">Track record</a>.</p></section>
-    <section class="panel hm-card" aria-labelledby="hm-think-t"><h2 id="hm-think-t">How I think</h2><ul class="hm-list">
-      <li><strong>Limits before forecasts.</strong> The book's own risk sets the size; a forecast moves it only as far as its out-of-sample record has earned (so far, not at all).</li>
-      <li><strong>Test the hedge, do not assume it.</strong> Since 1962 long bonds hedged stocks when inflation was below 3% and added risk above it, as they have since 2021; the hedge is chosen by regime, and puts or an index short do the work when bonds cannot.</li>
-      <li><strong>Count every try.</strong> Every backtest is deflated for the number of variants tested, and run beside fake data that should find nothing.</li>
-      <li><strong>Write the miss down.</strong> Each model has a one-page memo with what would prove it wrong, and the misses are logged.</li></ul>
-      <p class="prose"><a href="#memos">Model memos and the failure log</a> · <a href="#reading">What the desk reads</a></p></section>
-    <section class="panel hm-card" aria-labelledby="hm-plug-t"><h2 id="hm-plug-t">How it plugs into a lean team's book</h2><ol class="hm-list">
-      <li><strong>Monday risk note.</strong> Send holdings as a CSV; the engine returns the size each limit allows, the binding limit, and the hedge that keeps every name, on your names' own prices.</li>
-      <li><strong>Hedge selector.</strong> Index short, bonds, puts or a short basket, chosen by regime and tested on your book's days, not a generic 60/40 rule.</li>
-      <li><strong>Watch list that moves first.</strong> Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</li>
-      <li><strong>An audit trail.</strong> Every call timestamped and hash-chained; a reviewer can rerun any day with one command. Nothing executes: proposals only, for a person to approve.</li></ol></section>
-    <section class="panel hm-card hm-contact" aria-labelledby="hm-contact-t"><h2 id="hm-contact-t">Contact</h2><p id="hm-contact"></p><p class="prose">The engine, the agents that built it and the code are one click deeper: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p></section>
+<section class="view" id="view-home" data-guide="off" hidden aria-labelledby="hm-title">
+  <header class="hm-hero">
+    <p class="hm-kicker"><span class="hm-who">James Placco</span><span>Buildout research</span><span id="hm-asof">Data through Oct 23, 2026</span></p>
+    <h1 id="hm-title">Own the AI buildout at the size its risk allows. <em>Prove it out of sample.</em></h1>
+    <p class="hm-dek">A risk, sizing and hedging engine for a concentrated nine-name AI book. Every limit is measured on the names' own prices, every rule is walked forward before it may move the size, and every call is logged before it trades.</p>
+    <div class="hm-cta"><a class="btn" href="#desk">Today's call and why</a><a class="btn ghost" href="#track">Track record</a><button type="button" class="btn ghost" id="hm-pdf">Tear sheet (PDF)</button></div>
+    <p class="hm-note" id="hm-pdf-note" aria-live="polite"></p>
+  </header>
+
+  <section class="hm-band" aria-labelledby="hm-figs-t">
+    <h2 class="hm-label" id="hm-figs-t">Walk-forward record, net of costs</h2>
+    <dl class="hm-figs" id="hm-perf"></dl>
+    <p class="hm-fine" id="hm-figs-note"></p>
+  </section>
+
+  <div class="hm-pair">
+    <section class="hm-callbox" aria-labelledby="hm-call-t">
+      <h2 class="hm-label" id="hm-call-t">The call</h2>
+      <p class="hm-call" id="hm-call"></p>
+      <p class="hm-why" id="hm-why"></p>
+      <a class="hm-more" href="#desk">The three steps behind it</a>
+    </section>
+    <section class="hm-chartbox" aria-labelledby="hm-curve-t">
+      <h2 class="hm-label" id="hm-curve-t">Growth of $1, walk-forward</h2>
+      <div class="hm-curve" id="hm-curve"></div>
+    </section>
   </div>
+
+  <section class="hm-sect" aria-labelledby="hm-find-t">
+    <h2 class="hm-label" id="hm-find-t">What the evidence says now</h2>
+    <ol class="hm-find" id="hm-find"></ol>
+  </section>
+
+  <section class="hm-sect" aria-labelledby="hm-how-t">
+    <h2 class="hm-label" id="hm-how-t">Method</h2>
+    <ol class="hm-steps">
+      <li><span class="hm-n">01</span><h3>Measure</h3><p>Risk on the nine names' own daily prices: factor exposures, the one-month tail, the drawdown path.</p><a href="#book">Book risk</a></li>
+      <li><span class="hm-n">02</span><h3>Size</h3><p>The smallest size any limit allows. A forecast may move it only as far as its out-of-sample record has earned.</p><a href="#decision">Decision engine</a></li>
+      <li><span class="hm-n">03</span><h3>Hedge</h3><p>Chosen by regime and tested on the book's own days: an index short, puts, bonds only when bonds hedge.</p><a href="#hedgetest">Hedge test</a></li>
+      <li><span class="hm-n">04</span><h3>Log</h3><p>Each call goes to an append-only, hash-chained ledger before its first trading day. Misses go in the failure log.</p><a href="#memos">Memos and misses</a></li>
+    </ol>
+  </section>
+
+  <section class="hm-sect" aria-labelledby="hm-plug-t">
+    <h2 class="hm-label" id="hm-plug-t">For a lean investment team</h2>
+    <dl class="hm-plug">
+      <div><dt>Monday risk note</dt><dd>Holdings in as a CSV; out come the size each limit allows, the one that binds, and the hedge that keeps every name.</dd></div>
+      <div><dt>Hedge selector</dt><dd>Index short, puts, bonds or a short basket, chosen by regime and tested on your book's days, not a 60/40 habit.</dd></div>
+      <div><dt>Early-warning list</dt><dd>Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</dd></div>
+      <div><dt>Audit trail</dt><dd>Every call timestamped and reproducible with one command. Proposals only: nothing executes without a person.</dd></div>
+    </dl>
+  </section>
+
+  <footer class="hm-sign" aria-labelledby="hm-contact-t">
+    <div><h2 class="hm-name" id="hm-contact-t">James Placco</h2><p id="hm-contact"></p></div>
+    <p class="hm-fine">A research tool for a model book: not personal positions, not investment advice, and it places no orders. The engine, the code and how it was built: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p>
+  </footer>
 </section>
 <section class="view" id="view-track" hidden aria-labelledby="tr-title">
   <div class="vhead"><p class="eyebrow">Today · the track record</p><h1 id="tr-title">The track record: calls made in advance, sized by rule, and honest about their misses</h1>
@@ -8596,6 +8689,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
   ];
 
   const CHANGELOG = [
+    ["v0.38.1", "Nov 3, 2026", "Home as a fund one-pager: one line on what the engine does, the walk-forward record in five figures against holding and the Nasdaq-100, today's call beside the growth chart, the three findings that matter now (long bonds stopped hedging; limits, not forecasts, made the record; puts held in every regime), the method in four steps, what it does for a lean team, and contact with LinkedIn. The tear sheet now ships with the public site."],
     ["v0.38", "Nov 3, 2026", "A track record, not a model. A Home page answers in a minute: the call, the record, the method, the contact. A Track record desk keeps three records apart and never on one chart: the backtest (in-sample: size 0.59x chosen on the whole history, CAGR 21%, Sharpe 1.01, worst drawdown 29%), the walk-forward (size and hedge recomputed each month-end from data to that close, held the next month, costs charged, the universe chosen point in time each January: the call's Sharpe 0.93, the same as holding, with the worst drawdown cut from 51% to 20% and 2022 from minus 48% to minus 18%; the Nasdaq-100's Sharpe was 0.72), and live paper, which starts with the first entry in an append-only, hash-chained call ledger written before its first bar (ledger/calls.jsonl; python -m buildout reproduce --date recomputes any day). A monthly tear sheet downloads as a PDF. Survivorship was tested and found small here (the point-in-time nine earned what today's nine did; hindsight flatters the drawdown, not the return). Sizing as the product: vol target, quarter Kelly and a drawdown stop, shown cutting leverage as volatility rose; it averaged 0.21x, the same bet smaller, and says so. A Hedge test desk tests the long bond instead of assuming it: since 1962 it hedged when inflation was below 3% (correlation minus 0.17) and from 2000 to 2020 (minus 0.33), and failed above 3% (plus 0.25) and since 2021 (plus 0.35, where a 30% bond added 15% to stock variance); a regime rule only avoids the damage; the modelled put cut a quarter to a third of the Nasdaq-100's variance in every regime. A Memos desk gives each model one page (thesis, variant perception, what would prove it wrong, what changed) and a failure log. A Value creation desk runs a services buyout lever by lever with an exact equity bridge, checks the plan's 20 claims against sources (11 confirmed, 3 overstated, 3 wrong, 3 unverifiable), and reads the nine names through the same six levers. Hygiene: every price pull is validated (duplicates, order, non-positive closes, staleness stop the run), dependencies are pinned, a failed daily step opens an issue. Two bugs caught on the way: an annual volatility fed to a monthly formula, and zero-padded months in Shiller's file read as a 33% bond gain."],
     ["v0.37", "Nov 3, 2026", "A first screen for every desk. Twelve long desks (Book risk, Decision, OODA, Futures, Nowcast, Filings, Fundamentals, Private credit, Edge lab, Reasoning, Parameters, Insurers) now open with the sections a reader needs to act and fold the rest under one line that names what is inside; every section keeps its link and opens when linked. The Reading room shows 24 cards and a button for the other 107. Nothing was removed: the visible text on those desks fell by about half (Book risk 17,000 to 7,300 characters, Fundamentals 21,700 to 5,800, Nowcast 19,400 to 8,100) and the folds hold the rest."],
     ["v0.36", "Nov 2, 2026", "Wider reading, clearer reasoning, a second scrub. A Reading room on the Evidence path holds 130 checked sources in four kinds: research and policy work (the IMF, BIS, Fed notes, NBER and journal papers), data that sees the buildout before earnings (construction spending, interconnection queues, GPU rental indices, Korean chip exports, Hormuz tanker counts, tender filings), books, history and podcasts (Odlyzko on the railway mania, Chancellor, Perez, Bernoulli's Fallacy, Mallaby's The Infinity Machine, Yergin), and the strongest case against each thesis. Each says what it changes; each thesis card now carries its best dissent and its reading. Three sources became engine changes: Odlyzko's railway test as a calculator on the Fundamentals desk (one year of capex needs about 93% of what the three clouds bill, 1.5x at the IMF's three-year GPU life, against the railway mania's 4x); thesis t9 retitled from rotated to widened after LSEG's count of record hyperscaler bond issuance; t11 restated per token, not per GPU-hour, after a 40% rise in H100 rents. The Desk's reasoning now reads as three numbered steps, why not bonds, and what would change the call; the Q3 results of Microsoft, Alphabet and Amazon are on it; jargon on the first screen is defined. Two more independent checkers verified about 300 claims; the corrections: a reversed Templeton paraphrase, the Bagehot and Brookings attributions, Mackay's 1852 preface, early-print prices in the Digest, the Rates headline (a bear flattener, not parallel), Alphabet's 2021 equipment lives, SpaceX as a listed stake, a 12-0 vote, CAPE 40.1, the explainer's 1.00x against the Desk's 0.59x, and thesis cards that showed an older scorecard as the latest."],
@@ -10869,7 +10963,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
       if (after) after.after(nav);
     });
   }
-  const NO_LINK = "a, button, label, h1, h2, h3, h4, h5, h6, summary, svg, script, style, input, select, textarea, code, kbd, var, table, dt, .src, .eyebrow, .badge, .tip, .gloss, .methods, .term, .signals, #levels, .chart-title, .panel-title, .flabel, .tagline, .kind, .sig-state, .toc, .chips, .tchips, .sec, .readouts, .sentence";
+  const NO_LINK = "#view-home, a, button, label, h1, h2, h3, h4, h5, h6, summary, svg, script, style, input, select, textarea, code, kbd, var, table, dt, .src, .eyebrow, .badge, .tip, .gloss, .methods, .term, .signals, #levels, .chart-title, .panel-title, .flabel, .tagline, .kind, .sig-state, .toc, .chips, .tchips, .sec, .readouts, .sentence";
   const LINKED = new Set();
   function linkTerms(only) {
     const entries = [];
@@ -22641,13 +22735,13 @@ Quotes: ${JSON.stringify(cands)}`;
   const tP = (v, d = 1) => (fin(v) ? pctPlain(v, d) : "n/a");
   const tS = (v, d = 1) => (fin(v) ? pct(v, d) : "n/a");
   const T_ORDER = ["call", "call_short", "product", "vm_rule", "bond30", "hold"];
-  const CONTACT = { name: "Jamie Placco", line: "" };          // the line a reader uses to reach the author; set in one place
+  const CONTACT = { name: "James Placco", links: [["LinkedIn", "https://www.linkedin.com/in/james-placco/"]] };     // set in one place
 
-  function trackCurve(box, W, keys, title) {
+  function trackCurve(box, W, keys, title, height = 260) {
     const col = { call: "var(--accent)", call_short: "var(--s2)", product: "var(--s3)", vm_rule: "var(--s4)", bond30: "var(--s5)", hold: "var(--muted)", qqq: "var(--warn)" };
     const series = keys.filter((k) => W.curve[k]).map((k) => ({ name: k === "qqq" ? "Nasdaq-100 (QQQ)" : SNAP38.policy_name[k], color: col[k], width: k === "call" ? 2.5 : 1.5, pts: W.curve[k].map(([d, v]) => [Date.parse(d), v]) }));
     const p0 = series[0].pts;
-    xyChart(box, { series, yfmt: (v) => "$" + fx(v, 2), xfmt: dateLabel, xticks: yearTicks(p0[0][0], p0[p0.length - 1][0]), label: title, height: 260, snapXs: p0.map((p) => p[0]) });
+    xyChart(box, { series, yfmt: (v) => "$" + fx(v, 2), xfmt: dateLabel, xticks: yearTicks(p0[0][0], p0[p0.length - 1][0]), label: title, height, snapXs: p0.map((p) => p[0]) });
   }
 
   function policyTable(table, W, which) {
@@ -22664,7 +22758,8 @@ Quotes: ${JSON.stringify(cands)}`;
       const dl = window.claude && typeof window.claude.use === "function" ? await window.claude.use("downloads") : null;
       const bytes = Uint8Array.from(atob(T.tearsheet_pdf_b64), (c) => c.charCodeAt(0));
       if (dl) { await dl.save({ filename: `buildout-tearsheet-${T.asof}.pdf`, data: new Blob([bytes]) }); note.textContent = "Saved."; return; }
-      note.textContent = "Downloads are not available in this view. The PDF is in the repository as site/tearsheet.pdf, and on the published site as tearsheet.pdf.";
+      const a = h("a", null, "Open the tear sheet (PDF)"); a.href = "tearsheet.pdf"; a.target = "_blank"; a.rel = "noopener";
+      note.replaceChildren(a);
     } catch (e) {
       note.textContent = e && e.code === "declined" ? "Not saved." : "The download could not start here; the PDF is in the repository as site/tearsheet.pdf.";
     }
@@ -22759,18 +22854,35 @@ Quotes: ${JSON.stringify(cands)}`;
   function renderHome() {
     const T = T38(), box = $("#hm-perf");
     if (!box) return;
-    const B = typeof B30 === "function" ? B30() : null;
     const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null, BC = N && typeof bookCall === "function" ? bookCall(N) : null;
-    const call = BC && BC.menu ? `Cut the book to ${xx(BC.menu.lo.gross)}, or hold ${xx(BC.menu.hi.gross)} with ${pct0(BC.menu.hi.short)} of NAV short in Nasdaq-100 futures; no bond hedge.` : "";
-    $("#hm-call").textContent = call;
-    if (!T) return;
-    const W = T.pit, C = W.policies.call.net, Hd = W.policies.hold.net, L = T.live;
-    rsKpi(box, [[fx(C.sharpe, 2), "Walk-forward Sharpe of the call", `net of costs, ${C.from.slice(0, 4)} to ${C.to.slice(0, 4)}; holding the book ${fx(Hd.sharpe, 2)}`],
-      [tP(C.maxdd, 0), "Its worst drawdown", `holding the book: ${tP(Hd.maxdd, 0)}`],
-      [String(L.calls || 0), "Live calls logged", L.marked_days ? `${L.marked_days} days marked` : "timestamped and hash-chained; marks start with the next bar"]]);
+    $("#hm-call").textContent = BC && BC.menu ? `Hold ${xx(BC.menu.lo.gross)} of the book, or ${xx(BC.menu.hi.gross)} with ${pct0(BC.menu.hi.short)} of NAV short Nasdaq-100 futures. No bond hedge.` : "The call is on the Desk.";
+    $("#hm-why").textContent = BC ? `${(BC.bindingName || "the binding limit").replace(/^the /, "The ")} sets the size, measured on the nine names' own risk; the forecast has not earned the right to move it. Long bonds stay off while stocks and bonds fall together.` : "";
     const ct = $("#hm-contact");
-    ct.replaceChildren(h("strong", null, CONTACT.name));
-    if (CONTACT.line) ct.append(document.createTextNode(" · " + CONTACT.line));
+    ct.replaceChildren();
+    CONTACT.links.forEach(([k, u]) => { const a = h("a", null, k); a.href = u; a.target = "_blank"; a.rel = "noopener"; ct.append(a); });
+    const btn = $("#hm-pdf"), note = $("#hm-pdf-note");
+    if (btn && !btn._bound) { btn._bound = true; btn.addEventListener("click", () => saveTearsheet(btn, note)); }
+    if (!T) { box.replaceChildren(h("p", "empty", "The track record is not in this build.")); return; }
+    const W = T.pit, C = W.policies.call, Hd = W.policies.hold.net, Q = W.bench, L = T.live, E = (T.ledger && T.ledger.entries) || [];
+    $("#hm-asof").textContent = "Data through " + isoNice(T.asof);
+    const fig = (v, k, note) => { const d = h("div"); d.append(h("dt", null, k), h("dd", null, v), h("p", null, note)); return d; };
+    box.replaceChildren(
+      fig(fx(C.net.sharpe, 2), "Sharpe ratio", `Nasdaq-100 ${fx(Q.sharpe, 2)}; holding the book ${fx(Hd.sharpe, 2)}`),
+      fig(tP(C.net.maxdd, 0), "Worst drawdown", `holding the book ${tP(Hd.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`),
+      fig(tS(C.net.y2022, 0), "In 2022", `holding the book ${tS(Hd.y2022, 0)}; Nasdaq-100 ${tS(Q.y2022, 0)}`),
+      fig(tS(C.net.cagr, 1), "A year, compounded", `at ${xx(C.meta.avg_gross)} average exposure`),
+      fig(String(L.calls || E.length || 0), "Live calls logged", E.length ? `hash-chained; the first governs from ${isoNice(E[0].effective_from)}` : "hash-chained; the record starts now"));
+    $("#hm-figs-note").textContent = `Walk-forward, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: each month sized from data to that close and held the next month, costs charged, the nine names chosen point in time each January. The results of a model, not of an account. The backtest, with hindsight, is reported separately on the Track record.`;
+    const cv = $("#hm-curve");
+    if (cv && !cv.childElementCount) trackCurve(cv, W, ["call", "hold", "qqq"], "Walk-forward growth of $1, net of costs: the call, the book held at 1.00x, the Nasdaq-100", 230);
+    const R = (T.regimes && T.regimes.rows) || [], r21 = R.find((r) => /^2021 to/.test(r.regime)) || {}, hi = R.find((r) => r.regime === "Inflation above 3%") || {};
+    const A = T.alternatives, puts = A ? A.rows.map((r) => r.h.put && r.h.put.var_cut).filter(fin) : [];
+    const items = [
+      [sgn2(r21.corr), "Long Treasuries have stopped hedging", `Since 2021 stocks and bonds have moved together; a 30% bond position ${fin(r21.var_cut_30) && r21.var_cut_30 < 0 ? `added ${tP(-r21.var_cut_30, 0)} to` : "barely changed"} stock variance. Since 1962 bonds hedged below 3% inflation and failed above it (correlation ${sgn2(hi.corr)}).`, "#hedgetest", "Hedge test"],
+      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Limits, not forecasts, made the record", `The same Sharpe as holding the book, with the worst drawdown cut by more than half: size falls when the book's own risk rises, before the loss, not after.`, "#track", "Track record"],
+      [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modelled one-month, 90% put on the Nasdaq-100 removed that share of its variance in every inflation and policy regime since 2000, and was the only hedge that paid in 2022. It costs a premium; the bond's failure costs more.`, "#hedgetest", "Hedge test"]];
+    const ol = $("#hm-find"); ol.replaceChildren();
+    items.forEach(([big, t, p, href, lab]) => { const li = h("li"), a = h("a", null, lab); a.href = href; li.append(h("span", "hm-big", big), h("h3", null, t), h("p", null, p), a); ol.append(li); });
   }
 
   /* =====================================================================================
@@ -23254,7 +23366,7 @@ Quotes: ${JSON.stringify(cands)}`;
   function buildGuides() {
     VIEWS.forEach((v) => {
       const view = $("#view-" + v), g = DESK_GUIDE[v];
-      if (!view || !g || view.querySelector(":scope > .dguide")) return;
+      if (!view || !g || view.querySelector(":scope > .dguide") || view.dataset.guide === "off") return;      // v0.38.1: Home is its own front page
       const card = h("aside", "dguide");
       card.setAttribute("aria-label", "About this desk");
       const top = h("div", "dguide-top");
