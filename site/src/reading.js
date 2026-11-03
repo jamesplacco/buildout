@@ -6,7 +6,8 @@
      ===================================================================================== */
   const RR = () => (typeof SOURCES !== "undefined" && SOURCES && Array.isArray(SOURCES.rows) ? SOURCES : null);
   const RR_TYPE = { paper: "Paper", policy: "Policy", data: "Data", book: "Book", history: "History", longform: "Long read", podcast: "Podcast", practitioner: "Practitioner", skeptic: "Skeptic" };
-  const RR_STATE = { lane: "all", thesis: "all" };
+  const RR_STATE = { lane: "all", thesis: "all", all: false };
+  const RR_PAGE = 24;
   // the five that change the engine most: picked by hand, each with the rule it adds
   const RR_PICKS = [
     ["hallucinations.pdf", "Back out the revenue that capex and prices imply, and compare it with the usage trend every quarter."],
@@ -45,9 +46,10 @@
     // the list
     const rows = S.rows.filter((r) => (RR_STATE.lane === "all" || r.lane === RR_STATE.lane) && (RR_STATE.thesis === "all" || r.bears_on.includes(RR_STATE.thesis)));
     const th = RR_STATE.thesis !== "all" ? THESES.find((t) => t.id === RR_STATE.thesis) : null;
-    $("#rr-count").textContent = `${rows.length} of ${S.rows.length} sources${th ? ` on ${th.id.toUpperCase()}: ${th.t}` : ""}.`;
+    const shown = RR_STATE.all || rows.length <= RR_PAGE ? rows : rows.slice(0, RR_PAGE);
+    $("#rr-count").textContent = `${rows.length} of ${S.rows.length} sources${th ? ` on ${th.id.toUpperCase()}: ${th.t}` : ""}${shown.length < rows.length ? `; showing the first ${shown.length}` : ""}.`;
     box.replaceChildren();
-    rows.forEach((r) => {
+    shown.forEach((r) => {
       const c = h("article", "rr-card" + (r.lane === "dissent" ? " against" : ""));
       const top = h("div", "rr-top"); top.append(h("span", "rr-type", RR_TYPE[r.type] || r.type), h("span", "rr-date", r.date.length > 4 ? isoNice(r.date) : r.date));
       const t = h("h3"); const a = h("a", null, r.title); a.href = r.url; a.target = "_blank"; a.rel = "noopener"; t.append(a);
@@ -57,6 +59,9 @@
       c.append(top, t, h("p", "rr-who", r.who), h("p", "rr-claim", r.claim), ch, tags);
       box.append(c);
     });
+    const more = $("#rr-more"); more.replaceChildren();
+    if (shown.length < rows.length) { const b = h("button", "pill strong", `Show all ${rows.length}`); b.type = "button"; b.addEventListener("click", () => { RR_STATE.all = true; renderReading(); }); more.append(b); }
+    else if (RR_STATE.all && rows.length > RR_PAGE) { const b = h("button", "pill", `Show the first ${RR_PAGE}`); b.type = "button"; b.addEventListener("click", () => { RR_STATE.all = false; renderReading(); }); more.append(b); }
   }
 
   /* v0.36: the railway test on the Fundamentals desk (buildout/accounting.py required_revenue; tests check parity) */
