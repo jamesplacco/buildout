@@ -1,0 +1,545 @@
+[
+ {
+  "title": "Monthly Construction Spending (C30), private nonresidential office including data centers",
+  "who": "US Census Bureau",
+  "date": "2026-10-01",
+  "type": "data",
+  "url": "https://www.census.gov/construction/c30/current/index.html",
+  "claim": "The October 1, 2026 release put total US construction at a $2,203.1 billion annual rate for August; AGC's read of the July data shows data center spending up 57% year over year inside a $140 billion office-including-data-centers category.",
+  "bears_on": [
+   "t1",
+   "t4",
+   "nowcast",
+   "book"
+  ],
+  "changes": "Track the data center line each month (next release about Nov 3) and treat two straight months of falling year-over-year growth as the first physical sign that hyperscaler capex guidance is peaking ahead of the earnings calls.",
+  "verified": "Fetched the Census current release page (Aug data, $2,203.1B, +0.9% m/m); data center +57% y/y from the AGC July 2026 construction spending PDF (agc.org)."
+ },
+ {
+  "title": "Short-Term Energy Outlook (STEO), October 2026",
+  "who": "US Energy Information Administration",
+  "date": "2026-10-06",
+  "type": "data",
+  "url": "https://www.eia.gov/outlooks/steo/",
+  "claim": "EIA forecasts Brent at $96/b for 2026 and $105/b in 4Q26 (up $14 from last month), wholesale power at $52/MWh (+11% y/y), and US generation of 4,545 billion kWh in 2026 (about +2.6%) and 4,613 billion kWh in 2027, with commercial demand (which includes data centers) up 2.8% in 2027.",
+  "bears_on": [
+   "t3",
+   "t4",
+   "t2",
+   "hedges",
+   "swans",
+   "nowcast",
+   "rates"
+  ],
+  "changes": "Use each monthly revision to the Brent path as the input for the oil-shock sleeve and to the commercial-sector power line as a check on data center load; an upward Brent revision of $10 or more in one month is a reason to review hedge size.",
+  "verified": "Fetched the STEO landing page and the electricity, coal and renewables report page (October 6, 2026 edition)."
+ },
+ {
+  "title": "Queued Up: 2026 Edition, Characteristics of Power Plants Seeking Transmission Interconnection",
+  "who": "Lawrence Berkeley National Laboratory (Rand, Cheyette, Talley, Zhang, Gorman, Wiser, Seel, Jeong, Kahrl)",
+  "date": "2026-06-30",
+  "type": "data",
+  "url": "https://emp.lbl.gov/queues",
+  "claim": "About 1,312 GW of generation (plus about 749 GW of storage) sat in US interconnection queues at end-2025, down about 10% on the year as withdrawals outran new requests, and only 13% of capacity requested in 2000-2020 had reached commercial operation.",
+  "bears_on": [
+   "t4",
+   "nowcast",
+   "book",
+   "methods"
+  ],
+  "changes": "Apply the 13% completion base rate to any announced power pipeline, including utility and developer claims about data center supply, rather than taking queue GW at face value.",
+  "verified": "Fetched the eScholarship record of the report (escholarship.org/uc/item/5r79s9zn) for date, authors and headline numbers; LBNL page found via search but blocked to the fetcher."
+ },
+ {
+  "title": "PJM 2028/2029 Base Residual Auction results",
+  "who": "PJM Interconnection",
+  "date": "2026-07-14",
+  "type": "data",
+  "url": "https://www.pjm.com/-/media/DotCom/markets-ops/rpm/rpm-auction-info/2028-2029/2028-2029-bra-results-report.pdf",
+  "claim": "The auction cleared at the $325/MW-day cap across PJM for a third time, procured 138,318 MW, cost $16.4 billion (versus $29.7 billion without the collar) and left the region 6,831 MW short of its reliability requirement, with about 2 GW of extra forecast demand mostly from data centers.",
+  "bears_on": [
+   "t4",
+   "book",
+   "swans",
+   "nowcast"
+  ],
+  "changes": "Treat a fourth cap-clearing auction or a shortfall wider than 6.8 GW as confirmation that firm power, not chips, sets the pace of the buildout in the largest US grid, and watch the political response to the cost.",
+  "verified": "Fetched PJM's Inside Lines release and Utility Dive's July 15, 2026 report for cost and reserve figures."
+ },
+ {
+  "title": "ERCOT large load interconnection status and Batch Zero audit",
+  "who": "ERCOT / Public Utility Commission of Texas",
+  "date": "2026-08-21",
+  "type": "data",
+  "url": "https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf",
+  "claim": "ERCOT's large load queue reached about 474 GW of requests, roughly 90% from data centers, while only 17 large loads (about 6.6 GW) had passed stability assessment; an audit of hundreds of proposals is due to the PUCT around December 10, 2026.",
+  "bears_on": [
+   "t4",
+   "t1",
+   "nowcast",
+   "swans"
+  ],
+  "changes": "Read the December audit for the share of the queue judged speculative or duplicate; a large haircut lowers the realistic data center power path and the demand case for Texas gas and nuclear names.",
+  "verified": "Fetched Utility Dive (Aug 21, 2026) and New Project Media (June 2026, 438 GW); ERCOT board presentation link from search results."
+ },
+ {
+  "title": "FERC large load interconnection docket RM26-4 and June 18, 2026 show cause orders",
+  "who": "Federal Energy Regulatory Commission",
+  "date": "2026-06-18",
+  "type": "policy",
+  "url": "https://www.ferc.gov/RM26-4",
+  "claim": "After a DOE-initiated ANOPR in October 2025 and more than 3,500 pages of comments, FERC on June 18, 2026 issued show cause orders to six RTOs and ISOs to speed the interconnection of data centers and other large loads, following its December 2025 PJM co-location order.",
+  "bears_on": [
+   "t4",
+   "book",
+   "nowcast"
+  ],
+  "changes": "Follow the RTO compliance filings in this docket; rules that let large loads connect fast but curtail first would lower the effective firm-power premium and change the value of co-located nuclear deals.",
+  "verified": "Fetched the FERC news page on RM26-4 (April 16, 2026) and Duane Morris's June 23, 2026 note on the six show cause orders."
+ },
+ {
+  "title": "NRC new and advanced reactor licensing (TerraPower Kemmerer Unit 1 construction permit)",
+  "who": "US Nuclear Regulatory Commission",
+  "date": "2026-03-04",
+  "type": "data",
+  "url": "https://www.nrc.gov/reactors/new-reactors/advanced/who-were-working-with/applicant-projects.html",
+  "claim": "The NRC approved a construction permit for TerraPower's 345 MWe Natrium reactor on March 4, 2026, the first commercial non-light-water reactor approval in more than 40 years, and its applicant list now includes TVA Clinch River, Long Mott and Duke's Belews Creek early site permit.",
+  "bears_on": [
+   "t4",
+   "book",
+   "nowcast"
+  ],
+  "changes": "Log each NRC milestone (acceptance, permit, operating license) against the original review schedule; reviews finishing ahead of plan support a shorter nuclear timeline in the power thesis, slips push it out.",
+  "verified": "Fetched the NRC applicant projects page (updated June 18, 2026) and the ANS Nuclear News report of March 4, 2026."
+ },
+ {
+  "title": "US power transformer and substation supply shortfall (executive order on Chinese bulk power equipment)",
+  "who": "Wood Mackenzie",
+  "date": "2026-08-31",
+  "type": "practitioner",
+  "url": "https://www.woodmac.com/es/press-releases/us-executive-order-banning-chinese-bulk-power-equipment-set-to-worsen-critical-transformer-shortage/",
+  "claim": "Wood Mackenzie estimates a 2026 US supply shortage of 15% for power transformers and 8% for substations, and says a ban on Chinese bulk power equipment will worsen it because data centers had used Chinese makers to shorten lead times.",
+  "bears_on": [
+   "t4",
+   "t5",
+   "nowcast",
+   "book"
+  ],
+  "changes": "Treat transformer shortage estimates as a ceiling on how fast new data center load can be energized; a wider gap in the next update is a reason to discount near-term capacity adds in hyperscaler guidance.",
+  "verified": "Fetched the Wood Mackenzie press release (dated August 31, 2026)."
+ },
+ {
+  "title": "GE Vernova 3Q 2026 earnings release (Form 8-K): gas turbine backlog and slot reservations",
+  "who": "GE Vernova (SEC EDGAR)",
+  "date": "2026-10-28",
+  "type": "data",
+  "url": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000162/gevpressrelease3q26.htm",
+  "claim": "Gas power backlog plus slot reservations rose to 122 GW from 116 GW (53 GW to 64 GW firm backlog, 13 GW of reservations converted to orders), with total backlog of $197 billion and guidance for at least 130 GW by year-end.",
+  "bears_on": [
+   "t4",
+   "nowcast",
+   "filings",
+   "book"
+  ],
+  "changes": "Use the quarterly slot-reservation conversion rate as the cleanest read on whether data center power demand is firming into orders; conversion stalling while reservations grow would flag speculative demand.",
+  "verified": "EDGAR filing found via search (fetch blocked); figures confirmed from Turbomachinery Magazine's October 29, 2026 report on the release."
+ },
+ {
+  "title": "TSMC monthly revenue report",
+  "who": "Taiwan Semiconductor Manufacturing Co.",
+  "date": "2026-10-10",
+  "type": "data",
+  "url": "https://investor.tsmc.com/english/monthly-revenue",
+  "claim": "TSMC's September 2026 consolidated net revenue was NT$511.9 billion, up 54.6% year over year (unaudited).",
+  "bears_on": [
+   "t1",
+   "t11",
+   "nowcast",
+   "book",
+   "edges"
+  ],
+  "changes": "Use the monthly print (around the 10th) as the earliest hard read on AI chip volume for NVDA and AVGO; year-over-year growth falling below 30% for two months would be an early warning before the hyperscalers report.",
+  "verified": "Fetched the TSMC investor relations monthly revenue page."
+ },
+ {
+  "title": "Worldwide Semiconductor Equipment Market Statistics (WWSEMS) quarterly billings",
+  "who": "SEMI",
+  "date": "2026-09-04",
+  "type": "data",
+  "url": "https://www.semi.org/en/semi-press-release/global-semiconductor-equipment-billings-increased-23-percent-year-over-year-in-q2-2026-semi-reports",
+  "claim": "Global chip equipment billings were $40.53 billion in Q2 2026, up 23% year over year and 11% quarter over quarter, with South Korea up 54% and Taiwan up 24%, after $36.55 billion (+14%) in Q1.",
+  "bears_on": [
+   "t10",
+   "t1",
+   "nowcast"
+  ],
+  "changes": "Watch Korea billings as the memory capex signal; a second quarter of 50%-plus Korean growth supports the memory-as-capex-inflator thesis, while a sequential fall would mark the top of the memory build.",
+  "verified": "SEMI page blocked to the fetcher; figures confirmed from The Star (Sept 4, 2026 for Q2; June 5, 2026 for Q1) reporting the SEMI release."
+ },
+ {
+  "title": "SEAJ Japan-made semiconductor equipment sales (monthly)",
+  "who": "Semiconductor Equipment Association of Japan",
+  "date": "2026-09-29",
+  "type": "data",
+  "url": "https://www.seaj.or.jp/english/statistics/",
+  "claim": "Japan-made chip equipment sales (three-month average) hit a record of about 598 billion yen in August 2026, up 47.4% year over year and the eighth straight month of growth.",
+  "bears_on": [
+   "t10",
+   "nowcast"
+  ],
+  "changes": "Use SEAJ's late-month print as a monthly bridge between SEMI's quarterly data; growth falling under 20% would be an early read that tool demand for memory and advanced packaging is cooling.",
+  "verified": "Fetched TechNews (Sept 29, 2026) report on SEAJ August data; SEAJ statistics PDFs found via search."
+ },
+ {
+  "title": "DRAM and NAND contract price forecasts and DRAM Market Bulletin",
+  "who": "TrendForce (DRAMeXchange)",
+  "date": "2026-10-28",
+  "type": "data",
+  "url": "https://www.trendforce.com/research/download/RP261028TO",
+  "claim": "TrendForce forecast 3Q26 DRAM contract prices up 13-18% and NAND up 10-15% quarter over quarter, and 4Q26 conventional DRAM up 10-15% and NAND up 15-20%; its October 28 bulletin says cloud-provider orders keep supplier inventory low while PC and phone buyers cut purchases.",
+  "bears_on": [
+   "t10",
+   "t11",
+   "nowcast",
+   "book"
+  ],
+  "changes": "Track whether quarterly contract increases keep shrinking (from the 13-18% pace to single digits); a flat or negative quarter would be the signal that the memory bottleneck and its capex inflation are easing.",
+  "verified": "Fetched the TrendForce Oct 28, 2026 bulletin page, I-Connect007 (July 3, 2026) for 3Q26, and NextMSC tracker (Oct 9, 2026) citing the Sept 30 4Q26 forecast."
+ },
+ {
+  "title": "Silicon Index: daily H100 GPU rental price benchmark (SDH100RT)",
+  "who": "Silicon Data",
+  "date": "2026-11-02",
+  "type": "data",
+  "url": "https://www.silicondata.com/products/silicon-index?gpu=h100",
+  "claim": "Silicon Data's daily H100 rental index read $2.94 per GPU-hour, up 5.8% over seven days, against a hyperscaler H100 reading of $7.12.",
+  "bears_on": [
+   "t11",
+   "t1",
+   "nowcast",
+   "edges",
+   "futures"
+  ],
+  "changes": "Log the index daily and test it as a leading indicator for neocloud and ORCL credit spreads; a sustained fall below the SemiAnalysis October 2025 trough of $1.70 would revive the compute-deflation case, while rises cut against t11.",
+  "verified": "Fetched the Silicon Data index page (published every business day; no date stamp shown, read on Nov 2, 2026)."
+ },
+ {
+  "title": "H100 1-Year Rental Price Index (The Great GPU Shortage)",
+  "who": "SemiAnalysis (Nishball, Nanos, Cheang and others)",
+  "date": "2026-04-02",
+  "type": "practitioner",
+  "url": "https://newsletter.semianalysis.com/p/the-great-gpu-shortage-rental-capacity",
+  "claim": "SemiAnalysis's H100 one-year contract index rose about 40%, from $1.70 per GPU-hour in October 2025 to $2.35 by March 2026, with on-demand capacity sold out and Blackwell capacity booked through September 2026.",
+  "bears_on": [
+   "t11",
+   "t1",
+   "nowcast"
+  ],
+  "changes": "Treat rising term rental prices as direct evidence against t11 for 2026; the desk should check whether its compute-deflation thesis rests on per-token prices rather than per-GPU rental prices and say so explicitly.",
+  "verified": "Fetched the SemiAnalysis newsletter post."
+ },
+ {
+  "title": "Ornn Compute Price Index (OCPI) and ICE GPU compute futures",
+  "who": "Ornn / Intercontinental Exchange",
+  "date": "2026-05-19",
+  "type": "data",
+  "url": "https://www.businesswire.com/news/home/20260519470467/en/ICE-and-Ornn-to-Launch-GPU-Compute-Futures-Contracts",
+  "claim": "ICE and Ornn plan cash-settled, dollar-denominated GPU compute futures referencing OCPI spot series for H100, H200, B200 and RTX 5090, subject to regulatory approval; the B200 contract is listed on ice.com.",
+  "bears_on": [
+   "t11",
+   "futures",
+   "hedges",
+   "options"
+  ],
+  "changes": "Once open interest builds, use the futures curve as a market-implied path for compute prices and as a possible direct hedge for the compute-price leg of the book.",
+  "verified": "Fetched the Business Wire release; ICE product page for the OCPI B200 future found via search."
+ },
+ {
+  "title": "Amazon EC2 Capacity Blocks for ML pricing sheet",
+  "who": "Amazon Web Services",
+  "date": "2026-07-01",
+  "type": "data",
+  "url": "https://aws.amazon.com/ec2/capacityblocks/pricing/",
+  "claim": "AWS lists US East Capacity Block prices of $5.970 per H100-hour (p5.48xlarge), $7.895 per H200-hour (p5en) and $14.208 per B200-hour, after a roughly 20% increase effective July 1, 2026 that followed a 15% H200 rise in January; the next update is scheduled for January 2027.",
+  "bears_on": [
+   "t11",
+   "book",
+   "nowcast"
+  ],
+  "changes": "Check the January 2027 price update: a third increase confirms hyperscaler pricing power in AMZN's AI cloud, while a cut would be the first public sign of compute deflation from a hyperscaler.",
+  "verified": "Fetched the AWS Capacity Blocks pricing page; increase history from Tech Insider and The Register (Jan 5, 2026)."
+ },
+ {
+  "title": "IMF PortWatch chokepoint daily transit calls (Strait of Hormuz)",
+  "who": "International Monetary Fund and University of Oxford",
+  "date": "2026-11-02",
+  "type": "data",
+  "url": "https://portwatch.imf.org/pages/cb5856222a5b4105adc6ee7e880a1730",
+  "claim": "PortWatch publishes free daily AIS-based transit calls by vessel type for chokepoints including Hormuz, and its Hormuz page now warns of GPS jamming, AIS spoofing and vessels going dark during the conflict.",
+  "bears_on": [
+   "t3",
+   "swans",
+   "hedges",
+   "nowcast"
+  ],
+  "changes": "Use daily tanker transit calls as the trigger series for the oil-shock sleeve, but cross-check against a commercial tracker because AIS spoofing can understate or overstate traffic.",
+  "verified": "Fetched the PortWatch chokepoint page (AIS warning text) and site home; Hormuz daily transit-call series confirmed by Good Judgment Open questions that resolve on it."
+ },
+ {
+  "title": "Commodities at Sea daily Hormuz and Bab al-Mandab transit notes",
+  "who": "S&P Global Commodity Insights",
+  "date": "2026-10-26",
+  "type": "data",
+  "url": "https://www.spglobal.com/energy/en/news-research/latest-news/crude-oil/102626-vlcc-transits-climb-at-hormuz-steady-at-bab-al-mandab-for-second-day",
+  "claim": "S&P counted 17 ships through Hormuz on each of October 24 and 25, 2026, with VLCC transits rising to 6 on October 25, the most since October 17.",
+  "bears_on": [
+   "t3",
+   "swans",
+   "hedges"
+  ],
+  "changes": "Compare daily all-ship counts with the pre-war norm and with Kpler export volumes; a run of VLCC transits back near pre-war daily norms is the signal to scale down, not add to, oil-shock protection.",
+  "verified": "Fetched the S&P Global article."
+ },
+ {
+  "title": "Kpler Gulf crude export tracking and blog",
+  "who": "Kpler",
+  "date": "2026-10-05",
+  "type": "practitioner",
+  "url": "https://www.kpler.com/blog/iraqi-basrah-crude-exports-rebound-toward-3-00-mbd-in-october",
+  "claim": "Kpler data showed Middle East crude exports back above the pre-war average of about 18 mb/d by early October 2026 (seven-day average 18.5 mb/d on October 1), and Iraqi Basrah loadings recovering toward 3.0 mb/d in October from 98 kb/d in May.",
+  "bears_on": [
+   "t3",
+   "swans",
+   "hedges"
+  ],
+  "changes": "The gap between near-normal export volumes and low ship counts suggests flows run on fewer, larger or dark vessels; size the oil tail on volumes, not headline transit counts.",
+  "verified": "Fetched the Kpler blog post and Al Jazeera's October 5, 2026 Reuters report on Kpler data."
+ },
+ {
+  "title": "Weekly Petroleum Status Report: Strategic Petroleum Reserve stocks (series WCSSTUS1)",
+  "who": "US Energy Information Administration",
+  "date": "2026-10-15",
+  "type": "data",
+  "url": "https://www.eia.gov/petroleum/supply/weekly/",
+  "claim": "SPR crude stocks fell to 283.0 million barrels in the week ending October 9, 2026, 39.6% of capacity and the lowest since 1982, after the US committed 172 million barrels to a 400 million barrel IEA release in March.",
+  "bears_on": [
+   "t3",
+   "swans",
+   "hedges"
+  ],
+  "changes": "Every 10 million barrel weekly draw reduces the US buffer against a second disruption; with the SPR under 300 million barrels the desk should assume less policy dampening of an oil spike than in 2022.",
+  "verified": "Fetched the EIA WPSR page (data tables not rendered); level confirmed from political.org's October 19, 2026 report citing EIA weekly data."
+ },
+ {
+  "title": "Blue Owl Credit Income Corp. (OCIC) quarterly tender offers (Schedule TO-I/A on EDGAR)",
+  "who": "Blue Owl / SEC EDGAR",
+  "date": "2026-10-26",
+  "type": "data",
+  "url": "https://www.blueowl.com/repurchase-offers-ocic",
+  "claim": "OCIC holders tendered 341.4 million shares (16.8% of shares outstanding) in the September 2026 offer and received 29.8% of their requests, after fills of 22.8% in March and 26.6% in June; through December 2025 every request was paid in full.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "filings",
+   "swans"
+  ],
+  "changes": "Track tendered share of outstanding each quarter: a fall below the 5% cap would mean the redemption queue is clearing, while a rise back above 20% would signal renewed retail flight from non-traded BDCs.",
+  "verified": "Fetched the Blue Owl repurchase offers page (3Q26 offer closed Sept 30) and Crowdfunded Wealth's table citing TO-I/A accession 0001628280-26-067327; EDGAR itself blocked to the fetcher."
+ },
+ {
+  "title": "Fitch U.S. Private Credit Default Rate (PCDR)",
+  "who": "Fitch Ratings",
+  "date": "2026-09-14",
+  "type": "data",
+  "url": "https://www.webull.com/news/15578827387765760",
+  "claim": "Fitch's trailing-12-month private credit default rate reached a record 6.3% in August 2026 (6.1% in July, above 6% since April), with healthcare and industrial borrowers at 9.9% while technology software was 0.6%.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "swans"
+  ],
+  "changes": "Software defaults are still near zero, so the AI-disruption loss channel has not shown up in defaults yet; a software default rate above 3% would be the signal that AI is hitting private credit borrowers directly.",
+  "verified": "Fetched the Dow Jones report on Webull (Sept 14, 2026) of Fitch's August PCDR and Funds Society (March 2026); Newsquawk Oct 29, 2026 headline says the Q3 rate remains elevated. Fitch's own site blocked to the fetcher."
+ },
+ {
+  "title": "KBRA Middle Market Monthly Pulse and KBRA Middle Market Default Monitor (KMDM)",
+  "who": "KBRA",
+  "date": "2026-09-23",
+  "type": "data",
+  "url": "https://www.kbra.com/publications/RfnNrYxp/kbra-releases-research-private-credit-middle-market-monthly-pulse-august-2026?format=web",
+  "claim": "KBRA's LTM middle-market default rate rose to 3.50% by count, the three-month downgrade rate rose 170 bp to 13.9%, and median leverage rose 0.3x to 6.5x across 2,948 sponsored borrowers.",
+  "bears_on": [
+   "t6",
+   "credit"
+  ],
+  "changes": "Use the downgrade rate as a lead on defaults; downgrades above 15% with leverage still rising would justify adding to the private credit hedge before Fitch defaults move.",
+  "verified": "Fetched the KBRA publication page."
+ },
+ {
+  "title": "Federal Reserve H.8, Assets and Liabilities of Commercial Banks",
+  "who": "Board of Governors of the Federal Reserve System",
+  "date": "2026-10-30",
+  "type": "data",
+  "url": "https://www.federalreserve.gov/releases/h8/current/default.htm",
+  "claim": "Bank loans to nondepository financial institutions reached $2,118.8 billion in the week ending October 21, 2026, up about 20% from $1,721.9 billion a year earlier, while C&I loans were $2,997.0 billion.",
+  "bears_on": [
+   "t6",
+   "t9",
+   "credit",
+   "rates",
+   "nowcast"
+  ],
+  "changes": "Watch the weekly nonbank lending line as the bank-to-private-credit channel; a sharp stall or decline after this 20% growth would signal banks pulling back from fund finance before it shows in BDC marks.",
+  "verified": "Fetched the H.8 current release (October 30, 2026)."
+ },
+ {
+  "title": "Senior Loan Officer Opinion Survey on Bank Lending Practices (October 2026)",
+  "who": "Board of Governors of the Federal Reserve System",
+  "date": "2026-11-02",
+  "type": "data",
+  "url": "https://www.federalreserve.gov/data/sloos/sloos-202610.htm",
+  "claim": "Banks reported basically unchanged C&I standards for large firms but tighter standards for small firms and, on net, tighter standards for every category of loan to nonbank financial institutions, including private equity funds and business credit intermediaries.",
+  "bears_on": [
+   "t6",
+   "t2",
+   "credit",
+   "rates"
+  ],
+  "changes": "Tightening on loans to nonbanks while their demand rises is the setup the private credit thesis expects; next survey (late January 2027) showing further tightening would support adding hedge size.",
+  "verified": "Fetched the October 2026 SLOOS page."
+ },
+ {
+  "title": "Hiring for the data center build-out",
+  "who": "Indeed Hiring Lab (Aubrey Woessner, Laura Ullrich)",
+  "date": "2026-07-14",
+  "type": "data",
+  "url": "https://hiringlab.indeed.com/2026/07/14/hiring-for-the-data-center-build-out/",
+  "claim": "Data center job postings rose from about 2 to about 6 per 1,000 US postings in two years while total postings fell about 12%, and hourly installation and maintenance roles at data centers post a 42% pay premium (about $10 an hour).",
+  "bears_on": [
+   "t4",
+   "t1",
+   "nowcast"
+  ],
+  "changes": "Use the postings share as a weekly-frequency labor gauge of build activity; a fall in the share while big tech's share of local postings stays high would flag a slowdown in new sites before capex guidance changes.",
+  "verified": "Fetched the Hiring Lab post."
+ },
+ {
+  "title": "Department of War FY2027 budget request, RDT&E Programs (R-1)",
+  "who": "Office of the Under Secretary of War (Comptroller)",
+  "date": "2026-04",
+  "type": "data",
+  "url": "https://comptroller.war.gov/Portals/45/Documents/defbudget/FY2027/FY2027_r1.pdf",
+  "claim": "The FY2027 R-1 requests about $218.8 billion of discretionary RDT&E (about $74 billion above FY2026 enacted) plus about $124.9 billion of mandatory funds, within a national defense topline CSIS puts at about $1.5 trillion including about $350 billion of reconciliation.",
+  "bears_on": [
+   "t5",
+   "book",
+   "nowcast"
+  ],
+  "changes": "Track how much of the mandatory (reconciliation) money Congress actually passes; the multi-year re-armament thesis depends on the roughly $350 billion mandatory piece, which is the part most at risk.",
+  "verified": "Fetched the comptroller R-1 PDF and CSIS's April 10, 2026 analysis by Seamus P. Daniels."
+ },
+ {
+  "title": "Korea trade statistics, first 10 and 20 days of the month (Korea Customs Service)",
+  "who": "Korea Customs Service",
+  "date": "2026-10-21",
+  "type": "data",
+  "url": "https://www.koreatimes.co.kr/economy/20261021/exports-double-in-1st-20-days-of-october-on-robust-chip-shipments",
+  "claim": "Korea's exports in October 1-20, 2026 were a record $61.6 billion, with semiconductor exports of $27.5 billion, up 222.5% year over year.",
+  "bears_on": [
+   "t10",
+   "nowcast",
+   "edges",
+   "book"
+  ],
+  "changes": "Use the 10-day and 20-day chip export prints as the fastest public read on memory pricing and HBM volume; a deceleration below 100% year-over-year growth would be an early peak signal for the memory capex inflator.",
+  "verified": "Fetched the Korea Times report of the customs data."
+ },
+ {
+  "title": "Taiwan export orders (monthly)",
+  "who": "Taiwan Ministry of Economic Affairs",
+  "date": "2026-10-20",
+  "type": "data",
+  "url": "https://focustaiwan.tw/business/202610200019",
+  "claim": "Taiwan's September 2026 export orders hit a record $114.21 billion, up 62.4% year over year, with ICT orders up 87.3% and electronics up 71.0%, and MOEA guided to $112.5-115.9 billion next.",
+  "bears_on": [
+   "t1",
+   "nowcast",
+   "edges"
+  ],
+  "changes": "Orders lead shipments by one to three months, so compare MOEA's guidance with the next print; an actual below the low end of guidance would be an early miss for AI server demand.",
+  "verified": "Fetched Focus Taiwan's October 20, 2026 report of MOEA data."
+ },
+ {
+  "title": "North America Data Center Trends H1 2026",
+  "who": "CBRE",
+  "date": "2026-09-08",
+  "type": "practitioner",
+  "url": "https://www.cbre.com/insights/books/north-america-data-center-trends-h1-2026",
+  "claim": "Vacancy across eight primary North American markets held at 1.4% (0.2% in Northern Virginia), 7,481 MW was under construction (up 24.8%), and more than 80% of it was preleased.",
+  "bears_on": [
+   "t1",
+   "t4",
+   "credit",
+   "nowcast"
+  ],
+  "changes": "Preleasing and vacancy are the occupancy check on data center ABS and private credit loans; a falling prelease share or vacancy above 3% would be the first sign of the oversupply the FSB warns about.",
+  "verified": "Fetched the CBRE press release dated September 8, 2026."
+ },
+ {
+  "title": "NERC Level 3 Alert on large computational loads",
+  "who": "North American Electric Reliability Corporation",
+  "date": "2026-05-04",
+  "type": "policy",
+  "url": "https://www.nerc.com/programs/bulk-power-system-awareness/alerts",
+  "claim": "NERC issued its highest-level alert, only its third Level 3, after events such as a near-simultaneous loss of about 1,500 MW of voltage-sensitive data center load in Northern Virginia, with seven recommended actions and responses due August 3, 2026.",
+  "bears_on": [
+   "t4",
+   "swans"
+  ],
+  "changes": "Treat a mandatory large-load reliability standard as a likely next step; it would add ride-through equipment cost to new data centers and could slow interconnection.",
+  "verified": "Fetched Let's Data Science (May 8, 2026, citing E&E News) for alert details; NERC alerts page fetched and exists but lists alerts dynamically."
+ },
+ {
+  "title": "Commercial electricity sales have soared in Virginia, driven by data centers (Today in Energy)",
+  "who": "US Energy Information Administration",
+  "date": "2026-05-05",
+  "type": "data",
+  "url": "https://www.eia.gov/todayinenergy/detail.php?id=67664",
+  "claim": "Virginia's commercial power sales grew by nearly 30 million MWh from 2019 to 2025, and PJM's Dominion zone winter peak reached 25,413 MW in 2025-26, 45% above 2019-20.",
+  "bears_on": [
+   "t4",
+   "nowcast"
+  ],
+  "changes": "Use EIA's monthly state commercial sales (Electric Power Monthly) for Virginia and Texas as the measured, not forecast, data center load series; compare it with PJM's 5.4% a year peak growth forecast.",
+  "verified": "Fetched the EIA Today in Energy article."
+ },
+ {
+  "title": "Preliminary Monthly Electric Generator Inventory (EIA-860M)",
+  "who": "US Energy Information Administration",
+  "date": "2026-02-20",
+  "type": "data",
+  "url": "https://www.eia.gov/electricity/data/eia860m/",
+  "claim": "Developers planned a record 86 GW of US utility-scale additions for 2026: 43.4 GW solar, 24 GW batteries, 11.8 GW wind and only 6.3 GW natural gas.",
+  "bears_on": [
+   "t4",
+   "nowcast"
+  ],
+  "changes": "Track monthly slippage in planned gas and nuclear online dates in EIA-860M; firm capacity is a small share of additions, so delays there matter more for data center supply than solar totals.",
+  "verified": "Fetched the EIA Today in Energy article of February 20, 2026 citing EIA-860M."
+ },
+ {
+  "title": "Loudoun County Board pause on legislative data center and substation applications",
+  "who": "Loudoun County, Virginia",
+  "date": "2026-09-16",
+  "type": "policy",
+  "url": "https://www.loudoun.gov/DocumentCenter/View/222331/Statement---Loudoun-Board-Enacts-Pause-on-Data-Centers",
+  "claim": "Loudoun's board voted 7-1-1 on September 15, 2026 to pause consideration of legislative data center and substation applications until its standards review ends in 2027, while at least 17 grandfathered by-right cases totaling over 11 million square feet proceed.",
+  "bears_on": [
+   "t4",
+   "t1",
+   "nowcast"
+  ],
+  "changes": "Monitor county land-use dockets in the top markets as a permit-level signal; similar pauses spreading to other Virginia or Texas counties would move growth to new markets and lengthen time to power.",
+  "verified": "Fetched the Loudoun County statement and News Flash page."
+ }
+]

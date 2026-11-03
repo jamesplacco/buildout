@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_site import build  # noqa: E402
 import printcheck  # noqa: E402
 
-VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "credit", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
+VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "credit", "reading", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
          "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
@@ -90,7 +90,8 @@ async def check_page(page, label: str, views=VIEWS) -> None:
         res = await page.evaluate("""(bad) => {
           const de = document.documentElement, view = document.querySelector('.view:not([hidden])');
           const code = view && view.querySelector('.cd-src');            // the engine's own source may say null or NaN
-          const txt = view ? (code ? view.innerText.replace(code.innerText, '') : view.innerText) : '';
+          const txt0 = view ? (code ? view.innerText.replace(code.innerText, '') : view.innerText) : '';
+          const txt = txt0.replace(/The Infinity Machine/g, '');   // v0.36: a book title, not a number that overflowed
           const hits = bad.filter((b) => txt.includes(b));
           if (/\bnull\b/.test(txt)) hits.push("null");
           const seen = {}, dup = [];
@@ -198,7 +199,7 @@ async def extreme_inputs(page, label: str) -> None:
             await page.click(btn)
         await page.wait_for_timeout(300)
         txt = await page.evaluate("(() => { const v = document.querySelector('.view:not([hidden])'), c = v.querySelector('.cd-src'); return c ? v.innerText.replace(c.innerText, '') : v.innerText; })()")
-        bad = [b for b in BAD_TEXT if b in txt] + (["null"] if __import__("re").search(r"\bnull\b", txt) else [])
+        bad = [b for b in BAD_TEXT if b in txt.replace("The Infinity Machine", "")] + (["null"] if __import__("re").search(r"\bnull\b", txt) else [])
         if bad:
             fail(f"{label} extreme inputs on #{view}: shows {bad}")
 
@@ -562,7 +563,7 @@ async def think_and_field(page, label: str) -> None:
     """v0.8: the brain's reasoning under extreme and missing observations, and the field desk end to end."""
     import re
     def bad_text(txt):
-        return [b for b in BAD_TEXT if b in txt] + (["null"] if re.search(r"\bnull\b", txt) else [])
+        return [b for b in BAD_TEXT if b in txt.replace("The Infinity Machine", "")] + (["null"] if re.search(r"\bnull\b", txt) else [])
     await page.evaluate("location.hash = 'brain'")
     await page.wait_for_timeout(400)
     await page.click("#br-view button[data-v=think]")

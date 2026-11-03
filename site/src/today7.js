@@ -48,7 +48,7 @@
       v: `correlation ${sgn2(I.corr.v)}`, d: I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d), live: I.corr.live,
       why: `TLT hedge: ${TD.status !== "ok" ? "unavailable" : TD.on ? "on" : "off"} under policy hedge.tlt.v2. It returns at −0.10 (${fx(Math.max(0, I.corr.v + 0.1), 2)} away).`, href: "#d-duration" });
     const inBand = HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1];
-    out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation sits inside the band where 156 years of data cannot pin the line" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
+    out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation is in the 2.75 to 4.25% zone where 156 years of data cannot say whether bonds hedge" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
       v: `${pctPts(I.infl.avg36)} over 36 months${HL.band ? `; band ${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""}`, d: monthNice(I.infl.d), live: I.infl.live,
       why: `Inflation sleeve: ${I.infl.avg36 >= I.lineAt ? "8%, half gold, half energy" : "2%"}. TLT inflation gate ${TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`, href: "#fi-hedge" });
     let third = null;
@@ -92,8 +92,21 @@
     if (BC) {
       const B = BC.B, P = B.hedges && B.hedges.policies;
       const M = BC.menu;
-      ans.append(h("strong", null, "Why. "), document.createTextNode(`Measured on the nine names' own prices, the book at full size breaks ${BC.breaches === 3 ? "all three" : BC.breaches} of its risk limits: its worst month in twenty is ${pctPlain(B.tail.es95.governing, 0)} against a ${pctPlain(B.limits.es_budget, 0)} budget. ${M ? `Every mix from ${xx(M.lo.gross)} unhedged to ${xx(M.hi.gross)} with a ${pct0(M.hi.short)} short meets the limits at about ${pctPlain(M.hi.vol, 0)} volatility; the ends differ in what the book is a bet on, the market or these nine names against it, and that choice is the PM's.` : `The tightest limit allows ${xx(BC.size)}.`} The decision engine finds no evidence for sizing away from holding, and the one timing rule that passed its test (sizing by volatility, over two crashes) reads full size today, so the limits set the size. `), evTag("obs"));
-      ans.append(h("strong", null, " Hedge. "), document.createTextNode(`${st === "amplifying" ? "Bonds won't hedge it: stocks and bonds are moving together" : st === "hedging" ? "Bonds are hedging stocks at the moment" : "Whether bonds hedge is unproven"} (S&P 500 against the 10-year, 36 months: ${sgn2(I.corr.v)})${P ? `, and on the book's own days since ${B.hedges.from.slice(0, 4)} a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} against ${pct0(P.nasdaq_beta.variance_cut)} for a Nasdaq-100 short` : ""}. `), evTag("obs"));
+      // v0.36: the reasoning as three numbered steps, then the hedge, then what would change it
+      const S0 = B.sizes, L0 = B.limits;
+      ans.append(h("p", "t7-lede", `Why, in three steps:`));
+      const ol = h("ol", "t7-steps");
+      const li = (strong, text, ev) => { const x = h("li"); x.append(h("strong", null, strong + " "), document.createTextNode(text + " ")); if (ev) x.append(evTag(ev)); ol.append(x); };
+      li("At full size the book breaks its risk limits.", `Measured on the nine names' own daily prices since ${B.from.slice(0, 4)}: its worst month in twenty is ${pctPlain(B.tail.es95.governing, 0)} against a ${pctPlain(L0.es_budget, 0)} budget, its volatility ${pctPlain(B.risk.vol, 0)} against ${pctPlain(L0.vol_target, 0)}, and a bad year (95th percentile) ${pctPlain(B.at_full.drawdown95, 0)} down against a ${pctPlain(L0.max_drawdown, 0)} cap. The drawdown cap is the tightest: it allows ${xx(S0.drawdown_cap)}.`, "obs");
+      li("Nothing argues for a different size.", `The decision engine, tested on every month since 1940, finds no evidence that timing beats holding, and the one sizing rule with support (cut exposure when volatility is high; its gain comes from two crashes, 2000 and 2008, a thin record) reads full size today. So the limits, not a forecast, set the size.`, "obs");
+      if (M) li("There are two ways to meet the limits.", `Cut to ${xx(M.lo.gross)}, or hold ${xx(M.hi.gross)} and short ${pct0(M.hi.short)} of NAV in Nasdaq-100 futures; every mix in between also works, and all run near ${pctPlain(M.hi.vol, 0)} volatility. The first is a smaller bet on the market; the second is a bet that these nine names beat the index. Which bet to hold is the PM's call.`, null);
+      ans.append(ol);
+      const hp = h("p", "t7-hedge");
+      hp.append(h("strong", null, "Why not bonds. "), document.createTextNode(`${st === "amplifying" ? "Bonds have not been hedging: stocks and bonds have moved together" : st === "hedging" ? "Bonds are hedging stocks at the moment, but" : "Whether bonds hedge is unproven"} (S&P 500 against the 10-year, 36 months: ${sgn2(I.corr.v)})${P ? `, and on the book's own days since ${B.hedges.from.slice(0, 4)} a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} against ${pct0(P.nasdaq_beta.variance_cut)} for a Nasdaq-100 short` : ""}. `), evTag("obs"));
+      ans.append(hp);
+      const cp = h("p", "t7-change");
+      cp.append(h("strong", null, "What would change it. "), document.createTextNode(`The size rises if the book's volatility or tail falls back inside its limits at full size, or if the engine's evidence gate opens; it falls if a limit tightens. Bonds come back as the hedge if the stock-bond correlation turns negative (below ${sgn2(-0.10)}) with inflation easing.`));
+      ans.append(cp);
     } else {
       const lead = TD.status !== "ok" ? "Would bonds hedge the book? Unknown today." : TD.on ? "Would bonds hedge the book? Reliable enough to hold." : st === "amplifying" ? "Would bonds hedge the book? Not in this regime." : "Would bonds hedge the book? Unproven.";
       ans.append(h("strong", null, lead + " "), document.createTextNode(`S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}. `), evTag("obs"));
@@ -110,7 +123,7 @@
         const BC = N && typeof bookCall === "function" ? bookCall(N) : null;
         if (BC) {
           const S = BC.B.sizes;
-          sz.append(h("strong", null, `One call: ${xx(BC.size)}. `), document.createTextNode(`The decision engine holds the ${xx(N.exposure)} baseline (no evidence for any other size); the book's own limits, measured on its names' prices, allow ${xx(S.es_budget)} (expected shortfall), ${xx(S.vol_target)} (volatility) and ${xx(S.drawdown_cap)} (drawdown), and the smallest is the size. ${BC.keep != null ? `To keep every name at full size instead, short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}`));
+          sz.append(h("strong", null, `One call: ${xx(BC.size)}. `), document.createTextNode(`The decision engine holds the ${xx(N.exposure)} baseline (no evidence for any other size); the book's own limits, measured on its names' prices, allow ${xx(S.es_budget)} (expected shortfall), ${xx(S.vol_target)} (volatility) and ${xx(S.drawdown_cap)} (drawdown), and the smallest is the size. ${BC.menu ? `Or keep every name at full size and short ${pct0(BC.menu.hi.short)} of NAV in Nasdaq-100 futures. ` : BC.keep != null ? `Or keep every name at full size and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}`));
           const cross = [];
           if (opt) cross.push(`scenario solver ${xx(opt.port[0])}${fin(R0.robust_share) ? ` (optimal in ${pct0(R0.robust_share)} of assumption pairs)` : ""}`);
           if (N.hedge && /trend (on|off)/.test(N.hedge.context)) cross.push(`10-month trend rule ${/trend on/.test(N.hedge.context) ? "on" : "off"}`);
@@ -152,7 +165,7 @@
     // can I trust it
     const tr = $("#t7-trust");
     tr.replaceChildren();
-    const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 23, 2026"], ["Research", `${readF().panel.end}, line ${HL.status.replace(/_/g, " ")}`],
+    const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 23, 2026"], ["Research", `monthly panel to ${readF().panel.end}; inflation line ${HL.status === "ok" ? "validated" : HL.status.replace(/_/g, " ")}`],
       ["Filings", FUND.note || FUND.as_of], ["Book", LIVE.report && LIVE.report.summary ? `engine run ${isoNice(LIVE.report.summary.as_of)}${adjTxt(LIVE.report.summary.adjustments)}` : "model book, as shipped"]];
     fresh.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); tr.append(li); });
     if (typeof renderLanding === "function") renderLanding();   // the call board, the stages and the counts read the same inputs

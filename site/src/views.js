@@ -1041,15 +1041,16 @@
       c.id = t.id;
       const head = h("div", "thesis-head");
       const label = t.st === "active" ? "Active" : t.st === "watch" ? "Watch" : "Risk";
-      const last = Array.isArray(t.sc) && t.sc.length ? t.sc[t.sc.length - 1].v : null;
+      const SC = Array.isArray(t.sc) ? t.sc.slice().sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0)) : [];     // v0.36: by date, whatever the order in the data
+      const last = SC.length ? SC[SC.length - 1].v : null;
       head.append(h("h3", null, t.t), h("span", "status " + t.st, label + (last ? ` · ${last}` : "")));
       const left = h("div", "col"), right = h("div", "col");
       const sec = (title, node) => { const d = h("div"); d.append(h("h4", null, title), node); return d; };
       const ul = (items) => { const u = h("ul"); items.forEach((x) => u.append(h("li", null, x))); return u; };
       // v0.31: the card shows the stance, the latest verdict, the trade and what would change it; the evidence folds below
       left.append(h("p", "stance", t.stance));
-      if (Array.isArray(t.sc) && t.sc.length) {
-        const x = t.sc[t.sc.length - 1], p = h("p", "prose");
+      if (SC.length) {
+        const x = SC[SC.length - 1], p = h("p", "prose");
         p.append(h("strong", null, `${isoNice(x.d)}: ${x.v}. `), document.createTextNode(x.n + " "));
         if (x.src) { const a = h("a", "src", "Source"); a.href = x.src; a.target = "_blank"; a.rel = "noopener"; p.append(a); }
         left.append(sec("Latest scorecard", p));
@@ -1066,7 +1067,15 @@
         mbox.append(sec("This week's evidence", u));
       }
       if (BEAR[t.id]) mbox.append(sec("Strongest case against", h("p", "prose", BEAR[t.id])));
-      if (Array.isArray(t.sc) && t.sc.length > 1) mbox.append(sec("Earlier scorecards", ul(t.sc.slice(0, -1).map((x) => `${isoNice(x.d)}: ${x.v}. ${x.n}`))));
+      // v0.36: the Reading room's sources on this thesis: the best dissent first, then the reading that changes how it is tested
+      if (typeof SOURCES !== "undefined" && SOURCES && Array.isArray(SOURCES.rows)) {
+        const on = SOURCES.rows.filter((r) => r.bears_on.includes(t.id));
+        const srcList = (rows) => { const u = h("ul", "thesis-src"); rows.forEach((r) => { const li = h("li"); const a = h("a", null, r.title); a.href = r.url; a.target = "_blank"; a.rel = "noopener"; li.append(a, document.createTextNode(` (${r.who}, ${r.date.slice(0, 4)}). ${r.claim} `), h("em", null, "What it changes: " + r.changes)); u.append(li); }); return u; };
+        const against = on.filter((r) => r.lane === "dissent").slice(0, 2), read = on.filter((r) => r.lane !== "dissent").slice(0, 3);
+        if (against.length) mbox.append(sec("Read against it", srcList(against)));
+        if (read.length) { const d = sec("Read to test it", srcList(read)); const a = h("a", "src", `All ${on.length} sources on this thesis in the Reading room`); a.href = "#reading"; d.append(a); mbox.append(d); }
+      }
+      if (SC.length > 1) mbox.append(sec("Earlier scorecards", ul(SC.slice(0, -1).reverse().map((x) => `${isoNice(x.d)}: ${x.v}. ${x.n}`))));
       mbox.append(sec("Data the engine tracks", ul(t.data)));
       more.append(mbox);
       c.append(head, left, right, more);
@@ -1149,7 +1158,7 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", credit: "Private credit", library: "Library", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
+  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", credit: "Private credit", reading: "Reading room", library: "Library", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedges", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Engine", appendix: "Appendix",
     decide: "Decide", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
     noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Solve", games: "Games", field: "Field", ooda: "Decision loop", decision: "Decision engine", portfolio: "Portfolio", matrix: "The shortcut", geometry: "Geometry", positions: "Positions", engines: "Engine room", atlas: "Atlas", mind: "The mind", labs: "Labs", analysis: "Analysis", bonds: "Bonds", ml: "ML lab", reality: "Reality check", edge: "Edge", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",

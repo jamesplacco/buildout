@@ -102,3 +102,23 @@ def grade(value: float | None, healthy: float, red: float, direction: str) -> st
 def red_flags(metrics: dict) -> list[dict]:
     return [{"key": k, "test": label, "value": metrics.get(k), "grade": grade(metrics.get(k), h, r, d)}
             for k, label, h, r, d in RED_FLAG_TESTS]
+
+
+# ---------------------------------------------------------------- v0.36: the revenue a year of capex must earn
+# Odlyzko's test from the 1840s railway mania: back out the revenue the spending implies and set it against what is
+# actually billed. Inputs dated and sourced on the Fundamentals desk; the arithmetic is one line.
+CAPEX_2026 = {"Microsoft": 170e9, "Alphabet": 200e9, "Amazon": 220e9, "Meta": 140e9}     # guides after Q3 2026; midpoints of ranges
+CLOUD_Q3_2026 = {"AWS": 46.0e9, "Google Cloud": 30.7e9, "Microsoft Cloud": 63.9e9}      # quarterly revenue, Q3 2026 (Microsoft's includes commercial Office)
+
+
+def required_revenue(capex: float, life_years: float = 6.0, cost_of_capital: float = 0.09, op_margin: float = 0.36) -> dict:
+    """Revenue a year that one year's capex must generate to pay back its depreciation and earn its cost of capital:
+    required operating profit = capex x (1 / life + r); required revenue = that / operating margin."""
+    op = capex * (1.0 / life_years + cost_of_capital)
+    return {"capex": capex, "life_years": life_years, "cost_of_capital": cost_of_capital, "op_margin": op_margin,
+            "required_op_profit": op, "required_revenue": op / op_margin}
+
+
+def odlyzko_ratio(required: float, billed_run_rate: float) -> float:
+    """Implied revenue over what is billed today; above about 2 is where the railway mania's prices stood."""
+    return required / billed_run_rate

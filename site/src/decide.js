@@ -115,7 +115,7 @@
 
     // 4. index puts, aligned with the VIX and VIX-curve signals
     const t = I.term.v, vx = I.vix.v;
-    const tail = t >= 1 || vx >= 30 ? ["Monetize puts in stages", 2] : t >= 0.95 ? ["Buy put spreads before the curve inverts", 1] : vx >= 20 ? ["Hold hedges; do not chase", 1] : ["Buy 3- to 6-month put spreads: protection is cheap", 0];
+    const tail = t >= 1 || vx >= 30 ? ["Monetize puts in stages", 2] : t >= 0.95 ? ["Buy put spreads now, while the VIX curve still slopes up (front VIX near the 3-month)", 1] : vx >= 20 ? ["Hold hedges; do not chase", 1] : ["Buy 3- to 6-month put spreads: protection is cheap", 0];
     out.push({ id: "d-tail", n: "Buy insurance?", q: "Index puts and put spreads", level: tail[1],
       ins: [["VIX", fx(vx, 2), `${isoNice(I.vix.d)} · ${liveTag(I.vix)}`], ["VIX over 3-month VIX", fx(t, 3), `${isoNice(I.term.d)} · below 0.95 normal, above 1 inverted`],
         ["VXN", fx(I.vxn.v, 2), "Nasdaq-100 implied"], ["Budget", `${fx(POLICY7.limits.maxPremium * 100, 1)}% of NAV a year`, "the policy cap (limits.portfolio.v1); the Options desk prices what it buys"]],
@@ -490,10 +490,10 @@
             return BC ? cell("Do", BC.menu ? `Cut to ${xx(BC.menu.lo.gross)}, or keep ${xx(BC.menu.hi.gross)} and short ${pct0(BC.menu.hi.short)} of NAV in Nasdaq-100 futures. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}` : `Run the book at ${xx(BC.size)}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${BC.menu ? `Every mix between meets the limits at about ${pctPlain(BC.menu.hi.vol, 0)} volatility; the menu is on the Book risk desk. ` : BC.keep != null ? `Or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}${tail.act}; ${lower(cr.act)}.`, "#book", "Book risk")
               : cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call governs; the volatility rule's ${xx(g.vol)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions"); })()
         : cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")),
-      cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds won't hedge: stocks and bonds move together (${sgn2(I.corr.v)}).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
+      cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds have not been hedging: stocks and bonds have moved together (${sgn2(I.corr.v)}, 36 months).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
         above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `At 2% inflation from here, the 36-month average stays above 2.75% for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),
-      near.length ? cell("Watch", near.map((x) => `${x.row.n}: ${fmtRocLevel(x.row, x.at13.at)} in ${durTxt(x.at13.weeks)}`).join("; ") + ".",
-        `At the 13-week pace. ${near.map((x) => `${x.row.n}: "${x.at13.label}"`).join("; ")}.`, "#roc-title", "Rates of change")
+      near.length ? cell("Watch", near.map((x) => `${x.row.n} on pace to reach ${fmtRocLevel(x.row, x.at13.at)} in ${durTxt(x.at13.weeks)}`).join("; ") + ".",
+        `A straight-line projection of the last 13 weeks, not a forecast. Crossing reads: ${near.map((x) => `${x.row.n} "${x.at13.label}"`).join("; ")}.`, "#roc-title", "Rates of change")
         : cell("Watch", "No rule line is approaching at the current pace.", "", "#roc-title", "Rates of change"));
   }
 

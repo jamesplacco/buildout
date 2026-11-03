@@ -1,0 +1,520 @@
+[
+ {
+  "title": "... and the Cross-Section of Expected Returns",
+  "who": "Campbell R. Harvey, Yan Liu, Heqing Zhu (NBER WP 20592; Review of Financial Studies 2016)",
+  "date": "2014-10",
+  "type": "paper",
+  "url": "https://www.nber.org/papers/w20592",
+  "claim": "Given the hundreds of factors already tested, a newly discovered factor should clear a t-ratio of about 3.0 rather than the conventional 2.0.",
+  "bears_on": [
+   "methods",
+   "edges",
+   "decision"
+  ],
+  "changes": "Raise the hurdle in the edges desk from t of 2 to t of 3 and report how many signals were tried before each one shown.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting and Non-Normality",
+  "who": "David H. Bailey, Marcos Lopez de Prado (Journal of Portfolio Management 40(5))",
+  "date": "2014-07-31",
+  "type": "paper",
+  "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551",
+  "claim": "Proposes the Deflated Sharpe Ratio, which adjusts a backtest Sharpe for the number of trials run and for non-normal returns (skew and fat tails).",
+  "bears_on": [
+   "methods",
+   "decision",
+   "edges"
+  ],
+  "changes": "Every sizing-engine backtest since 1940 should print a deflated Sharpe next to the raw one, with the trial count logged.",
+  "verified": "Fetched the SSRN abstract page."
+ },
+ {
+  "title": "Replicating Anomalies",
+  "who": "Kewei Hou, Chen Xue, Lu Zhang (NBER WP 23394; Review of Financial Studies 2020)",
+  "date": "2017-05",
+  "type": "paper",
+  "url": "https://www.nber.org/papers/w23394",
+  "claim": "Of 447 anomalies, 286 (64%) are insignificant at 5% with NYSE breakpoints and value weights, rising to 380 (85%) at a t cutoff of 3.",
+  "bears_on": [
+   "methods",
+   "edges"
+  ],
+  "changes": "Test edges with value weights and NYSE breakpoints so microcaps cannot carry a signal.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "Is There A Replication Crisis In Finance?",
+  "who": "Theis Ingerslev Jensen, Bryan T. Kelly, Lasse Heje Pedersen (NBER WP 28432; Journal of Finance 2023)",
+  "date": "2021-02",
+  "type": "skeptic",
+  "url": "https://www.nber.org/papers/w28432",
+  "claim": "Argues against the replication-crisis view: a Bayesian model finds most factors replicate, cluster into 13 themes, and work out of sample across 93 countries.",
+  "bears_on": [
+   "methods",
+   "edges"
+  ],
+  "changes": "Pair the multiple-testing haircut with Bayesian shrinkage by theme rather than throwing out every factor that fails a single t test.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "Volatility Managed Portfolios",
+  "who": "Alan Moreira, Tyler Muir (NBER WP 22208; Journal of Finance 2017)",
+  "date": "2016-04",
+  "type": "paper",
+  "url": "https://www.nber.org/papers/w22208",
+  "claim": "Scaling factor exposure down when recent volatility is high produces large alphas and higher Sharpe ratios across market, value, momentum, profitability and carry factors.",
+  "bears_on": [
+   "methods",
+   "decision",
+   "futures"
+  ],
+  "changes": "Use as the baseline case for vol-targeting in the sizing engine, read alongside the Cederburg critique.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "On the performance of volatility-managed portfolios",
+  "who": "Scott Cederburg, Michael S. O'Doherty, Feifei Wang, Xuemin (Sterling) Yan (Journal of Financial Economics 138(1))",
+  "date": "2020",
+  "type": "skeptic",
+  "url": "https://econpapers.repec.org/RePEc:eee:jfinec:v:138:y:2020:i:1:p:95-117",
+  "claim": "Across 103 equity strategies, volatility-managed versions do not consistently beat unmanaged ones, and realistic out-of-sample versions generally earn lower Sharpe ratios because the spanning regressions are unstable.",
+  "bears_on": [
+   "methods",
+   "decision"
+  ],
+  "changes": "Only credit vol-targeting in the engine if it wins in a real-time walk-forward, not in a full-sample spanning regression.",
+  "verified": "Fetched the RePEc/EconPapers abstract page."
+ },
+ {
+  "title": "A Changing Stock-Bond Correlation: Drivers and Implications",
+  "who": "Alfie Brixton, Jordan Brooks, Peter Hecht, Antti Ilmanen, Thomas Maloney, Nicholas McQuinn (AQR; Journal of Portfolio Management)",
+  "date": "2023-02-28",
+  "type": "practitioner",
+  "url": "https://www.aqr.com/Insights/Research/Journal-Article/A-Changing-Stock-Bond-Correlation",
+  "claim": "Stock-bond correlation depends on the relative volatility of growth versus inflation news rather than the inflation level, and a simple model explains about 70% of its long-run variation in the US.",
+  "bears_on": [
+   "t8",
+   "t2",
+   "hedges",
+   "rates"
+  ],
+  "changes": "Drive the hedge desk's bond-hedge weight off a measured ratio of inflation to growth uncertainty instead of a fixed negative correlation.",
+  "verified": "Fetched the AQR publication page."
+ },
+ {
+  "title": "Pathetic Protection: The Elusive Benefits of Protective Puts",
+  "who": "Roni Israelov (AQR; Journal of Alternative Investments)",
+  "date": "2018-12-31",
+  "type": "skeptic",
+  "url": "https://www.aqr.com/Insights/Research/White-Papers/Pathetic-Protection-The-Elusive-Benefits-of-Protective-Puts",
+  "claim": "Index puts are less effective at cutting drawdowns than simply holding less equity, and the volatility risk premium can make them raise drawdowns per unit of expected return.",
+  "bears_on": [
+   "t8",
+   "options",
+   "swans",
+   "hedges"
+  ],
+  "changes": "Argues against a put-only tail budget: benchmark the standing tail budget against a plain reduction in gross exposure of equal cost.",
+  "verified": "Fetched the AQR publication page."
+ },
+ {
+  "title": "The Best Strategies for Inflationary Times",
+  "who": "Henry Neville, Campbell R. Harvey and co-authors (Man Group; SSRN 3813202)",
+  "date": "2021",
+  "type": "practitioner",
+  "url": "https://www.man.com/insights/best-strategies-for-inflationary-times",
+  "claim": "Over 95 years of US, UK and Japan data, unexpected inflation hurts both bonds and equities, while commodities and especially trend-following gave the most reliable protection in inflation surges.",
+  "bears_on": [
+   "t3",
+   "t7",
+   "t8",
+   "futures",
+   "hedges"
+  ],
+  "changes": "Size the futures trend sleeve as the main inflation-shock hedge and treat long Treasuries as a growth-scare hedge only.",
+  "verified": "Fetched the Man Group page; SSRN id confirmed via a hosted copy of the PDF."
+ },
+ {
+  "title": "The Rise and Risks of Private Credit (Global Financial Stability Report, Chapter 2)",
+  "who": "International Monetary Fund",
+  "date": "2024-04",
+  "type": "policy",
+  "url": "https://www.imf.org/en/Publications/GFSR/Issues/2024/04/16/global-financial-stability-report-april-2024",
+  "claim": "Private credit has never faced a severe downturn at its current size, borrowers are opaque, and managers have incentives to delay recognising losses, so losses could surface suddenly.",
+  "bears_on": [
+   "t6",
+   "credit"
+  ],
+  "changes": "Treat reported private-credit marks as lagging and anchor the credit desk on market prices of listed vehicles.",
+  "verified": "Fetched the IMF chapter 2 executive summary text from imf.org and the GFSR issue page in search."
+ },
+ {
+  "title": "Bank Lending to Private Credit: Size, Characteristics, and Financial Stability Implications",
+  "who": "Jose Berrospide, Fang Cai, Siddhartha Lewis-Hayre, Filip Zikes (Federal Reserve Board, FEDS Notes)",
+  "date": "2025-05-23",
+  "type": "skeptic",
+  "url": "https://www.federalreserve.gov/econres/notes/feds-notes/bank-lending-to-private-credit-size-characteristics-and-financial-stability-implications-20250523.html",
+  "claim": "Argues against an imminent private-credit contagion: bank commitments to private credit vehicles are about $95bn, and a full drawdown stress of about $36bn would cut aggregate bank CET1 by only about 2 basis points, though public BDC leverage rose from about 40% to 53%.",
+  "bears_on": [
+   "t6",
+   "credit"
+  ],
+  "changes": "Frame t6 as losses surfacing first in fund NAVs and BDC prices, not as a bank-capital event; watch BDC leverage as the trigger.",
+  "verified": "Fetched the Federal Reserve page."
+ },
+ {
+  "title": "The Credit Market Lens: What BDC Markets Are Signaling About Private Credit Valuations",
+  "who": "Lotfi Karoui, with Michael Puempel and Gabriel Cazaubieilh (PIMCO)",
+  "date": "2026-08-17",
+  "type": "practitioner",
+  "url": "https://www.pimco.com/ca/en/insights/the-credit-market-lens-what-bdc-markets-are-signaling-about-private-credit-valuations",
+  "claim": "BDC equities trade at significant discounts to NAV while the 25th percentile of BDC loan marks (97.51 at March 2026) sits above broadly syndicated loan prices (94.95), and the direct-lending spread pickup over leveraged loans fell from over 300bp to under 100bp.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "methods"
+  ],
+  "changes": "Add a marks-versus-BSL gap and a BDC price-to-NAV series to the credit desk as the early read on private-credit losses.",
+  "verified": "Fetched the PIMCO article page."
+ },
+ {
+  "title": "Risk-Adjusting the Returns to Private Debt Funds",
+  "who": "Isil Erel, Thomas Flanagan, Michael S. Weisbach (NBER WP 32278)",
+  "date": "2024-03",
+  "type": "paper",
+  "url": "https://www.nber.org/papers/w32278",
+  "claim": "After adjusting for both equity and debt risk, the typical private debt fund earns a net-of-fee abnormal return statistically indistinguishable from zero; it looks positive only against debt-only benchmarks.",
+  "bears_on": [
+   "t6",
+   "credit",
+   "methods"
+  ],
+  "changes": "Supports 'not a yield to chase': benchmark any private-credit yield against a blend of equity and loan indices, not a loan index alone.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "Global Financial Stability Report, April 2026 (Chapter 1: Global Financial Markets Confront the War in the Middle East and Amplification Risks)",
+  "who": "International Monetary Fund",
+  "date": "2026-04",
+  "type": "policy",
+  "url": "https://www.imf.org/-/media/files/publications/gfsr/2026/april/english/text.pdf.md",
+  "claim": "Hyperscalers are expected to make up 70% of a projected $3.4 trillion of AI capex by 2029 and have raised over $100bn in bonds since January 2025; since 2020 equities and Treasuries have often sold off together, eroding the equity-bond hedge.",
+  "bears_on": [
+   "t1",
+   "t6",
+   "t8",
+   "t9",
+   "t3",
+   "hedges",
+   "credit"
+  ],
+  "changes": "Use its useful-life test (a 3-year GPU life cuts aggregate EBIT margin by more than 9 points versus an implied 7 years) as a stress case in the book and filings desks.",
+  "verified": "Fetched the IMF report text from imf.org."
+ },
+ {
+  "title": "Annual Economic Report 2026, Chapter I: Progress and peril",
+  "who": "Bank for International Settlements",
+  "date": "2026-06-28",
+  "type": "policy",
+  "url": "https://www.bis.org/publ/arpdf/ar2026e1.htm",
+  "claim": "The five largest hyperscalers are set to spend over $1 trillion on AI capex across 2025 and 2026, outpacing their free cash flow, with circular equity-for-compute deals, poorly disclosed lease-backs, and direct lending funds now holding about 15% of portfolios in AI and IT; it also documents the Hormuz shock that cut crude flows by over 10 mb/d.",
+  "bears_on": [
+   "t1",
+   "t9",
+   "t6",
+   "t3",
+   "swans",
+   "credit"
+  ],
+  "changes": "Track the share of capex funded by leases and vendor equity stakes as a named t9 indicator, and model a Hormuz-scale oil shock as a standing swan.",
+  "verified": "Fetched the BIS chapter page on bis.org."
+ },
+ {
+  "title": "Building AI on credit: structures and spillovers (BIS Bulletin 140)",
+  "who": "Mathias Drehmann, Egemen Eren (Bank for International Settlements)",
+  "date": "2026-10-27",
+  "type": "policy",
+  "url": "https://www.bis.org/publications/bulletin-140-building-ai-credit--structures-and-spillovers",
+  "claim": "A growing share of AI capex is funded through long-term debt and off-balance-sheet vehicles whose ratings lean on a few large firms' commitments; spillovers to Treasuries and IG bonds on AI-financing news days in 2026 were small and short-lived.",
+  "bears_on": [
+   "t9",
+   "t1",
+   "credit",
+   "rates"
+  ],
+  "changes": "Read the annex for instrument detail and add an event study of Treasury and IG moves on large AI-financing days to the rates desk.",
+  "verified": "Fetched the BIS publication page."
+ },
+ {
+  "title": "Financial Policy Committee Record, October 2025",
+  "who": "Bank of England",
+  "date": "2025-10-08",
+  "type": "policy",
+  "url": "https://www.bankofengland.co.uk/financial-policy-committee-record/2025/october-2025",
+  "claim": "Equity valuations look stretched for AI-focused tech; the top five S&P 500 firms are close to 30% of the index, the highest share in 50 years, and power or data bottlenecks could trigger a repricing.",
+  "bears_on": [
+   "t1",
+   "t4",
+   "book",
+   "swans"
+  ],
+  "changes": "Add concentration of the top five names as a book-level risk input alongside single-name limits.",
+  "verified": "Fetched the Bank of England page."
+ },
+ {
+  "title": "The Simple Macroeconomics of AI",
+  "who": "Daron Acemoglu (NBER WP 32487)",
+  "date": "2024-05",
+  "type": "skeptic",
+  "url": "https://www.nber.org/papers/w32487",
+  "claim": "Argues against large AI macro payoffs: task-level evidence implies no more than a 0.66% TFP gain over 10 years, or under 0.53% after accounting for hard-to-learn tasks.",
+  "bears_on": [
+   "t1",
+   "nowcast",
+   "findings"
+  ],
+  "changes": "Keep a low-productivity scenario in the desk's AI cash-flow model so the buildout call is not conditioned on a boom.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "Generative AI at Work",
+  "who": "Erik Brynjolfsson, Danielle Li, Lindsey R. Raymond (NBER WP 31161; Quarterly Journal of Economics)",
+  "date": "2023-04",
+  "type": "paper",
+  "url": "https://www.nber.org/papers/w31161",
+  "claim": "Among 5,179 customer-support agents, an AI assistant raised issues resolved per hour by 14% on average and 34% for novice workers, with little effect on the most skilled.",
+  "bears_on": [
+   "t1",
+   "nowcast"
+  ],
+  "changes": "Use as the micro anchor for an AI-adoption nowcast: watch for gains in junior-heavy, high-volume service functions first.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "What Investment Data Implies about the AI Transition",
+  "who": "Jessica Wachter, Jonathan Wachter (NBER WP 35290)",
+  "date": "2026",
+  "type": "paper",
+  "url": "https://ideas.repec.org/p/nbr/nberwo/35290.html",
+  "claim": "The five largest US tech firms spent $380bn on capex in 2025 with about double forecast for 2026; matching that in a model implies a roughly 2.7x AI-sector productivity boost and extra cumulative GDP growth of 5 to 58 points by 2030.",
+  "bears_on": [
+   "t1",
+   "t2",
+   "rates"
+  ],
+  "changes": "Gives the constructive side of t1 a model: the same boom raises the risk-free rate about 0.5 points, so the rates desk should expect higher real yields, not lower, if the buildout pays.",
+  "verified": "Fetched the IDEAS/RePEc listing of the NBER paper."
+ },
+ {
+  "title": "Assessing a Medium-Run Natural Rate of Interest (FRBSF Economic Letter 2026-22)",
+  "who": "Vasco Curdia (Federal Reserve Bank of San Francisco)",
+  "date": "2026-08-17",
+  "type": "skeptic",
+  "url": "https://frbsf.org/research-and-insights/publications/economic-letter/2026/08/assessing-medium-run-natural-rate-of-interest/",
+  "claim": "Argues against t2: with the funds rate at 3.5-3.75% and inflation about 3%, the real policy rate of roughly 0.5-0.75% sits below a medium-run natural rate of about 1.5%, a somewhat accommodative stance.",
+  "bears_on": [
+   "t2",
+   "rates"
+  ],
+  "changes": "Distinguish policy real rates from market long real yields in t2; if tightening is happening it is in term premiums and long TIPS yields, not the policy rate.",
+  "verified": "Fetched the FRBSF page."
+ },
+ {
+  "title": "The Budget and Economic Outlook: 2026 to 2036",
+  "who": "Congressional Budget Office",
+  "date": "2026-02-11",
+  "type": "policy",
+  "url": "https://www.cbo.gov/publication/61882",
+  "claim": "Projects a FY2026 deficit of $1.9 trillion (5.8% of GDP) and debt held by the public rising from 101% of GDP in 2026 to 120% in 2036.",
+  "bears_on": [
+   "t2",
+   "t7",
+   "t5",
+   "rates"
+  ],
+  "changes": "Feed the CBO debt path into the rates desk as a structural term-premium driver behind real yields.",
+  "verified": "Fetched the CBO publication page."
+ },
+ {
+  "title": "2024 United States Data Center Energy Usage Report",
+  "who": "Lawrence Berkeley National Laboratory for the US Department of Energy",
+  "date": "2024-12-20",
+  "type": "data",
+  "url": "https://content.govdelivery.com/accounts/USEERE/bulletins/3c88056",
+  "claim": "US data centers used 4.4% of US electricity in 2023 and are projected to use 6.7% to 12% by 2028.",
+  "bears_on": [
+   "t4",
+   "nowcast"
+  ],
+  "changes": "Use the 6.7-12% band as the official range the power names are priced against and flag when utility load filings move outside it.",
+  "verified": "Fetched the DOE announcement bulletin; the LBNL page itself refused the fetch."
+ },
+ {
+  "title": "Queued Up: 2026 Edition, Characteristics of Power Plants Seeking Transmission Interconnection As of the End of 2025",
+  "who": "Joseph Rand, Ryan Wiser and co-authors (Lawrence Berkeley National Laboratory)",
+  "date": "2026-05",
+  "type": "data",
+  "url": "https://eta-publications.lbl.gov/bibcite/reference/36938",
+  "claim": "About 1,312 GW of generation and 749 GW of storage sit in US interconnection queues; gas requests rose 86% to 253 GW, median time to operation exceeds 5 years, and only 13% of 2000-2020 requests were built.",
+  "bears_on": [
+   "t4",
+   "nowcast"
+  ],
+  "changes": "Supports power as the binding constraint: track the gas queue and completion rate as leading indicators for firm-power names.",
+  "verified": "Fetched the LBNL publication record."
+ },
+ {
+  "title": "Rethinking Load Growth: Assessing the Potential for Integration of Large Flexible Loads in US Power Systems",
+  "who": "Tyler Norris, Tim Profeta, Dalia Patino-Echeverri, Adam Cowie-Haskell (Duke Nicholas Institute)",
+  "date": "2025-02",
+  "type": "skeptic",
+  "url": "https://nicholasinstitute.duke.edu/publications/rethinking-load-growth-assessing-potential-integration-large-flexible-loads-us-power",
+  "claim": "Argues against power as a hard limit: the existing US grid could absorb 76 GW of new load at 0.25% average annual curtailment, 98 GW at 0.5% and 126 GW at 1%, with curtailments averaging about 2 hours.",
+  "bears_on": [
+   "t4"
+  ],
+  "changes": "If data centers accept curtailment, the firm-power premium shrinks; the desk should watch for flexible-interconnection deals as a t4 kill signal.",
+  "verified": "Duke pages blocked the fetch with a bot check; confirmed authors and figures via POWER Magazine's report and the Duke PDF listing in search."
+ },
+ {
+  "title": "LLM inference prices have fallen rapidly but unequally across tasks",
+  "who": "Ben Cottier, Ben Snodin, David Owen, Tom Adamczewski (Epoch AI)",
+  "date": "2025-03-12",
+  "type": "data",
+  "url": "https://epoch.ai/data-insights/llm-inference-price-trends",
+  "claim": "The price to reach GPT-4-level performance on PhD science questions fell about 40x per year, with declines across milestones ranging from 9x to 900x per year.",
+  "bears_on": [
+   "t11",
+   "nowcast"
+  ],
+  "changes": "Compare token price declines against reported dollar AI revenue growth each quarter to test whether usage outruns deflation.",
+  "verified": "Fetched the Epoch AI page."
+ },
+ {
+  "title": "Trends in GPU Price-Performance",
+  "who": "Marius Hobbhahn, Tamay Besiroglu (Epoch AI)",
+  "date": "2022-06-27",
+  "type": "data",
+  "url": "https://epoch.ai/blog/trends-in-gpu-price-performance",
+  "claim": "FLOP/s per dollar doubles about every 2.5 years across 470 GPUs and about every 2.1 years for ML GPUs.",
+  "bears_on": [
+   "t11",
+   "t1",
+   "filings"
+  ],
+  "changes": "Use hardware deflation of roughly 25-30% a year to sanity check depreciation lives in hyperscaler filings.",
+  "verified": "Fetched the Epoch AI blog page."
+ },
+ {
+  "title": "AI and Memory Wall",
+  "who": "Amir Gholami, Zhewei Yao, Sehoon Kim, Coleman Hooper, Michael W. Mahoney, Kurt Keutzer (arXiv 2403.14123; IEEE Micro)",
+  "date": "2024-03-21",
+  "type": "paper",
+  "url": "https://arxiv.org/abs/2403.14123",
+  "claim": "Over 20 years, peak server FLOPS grew about 3.0x every two years versus 1.6x for DRAM bandwidth and 1.4x for interconnect, making memory the main bottleneck for AI serving.",
+  "bears_on": [
+   "t10",
+   "t11"
+  ],
+  "changes": "Supports memory as the second bottleneck: weight HBM supply and pricing as a capex driver separate from logic.",
+  "verified": "Fetched the arXiv abstract page."
+ },
+ {
+  "title": "Memory has grown to nearly two-thirds of AI chip component costs",
+  "who": "Venkat Somala (Epoch AI)",
+  "date": "2026-05-21",
+  "type": "data",
+  "url": "https://epoch.ai/data-insights/ai-chip-component-cost-shares",
+  "claim": "HBM rose from 52% of AI chip component spending in Q1 2024 to 63% in Q4 2025, with HBM spend growing from about $12bn to $32bn.",
+  "bears_on": [
+   "t10",
+   "t1"
+  ],
+  "changes": "Supports memory as the capex inflator: add an HBM cost share series to the nowcast desk.",
+  "verified": "Fetched the Epoch AI page."
+ },
+ {
+  "title": "Historical Oil Shocks",
+  "who": "James D. Hamilton (NBER WP 16790)",
+  "date": "2011-02",
+  "type": "history",
+  "url": "https://www.nber.org/papers/w16790",
+  "claim": "Reviews oil shocks from Suez (1956-57) through the 1973-74 embargo, the Iranian revolution, the Iran-Iraq war, the 1990-91 Gulf war and 2007-08, noting most major shocks were followed by downturns.",
+  "bears_on": [
+   "t3",
+   "swans"
+  ],
+  "changes": "Calibrate the swans desk's oil scenario to the historical episode set, not a single volatility estimate.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "World military expenditure 2025 (SIPRI press release and fact sheet)",
+  "who": "Stockholm International Peace Research Institute",
+  "date": "2026-04-27",
+  "type": "data",
+  "url": "https://www.sipri.org/media/press-release/2026/global-military-spending-rise-continues-european-asian-expenditures-surge",
+  "claim": "World military spending reached $2,887bn in 2025, up 2.9% in real terms for an 11th straight annual rise, with Europe up 14% to $864bn.",
+  "bears_on": [
+   "t5"
+  ],
+  "changes": "Use SIPRI series as the base for a re-armament budget tracker, with Europe as the growth leg.",
+  "verified": "Fetched the SIPRI press release."
+ },
+ {
+  "title": "Guns and growth: The economic consequences of defense buildups (Kiel Report 2)",
+  "who": "Ethan Ilzetzki (Kiel Institute for the World Economy)",
+  "date": "2025-02",
+  "type": "policy",
+  "url": "https://ideas.repec.org/p/zbw/ifwkrp/311212.html",
+  "claim": "Surveys macroeconomics, public finance and economic history to assess short- and long-run effects of rearmament on output and productivity.",
+  "bears_on": [
+   "t5",
+   "rates"
+  ],
+  "changes": "Read for the fiscal multiplier range before assigning a growth or yield effect to European defense budgets.",
+  "verified": "Fetched the IDEAS/RePEc listing; figures not in the abstract so none quoted."
+ },
+ {
+  "title": "The Golden Dilemma",
+  "who": "Claude B. Erb, Campbell R. Harvey (NBER WP 18706; Financial Analysts Journal 2013)",
+  "date": "2013-01",
+  "type": "skeptic",
+  "url": "https://www.nber.org/papers/w18706",
+  "claim": "Argues against gold as a practical inflation hedge: it hedges over centuries but not over normal investment horizons, and high real gold prices have tended to precede below-average returns.",
+  "bears_on": [
+   "t7",
+   "hedges"
+  ],
+  "changes": "Keep the gold sleeve small and justify it on debasement and reserve demand, not on inflation hedging.",
+  "verified": "Fetched the NBER abstract page."
+ },
+ {
+  "title": "Gold demand: the role of the official sector and geopolitics (box in The international role of the euro, June 2025)",
+  "who": "Anja Bruggen, Maurizio Michael Habib, Roger Gomis, Alessandro Vallin (European Central Bank)",
+  "date": "2025-06-11",
+  "type": "policy",
+  "url": "https://ecb.europa.eu/press/other-publications/ire/focus/html/ecb.irebox202506_01~f93400a4aa.en.html",
+  "claim": "Central bank gold buying exceeded 20% of global gold demand in 2024 versus about a tenth in the 2010s, and the historical link between gold and real yields broke down after 2022.",
+  "bears_on": [
+   "t7",
+   "t2"
+  ],
+  "changes": "Do not model gold as a real-rate trade; drive the sleeve off official-sector demand and sanctions risk.",
+  "verified": "Fetched the ECB box page."
+ },
+ {
+  "title": "Bitcoin: An inflation hedge but not a safe haven",
+  "who": "Sangyup Choi, Junhyeok Shin (Finance Research Letters 46)",
+  "date": "2022",
+  "type": "paper",
+  "url": "https://ideas.repec.org/a/eee/finlet/v46y2022ipbs1544612321003810.html",
+  "claim": "In a VAR, bitcoin rises after inflation shocks but falls during financial uncertainty shocks, unlike gold, so it is not a safe haven.",
+  "bears_on": [
+   "t7",
+   "swans"
+  ],
+  "changes": "Never count the bitcoin sleeve toward the tail budget; it is a debasement position that sells off in crises.",
+  "verified": "Fetched the IDEAS/RePEc abstract page."
+ }
+]

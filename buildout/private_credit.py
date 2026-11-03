@@ -341,7 +341,7 @@ def report(today: str | None = None) -> dict:
                         "Cash cover takes PIK interest out of NII; other non-cash income (PIK dividends, accretion) is not removed, so cover is if anything lower.",
                         "OWL management's 12 bp realized-loss figure and Fitch's 6.3% default rate measure different things; the loss gap reconciles them by construction, not by audit.",
                         "The queue model assumes the queue stays its current size; requests have fallen two quarters at OCIC and risen at OTIC.",
-                        "Hyperion's loan to value and debt service cover were not disclosed (a private bond offering); an unofficial reconstruction of the rating agency's pre-sale puts debt service cover near 1.12x.", "OBDC's June buyback price is the only verified price; a secondary source puts its Oct 16 close near $10.23, about 72% of June NAV.",
+                        "Hyperion's loan to value and debt service cover were not disclosed by Meta (a private bond offering); at the Brookings session the paper's author put them at roughly 90% and about 1.15x, and an unofficial reconstruction of the rating agency's pre-sale near 1.12x.", "OBDC's June buyback price is the only verified price; a secondary source puts its Oct 16 close near $10.23, about 72% of June NAV.",
                         "In the cohort, HPS's and Ares's request shares are inferred from their reported fills (cap divided by fill); the inversion is checked on two funds that reported both. The listed peers' prices are not verified, so their discounts are not shown."],
     }
 

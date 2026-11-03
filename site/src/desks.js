@@ -108,7 +108,7 @@
     const w = h("div", "tablewrap");
     w.append(tbl);
     const g = fundRow("GOOGL");
-    box.append(w, h("p", "sentence warn", `Alphabet's non-operating income (${B$(g.nonop)}) was larger than its operating income (${B$(g.op_income)}) over the last twelve months. Most of it is marks on private stakes (SpaceX, Anthropic). Value it on operating income: the marks are reflexive, rising with the boom and reversing faster than the business.`));
+    box.append(w, h("p", "sentence warn", `Alphabet's non-operating income (${B$(g.nonop)}) was larger than its operating income (${B$(g.op_income)}) over the last twelve months. Most of it is marks on equity stakes (SpaceX, listed since June 2026, and Anthropic); in Q3 2026 those marks swung to a loss of about $8B, so this reading is stale until the next filings run. Value it on operating income: the marks are reflexive, rising with the boom and reversing faster than the business.`));
     const p = h("p", "hint");
     p.append(document.createTextNode("Pre-tax income = operating + non-operating. A reversal of half the marks cuts pre-tax income by half the marks' share; at an unchanged price, the multiple rises by 1 ÷ (1 − cut) − 1. "));
     p.append(srcLink(SRC5.goog98));
@@ -180,7 +180,7 @@
       card("Backlog and power", "CoreWeave", B$(cw.rpo, 0), [["Years of revenue", fx(cw.rpo_years, 1)], ["Power", `${fx(cw.power_active_gw, 1)} GW active, ${fx(cw.power_contracted_gw, 1)} GW contracted`], ["Debt", `${B$(cw.debt)}, up ${pct0(cw.debt_yoy)} in a year`], ["Latest quarter", `operating loss of $${Math.round(Math.abs(cw.op_income_lq) * 1000)}M against $${Math.round(cw.interest_lq * 1000)}M of interest`]], SRC5.crwv));
   }
   const LIVES = [
-    ["2021", "Alphabet", "Servers 3 to 4 years; network gear 4 to 5", "Lower depreciation (amount not restated here)", SRC5.lives],
+    ["2021", "Alphabet", "Servers 3 to 4 years; certain network equipment 3 to 5", "Lower depreciation (amount not restated here)", SRC5.lives],
     ["FY2023 (Jul 2022)", "Microsoft", "Servers and network gear 4 to 6 years", "About $3.7B of savings in fiscal 2023", SRC5.msftlife],
     ["2022", "Amazon", "Servers 4 to 5 years; network gear 5 to 6", "Depreciation $3.6B lower", ["Hudson Labs", "https://www.hudson-labs.com/research/amazon-server-depreciation-amzn"]],
     ["2023", "Alphabet", "Servers and network gear to 6 years", "Depreciation $3.9B lower; net income $3.0B higher", SRC5.lives],
@@ -332,7 +332,7 @@
         `The correlation state decides the TLT hedge; the inflation gate is a mandate rule the engine's own test (${H.experiment && H.experiment.inflation_adds_value === false ? "inflation adds no value out of sample" : "see above"}) does not support, kept only as a belt beside the braces and never the reason for today's call. Two lines, two jobs: the validated ${fin(H.line) ? pctPts(H.line * 100) : "n/a"} gates the bond hedge; the ${pctPts((H.line60 || 0.0275) * 100)} low edge of the uncertain band triggers the inflation sleeve.`, ["d-duration", "Decision 2"]),
       findingCard("fi-tails", "Crashes are thousands of times more common than a bell curve allows",
         `Monthly stock returns since 1871 had ${T.rows[3].obs} six-sigma down months; a normal distribution with the same volatility expects one every ${fx(T.rows[3].every / 1e6, 1)} million years.`,
-        "α " + fx(T.alpha, 2), "tail index (Hill, worst 5% of months): moments of order α and above do not exist, so kurtosis is infinite",
+        "α " + fx(T.alpha, 2), "tail index (Hill, worst 5% of months): an estimated tail index below 4 means kurtosis may not be finite (a noisy estimate)",
         [["Method", `Log returns standardized by their full-sample mean and standard deviation (${fx(T.sigma * 100, 2)}% a month), counted beyond 3 to 6 sigma, against the normal's expected count. The tail index uses the worst 5% of months.`],
           ["Caveat", "Volatility clusters, so part of the excess is regime, not shape. That is the point: the regime is the risk."],
           ["Worst months", T.worst.map((w) => `${w.m} (${fx(w.s, 1)}σ)`).join(", ") + "."]],
@@ -389,8 +389,8 @@
           { label: "Gold, stocks down 15%", v: G.stocks_down15.gold * 100, lbl: sPct(G.stocks_down15.gold, 1), color: "var(--s2)" }], { label: "Real returns of gold and stocks by regime", yfmt: (t) => t + "%" }),
         "Gold is half of the inflation sleeve.", ["d-inflation", "Decision 3"]),
       findingCard("fi-cape", "From today's valuation, history's ten-year returns were thin",
-        `When the cyclically adjusted P/E was in its top decile (above ${fx(C.rows[9].lo, 1)}), the next ten years' real return averaged ${sPct(C.rows[9].f, 1)} a year; above 30 it averaged ${sPct(C.above30.mean, 1)} (${C.above30.months} months). The CAPE is 40.9 now.`,
-        "40.9", "CAPE, Oct 20 (multpl.com); top decile since 1881",
+        `When the cyclically adjusted P/E was in its top decile (above ${fx(C.rows[9].lo, 1)}), the next ten years' real return averaged ${sPct(C.rows[9].f, 1)} a year; above 30 it averaged ${sPct(C.above30.mean, 1)} (${C.above30.months} months). The CAPE was 40.1 on Oct 30.`,
+        "40.1", "CAPE, Oct 30 (multpl.com); top decile since 1881",
         [["Method", "Shiller's CAPE in deciles; forward 10-year annualized real total return from each month."],
           ["Caveat", "Valuation sets the long-run return, never the timing: CAPE was above 30 for most of 1997 to 2001 and 2017 to 2021."],
           ["Range in the top decile", `${sPct(C.rows[9].w, 1)} to ${sPct(C.rows[9].b, 1)} a year. The average, ${sPct(C.rows[9].f, 1)}, is about half the ${sPct(C.rows.reduce((s, r) => s + r.f * r.n, 0) / C.rows.reduce((s, r) => s + r.n, 0), 1)} of all months.`]],

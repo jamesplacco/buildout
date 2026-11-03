@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.35</span>
+      Buildout <span class="ver">v0.36</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -35,7 +35,7 @@
     <div class="t7-head">
       <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Oct 23, 2026</p>
       <h1 id="desk-title">Run the book at 0.59x, or keep every name and short 86% of NAV in Nasdaq-100 futures; no bond hedge.</h1>
-      <p class="t7-answer" id="t7-answer"></p>
+      <div class="t7-answer" id="t7-answer"></div>
       <p class="t7-status" id="t7-status"></p>
     </div>
     <div class="brief" id="brief"></div>
@@ -52,12 +52,13 @@
       <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#reality">Reality check →</a></section>
       <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
         <ul class="cal cal-compact">
-          <li><b>Oct 28</b><span>FOMC decision at 2:00 pm ET (a hold priced at about 90%, a December hike at about 75%); Microsoft and Alphabet report after the close.</span></li>
-          <li><b>Oct 29</b><span>Amazon reports after the close (2026 capex guided near $220B).</span></li>
-          <li><b>Nov 3</b><span>US midterm elections; reported US and Israeli strike plans on Iran are dated after the vote.</span></li>
-          <li><b>Nov 10</b><span>October CPI. September printed 3.7% headline and 2.6% core.</span></li>
-          <li><b>Nov 18</b><span>NVIDIA reports (about); the largest weight in the book with Microsoft, Amazon and Alphabet.</span></li>
-          <li><b>Dec 8</b><span>SpaceX's 180-day lockup ends; about 1.3 billion shares unlock earlier, two trading days after its Q3 results. <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
+          <li><b>Done</b><span>Oct 28: the Fed held at 3.75 to 4.00%, 10 to 2, two dissents for a hike. Microsoft: revenue $92.3B (+19%), Azure +48%, capex $39.4B. Alphabet: Cloud $30.7B (+103%), capex $51.4B, free cash flow −$9.1B, 2026 guide $195 to 205B kept; shares fell about 8% after hours. Oct 29, Amazon: AWS $46.0B (+39%), capex $77.3B in the quarter, about $220B for 2026 kept. <a class="src" href="https://www.xtb.com/en/market-analysis/news-and-research/alphabet-disappoints-wall-street-despite-record-results-shares-plunge-over-8-and-test-300">XTB</a> · <a class="src" href="https://www.datastudios.org/post/amazon-q3-2026-results-aws-39-percent-growth-46-billion-220-billion-capex">Amazon summary</a></span></li>
+          <li><b>Nov 3</b><span>US midterm elections; reported US and Israeli strike plans on Iran are dated after the vote. Apollo reports Q3.</span></li>
+          <li><b>Nov 4</b><span>OBDC reports after the close: Blue Owl's listed fund's NAV, non-accruals and PIK (Private credit desk).</span></li>
+          <li><b>Nov 10</b><span>October CPI, 8:30 ET. September printed 3.7% headline and 2.6% core.</span></li>
+          <li><b>Nov 17</b><span>NVIDIA reports, 5 pm ET; the largest weight in the book with Microsoft, Amazon and Alphabet.</span></li>
+          <li><b>Dec 8</b><span>The last scheduled SpaceX lockup release (a tranche of about 1.3 billion shares already unlocked around Oct 22, after its Q3 results; Musk's stake stays locked to June 2027). <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
+          <li><b>Dec 9</b><span>FOMC decision; markets priced a December hike near 85% after the Oct 28 meeting.</span></li>
         </ul>
       </section>
     </div>
@@ -100,7 +101,7 @@
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
-      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 666 of 666</span></span>
+      <span class="chip"><span class="dot good"></span><span id="chip-tests">Tests 670 of 670</span></span>
       <span class="chip" id="chip-run" title="This copy is a dated snapshot: the daily run (GitHub Actions) replaces every live panel when its keys are set; nothing here has run live yet."><span class="dot warn"></span><span>Snapshot, Oct 23; daily run not yet live</span></span>
       <span class="chip" id="chip-data"><span class="dot good"></span><span>Databento key set in GitHub</span></span>
       <span class="chip"><span class="dot good"></span><span id="chip-sources">99 sources</span></span>
@@ -472,7 +473,7 @@
 <section class="view" id="view-rates" hidden aria-labelledby="rates-title">
   <div class="vhead">
     <p class="eyebrow">Rates &amp; curves</p>
-    <h1 id="rates-title">A parallel rise in the curve, led by real yields</h1>
+    <h1 id="rates-title">A bear-flattening rise in the curve, led by real yields</h1>
     <p class="lede">Every Treasury yield from one month to 30 years is 39 to 122bp higher than on Jan 2 (Oct 23 close), led by the 2- and 3-year notes as the Fed turned to hikes. Since spring the 10-year is up about 80bp while the 10-year breakeven slipped about 10bp. That is a real-rate squeeze, the regime in which long bonds stop hedging stocks.</p>
   </div>
 
@@ -487,7 +488,7 @@
       <div class="panel">
         <div class="panel-head"><span class="panel-title">Curve spreads, Oct 23 vs Jan 2</span></div>
         <div class="tiles compact" id="spread-tiles"></div>
-        <p class="hint">2s10s and 10s30s flattened as the front end priced hikes; 3m10y steepened because 2-year and longer yields rose more than bills. 20s30s went from +5bp to −5bp: the 20-year again yields more than the 30-year, the old kink from thin demand for 20-year bonds.</p>
+        <p class="hint">2s10s and 10s30s flattened as the front end priced hikes; 3m10y steepened because 2-year and longer yields rose more than bills. 20s30s went from +5bp to −4bp: the 20-year again yields more than the 30-year, the old kink from thin demand for 20-year bonds.</p>
       </div>
       <div class="panel">
         <div class="panel-head"><span class="panel-title">What the 10-year pays for</span><span class="src">Sep 17 and Oct 7, 2026</span></div>
@@ -514,8 +515,8 @@
   <section class="section" aria-labelledby="policy-title">
     <div class="section-head"><p class="eyebrow">Policy and the global long end</p><h2 id="policy-title">Marginal buyers of duration</h2></div>
     <div class="tiles">
-      <article class="tile"><span class="label">Fed funds target</span><span class="value">3.75–4.00%</span><span class="note">Hiked 25bp on Sep 16; all 19 participants backed it.</span><span class="src"><a href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a></span></article>
-      <article class="tile"><span class="label">Odds of an October hike</span><span class="value">≈33%</span><span class="note">Oct 16, up from 19% on Oct 8 and down from 70% on Sep 28. UOB sees 4.50% by early 2027.</span><span class="src"><a href="https://www.roic.ai/news/wall-streets-fear-gauge-spikes-vix-jumps-to-four-month-high-as-inflation-fears-and-ai-debt-worries-rattle-markets-10-16-2026">ROIC (Reuters)</a> · <a href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a></span></article>
+      <article class="tile"><span class="label">Fed funds target</span><span class="value">3.75–4.00%</span><span class="note">Hiked 25bp on Sep 16 by a unanimous 12-0 vote; held on Oct 28, 10 to 2.</span><span class="src"><a href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a></span></article>
+      <article class="tile"><span class="label">Odds of a December hike</span><span class="value">≈85%</span><span class="note">After the Oct 28 hold (10 to 2, two dissents for a hike); the October hike priced near 33% on Oct 16 did not come. UOB sees 4.50% by early 2027.</span><span class="src"><a href="https://admiralmarkets.com/analytics/traders-blog/fomc-october-2026-fed-holds-rates">Admiral Markets</a> · <a href="https://www.fxstreet.com/news/federal-reserve-more-hikes-ahead-after-october-pause-uob-202610081303">UOB via FXStreet</a></span></article>
       <article class="tile"><span class="label">Japan 30-year auction</span><span class="value">4.11%</span><span class="note">Oct 8 average yield on a 4.2% coupon. Japanese insurers can now earn at home.</span><span class="src"><a href="https://www.mof.go.jp/english/policy/jgbs/auction/calendar/eresul/eresul20261008.htm">Ministry of Finance, Japan</a></span></article>
       <article class="tile"><span class="label">UK Bank Rate</span><span class="value">3.75%</span><span class="note">As of Oct 7.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">MacroRadar</a></span></article>
       <article class="tile"><span class="label">Fed balance sheet</span><span class="value">$6.74T</span><span class="note">September; Treasury cash account $949B.</span><span class="src"><a href="https://www.macroradar.io/as-of/2026-10-07">FRED via MacroRadar</a></span></article>
@@ -614,7 +615,7 @@
   <div class="vhead">
     <p class="eyebrow">Options &amp; volatility</p>
     <h1 id="options-title">Defined-cost protection: pricing, payoff and budget</h1>
-    <p class="lede">An option is the only hedge whose payoff is contractual, so it does not depend on correlation holding. The tools below price the protection, show its payoff against the book and size an annual budget. Cboe flagged volatility and convexity premia at their lowest of the year in mid-August, before October's AI selloff.</p>
+    <p class="lede">An option's payoff is set by contract and its cost is capped at the premium, so it does not depend on a correlation holding, and it pays more the further the market falls. The tools below price the protection, show its payoff against the book and size an annual budget. Cboe flagged implied volatility at its year-to-date low in mid-August, while deep-put convexity stayed expensive, before October's AI selloff.</p>
     <span class="src"><a href="https://www.cboe.com/insights/posts/week-of-8-17-2026-volatility-convexity-premia-fall-to-lowest-ytd-levels-on-benign-inflation-data">Cboe, week of Aug 17, 2026</a></span>
   </div>
 
@@ -750,12 +751,12 @@
       <article class="lane good">
         <div class="lane-head"><h3>Growth scare</h3><span class="verdict good"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Bonds hedge</span></div>
         <ol class="chain"><li>AI revenue or demand disappoints</li><li>Growth and rate expectations fall</li><li>Long yields drop</li><li>TLT rallies while the book falls</li></ol>
-        <div class="evidence"><p><strong>Oct 8, 2026.</strong> Reports of weak OpenAI revenue hit AI names; the Nasdaq-100 fell 1.39%. The 30-year yield fell 5.9bp, worth about +0.9% on a bond with TLT's 14.85-year duration.</p><span class="src"><a href="https://investinglive.com/stocks/nasdaq-indices-lead-the-slide-as-ai-stocks-tumble/">investingLive</a></span></div>
+        <div class="evidence"><p><strong>Oct 8, 2026.</strong> Reports of weak OpenAI revenue hit AI names; the Nasdaq-100 fell 1.39%. The 30-year yield fell 5.9bp, worth about +0.9% on a bond with TLT's duration (14.9 years, iShares, Oct 23).</p><span class="src"><a href="https://investinglive.com/stocks/nasdaq-indices-lead-the-slide-as-ai-stocks-tumble/">investingLive</a></span></div>
       </article>
       <article class="lane bad">
         <div class="lane-head"><h3>Financing or inflation shock</h3><span class="verdict bad"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>Bonds fail</span></div>
         <ol class="chain"><li>Oil, capex debt or fiscal supply push inflation and issuance up</li><li>Term premium rises; the Fed hikes</li><li>Long yields climb</li><li>TLT falls with the book</li></ol>
-        <div class="evidence"><p><strong>March 2026.</strong> As the Iran war closed the Strait of Hormuz, the S&amp;P 500 fell 5.1% and a 10-year Treasury position lost about 2.0% in the same month. <strong>Dec 12, 2025.</strong> The Nasdaq-100 fell 1.9% on AI capex worries while the 10-year yield rose 4bp.</p><span class="src"><a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve</a> · <a href="https://www.plasticsindustry.org/blog/oil-prices-fall-after-iran-ceasefire-will-u-s-inflation-finally-cool-down/">Plastics Industry Association</a> · <a href="https://www.swissinfo.ch/eng/tech-drags-us-futures-as-global-stocks-eye-records%3A-markets-wrap/90624963">Bloomberg via Swissinfo</a></span></div>
+        <div class="evidence"><p><strong>March 2026.</strong> As the Iran war closed the Strait of Hormuz, the S&amp;P 500 fell 5.1% and a 10-year Treasury position lost about 2.0% in the same month. <strong>Dec 12, 2025.</strong> The Nasdaq-100 fell 1.9% on AI capex worries while the 10-year yield rose about 5bp.</p><span class="src"><a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve</a> · <a href="https://www.plasticsindustry.org/blog/oil-prices-fall-after-iran-ceasefire-will-u-s-inflation-finally-cool-down/">Plastics Industry Association</a> · <a href="https://www.swissinfo.ch/eng/tech-drags-us-futures-as-global-stocks-eye-records%3A-markets-wrap/90624963">Bloomberg via Swissinfo</a></span></div>
       </article>
     </div>
     <p class="callout">A hedge removes at most <strong>ρ² of the book's variance</strong>: 9% at a −0.3 correlation. Long bonds protect against a scenario; options and lower gross protect against the drawdown itself.</p>
@@ -863,7 +864,7 @@
   <section class="section" aria-labelledby="rules-title">
     <div class="section-head"><p class="eyebrow">Rules</p><h2 id="rules-title">Risk limits enforced by the engine</h2></div>
     <ol class="steps">
-      <li><div><strong>Ruin is the only unrecoverable loss.</strong><span>Size so the 95th-percentile one-year drawdown stays inside the limit, before any view on return. (Taleb's ergodicity point: a bet you cannot repeat forever is not worth its average.)</span></div></li>
+      <li><div><strong>Ruin is the only unrecoverable loss.</strong><span>Size so the 95th-percentile one-year drawdown stays inside the limit, before any view on return. (Ole Peters' ergodicity point, popularised by Taleb: a bet you cannot repeat forever is not worth its average.)</span></div></li>
       <li><div><strong>Barbell the book.</strong><span>Very safe on one side (bills, TIPS), very convex on the other (options, the concentrated AI sleeve). Avoid the fragile middle: leveraged carry that loses everything in one gap.</span></div></li>
       <li><div><strong>Prefer contracts to correlations.</strong><span>A put pays by contract. A bond hedge pays only if the correlation holds, and it flipped in 2022 and again in 2026.</span></div></li>
       <li><div><strong>Trim on rules.</strong><span>A position that runs 20% over its target weight gets cut back to target. Sell in pieces; never all or nothing.</span></div></li>
@@ -1986,7 +1987,7 @@
   <div class="vhead">
     <p class="eyebrow">Swans · Fat tails and the hedges that survive them</p>
     <h1 id="sw-title">Tail risk: measurement and cost-efficient protection</h1>
-    <p class="lede">A normal model says a six-sigma month comes once in 84 million years. Since 1871 the S&amp;P 500 has had two. The desk's answer is Taleb's: name the gray swans that can be named, own convexity for the rest, and never size so that one of them is ruin.</p>
+    <p class="lede">A normal model says a six-sigma month comes once in 84 million years. Since 1871, Shiller's S&amp;P Composite series has had two. The desk's answer is Taleb's: name the gray swans that can be named, own convexity for the rest, and never size so that one of them is ruin.</p>
   </div>
   <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#tails-title">Fat tails</a><a href="#atlas-title">Swan atlas</a><a href="#tal-title">Taleb's toolkit</a><a href="#tl-title">Tail-hedge lab</a></nav>
   <section class="section" aria-labelledby="tails-title">
@@ -2029,13 +2030,28 @@
     <h1 id="fu-title">Capital expenditure now absorbs most of operating cash flow</h1>
     <p class="lede" id="fu-lede">Five builders spent $586B on capex in the last twelve months against $707B of operating cash flow, and their 2026 guidance adds up to more than that cash flow. Underneath: cash coverage from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.</p>
   </div>
-  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#fu-t-title">The table</a><a href="#mi-title">Cash coverage</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
+  <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#rq-title">The railway test</a><a href="#fu-t-title">The table</a><a href="#mi-title">Cash coverage</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
+  <section class="section" aria-labelledby="rq-title">
+    <div class="section-head"><p class="eyebrow">The railway test</p><h2 id="rq-title">What one year of AI capex must earn, against what the clouds bill</h2>
+      <p class="prose">In the 1840s British railway mania, investors had public traffic data, and share prices still implied four times the revenue the lines went on to earn (about &pound;60m implied against about &pound;15m actual in 1852; <a href="https://www-users.cse.umn.edu/~odlyzko/doc/hallucinations.pdf">Odlyzko, 2010</a>). The same test today: take one year of capex, ask what revenue it must generate to pay back its depreciation and earn its cost of capital, and set that against what the three clouds bill. The defaults are sourced; move them.</p></div>
+    <div class="grid2">
+      <form class="panel controls" aria-label="Required revenue inputs" onsubmit="return false">
+        <label class="bd-sl"><span>2026 capex, four hyperscalers <b id="rq-c-v"></b></span><input type="range" id="rq-c" min="400" max="1200" step="10" value="730"></label>
+        <label class="bd-sl"><span>Useful life of the spend <b id="rq-l-v"></b></span><input type="range" id="rq-l" min="2" max="8" step="0.5" value="6"></label>
+        <label class="bd-sl"><span>Cost of capital <b id="rq-r-v"></b></span><input type="range" id="rq-r" min="0.05" max="0.14" step="0.005" value="0.09"></label>
+        <label class="bd-sl"><span>Operating margin on the revenue it earns <b id="rq-m-v"></b></span><input type="range" id="rq-m" min="0.15" max="0.6" step="0.01" value="0.36"></label>
+        <div class="seg" role="group" aria-label="Presets" id="rq-presets"><button type="button" data-l="6" data-m="0.36">As booked (6 years)</button><button type="button" data-l="3" data-m="0.36">IMF stress (3-year GPU life)</button><button type="button" data-l="5" data-m="0.25">Thinner margin</button></div>
+      </form>
+      <div class="panel"><div class="tiles compact" id="rq-tiles"></div><p class="sentence" id="rq-out"></p></div>
+    </div>
+    <p class="hint">Sources: capex guides after Q3 2026 (Microsoft about $170B for calendar 2026, Amazon about $220B, Alphabet $195 to 205B, Meta $135 to 145B; midpoints used); Q3 2026 cloud revenue (AWS $46.0B, Google Cloud $30.7B, Microsoft Cloud $63.9B, which includes commercial Office); 36% is Google Cloud's Q3 operating margin; the 3-year life is the IMF's stress case (GFSR, April 2026). The test covers one vintage only: the 2024 and 2025 spending also has to earn its return out of the same revenue.</p>
+  </section>
   <section class="section" aria-labelledby="fu-t-title">
     <div class="section-head"><p class="eyebrow">Last twelve months</p><h2 id="fu-t-title">The builders: filing-based overview</h2><p class="prose" id="fu-t-sub">$ billions, trailing twelve months to each company's latest quarter. Every figure is a sum of discrete quarters recovered from the SEC's XBRL facts, except where a cell is marked secondary (a figure the XBRL tags do not carry, taken from a named secondary source and dated); the engine refreshes it daily once the SEC contact is set.</p></div>
     <div class="panel"><div class="tablewrap"><table class="fund" id="fund-table"></table></div><p class="hint" id="fu-note"></p></div>
   </section>
   <section class="section" id="fu-latest-sec" aria-labelledby="fu-latest-title">
-    <div class="section-head"><p class="eyebrow">Latest quarter</p><h2 id="fu-latest-title">What the most recent releases say, company by company</h2><p class="prose">The quarter each builder reported most recently, from its own release or filing, checked twice; the trailing-twelve-month table above moves when the daily run reads the filings. Meta and Tesla reported Q3 on Oct 21; SpaceX on Oct 20; Microsoft and Alphabet report Oct 28, Amazon Oct 29.</p></div>
+    <div class="section-head"><p class="eyebrow">Latest quarter</p><h2 id="fu-latest-title">What the most recent releases say, company by company</h2><p class="prose">The quarter each builder reported most recently, from its own release or filing, checked twice; the trailing-twelve-month table above moves when the daily run reads the filings. Meta and Tesla reported Q3 on Oct 21, SpaceX on Oct 20, Microsoft and Alphabet on Oct 28, Amazon on Oct 29; the filings run reads them when it next runs.</p></div>
     <div class="dg-items" id="fu-latest"></div>
   </section>
   <section class="section" aria-labelledby="mi-title">
@@ -2307,7 +2323,7 @@
   <div class="vhead">
     <p class="eyebrow">Findings · Original research on 156 years of data</p>
     <h1 id="fi-title">Eight findings most portfolios do not reflect</h1>
-    <p class="lede">Each finding states the claim, shows the numbers, explains the method and the caveat, and says what it changes on the desk. All of it is reproducible with one command, <code>python -m buildout research</code>, which reruns on public data every day.</p>
+    <p class="lede">Each finding states the claim, shows the numbers, explains the method and the caveat, and says what it changes on the desk. All of it is reproducible with one command, <code>python -m buildout research</code>, which is built to rerun daily on public data (the page shows a snapshot until the daily run is live).</p>
   </div>
   <div class="read" id="fi-read"></div>
   <div class="section" id="fi-list"></div>
@@ -2468,7 +2484,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">666 of 666 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">670 of 670 pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2599,7 +2615,7 @@
     <div class="hw-para">
       <p class="prose">The engine is a set of numbers learned from history, with the rules that update them written down in advance. It starts from monthly US stock returns since 1871 and a handful of things known at the time: how expensive stocks are, where bond yields and inflation stand, how the market has been trending, how volatile it has been and how far it sits below its last high. From these it keeps two kinds of belief up to date. One is about the <b>state</b> of the market: a few regimes (calm, turbulent, stressed), each with its own typical return and risk, and the odds of being in each this month. The other is about the <b>next year</b>: four simple forecasters, combined by how well each has actually done.</p>
       <p class="prose">It then asks one question. For an investor who dislikes losses about as much as the average long-run investor must have (the dislike is set so that holding exactly one times capital is the neutral answer), what exposure to stocks makes the next month's expected outcome best, provided the worst month in twenty costs no more than <span id="hw-es">12%</span> of capital? That number is the engine's <b>optimum</b>, <span id="hw-opt">1.50x</span> today.</p>
-      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the book holds <span id="hw-x">1.00x</span>. Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
+      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the engine holds the index at <span id="hw-x">1.00x</span>; the book's own risk limits, measured on its nine names, then cut it (the Desk shows the size). Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
     </div>
   </section>
 
@@ -2639,7 +2655,7 @@
       <div><dt>Optimum</dt><dd>The exposure with the best expected outcome for that risk aversion inside that budget. Today 1.50x.</dd></div>
       <div><dt>Gate</dt><dd>The share of the move from holding toward the optimum that reaches the book, from the strength of the record. Today 0%.</dd></div>
       <div><dt>Overlay</dt><dd>A scaling of exposure when the market is below its 10-month average. Adopted only if it keeps a cautious investor's expected utility walked forward; today none is.</dd></div>
-      <div><dt>Walked forward</dt><dd>Every number for a past month was computed only from data available then, so the record is a fair test, not a fit.</dd></div>
+      <div><dt>Walked forward</dt><dd>Every number for a past month was computed only from data available then, so the record is a fair test of the fitted parameters; the design choices (which models, the hand-set constants) were made knowing the history.</dd></div>
     </dl>
   </section>
 
@@ -2648,7 +2664,7 @@
     <div class="grid2">
       <div class="panel"><span class="panel-title">Not a price predictor</span><p class="prose">Its forecasters barely beat the long-run average out of sample, and it says so. The value is in the risk budget, the regime odds, the gate and the written-down rules, not in calling the market.</p></div>
       <div class="panel"><span class="panel-title">Not an order system</span><p class="prose">Nothing on this site or in the code places, routes or cancels a trade. It writes proposals a person approves; the MCP server has no order tool.</p></div>
-      <div class="panel"><span class="panel-title">Not tuned</span><p class="prose">Eleven constants are set by hand and listed with reasons; the gate is a fixed function of the record once the count of strategies tried is fixed; the overlay factor was chosen by a rule stated before the result and then rejected by that rule's own walk-forward. There is no dial that makes the backtest look better.</p></div>
+      <div class="panel"><span class="panel-title">Not tuned</span><p class="prose">Eleven constants are set by hand and listed with reasons; the gate is a fixed function of the record once the count of strategies tried is fixed; the overlay factor was chosen by a rule stated before the result and then rejected by that rule's own walk-forward. No parameter was tuned to the backtest's result, though the design was chosen knowing the history.</p></div>
       <div class="panel"><span class="panel-title">Not a black box</span><p class="prose">Twenty-two learned objects, 2,850 numbers in the decision core, each with its shape and its optimiser on the <a href="#parameters">Parameters desk</a>; the source is on the <a href="#code">source desk</a>; the daily record is the Engine room.</p></div>
     </div>
   </section>
@@ -2724,9 +2740,24 @@
     <div class="tablewrap"><table class="rs-table" id="bk-liq"></table></div>
   </section>
   <section class="section" aria-labelledby="bk-val-t">
-    <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Proof the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p></div>
+    <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Checks that the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p></div>
     <ul class="prose" id="bk-limits"></ul>
     <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
+  </section>
+</section>
+<section class="view" id="view-reading" hidden aria-labelledby="rr-title">
+  <div class="vhead"><p class="eyebrow">Evidence · the reading room</p><h1 id="rr-title">The reading room: what the desk reads, and what each source changes</h1>
+    <p class="lede">A desk that reads only market data sees the buildout last. This room holds the rest, chosen for range the way a senior reading list is chosen: papers and policy work, data that moves before earnings, books and the history of other buildouts, and the strongest case against each thesis. Every entry was opened and checked, carries its date, names the theses it bears on, and says what it changes in the engine or on a desk.</p></div>
+  <div class="at-tiles" id="rr-tiles"></div>
+  <section class="section" aria-labelledby="rr-picks-t">
+    <div class="section-head"><p class="eyebrow">Five that change the engine</p><h2 id="rr-picks-t">The sources that most change how the desk tests itself</h2></div>
+    <ol class="prose rr-picks" id="rr-picks"></ol>
+  </section>
+  <section class="section" aria-labelledby="rr-all-t">
+    <div class="section-head"><p class="eyebrow">Every source</p><h2 id="rr-all-t">Filter by kind and by thesis</h2><p class="prose">A card on the other side says what reading would make the desk agree with it. Each tag opens the thesis or desk it bears on.</p></div>
+    <div class="rr-filters" id="rr-filters"></div>
+    <p class="hint" id="rr-count"></p>
+    <div class="rr-grid" id="rr-list"></div>
   </section>
 </section>
 <section class="view" id="view-credit" hidden aria-labelledby="credit-title">
@@ -2827,7 +2858,7 @@
     <div class="tablewrap"><table class="rs-table" id="ft-mk"></table></div>
   </section>
   <section class="section" aria-labelledby="ft-val-t">
-    <div class="section-head"><p class="eyebrow">Validation</p><h2 id="ft-val-t">Proof the machine works: a planted edge, and worlds with none</h2><p class="prose" id="ft-val-p"></p></div>
+    <div class="section-head"><p class="eyebrow">Validation</p><h2 id="ft-val-t">Checks that the machine works: a planted edge, and worlds with none</h2><p class="prose" id="ft-val-p"></p></div>
     <div class="tablewrap"><table class="rs-table" id="ft-val"></table></div>
   </section>
   <section class="section" aria-labelledby="ft-lim-t">
@@ -2853,7 +2884,7 @@
     <div class="math" id="fl-math"></div>
   </section>
   <section class="section" aria-labelledby="fl-val-t">
-    <div class="section-head"><p class="eyebrow">Validation</p><h2 id="fl-val-t">Proof the machine works: a planted edge on synthetic data</h2><p class="prose" id="fl-val-p"></p></div>
+    <div class="section-head"><p class="eyebrow">Validation</p><h2 id="fl-val-t">Checks that the machine works: a planted edge on synthetic data</h2><p class="prose" id="fl-val-p"></p></div>
     <div class="tablewrap"><table class="rs-table" id="fl-val"></table></div>
     <p class="prose" id="fl-cal-p"></p>
     <div class="tablewrap"><table class="rs-table" id="fl-cal"></table></div>
@@ -3503,6 +3534,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v36-t">
+    <div class="section-head"><p class="eyebrow">v0.36</p><h2 id="ag-v36-t">Release metrics</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>130</b><span>Checked sources in the Reading room</span><small>research, data, books and history, and the other side</small></div>
+      <div class="at-kpi"><b>6</b><span>Agents in parallel</span><small>four source lanes, two independent checkers</small></div>
+      <div class="at-kpi"><b>0.93x</b><span>The railway test today</span><small>one year of capex needs 93% of what the clouds bill; the mania stood near 4x</small></div>
+      <div class="at-kpi"><b>3</b><span>Theses changed by what the reading found</span><small>t1 mixed, t9 widened not rotated, t11 per token not per GPU-hour</small></div></div>
+    <p class="prose">The user asked for the range of a senior reading list. Four agents each took a lane (research and policy, data that moves first, books and history, dissent) with one rule: open every source, invent nothing, and say what it changes. Two more checked about 300 claims on the desks the first pass had not covered, without seeing the lead agent's conclusions. The lead agent rewrote the Desk's reasoning, built the railway test, and let the dissent change three theses rather than decorate them.</p>
   </section>
   <section class="section" aria-labelledby="ag-v35-t">
     <div class="section-head"><p class="eyebrow">v0.35</p><h2 id="ag-v35-t">Release metrics</h2></div>
