@@ -19,7 +19,7 @@
   function buildGuides() {
     VIEWS.forEach((v) => {
       const view = $("#view-" + v), g = DESK_GUIDE[v];
-      if (!view || !g || view.querySelector(":scope > .dguide")) return;
+      if (!view || !g || view.querySelector(":scope > .dguide") || view.dataset.guide === "off") return;      // v0.38.1: Home is its own front page
       const card = h("aside", "dguide");
       card.setAttribute("aria-label", "About this desk");
       const top = h("div", "dguide-top");

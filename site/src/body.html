@@ -3,9 +3,9 @@
 <a class="skip" href="#main" id="skip">Skip to content</a>
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="#desk">
+    <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.38</span>
+      Buildout <span class="ver">v0.38.1</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -2596,7 +2596,7 @@
       <li><div><strong>Publish</strong><span>Make the repository public with GitHub Pages, and write a one-page case study on process and results.</span></div></li>
     </ol>
   </section>
-  <footer class="foot"><p>Built by Jamie Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
+  <footer class="foot"><p>Built by James Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
 </section>
 
 <!-- ======================= HOW IT WORKS ======================= -->
@@ -2745,25 +2745,63 @@
     <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
   </section>
 </section>
-<section class="view" id="view-home" hidden aria-labelledby="hm-title">
-  <div class="vhead"><p class="eyebrow">Buildout · a research engine for an AI-buildout equity book</p><h1 id="hm-title">How much of the AI buildout to own, how to hedge it, and the record that says whether to believe it</h1>
-    <p class="lede">Buildout sizes and hedges a model book of nine AI-buildout names (Microsoft, Amazon, Alphabet, Meta, Nvidia, Broadcom, Tesla, SpaceX, Oracle) from their own risk, tests every rule out of sample before it may move the size, and logs each call before the market opens on it. It is a model book, not personal positions, and it places no orders.</p></div>
-  <div class="hm-grid">
-    <section class="panel hm-card" aria-labelledby="hm-what-t"><h2 id="hm-what-t">Today's call</h2><p class="hm-call" id="hm-call"></p><p class="prose">Why, in three steps, on the <a href="#desk">Desk</a>; the size each risk limit allows on <a href="#book">Book risk</a>.</p></section>
-    <section class="panel hm-card" aria-labelledby="hm-perf-t"><h2 id="hm-perf-t">The record</h2><div class="at-tiles compact" id="hm-perf"></div><p class="prose">Backtest, walk-forward and live paper, never mixed, with a downloadable tear sheet: <a href="#track">Track record</a>.</p></section>
-    <section class="panel hm-card" aria-labelledby="hm-think-t"><h2 id="hm-think-t">How I think</h2><ul class="hm-list">
-      <li><strong>Limits before forecasts.</strong> The book's own risk sets the size; a forecast moves it only as far as its out-of-sample record has earned (so far, not at all).</li>
-      <li><strong>Test the hedge, do not assume it.</strong> Since 1962 long bonds hedged stocks when inflation was below 3% and added risk above it, as they have since 2021; the hedge is chosen by regime, and puts or an index short do the work when bonds cannot.</li>
-      <li><strong>Count every try.</strong> Every backtest is deflated for the number of variants tested, and run beside fake data that should find nothing.</li>
-      <li><strong>Write the miss down.</strong> Each model has a one-page memo with what would prove it wrong, and the misses are logged.</li></ul>
-      <p class="prose"><a href="#memos">Model memos and the failure log</a> · <a href="#reading">What the desk reads</a></p></section>
-    <section class="panel hm-card" aria-labelledby="hm-plug-t"><h2 id="hm-plug-t">How it plugs into a lean team's book</h2><ol class="hm-list">
-      <li><strong>Monday risk note.</strong> Send holdings as a CSV; the engine returns the size each limit allows, the binding limit, and the hedge that keeps every name, on your names' own prices.</li>
-      <li><strong>Hedge selector.</strong> Index short, bonds, puts or a short basket, chosen by regime and tested on your book's days, not a generic 60/40 rule.</li>
-      <li><strong>Watch list that moves first.</strong> Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</li>
-      <li><strong>An audit trail.</strong> Every call timestamped and hash-chained; a reviewer can rerun any day with one command. Nothing executes: proposals only, for a person to approve.</li></ol></section>
-    <section class="panel hm-card hm-contact" aria-labelledby="hm-contact-t"><h2 id="hm-contact-t">Contact</h2><p id="hm-contact"></p><p class="prose">The engine, the agents that built it and the code are one click deeper: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p></section>
+<section class="view" id="view-home" data-guide="off" hidden aria-labelledby="hm-title">
+  <header class="hm-hero">
+    <p class="hm-kicker"><span class="hm-who">James Placco</span><span>Buildout research</span><span id="hm-asof">Data through Oct 23, 2026</span></p>
+    <h1 id="hm-title">Own the AI buildout at the size its risk allows. <em>Prove it out of sample.</em></h1>
+    <p class="hm-dek">A risk, sizing and hedging engine for a concentrated nine-name AI book. Every limit is measured on the names' own prices, every rule is walked forward before it may move the size, and every call is logged before it trades.</p>
+    <div class="hm-cta"><a class="btn" href="#desk">Today's call and why</a><a class="btn ghost" href="#track">Track record</a><button type="button" class="btn ghost" id="hm-pdf">Tear sheet (PDF)</button></div>
+    <p class="hm-note" id="hm-pdf-note" aria-live="polite"></p>
+  </header>
+
+  <section class="hm-band" aria-labelledby="hm-figs-t">
+    <h2 class="hm-label" id="hm-figs-t">Walk-forward record, net of costs</h2>
+    <dl class="hm-figs" id="hm-perf"></dl>
+    <p class="hm-fine" id="hm-figs-note"></p>
+  </section>
+
+  <div class="hm-pair">
+    <section class="hm-callbox" aria-labelledby="hm-call-t">
+      <h2 class="hm-label" id="hm-call-t">The call</h2>
+      <p class="hm-call" id="hm-call"></p>
+      <p class="hm-why" id="hm-why"></p>
+      <a class="hm-more" href="#desk">The three steps behind it</a>
+    </section>
+    <section class="hm-chartbox" aria-labelledby="hm-curve-t">
+      <h2 class="hm-label" id="hm-curve-t">Growth of $1, walk-forward</h2>
+      <div class="hm-curve" id="hm-curve"></div>
+    </section>
   </div>
+
+  <section class="hm-sect" aria-labelledby="hm-find-t">
+    <h2 class="hm-label" id="hm-find-t">What the evidence says now</h2>
+    <ol class="hm-find" id="hm-find"></ol>
+  </section>
+
+  <section class="hm-sect" aria-labelledby="hm-how-t">
+    <h2 class="hm-label" id="hm-how-t">Method</h2>
+    <ol class="hm-steps">
+      <li><span class="hm-n">01</span><h3>Measure</h3><p>Risk on the nine names' own daily prices: factor exposures, the one-month tail, the drawdown path.</p><a href="#book">Book risk</a></li>
+      <li><span class="hm-n">02</span><h3>Size</h3><p>The smallest size any limit allows. A forecast may move it only as far as its out-of-sample record has earned.</p><a href="#decision">Decision engine</a></li>
+      <li><span class="hm-n">03</span><h3>Hedge</h3><p>Chosen by regime and tested on the book's own days: an index short, puts, bonds only when bonds hedge.</p><a href="#hedgetest">Hedge test</a></li>
+      <li><span class="hm-n">04</span><h3>Log</h3><p>Each call goes to an append-only, hash-chained ledger before its first trading day. Misses go in the failure log.</p><a href="#memos">Memos and misses</a></li>
+    </ol>
+  </section>
+
+  <section class="hm-sect" aria-labelledby="hm-plug-t">
+    <h2 class="hm-label" id="hm-plug-t">For a lean investment team</h2>
+    <dl class="hm-plug">
+      <div><dt>Monday risk note</dt><dd>Holdings in as a CSV; out come the size each limit allows, the one that binds, and the hedge that keeps every name.</dd></div>
+      <div><dt>Hedge selector</dt><dd>Index short, puts, bonds or a short basket, chosen by regime and tested on your book's days, not a 60/40 habit.</dd></div>
+      <div><dt>Early-warning list</dt><dd>Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</dd></div>
+      <div><dt>Audit trail</dt><dd>Every call timestamped and reproducible with one command. Proposals only: nothing executes without a person.</dd></div>
+    </dl>
+  </section>
+
+  <footer class="hm-sign" aria-labelledby="hm-contact-t">
+    <div><h2 class="hm-name" id="hm-contact-t">James Placco</h2><p id="hm-contact"></p></div>
+    <p class="hm-fine">A research tool for a model book: not personal positions, not investment advice, and it places no orders. The engine, the code and how it was built: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p>
+  </footer>
 </section>
 <section class="view" id="view-track" hidden aria-labelledby="tr-title">
   <div class="vhead"><p class="eyebrow">Today · the track record</p><h1 id="tr-title">The track record: calls made in advance, sized by rule, and honest about their misses</h1>

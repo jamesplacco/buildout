@@ -9,13 +9,13 @@
   const tP = (v, d = 1) => (fin(v) ? pctPlain(v, d) : "n/a");
   const tS = (v, d = 1) => (fin(v) ? pct(v, d) : "n/a");
   const T_ORDER = ["call", "call_short", "product", "vm_rule", "bond30", "hold"];
-  const CONTACT = { name: "Jamie Placco", line: "" };          // the line a reader uses to reach the author; set in one place
+  const CONTACT = { name: "James Placco", links: [["LinkedIn", "https://www.linkedin.com/in/james-placco/"]] };     // set in one place
 
-  function trackCurve(box, W, keys, title) {
+  function trackCurve(box, W, keys, title, height = 260) {
     const col = { call: "var(--accent)", call_short: "var(--s2)", product: "var(--s3)", vm_rule: "var(--s4)", bond30: "var(--s5)", hold: "var(--muted)", qqq: "var(--warn)" };
     const series = keys.filter((k) => W.curve[k]).map((k) => ({ name: k === "qqq" ? "Nasdaq-100 (QQQ)" : SNAP38.policy_name[k], color: col[k], width: k === "call" ? 2.5 : 1.5, pts: W.curve[k].map(([d, v]) => [Date.parse(d), v]) }));
     const p0 = series[0].pts;
-    xyChart(box, { series, yfmt: (v) => "$" + fx(v, 2), xfmt: dateLabel, xticks: yearTicks(p0[0][0], p0[p0.length - 1][0]), label: title, height: 260, snapXs: p0.map((p) => p[0]) });
+    xyChart(box, { series, yfmt: (v) => "$" + fx(v, 2), xfmt: dateLabel, xticks: yearTicks(p0[0][0], p0[p0.length - 1][0]), label: title, height, snapXs: p0.map((p) => p[0]) });
   }
 
   function policyTable(table, W, which) {
@@ -32,7 +32,8 @@
       const dl = window.claude && typeof window.claude.use === "function" ? await window.claude.use("downloads") : null;
       const bytes = Uint8Array.from(atob(T.tearsheet_pdf_b64), (c) => c.charCodeAt(0));
       if (dl) { await dl.save({ filename: `buildout-tearsheet-${T.asof}.pdf`, data: new Blob([bytes]) }); note.textContent = "Saved."; return; }
-      note.textContent = "Downloads are not available in this view. The PDF is in the repository as site/tearsheet.pdf, and on the published site as tearsheet.pdf.";
+      const a = h("a", null, "Open the tear sheet (PDF)"); a.href = "tearsheet.pdf"; a.target = "_blank"; a.rel = "noopener";
+      note.replaceChildren(a);
     } catch (e) {
       note.textContent = e && e.code === "declined" ? "Not saved." : "The download could not start here; the PDF is in the repository as site/tearsheet.pdf.";
     }
@@ -127,16 +128,34 @@
   function renderHome() {
     const T = T38(), box = $("#hm-perf");
     if (!box) return;
-    const B = typeof B30 === "function" ? B30() : null;
     const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null, BC = N && typeof bookCall === "function" ? bookCall(N) : null;
-    const call = BC && BC.menu ? `Cut the book to ${xx(BC.menu.lo.gross)}, or hold ${xx(BC.menu.hi.gross)} with ${pct0(BC.menu.hi.short)} of NAV short in Nasdaq-100 futures; no bond hedge.` : "";
-    $("#hm-call").textContent = call;
-    if (!T) return;
-    const W = T.pit, C = W.policies.call.net, Hd = W.policies.hold.net, L = T.live;
-    rsKpi(box, [[fx(C.sharpe, 2), "Walk-forward Sharpe of the call", `net of costs, ${C.from.slice(0, 4)} to ${C.to.slice(0, 4)}; holding the book ${fx(Hd.sharpe, 2)}`],
-      [tP(C.maxdd, 0), "Its worst drawdown", `holding the book: ${tP(Hd.maxdd, 0)}`],
-      [String(L.calls || 0), "Live calls logged", L.marked_days ? `${L.marked_days} days marked` : "timestamped and hash-chained; marks start with the next bar"]]);
+    $("#hm-call").textContent = BC && BC.menu ? `Hold ${xx(BC.menu.lo.gross)} of the book, or ${xx(BC.menu.hi.gross)} with ${pct0(BC.menu.hi.short)} of NAV short Nasdaq-100 futures. No bond hedge.` : "The call is on the Desk.";
+    $("#hm-why").textContent = BC ? `${(BC.bindingName || "the binding limit").replace(/^the /, "The ")} sets the size, measured on the nine names' own risk; the forecast has not earned the right to move it. Long bonds stay off while stocks and bonds fall together.` : "";
     const ct = $("#hm-contact");
-    ct.replaceChildren(h("strong", null, CONTACT.name));
-    if (CONTACT.line) ct.append(document.createTextNode(" · " + CONTACT.line));
+    ct.replaceChildren();
+    CONTACT.links.forEach(([k, u]) => { const a = h("a", null, k); a.href = u; a.target = "_blank"; a.rel = "noopener"; ct.append(a); });
+    const btn = $("#hm-pdf"), note = $("#hm-pdf-note");
+    if (btn && !btn._bound) { btn._bound = true; btn.addEventListener("click", () => saveTearsheet(btn, note)); }
+    if (!T) { box.replaceChildren(h("p", "empty", "The track record is not in this build.")); return; }
+    const W = T.pit, C = W.policies.call, Hd = W.policies.hold.net, Q = W.bench, L = T.live, E = (T.ledger && T.ledger.entries) || [];
+    $("#hm-asof").textContent = "Data through " + isoNice(T.asof);
+    const fig = (v, k, note) => { const d = h("div"); d.append(h("dt", null, k), h("dd", null, v), h("p", null, note)); return d; };
+    box.replaceChildren(
+      fig(fx(C.net.sharpe, 2), "Sharpe ratio", `Nasdaq-100 ${fx(Q.sharpe, 2)}; holding the book ${fx(Hd.sharpe, 2)}`),
+      fig(tP(C.net.maxdd, 0), "Worst drawdown", `holding the book ${tP(Hd.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`),
+      fig(tS(C.net.y2022, 0), "In 2022", `holding the book ${tS(Hd.y2022, 0)}; Nasdaq-100 ${tS(Q.y2022, 0)}`),
+      fig(tS(C.net.cagr, 1), "A year, compounded", `at ${xx(C.meta.avg_gross)} average exposure`),
+      fig(String(L.calls || E.length || 0), "Live calls logged", E.length ? `hash-chained; the first governs from ${isoNice(E[0].effective_from)}` : "hash-chained; the record starts now"));
+    $("#hm-figs-note").textContent = `Walk-forward, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: each month sized from data to that close and held the next month, costs charged, the nine names chosen point in time each January. The results of a model, not of an account. The backtest, with hindsight, is reported separately on the Track record.`;
+    const cv = $("#hm-curve");
+    if (cv && !cv.childElementCount) trackCurve(cv, W, ["call", "hold", "qqq"], "Walk-forward growth of $1, net of costs: the call, the book held at 1.00x, the Nasdaq-100", 230);
+    const R = (T.regimes && T.regimes.rows) || [], r21 = R.find((r) => /^2021 to/.test(r.regime)) || {}, hi = R.find((r) => r.regime === "Inflation above 3%") || {};
+    const A = T.alternatives, puts = A ? A.rows.map((r) => r.h.put && r.h.put.var_cut).filter(fin) : [];
+    const items = [
+      [sgn2(r21.corr), "Long Treasuries have stopped hedging", `Since 2021 stocks and bonds have moved together; a 30% bond position ${fin(r21.var_cut_30) && r21.var_cut_30 < 0 ? `added ${tP(-r21.var_cut_30, 0)} to` : "barely changed"} stock variance. Since 1962 bonds hedged below 3% inflation and failed above it (correlation ${sgn2(hi.corr)}).`, "#hedgetest", "Hedge test"],
+      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Limits, not forecasts, made the record", `The same Sharpe as holding the book, with the worst drawdown cut by more than half: size falls when the book's own risk rises, before the loss, not after.`, "#track", "Track record"],
+      [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modelled one-month, 90% put on the Nasdaq-100 removed that share of its variance in every inflation and policy regime since 2000, and was the only hedge that paid in 2022. It costs a premium; the bond's failure costs more.`, "#hedgetest", "Hedge test"]];
+    const ol = $("#hm-find"); ol.replaceChildren();
+    items.forEach(([big, t, p, href, lab]) => { const li = h("li"), a = h("a", null, lab); a.href = href; li.append(h("span", "hm-big", big), h("h3", null, t), h("p", null, p), a); ol.append(li); });
   }
+
