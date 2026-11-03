@@ -5,7 +5,7 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 42;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TESTS_PASSING = 670;     // the shipped test count (the chip and the hood tile read it)
+  const TESTS_PASSING = 729;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());

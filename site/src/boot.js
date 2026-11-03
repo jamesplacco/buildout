@@ -2,9 +2,9 @@
      boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {   // v0.31: five groups for a reader with ten minutes. Today is the decision; Evidence is what has been proven; Library holds everything else, one index away
-    today: { name: "Today", views: ["desk", "book", "decision", "ooda", "journal"] },
-    evidence: { name: "Evidence", views: ["inventory", "theses", "reading", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
-    markets: { name: "Markets", views: ["hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
+    today: { name: "Today", views: ["home", "desk", "track", "book", "decision", "ooda", "journal"] },
+    evidence: { name: "Evidence", views: ["inventory", "memos", "theses", "reading", "levers", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
+    markets: { name: "Markets", views: ["hedgetest", "hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
     library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
   };
@@ -21,6 +21,7 @@
   // FOLD lists the sections (by aria-labelledby) that stay visible; everything after the first kept section folds.
   const FOLD = {
     book: ["bk-size-t", "bk-front-t", "bk-hedge-t"],
+    track: ["tr-three-t", "tr-wf-t", "tr-surv-t", "tr-lev-t"],
     decision: ["dx-inf-title", "dx-dec-title", "dx-ov-title"],
     ooda: ["oo-obs-title", "oo-ori-title", "oo-dec-title", "oo-act-title"],
     futures: ["ft-status-t", "ft-res-t", "ft-book-t"],
@@ -96,6 +97,11 @@
     book: () => guard("Book risk", renderBookRisk, $("#bk-tiles")),
     credit: () => guard("Private credit", renderCredit, $("#pc-tiles")),
     reading: () => guard("Reading room", renderReading, $("#rr-list")),
+    home: () => guard("Home", renderHome, $("#hm-perf")),
+    track: () => guard("Track record", renderTrack, $("#tr-tiles")),
+    hedgetest: () => guard("Hedge test", renderHedgeTest, $("#ht-tiles")),
+    memos: () => guard("Memos", renderMemos, $("#mm-list")),
+    levers: () => guard("Value creation", renderLevers, $("#lv-tiles")),
     library: () => guard("Library", renderLibrary, $("#lib-grid")),
     inventory: () => guard("Inventory", renderInventory, $("#inv-tiles")),
     engines: () => { guard("Engine room", renderEngines, $("#en-table")); guard("Market charts", drawMacroCharts, $("#corr-chart")); guard("Book charts", drawBookCharts, $("#bt-chart")); },
@@ -105,7 +111,7 @@
   let current = null;
   // any element id is a deep link: the view that contains it opens and the element scrolls into view
   function resolve(token) {
-    if (!token) return { view: "desk", el: null };
+    if (!token) return { view: "home", el: null };          // v0.38: the front door; the Desk is one click away
     if (VIEWS.includes(token)) return { view: token, el: null };
     if (GROUPS[token]) return { view: lastInGroup[token] || GROUPS[token].views[0], el: null };
     let el = document.getElementById(token);
@@ -114,7 +120,7 @@
     if (!el && /^lg-/.test(token) && lgGroup !== "All") { lgGroup = "All"; renderLegends(); el = document.getElementById(token); }
     if (!el && LAZY.pending) { lazyFlushAll(); el = document.getElementById(token); }      // a deep link into a desk not built yet
     const v = el && el.closest(".view");
-    return v ? { view: v.id.slice(5), el } : { view: "desk", el: null };
+    return v ? { view: v.id.slice(5), el } : { view: "home", el: null };      // v0.38: an unknown link opens Home
   }
   function renderSubtabs(view) {
     const g = groupOf(view), nav = $("#subtabs");

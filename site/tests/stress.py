@@ -38,7 +38,7 @@ import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "credit", "reading", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
-         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory"]
+         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory", "home", "track", "hedgetest", "memos", "levers"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -237,7 +237,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("location.hash") != "#options":
         fail(f"{label}: the Markets group did not reopen the last desk read in it")
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
-    if ["Options", "page"] not in sub or len(sub) != 7:                # seven Markets desks since v0.34 (the rest in the Library)
+    if ["Options", "page"] not in sub or len(sub) != 8:                # eight Markets desks since v0.38 (the hedge test) (the rest in the Library)
         fail(f"{label}: Markets subtabs wrong: {sub}")
     pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")
@@ -247,7 +247,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if not (flipped and back):
         fail(f"{label}: M did not toggle the math")
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
-                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "desk"), ("%E0%A4%A", "desk"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("explained", "explained"), ("hw-replay-title", "explained"), ("digest", "digest"), ("dg-how-t", "digest"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
+                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "home"), ("%E0%A4%A", "home"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("explained", "explained"), ("hw-replay-title", "explained"), ("digest", "digest"), ("dg-how-t", "digest"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),

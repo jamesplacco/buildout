@@ -98,6 +98,8 @@ def test_rule(r: pd.Series, cash: pd.Series, rule: dict, gamma: float = GAMMA) -
 
 def expected_max_t(n: int) -> float:
     """The expected maximum of n independent standard normal t statistics (Bailey and Lopez de Prado's approximation)."""
+    if n <= 1:          # one trial: no selection, and the formula's ppf(0) would be minus infinity
+        return 0.0
     g = 0.5772156649
     return float((1 - g) * stats.norm.ppf(1 - 1 / n) + g * stats.norm.ppf(1 - 1 / (n * math.e)))
 

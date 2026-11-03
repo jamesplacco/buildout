@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#desk">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.37</span>
+      Buildout <span class="ver">v0.38</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -2743,6 +2743,111 @@
     <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Checks that the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p></div>
     <ul class="prose" id="bk-limits"></ul>
     <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
+  </section>
+</section>
+<section class="view" id="view-home" hidden aria-labelledby="hm-title">
+  <div class="vhead"><p class="eyebrow">Buildout · a research engine for an AI-buildout equity book</p><h1 id="hm-title">How much of the AI buildout to own, how to hedge it, and the record that says whether to believe it</h1>
+    <p class="lede">Buildout sizes and hedges a model book of nine AI-buildout names (Microsoft, Amazon, Alphabet, Meta, Nvidia, Broadcom, Tesla, SpaceX, Oracle) from their own risk, tests every rule out of sample before it may move the size, and logs each call before the market opens on it. It is a model book, not personal positions, and it places no orders.</p></div>
+  <div class="hm-grid">
+    <section class="panel hm-card" aria-labelledby="hm-what-t"><h2 id="hm-what-t">Today's call</h2><p class="hm-call" id="hm-call"></p><p class="prose">Why, in three steps, on the <a href="#desk">Desk</a>; the size each risk limit allows on <a href="#book">Book risk</a>.</p></section>
+    <section class="panel hm-card" aria-labelledby="hm-perf-t"><h2 id="hm-perf-t">The record</h2><div class="at-tiles compact" id="hm-perf"></div><p class="prose">Backtest, walk-forward and live paper, never mixed, with a downloadable tear sheet: <a href="#track">Track record</a>.</p></section>
+    <section class="panel hm-card" aria-labelledby="hm-think-t"><h2 id="hm-think-t">How I think</h2><ul class="hm-list">
+      <li><strong>Limits before forecasts.</strong> The book's own risk sets the size; a forecast moves it only as far as its out-of-sample record has earned (so far, not at all).</li>
+      <li><strong>Test the hedge, do not assume it.</strong> Since 1962 long bonds hedged stocks when inflation was below 3% and added risk above it, as they have since 2021; the hedge is chosen by regime, and puts or an index short do the work when bonds cannot.</li>
+      <li><strong>Count every try.</strong> Every backtest is deflated for the number of variants tested, and run beside fake data that should find nothing.</li>
+      <li><strong>Write the miss down.</strong> Each model has a one-page memo with what would prove it wrong, and the misses are logged.</li></ul>
+      <p class="prose"><a href="#memos">Model memos and the failure log</a> · <a href="#reading">What the desk reads</a></p></section>
+    <section class="panel hm-card" aria-labelledby="hm-plug-t"><h2 id="hm-plug-t">How it plugs into a lean team's book</h2><ol class="hm-list">
+      <li><strong>Monday risk note.</strong> Send holdings as a CSV; the engine returns the size each limit allows, the binding limit, and the hedge that keeps every name, on your names' own prices.</li>
+      <li><strong>Hedge selector.</strong> Index short, bonds, puts or a short basket, chosen by regime and tested on your book's days, not a generic 60/40 rule.</li>
+      <li><strong>Watch list that moves first.</strong> Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</li>
+      <li><strong>An audit trail.</strong> Every call timestamped and hash-chained; a reviewer can rerun any day with one command. Nothing executes: proposals only, for a person to approve.</li></ol></section>
+    <section class="panel hm-card hm-contact" aria-labelledby="hm-contact-t"><h2 id="hm-contact-t">Contact</h2><p id="hm-contact"></p><p class="prose">The engine, the agents that built it and the code are one click deeper: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p></section>
+  </div>
+</section>
+<section class="view" id="view-track" hidden aria-labelledby="tr-title">
+  <div class="vhead"><p class="eyebrow">Today · the track record</p><h1 id="tr-title">The track record: calls made in advance, sized by rule, and honest about their misses</h1>
+    <p class="lede">Three records, never on one chart: the backtest with hindsight, the walk-forward record that recomputes every decision from data it had, and the live ledger, which starts now.</p></div>
+  <div class="at-tiles" id="tr-tiles"></div>
+  <section class="section" aria-labelledby="tr-three-t">
+    <div class="section-head"><p class="eyebrow">Three records</p><h2 id="tr-three-t">Backtest, walk-forward, live: what each can and cannot show</h2><p class="prose" id="tr-three-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="tr-three"></table></div>
+    <p class="hm-dl"><button type="button" class="pill strong" id="tr-pdf">Download the tear sheet (PDF)</button> <span class="hint" id="tr-pdf-note"></span></p>
+  </section>
+  <section class="section" aria-labelledby="tr-wf-t">
+    <div class="section-head"><p class="eyebrow">Walk-forward</p><h2 id="tr-wf-t">Every decision from data it had, costs charged</h2><p class="prose" id="tr-pol-p"></p></div>
+    <figure class="panel chart" style="margin:0"><div class="svgbox" id="tr-curve"></div></figure>
+    <div class="tablewrap"><table class="rs-table" id="tr-pol"></table></div>
+  </section>
+  <section class="section" aria-labelledby="tr-surv-t">
+    <div class="section-head"><p class="eyebrow">Survivorship</p><h2 id="tr-surv-t">The names were not obvious in advance: a point-in-time universe</h2><p class="prose" id="tr-surv-p"></p></div>
+    <div class="grid2"><div class="tablewrap"><table class="rs-table" id="tr-mem"></table></div><div class="tablewrap"><table class="rs-table" id="tr-hind"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="tr-lev-t">
+    <div class="section-head"><p class="eyebrow">Sizing is the product</p><h2 id="tr-lev-t">Vol targeting, a fractional Kelly cap and a hard drawdown stop</h2><p class="prose" id="tr-lev-p"></p></div>
+    <figure class="panel chart" style="margin:0"><div class="svgbox" id="tr-lev"></div></figure>
+  </section>
+  <section class="section" aria-labelledby="tr-weeks-t">
+    <div class="section-head"><p class="eyebrow">The weeks</p><h2 id="tr-weeks-t">What each policy would have done, day by day, in the weeks that mattered</h2><p class="prose">Positions as each policy held them that week (decided at the previous month-end), net of costs. 2020's crash, 2022's inflation shocks, the 2024 carry unwind, the 2025 tariff week and October 2026's AI scare.</p></div>
+    <div id="tr-weeks"></div>
+  </section>
+  <section class="section" aria-labelledby="tr-ledger-t">
+    <div class="section-head"><p class="eyebrow">The ledger</p><h2 id="tr-ledger-t">Every call, timestamped before the next bar and hash-chained</h2><p class="prose" id="tr-ledger-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="tr-ledger"></table></div>
+  </section>
+</section>
+<section class="view" id="view-hedgetest" hidden aria-labelledby="ht-title">
+  <div class="vhead"><p class="eyebrow">Markets · the hedge, tested</p><h1 id="ht-title">Does the long bond hedge this book? It depends on the regime, and since 2021 it has not</h1>
+    <p class="lede">2022 is the problem case: stocks and long bonds fell together. This desk splits the stock-bond relationship by inflation and policy regime since 1962, compares the bond with the alternatives, and walks a hedge ratio that changes with the regime forward.</p></div>
+  <div class="at-tiles" id="ht-tiles"></div>
+  <section class="section" aria-labelledby="ht-reg-t">
+    <div class="section-head"><p class="eyebrow">By regime</p><h2 id="ht-reg-t">Stocks against Treasuries, split by inflation and policy direction</h2><p class="prose" id="ht-reg-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="ht-reg"></table></div>
+  </section>
+  <section class="section" aria-labelledby="ht-alt-t">
+    <div class="section-head"><p class="eyebrow">The alternatives</p><h2 id="ht-alt-t">The bond against the 2-year note, gold, puts, cash and a short basket</h2><p class="prose" id="ht-alt-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="ht-alt"></table></div>
+  </section>
+  <section class="section" aria-labelledby="ht-walk-t">
+    <div class="section-head"><p class="eyebrow">Regime-switching</p><h2 id="ht-walk-t">A bond weight that changes with the regime, walked forward</h2><p class="prose" id="ht-walk-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="ht-walk"></table></div>
+  </section>
+</section>
+<section class="view" id="view-memos" hidden aria-labelledby="memo-title">
+  <div class="vhead"><p class="eyebrow">Evidence · memos and misses</p><h1 id="memo-title">One page per model, and a log of what went wrong</h1>
+    <p class="lede">Each model is written up like a pitch: the thesis, where it differs from the usual way of doing it, the evidence, what would prove it wrong, and what changed and why. The failure log lists the misses, newest first.</p></div>
+  <section class="section" aria-labelledby="mm-memo-t">
+    <div class="section-head"><p class="eyebrow">Memos</p><h2 id="mm-memo-t">The models, one page each</h2></div>
+    <div class="memo-grid" id="mm-list"></div>
+  </section>
+  <section class="section" aria-labelledby="mm-fail-t">
+    <div class="section-head"><p class="eyebrow">Failure log</p><h2 id="mm-fail-t">The misses, and what each changed</h2><p class="prose" id="mm-fail-n"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="mm-fail"></table></div>
+  </section>
+</section>
+<section class="view" id="view-levers" hidden aria-labelledby="lv-title">
+  <div class="vhead"><p class="eyebrow">Evidence · value creation</p><h1 id="lv-title">Value creation, lever by lever: a services buyout's arithmetic, and the same levers on the AI buildout</h1>
+    <p class="lede">Six levers move equity value in any business: the multiple, revenue growth, margin, capital efficiency, leverage and management. The worked example is a search-fund style buyout of a small mechanical services company, with every input a slider and the equity bridge reconciled to the dollar; the plan's claims are checked against sources; then the same six levers are read on the nine AI-buildout companies.</p></div>
+  <div class="at-tiles" id="lv-tiles"></div>
+  <section class="section" aria-labelledby="lv-calc-t">
+    <div class="section-head"><p class="eyebrow">The worked example</p><h2 id="lv-calc-t">Buy at 3.5x, fix pricing, collections and procurement, add members, set-asides and a bolt-on, exit to a platform</h2><p class="prose" id="lv-read"></p></div>
+    <div class="grid2">
+      <form class="panel controls" aria-label="Deal inputs" onsubmit="return false"><div id="lv-sliders"></div><button type="button" class="pill" id="lv-reset">Reset to the checked defaults</button></form>
+      <div class="panel"><div class="tablewrap"><table class="rs-table" id="lv-bridge"></table></div></div>
+    </div>
+    <div class="tablewrap"><table class="rs-table" id="lv-path"></table></div>
+    <p class="hint">Assumptions behind the defaults: revenue $7.0M at a 14% EBITDA margin (about $1.0M); 90% of the price borrowed at 10% over ten years with free cash swept to debt; 4% underlying growth; 80% of a price lift reaching EBITDA; 35% of EBITDA lost to taxes and capital spending; working capital of $0.5M released in year 1 by collecting at the door; a roofing bolt-on at 4x in year 3 financed on the same terms; the platform multiple only if EBITDA reaches the threshold and a general manager is in the seat by year 3. Every one is a slider or a line in buildout/levers.py.</p>
+  </section>
+  <section class="section" aria-labelledby="lv-claims-t">
+    <div class="section-head"><p class="eyebrow">The plan, checked</p><h2 id="lv-claims-t">Each claim in the plan against what the sources say</h2><p class="prose" id="lv-claims-sum"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="lv-claims"></table></div>
+    <ul class="prose" id="lv-claims-src"></ul>
+  </section>
+  <section class="section" aria-labelledby="lv-ai-t">
+    <div class="section-head"><p class="eyebrow">The same levers on the buildout</p><h2 id="lv-ai-t">Multiple, growth, margin, capital efficiency, leverage and management for the nine names</h2><p class="prose" id="lv-ai-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="lv-ai"></table></div>
+    <p class="note">Figures are the latest reported quarter (Nvidia, Broadcom and Oracle report a quarter behind the October filers), with twelve-month cash flows; forward P/E at the Oct 30 close, five-year averages from LSEG as quoted by MarketWatch (Meta's from a source that names no provider). Debt includes leases unless stated.</p>
+    <ul class="prose" id="lv-ai-src"></ul>
   </section>
 </section>
 <section class="view" id="view-reading" hidden aria-labelledby="rr-title">

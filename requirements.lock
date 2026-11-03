@@ -1,0 +1,37 @@
+# Exact pins for CI and the daily run, resolved for Python 3.12 (CPython 3.12.3, manylinux x86_64) on 2026-11-03.
+# Top level: the runtime dependencies in pyproject.toml, the dev extra (pytest, hypothesis) and pyyaml (the workflow
+# tests read the YAML). Every package below is one of those or something they require at runtime.
+# Install with:  pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
+# To refresh: build a clean 3.12 venv, pip install the top-level names, run the suite, and copy the new versions here.
+
+# runtime
+numpy==2.5.4
+pandas==3.1.0
+scipy==1.18.1
+pyarrow==26.0.0
+scikit-learn==1.9.1
+pyyaml==6.0.3
+
+# required by pandas and python-dateutil
+python-dateutil==3.0.0
+tzdata==2026.6
+six==1.17.0
+
+# required by scikit-learn and joblib
+joblib==1.6.0
+threadpoolctl==3.7.0
+narwhals==2.28.0
+cloudpickle==3.1.2
+
+# test
+pytest==9.2.0
+hypothesis==6.170.13
+
+# required by pytest
+iniconfig==2.3.1
+packaging==26.3
+pluggy==1.7.0
+pygments==2.21.0
+
+# required by hypothesis
+sortedcontainers==2.4.0

@@ -176,6 +176,18 @@ def main(argv: list[str] | None = None) -> None:
     bkp = sub.add_parser("book", help="v0.30: the book on its names' own daily prices: exposures, risk, tail, the size each limit allows, hedges tested out of sample, stress, liquidity")
     bkp.add_argument("--out", default="out")
     bkp.add_argument("--cache", default=".cache/book")
+    lgp = sub.add_parser("ledger", help="v0.38: the append-only, hash-chained call ledger: append | verify | show")
+    lgp.add_argument("action", nargs="?", default="verify")
+    lgp.add_argument("--book", default=None)
+    tkp = sub.add_parser("track", help="v0.38: the track record: walk-forward with costs, point-in-time universe, the hedge by regime, the weeks")
+    tkp.add_argument("--out", default="out")
+    tkp.add_argument("--cache", default=".cache/book")
+    vlp = sub.add_parser("validate", help="v0.38: validate every price frame the book pulls (missing bars, splits, duplicates, staleness)")
+    vlp.add_argument("--cache", default=".cache/book")
+    vlp.add_argument("--json", default=None)
+    rpp = sub.add_parser("reproduce", help="v0.38: recompute any day's call from data through that date and check it against the ledger")
+    rpp.add_argument("--date", required=True)
+    rpp.add_argument("--cache", default=".cache/book")
     pcp = sub.add_parser("credit", help="v0.34: the private credit lens, Blue Owl at the centre: queues, marks, income quality, the sector's default rate, the scorecard and the book's exposure")
     pcp.add_argument("--out", default="out")
     pcp.add_argument("--part", default="summary")
@@ -535,6 +547,44 @@ def main(argv: list[str] | None = None) -> None:
         for f in o["findings"]:
             print(" ", f)
         print("wrote", path)
+        return
+    if a.cmd == "ledger":
+        from . import ledger
+        raise SystemExit(ledger.main([a.action] + (["--book", a.book] if a.book else [])))
+    if a.cmd == "track":
+        from . import book as bk, ledger, track
+        from .jsonout import write
+        o = bk._clean(track.build(bk.download(a.cache), bk.treasury(), None, ledger.read()))
+        print("wrote", write(o, a.out, "track.json"))
+        return
+    if a.cmd == "validate":
+        from . import book as bk
+        from .data import validate as vd
+        rep = vd.validate_all(bk.download(a.cache, validate=False))
+        for r in rep["results"]:
+            print(vd.line(r))
+        print(f"{rep['n']} frames, {len(rep['failed'])} failed, {rep['warnings']} warnings")
+        if a.json:
+            from pathlib import Path
+            import json as _j
+            Path(a.json).write_text(_j.dumps(rep, indent=1, default=vd._default))
+        raise SystemExit(0 if rep["ok"] else 1)
+    if a.cmd == "reproduce":
+        from . import book as bk, ledger
+        import pandas as pd
+        prices = bk.download(a.cache)
+        cut = pd.Timestamp(a.date)
+        trimmed = {k: v[pd.to_datetime(v["date"]) <= cut] for k, v in prices.items()}
+        ust = bk.treasury()
+        o = bk.build(trimmed, ust.loc[:cut])
+        logged = [e for e in ledger.read() if e["data_asof"] == str(o["asof"])]
+        print(f"data through {o['asof']}: size {o['size']:.4f} ({o['binding']})")
+        if logged:
+            e = logged[-1]
+            same = abs(e["call"]["size"] - round(float(o["size"]), 4)) < 5e-4 and e["call"]["binding"] == o["binding"]
+            print(f"ledger entry {e['seq']} (written {e['ts_utc']}): size {e['call']['size']:.4f} ({e['call']['binding']}): {'REPRODUCED' if same else 'DIFFERS'}")
+            raise SystemExit(0 if same else 1)
+        print("no ledger entry for that data date")
         return
     if a.cmd == "credit":
         from . import private_credit as pc

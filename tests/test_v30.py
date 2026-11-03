@@ -41,7 +41,7 @@ def test_the_snapshot_is_a_real_run_with_consistent_sizes():
 def test_the_desk_calls_the_book_and_the_desk_is_wired():
     boot, body, land = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text(), (SRC / "landing.js").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["today"].startswith('"desk", "book"') and 'id="view-book"' in body and "renderBookRisk" in boot
+    assert groups["today"].startswith('"home", "desk", "track", "book"') and 'id="view-book"' in body and "renderBookRisk" in boot
     assert "bookCall(N)" in land and "Run the book at" in land and any(d[0] == "book" for d in mind.DESKS)
     assert '"snap30.js", "book.js"' in (ROOT / "scripts" / "assemble_page.py").read_text()
     assert "book_risk" in mcp_server.TOOLS and not any(re.search(r"place|execute|submit|send_order", n) for n in mcp_server.TOOLS)

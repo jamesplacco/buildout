@@ -3,6 +3,16 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.38 turns the model into a dated, auditable track record. `buildout/track.py` walks the call forward month by
+month with costs and a point-in-time universe, keeps the backtest, the walk-forward and live paper apart, replays named
+weeks, and tests the long bond by inflation and policy regime against puts, short Treasuries, gold, cash and a short
+basket of weak AI names. `buildout/ledger.py` is an append-only, hash-chained ledger of calls (`ledger/calls.jsonl`;
+`python -m buildout ledger verify`), each governing from the next trading day after it is written; `python -m buildout
+reproduce --date YYYY-MM-DD` recomputes a day's call and checks it against the ledger. `scripts/snapshot_v38.py` writes
+the monthly tear sheet (`site/tearsheet.pdf`). `buildout/levers.py` is the value-creation model behind the Value creation
+desk. Every price pull is validated (`buildout/data/validate.py`, `python -m buildout validate`); dependencies are pinned
+in `requirements.lock`; a failed daily step opens an issue.
+
 Version 0.36 adds the Reading room (`buildout/assets/sources/*.json`, `scripts/snapshot_sources.py`): about 130 checked
 sources in four kinds, each mapped to the theses and desks it bears on and to what it changes; the railway test
 (`accounting.required_revenue`) on the Fundamentals desk; a rewritten Desk narrative; and a second accuracy pass.

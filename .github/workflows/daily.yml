@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  issues: write   # the Status alert step opens or comments on the "Daily run failed" issue
 
 concurrency:
   group: daily-run
@@ -27,26 +28,34 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: requirements.lock
 
       - name: Install
-        run: pip install -e ".[databento,dev]"
+        # exact pins for every dependency, then the package without re-resolving; databento is optional, so it goes last
+        run: |
+          pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
+          pip install "databento>=0.40"
 
       - name: Smoke test the engine
+        id: smoke
         # v0.32: the full suite runs in CI on every push (tests.yml); the data run keeps a two-minute smoke test so a
         # broken install stops it, without spending its time budget on 600 tests
         run: pytest -q -x -p no:cacheprovider tests/test_v08.py tests/test_v12.py tests/test_book.py tests/test_sizing_rules.py
 
       - name: Market regime (FRED, free)
+        id: macro
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true   # v0.31: a FRED outage must not skip the Databento book run and every step after it
         run: python -m buildout macro --out site/data
 
       - name: Long-history research (public datasets on GitHub, free)
+        id: research
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true   # a dataset mirror being down must never block the market data
         run: python -m buildout research --out site/data
 
       - name: Brain and field-manual engine (public datasets, free)
+        id: brain
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: |
@@ -54,6 +63,7 @@ jobs:
           python -m buildout buyside --out site/data
 
       - name: Noteworthy feeds (RSS, Substack, Telegram, Reddit, HN, news; X with a token)
+        id: feeds
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true   # social sources come and go; they never block the market data
         env:
@@ -61,11 +71,13 @@ jobs:
         run: python -m buildout feeds --out site/data
 
       - name: Source registry
+        id: sources
         continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         run: python -m buildout sources --out site/data
 
       - name: Book run (Databento)
+        id: book
         continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
         timeout-minutes: 20   # v0.33: one hung step can no longer use up the whole job
         env:
@@ -79,6 +91,7 @@ jobs:
           python -m buildout run --config config.toml --out site/data
 
       - name: Fundamentals (SEC EDGAR)
+        id: fundamentals
         continue-on-error: true   # v0.33: a failed or timed-out data step never skips the steps after it
         timeout-minutes: 15   # v0.33: one hung step can no longer use up the whole job
         env:
@@ -91,16 +104,19 @@ jobs:
           python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
 
       - name: The atlas (every monthly series, FRED and GitHub mirrors; learned structure)
+        id: atlas
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout atlas --out site/data
 
       - name: The labs (156 years of public data; trend, oscillators, valuation, regimes, volatility, spreads)
+        id: labs
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout labs --out site/data
 
       - name: Data connections (which sources and credentials answer today)
+        id: connect
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         env:
@@ -109,6 +125,7 @@ jobs:
         run: python -m buildout connect --out site/data
 
       - name: Technical and fundamental analysis (Databento, then Yahoo, then Stooq; SEC filings)
+        id: market
         timeout-minutes: 20   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         env:
@@ -117,63 +134,197 @@ jobs:
         run: python -m buildout market --out site/data
 
       - name: Reinforcement-learning sizing agent (fitted Q iteration, judged out of sample)
+        id: rl
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout rl --out site/data
 
       - name: Bonds, simply (every Treasury ETF repriced on today's Treasury curve)
+        id: bonds
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout bonds --live --out site/data
 
       - name: Machine-learning lab (purged walk-forward, CPCV, conformal intervals, analogs)
+        id: ml
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout ml --out site/data
 
       - name: Decision engine (stacked forecasts, regimes, changepoints, geometric analogs, model averaging, an evidence gate)
+        id: decide
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout decide --out site/data
 
       - name: Portfolio engine (stocks, Treasuries, gold and cash from regimes, a learner over policies)
+        id: portfolio
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout portfolio --out site/data
 
       - name: The shape of the market (covariance geometry, random matrices, topology, transport, every claim tested)
+        id: geometry
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout geometry --out site/data
 
       - name: Reality check (every model's assumptions, breakpoints, kappa, fragility, stressed worlds)
+        id: reality
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout reality --out site/data
 
       - name: Reasoner and games (reads the files above; no network)
+        id: reason
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout reason --out site/data
 
       - name: Decision engines and the manifest (valuation, causal statistics, hedge book, decision loop; no network)
+        id: engines
         timeout-minutes: 10   # v0.33: one hung step can no longer use up the whole job
         continue-on-error: true
         run: python -m buildout engine --out site/data --only valuation,causal,hedges,ooda
 
+      - name: Book risk and the call ledger (validated prices; one hash-chained entry per new data date)
+        id: ledger
+        if: always()
+        timeout-minutes: 15
+        continue-on-error: true
+        run: |
+          python -m buildout book --out site/data
+          python -m buildout ledger append --book site/data/book.json
+          python -m buildout ledger verify
+
       - name: Status (freshness and sanity checks for the page)
+        id: status
         if: always()
         run: python -m buildout status --out site/data
 
       - name: Commit results
+        id: commit
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data
+          git add site/data ledger/calls.jsonl
           if git diff --cached --quiet; then
             echo "No new data."
             exit 0
           fi
           git commit -m "Daily data $(date -u +%Y-%m-%d)"
           git push
+
+      # A failed data step is kept from blocking the steps after it (continue-on-error), which also keeps the job green.
+      # The two steps below turn any failure back into a red run and an issue, so a broken day is never silent.
+      - name: Status check
+        id: status_check
+        if: always()
+        env:
+          STEP_OUTCOMES: |
+            smoke|Smoke test the engine|${{ steps.smoke.outcome }}
+            macro|Market regime (FRED)|${{ steps.macro.outcome }}
+            research|Long-history research|${{ steps.research.outcome }}
+            brain|Brain and field-manual engine|${{ steps.brain.outcome }}
+            feeds|Noteworthy feeds|${{ steps.feeds.outcome }}
+            sources|Source registry|${{ steps.sources.outcome }}
+            book|Book run (Databento)|${{ steps.book.outcome }}
+            fundamentals|Fundamentals (SEC EDGAR)|${{ steps.fundamentals.outcome }}
+            atlas|The atlas|${{ steps.atlas.outcome }}
+            labs|The labs|${{ steps.labs.outcome }}
+            connect|Data connections|${{ steps.connect.outcome }}
+            market|Technical and fundamental analysis|${{ steps.market.outcome }}
+            rl|Reinforcement-learning sizing agent|${{ steps.rl.outcome }}
+            bonds|Bonds, simply|${{ steps.bonds.outcome }}
+            ml|Machine-learning lab|${{ steps.ml.outcome }}
+            decide|Decision engine|${{ steps.decide.outcome }}
+            portfolio|Portfolio engine|${{ steps.portfolio.outcome }}
+            geometry|The shape of the market|${{ steps.geometry.outcome }}
+            reality|Reality check|${{ steps.reality.outcome }}
+            reason|Reasoner and games|${{ steps.reason.outcome }}
+            engines|Decision engines and the manifest|${{ steps.engines.outcome }}
+            ledger|Book risk and the call ledger|${{ steps.ledger.outcome }}
+            status|Status (freshness and sanity checks)|${{ steps.status.outcome }}
+            commit|Commit results|${{ steps.commit.outcome }}
+          # report.json and capex.json are only written once their credential is set; until then their absence is expected
+          HAS_DATABENTO: ${{ secrets.DATABENTO_API_KEY != '' }}
+          HAS_SEC_UA: ${{ vars.SEC_USER_AGENT != '' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          steps = [ln.split("|") for ln in os.environ["STEP_OUTCOMES"].strip().splitlines() if ln.count("|") == 2]
+          failed = [(i, n, o or "not run") for i, n, o in steps if o != "success" and o != "skipped"]
+          skipped = [n for i, n, o in steps if o == "skipped"]
+          expected_absent = set()
+          if os.environ.get("HAS_DATABENTO") != "true":
+              expected_absent.add("report.json")
+          if os.environ.get("HAS_SEC_UA") != "true":
+              expected_absent.add("capex.json")
+          p = Path("site/data/status.json")
+          try:
+              st = json.loads(p.read_text())
+              files = st.get("files") or {}
+              missing = sorted(k for k, v in files.items() if not v.get("present") and k not in expected_absent)
+              invalid = sorted(k for k, v in files.items() if v.get("present") and v.get("valid") is False)
+              checks = [c for c in st.get("checks") or [] if not c.get("ok")]
+              status_err = None
+          except (OSError, ValueError) as exc:
+              missing, invalid, checks, status_err = [], [], [], f"{p} could not be read: {exc}"
+
+          bad = bool(failed or missing or invalid or status_err)
+          md = ["## Daily run: " + ("FAILED" if bad else "all data steps succeeded"), "", f"Run: {os.environ['RUN_URL']}", ""]
+          if failed:
+              md += ["### Failed steps", "", "| Step | Id | Outcome |", "|---|---|---|"] + [f"| {n} | `{i}` | {o} |" for i, n, o in failed] + [""]
+          if status_err:
+              md += ["### status.json", "", status_err, ""]
+          if missing or invalid:
+              md += ["### Output files", ""] + [f"- missing: `{f}`" for f in missing] + [f"- not valid JSON: `{f}`" for f in invalid] + [""]
+          if expected_absent:
+              md += ["Not expected yet (credential not set): " + ", ".join(f"`{f}`" for f in sorted(expected_absent)), ""]
+          if skipped:
+              md += ["Skipped: " + ", ".join(skipped), ""]
+          if checks:
+              md += ["### Sanity checks that did not pass (reported, not failing the run)", ""] + [f"- {c.get('name')}" + (f": {c['detail']}" if c.get("detail") else "") for c in checks] + [""]
+          text = "\n".join(md) + "\n"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+              fh.write(text)
+          Path(os.environ["RUNNER_TEMP"], "status_check.md").write_text(text)
+          for i, n, o in failed:
+              print(f"::error title=Daily step failed::{n} ({i}): {o}")
+          for f in missing:
+              print(f"::error title=Output missing::site/data/{f}")
+          if status_err:
+              print(f"::error title=status.json::{status_err}")
+          print(text)
+          raise SystemExit(1 if bad else 0)
+          PY
+
+      - name: Status alert
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Daily run failed"
+          body="$RUNNER_TEMP/status_alert.md"
+          {
+            echo "The daily run of $(date -u +%Y-%m-%d) failed: $RUN_URL"
+            echo
+            if [ -s "$RUNNER_TEMP/status_check.md" ]; then
+              cat "$RUNNER_TEMP/status_check.md"
+            else
+              echo "The status check did not write a summary (a step before it failed outright); the run log has the error."
+            fi
+          } > "$body"
+          num=$(gh issue list --state open --limit 200 --json number,title --jq "map(select(.title == \"$title\")) | sort_by(.number) | .[0].number // empty")
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body-file "$body"
+            echo "Commented on issue #$num"
+          else
+            gh issue create --title "$title" --body-file "$body"
+          fi
