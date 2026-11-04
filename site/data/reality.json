@@ -1,0 +1,535 @@
+{
+ "schema": 1,
+ "checks": {
+  "tails_month": {
+   "series": "S&P 500 real total return, monthly since 1871",
+   "n": 1868,
+   "kurtosis": 20.924007,
+   "jb_p": 0.0,
+   "hill_alpha": 3.111506,
+   "threshold_sd": 3.0,
+   "observed_beyond": 23,
+   "gaussian_expects": 5.043219,
+   "ratio": 4.560579,
+   "var99_empirical": -0.114862,
+   "var99_normal": -0.088198,
+   "var_understatement": 0.302314,
+   "status": "broken"
+  },
+  "tails_day": {
+   "series": "Brent, daily since 1987",
+   "n": 9116,
+   "kurtosis": 56.182732,
+   "jb_p": 0.0,
+   "hill_alpha": 2.664908,
+   "threshold_sd": 5.0,
+   "observed_beyond": 25,
+   "gaussian_expects": 0.005226,
+   "ratio": 4783.561577,
+   "var99_empirical": -0.071165,
+   "var99_normal": -0.062637,
+   "var_understatement": 0.136143,
+   "status": "broken"
+  },
+  "dependence": {
+   "returns": {
+    "Q": 152.687448,
+    "p": 1.614e-26,
+    "rho1": 0.25956
+   },
+   "squared": {
+    "Q": 278.426085,
+    "p": 1.569e-52,
+    "rho1": 0.091735
+   },
+   "n": 1868,
+   "n_effective": 1144.677364,
+   "working_rho1": 0.25,
+   "status": "broken"
+  },
+  "stability": {
+   "sup_f": {
+    "F": 1.536436,
+    "at": 599,
+    "p": 0.875
+   },
+   "break_date": "1921-01",
+   "sharpe30_min": 0.202561,
+   "sharpe30_max": 0.940662,
+   "sharpe30_min_at": "1932-06",
+   "sharpe30_max_at": "1972-04",
+   "vol10_min": 0.093245,
+   "vol10_max": 0.317146,
+   "status": "strained"
+  },
+  "correlation": {
+   "full": 0.142673,
+   "share_windows_positive": 0.732332,
+   "low_inflation": 0.012672,
+   "high_inflation": 0.299339,
+   "months_high": 697,
+   "window_min": -0.770241,
+   "window_max": 0.696218,
+   "status": "broken"
+  },
+  "trend": {
+   "sharpe_gain_by_delay": {
+    "1": 0.237224,
+    "2": 0.082119,
+    "3": 0.030009,
+    "4": -0.005084,
+    "6": -0.084823
+   },
+   "breakeven_cost": 0.005592,
+   "switches_per_year": 1.342612,
+   "hold_sharpe": 0.558453,
+   "status": "holds"
+  },
+  "kelly": {
+   "full": 3.957408,
+   "window_years": 30,
+   "min": 1.360444,
+   "max": 8.007138,
+   "share_over_2x": 0.007937,
+   "share_below_half": 0.142857,
+   "last_window": 4.962022,
+   "last_window_ci90": [
+    2.049081,
+    7.874964
+   ],
+   "status": "strained"
+  },
+  "hedge": {
+   "weight": 0.3,
+   "sigma_bond": 0.102699,
+   "sigma_book": 0.18,
+   "rho_star": -0.085582,
+   "now": null,
+   "status": null
+  },
+  "testing": {
+   "n": 34,
+   "p05": 13,
+   "t3": 9,
+   "holm": 8
+  },
+  "garch": {
+   "persistence": 0.996304,
+   "status": "strained"
+  },
+  "kappa": {
+   "series": {
+    "S&P 500, monthly": {
+     "kappa": 0.128954,
+     "n": 30,
+     "n_equivalent_30": 38.588814
+    },
+    "Brent, daily": {
+     "kappa": 0.204215,
+     "n": 30,
+     "n_equivalent_30": 46.414234
+    },
+    "Henry Hub gas, daily": {
+     "kappa": 0.298591,
+     "n": 30,
+     "n_equivalent_30": 61.876823
+    },
+    "VIX, daily change": {
+     "kappa": 0.130801,
+     "n": 30,
+     "n_equivalent_30": 38.749223
+    },
+    "Gaussian (check)": {
+     "kappa": 0.0,
+     "n": 30,
+     "n_equivalent_30": 30.0
+    }
+   },
+   "status": "strained"
+  },
+  "ml": {
+   "skill": 0.039837,
+   "pbo": 0.821429,
+   "novelty_pct": 0.252632,
+   "status": "holds"
+  },
+  "fragility": {
+   "grid": [
+    -0.4,
+    -0.35,
+    -0.3,
+    -0.25,
+    -0.2,
+    -0.15,
+    -0.1,
+    -0.05,
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2
+   ],
+   "structures": {
+    "unhedged": {
+     "H": {
+      "0.05": 0.0,
+      "0.10": 0.0,
+      "0.15": 0.0,
+      "0.20": 0.0,
+      "0.25": 0.0,
+      "0.30": 0.0
+     },
+     "H_min": 0.0,
+     "at": "0.05",
+     "accel": 2.0,
+     "curve": [
+      -0.78,
+      -0.6825,
+      -0.585,
+      -0.4875,
+      -0.39,
+      -0.2925,
+      -0.195,
+      -0.0975,
+      0.0,
+      0.0975,
+      0.195,
+      0.2925,
+      0.39
+     ],
+     "verdict": "linear"
+    },
+    "put_spread": {
+     "H": {
+      "0.05": 0.009926,
+      "0.10": 0.0,
+      "0.15": -0.009926,
+      "0.20": 0.0,
+      "0.25": 0.0,
+      "0.30": 0.0
+     },
+     "H_min": -0.009926,
+     "at": "0.15",
+     "accel": 2.113031,
+     "curve": [
+      -0.750296,
+      -0.652796,
+      -0.555296,
+      -0.457796,
+      -0.360296,
+      -0.262796,
+      -0.185148,
+      -0.1075,
+      -0.01,
+      0.0875,
+      0.185,
+      0.2825,
+      0.38
+     ],
+     "verdict": "convex, then fragile"
+    },
+    "collar": {
+     "H": {
+      "0.05": 1.388e-17,
+      "0.10": 0.0125,
+      "0.15": -5.551e-17,
+      "0.20": 0.0,
+      "0.25": 0.0,
+      "0.30": 0.0
+     },
+     "H_min": -5.551e-17,
+     "at": "0.15",
+     "accel": 1.807717,
+     "curve": [
+      -0.631778,
+      -0.559278,
+      -0.486778,
+      -0.414278,
+      -0.341778,
+      -0.269278,
+      -0.196778,
+      -0.099278,
+      -0.001778,
+      0.095722,
+      0.193222,
+      0.265722,
+      0.338222
+     ],
+     "verdict": "convex"
+    },
+    "vix_calls": {
+     "H": {
+      "0.05": 0.002944,
+      "0.10": 0.00368,
+      "0.15": 0.0,
+      "0.20": -0.000736,
+      "0.25": -0.005889,
+      "0.30": 0.0
+     },
+     "H_min": -0.005889,
+     "at": "0.25",
+     "accel": 1.960883,
+     "curve": [
+      -0.740835,
+      -0.643335,
+      -0.545835,
+      -0.448335,
+      -0.362612,
+      -0.278362,
+      -0.194111,
+      -0.1025,
+      -0.005,
+      0.0925,
+      0.19,
+      0.2875,
+      0.385
+     ],
+     "verdict": "convex, then fragile"
+    },
+    "levered_1_5x": {
+     "H": {
+      "0.05": 0.0,
+      "0.10": -5.551e-17,
+      "0.15": 5.551e-17,
+      "0.20": -1.11e-16,
+      "0.25": 0.0,
+      "0.30": 1.11e-16
+     },
+     "H_min": -1.11e-16,
+     "at": "0.20",
+     "accel": 1.985401,
+     "curve": [
+      -1.1765,
+      -1.03025,
+      -0.884,
+      -0.73775,
+      -0.5915,
+      -0.44525,
+      -0.299,
+      -0.15275,
+      -0.0065,
+      0.13975,
+      0.286,
+      0.43225,
+      0.5785
+     ],
+     "verdict": "linear"
+    },
+    "short_put": {
+     "H": {
+      "0.05": 0.0,
+      "0.10": -0.025,
+      "0.15": 5.551e-17,
+      "0.20": -5.551e-17,
+      "0.25": 0.0,
+      "0.30": 2.22e-16
+     },
+     "H_min": -0.025,
+     "at": "0.10",
+     "accel": 2.323811,
+     "curve": [
+      -1.071762,
+      -0.924262,
+      -0.776762,
+      -0.629262,
+      -0.481762,
+      -0.334262,
+      -0.186762,
+      -0.089262,
+      0.008238,
+      0.105738,
+      0.203238,
+      0.300738,
+      0.398238
+     ],
+     "verdict": "fragile"
+    }
+   },
+   "d": 0.05
+  },
+  "worlds": {
+   "n": 400,
+   "block": 12,
+   "months": 600,
+   "cost": 0.001,
+   "all": {
+    "trend_sharpe": 0.5475,
+    "trend_dd": 0.9175,
+    "mix_sharpe": 0.8775,
+    "corr_median": 0.143446,
+    "mix_dd": 1.0
+   },
+   "inflation": {
+    "trend_sharpe": 0.75,
+    "trend_dd": 0.965,
+    "mix_sharpe": 0.0375,
+    "corr_median": 0.355627,
+    "mix_dd": 0.8125,
+    "pool_months": 443
+   }
+  }
+ },
+ "map": [
+  {
+   "model": "Value at risk and the Sharpe ratio",
+   "where": "analytics/risk.py, labs.py",
+   "assumes": [
+    "normal returns",
+    "independent months"
+   ],
+   "checks": [
+    "tails_month",
+    "dependence"
+   ],
+   "consequence": "A normal 1-in-100 month understates the empirical one by 30%; the engine reports historical and fat-tailed VaR beside it.",
+   "statuses": [
+    "broken",
+    "broken"
+   ],
+   "verdict": "broken"
+  },
+  {
+   "model": "The 10-month trend rule",
+   "where": "labs.py trend_lab",
+   "assumes": [
+    "no costs",
+    "no delay",
+    "stable parameters"
+   ],
+   "checks": [
+    "trend",
+    "stability"
+   ],
+   "consequence": "Its Sharpe gain is gone at 56 basis points a switch and vanishes with longer delays.",
+   "statuses": [
+    "holds",
+    "strained"
+   ],
+   "verdict": "strained"
+  },
+  {
+   "model": "Kelly sizing",
+   "where": "decisions.py, games2.py",
+   "assumes": [
+    "known edge",
+    "stable parameters"
+   ],
+   "checks": [
+    "kelly"
+   ],
+   "consequence": "30-year windows put the Kelly fraction anywhere from 1.4 to 8.0 times capital, and monthly-averaged prices understate volatility, so every one of them is too high. Size at half or less.",
+   "statuses": [
+    "strained"
+   ],
+   "verdict": "strained"
+  },
+  {
+   "model": "The TLT hedge",
+   "where": "research.py, hedgebook.py",
+   "assumes": [
+    "negative stock-bond correlation"
+   ],
+   "checks": [
+    "hedge",
+    "correlation"
+   ],
+   "consequence": "A 30% TLT sleeve adds variance once the correlation is above -0.09.",
+   "statuses": [
+    "broken"
+   ],
+   "verdict": "broken"
+  },
+  {
+   "model": "The brain's linear links (structural VAR)",
+   "where": "atlas.py, brain.py",
+   "assumes": [
+    "stable parameters",
+    "linear links",
+    "no hidden causes"
+   ],
+   "checks": [
+    "stability",
+    "crisis"
+   ],
+   "consequence": "Links are learned on 1990 onward and re-estimated monthly; robustness values say how strong a hidden cause must be to erase each one.",
+   "statuses": [
+    "strained"
+   ],
+   "verdict": "strained"
+  },
+  {
+   "model": "Valuation regressions (CAPE)",
+   "where": "labs.py valuation_lab",
+   "assumes": [
+    "stable parameters",
+    "earnings known when used"
+   ],
+   "checks": [
+    "stability"
+   ],
+   "consequence": "Judged only out of sample with a four-month earnings lag; a decade tool, not a timing tool.",
+   "statuses": [
+    "strained"
+   ],
+   "verdict": "strained"
+  },
+  {
+   "model": "Machine-learning forecasts",
+   "where": "ml.py",
+   "assumes": [
+    "the past resembles the future",
+    "enough independent data"
+   ],
+   "checks": [
+    "ml",
+    "dependence",
+    "kappa"
+   ],
+   "consequence": "Out of sample against the historical mean, with purged validation and the probability of backtest overfitting shown beside every number.",
+   "statuses": [
+    "holds",
+    "broken",
+    "strained"
+   ],
+   "verdict": "broken"
+  },
+  {
+   "model": "Black-Scholes option prices",
+   "where": "analytics/options.py, hedgebook.py",
+   "assumes": [
+    "normal returns",
+    "constant volatility"
+   ],
+   "checks": [
+    "tails_day",
+    "garch"
+   ],
+   "consequence": "Puts are priced with a skew add-on and stress scenarios, never at one flat volatility.",
+   "statuses": [
+    "broken",
+    "strained"
+   ],
+   "verdict": "broken"
+  },
+  {
+   "model": "The mind's evidence weights",
+   "where": "mind.py",
+   "assumes": [
+    "reliabilities set by hand",
+    "families are independent"
+   ],
+   "checks": [],
+   "consequence": "Every weight is shown, every verdict comes with a leave-one-family-out range and its hinge; the weights are not yet learned from outcomes.",
+   "statuses": [],
+   "verdict": "untested"
+  }
+ ],
+ "findings": [
+  "Normal returns: monthly stocks show 23 moves beyond 3 standard deviations where a bell curve expects 5.0; the normal 1-in-100 month understates the real one by 30%.",
+  "Brent has 25 daily moves beyond 5 standard deviations where a bell curve expects 0.01.",
+  "Taleb's kappa for monthly stocks is 0.13: matching what 30 Gaussian months reveal about the mean takes about 39 months.",
+  "The trend rule's Sharpe gain disappears at 56 basis points a switch, and by a four-month delay.",
+  "Kelly sizing on stocks from a 30-year backtest ranged from 1.4 to 8.0 times capital depending on which 30 years: the edge is not known well enough to bet full Kelly.",
+  "In 400 bootstrapped histories a 60/40 mix beats all stocks on Sharpe 88% of the time; in histories drawn from inflationary months, 4%."
+ ]
+}

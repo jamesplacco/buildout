@@ -1,0 +1,620 @@
+{
+ "schema": 1,
+ "observed": {
+  "infl": null,
+  "corr": null,
+  "oil": null,
+  "vix": null,
+  "hy": null,
+  "capex": null,
+  "curve": null
+ },
+ "params": {
+  "beta_market": 1.15,
+  "beta_ai": 1.0,
+  "tlt_duration": 16.5,
+  "tlt_convexity": 360.0,
+  "y30": 0.0485,
+  "rf": 0.042,
+  "borrow_spread": 0.01,
+  "vix": 18.0,
+  "index_vol": 25.0,
+  "skew_pts": 3.0,
+  "horizon": 0.25,
+  "max_loss": 0.15,
+  "max_equity": 1.5,
+  "max_gross": 2.0,
+  "max_premium": 0.02
+ },
+ "scenarios": [
+  {
+   "id": "base",
+   "name": "Grind higher (base case)",
+   "market": 0.06,
+   "ai": 0.02,
+   "dy": 0.001,
+   "oil": 0.0,
+   "gold": 0.01,
+   "prior": 0.52
+  },
+  {
+   "id": "soft",
+   "name": "Soft landing, cuts",
+   "market": 0.07,
+   "ai": 0.03,
+   "dy": -0.005,
+   "oil": -0.05,
+   "gold": 0.02,
+   "prior": 0.12
+  },
+  {
+   "id": "melt",
+   "name": "AI melt-up, yields up",
+   "market": 0.12,
+   "ai": 0.1,
+   "dy": 0.004,
+   "oil": 0.05,
+   "gold": 0.0,
+   "prior": 0.1
+  },
+  {
+   "id": "termprem",
+   "name": "AI financing / term-premium shock",
+   "market": -0.08,
+   "ai": -0.06,
+   "dy": 0.0075,
+   "oil": 0.0,
+   "gold": 0.03,
+   "prior": 0.09
+  },
+  {
+   "id": "digest",
+   "name": "AI capex digestion (growth scare)",
+   "market": -0.12,
+   "ai": -0.12,
+   "dy": -0.006,
+   "oil": -0.1,
+   "gold": 0.04,
+   "prior": 0.07
+  },
+  {
+   "id": "stagfl",
+   "name": "Inflation + hikes (2022 replay)",
+   "market": -0.15,
+   "ai": -0.06,
+   "dy": 0.01,
+   "oil": 0.25,
+   "gold": 0.06,
+   "prior": 0.06
+  },
+  {
+   "id": "crash",
+   "name": "Liquidity crash, everything sells",
+   "market": -0.22,
+   "ai": -0.08,
+   "dy": 0.0025,
+   "oil": -0.2,
+   "gold": -0.04,
+   "prior": 0.04
+  }
+ ],
+ "signals": [
+  {
+   "id": "infl",
+   "name": "36-month inflation at or above 2.75%",
+   "cluster": "inflation",
+   "lik": [
+    0.4,
+    0.3,
+    0.5,
+    0.6,
+    0.3,
+    0.9,
+    0.4
+   ]
+  },
+  {
+   "id": "corr",
+   "name": "Stocks and bonds moving together (correlation above 0)",
+   "cluster": "inflation",
+   "lik": [
+    0.4,
+    0.35,
+    0.55,
+    0.7,
+    0.25,
+    0.85,
+    0.5
+   ]
+  },
+  {
+   "id": "oil",
+   "name": "Brent at or above 1.3x its 5-year average",
+   "cluster": "oil",
+   "lik": [
+    0.15,
+    0.15,
+    0.25,
+    0.2,
+    0.15,
+    0.7,
+    0.2
+   ]
+  },
+  {
+   "id": "vix",
+   "name": "VIX at or above 20",
+   "cluster": "stress",
+   "lik": [
+    0.2,
+    0.2,
+    0.25,
+    0.5,
+    0.6,
+    0.55,
+    0.8
+   ]
+  },
+  {
+   "id": "hy",
+   "name": "High-yield spread at or above 4.5%",
+   "cluster": "credit",
+   "lik": [
+    0.15,
+    0.15,
+    0.1,
+    0.4,
+    0.5,
+    0.45,
+    0.7
+   ]
+  },
+  {
+   "id": "capex",
+   "name": "Builders' capex above 80% of operating cash flow",
+   "cluster": "ai",
+   "lik": [
+    0.5,
+    0.4,
+    0.6,
+    0.7,
+    0.7,
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "curve",
+   "name": "2s10s curve inverted",
+   "cluster": "growth",
+   "lik": [
+    0.25,
+    0.35,
+    0.2,
+    0.2,
+    0.55,
+    0.45,
+    0.5
+   ]
+  }
+ ],
+ "posterior": {
+  "prior": [
+   0.52,
+   0.12,
+   0.1,
+   0.09,
+   0.07,
+   0.06,
+   0.04
+  ],
+  "posterior": [
+   0.52,
+   0.12,
+   0.1,
+   0.09,
+   0.07,
+   0.06,
+   0.04
+  ],
+  "log_contrib": {}
+ },
+ "alternatives": {
+  "keep": {
+   "port": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rets": [
+    0.089,
+    0.1105,
+    0.238,
+    -0.152,
+    -0.258,
+    -0.2325,
+    -0.333
+   ],
+   "elog": 0.010459,
+   "ce": 0.010514,
+   "worst": -0.333,
+   "mean": 0.02433,
+   "feasible": false,
+   "max_regret": 0.188925
+  },
+  "reduce": {
+   "port": [
+    0.45,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rets": [
+    0.045825,
+    0.0555,
+    0.112875,
+    -0.062625,
+    -0.110325,
+    -0.09885,
+    -0.144075
+   ],
+   "elog": 0.014004,
+   "ce": 0.014103,
+   "worst": -0.144075,
+   "mean": 0.016724,
+   "feasible": true,
+   "max_regret": 0.125125
+  },
+  "hedge": {
+   "port": [
+    1.0,
+    0.0,
+    0.0,
+    0.1
+   ],
+   "rets": [
+    0.0887,
+    0.1112,
+    0.2367,
+    -0.1503,
+    -0.2553,
+    -0.2278,
+    -0.3383
+   ],
+   "elog": 0.010768,
+   "ce": 0.010826,
+   "worst": -0.3383,
+   "mean": 0.02454,
+   "feasible": false,
+   "max_regret": 0.194225
+  },
+  "optimal": {
+   "port": [
+    0.45,
+    0.0,
+    0.0,
+    0.1
+   ],
+   "rets": [
+    0.045775,
+    0.05645,
+    0.111825,
+    -0.060675,
+    -0.107375,
+    -0.0939,
+    -0.149125
+   ],
+   "elog": 0.014504,
+   "ce": 0.014609,
+   "worst": -0.149125,
+   "mean": 0.017184,
+   "feasible": true,
+   "max_regret": 0.126175
+  },
+  "minimax_regret": "reduce"
+ },
+ "robust": {
+  "names": [
+   "keep",
+   "reduce",
+   "hedge",
+   "optimal"
+  ],
+  "mix": [
+   0.0,
+   1.0,
+   0.0,
+   0.0
+  ],
+  "nature": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "value": -0.144075,
+  "mixed_port": [
+   0.45,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "value_of_info": {
+  "evpi_bp": 438.453778,
+  "signals": [
+   {
+    "id": "vix",
+    "name": "VIX at or above 20",
+    "p_on": 0.305,
+    "evsi_bp": 129.842301,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.02,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "hy",
+    "name": "High-yield spread at or above 4.5%",
+    "p_on": 0.232,
+    "evsi_bp": 127.818399,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.02,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "curve",
+    "name": "2s10s curve inverted",
+    "p_on": 0.2955,
+    "evsi_bp": 46.049017,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.02,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "oil",
+    "name": "Brent at or above 1.3x its 5-year average",
+    "p_on": 0.1995,
+    "evsi_bp": 37.414418,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.02,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "infl",
+    "name": "36-month inflation at or above 2.75%",
+    "p_on": 0.439,
+    "evsi_bp": 19.932641,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "corr",
+    "name": "Stocks and bonds moving together (correlation above 0)",
+    "p_on": 0.4565,
+    "evsi_bp": 18.053713,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "capex",
+    "name": "Builders' capex above 80% of operating cash flow",
+    "p_on": 0.53,
+    "evsi_bp": 9.451837,
+    "observed": null,
+    "flip_changes_choice": null,
+    "choice_if_on": [
+     0.1,
+     0.0,
+     0.0,
+     0.1
+    ],
+    "choice_if_off": [
+     0.45,
+     0.0,
+     0.0,
+     0.1
+    ]
+   }
+  ]
+ },
+ "reverse_stress": {
+  "low_inflation": {
+   "shock": [
+    -0.032607,
+    -0.112502,
+    -0.00031,
+    -0.019218,
+    0.00289
+   ],
+   "sigmas": 1.039239,
+   "p_normal": 0.149347,
+   "port_sd": 0.144336
+  },
+  "inflation": {
+   "shock": [
+    -0.030875,
+    -0.114493,
+    0.00065,
+    0.015092,
+    -0.005064
+   ],
+   "sigmas": 1.048396,
+   "p_normal": 0.147228,
+   "port_sd": 0.143076
+  }
+ },
+ "factor_cov": {
+  "factors": [
+   "market",
+   "ai",
+   "dy",
+   "oil",
+   "gold"
+  ],
+  "horizon_months": 3,
+  "regimes": {
+   "low_inflation": {
+    "months": 383,
+    "cov": [
+     [
+      0.003938,
+      0.0,
+      3.742e-05,
+      0.002321,
+      -0.000349
+     ],
+     [
+      0.0,
+      0.015625,
+      0.0,
+      0.0,
+      0.0
+     ],
+     [
+      3.742e-05,
+      0.0,
+      1.378e-05,
+      0.000192,
+      -3.558e-05
+     ],
+     [
+      0.002321,
+      0.0,
+      0.000192,
+      0.031385,
+      0.001294
+     ],
+     [
+      -0.000349,
+      0.0,
+      -3.558e-05,
+      0.001294,
+      0.003631
+     ]
+    ]
+   },
+   "inflation": {
+    "months": 57,
+    "cov": [
+     [
+      0.003664,
+      0.0,
+      -7.713e-05,
+      -0.001791,
+      0.000601
+     ],
+     [
+      0.0,
+      0.015625,
+      0.0,
+      0.0,
+      0.0
+     ],
+     [
+      -7.713e-05,
+      0.0,
+      1.515e-05,
+      0.000168,
+      -8.124e-05
+     ],
+     [
+      -0.001791,
+      0.0,
+      0.000168,
+      0.028896,
+      0.000468
+     ],
+     [
+      0.000601,
+      0.0,
+      -8.124e-05,
+      0.000468,
+      0.004765
+     ]
+    ]
+   }
+  }
+ },
+ "labels": {
+  "scenarios": "Assumed",
+  "likelihoods": "Hypothesis",
+  "signals": "Observed",
+  "cov": "Estimated"
+ },
+ "games": {
+  "capex": null,
+  "basis": "capex.json unavailable"
+ }
+}

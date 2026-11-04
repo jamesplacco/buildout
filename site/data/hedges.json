@@ -1,0 +1,438 @@
+{
+ "schema": 2,
+ "catalog": [
+  {
+   "id": "tlt",
+   "name": "Long Treasuries (TLT)",
+   "param": "ratio",
+   "default": 0.3,
+   "range": [
+    0.0,
+    1.0
+   ],
+   "unit": "x equity",
+   "protects": [
+    "soft",
+    "digest"
+   ],
+   "nodes": [
+    "y10",
+    "tlt"
+   ],
+   "door": "two-way",
+   "note": "Fails when stocks and bonds fall together (2022, term-premium shocks)."
+  },
+  {
+   "id": "put_spread",
+   "name": "Index put spread 95/85",
+   "param": "premium",
+   "default": 0.01,
+   "range": [
+    0.0,
+    0.03
+   ],
+   "unit": "of NAV",
+   "protects": [
+    "termprem",
+    "digest",
+    "stagfl",
+    "crash"
+   ],
+   "nodes": [
+    "eq",
+    "vix"
+   ],
+   "door": "two-way",
+   "note": "Pays from a 5% fall, up to its 10-point maximum at a 15% fall; no more beyond.",
+   "price": 0.025186
+  },
+  {
+   "id": "collar",
+   "name": "Collar 90/110",
+   "param": "share",
+   "default": 0.5,
+   "range": [
+    0.0,
+    1.0
+   ],
+   "unit": "of equity",
+   "protects": [
+    "digest",
+    "stagfl",
+    "crash"
+   ],
+   "nodes": [
+    "eq"
+   ],
+   "door": "two-way",
+   "note": "Close to free; gives up gains above 10% in a melt-up.",
+   "price": 0.003555
+  },
+  {
+   "id": "gold",
+   "name": "Gold sleeve",
+   "param": "weight",
+   "default": 0.04,
+   "range": [
+    0.0,
+    0.2
+   ],
+   "unit": "of NAV",
+   "protects": [
+    "termprem",
+    "stagfl"
+   ],
+   "nodes": [
+    "gold",
+    "dollar"
+   ],
+   "door": "two-way",
+   "note": "Hedges inflation and policy shocks; can fall in a liquidity crash."
+  },
+  {
+   "id": "vix_calls",
+   "name": "VIX call spread 25/40",
+   "param": "premium",
+   "default": 0.005,
+   "range": [
+    0.0,
+    0.02
+   ],
+   "unit": "of NAV",
+   "protects": [
+    "crash",
+    "digest"
+   ],
+   "nodes": [
+    "vix"
+   ],
+   "door": "two-way",
+   "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters.",
+   "price": 1.698158
+  },
+  {
+   "id": "beta_short",
+   "name": "Short index futures",
+   "param": "share",
+   "default": 0.25,
+   "range": [
+    0.0,
+    1.0
+   ],
+   "unit": "of market beta",
+   "protects": [
+    "termprem",
+    "digest",
+    "stagfl",
+    "crash"
+   ],
+   "nodes": [
+    "eq"
+   ],
+   "door": "two-way",
+   "note": "Linear: costs upside one for one; keeps the AI bet."
+  },
+  {
+   "id": "ai_pair",
+   "name": "Short semiconductor basket",
+   "param": "weight",
+   "default": 0.15,
+   "range": [
+    0.0,
+    0.5
+   ],
+   "unit": "of NAV",
+   "protects": [
+    "digest",
+    "termprem"
+   ],
+   "nodes": [
+    "aidemand",
+    "capex",
+    "NVDA",
+    "AVGO"
+   ],
+   "door": "two-way",
+   "note": "Hedges an AI-capex digestion; basis risk if the book's names diverge from the basket."
+  },
+  {
+   "id": "trend",
+   "name": "Trend cut",
+   "param": "cut",
+   "default": 0.5,
+   "range": [
+    0.0,
+    1.0
+   ],
+   "unit": "of equity",
+   "protects": [
+    "digest",
+    "stagfl",
+    "crash"
+   ],
+   "nodes": [
+    "eq"
+   ],
+   "door": "two-way",
+   "note": "Cuts after an 8% fall and avoids about 60% of the rest; false signals cost about 1% a quarter (Assumed)."
+  },
+  {
+   "id": "degross",
+   "name": "Run less equity",
+   "param": "cut",
+   "default": 0.2,
+   "range": [
+    0.0,
+    0.8
+   ],
+   "unit": "of equity",
+   "protects": [
+    "termprem",
+    "digest",
+    "stagfl",
+    "crash"
+   ],
+   "nodes": [
+    "eq"
+   ],
+   "door": "two-way",
+   "note": "The simplest hedge: less of everything, cash earns the rate."
+  }
+ ],
+ "advisor_prior_odds": {
+  "combinations": 512,
+  "meets_limit": 192,
+  "loss_limit": 0.15,
+  "cheapest_meeting_limit": [
+   {
+    "on": [
+     "ai_pair",
+     "collar",
+     "degross",
+     "trend"
+    ],
+    "ce": 0.017915,
+    "worst": -0.122253,
+    "cost_bp": 35.094703,
+    "meets": true,
+    "all_in_bp": 55.094703
+   },
+   {
+    "on": [
+     "ai_pair",
+     "collar",
+     "degross",
+     "gold",
+     "trend"
+    ],
+    "ce": 0.018128,
+    "worst": -0.121073,
+    "cost_bp": 33.254703,
+    "meets": true,
+    "all_in_bp": 58.254703
+   },
+   {
+    "on": [
+     "collar",
+     "degross",
+     "put_spread",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.016584,
+    "worst": -0.148671,
+    "cost_bp": 37.155496,
+    "meets": true,
+    "all_in_bp": 62.155496
+   },
+   {
+    "on": [
+     "beta_short",
+     "collar",
+     "degross",
+     "trend"
+    ],
+    "ce": 0.016646,
+    "worst": -0.138153,
+    "cost_bp": 44.279703,
+    "meets": true,
+    "all_in_bp": 64.279703
+   },
+   {
+    "on": [
+     "collar",
+     "degross",
+     "gold",
+     "put_spread",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.016803,
+    "worst": -0.147491,
+    "cost_bp": 35.315496,
+    "meets": true,
+    "all_in_bp": 65.315496
+   }
+  ],
+  "best_growth": [
+   {
+    "on": [
+     "collar",
+     "degross",
+     "gold",
+     "trend"
+    ],
+    "ce": 0.019668,
+    "worst": -0.171473,
+    "cost_bp": -9.885297,
+    "meets": false,
+    "all_in_bp": 10.114703
+   },
+   {
+    "on": [
+     "collar",
+     "degross",
+     "trend"
+    ],
+    "ce": 0.019445,
+    "worst": -0.172653,
+    "cost_bp": -8.045297,
+    "meets": false,
+    "all_in_bp": 6.954703
+   },
+   {
+    "on": [
+     "collar",
+     "degross",
+     "gold",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.018762,
+    "worst": -0.165284,
+    "cost_bp": 5.194522,
+    "meets": false,
+    "all_in_bp": 30.194522
+   },
+   {
+    "on": [
+     "collar",
+     "degross",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.018538,
+    "worst": -0.166464,
+    "cost_bp": 7.034522,
+    "meets": false,
+    "all_in_bp": 27.034522
+   },
+   {
+    "on": [
+     "collar",
+     "gold",
+     "trend"
+    ],
+    "ce": 0.018334,
+    "worst": -0.225173,
+    "cost_bp": -37.545297,
+    "meets": false,
+    "all_in_bp": -22.545297
+   }
+  ],
+  "best_worst_case": [
+   {
+    "on": [
+     "ai_pair",
+     "beta_short",
+     "collar",
+     "degross",
+     "gold",
+     "put_spread",
+     "trend"
+    ],
+    "ce": 0.011865,
+    "worst": -0.071486,
+    "cost_bp": 115.700677,
+    "meets": true,
+    "all_in_bp": 150.700677
+   },
+   {
+    "on": [
+     "ai_pair",
+     "beta_short",
+     "collar",
+     "degross",
+     "put_spread",
+     "trend"
+    ],
+    "ce": 0.011663,
+    "worst": -0.072266,
+    "cost_bp": 117.540677,
+    "meets": true,
+    "all_in_bp": 147.540677
+   },
+   {
+    "on": [
+     "ai_pair",
+     "beta_short",
+     "degross",
+     "gold",
+     "put_spread",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.008448,
+    "worst": -0.07412,
+    "cost_bp": 149.004202,
+    "meets": true,
+    "all_in_bp": 184.004202
+   },
+   {
+    "on": [
+     "ai_pair",
+     "beta_short",
+     "degross",
+     "put_spread",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.008246,
+    "worst": -0.0749,
+    "cost_bp": 150.844202,
+    "meets": true,
+    "all_in_bp": 180.844202
+   },
+   {
+    "on": [
+     "ai_pair",
+     "beta_short",
+     "collar",
+     "degross",
+     "gold",
+     "put_spread",
+     "trend",
+     "vix_calls"
+    ],
+    "ce": 0.010424,
+    "worst": -0.075898,
+    "cost_bp": 130.780496,
+    "meets": true,
+    "all_in_bp": 170.780496
+   }
+  ]
+ },
+ "assumed": {
+  "smh_beta_market": 1.3,
+  "smh_beta_ai": 1.5,
+  "vix0": 18.0,
+  "vix_vol": 1.0,
+  "vix_term": 1.5,
+  "vix_per_market": 90.0,
+  "trend_trigger": -0.08,
+  "trend_whipsaw": 0.01,
+  "trend_capture": 0.6,
+  "call_skew": -2.0,
+  "put_skew": 3.0
+ }
+}
