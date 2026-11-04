@@ -1,0 +1,185 @@
+{
+ "schema": 1,
+ "latest": {
+  "month": "2026-09",
+  "cpi_3m_ann": 0.036273,
+  "infl36": 0.030623,
+  "corr36": 0.151917,
+  "brent_vs_5y": 1.476497
+ },
+ "selector": {
+  "above_line": {
+   "periods": 190,
+   "book_es": 0.091103,
+   "rows": [
+    {
+     "hedge": "Put spread 95/85",
+     "on_worst": 0.020887,
+     "es_removed": 0.007112,
+     "carry": -0.054971,
+     "per_carry": 0.43123,
+     "hit": 0.9,
+     "periods": 190
+    },
+    {
+     "hedge": "Gold",
+     "on_worst": 0.028657,
+     "es_removed": 0.00233,
+     "carry": 0.094252,
+     "per_carry": null,
+     "hit": 0.7,
+     "periods": 190
+    },
+    {
+     "hedge": "10-year Treasury",
+     "on_worst": 0.002978,
+     "es_removed": -0.000205,
+     "carry": 0.043783,
+     "per_carry": null,
+     "hit": 0.6,
+     "periods": 190
+    },
+    {
+     "hedge": "Brent (spot)",
+     "on_worst": 0.004645,
+     "es_removed": -0.020092,
+     "carry": 0.071534,
+     "per_carry": null,
+     "hit": 0.4,
+     "periods": 190
+    }
+   ]
+  },
+  "below_line": {
+   "periods": 250,
+   "book_es": 0.081872,
+   "rows": [
+    {
+     "hedge": "10-year Treasury",
+     "on_worst": 0.022993,
+     "es_removed": 0.007053,
+     "carry": 0.053825,
+     "per_carry": null,
+     "hit": 0.923077,
+     "periods": 250
+    },
+    {
+     "hedge": "Put spread 95/85",
+     "on_worst": 0.013073,
+     "es_removed": 0.00431,
+     "carry": -0.086491,
+     "per_carry": 0.166098,
+     "hit": 0.692308,
+     "periods": 250
+    },
+    {
+     "hedge": "Gold",
+     "on_worst": 0.014334,
+     "es_removed": 0.003457,
+     "carry": 0.055215,
+     "per_carry": null,
+     "hit": 0.538462,
+     "periods": 250
+    },
+    {
+     "hedge": "Brent (spot)",
+     "on_worst": -0.0865,
+     "es_removed": -0.035871,
+     "carry": 0.134803,
+     "per_carry": null,
+     "hit": 0.230769,
+     "periods": 250
+    }
+   ]
+  }
+ },
+ "selector_since": "1990-02",
+ "tail": {
+  "months": 1868,
+  "alpha": 0.975,
+  "normal": 0.08659,
+  "student_t": 0.102166,
+  "historical": 0.126418,
+  "nu": 3.836862,
+  "var_normal": 0.071385,
+  "var_t": 0.067029
+ },
+ "tail_post1990": {
+  "months": 440,
+  "alpha": 0.975,
+  "normal": 0.075425,
+  "student_t": 0.093427,
+  "historical": 0.115915,
+  "nu": 3.473282,
+  "var_normal": 0.061823,
+  "var_t": 0.058132
+ },
+ "replays": [
+  {
+   "key": "gulf-1990",
+   "name": "1990 Gulf War oil shock",
+   "from": "1990-08",
+   "to": "1990-10",
+   "book": -0.138976,
+   "bond10": 0.005031,
+   "gold": 0.049587,
+   "brent": 1.098108,
+   "put_spread": -0.008679,
+   "book_plus_bonds": -0.137796,
+   "book_plus_stack": -0.111012
+  },
+  {
+   "key": "quant-2007",
+   "name": "August 2007 quant quake",
+   "from": "2007-07",
+   "to": "2007-08",
+   "book": -0.036477,
+   "bond10": 0.042405,
+   "gold": 0.01372,
+   "brent": -0.004009,
+   "put_spread": -0.015898,
+   "book_plus_bonds": -0.023929,
+   "book_plus_stack": -0.051784
+  },
+  {
+   "key": "gfc-2008",
+   "name": "2008 credit crisis",
+   "from": "2008-09",
+   "to": "2009-02",
+   "book": -0.361903,
+   "bond10": 0.104475,
+   "gold": 0.123957,
+   "brent": -0.617419,
+   "put_spread": 0.016381,
+   "book_plus_bonds": -0.341823,
+   "book_plus_stack": -0.360072
+  },
+  {
+   "key": "covid-2020",
+   "name": "March 2020 dash for cash",
+   "from": "2020-02",
+   "to": "2020-03",
+   "book": -0.188167,
+   "bond10": 0.087849,
+   "gold": 0.019859,
+   "brent": -0.497036,
+   "put_spread": 0.070059,
+   "book_plus_bonds": -0.163553,
+   "book_plus_stack": -0.137255
+  },
+  {
+   "key": "inflation-2022",
+   "name": "2022 inflation bear market",
+   "from": "2022-01",
+   "to": "2022-09",
+   "book": -0.166889,
+   "bond10": -0.149966,
+   "gold": -0.060894,
+   "brent": 0.210249,
+   "put_spread": -0.054399,
+   "book_plus_bonds": -0.20751,
+   "book_plus_stack": -0.204331
+  }
+ ],
+ "line": 0.0275
+}

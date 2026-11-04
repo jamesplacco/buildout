@@ -1,0 +1,711 @@
+{
+ "schema": 1,
+ "count": 99,
+ "by_kind": {
+  "series": 47,
+  "dataset": 6,
+  "api": 3,
+  "manual": 3,
+  "rss": 20,
+  "telegram": 1,
+  "x": 6,
+  "reddit": 2,
+  "hn": 1,
+  "news": 10
+ },
+ "sources": [
+  {
+   "name": "FRED NASDAQ100",
+   "kind": "series",
+   "what": "NASDAQ100",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS1MO",
+   "kind": "series",
+   "what": "DGS1MO",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS3MO",
+   "kind": "series",
+   "what": "DGS3MO",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS6MO",
+   "kind": "series",
+   "what": "DGS6MO",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS1",
+   "kind": "series",
+   "what": "DGS1",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS2",
+   "kind": "series",
+   "what": "DGS2",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS3",
+   "kind": "series",
+   "what": "DGS3",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS5",
+   "kind": "series",
+   "what": "DGS5",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS7",
+   "kind": "series",
+   "what": "DGS7",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS10",
+   "kind": "series",
+   "what": "DGS10",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS20",
+   "kind": "series",
+   "what": "DGS20",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DGS30",
+   "kind": "series",
+   "what": "DGS30",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DFII10",
+   "kind": "series",
+   "what": "DFII10",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED T10YIE",
+   "kind": "series",
+   "what": "T10YIE",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED THREEFYTP10",
+   "kind": "series",
+   "what": "THREEFYTP10",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED BAMLC0A0CM",
+   "kind": "series",
+   "what": "BAMLC0A0CM",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED BAMLH0A0HYM2",
+   "kind": "series",
+   "what": "BAMLH0A0HYM2",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED VIXCLS",
+   "kind": "series",
+   "what": "VIXCLS",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DTWEXBGS",
+   "kind": "series",
+   "what": "DTWEXBGS",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DCOILBRENTEU",
+   "kind": "series",
+   "what": "DCOILBRENTEU",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DCOILWTICO",
+   "kind": "series",
+   "what": "DCOILWTICO",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED T5YIE",
+   "kind": "series",
+   "what": "T5YIE",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED T5YIFR",
+   "kind": "series",
+   "what": "T5YIFR",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED BAMLC0A4CBBB",
+   "kind": "series",
+   "what": "BAMLC0A4CBBB",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED BAMLH0A3HYC",
+   "kind": "series",
+   "what": "BAMLH0A3HYC",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED VXNCLS",
+   "kind": "series",
+   "what": "VXNCLS",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED VXVCLS",
+   "kind": "series",
+   "what": "VXVCLS",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED SP500",
+   "kind": "series",
+   "what": "SP500",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DEXJPUS",
+   "kind": "series",
+   "what": "DEXJPUS",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED CBBTCUSD",
+   "kind": "series",
+   "what": "CBBTCUSD",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED SOFR",
+   "kind": "series",
+   "what": "SOFR",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED IORB",
+   "kind": "series",
+   "what": "IORB",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED WALCL",
+   "kind": "series",
+   "what": "WALCL",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED WTREGEN",
+   "kind": "series",
+   "what": "WTREGEN",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED RRPONTSYD",
+   "kind": "series",
+   "what": "RRPONTSYD",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED WRESBAL",
+   "kind": "series",
+   "what": "WRESBAL",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED CPIAUCSL",
+   "kind": "series",
+   "what": "CPIAUCSL",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED SAHMREALTIME",
+   "kind": "series",
+   "what": "SAHMREALTIME",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED UNRATE",
+   "kind": "series",
+   "what": "UNRATE",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED T10Y3M",
+   "kind": "series",
+   "what": "T10Y3M",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED NFCI",
+   "kind": "series",
+   "what": "NFCI",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED ICSA",
+   "kind": "series",
+   "what": "ICSA",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED UMCSENT",
+   "kind": "series",
+   "what": "UMCSENT",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED PCEC96",
+   "kind": "series",
+   "what": "PCEC96",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DHHNGSP",
+   "kind": "series",
+   "what": "DHHNGSP",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED DRTSCILM",
+   "kind": "series",
+   "what": "DRTSCILM",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "FRED MORTGAGE30US",
+   "kind": "series",
+   "what": "MORTGAGE30US",
+   "cadence": "daily or as published",
+   "cost": "free"
+  },
+  {
+   "name": "GitHub dataset: shiller",
+   "kind": "dataset",
+   "what": "s-and-p-500/main/data/data.csv",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "GitHub dataset: cpi",
+   "kind": "dataset",
+   "what": "cpi-us/main/data/cpiai.csv",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "GitHub dataset: y10",
+   "kind": "dataset",
+   "what": "bond-yields-us-10y/main/data/monthly.csv",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "GitHub dataset: brent",
+   "kind": "dataset",
+   "what": "oil-prices/main/data/brent-daily.csv",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "GitHub dataset: vix",
+   "kind": "dataset",
+   "what": "finance-vix/main/data/vix-daily.csv",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "GitHub dataset: gold",
+   "kind": "dataset",
+   "what": "gold-prices/main/data/monthly.csv",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "SEC EDGAR XBRL",
+   "kind": "api",
+   "what": "Capex, cash flow, debt, depreciation, stock compensation from 10-K and 10-Q filings",
+   "cadence": "quarterly",
+   "cost": "free; contact email"
+  },
+  {
+   "name": "Databento",
+   "kind": "api",
+   "what": "Daily bars, corporate actions, CME Treasury futures for the model book",
+   "cadence": "daily",
+   "cost": "pay as you go"
+  },
+  {
+   "name": "Kalshi",
+   "kind": "api",
+   "what": "Prediction-market odds on the Fed path, CPI and recession",
+   "cadence": "daily",
+   "cost": "free"
+  },
+  {
+   "name": "IEA Oil Market Report",
+   "kind": "manual",
+   "what": "Dated Brent against futures, Hormuz flows, inventories",
+   "cadence": "monthly",
+   "cost": "free summaries"
+  },
+  {
+   "name": "PJM capacity auctions",
+   "kind": "manual",
+   "what": "Capacity clearing prices and the reliability shortfall",
+   "cadence": "yearly",
+   "cost": "free"
+  },
+  {
+   "name": "Cboe volume briefings",
+   "kind": "manual",
+   "what": "Off-exchange share, 0DTE share, retail activity",
+   "cadence": "monthly",
+   "cost": "free"
+  },
+  {
+   "name": "Federal Reserve press releases",
+   "kind": "rss",
+   "what": "https://www.federalreserve.gov/feeds/press_all.xml",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "BLS latest releases",
+   "kind": "rss",
+   "what": "https://www.bls.gov/feed/bls_latest.rss",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "EIA Today in Energy",
+   "kind": "rss",
+   "what": "https://www.eia.gov/rss/todayinenergy.xml",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "SEC press releases",
+   "kind": "rss",
+   "what": "https://www.sec.gov/news/pressreleases.rss",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Bouchaud (market microstructure)",
+   "kind": "rss",
+   "what": "https://bouchaud.substack.com/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Farview (multi-manager hedge funds)",
+   "kind": "rss",
+   "what": "https://farview.substack.com/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "EventHorizonIQ (BDCs and private credit)",
+   "kind": "rss",
+   "what": "https://eventhorizoniq.substack.com/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Data Gravity (GPU economics)",
+   "kind": "rss",
+   "what": "https://www.datagravity.dev/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Doomberg (energy)",
+   "kind": "rss",
+   "what": "https://newsletter.doomberg.com/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Apricitas Economics",
+   "kind": "rss",
+   "what": "https://www.apricitas.io/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Net Interest (financials)",
+   "kind": "rss",
+   "what": "https://www.netinterest.co/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "The Diff",
+   "kind": "rss",
+   "what": "https://www.thediff.co/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "BowTied Bull (retail and crypto risk appetite)",
+   "kind": "rss",
+   "what": "https://bowtiedbull.io/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "SixSigmaResearch (single-stock fundamentals)",
+   "kind": "rss",
+   "what": "https://sixsigmaresearch.com/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Taleb, Incerto on Medium (fat tails, ruin)",
+   "kind": "rss",
+   "what": "https://medium.com/feed/incerto",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Damodaran, Musings on Markets (valuation, ERP)",
+   "kind": "rss",
+   "what": "https://aswathdamodaran.blogspot.com/feeds/posts/default",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "SemiAnalysis (semiconductors, AI infrastructure)",
+   "kind": "rss",
+   "what": "https://newsletter.semianalysis.com/feed",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Stratechery (tech strategy)",
+   "kind": "rss",
+   "what": "https://stratechery.com/feed/",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Bespoke Investment Group",
+   "kind": "rss",
+   "what": "https://www.bespokepremium.com/feed/",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "arXiv cs.AI (new AI papers)",
+   "kind": "rss",
+   "what": "https://rss.arxiv.org/rss/cs.AI",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Walter Bloomberg",
+   "kind": "telegram",
+   "what": "WalterBloomberg",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "The Kobeissi Letter",
+   "kind": "x",
+   "what": "KobeissiLetter",
+   "cadence": "every run",
+   "cost": "X API token"
+  },
+  {
+   "name": "Six Sigma Capital",
+   "kind": "x",
+   "what": "SixSigmaCapital",
+   "cadence": "every run",
+   "cost": "X API token"
+  },
+  {
+   "name": "BowTiedBull",
+   "kind": "x",
+   "what": "BowTiedBull",
+   "cadence": "every run",
+   "cost": "X API token"
+  },
+  {
+   "name": "Nick Timiraos (WSJ, the Fed)",
+   "kind": "x",
+   "what": "NickTimiraos",
+   "cadence": "every run",
+   "cost": "X API token"
+  },
+  {
+   "name": "Jim Bianco",
+   "kind": "x",
+   "what": "biancoresearch",
+   "cadence": "every run",
+   "cost": "X API token"
+  },
+  {
+   "name": "SemiAnalysis",
+   "kind": "x",
+   "what": "SemiAnalysis_",
+   "cadence": "every run",
+   "cost": "X API token"
+  },
+  {
+   "name": "r/investing",
+   "kind": "reddit",
+   "what": "investing",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "r/quant",
+   "kind": "reddit",
+   "what": "quant",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Hacker News",
+   "kind": "hn",
+   "what": "",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Physical oil premium",
+   "kind": "news",
+   "what": "\"dated brent\" OR hormuz OR backwardation",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Fed second hike",
+   "kind": "news",
+   "what": "FOMC hike October",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Private credit gates",
+   "kind": "news",
+   "what": "BDC redemptions OR \"private credit\" gate",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Memory supercycle",
+   "kind": "news",
+   "what": "HBM OR DRAM contract prices",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Grid power ceiling",
+   "kind": "news",
+   "what": "PJM capacity OR \"data center power\"",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: GPU useful-life reset",
+   "kind": "news",
+   "what": "GPU \"useful life\" depreciation",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Market structure shift",
+   "kind": "news",
+   "what": "0DTE OR \"off-exchange\" OR \"market maker\"",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Pod shop costs and crowding",
+   "kind": "news",
+   "what": "multistrategy hedge fund pass-through",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Consumer strain",
+   "kind": "news",
+   "what": "\"consumer sentiment\" OR delinquencies",
+   "cadence": "every run",
+   "cost": "free"
+  },
+  {
+   "name": "Google News: Agents eat seat-based software",
+   "kind": "news",
+   "what": "SaaS AI agents selloff",
+   "cadence": "every run",
+   "cost": "free"
+  }
+ ]
+}

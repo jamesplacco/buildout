@@ -1,0 +1,501 @@
+{
+ "schema": 2,
+ "version": "0.38.1",
+ "run_at": "2026-11-04T18:56:52+00:00",
+ "engines": [
+  {
+   "name": "macro",
+   "title": "Market regime",
+   "module": "macro.py",
+   "offline": false,
+   "does": "FRED: curve, spreads, levels, stock-bond correlation and regime",
+   "reads": [],
+   "writes": [
+    "macro.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "macro.json": null
+   }
+  },
+  {
+   "name": "research",
+   "title": "Long-history research",
+   "module": "research.py",
+   "offline": false,
+   "does": "156 years: the hedge line out of sample, fat tails, base rates",
+   "reads": [],
+   "writes": [
+    "research.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "research.json": "d2c6580ba083f72a"
+   }
+  },
+  {
+   "name": "brain",
+   "title": "Brain links",
+   "module": "brain.py",
+   "offline": false,
+   "does": "Measured links by regime, the series, structure learning, robust links, self-checks (conformal, stacking, robustness values)",
+   "reads": [],
+   "writes": [
+    "brain.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "brain.json": "e8144ce521a6d89f"
+   }
+  },
+  {
+   "name": "book",
+   "title": "Book run",
+   "module": "pipeline.py",
+   "offline": false,
+   "does": "Databento: exposures, regime, hedge, sizing, VaR, stress, backtest, robustness",
+   "reads": [
+    "research.json"
+   ],
+   "writes": [
+    "report.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "report.json": null
+   }
+  },
+  {
+   "name": "capex",
+   "title": "Fundamentals",
+   "module": "fundamentals.py",
+   "offline": false,
+   "does": "SEC XBRL: TTM cash flows, capex, debt, depreciation paths",
+   "reads": [],
+   "writes": [
+    "capex.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "capex.json": "296475cf1feee351"
+   }
+  },
+  {
+   "name": "atlas",
+   "title": "The atlas",
+   "module": "atlas.py",
+   "offline": false,
+   "does": "Every monthly series: graphical lasso with stability selection, LiNGAM orientation, structural VAR, connectedness",
+   "reads": [],
+   "writes": [
+    "atlas.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "atlas.json": "564b4dd19e662deb"
+   }
+  },
+  {
+   "name": "labs",
+   "title": "The labs",
+   "module": "labs.py",
+   "offline": false,
+   "does": "Trading claims on 156 years: trend rules with a bootstrap, max test and deflated Sharpe; oscillators; valuation out of sample; Markov regimes; GARCH; cointegration; multiple testing",
+   "reads": [],
+   "writes": [
+    "labs.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "labs.json": "83f1a5be6849d10c"
+   }
+  },
+  {
+   "name": "ml",
+   "title": "Machine-learning lab",
+   "module": "ml.py",
+   "offline": false,
+   "does": "Seven models and two ensembles forecast 12-month returns and 15% falls since 1940: purged walk-forward, Diebold-Mariano, CPCV and overfitting odds, conformal intervals, analogs, novelty",
+   "reads": [],
+   "writes": [
+    "ml.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "ml.json": "d3691820a7d1420b"
+   }
+  },
+  {
+   "name": "reality",
+   "title": "Reality check",
+   "module": "assumptions.py",
+   "offline": false,
+   "does": "Every model's assumptions tested: tails, dependence, stability, correlation regimes, breakpoints, kappa, fragility, 400 stressed worlds",
+   "reads": [
+    "labs.json"
+   ],
+   "writes": [
+    "reality.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "reality.json": "e57cbcaacf087ca8"
+   }
+  },
+  {
+   "name": "connect",
+   "title": "Data connections",
+   "module": "datahub.py",
+   "offline": false,
+   "does": "Credential and reachability check for every data source",
+   "reads": [],
+   "writes": [
+    "connections.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "connections.json": "759c3de49998e963"
+   }
+  },
+  {
+   "name": "market",
+   "title": "Technicals and fundamentals",
+   "module": "technicals.py",
+   "offline": false,
+   "does": "Daily OHLCV from the best available source: every indicator, signals, levels and an event study per ticker; SEC statements, ratios and scores",
+   "reads": [],
+   "writes": [
+    "technicals.json",
+    "statements.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "technicals.json": "3dfe7482d1154696",
+    "statements.json": "7fd063bba54b9f0d"
+   }
+  },
+  {
+   "name": "rl",
+   "title": "Reinforcement-learning sizing",
+   "module": "rl.py",
+   "offline": false,
+   "does": "Fitted Q iteration over trend, volatility, valuation and drawdown states, walk-forward from 1940",
+   "reads": [],
+   "writes": [
+    "rl.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "rl.json": "48f6a486fd73ca5d"
+   }
+  },
+  {
+   "name": "portfolio",
+   "title": "Portfolio engine",
+   "module": "portfolio.py",
+   "offline": false,
+   "does": "Stocks, Treasuries, gold and cash from a three-asset regime model, utility-optimal mixes in a risk budget, eight policies walked forward, a learner over policies, a regime-switching bootstrap of ten years and eight replayed drawdowns",
+   "reads": [],
+   "writes": [
+    "portfolio.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "portfolio.json": "ff72206315f86710"
+   }
+  },
+  {
+   "name": "geometry",
+   "title": "The shape of the market",
+   "module": "geometry.py",
+   "offline": false,
+   "does": "Covariance matrices as points on a curved space (affine-invariant analogs, an era map, Frechet means), random matrix theory, persistent homology, optimal transport, the Levy area, long memory and volatility drag, every claim walked forward and corrected for testing many",
+   "reads": [],
+   "writes": [
+    "geometry.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "geometry.json": "32d442c1ef584976"
+   }
+  },
+  {
+   "name": "decide",
+   "title": "Decision engine",
+   "module": "decide.py",
+   "offline": false,
+   "does": "Data to decision: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, a Kalman stock-bond beta, dynamic model averaging, utility-optimal exposure inside a risk budget, an evidence gate, a hedge selector and a conservative RL check, walked forward from 1940",
+   "reads": [],
+   "writes": [
+    "decision.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "decision.json": "650d1d09a26bec2c"
+   }
+  },
+  {
+   "name": "bonds",
+   "title": "Bonds, simply",
+   "module": "bondlab.py",
+   "offline": false,
+   "does": "Every Treasury ETF repriced bond by bond on today's curve at any 10-year and 30-year yield; convexity, income, roll, break-evens; stocks per point of yield by inflation band",
+   "reads": [],
+   "writes": [
+    "bonds.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "bonds.json": "1af084f6aa769967"
+   }
+  },
+  {
+   "name": "feeds",
+   "title": "Noteworthy",
+   "module": "feeds.py",
+   "offline": false,
+   "does": "Feeds, heat, niche skew, lead time",
+   "reads": [],
+   "writes": [
+    "feeds.json"
+   ],
+   "status": "external",
+   "outputs": {
+    "feeds.json": "42f688391399eb13"
+   }
+  },
+  {
+   "name": "reason",
+   "title": "Solver and games",
+   "module": "reasoner.py",
+   "offline": true,
+   "does": "Tempered Bayes, the constrained choice, the game against Nature, value of information, games",
+   "reads": [
+    "macro.json",
+    "research.json",
+    "brain.json",
+    "capex.json",
+    "report.json"
+   ],
+   "writes": [
+    "reason.json"
+   ],
+   "status": "skipped",
+   "outputs": {
+    "reason.json": "eb45f7b352525658"
+   }
+  },
+  {
+   "name": "valuation",
+   "title": "Valuation and accounting",
+   "module": "valuation.py",
+   "offline": true,
+   "does": "Accounting quality, reverse DCF, base rates, irrationality and why, per position",
+   "reads": [
+    "capex.json",
+    "macro.json"
+   ],
+   "writes": [
+    "valuation.json"
+   ],
+   "status": "ok",
+   "outputs": {
+    "valuation.json": "7042ff7f5fdb6333"
+   },
+   "seconds": 1.057,
+   "inputs": {
+    "capex.json": "296475cf1feee351",
+    "macro.json": null
+   },
+   "attempts": 1
+  },
+  {
+   "name": "causal",
+   "title": "Causal statistics",
+   "module": "causal_stats.py",
+   "offline": true,
+   "does": "Granger, partial correlations, crisis behaviour, tail dependence, lead-lag",
+   "reads": [
+    "brain.json"
+   ],
+   "writes": [
+    "causal.json"
+   ],
+   "status": "ok",
+   "outputs": {
+    "causal.json": "fcce438ce0d67816"
+   },
+   "seconds": 0.086,
+   "inputs": {
+    "brain.json": "e8144ce521a6d89f"
+   },
+   "attempts": 1
+  },
+  {
+   "name": "hedges",
+   "title": "Hedge book",
+   "module": "hedgebook.py",
+   "offline": true,
+   "does": "Prebuilt hedges, priced and run through the scenarios; the advisor",
+   "reads": [],
+   "writes": [
+    "hedges.json"
+   ],
+   "status": "ok",
+   "outputs": {
+    "hedges.json": "4da792fc58c3f6e4"
+   },
+   "seconds": 1.166,
+   "attempts": 1
+  },
+  {
+   "name": "ooda",
+   "title": "Decision loop",
+   "module": "ooda.py",
+   "offline": true,
+   "does": "Observe, orient, decide, act: one decision record per position and hedge",
+   "reads": [
+    "macro.json",
+    "research.json",
+    "brain.json",
+    "capex.json",
+    "report.json"
+   ],
+   "writes": [
+    "ooda.json"
+   ],
+   "status": "ok",
+   "outputs": {
+    "ooda.json": "46521b83581d5c35"
+   },
+   "seconds": 1.657,
+   "inputs": {
+    "macro.json": null,
+    "research.json": "d2c6580ba083f72a",
+    "brain.json": "e8144ce521a6d89f",
+    "capex.json": "296475cf1feee351",
+    "report.json": null
+   },
+   "attempts": 1
+  },
+  {
+   "name": "mind",
+   "title": "The mind",
+   "module": "mind.py",
+   "offline": true,
+   "does": "One graph of the brain and the engine: concepts, markets, checked evidence, voices, engine modules, economies and signals",
+   "reads": [
+    "atlas.json",
+    "labs.json",
+    "research.json",
+    "ml.json",
+    "reality.json"
+   ],
+   "writes": [
+    "mind.json"
+   ],
+   "status": "skipped",
+   "outputs": {
+    "mind.json": null
+   }
+  },
+  {
+   "name": "voices",
+   "title": "Investor voices",
+   "module": "voices.py",
+   "offline": true,
+   "does": "Verified quotes, extreme bear to extreme bull; integrity checked on every run",
+   "reads": [],
+   "writes": [
+    "voices.json"
+   ],
+   "status": "skipped",
+   "outputs": {
+    "voices.json": null
+   }
+  },
+  {
+   "name": "parameters",
+   "title": "The parameters",
+   "module": "parameters.py",
+   "offline": true,
+   "does": "Theta: every matrix the engine learns, its shape, the algorithm and objective that shaped it, its data, refit schedule and the desks it feeds",
+   "reads": [
+    "decision.json",
+    "portfolio.json",
+    "rl.json",
+    "ml.json",
+    "geometry.json",
+    "atlas.json",
+    "mind.json"
+   ],
+   "writes": [
+    "parameters.json"
+   ],
+   "status": "skipped",
+   "outputs": {
+    "parameters.json": null
+   }
+  },
+  {
+   "name": "status",
+   "title": "Run status",
+   "module": "status.py",
+   "offline": true,
+   "does": "Freshness and sanity checks on every output",
+   "reads": [],
+   "writes": [
+    "status.json"
+   ],
+   "status": "skipped",
+   "outputs": {
+    "status.json": "b2181c74753b57a8"
+   }
+  }
+ ],
+ "ok": 4,
+ "failed": 0,
+ "runner": {
+  "jobs": 4,
+  "isolated": true,
+  "wall_seconds": 2.642,
+  "serial_seconds": 3.966,
+  "speedup": 1.5,
+  "levels": [
+   [
+    "atlas",
+    "bonds",
+    "brain",
+    "capex",
+    "connect",
+    "decide",
+    "feeds",
+    "geometry",
+    "hedges",
+    "labs",
+    "macro",
+    "market",
+    "ml",
+    "portfolio",
+    "research",
+    "rl",
+    "status",
+    "voices"
+   ],
+   [
+    "book",
+    "causal",
+    "reality",
+    "valuation"
+   ],
+   [
+    "mind",
+    "ooda",
+    "reason"
+   ],
+   [
+    "parameters"
+   ]
+  ]
+ }
+}

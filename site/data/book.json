@@ -1,0 +1,1649 @@
+{
+ "schema": 1,
+ "asof": "2026-11-03",
+ "treasury_to": "2026-11-03",
+ "from": "2017-01-04",
+ "days": 2472,
+ "weights": {
+  "MSFT": 0.14,
+  "AMZN": 0.14,
+  "GOOGL": 0.14,
+  "NVDA": 0.14,
+  "META": 0.12,
+  "TSLA": 0.1,
+  "AVGO": 0.08,
+  "SPCX": 0.08,
+  "ORCL": 0.06
+ },
+ "nav_usd": 100000000.0,
+ "first_date": {
+  "MSFT": "2017-01-04",
+  "AMZN": "2017-01-04",
+  "GOOGL": "2017-01-04",
+  "NVDA": "2017-01-04",
+  "META": "2017-01-04",
+  "TSLA": "2017-01-04",
+  "AVGO": "2017-01-04",
+  "SPCX": "2026-06-15",
+  "ORCL": "2017-01-04"
+ },
+ "last_date": {
+  "MSFT": "2026-11-03",
+  "AMZN": "2026-11-03",
+  "GOOGL": "2026-11-03",
+  "NVDA": "2026-11-03",
+  "META": "2026-11-03",
+  "TSLA": "2026-11-03",
+  "AVGO": "2026-11-03",
+  "SPCX": "2026-11-03",
+  "ORCL": "2026-11-03"
+ },
+ "exposure": {
+  "market": 1.219124,
+  "semis": -0.36649,
+  "rates": -0.15842,
+  "beta_broad_market": 1.60909,
+  "beta_broad_market_10y": 1.340535,
+  "rates_dv01_per_100m": -19310.44523
+ },
+ "betas": [
+  {
+   "name": "MSFT",
+   "market": 0.809573,
+   "semis": -0.669769,
+   "rates": -0.370683,
+   "broad_market": 1.00951,
+   "days": 2409,
+   "specific_vol": 0.24718,
+   "prior": null
+  },
+  {
+   "name": "AMZN",
+   "market": 1.02546,
+   "semis": -0.536469,
+   "rates": -0.295472,
+   "broad_market": 1.390687,
+   "days": 2409,
+   "specific_vol": 0.272638,
+   "prior": null
+  },
+  {
+   "name": "GOOGL",
+   "market": 0.940431,
+   "semis": -0.548059,
+   "rates": -0.17309,
+   "broad_market": 1.216009,
+   "days": 2409,
+   "specific_vol": 0.271795,
+   "prior": null
+  },
+  {
+   "name": "NVDA",
+   "market": 1.363442,
+   "semis": 0.049771,
+   "rates": -0.233874,
+   "broad_market": 1.887395,
+   "days": 2409,
+   "specific_vol": 0.282275,
+   "prior": null
+  },
+  {
+   "name": "META",
+   "market": 1.028228,
+   "semis": -0.547794,
+   "rates": -0.02919,
+   "broad_market": 1.409404,
+   "days": 2409,
+   "specific_vol": 0.360342,
+   "prior": null
+  },
+  {
+   "name": "TSLA",
+   "market": 1.635201,
+   "semis": -0.38857,
+   "rates": 0.077181,
+   "broad_market": 2.230538,
+   "days": 2409,
+   "specific_vol": 0.380305,
+   "prior": null
+  },
+  {
+   "name": "AVGO",
+   "market": 1.484246,
+   "semis": 0.398867,
+   "rates": -0.145642,
+   "broad_market": 2.031923,
+   "days": 2409,
+   "specific_vol": 0.323799,
+   "prior": null
+  },
+  {
+   "name": "SPCX",
+   "market": 1.767974,
+   "semis": -0.515746,
+   "rates": -0.067425,
+   "broad_market": 2.703259,
+   "days": 99,
+   "specific_vol": 0.679798,
+   "prior": "TSLA"
+  },
+  {
+   "name": "ORCL",
+   "market": 1.543197,
+   "semis": -0.231895,
+   "rates": 0.07745,
+   "broad_market": 2.092222,
+   "days": 2409,
+   "specific_vol": 0.516005,
+   "prior": null
+  }
+ ],
+ "factors": {
+  "market": {
+   "name": "Nasdaq-100 (QQQ)",
+   "vol": 0.209532
+  },
+  "semis": {
+   "name": "Semiconductors net of the Nasdaq-100 (SOXX less its walked-forward beta times QQQ)",
+   "vol": 0.226174
+  },
+  "rates": {
+   "name": "20-year Treasury par bond (daily par yields)",
+   "vol": 0.089429
+  }
+ },
+ "factor_corr": {
+  "market": {
+   "market": 1.0,
+   "semis": 0.285971,
+   "rates": 0.071216
+  },
+  "semis": {
+   "market": 0.285971,
+   "semis": 1.0,
+   "rates": -0.096798
+  },
+  "rates": {
+   "market": 0.071216,
+   "semis": -0.096798,
+   "rates": 1.0
+  }
+ },
+ "risk": {
+  "vol": 0.270256,
+  "vol_names_cov": 0.255992,
+  "vol_names_cov_over": [
+   "MSFT",
+   "AMZN",
+   "GOOGL",
+   "NVDA",
+   "META",
+   "TSLA",
+   "AVGO",
+   "ORCL"
+  ],
+  "vol_ewma_now": 0.278659,
+  "variance_share": {
+   "market": 0.806969,
+   "semis": 0.009612,
+   "rates": -0.002337,
+   "specific": 0.185756
+  },
+  "effective_bets": 1.763142,
+  "effective_names": 8.652321,
+  "diversification_ratio": 1.598534,
+  "weight_hhi": 0.1192,
+  "contributions": [
+   {
+    "name": "MSFT",
+    "weight": 0.14,
+    "share": 0.093112
+   },
+   {
+    "name": "AMZN",
+    "weight": 0.14,
+    "share": 0.116336
+   },
+   {
+    "name": "GOOGL",
+    "weight": 0.14,
+    "share": 0.108628
+   },
+   {
+    "name": "NVDA",
+    "weight": 0.14,
+    "share": 0.147066
+   },
+   {
+    "name": "META",
+    "weight": 0.12,
+    "share": 0.108946
+   },
+   {
+    "name": "TSLA",
+    "weight": 0.1,
+    "share": 0.129173
+   },
+   {
+    "name": "AVGO",
+    "weight": 0.08,
+    "share": 0.086775
+   },
+   {
+    "name": "SPCX",
+    "weight": 0.08,
+    "share": 0.135118
+   },
+   {
+    "name": "ORCL",
+    "weight": 0.06,
+    "share": 0.074846
+   }
+  ]
+ },
+ "tail": {
+  "months": 2452,
+  "daily_vol_now_ann": 0.278659,
+  "es95": {
+   "historical": 0.148265,
+   "filtered": 0.140093,
+   "student_t": 0.174653,
+   "governing": 0.174653,
+   "method": "student_t"
+  },
+  "es97.5": {
+   "historical": 0.174542,
+   "filtered": 0.163,
+   "student_t": 0.212813,
+   "governing": 0.212813,
+   "method": "student_t"
+  },
+  "day": {
+   "var99_hist": 0.049996,
+   "es99_hist": 0.062383,
+   "var99_now": 0.04083,
+   "es97_5_now": 0.047883
+  }
+ },
+ "var_backtest": {
+  "normal": {
+   "days": 2412,
+   "breaches": 54,
+   "expected": 24.12,
+   "rate": 0.022388,
+   "p": 0.0,
+   "avg_loss_given_breach": 0.045118,
+   "avg_var_on_breach": 0.035373,
+   "from": "2017-03-31",
+   "model": "normal quantile at the RiskMetrics volatility (lambda 0.94)"
+  },
+  "filtered": {
+   "days": 2162,
+   "breaches": 14,
+   "expected": 21.62,
+   "rate": 0.006475,
+   "p": 0.078322,
+   "avg_loss_given_breach": 0.049177,
+   "avg_var_on_breach": 0.043481,
+   "from": "2018-03-29",
+   "model": "walked-forward 1% quantile of standardized returns at the RiskMetrics volatility"
+  }
+ },
+ "limits": {
+  "es_budget": 0.12,
+  "vol_target": 0.2,
+  "max_drawdown": 0.25,
+  "max_gross": 1.5,
+  "drawdown_drift": 0.113127,
+  "cash_rate": 0.0461
+ },
+ "sizes": {
+  "es_budget": 0.687075,
+  "vol_target": 0.74004,
+  "drawdown_cap": 0.57996,
+  "gross_cap": 1.5
+ },
+ "binding": "drawdown_cap",
+ "size": 0.57996,
+ "at_full": {
+  "es95": 0.174653,
+  "vol": 0.270256,
+  "drawdown95": 0.411552
+ },
+ "keep_names_hedge": {
+  "short_nasdaq_frac": 0.84165,
+  "best_short": 0.84165,
+  "es95": 0.097492,
+  "vol": 0.150857,
+  "drawdown95": 0.25,
+  "worst": 0.999999,
+  "market_beta_left": 0.377473,
+  "meets_all": true,
+  "binding_after": "drawdown_cap",
+  "notional_usd_per_100m": 84165039.0625
+ },
+ "frontier": [
+  {
+   "gross": 0.57996,
+   "short": 0.0,
+   "meets": true,
+   "es95": 0.101292,
+   "vol": 0.156738,
+   "drawdown95": 0.25,
+   "cagr": 0.200009,
+   "y2022": -0.258565,
+   "maxdd": 0.293943,
+   "hedge_drag_ann": 0.0,
+   "market_beta_left": 0.707044,
+   "stock_specific_share": null
+  },
+  {
+   "gross": 0.6,
+   "short": 0.05,
+   "meets": true,
+   "es95": 0.099074,
+   "vol": 0.153306,
+   "drawdown95": 0.244884,
+   "cagr": 0.198107,
+   "y2022": -0.250358,
+   "maxdd": 0.286191,
+   "hedge_drag_ann": 0.009197,
+   "market_beta_left": 0.681474,
+   "stock_specific_share": null
+  },
+  {
+   "gross": 0.7,
+   "short": 0.2,
+   "meets": true,
+   "es95": 0.100134,
+   "vol": 0.154945,
+   "drawdown95": 0.248996,
+   "cagr": 0.206197,
+   "y2022": -0.242483,
+   "maxdd": 0.281181,
+   "hedge_drag_ann": 0.036786,
+   "market_beta_left": 0.653387,
+   "stock_specific_share": null
+  },
+  {
+   "gross": 0.8,
+   "short": 0.4,
+   "meets": true,
+   "es95": 0.097641,
+   "vol": 0.151088,
+   "drawdown95": 0.245004,
+   "cagr": 0.204916,
+   "y2022": -0.217721,
+   "maxdd": 0.25909,
+   "hedge_drag_ann": 0.073573,
+   "market_beta_left": 0.575299,
+   "stock_specific_share": null
+  },
+  {
+   "gross": 0.9,
+   "short": 0.6,
+   "meets": true,
+   "es95": 0.097481,
+   "vol": 0.15084,
+   "drawdown95": 0.246354,
+   "cagr": 0.203137,
+   "y2022": -0.192673,
+   "maxdd": 0.236777,
+   "hedge_drag_ann": 0.110359,
+   "market_beta_left": 0.497211,
+   "stock_specific_share": null
+  },
+  {
+   "gross": 1.0,
+   "short": 0.85,
+   "meets": true,
+   "es95": 0.09709,
+   "vol": 0.150235,
+   "drawdown95": 0.24923,
+   "cagr": 0.191053,
+   "y2022": -0.149847,
+   "maxdd": 0.196428,
+   "hedge_drag_ann": 0.156342,
+   "market_beta_left": 0.369124,
+   "stock_specific_share": null
+  }
+ ],
+ "vol_rule": {
+  "book": {
+   "name": "the book, 2017 on",
+   "verdict": "reversed",
+   "headline": {
+    "rule": {
+     "window": 21,
+     "target": 0.2,
+     "cap": 1.5,
+     "form": "var"
+    },
+    "months": 117,
+    "from": "2017-03-01",
+    "to": "2026-11-03",
+    "utility_gain_month": -0.003873,
+    "t": -0.695389,
+    "p": 0.504369,
+    "df": 9,
+    "sharpe_rule": 1.081431,
+    "sharpe_hold": 1.148393,
+    "halves": {
+     "first": {
+      "t": -0.879403,
+      "gain": -0.005856
+     },
+     "second": {
+      "t": -0.230471,
+      "gain": -0.001924
+     }
+    },
+    "maxdd_rule": 0.268138,
+    "maxdd_hold": 0.468869,
+    "avg_exposure": 0.79257,
+    "time_below_1": 0.6553,
+    "cagr_rule": 0.259337,
+    "cagr_hold": 0.340564,
+    "thirds": [
+     {
+      "from": "2017-03-01",
+      "to": "2020-04-14",
+      "t": -0.094923,
+      "sharpe_rule": 1.138613,
+      "sharpe_hold": 1.275927
+     },
+     {
+      "from": "2020-06-01",
+      "to": "2023-07-24",
+      "t": 0.001039,
+      "sharpe_rule": 1.395609,
+      "sharpe_hold": 1.029111
+     },
+     {
+      "from": "2023-09-01",
+      "to": "2026-11-03",
+      "t": -3.04965,
+      "sharpe_rule": 0.714004,
+      "sharpe_hold": 1.085372
+     }
+    ],
+    "t_at_5x_cost": -0.739425,
+    "exposure_now": 0.452606
+   },
+   "best": {
+    "rule": {
+     "window": 21,
+     "target": 0.2,
+     "cap": 1.5,
+     "form": "vol"
+    },
+    "t": -0.575004
+   },
+   "t_bar": 1.664811,
+   "n_rules": 12,
+   "months": 117,
+   "rules": [
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.15,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -1.44997,
+     "sharpe_rule": 1.055627,
+     "maxdd_rule": 0.184277
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.15,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -1.416233,
+     "sharpe_rule": 0.965928,
+     "maxdd_rule": 0.261446
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.2,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -1.023517,
+     "sharpe_rule": 1.172988,
+     "maxdd_rule": 0.195101
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -0.695389,
+     "sharpe_rule": 1.081431,
+     "maxdd_rule": 0.268138
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.15,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -1.48453,
+     "sharpe_rule": 1.014566,
+     "maxdd_rule": 0.210779
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.15,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -1.427585,
+     "sharpe_rule": 1.004873,
+     "maxdd_rule": 0.241594
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.2,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -1.188983,
+     "sharpe_rule": 1.064028,
+     "maxdd_rule": 0.262457
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -0.913969,
+     "sharpe_rule": 1.008658,
+     "maxdd_rule": 0.320201
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "vol"
+     },
+     "t": -0.575004,
+     "sharpe_rule": 1.156684,
+     "maxdd_rule": 0.293355
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "vol"
+     },
+     "t": -0.797304,
+     "sharpe_rule": 1.109386,
+     "maxdd_rule": 0.346235
+    },
+    {
+     "rule": {
+      "window": 126,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -1.347102,
+     "sharpe_rule": 0.86882,
+     "maxdd_rule": 0.312214
+    },
+    {
+     "rule": {
+      "window": 126,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "vol"
+     },
+     "t": -1.235216,
+     "sharpe_rule": 1.012858,
+     "maxdd_rule": 0.320166
+    }
+   ]
+  },
+  "nasdaq_2017": {
+   "name": "the Nasdaq-100 (QQQ), 2017 on",
+   "verdict": "chance",
+   "headline": {
+    "rule": {
+     "window": 21,
+     "target": 0.2,
+     "cap": 1.5,
+     "form": "var"
+    },
+    "months": 117,
+    "from": "2017-03-01",
+    "to": "2026-11-03",
+    "utility_gain_month": 0.000816,
+    "t": 0.258187,
+    "p": 0.802069,
+    "df": 9,
+    "sharpe_rule": 0.950382,
+    "sharpe_hold": 0.88141,
+    "halves": {
+     "first": {
+      "t": -0.554335,
+      "gain": -0.002521
+     },
+     "second": {
+      "t": 1.081808,
+      "gain": 0.004097
+     }
+    },
+    "maxdd_rule": 0.262249,
+    "maxdd_hold": 0.351225,
+    "avg_exposure": 1.07906,
+    "time_below_1": 0.413722,
+    "cagr_rule": 0.20622,
+    "cagr_hold": 0.195766,
+    "thirds": [
+     {
+      "from": "2017-03-01",
+      "to": "2020-04-14",
+      "t": 0.320616,
+      "sharpe_rule": 0.959688,
+      "sharpe_hold": 0.950114
+     },
+     {
+      "from": "2020-06-01",
+      "to": "2023-07-24",
+      "t": 0.571325,
+      "sharpe_rule": 1.08016,
+      "sharpe_hold": 0.71798
+     },
+     {
+      "from": "2023-09-01",
+      "to": "2026-11-03",
+      "t": -0.18186,
+      "sharpe_rule": 0.830594,
+      "sharpe_hold": 0.925073
+     }
+    ],
+    "t_at_5x_cost": 0.184626,
+    "exposure_now": 0.782708
+   },
+   "best": {
+    "rule": {
+     "window": 21,
+     "target": 0.2,
+     "cap": 1.5,
+     "form": "vol"
+    },
+    "t": 0.406773
+   },
+   "t_bar": 1.664811,
+   "n_rules": 12,
+   "months": 117,
+   "rules": [
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.15,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -0.707986,
+     "sharpe_rule": 0.956218,
+     "maxdd_rule": 0.173327
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.15,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -0.519334,
+     "sharpe_rule": 0.908507,
+     "maxdd_rule": 0.18556
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.2,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -0.274425,
+     "sharpe_rule": 0.990049,
+     "maxdd_rule": 0.206463
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": 0.258187,
+     "sharpe_rule": 0.950382,
+     "maxdd_rule": 0.262249
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.15,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -1.07232,
+     "sharpe_rule": 0.764939,
+     "maxdd_rule": 0.22514
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.15,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -0.964354,
+     "sharpe_rule": 0.695996,
+     "maxdd_rule": 0.279613
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.2,
+      "cap": 1.0,
+      "form": "var"
+     },
+     "t": -0.940192,
+     "sharpe_rule": 0.765848,
+     "maxdd_rule": 0.285594
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -0.528186,
+     "sharpe_rule": 0.751997,
+     "maxdd_rule": 0.349138
+    },
+    {
+     "rule": {
+      "window": 21,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "vol"
+     },
+     "t": 0.406773,
+     "sharpe_rule": 0.949206,
+     "maxdd_rule": 0.275285
+    },
+    {
+     "rule": {
+      "window": 63,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "vol"
+     },
+     "t": -0.446113,
+     "sharpe_rule": 0.801199,
+     "maxdd_rule": 0.34233
+    },
+    {
+     "rule": {
+      "window": 126,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "var"
+     },
+     "t": -1.287571,
+     "sharpe_rule": 0.567017,
+     "maxdd_rule": 0.408936
+    },
+    {
+     "rule": {
+      "window": 126,
+      "target": 0.2,
+      "cap": 1.5,
+      "form": "vol"
+     },
+     "t": -1.044812,
+     "sharpe_rule": 0.713329,
+     "maxdd_rule": 0.348633
+    }
+   ]
+  },
+  "long_record": null,
+  "rule": {
+   "window": 21,
+   "target": 0.2,
+   "cap": 1.5,
+   "form": "var"
+  },
+  "n_rules": 12,
+  "t_bar": 1.664811,
+  "gamma": 2.2
+ },
+ "hedges": {
+  "from": "2017-07-06",
+  "to": "2026-11-03",
+  "days": 2346,
+  "policies": {
+   "none": {
+    "vol": 0.296206,
+    "variance_cut": 0.0,
+    "mean_ann": 0.329806,
+    "leg_mean_ann": 0.0,
+    "worst_5pct_days": -0.043236,
+    "worst_10pct_months": -0.11129,
+    "es95_month": 0.150292,
+    "max_drawdown": 0.468869,
+    "y2022": -0.42391,
+    "sharpe": 1.022499
+   },
+   "nasdaq_beta": {
+    "vol": 0.093399,
+    "variance_cut": 0.900574,
+    "mean_ann": 0.112519,
+    "leg_mean_ann": -0.217287,
+    "worst_5pct_days": -0.002617,
+    "worst_10pct_months": -0.016686,
+    "es95_month": 0.052158,
+    "max_drawdown": 0.237295,
+    "y2022": -0.002386,
+    "sharpe": 0.91632
+   },
+   "nasdaq_and_semis": {
+    "vol": 0.089118,
+    "variance_cut": 0.90948,
+    "mean_ann": 0.112222,
+    "leg_mean_ann": -0.217583,
+    "worst_5pct_days": -0.002419,
+    "worst_10pct_months": -0.010805,
+    "es95_month": 0.045078,
+    "max_drawdown": 0.157429,
+    "y2022": -0.005315,
+    "sharpe": 0.957011
+   },
+   "bond_when_it_hedges": {
+    "vol": 0.292228,
+    "variance_cut": 0.026681,
+    "mean_ann": 0.33521,
+    "leg_mean_ann": 0.005405,
+    "worst_5pct_days": -0.041634,
+    "worst_10pct_months": -0.10985,
+    "es95_month": 0.14694,
+    "max_drawdown": 0.497193,
+    "y2022": -0.453122,
+    "sharpe": 1.054913
+   },
+   "bond_static_30": {
+    "vol": 0.295763,
+    "variance_cut": 0.002987,
+    "mean_ann": 0.320974,
+    "leg_mean_ann": -0.008832,
+    "worst_5pct_days": -0.042632,
+    "worst_10pct_months": -0.113985,
+    "es95_month": 0.152886,
+    "max_drawdown": 0.522584,
+    "y2022": -0.477763,
+    "sharpe": 0.994169
+   }
+  },
+  "now": {
+   "nasdaq_beta": 1.051859,
+   "nasdaq": 1.876021,
+   "semis": -0.388135,
+   "bond_ratio": 0.0
+  }
+ },
+ "episodes": [
+  {
+   "episode": "COVID crash",
+   "from": "2020-02-19",
+   "to": "2020-03-23",
+   "book": -0.303339,
+   "nasdaq": -0.279167,
+   "semis_etf": -0.31908,
+   "bond20": 0.133106,
+   "worst_point": -0.328958,
+   "worst_name": "TSLA",
+   "worst_name_return": -0.526651,
+   "names_missing": [
+    "SPCX"
+   ]
+  },
+  {
+   "episode": "2022 inflation shock",
+   "from": "2022-01-03",
+   "to": "2022-10-12",
+   "book": -0.419771,
+   "nasdaq": -0.342889,
+   "semis_etf": -0.447429,
+   "bond20": -0.256085,
+   "worst_point": -0.420397,
+   "worst_name": "META",
+   "worst_name_return": -0.623383,
+   "names_missing": [
+    "SPCX"
+   ]
+  },
+  {
+   "episode": "Yen carry unwind",
+   "from": "2024-07-10",
+   "to": "2024-08-05",
+   "book": -0.178065,
+   "nasdaq": -0.134384,
+   "semis_etf": -0.234773,
+   "bond20": 0.060325,
+   "worst_point": -0.178065,
+   "worst_name": "NVDA",
+   "worst_name_return": -0.25543,
+   "names_missing": [
+    "SPCX"
+   ]
+  },
+  {
+   "episode": "DeepSeek shock",
+   "from": "2025-01-24",
+   "to": "2025-01-27",
+   "book": -0.058982,
+   "nasdaq": -0.029115,
+   "semis_etf": -0.078434,
+   "bond20": 0.011865,
+   "worst_point": -0.058982,
+   "worst_name": "AVGO",
+   "worst_name_return": -0.173968,
+   "names_missing": [
+    "SPCX"
+   ]
+  },
+  {
+   "episode": "Tariff shock",
+   "from": "2025-04-02",
+   "to": "2025-04-08",
+   "book": -0.119485,
+   "nasdaq": -0.1262,
+   "semis_etf": -0.182711,
+   "bond20": -0.022411,
+   "worst_point": -0.119485,
+   "worst_name": "TSLA",
+   "worst_name_return": -0.215377,
+   "names_missing": [
+    "SPCX"
+   ]
+  },
+  {
+   "episode": "March 2026 risk-off",
+   "from": "2026-02-27",
+   "to": "2026-03-31",
+   "book": -0.048716,
+   "nasdaq": -0.048396,
+   "semis_etf": -0.066505,
+   "bond20": -0.035191,
+   "worst_point": -0.093024,
+   "worst_name": "META",
+   "worst_name_return": -0.11659,
+   "names_missing": [
+    "SPCX"
+   ]
+  }
+ ],
+ "scenarios": [
+  {
+   "scenario": "AI capex digestion (growth scare)",
+   "nasdaq": -0.15,
+   "semis_vs_nasdaq": -0.15,
+   "dy_bp": -75,
+   "bond20": 0.097112,
+   "book": -0.14328,
+   "with_bond_30": -0.114146,
+   "with_nasdaq_hedge": -0.017032,
+   "worst_name": "AVGO",
+   "worst_name_move": -0.296611
+  },
+  {
+   "scenario": "AI financing / term-premium shock",
+   "nasdaq": -0.1,
+   "semis_vs_nasdaq": -0.1,
+   "dy_bp": 75,
+   "bond20": -0.085729,
+   "book": -0.071682,
+   "with_bond_30": -0.097401,
+   "with_nasdaq_hedge": 0.012483,
+   "worst_name": "AVGO",
+   "worst_name_move": -0.175826
+  },
+  {
+   "scenario": "Inflation + hikes (2022 replay)",
+   "nasdaq": -0.2,
+   "semis_vs_nasdaq": -0.1,
+   "dy_bp": 125,
+   "bond20": -0.136558,
+   "book": -0.185542,
+   "with_bond_30": -0.22651,
+   "with_nasdaq_hedge": -0.017212,
+   "worst_name": "AVGO",
+   "worst_name_move": -0.316847
+  },
+  {
+   "scenario": "AI melt-up, yields up",
+   "nasdaq": 0.1,
+   "semis_vs_nasdaq": 0.15,
+   "dy_bp": 50,
+   "bond20": -0.058418,
+   "book": 0.076193,
+   "with_bond_30": 0.058668,
+   "with_nasdaq_hedge": -0.007972,
+   "worst_name": "MSFT",
+   "worst_name_move": 0.002146
+  },
+  {
+   "scenario": "Soft landing, cuts",
+   "nasdaq": 0.08,
+   "semis_vs_nasdaq": 0.05,
+   "dy_bp": -50,
+   "bond20": 0.063477,
+   "book": 0.069149,
+   "with_bond_30": 0.088192,
+   "with_nasdaq_hedge": 0.001817,
+   "worst_name": "MSFT",
+   "worst_name_move": 0.007748
+  }
+ ],
+ "worst_days": [
+  {
+   "date": "2020-03-16",
+   "book": -0.138722,
+   "nasdaq": -0.119788,
+   "semis_etf": -0.15227,
+   "bond20": 0.037702
+  },
+  {
+   "date": "2020-03-12",
+   "book": -0.099077,
+   "nasdaq": -0.091691,
+   "semis_etf": -0.10973,
+   "bond20": -0.024624
+  },
+  {
+   "date": "2020-03-09",
+   "book": -0.071742,
+   "nasdaq": -0.069464,
+   "semis_etf": -0.085369,
+   "bond20": 0.040379
+  },
+  {
+   "date": "2022-02-03",
+   "book": -0.070977,
+   "nasdaq": -0.040544,
+   "semis_etf": -0.043518,
+   "bond20": -0.004773
+  },
+  {
+   "date": "2025-04-03",
+   "book": -0.065737,
+   "nasdaq": -0.053534,
+   "semis_etf": -0.100908,
+   "bond20": 0.009283
+  },
+  {
+   "date": "2022-09-13",
+   "book": -0.064165,
+   "nasdaq": -0.054837,
+   "semis_etf": -0.062157,
+   "bond20": 0.0015
+  },
+  {
+   "date": "2020-09-08",
+   "book": -0.060793,
+   "nasdaq": -0.048064,
+   "semis_etf": -0.046704,
+   "bond20": 0.005444
+  },
+  {
+   "date": "2020-09-03",
+   "book": -0.060333,
+   "nasdaq": -0.0507,
+   "semis_etf": -0.05583,
+   "bond20": 0.005388
+  },
+  {
+   "date": "2022-05-05",
+   "book": -0.059913,
+   "nasdaq": -0.050364,
+   "semis_etf": -0.048479,
+   "bond20": -0.020198
+  },
+  {
+   "date": "2025-01-27",
+   "book": -0.058982,
+   "nasdaq": -0.029115,
+   "semis_etf": -0.078434,
+   "bond20": 0.011865
+  }
+ ],
+ "correlation": {
+  "definition": "63-day exponentially weighted correlation of daily returns, book vs the 20-year par bond",
+  "book_63d": 0.018993,
+  "nasdaq_63d": 0.071216,
+  "book_36m_monthly": -0.112424,
+  "state": "amplifying",
+  "state_since": "2026-03-25",
+  "share_days_hedging": 0.511534,
+  "by_year": {
+   "2017": -0.123877,
+   "2018": -0.100863,
+   "2019": -0.370074,
+   "2020": -0.344407,
+   "2021": 0.045605,
+   "2022": -0.010762,
+   "2023": 0.139108,
+   "2024": 0.039717,
+   "2025": -0.088604,
+   "2026": 0.151704
+  },
+  "shock": [
+   {
+    "group": "2017 to 2021",
+    "days": 52.0,
+    "avg_equity": -0.044232,
+    "avg_bond": 0.00447,
+    "bond_up_share": 0.711538,
+    "offset": 0.101064
+   },
+   {
+    "group": "2022 on",
+    "days": 72.0,
+    "avg_equity": -0.041438,
+    "avg_bond": 0.000718,
+    "bond_up_share": 0.541667,
+    "offset": 0.017339
+   }
+  ]
+ },
+ "liquidity": [
+  {
+   "name": "MSFT",
+   "adv_usd": 11826023551.75,
+   "position_usd": 14000000.0,
+   "days_100m": 0.005919,
+   "days_1bn": 0.059191,
+   "share_of_adv_100m": 0.001184
+  },
+  {
+   "name": "AMZN",
+   "adv_usd": 10787745905.65,
+   "position_usd": 14000000.0,
+   "days_100m": 0.006489,
+   "days_1bn": 0.064888,
+   "share_of_adv_100m": 0.001298
+  },
+  {
+   "name": "GOOGL",
+   "adv_usd": 7085978979.95,
+   "position_usd": 14000000.0,
+   "days_100m": 0.009879,
+   "days_1bn": 0.098787,
+   "share_of_adv_100m": 0.001976
+  },
+  {
+   "name": "NVDA",
+   "adv_usd": 21739127349.85,
+   "position_usd": 14000000.0,
+   "days_100m": 0.00322,
+   "days_1bn": 0.0322,
+   "share_of_adv_100m": 0.000644
+  },
+  {
+   "name": "META",
+   "adv_usd": 15641313451.6,
+   "position_usd": 12000000.0,
+   "days_100m": 0.003836,
+   "days_1bn": 0.03836,
+   "share_of_adv_100m": 0.000767
+  },
+  {
+   "name": "TSLA",
+   "adv_usd": 13887231689.4,
+   "position_usd": 10000000.0,
+   "days_100m": 0.0036,
+   "days_1bn": 0.036004,
+   "share_of_adv_100m": 0.00072
+  },
+  {
+   "name": "AVGO",
+   "adv_usd": 7316190177.9,
+   "position_usd": 8000000.0,
+   "days_100m": 0.005467,
+   "days_1bn": 0.054673,
+   "share_of_adv_100m": 0.001093
+  },
+  {
+   "name": "SPCX",
+   "adv_usd": 15042891868.4,
+   "position_usd": 8000000.0,
+   "days_100m": 0.002659,
+   "days_1bn": 0.026591,
+   "share_of_adv_100m": 0.000532
+  },
+  {
+   "name": "ORCL",
+   "adv_usd": 4884054584.9,
+   "position_usd": 6000000.0,
+   "days_100m": 0.006142,
+   "days_1bn": 0.061424,
+   "share_of_adv_100m": 0.001228
+  }
+ ],
+ "drawdowns": {
+  "max": 0.468869,
+  "peak": "2021-11-19",
+  "trough": "2022-11-03",
+  "now": 0.096508,
+  "nasdaq_max": 0.351225,
+  "monthly": {
+   "months": [
+    "2017-01",
+    "2017-02",
+    "2017-03",
+    "2017-04",
+    "2017-05",
+    "2017-06",
+    "2017-07",
+    "2017-08",
+    "2017-09",
+    "2017-10",
+    "2017-11",
+    "2017-12",
+    "2018-01",
+    "2018-02",
+    "2018-03",
+    "2018-04",
+    "2018-05",
+    "2018-06",
+    "2018-07",
+    "2018-08",
+    "2018-09",
+    "2018-10",
+    "2018-11",
+    "2018-12",
+    "2019-01",
+    "2019-02",
+    "2019-03",
+    "2019-04",
+    "2019-05",
+    "2019-06",
+    "2019-07",
+    "2019-08",
+    "2019-09",
+    "2019-10",
+    "2019-11",
+    "2019-12",
+    "2020-01",
+    "2020-02",
+    "2020-03",
+    "2020-04",
+    "2020-05",
+    "2020-06",
+    "2020-07",
+    "2020-08",
+    "2020-09",
+    "2020-10",
+    "2020-11",
+    "2020-12",
+    "2021-01",
+    "2021-02",
+    "2021-03",
+    "2021-04",
+    "2021-05",
+    "2021-06",
+    "2021-07",
+    "2021-08",
+    "2021-09",
+    "2021-10",
+    "2021-11",
+    "2021-12",
+    "2022-01",
+    "2022-02",
+    "2022-03",
+    "2022-04",
+    "2022-05",
+    "2022-06",
+    "2022-07",
+    "2022-08",
+    "2022-09",
+    "2022-10",
+    "2022-11",
+    "2022-12",
+    "2023-01",
+    "2023-02",
+    "2023-03",
+    "2023-04",
+    "2023-05",
+    "2023-06",
+    "2023-07",
+    "2023-08",
+    "2023-09",
+    "2023-10",
+    "2023-11",
+    "2023-12",
+    "2024-01",
+    "2024-02",
+    "2024-03",
+    "2024-04",
+    "2024-05",
+    "2024-06",
+    "2024-07",
+    "2024-08",
+    "2024-09",
+    "2024-10",
+    "2024-11",
+    "2024-12",
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08",
+    "2026-09",
+    "2026-10",
+    "2026-11"
+   ],
+   "book": [
+    1.0775,
+    1.0911,
+    1.1455,
+    1.1957,
+    1.3147,
+    1.3106,
+    1.3666,
+    1.406,
+    1.4031,
+    1.5279,
+    1.5312,
+    1.5195,
+    1.7266,
+    1.7009,
+    1.5754,
+    1.6228,
+    1.7297,
+    1.7623,
+    1.7762,
+    1.8787,
+    1.8685,
+    1.6999,
+    1.6726,
+    1.5431,
+    1.6829,
+    1.7207,
+    1.8142,
+    1.8927,
+    1.6472,
+    1.8241,
+    1.8884,
+    1.8338,
+    1.8576,
+    2.0157,
+    2.1173,
+    2.2313,
+    2.4207,
+    2.3788,
+    2.2185,
+    2.6754,
+    2.8663,
+    3.1196,
+    3.4331,
+    4.0749,
+    3.852,
+    3.7614,
+    4.1694,
+    4.3622,
+    4.4366,
+    4.4907,
+    4.6093,
+    5.0648,
+    5.036,
+    5.4472,
+    5.5914,
+    5.985,
+    5.6661,
+    6.4352,
+    6.7282,
+    6.6946,
+    6.0545,
+    5.7032,
+    6.186,
+    5.083,
+    4.9743,
+    4.4292,
+    5.0698,
+    4.7231,
+    4.1251,
+    3.972,
+    4.3298,
+    3.8567,
+    4.6049,
+    4.815,
+    5.4519,
+    5.5193,
+    6.5327,
+    7.1166,
+    7.497,
+    7.5527,
+    7.1135,
+    6.9646,
+    7.7779,
+    8.1581,
+    8.4808,
+    9.497,
+    9.8416,
+    9.6025,
+    10.2999,
+    11.4468,
+    11.2396,
+    11.2118,
+    12.0323,
+    12.1009,
+    12.9796,
+    13.9179,
+    14.3354,
+    13.0885,
+    11.6527,
+    11.9744,
+    14.0526,
+    15.401,
+    16.5623,
+    16.5485,
+    18.0802,
+    18.9498,
+    18.4097,
+    18.3296,
+    18.2914,
+    16.784,
+    15.9663,
+    18.8082,
+    20.2643,
+    18.1206,
+    17.8888,
+    19.0702,
+    19.5768,
+    18.2926,
+    18.5059
+   ],
+   "nasdaq": [
+    1.0421,
+    1.0877,
+    1.1097,
+    1.14,
+    1.1844,
+    1.157,
+    1.204,
+    1.2289,
+    1.2253,
+    1.2817,
+    1.307,
+    1.3149,
+    1.43,
+    1.4115,
+    1.354,
+    1.3608,
+    1.438,
+    1.4545,
+    1.4952,
+    1.5816,
+    1.5772,
+    1.4416,
+    1.4378,
+    1.3133,
+    1.4317,
+    1.4745,
+    1.5324,
+    1.6166,
+    1.4837,
+    1.5963,
+    1.6336,
+    1.6025,
+    1.6172,
+    1.6881,
+    1.7568,
+    1.825,
+    1.8805,
+    1.7666,
+    1.6379,
+    1.8831,
+    2.0074,
+    2.1336,
+    2.2903,
+    2.541,
+    2.3941,
+    2.3212,
+    2.5818,
+    2.7084,
+    2.7155,
+    2.7119,
+    2.7583,
+    2.9214,
+    2.8863,
+    3.067,
+    3.1547,
+    3.2878,
+    3.101,
+    3.3449,
+    3.4117,
+    3.4511,
+    3.1492,
+    3.0082,
+    3.1487,
+    2.7206,
+    2.6774,
+    2.4388,
+    2.7449,
+    2.604,
+    2.3297,
+    2.4228,
+    2.5572,
+    2.3268,
+    2.5744,
+    2.5651,
+    2.8086,
+    2.8229,
+    3.0454,
+    3.2374,
+    3.3624,
+    3.3125,
+    3.1442,
+    3.0793,
+    3.4124,
+    3.603,
+    3.6686,
+    3.8624,
+    3.9116,
+    3.7405,
+    3.9706,
+    4.2276,
+    4.1567,
+    4.2025,
+    4.3127,
+    4.2754,
+    4.5042,
+    4.5246,
+    4.6225,
+    4.4975,
+    4.1562,
+    4.2142,
+    4.601,
+    4.8948,
+    5.0134,
+    5.0612,
+    5.3333,
+    5.5883,
+    5.501,
+    5.4641,
+    5.5314,
+    5.4017,
+    5.1403,
+    5.9468,
+    6.5753,
+    6.5655,
+    6.1339,
+    6.3904,
+    6.6022,
+    6.1624,
+    6.1159
+   ]
+  },
+  "cagr": 0.346455,
+  "nasdaq_cagr": 0.202744
+ },
+ "limitations": [
+  "Today's weights applied to history: the record is what this book would have done, not what anyone held.",
+  "GOOG (class C) stands in for GOOGL; the two trade within a fraction of a percent of each other.",
+  "SPCX has traded since June 12, 2026. Before that its weight is spread over the other names pro rata, and its betas lean on TSLA's until it has two years of its own.",
+  "The rates factor is a 20-year par bond rebuilt from the Treasury's daily par yields, a TLT proxy with duration about 12 against TLT's 16. Cash is proxied by the 2-year yield (older Treasury files here carry 2, 10 and 20 years only).",
+  "Hedge legs are measured as futures: their returns are in excess of cash. No transaction costs, no margin, no borrow.",
+  "Ten years of daily data hold one bear market (2022) and two fast crashes (2020, 2025); the tail numbers are only as wide as that record, which is why the most cautious of three methods governs."
+ ],
+ "meta": {
+  "source": "mirror download"
+ },
+ "sources": {
+  "prices": "https://github.com/yennanliu/finance_data",
+  "treasury": "US Treasury daily par yield curve rates (home.treasury.gov)",
+  "method": "buildout/book.py"
+ },
+ "findings": [
+  "Measured on the nine names' own daily prices from 2017-01-04 to 2026-11-03, the book at 1.00x runs 27% volatility, a one-month 95% expected shortfall of 17.5% (the most cautious of historical 14.8%, filtered 14.0% and Student-t 17.5%) and a one-year 95% drawdown of 41%, against limits of 12%, 20% and 25%.",
+  "The limits allow 0.69x (shortfall), 0.74x (volatility) and 0.58x (drawdown); the drawdown cap binds, so the book's size is 0.58x. Keeping every name at full size instead takes a Nasdaq-100 futures short of 84% of NAV.",
+  "Exposures: Nasdaq-100 beta 1.22 (broad market 1.61 now, 1.34 over ten years), semis net of the market -0.37, rates -0.16. 81% of the variance is the market and 19% is stock-specific: effective independent bets 1.8 of nine.",
+  "Hedges walked forward from 2017-07-06: a Nasdaq-100 short at the measured beta cut the variance 90% and turned 2022 from -42% to -0.2%; the long bond held only when its correlation said it hedged cut it 3% (2022 -45%), and a standing 30% long bond 0% (2022 -48%).",
+  "Stock-bond correlation (63-day, book against the 20-year bond): +0.02, state amplifying. On the book's worst 5% of days since 2022 the bond rose 54% of the time.",
+  "The one-day 99% VaR, backtested on the book: a normal model at today's volatility was breached 54 times against 24 expected (p 0.000); filtered historical simulation 14 against 22 (p 0.08)."
+ ]
+}

@@ -1,0 +1,644 @@
+{
+ "schema": 2,
+ "curve": {
+  "1m": 0.0403,
+  "2m": 0.0415,
+  "3m": 0.0421,
+  "4m": 0.0418,
+  "6m": 0.0426,
+  "1y": 0.044,
+  "2y": 0.0461,
+  "3y": 0.0468,
+  "5y": 0.0474,
+  "7y": 0.0483,
+  "10y": 0.0495,
+  "20y": 0.0535,
+  "30y": 0.0532
+ },
+ "funds": {
+  "SHY": {
+   "name": "iShares 1-3 Year Treasury Bond ETF",
+   "lo": 1,
+   "hi": 3,
+   "zero": false,
+   "a": 1.0,
+   "b": 2.8,
+   "coupon": 0.031442,
+   "duration": 1.79,
+   "convexity": 4.379804,
+   "ytm": 0.045837,
+   "price": 81.2752,
+   "price_as_of": "2026-10-21",
+   "reported_duration": 1.79,
+   "wam": 1.9,
+   "ytm_reported": 0.0476
+  },
+  "IEI": {
+   "name": "iShares 3-7 Year Treasury Bond ETF",
+   "lo": 3,
+   "hi": 7,
+   "zero": false,
+   "a": 3.0,
+   "b": 6.44,
+   "coupon": 0.035241,
+   "duration": 4.21,
+   "convexity": 21.58008,
+   "ytm": 0.047424,
+   "price": 114.0,
+   "price_as_of": "2026-10-20",
+   "reported_duration": 4.21,
+   "wam": 4.72,
+   "ytm_reported": 0.0495
+  },
+  "IEF": {
+   "name": "iShares 7-10 Year Treasury Bond ETF",
+   "lo": 7,
+   "hi": 10,
+   "zero": false,
+   "a": 7.0,
+   "b": 9.84,
+   "coupon": 0.043351,
+   "duration": 6.83,
+   "convexity": 56.342626,
+   "ytm": 0.048892,
+   "price": 91.05,
+   "price_as_of": "2026-10-23",
+   "reported_duration": 6.83,
+   "wam": 8.42,
+   "ytm_reported": 0.0508
+  },
+  "TLH": {
+   "name": "iShares 10-20 Year Treasury Bond ETF",
+   "lo": 10,
+   "hi": 20,
+   "zero": false,
+   "a": 13.12,
+   "b": 20.0,
+   "coupon": 0.037709,
+   "duration": 11.55,
+   "convexity": 171.451317,
+   "ytm": 0.052171,
+   "price": 94.19,
+   "price_as_of": "2026-10-21",
+   "reported_duration": 11.55,
+   "wam": 16.56,
+   "ytm_reported": 0.0541
+  },
+  "TLT": {
+   "name": "iShares 20+ Year Treasury Bond ETF",
+   "lo": 20,
+   "hi": 30,
+   "zero": false,
+   "a": 22.08,
+   "b": 30.0,
+   "coupon": 0.038015,
+   "duration": 14.85,
+   "convexity": 313.553251,
+   "ytm": 0.053317,
+   "price": 81.34,
+   "price_as_of": "2026-10-23",
+   "reported_duration": 14.85,
+   "wam": 26.04,
+   "ytm_reported": 0.0548
+  },
+  "EDV": {
+   "name": "Vanguard Extended Duration Treasury ETF (STRIPS)",
+   "lo": 20,
+   "hi": 30,
+   "zero": true,
+   "a": 20.0,
+   "b": 29.2,
+   "coupon": 0.0,
+   "duration": 23.606242,
+   "convexity": 575.351056,
+   "ytm": 0.053364,
+   "price": 57.71,
+   "price_as_of": "2026-10-21",
+   "reported_duration": 23.9,
+   "wam": 24.6,
+   "ytm_reported": 0.058
+  },
+  "ZROZ": {
+   "name": "PIMCO 25+ Year Zero Coupon US Treasury ETF",
+   "lo": 25,
+   "hi": 30,
+   "zero": true,
+   "coupon": 0.0,
+   "duration": 26.682595,
+   "convexity": 726.906598,
+   "ytm": 0.053276,
+   "price": null,
+   "price_as_of": null,
+   "reported_duration": null,
+   "wam": null,
+   "ytm_reported": null
+  }
+ },
+ "cases": {
+  "both_4": {
+   "y10": 0.04,
+   "y30": 0.04,
+   "funds": {
+    "SHY": {
+     "change": 0.017205,
+     "total": 0.05517,
+     "price": 82.673504,
+     "price_total": 85.759161
+    },
+    "IEI": {
+     "change": 0.040987,
+     "total": 0.081422,
+     "price": 118.672528,
+     "price_total": 123.282145
+    },
+    "IEF": {
+     "change": 0.067502,
+     "total": 0.111627,
+     "price": 97.196049,
+     "price_total": 101.213602
+    },
+    "TLH": {
+     "change": 0.134544,
+     "total": 0.183996,
+     "price": 106.862665,
+     "price_total": 111.520597
+    },
+    "TLT": {
+     "change": 0.212576,
+     "total": 0.257634,
+     "price": 98.63097,
+     "price_total": 102.295955
+    },
+    "EDV": {
+     "change": 0.335723,
+     "total": 0.38523,
+     "price": 77.084573,
+     "price_total": 79.941627
+    },
+    "ZROZ": {
+     "change": 0.406471,
+     "total": 0.455954,
+     "price": null,
+     "price_total": null
+    }
+   }
+  },
+  "both_5": {
+   "y10": 0.05,
+   "y30": 0.05,
+   "funds": {
+    "SHY": {
+     "change": -0.000894,
+     "total": 0.046387,
+     "price": 81.202503,
+     "price_total": 85.045316
+    },
+    "IEI": {
+     "change": -0.002102,
+     "total": 0.046622,
+     "price": 113.760337,
+     "price_total": 119.314944
+    },
+    "IEF": {
+     "change": -0.003408,
+     "total": 0.04763,
+     "price": 90.739705,
+     "price_total": 95.386736
+    },
+    "TLH": {
+     "change": 0.008531,
+     "total": 0.062459,
+     "price": 94.993553,
+     "price_total": 100.073049
+    },
+    "TLT": {
+     "change": 0.037872,
+     "total": 0.08689,
+     "price": 84.420541,
+     "price_total": 88.407667
+    },
+    "EDV": {
+     "change": 0.053164,
+     "total": 0.103004,
+     "price": 60.77812,
+     "price_total": 63.654368
+    },
+    "ZROZ": {
+     "change": 0.075726,
+     "total": 0.124555,
+     "price": null,
+     "price_total": null
+    }
+   }
+  },
+  "both_6": {
+   "y10": 0.06,
+   "y30": 0.06,
+   "funds": {
+    "SHY": {
+     "change": -0.018556,
+     "total": 0.037746,
+     "price": 79.767049,
+     "price_total": 84.34302
+    },
+    "IEI": {
+     "change": -0.043039,
+     "total": 0.013271,
+     "price": 109.09352,
+     "price_total": 115.512928
+    },
+    "IEF": {
+     "change": -0.068705,
+     "total": -0.011803,
+     "price": 84.79442,
+     "price_total": 89.975294
+    },
+    "TLH": {
+     "change": -0.100066,
+     "total": -0.043057,
+     "price": 84.764744,
+     "price_total": 90.134488
+    },
+    "TLT": {
+     "change": -0.103336,
+     "total": -0.051981,
+     "price": 72.934679,
+     "price_total": 77.111878
+    },
+    "EDV": {
+     "change": -0.168108,
+     "total": -0.120163,
+     "price": 48.008481,
+     "price_total": 50.775409
+    },
+    "ZROZ": {
+     "change": -0.176005,
+     "total": -0.13015,
+     "price": null,
+     "price_total": null
+    }
+   }
+  },
+  "down_100": {
+   "y10": 0.0395,
+   "y30": 0.0432,
+   "funds": {
+    "SHY": {
+     "change": 0.018121,
+     "total": 0.055613,
+     "price": 82.748006,
+     "price_total": 85.795161
+    },
+    "IEI": {
+     "change": 0.0432,
+     "total": 0.083202,
+     "price": 118.924839,
+     "price_total": 123.484991
+    },
+    "IEF": {
+     "change": 0.071204,
+     "total": 0.114953,
+     "price": 97.533131,
+     "price_total": 101.51647
+    },
+    "TLH": {
+     "change": 0.124562,
+     "total": 0.176751,
+     "price": 105.922462,
+     "price_total": 110.838209
+    },
+    "TLT": {
+     "change": 0.165511,
+     "total": 0.21505,
+     "price": 94.802682,
+     "price_total": 98.832202
+    },
+    "EDV": {
+     "change": 0.267404,
+     "total": 0.322761,
+     "price": 73.141904,
+     "price_total": 76.336561
+    },
+    "ZROZ": {
+     "change": 0.306792,
+     "total": 0.362902,
+     "price": null,
+     "price_total": null
+    }
+   }
+  },
+  "up_100": {
+   "y10": 0.0595,
+   "y30": 0.0632,
+   "funds": {
+    "SHY": {
+     "change": -0.017683,
+     "total": 0.038175,
+     "price": 79.837994,
+     "price_total": 84.377864
+    },
+    "IEI": {
+     "change": -0.041042,
+     "total": 0.014906,
+     "price": 109.321251,
+     "price_total": 115.699231
+    },
+    "IEF": {
+     "change": -0.065566,
+     "total": -0.008935,
+     "price": 85.080243,
+     "price_total": 90.236511
+    },
+    "TLH": {
+     "change": -0.107376,
+     "total": -0.048412,
+     "price": 84.076284,
+     "price_total": 89.630037
+    },
+    "TLT": {
+     "change": -0.133996,
+     "total": -0.08005,
+     "price": 70.440772,
+     "price_total": 74.828767
+    },
+    "EDV": {
+     "change": -0.209557,
+     "total": -0.158762,
+     "price": 45.616487,
+     "price_total": 48.547866
+    },
+    "ZROZ": {
+     "change": -0.233623,
+     "total": -0.184986,
+     "price": null,
+     "price_total": null
+    }
+   }
+  }
+ },
+ "grid_tlt": {
+  "y": [
+   0.03,
+   0.035,
+   0.04,
+   0.045,
+   0.05,
+   0.055,
+   0.06,
+   0.065,
+   0.07
+  ],
+  "change": [
+   [
+    0.429962,
+    0.336199,
+    0.250769,
+    0.172828,
+    0.101627,
+    0.036496,
+    -0.02316,
+    -0.077875,
+    -0.128124
+   ],
+   [
+    0.407289,
+    0.315262,
+    0.231418,
+    0.154927,
+    0.085051,
+    0.021135,
+    -0.03741,
+    -0.091105,
+    -0.140418
+   ],
+   [
+    0.385217,
+    0.294879,
+    0.212576,
+    0.137495,
+    0.06891,
+    0.006174,
+    -0.051289,
+    -0.103992,
+    -0.152395
+   ],
+   [
+    0.363725,
+    0.27503,
+    0.194228,
+    0.120519,
+    0.053188,
+    -0.0084,
+    -0.06481,
+    -0.116548,
+    -0.164066
+   ],
+   [
+    0.342796,
+    0.2557,
+    0.176358,
+    0.103983,
+    0.037872,
+    -0.022598,
+    -0.077984,
+    -0.128784,
+    -0.17544
+   ],
+   [
+    0.322411,
+    0.236871,
+    0.15895,
+    0.087874,
+    0.022951,
+    -0.036432,
+    -0.090823,
+    -0.140709,
+    -0.186528
+   ],
+   [
+    0.302554,
+    0.218528,
+    0.14199,
+    0.072177,
+    0.008411,
+    -0.049914,
+    -0.103336,
+    -0.152333,
+    -0.197336
+   ],
+   [
+    0.283208,
+    0.200656,
+    0.125464,
+    0.056881,
+    -0.00576,
+    -0.063055,
+    -0.115533,
+    -0.163666,
+    -0.207876
+   ],
+   [
+    0.264356,
+    0.18324,
+    0.109358,
+    0.041973,
+    -0.019573,
+    -0.075866,
+    -0.127426,
+    -0.174717,
+    -0.218154
+   ]
+  ]
+ },
+ "breakeven": {
+  "SHY": 0.025607,
+  "IEI": 0.011265,
+  "IEF": 0.007158,
+  "TLH": 0.004517,
+  "TLT": 0.00359,
+  "EDV": 0.002261,
+  "ZROZ": 0.001997
+ },
+ "step": 0.5,
+ "equity": {
+  "all": {
+   "per_point": -0.015968,
+   "t": -2.452065,
+   "n": 1797,
+   "r2": 0.00498
+  },
+  "low_inflation": {
+   "per_point": 0.034011,
+   "t": 2.489236,
+   "n": 1100,
+   "r2": 0.008349
+  },
+  "middle_inflation": {
+   "per_point": -0.027318,
+   "t": -2.411766,
+   "n": 297,
+   "r2": 0.027257
+  },
+  "high_inflation": {
+   "per_point": -0.033397,
+   "t": -3.474119,
+   "n": 400,
+   "r2": 0.056758
+  },
+  "since_2000": {
+   "per_point": 0.03555,
+   "t": 2.065404,
+   "n": 285,
+   "r2": 0.041892
+  },
+  "now": {
+   "infl36": 0.030163,
+   "as_of": "2026-09",
+   "regime": "middle_inflation"
+  }
+ },
+ "facts": {
+  "SHY": {
+   "duration": 1.79,
+   "duration_as_of": "2026-10-20",
+   "wam": 1.9,
+   "ytm": 0.0476,
+   "sec_yield": 0.0467,
+   "price": 81.2752,
+   "as_of": "2026-10-21",
+   "price_src": "bd-shy-nav"
+  },
+  "IEI": {
+   "duration": 4.21,
+   "duration_as_of": "2026-10-20",
+   "wam": 4.72,
+   "ytm": 0.0495,
+   "sec_yield": 0.0488,
+   "price": 114.0,
+   "as_of": "2026-10-20",
+   "price_src": "bd-iei-nav"
+  },
+  "IEF": {
+   "duration": 6.83,
+   "duration_as_of": "2026-10-20",
+   "wam": 8.42,
+   "ytm": 0.0508,
+   "sec_yield": 0.0503,
+   "price": 91.05,
+   "as_of": "2026-10-23",
+   "price_src": "tp-ief-close-1022-23"
+  },
+  "TLH": {
+   "duration": 11.55,
+   "duration_as_of": "2026-10-21",
+   "wam": 16.56,
+   "ytm": 0.0541,
+   "sec_yield": 0.0536,
+   "price": 94.19,
+   "as_of": "2026-10-21",
+   "price_src": "bd-tlh-close-price"
+  },
+  "TLT": {
+   "duration": 14.85,
+   "duration_as_of": "2026-10-20",
+   "wam": 26.04,
+   "ytm": 0.0548,
+   "sec_yield": 0.054,
+   "price": 81.34,
+   "as_of": "2026-10-23",
+   "price_src": "tp-tlt-close-1022-23"
+  },
+  "EDV": {
+   "duration": 23.9,
+   "duration_as_of": "2026-09-30",
+   "wam": 24.6,
+   "ytm": 0.058,
+   "price": 57.71,
+   "as_of": "2026-10-21",
+   "price_src": "bd-edv-nav"
+  },
+  "GOVT": {
+   "duration": 5.48,
+   "duration_as_of": "2026-10-21",
+   "wam": 7.48,
+   "ytm": 0.05,
+   "sec_yield": 0.0502,
+   "price": 22.06,
+   "as_of": "2026-10-21",
+   "price_src": "bd-govt-close-price"
+  },
+  "SPTL": {
+   "duration": 13.63,
+   "duration_as_of": "2026-10-21",
+   "wam": 21.68,
+   "ytm": 0.0544,
+   "sec_yield": 0.055,
+   "price": 24.5,
+   "as_of": "2026-10-21",
+   "price_src": "bd-sptl-nav"
+  },
+  "VGLT": {
+   "duration": 13.2,
+   "duration_as_of": "2026-09-30",
+   "wam": 21.7,
+   "ytm": 0.056,
+   "price": 51.47,
+   "as_of": "2026-10-21",
+   "price_src": "bd-vglt-nav"
+  },
+  "TLTW": {
+   "duration": 14.84,
+   "duration_as_of": "2026-10-21",
+   "wam": 26.0,
+   "ytm": 0.0547,
+   "sec_yield": 0.0473,
+   "price": 20.74,
+   "as_of": "2026-10-21",
+   "price_src": "bd-tltw-close-price"
+  }
+ },
+ "curve_meta": {
+  "as_of": "11/03/2026",
+  "source": "US Treasury (live)"
+ }
+}

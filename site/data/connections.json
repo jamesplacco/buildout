@@ -1,0 +1,86 @@
+{
+ "schema": 2,
+ "checked": "2026-11-04T18:50:33Z",
+ "sources": [
+  {
+   "source": "databento",
+   "what": "Split-adjusted daily OHLCV, futures",
+   "cost": "paid",
+   "credential": true,
+   "reachable": true,
+   "ms": 164,
+   "note": "",
+   "ok": true
+  },
+  {
+   "source": "yahoo",
+   "what": "Daily OHLCV, adjusted",
+   "cost": "free",
+   "credential": null,
+   "reachable": true,
+   "ms": 159,
+   "note": "",
+   "ok": true
+  },
+  {
+   "source": "stooq",
+   "what": "Daily OHLCV",
+   "cost": "free",
+   "credential": null,
+   "reachable": true,
+   "ms": 415,
+   "note": "",
+   "ok": true
+  },
+  {
+   "source": "sec",
+   "what": "XBRL company facts",
+   "cost": "free",
+   "credential": true,
+   "reachable": false,
+   "ms": null,
+   "note": "ValueError",
+   "ok": false
+  },
+  {
+   "source": "treasury",
+   "what": "Daily par yield curve",
+   "cost": "free",
+   "credential": null,
+   "reachable": false,
+   "ms": null,
+   "note": "RuntimeError",
+   "ok": false
+  },
+  {
+   "source": "cftc",
+   "what": "Traders in financial futures",
+   "cost": "free",
+   "credential": null,
+   "reachable": true,
+   "ms": 2912,
+   "note": "",
+   "ok": true
+  },
+  {
+   "source": "fred",
+   "what": "Macro and rates",
+   "cost": "free",
+   "credential": null,
+   "reachable": true,
+   "ms": 348,
+   "note": "",
+   "ok": true
+  },
+  {
+   "source": "github",
+   "what": "Public dataset mirrors",
+   "cost": "free",
+   "credential": null,
+   "reachable": true,
+   "ms": 75,
+   "note": "",
+   "ok": true
+  }
+ ]
+}
