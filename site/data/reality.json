@@ -18,17 +18,17 @@
   },
   "tails_day": {
    "series": "Brent, daily since 1987",
-   "n": 9116,
-   "kurtosis": 56.182732,
+   "n": 9121,
+   "kurtosis": 55.965549,
    "jb_p": 0.0,
-   "hill_alpha": 2.664908,
+   "hill_alpha": 2.642893,
    "threshold_sd": 5.0,
-   "observed_beyond": 25,
-   "gaussian_expects": 0.005226,
-   "ratio": 4783.561577,
-   "var99_empirical": -0.071165,
-   "var99_normal": -0.062637,
-   "var_understatement": 0.136143,
+   "observed_beyond": 24,
+   "gaussian_expects": 0.005229,
+   "ratio": 4589.701726,
+   "var99_empirical": -0.071199,
+   "var99_normal": -0.062714,
+   "var_understatement": 0.1353,
    "status": "broken"
   },
   "dependence": {
@@ -109,12 +109,12 @@
   },
   "testing": {
    "n": 34,
-   "p05": 13,
-   "t3": 9,
+   "p05": 15,
+   "t3": 8,
    "holm": 8
   },
   "garch": {
-   "persistence": 0.996304,
+   "persistence": 0.99662,
    "status": "strained"
   },
   "kappa": {
@@ -125,14 +125,14 @@
      "n_equivalent_30": 38.588814
     },
     "Brent, daily": {
-     "kappa": 0.204215,
+     "kappa": 0.16553,
      "n": 30,
-     "n_equivalent_30": 46.414234
+     "n_equivalent_30": 42.036509
     },
     "Henry Hub gas, daily": {
-     "kappa": 0.298591,
+     "kappa": 0.367659,
      "n": 30,
-     "n_equivalent_30": 61.876823
+     "n_equivalent_30": 80.637779
     },
     "VIX, daily change": {
      "kappa": 0.130801,
@@ -526,7 +526,7 @@
  ],
  "findings": [
   "Normal returns: monthly stocks show 23 moves beyond 3 standard deviations where a bell curve expects 5.0; the normal 1-in-100 month understates the real one by 30%.",
-  "Brent has 25 daily moves beyond 5 standard deviations where a bell curve expects 0.01.",
+  "Brent has 24 daily moves beyond 5 standard deviations where a bell curve expects 0.01.",
   "Taleb's kappa for monthly stocks is 0.13: matching what 30 Gaussian months reveal about the mean takes about 39 months.",
   "The trend rule's Sharpe gain disappears at 56 basis points a switch, and by a four-month delay.",
   "Kelly sizing on stocks from a 30-year backtest ranged from 1.4 to 8.0 times capital depending on which 30 years: the edge is not known well enough to bet full Kelly.",
