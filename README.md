@@ -3,6 +3,12 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.39 adds the VIX as a hedge (`buildout/vixhedge.py`: VIX futures, modelled VIX calls and Nasdaq-100 puts,
+marked daily on the book) and execution through Robinhood (`buildout/execution.py`, `docs/TRADING.md`): the logged call
+becomes a hashed, risk-checked ticket for a Robinhood Agentic account; Robinhood's own Trading MCP places the orders after
+a person approves the ticket id (`/rebalance` in Claude Code; `.mcp.json` connects both servers). Buildout holds no
+brokerage credential and places nothing. Paper mode by default; `python -m buildout trade status`.
+
 Version 0.38 turns the model into a dated, auditable track record. `buildout/track.py` walks the call forward month by
 month with costs and a point-in-time universe, keeps the backtest, the walk-forward and live paper apart, replays named
 weeks, and tests the long bond by inflation and policy regime against puts, short Treasuries, gold, cash and a short

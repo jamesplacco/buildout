@@ -197,8 +197,11 @@ def test_mcp_handshake_and_tool_list_over_stdio():
     assert out[0]["result"]["protocolVersion"] == "2024-11-05" and out[0]["result"]["serverInfo"]["version"] == __import__("buildout").__version__
     names = [t["name"] for t in out[1]["result"]["tools"]]
     assert names == ["get_research_snapshot", "get_portfolio_risk", "analyze_positions", "decision_loop", "position_valuation", "hedge_book", "reason", "labs_lookup", "game_math", "ml_forecast", "reality_check", "triage_backtest", "damodaran_value", "technical_analysis", "fundamental_analysis", "rl_policy", "decision_engine", "mind_board", "geometry_engine", "reasoning_engine", "edge_lab", "nowcast", "filings_engine", "futures_engine", "book_risk", "private_credit", "forecast_verification", "parameter_inventory", "portfolio_engine", "bond_scenario", "market_history", "data_connections", "investor_voices", "atlas_trace", "brain_selfcheck", "run_hedge_scenario", "evaluate_trade", "create_order_proposal",
-                     "review_decision", "compare_explanations", "learned_structure", "trace_exposure"]
-    assert all(t["annotations"]["readOnlyHint"] for t in out[1]["result"]["tools"])
+                     "review_decision", "compare_explanations", "learned_structure", "trace_exposure", "trade_plan", "record_fills", "trading_status", "paper_fill"]
+    TRADING = {"trade_plan", "record_fills", "paper_fill"}                  # v0.39: write tickets and fills to private/ only, never to a broker
+    assert all(t["annotations"]["readOnlyHint"] for t in out[1]["result"]["tools"] if t["name"] not in TRADING)
+    assert all(not t["annotations"].get("destructiveHint", False) and not t["annotations"].get("openWorldHint", True)
+               for t in out[1]["result"]["tools"] if t["name"] in TRADING)
     assert out[2]["error"]["code"] == -32700 and out[3]["error"]["code"] == -32601
 
 

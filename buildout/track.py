@@ -502,6 +502,11 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
             vx = vix.set_index("DATE")["CLOSE"].astype(float)
             out["alternatives"] = alternatives(frames, Hm, vx, pol)
             out["regime_walk"] = regime_hedge_walk(pit, bond, Hm, pol, cash)
+            try:                                               # v0.39: VIX as a hedge (needs the VIX futures record)
+                from . import vixhedge
+                out["vix"] = vixhedge.build(frames, pit, cash, Hm, pol, vix=vx)
+            except Exception as exc:                           # noqa: BLE001
+                out["vix_error"] = f"{type(exc).__name__}: {exc}"[:200]
         wb = weak_basket(prices, cal)
         rm = (1 + pit.loc[wb.index]).resample("ME").prod() - 1
         wm = (1 + wb).resample("ME").prod() - 1

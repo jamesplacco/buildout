@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.38.1</span>
+      Buildout <span class="ver">v0.39</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -2849,6 +2849,55 @@
   <section class="section" aria-labelledby="ht-walk-t">
     <div class="section-head"><p class="eyebrow">Regime-switching</p><h2 id="ht-walk-t">A bond weight that changes with the regime, walked forward</h2><p class="prose" id="ht-walk-p"></p></div>
     <div class="tablewrap"><table class="rs-table" id="ht-walk"></table></div>
+  </section>
+  <section class="section" aria-labelledby="vx-t">
+    <div class="section-head"><p class="eyebrow">Volatility</p><h2 id="vx-t">The VIX as a hedge: it pays in crashes, bleeds the rest of the time, and missed 2022</h2><p class="prose" id="vx-p"></p></div>
+    <div class="at-tiles" id="vx-tiles"></div>
+    <h3 class="sub" id="vx-book-t">On the book, marked daily: each hedge at a fixed share of the book's value</h3>
+    <div class="tablewrap"><table class="rs-table" id="vx-book"></table></div>
+    <p class="note" id="vx-book-n"></p>
+    <h3 class="sub" id="vx-reg-t">Against the Nasdaq-100 by regime, monthly</h3>
+    <div class="tablewrap"><table class="rs-table" id="vx-reg"></table></div>
+    <h3 class="sub" id="vx-wk-t">The VIX in the named weeks</h3>
+    <div class="tablewrap"><table class="rs-table" id="vx-wk"></table></div>
+    <p class="note" id="vx-n"></p>
+  </section>
+</section>
+<section class="view" id="view-execution" hidden aria-labelledby="exd-title">
+  <div class="vhead"><p class="eyebrow">Today · from the call to orders</p><h1 id="exd-title">The call becomes a ticket; Robinhood places it after a person approves</h1>
+    <p class="lede">Buildout decides what to trade and whether it is allowed. Robinhood's own Trading MCP places the orders, in a separate Agentic account, only after the ticket is approved. Buildout holds no brokerage credential and has no tool that places an order.</p></div>
+  <div class="at-tiles" id="ex-tiles"></div>
+  <section class="section" aria-labelledby="ex-flow-t">
+    <div class="section-head"><p class="eyebrow">The flow</p><h2 id="ex-flow-t">Five steps, two servers, one approval</h2></div>
+    <ol class="ex-flow">
+      <li><b>The call is logged.</b> The day's size and hedge are written to the hash-chained ledger before the next trading day (<code>ledger/calls.jsonl</code>).</li>
+      <li><b>Robinhood is read.</b> The assistant reads the Agentic account (equity, cash, positions) and quotes through Robinhood's Trading MCP.</li>
+      <li><b>Buildout writes the ticket.</b> <code>trade_plan</code> turns the call into target holdings and limit orders, runs every check below, and returns a hashed ticket id that expires in 15 minutes.</li>
+      <li><b>A person approves.</b> Nothing is placed unless every check passes, the account is in live mode, and the person approves that exact ticket id.</li>
+      <li><b>Robinhood places; Buildout records.</b> Each order goes through Robinhood's MCP as a limit order, sells first; <code>record_fills</code> checks the fills against the ticket and chains them into a private log.</li>
+    </ol>
+  </section>
+  <section class="section" aria-labelledby="ex-map-t">
+    <div class="section-head"><p class="eyebrow">What the account allows</p><h2 id="ex-map-t">The call, mapped to what a Robinhood Agentic account can hold</h2><p class="prose" id="ex-map-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="ex-map"></table></div>
+  </section>
+  <section class="section" aria-labelledby="ex-tgt-t">
+    <div class="section-head"><p class="eyebrow">Today's targets</p><h2 id="ex-tgt-t">Share of the account in each holding, both variants</h2><p class="prose" id="ex-tgt-p"></p></div>
+    <div class="tablewrap"><table class="rs-table" id="ex-tgt"></table></div>
+  </section>
+  <section class="section" aria-labelledby="ex-chk-t">
+    <div class="section-head"><p class="eyebrow">The checks</p><h2 id="ex-chk-t">Every ticket, every time</h2></div>
+    <div class="tablewrap"><table class="rs-table" id="ex-chk"></table></div>
+  </section>
+  <section class="section" aria-labelledby="ex-run-t">
+    <div class="section-head"><p class="eyebrow">Run it</p><h2 id="ex-run-t">Paper first, then live</h2></div>
+    <pre class="code ex-pre" id="ex-run">git clone https://github.com/jamesplacco/buildout &amp;&amp; cd buildout
+claude                 # .mcp.json connects Buildout and Robinhood's Trading MCP; /mcp to sign in to Robinhood
+/rebalance             # reads the Agentic account, writes the ticket, waits for your approval
+
+python -m buildout trade status      # mode, limits, today's tickets, the halt switch
+python -m buildout trade halt        # stop every ticket (private/HALT)</pre>
+    <p class="note">Tickets, fills and the paper account live in <code>private/</code>, which git ignores: nothing about a real account reaches this page or the repository. Live mode is switched on only in <code>config.private.toml</code>.</p>
   </section>
 </section>
 <section class="view" id="view-memos" hidden aria-labelledby="memo-title">

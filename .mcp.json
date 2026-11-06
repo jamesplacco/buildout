@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "buildout": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "buildout.mcp_server", "--data", "site/data"]
+    },
+    "robinhood-trading": {
+      "type": "http",
+      "url": "https://agent.robinhood.com/mcp/trading"
+    }
+  }
+}
