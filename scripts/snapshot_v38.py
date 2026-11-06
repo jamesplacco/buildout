@@ -133,6 +133,8 @@ def main(argv: list[str]) -> None:
         prices = pickle.load(open(arg("--mirror-pickle"), "rb"))["prices"] if arg("--mirror-pickle") else bk.download()
         frames = pickle.load(open(arg("--carver-pickle"), "rb")) if arg("--carver-pickle") else None
         T = bk._clean(track.build(prices, bk.treasury(), frames, ledger.read()))
+    if arg("--vix-json"):                       # v0.39: merge a VIX study run on its own (buildout/vixhedge.py)
+        T["vix"] = json.loads(Path(arg("--vix-json")).read_text())
     rows = ledger.read()
     T["ledger"] = {"verify": ledger.verify(), "entries": rows}
     if rows and not T.get("live", {}).get("marked_days"):      # calls logged after the build's last price: none marked yet

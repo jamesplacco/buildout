@@ -5,6 +5,18 @@
      with what it cost and what changed. Nothing here is computed; every figure is the desk's own, linked.
      ===================================================================================== */
   const MEMOS = [
+    { id: "m-vix", n: "The VIX sleeve: insurance for the crash, not the bear market", desk: "hedgetest", since: "v0.39, Nov 5, 2026",
+      thesis: "A small long position in VIX futures (VIXY on Robinhood) pays when the AI book crashes and costs a known amount the rest of the time. At 5% of the account it is the cheapest cut to the one-month tail of any hedge tested; it is not a substitute for the call's size.",
+      variant: "Most retail VIX hedging is either avoided (the decay is notorious) or sized to feel safe. Here it is sized from the book's own daily record: tail cut per point of growth given up, against puts and the index short on the same days.",
+      evidence: "Monthly since 2006, VIX futures moved -0.62 with the Nasdaq-100 and cut 38% of its variance at the best weight, but lost about 20% a year on average and lost money in about two months in three. On the book from 2017 to March 2024, 10% of its value in VIX futures cut the Feb 19 to Mar 23, 2020 loss from 29% to 18% for 1.5 points a year of growth, and moved 2022 from -46% to -45%: only the index short helped there.",
+      wrong: "The sleeve fails to gain in the next fast fall of 10% or more in the Nasdaq-100, or its cost over a year exceeds 1.5% of the account; either turns it off (vix_share = 0).",
+      changed: "Nov 5: added to the execution defaults at 5% of the account, studied on the Hedge test desk." },
+    { id: "m-exec", n: "Execution: a ticket a person approves, placed by the broker's own agent", desk: "execution", since: "v0.39, Nov 5, 2026",
+      thesis: "The model should trade only what it can defend line by line. Buildout writes a hashed, checked ticket from the logged call; Robinhood's Trading MCP places it in a separate Agentic account after a person approves the ticket id.",
+      variant: "Agentic trading usually hands an assistant a brokerage connection and a goal. Here the assistant gets a ticket it may not alter, a list of checks it cannot skip, and no credential: the broker's agent places orders, the engine never does.",
+      evidence: "Robinhood's Agentic account (support pages, Nov 5, 2026) allows long stocks and ETFs and single-leg long options, with no margin, shorting or futures for agents. Every mapping, check and limit is tested (tests/test_v39.py): a halted switch, a non-Agentic account, a stale call, an unlogged call, a missing quote, an unknown holding, too much turnover and an oversized order each block the ticket.",
+      wrong: "A ticket is placed that failed a check or was not approved, a fill lands through its limit, or paper tickets drift from what the call says; any of these halts trading until the cause is fixed and logged here.",
+      changed: "Nov 5: built in paper mode; live mode is switched on only in the private config." },
     { id: "m-book", n: "Book sizing: the limits set the size", desk: "book", since: "v0.30, Oct 27, 2026",
       thesis: "Size the book from its own names' risk against three hard limits (a 12% worst month in twenty, 20% volatility, a 25% one-year drawdown at 95%), not from a forecast. Today the drawdown cap binds at about 0.59x, or full size with an 85% Nasdaq-100 short.",
       variant: "The usual practice sizes a concentrated tech book by conviction, or by the index's volatility. The nine names carry about 2.7 times the index's one-month tail; a book sized on the index is oversized by the same factor.",

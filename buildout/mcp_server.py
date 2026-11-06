@@ -4,8 +4,10 @@
 
 Model Context Protocol over stdio (JSON-RPC 2.0, one message per line). Standard library only, no SDK.
 
-Every tool is research or a proposal. Nothing here places, routes or cancels an order, reads a brokerage account or
-touches config.private.toml: create_order_proposal returns a proposal for a person to review and execute elsewhere.
+Every tool is research, a proposal or a ticket. Nothing here places, routes or cancels an order or holds a brokerage
+credential: create_order_proposal returns a proposal for a person to review; trade_plan (v0.39) returns a risk-checked
+ticket that the assistant places through Robinhood's own Trading MCP only after the person approves it, and
+record_fills logs what Robinhood reports. Trading limits are read from [trading] in config.toml and config.private.toml.
 
   get_research_snapshot   what the engine's latest files say (hedge line, regime, data checks), with dates
   get_portfolio_risk      the model book: weights, the engine's risk summary, and which names are the same bet
@@ -37,6 +39,10 @@ touches config.private.toml: create_order_proposal returns a proposal for a pers
                           extreme bull; never generates a quote
   atlas_trace             the whole brain (every monthly series, learned links, judged concepts): trace any shock month
                           by month to any node, or read one node's links, importance and regime changes
+  trade_plan              v0.39: the call as an order ticket for a Robinhood Agentic account, every check run; never placed here
+  record_fills            v0.39: Robinhood's fills checked against the ticket, appended to a hash-chained private log
+  trading_status          v0.39: paper or live, the halt switch, limits, today's tickets
+  paper_fill              v0.39: paper mode, fill a ticket at its limits in the private paper account
   brain_selfcheck         how far to trust the brain: honest error bars, the world model the data trusts, and what an
                           unseen cause would have to explain to erase each measured link
 """
@@ -1287,6 +1293,46 @@ def data_connections(ctx: Context, args: dict) -> dict:
     return {"sources": _snap16("connections"), "note": "From the last snapshot; pass live: true to test now."}
 
 
+# ---------------------------------------------------------------- v0.39: from the call to a ticket (never placed here)
+def trade_plan(ctx: Context, args: dict) -> dict:
+    from . import execution as ex
+    acct, quotes = args.get("account"), args.get("quotes")
+    if not isinstance(acct, dict) or not isinstance(quotes, dict):
+        raise ToolError("pass account {equity, cash, account_type, positions:[{symbol, quantity}]} and quotes {SYMBOL: {bid, ask, last}} from Robinhood's Trading MCP")
+    P = ex.load_params()
+    for k in ("variant", "vix_share"):
+        if k in args:
+            setattr(P, k, args[k] if k == "variant" else float(args[k]))
+    if P.variant not in ("unhedged", "hedged") or not 0 <= P.vix_share <= 0.2:
+        raise ToolError("variant is unhedged or hedged; vix_share is 0 to 0.2")
+    return _clean(ex.plan(acct, quotes, P=P))
+
+
+def record_fills(ctx: Context, args: dict) -> dict:
+    from . import execution as ex
+    tid, fills = str(args.get("ticket_id", "")), args.get("fills")
+    if not isinstance(fills, list):
+        raise ToolError("fills is a list of {symbol, side, quantity, price, order_id, status} as Robinhood reports them")
+    try:
+        return ex.record_fills(tid, fills)
+    except (KeyError, ValueError, RuntimeError) as exc:
+        raise ToolError(str(exc)) from exc
+
+
+def trading_status(ctx: Context, args: dict) -> dict:
+    from . import execution as ex
+    return _clean(ex.status())
+
+
+def paper_fill(ctx: Context, args: dict) -> dict:
+    from . import execution as ex
+    try:
+        return _clean(ex.paper_fill(str(args.get("ticket_id", ""))))
+    except (KeyError, ValueError, RuntimeError) as exc:
+        raise ToolError(str(exc)) from exc
+
+
+
 TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
     "get_research_snapshot": (get_research_snapshot, "The engine's latest research: the out-of-sample TLT hedge line and its band, the stock-bond regime, "
                               "data checks, the reasoner's scenario probabilities and the brain's readings, each with its date and evidence label.",
@@ -1497,6 +1543,24 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                              "counterfactual": _obj({"node": {"type": "string"}, "value": NUM}, ["node", "value"]),
                              "tail_probability": {**NUM, "description": "how bad a quarter the loss story describes, e.g. 0.05 = 1 in 20"}}),
                        {"readOnlyHint": True, "openWorldHint": False}),
+    "trade_plan": (trade_plan, "Turn today's call into an order TICKET for a Robinhood Agentic account: target holdings (the book at the call's size, "
+                   "PSQ for the index short if hedged, VIXY for the VIX sleeve), the limit orders to reach them, and every risk check (halt, account type, "
+                   "data age, the call logged in the ledger, allowlist, no shorting, no borrowing, cash floor, order and turnover caps, one ticket a day). "
+                   "Pass the account and quotes read from Robinhood's Trading MCP. Buildout places nothing: if execute is true and the person approves "
+                   "the ticket id, place each order through Robinhood's MCP, then call record_fills.",
+                   _obj({"account": {"type": "object", "description": "{equity, cash, account_type, positions:[{symbol, quantity}]}"},
+                         "quotes": {"type": "object", "description": "{SYMBOL: {bid, ask, last}} for every book name, PSQ and VIXY"},
+                         "variant": {"type": "string", "enum": ["unhedged", "hedged"]},
+                         "vix_share": {**NUM, "description": "VIX sleeve as a share of equity, 0 to 0.2 (default from config, 0.05)"}}, ["account", "quotes"]),
+                   {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False}),
+    "record_fills": (record_fills, "Record the fills Robinhood reported for a ticket: each checked against the ticket's orders (symbol, side, no more shares, "
+                     "not through the limit) and appended to a hash-chained private log.",
+                     _obj({"ticket_id": {"type": "string"}, "fills": {"type": "array", "items": {"type": "object"}}}, ["ticket_id", "fills"]),
+                     {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False}),
+    "trading_status": (trading_status, "Trading mode (paper or live), the halt switch, the limits, today's tickets, the fills chain and the paper account.",
+                       _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
+    "paper_fill": (paper_fill, "Paper mode only: fill a ticket at its limit prices in the private paper account and record the fills.",
+                   _obj({"ticket_id": {"type": "string"}}, ["ticket_id"]), {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}),
 }
 
 

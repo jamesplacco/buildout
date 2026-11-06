@@ -133,7 +133,7 @@ def test_home_is_the_default_view_and_new_views_are_wired():
         assert f'id="view-{v}"' in body and re.search(rf"\b{v}: ", views), v
     assert 'today: { name: "Today", views: ["home",' in boot
     scripts = (ROOT / "scripts" / "assemble_page.py").read_text()
-    assert '"snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js"' in scripts
+    assert '"snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "execdesk.js"' in scripts
 
 
 def test_a_bad_pull_stops_the_book(tmp_path):

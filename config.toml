@@ -42,3 +42,14 @@ adjustments = "auto"               # auto: Databento's split/dividend factors if
 max_cost_usd = 5.0                 # refuse an unattended Databento pull priced above this
 cache_dir = ".cache"
 use_fred = true
+
+[trading]                          # v0.39: the ticket planner (buildout/execution.py); override in config.private.toml
+mode = "paper"                     # paper | live. Live tickets can be placed through Robinhood's Trading MCP after approval
+variant = "unhedged"               # unhedged: the call's smallest size; hedged: the largest size a cash account allows, with PSQ
+vix_share = 0.05                   # VIX sleeve (VIXY) as a share of equity; 0 turns it off
+max_gross = 0.98                   # everything long, as a share of equity (no margin in the Agentic account)
+cash_floor = 0.02
+max_order_pct = 0.25
+max_order_usd = 25000
+max_turnover_pct = 0.60
+max_tickets_per_day = 1

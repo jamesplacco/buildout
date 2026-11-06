@@ -182,6 +182,14 @@ def main(argv: list[str] | None = None) -> None:
     tkp = sub.add_parser("track", help="v0.38: the track record: walk-forward with costs, point-in-time universe, the hedge by regime, the weeks")
     tkp.add_argument("--out", default="out")
     tkp.add_argument("--cache", default=".cache/book")
+    trp = sub.add_parser("trade", help="v0.39: the call as an order ticket for a Robinhood Agentic account (never placed here); see docs/TRADING.md")
+    trp.add_argument("action", choices=["plan", "status", "halt", "resume", "paper-fill", "fills"])
+    trp.add_argument("--account", default=None, help="JSON file: {equity, cash, account_type, positions:[{symbol, quantity}]}")
+    trp.add_argument("--quotes", default=None, help="JSON file: {SYMBOL: {bid, ask, last}}")
+    trp.add_argument("--variant", default=None, choices=["unhedged", "hedged"])
+    trp.add_argument("--vix-share", type=float, default=None)
+    trp.add_argument("--ticket", default=None)
+    trp.add_argument("--fills", default=None, help="JSON file: [{symbol, side, quantity, price, order_id}]")
     vlp = sub.add_parser("validate", help="v0.38: validate every price frame the book pulls (missing bars, splits, duplicates, staleness)")
     vlp.add_argument("--cache", default=".cache/book")
     vlp.add_argument("--json", default=None)
@@ -557,6 +565,33 @@ def main(argv: list[str] | None = None) -> None:
         o = bk._clean(track.build(bk.download(a.cache), bk.treasury(), None, ledger.read()))
         print("wrote", write(o, a.out, "track.json"))
         return
+    if a.cmd == "trade":
+        import json as _j
+        from pathlib import Path as _P
+        from . import execution as ex
+        if a.action == "status":
+            print(_j.dumps(ex.status(), indent=1, default=str)); return
+        if a.action == "halt":
+            ex.PRIVATE.mkdir(parents=True, exist_ok=True); (ex.PRIVATE / "HALT").write_text("halted from the command line\n"); print("halted: private/HALT"); return
+        if a.action == "resume":
+            (ex.PRIVATE / "HALT").unlink(missing_ok=True); print("resumed"); return
+        if a.action == "paper-fill":
+            print(_j.dumps(ex.paper_fill(a.ticket), indent=1, default=str)); return
+        if a.action == "fills":
+            print(_j.dumps(ex.record_fills(a.ticket, _j.loads(_P(a.fills).read_text())), indent=1)); return
+        P = ex.load_params()
+        if a.variant:
+            P.variant = a.variant
+        if a.vix_share is not None:
+            P.vix_share = a.vix_share
+        acct = _j.loads(_P(a.account).read_text()) if a.account else {**ex.paper_account(), "account_type": "agentic (paper)"}
+        t = ex.plan(acct, _j.loads(_P(a.quotes).read_text()), P=P)
+        print(f"{t['id']}  mode {t['mode']}  checks {'pass' if t['all_checks_pass'] else 'FAIL'}  execute {t['execute']}")
+        for o in t["orders"]:
+            print(f"  {o['seq']:>2} {o['side']:<4} {o['quantity']:>10g} {o['symbol']:<6} limit {o['limit_price']:>10.2f}  ${o['notional']:>11,.2f}  {o['reason']}")
+        for c in t["checks"]:
+            print(f"  [{'ok' if c['pass'] else 'FAIL'}] {c['check']}" + ("" if c["pass"] else f": {c['value']}"))
+        raise SystemExit(0 if t["all_checks_pass"] else 1)
     if a.cmd == "validate":
         from . import book as bk
         from .data import validate as vd

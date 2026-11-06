@@ -2,7 +2,7 @@
      boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
   const GROUPS = {   // v0.31: five groups for a reader with ten minutes. Today is the decision; Evidence is what has been proven; Library holds everything else, one index away
-    today: { name: "Today", views: ["home", "desk", "track", "book", "decision", "ooda", "journal"] },
+    today: { name: "Today", views: ["home", "desk", "track", "book", "decision", "execution", "ooda", "journal"] },
     evidence: { name: "Evidence", views: ["inventory", "memos", "theses", "reading", "levers", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
     markets: { name: "Markets", views: ["hedgetest", "hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
@@ -99,7 +99,8 @@
     reading: () => guard("Reading room", renderReading, $("#rr-list")),
     home: () => guard("Home", renderHome, $("#hm-perf")),
     track: () => guard("Track record", renderTrack, $("#tr-tiles")),
-    hedgetest: () => guard("Hedge test", renderHedgeTest, $("#ht-tiles")),
+    hedgetest: () => { guard("Hedge test", renderHedgeTest, $("#ht-tiles")); guard("VIX hedge", renderVix, $("#vx-tiles")); },
+    execution: () => guard("Execution", renderExecution, $("#ex-tiles")),
     memos: () => guard("Memos", renderMemos, $("#mm-list")),
     levers: () => guard("Value creation", renderLevers, $("#lv-tiles")),
     library: () => guard("Library", renderLibrary, $("#lib-grid")),
