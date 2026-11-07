@@ -78,3 +78,26 @@ def test_costs_never_raise_a_return():
     W = track.walk_forward(r, q - cash, pd.Series(0.0, index=r.index), cash)
     for k, (g, n, m) in W["policies"].items():
         assert g.notna().all() and n.notna().all() and (n <= g + 1e-12).all(), k
+
+
+def test_v40_1_every_card_list_sits_under_a_section_heading():
+    """Positions, Methods, Findings and Math lab put h3 cards straight under the h1; each list now has an h2 above it."""
+    body = (ROOT / "site" / "src" / "body.html").read_text()
+    for name, box in (("holdings", "ps-grid"), ("methods", "mt-list"), ("findings", "fi-read"), ("models", "lab-list")):
+        at = body.index(f'id="{box}"')
+        assert f'<h2 class="sr-only">The {name}</h2>' in body[at - 200:at], box
+
+
+def test_v40_1_the_page_embeds_a_small_png_icon_and_a_light_logo():
+    import base64, re
+    head = __import__("scripts.assemble_page", fromlist=["assemble"]).assemble()[:400_000]
+    icon = re.search(r'rel="icon" type="image/png" href="data:image/png;base64,([A-Za-z0-9+/=]+)"', head)
+    assert icon and base64.b64decode(icon.group(1))[:8] == b"\x89PNG\r\n\x1a\n" and len(icon.group(1)) < 20_000
+    assert len((ROOT / "site" / "src" / "logo.html").read_text()) < 60_000
+
+
+def test_v40_1_live_chart_ticks_are_pairs():
+    """xyChart reads ticks as [x, label]; bare numbers threw and emptied the Track desk."""
+    js = (ROOT / "site" / "src" / "trackdesk.js").read_text()
+    seg = js[js.index("function renderLive"):js.index("function renderTrack")]
+    assert ".map((i) => [xs[i], " in seg and "xticks: xs.length > 1 ? [xs[0]" not in seg

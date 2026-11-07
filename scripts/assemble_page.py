@@ -33,7 +33,10 @@ def assemble(src: Path = SRC) -> str:
     body = (src / "body.html").read_text().strip()
     if (src / "logo.html").exists():                     # the lotus symbols (scripts/make_logo.py)
         body = body.replace("<!--LOGO-->", (src / "logo.html").read_text().strip(), 1)
-    if (src / "favicon.svg").exists():
+    if (src / "favicon.png").exists():                   # v0.40.1: 64 px PNG, a few KB, in place of the 57 KB vector
+        import base64
+        head = head.replace("</title>", '</title>\n<link rel="icon" type="image/png" href="data:image/png;base64,' + base64.b64encode((src / "favicon.png").read_bytes()).decode() + '">', 1)
+    elif (src / "favicon.svg").exists():
         from urllib.parse import quote
         head = head.replace("</title>", '</title>\n<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,' + quote((src / "favicon.svg").read_text().strip(), safe=" =:/,") + '">', 1)
     texts = {name: (src / name).read_text().rstrip() for name in SCRIPTS}

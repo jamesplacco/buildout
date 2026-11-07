@@ -6,7 +6,7 @@
      ===================================================================================== */
   const MCP_TOOLS = 46;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
   const TEST_FILES = 60;      // tests/test_*.py, pinned by tests/test_v39_1.py
-  const TESTS_PASSING = 772;     // the shipped test count (the chip and the hood tile read it)
+  const TESTS_PASSING = 775;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());

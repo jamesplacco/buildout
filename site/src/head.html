@@ -1423,6 +1423,8 @@ svg.lotus { color: var(--accent); overflow: visible; }
 .ag-earlier > summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
 .desk-more { margin-block: 28px; border-top: 1px solid var(--rule); padding-top: 12px; }
 .desk-more > summary { cursor: pointer; font-weight: 600; padding: 8px 0; list-style-position: outside; }
+.desk-more > summary + * { margin-top: 24px; }
+.desk-more > * + * + * { margin-top: 64px; }      /* the folded sections keep the desk's 64px rhythm (v0.40.1) */
 .desk-more > summary small { font-weight: 400; color: var(--muted); margin-left: 6px; }
 .at-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 10px; margin-block: 18px; }
 .at-kpi { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 12px; display: grid; gap: 2px; min-width: 0; }

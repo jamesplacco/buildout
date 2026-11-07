@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.40</span>
+      Buildout <span class="ver">v0.40.1</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -1846,6 +1846,7 @@
     <p class="t7-status" id="ps-status"></p>
   </div>
   <div class="filters" id="ps-filter" role="group" aria-label="Filter positions"></div>
+  <h2 class="sr-only">The holdings</h2>
   <div class="cards2" id="ps-grid"></div>
   <div class="math"><span class="mlabel">How it is computed</span>Enterprise value = market value &minus; cash + debt. Free cash flow margin moves in a straight line from today's (after stock pay) to the steady-state margin (what the business throws off when it stops growing: the lower of after-tax operating earnings and operating cash flow &minus; D&amp;A &minus; stock pay, over revenue, so customer prepayments, deferred taxes and other timing do not flatter it) over ten years; terminal growth 3%; discount rate = 10-year yield + beta &times; 4.5% equity premium, blended with after-tax debt. The implied growth solves PV = EV by bisection. Base rates: Mauboussin, Callahan and Majd, The Base Rate Book (2016), 10-year real sales CAGR by starting size, 1950 to 2015; implied nominal growth less 2.5% inflation is compared with them.</div>
   <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are dated market readings. Assumptions are labelled. Research on a model book, not advice.</p></footer>
@@ -1858,6 +1859,7 @@
     <p class="lede">The engine borrows from statistics, control engineering, meteorology, actuarial science, physics, machine learning and decision theory. Each method is listed once with the formula it computes (shown with today's numbers where it has one) and its out-of-sample evidence.</p></div>
   <div class="at-tiles" id="mt-tiles"></div>
   <div class="pm-filter" id="mt-filter" role="group" aria-label="Filter by field"></div>
+  <h2 class="sr-only">The methods</h2>
   <div class="mt-list" id="mt-list"></div>
 </section>
 
@@ -2324,6 +2326,7 @@
     <h1 id="fi-title">Eight findings most portfolios do not reflect</h1>
     <p class="lede">Each finding states the claim, shows the numbers, explains the method and the caveat, and says what it changes on the desk. All of it is reproducible with one command, <code>python -m buildout research</code>, which is built to rerun daily on public data (the page shows a snapshot until the daily run is live).</p>
   </div>
+  <h2 class="sr-only">The findings</h2>
   <div class="read" id="fi-read"></div>
   <div class="section" id="fi-list"></div>
   <footer class="foot"><p>Monthly data overlap, so counts of months overstate the number of independent observations; small samples (oil shocks, VIX spikes) are direction, not law. Sources: Shiller, BLS, EIA, CBOE, the Treasury.</p></footer>
@@ -2446,6 +2449,7 @@
     <h1 id="lab-title">Seven interactive models behind the desk's rules</h1>
     <p class="lede">Each model is a formula the engine uses, made interactive. The coin game is the recommended starting point: it shows leverage, Kelly sizing and the risk of ruin in a single view.</p>
   </div>
+  <h2 class="sr-only">The models</h2>
   <div id="lab-list" class="section"></div>
 </section>
 
@@ -2559,9 +2563,9 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Ticker</th><th class="r">Weight</th><th>Role</th></tr></thead>
         <tbody>
-          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler; reports Oct 28</td></tr>
-          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler; reports Oct 29</td></tr>
-          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2; reports Oct 28</td></tr>
+          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler; reported Q3 on Oct 28</td></tr>
+          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler; reported Q3 on Oct 29</td></tr>
+          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2 and Q3 (Oct 28)</td></tr>
           <tr><td>NVDA</td><td class="r">14%</td><td>Compute</td></tr>
           <tr><td>META</td><td class="r">12%</td><td>Hyperscaler; free cash flow negative in Q3 (Oct 21)</td></tr>
           <tr><td>TSLA</td><td class="r">10%</td><td>Autonomy, robotics</td></tr>
