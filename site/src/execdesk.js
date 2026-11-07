@@ -5,7 +5,8 @@
   function exTarget(call, variant, P = EX_DEFAULT) {
     let vix = Math.max(0, P.vix_share);
     const room = P.max_gross - vix;
-    const fr = (call.frontier && call.frontier.length ? call.frontier : [{ gross: call.size, short: 0 }]).slice().sort((a, b) => a.gross - b.gross);
+    const ok = (call.frontier || []).filter((r) => r.meets !== false && r.short != null && r.gross != null);   // rows that meet every limit only
+    const fr = (ok.length ? ok : [{ gross: call.size, short: 0 }]).slice().sort((a, b) => a.gross - b.gross);
     let g = fr[0].gross, s = fr[0].short || 0;
     if (variant === "hedged") {
       for (let i = 0; i + 1 < fr.length; i++) {
@@ -17,6 +18,7 @@
       }
     }
     if (g > room) vix = Math.max(0, P.max_gross - g);
+    if (g + s + vix > P.max_gross) g = Math.max(0, P.max_gross - s - vix);     // clipped to what a cash account can hold, as in execution.target()
     return { gross: g, short: s, vix };
   }
 
@@ -67,9 +69,9 @@
     rsKpi($("#vx-tiles"), [
       [sgn2(all.h.vix_fut.corr), "VIX futures against the Nasdaq-100", `monthly, ${V.from} to ${V.to}; they cut ${tP(all.h.vix_fut.var_cut, 0)} of its variance at the best weight`],
       [tS(V.carry.ann_all, 0), "What holding them costs, a year", `on average; they lost money in ${tP(V.carry.share_months_negative, 0)} of months`],
-      [`${tS(none.y2020q1, 0)} to ${tS(f10.y2020q1, 0)}`, "The book, Feb 19 to Mar 23, 2020", `with 10% of its value in VIX futures, for ${tP(f10.cagr_cost, 1)} a year of growth given up`],
+      [`${tS(none.y2020q1, 0)} to ${tS(f10.y2020q1, 0)}`, "The book, Feb 19 to Mar 23, 2020", `with 10% of its value in VIX futures; ${f10.cagr_cost > 0 ? `${tP(f10.cagr_cost, 1)} a year of growth given up` : `growth ${tS(-f10.cagr_cost, 1)} a year higher on these days, a window that holds the Feb 2018 and Mar 2020 spikes`}`],
       [`${tS(none.y2022, 0)} to ${tS(f10.y2022, 0)}`, "The book in 2022, the same hedge", `the slow bear: a 25% index short took it to ${tS(s25.y2022, 0)}`]]);
-    $("#vx-p").textContent = `The VIX rises when stocks fall, so owning it looks like the natural hedge for an AI book. The record says it is a crash hedge, not a bear-market hedge. VIX futures (what VIXY holds) paid in the fast falls (2008, March 2020) and cost about ${tP(-V.carry.ann_all, 0)} a year on average the rest of the time, because the futures sit above the spot VIX in calm markets and drift down to it. In 2022 the VIX never spiked, the futures barely moved, and the hedge did almost nothing. Per point of one-month tail cut, VIX futures were the cheapest hedge on the book (${fx(f05.es_cut_per_cost, 1)} points of tail per point of growth at 5% of the book, against ${fx(s25.es_cut_per_cost, 1)} for a 25% index short), but only the index short cut the worst drawdown and 2022. The two do different jobs: the default execution keeps a 5% VIX sleeve for the crash and leaves the bear market to the call's size.`;
+    $("#vx-p").textContent = `The VIX rises when stocks fall, so owning it looks like the natural hedge for an AI book. The record says it is a crash hedge, not a bear-market hedge. VIX futures (what VIXY holds) paid in the fast falls (2008, March 2020) and cost about ${tP(-V.carry.ann_all, 0)} a year on average the rest of the time, because the futures sit above the spot VIX in calm markets and drift down to it. In 2022 the VIX never spiked, the futures barely moved, and the hedge did almost nothing. ${f05.cagr_cost > 0 ? `Per point of one-month tail cut, VIX futures were the cheapest hedge on the book (${fx(f05.es_cut_per_cost, 1)} points of tail per point of growth at 5% of the book, against ${fx(s25.es_cut_per_cost, 1)} for a 25% index short)` : `On the book's days from ${isoNice(V.book.from)} to ${isoNice(V.book.to)}, a 5% VIX sleeve cut the one-month tail from ${tP(none.es21, 1)} to ${tP(f05.es21, 1)} and cost nothing, because those days hold two VIX spikes; that is the window's luck, not the hedge's carry, which over the longer monthly record ran near ${tS(V.carry.ann_all, 0)} a year`}, but only the index short cut the worst drawdown and 2022. The two do different jobs: the default execution keeps a 5% VIX sleeve for the crash and leaves the bear market to the call's size.`;
     const lab = { none: "No hedge", vix_fut: "VIX futures", vix_call: "VIX calls, 125% strike (modelled)", nq_put: "Nasdaq-100 puts, 90% strike (modelled)", nq_short: "Nasdaq-100 futures short" };
     fillTable($("#vx-book"), ["Hedge", "Share of the book", "One-month tail (ES 95%)", "Worst drawdown", "Feb 19 to Mar 23, 2020", "2022", "CAGR", "Tail cut per point of growth given up"],
       B.map((r) => [lab[r.hedge] || r.hedge, r.hedge === "none" ? "" : pct0(r.share), tP(r.es21, 1), tP(r.maxdd, 0), tS(r.y2020q1, 0), tS(r.y2022, 0), tS(r.cagr, 1), fin(r.es_cut_per_cost) ? fx(r.es_cut_per_cost, 2) : ""]), 2);
@@ -78,5 +80,5 @@
       R.map((r) => [r.regime, String(r.months), String(r.down_months), sgn2(r.h.vix_fut.corr), tS(r.h.vix_fut.down, 1), tP(r.h.vix_fut.var_cut, 0), tS(r.h.vix_fut.ann, 0),
                     tS(r.h.vix_call.down, 1), tS(r.h.vix_call.ann, 0), tS(r.h.vix_index.down, 1)]), 1);
     fillTable($("#vx-wk"), ["Week", "VIX before", "VIX at the end", "High"], (V.weeks || []).map((w) => [w.week, fx(w.start, 1), fx(w.end, 1), fx(w.high, 1)]), 1);
-    $("#vx-n").textContent = `The VIX index cannot be bought; its column is the ceiling a hedge could reach, not a return anyone earned. The VIX closed at ${fx(V.vix_now.level, 1)} on ${isoNice(V.vix_now.date)}, above ${tP(V.vix_now.pct_since_1990, 0)} of days since 1990. On Robinhood, agents cannot trade VIX futures; VIXY trades as shares, and VIX index options are listed (single-leg long options are open to agents, index options through the agent are not confirmed).`;
+    $("#vx-n").textContent = `The VIX index cannot be bought; its column is the ceiling a hedge could reach, not a return anyone earned. The free VIX record this build reads ends on ${isoNice(V.vix_now.date)}, when the VIX closed at ${fx(V.vix_now.level, 1)}, above ${tP(V.vix_now.pct_since_1990, 0)} of days since 1990. On Robinhood, agents cannot trade VIX futures; VIXY trades as shares, and VIX index options are listed (single-leg long options are open to agents, index options through the agent are not confirmed).`;
   }

@@ -25,6 +25,7 @@ def reset() -> None:
 
 def get(url: str, user_agent: str = "buildout/0.1", retries: int = 3, timeout: int = 30) -> bytes:
     host = urllib.parse.urlsplit(url).netloc
+    user_agent = " ".join(str(user_agent).split())      # v0.39.1: a pasted line break or tab in a contact header is a space, not an invalid header
     if _fails.get(host, 0) >= BREAKER:
         raise RuntimeError(f"skipped: {host} failed {_fails[host]} files in a row this run: {url}")
     last: Exception | None = None
@@ -32,7 +33,10 @@ def get(url: str, user_agent: str = "buildout/0.1", retries: int = 3, timeout: i
     for attempt in range(retries):
         tries += 1
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": user_agent, "Accept-Encoding": "identity"})
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": user_agent, "Accept-Encoding": "identity"})
+            except ValueError:
+                raise RuntimeError("the User-Agent header is not valid (its value is not repeated here)") from None
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 body = resp.read()
             _fails[host] = 0

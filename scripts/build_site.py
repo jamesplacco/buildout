@@ -5,6 +5,7 @@ so this adds both and copies the daily JSON next to the page.
 """
 from __future__ import annotations
 
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -34,6 +35,13 @@ def build(src: str = "site", out: str = "_site") -> Path:
     data = Path(src, "data")
     if data.exists():
         shutil.copytree(data, dest / "data")
+    led = Path(src).resolve().parent / "ledger" / "calls.jsonl"
+    if led.exists():                      # v0.39.1: the ledger, verified, so the published page shows every call logged since its build
+        import sys as _sys
+        _sys.path.insert(0, str(Path(src).resolve().parent))
+        from buildout import ledger as _ledger
+        (dest / "data").mkdir(parents=True, exist_ok=True)
+        (dest / "data" / "calls.json").write_text(json.dumps({"verify": _ledger.verify(led), "entries": _ledger.read(led)}))
     return dest / "index.html"
 
 

@@ -25,6 +25,7 @@ import hashlib
 import json
 import math
 import os
+import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -94,8 +95,9 @@ def target(call: dict, P: TradingParams, weights: dict[str, float]) -> dict:
     """Target shares of equity by symbol: the book at the chosen size, the PSQ short sleeve, the VIX sleeve."""
     vix = max(0.0, float(P.vix_share))
     room = P.max_gross - vix
-    fr = sorted(call.get("frontier") or [{"gross": call["size"], "short": 0.0}], key=lambda r: r["gross"])
-    g, h = float(fr[0]["gross"]), float(fr[0].get("short", 0.0))
+    fr = [r for r in (call.get("frontier") or []) if r.get("meets", True) and r.get("short") is not None and r.get("gross") is not None]
+    fr = sorted(fr or [{"gross": call["size"], "short": 0.0}], key=lambda r: r["gross"])      # rows that meet every limit only
+    g, h = float(fr[0]["gross"]), float(fr[0].get("short") or 0.0)
     if P.variant == "hedged":
         for a, b in zip(fr, fr[1:]):                    # walk the frontier while book + short fits the cash account
             if b["gross"] + b["short"] <= room:
@@ -108,6 +110,8 @@ def target(call: dict, P: TradingParams, weights: dict[str, float]) -> dict:
             break
     if g > room:                                         # the call itself does not fit beside the VIX sleeve: the sleeve gives way
         vix = max(0.0, P.max_gross - g)
+    if g + h + vix > P.max_gross:                        # a call above what a cash account can hold is held at the most it can
+        g = max(0.0, P.max_gross - h - vix)
     tw = {k: g * w for k, w in weights.items()}
     if h > 1e-6:
         tw[P.short_symbol] = h
@@ -162,15 +166,36 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     age = _bdays_between(call["asof"], today) if call.get("asof") else 99
     chk(f"call's data at most {P.max_data_age_bd} business days old", age <= P.max_data_age_bd, {"data": call.get("asof"), "business_days": age})
     lv = ledger_check if ledger_check is not None else ledger.verify()
-    logged = any(e.get("data_asof") == call.get("asof") for e in ledger.read()) if ledger_check is None else ledger_check.get("logged", True)
+    if ledger_check is None:
+        ent = [e for e in (ledger.read() if lv.get("ok") else []) if e.get("data_asof") == call.get("asof")]
+        logged, eff = bool(ent), (ent[-1]["effective_from"] if ent else None)
+    else:
+        logged, eff = ledger_check.get("logged", True), ledger_check.get("effective_from")
     chk("call logged in the verified ledger before trading", lv.get("ok") and logged, {"ledger_ok": lv.get("ok"), "logged": logged})
+    chk("the call is in force today (on or after its effective date)", eff is None or eff <= today, {"effective_from": eff, "today": today},
+        "a call governs from the trading day after it is logged; trading it sooner would run ahead of the record")
+
+    def num(v):
+        try:
+            x = float(v)
+        except (TypeError, ValueError):
+            return None
+        return x if math.isfinite(x) and x > 0 else None
+
+    bad_quotes = sorted(s for s, q in Q.items() if not isinstance(q, dict) or any(q.get(k) not in (None, "") and num(q.get(k)) is None for k in ("bid", "ask", "last"))
+                        or (num(q.get("bid")) and num(q.get("ask")) and num(q["bid"]) > num(q["ask"])))
 
     def px(sym, side):
-        q = Q.get(sym) or {}
-        bid, ask, last = (float(q[k]) if q.get(k) not in (None, "") else None for k in ("bid", "ask", "last"))
+        q = Q.get(sym) if isinstance(Q.get(sym), dict) else {}
+        bid, ask, last = (num(q.get(k)) for k in ("bid", "ask", "last"))
         ref = (ask if side == "buy" else bid) or last
         return ref, bid, ask, last
 
+    marks = {s: (lambda r: ((r[1] + r[2]) / 2) if r[1] and r[2] else r[3])(px(s, "buy")) for s in held}
+    implied = cash + sum(q * (marks.get(s) or 0) for s, q in held.items())
+    chk("equity matches cash plus positions (within 2%)", eq > 0 and abs(implied - eq) <= 0.02 * eq, {"reported": round(eq, 2), "implied": round(implied, 2)},
+        "a stale or wrong equity figure would size every order wrong")
+    chk("every quote is a positive number with bid at most ask", not bad_quotes, bad_quotes)
     syms = sorted(set(T["weights"]) | set(held))
     orders, missing, wide = [], [], []
     for s in syms:
@@ -192,7 +217,10 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
         qty = abs(diff) / lim
         if s not in T["weights"]:
             qty = held.get(s, 0.0)                     # out of the plan: sell all of it
-        qty = round(qty, 4) if P.fractional else float(math.floor(qty + 1e-9))
+        if s not in T["weights"]:
+            pass                                       # an exit sells the whole holding, fractions included
+        else:
+            qty = round(qty, 4) if P.fractional else float(math.floor(qty + 1e-9))
         if side == "sell":
             qty = min(qty, held.get(s, 0.0))
         if qty <= 0:
@@ -200,7 +228,11 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
         orders.append({"symbol": s, "side": side, "quantity": qty, "type": "limit", "limit_price": lim, "time_in_force": "gfd",
                        "notional": round(qty * lim, 2), "target_share": round(T["weights"].get(s, 0.0), 4),
                        "reason": HEDGE_LABEL.get(s, "book name to the call's size") if s in T["weights"] else "not in the plan"})
-    orders.sort(key=lambda o: (o["side"] != "sell", -o["notional"]))   # sells first: they fund the buys
+    orders.sort(key=lambda o: (o["side"] != "sell", -o["notional"]))   # sells first
+    stage = "single"
+    sell_orders = [o for o in orders if o["side"] == "sell"]
+    if sell_orders and sum(o["notional"] for o in orders if o["side"] == "buy") > cash - P.cash_floor * eq + 1e-6:
+        orders, stage = sell_orders, "sells first"     # buys that need the sale proceeds wait: plan again once the sells have filled
     for i, o in enumerate(orders, 1):
         o["seq"] = i
     chk("every symbol has a quote", not missing, missing)
@@ -210,6 +242,7 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     buys = sum(o["notional"] for o in orders if o["side"] == "buy")
     sells = sum(o["notional"] for o in orders if o["side"] == "sell")
     cash_after = cash + sells - buys
+    chk("buys funded from cash on hand", buys <= cash - P.cash_floor * eq + 1e-6 or not buys, {"buys": round(buys, 2), "cash": round(cash, 2)})
     after = dict(held)
     for o in orders:
         after[o["symbol"]] = after.get(o["symbol"], 0.0) + (o["quantity"] if o["side"] == "buy" else -o["quantity"])
@@ -222,19 +255,20 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     cap = 1.0 if first_build else P.max_turnover_pct
     turn = (buys + sells) / eq if eq else 0
     chk(f"turnover at most {cap:.0%} of equity", turn <= cap + 1e-6, round(turn, 4), "a first build from cash may reach 100%")
-    n_today = sum(1 for t in _tickets_on(today) if t.get("status") in ("filled", "partially_filled", "placed"))
+    n_today = sum(1 for t in _tickets_on(today) if t.get("execute") or t.get("status") in ("filled", "partially_filled"))
     chk(f"at most {P.max_tickets_per_day} executed ticket a day", n_today < P.max_tickets_per_day, n_today)
     ok = all(c["pass"] for c in checks)
     body = {"created": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "expires": (now + timedelta(minutes=P.ticket_ttl_min)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "mode": P.mode, "broker": P.broker, "call": {"asof": call.get("asof"), "size": call.get("size"), "binding": call.get("binding")},
-            "target": T, "orders": orders, "account": {"equity": eq, "cash": cash, "positions": held}, "quotes": Q}
-    tid = "tkt-" + _sha(body)[:16]
-    ticket = {"id": tid, **body, "checks": checks, "all_checks_pass": ok, "execute": bool(ok and P.mode == "live" and orders),
+            "mode": P.mode, "broker": P.broker, "call": {"asof": call.get("asof"), "size": call.get("size"), "binding": call.get("binding"), "effective_from": eff},
+            "target": T, "orders": orders, "stage": stage, "account": {"equity": eq, "cash": cash, "positions": held}, "quotes": Q}
+    ticket = {**body, "checks": checks, "all_checks_pass": ok, "execute": bool(ok and P.mode == "live" and orders),
               "summary": {"orders": len(orders), "buys_usd": round(buys, 2), "sells_usd": round(sells, 2), "cash_after": round(cash_after, 2), "gross_after": round(gross_after, 4)},
               "placed_by_buildout": False,
               "instructions": ("Show the person every order and check. Place nothing unless execute is true, every check passes, the ticket has not "
                                "expired, and the person has approved this ticket id. Place each order through Robinhood's Trading MCP in seq order "
-                               "as a limit order at limit_price, then call record_fills with what Robinhood reports.")}
+                               "as a limit order at limit_price, then call record_fills with what Robinhood reports."
+                               + (" This is the sells-only first stage: after the sells fill and are recorded, plan again for the buys." if stage != "single" else ""))}
+    ticket = {"id": "tkt-" + _sha(ticket)[:16], **ticket}      # the id covers every field, the checks and execute included
     _save_ticket(ticket)
     return ticket
 
@@ -249,12 +283,17 @@ def _save_ticket(t: dict) -> None:
     (_tickets_dir() / f"{t['id']}.json").write_text(json.dumps(t, indent=1))
 
 
+TICKET_ID = re.compile(r"^tkt-[0-9a-f]{16}$")
+
+
 def load_ticket(tid: str) -> dict:
+    if not TICKET_ID.match(str(tid)):
+        raise KeyError(f"no ticket {tid!r}")
     p = _tickets_dir() / f"{tid}.json"
-    if not tid.startswith("tkt-") or not p.exists():
+    if not p.exists():
         raise KeyError(f"no ticket {tid}")
     t = json.loads(p.read_text())
-    core = {k: t[k] for k in ("created", "expires", "mode", "broker", "call", "target", "orders", "account", "quotes")}
+    core = {k: v for k, v in t.items() if k not in ("id", "status")}
     if "tkt-" + _sha(core)[:16] != tid:
         raise ValueError(f"ticket {tid} was altered after it was written")
     return t
@@ -302,21 +341,34 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None) -> di
     if not v["ok"]:
         raise RuntimeError(f"private/fills.jsonl fails verification at entry {v.get('broken_at')}; nothing was appended")
     by = {(o["symbol"], o["side"]): o for o in t["orders"]}
+    earlier = [f for e in _fills() if e.get("ticket") == tid for f in e.get("fills", [])]
+    seen_ids = {f["order_id"] for f in earlier if f.get("order_id")}
+    total = {}
+    for f in earlier:
+        total[(f["symbol"], f["side"])] = total.get((f["symbol"], f["side"]), 0.0) + float(f["quantity"])
     issues, clean = [], []
     for f in fills:
         s, side = str(f.get("symbol", "")).upper(), str(f.get("side", "")).lower()
-        q, p = float(f.get("quantity") or 0), float(f.get("price") or 0)
+        try:
+            q, p = float(f.get("quantity") or 0), float(f.get("price") or 0)
+        except (TypeError, ValueError):
+            issues.append(f"{s}: quantity or price is not a number"); continue
+        oid = str(f.get("order_id", ""))[:64]
+        if oid and oid in seen_ids:
+            issues.append(f"{s}: order {oid} was already recorded"); continue
+        seen_ids.add(oid)
         o = by.get((s, side))
         if not o:
             issues.append(f"{s} {side}: not on the ticket")
         else:
-            if q > o["quantity"] + 1e-9:
-                issues.append(f"{s}: filled {q} against {o['quantity']} ordered")
-            if side == "buy" and p > o["limit_price"] + 1e-6 or side == "sell" and p < o["limit_price"] - 1e-6:
+            total[(s, side)] = total.get((s, side), 0.0) + q
+            if total[(s, side)] > o["quantity"] + 1e-9:
+                issues.append(f"{s}: filled {total[(s, side)]:g} in all against {o['quantity']:g} ordered")
+            if (side == "buy" and p > o["limit_price"] + 1e-6) or (side == "sell" and p < o["limit_price"] - 1e-6):
                 issues.append(f"{s}: price {p} through the limit {o['limit_price']}")
-        clean.append({"symbol": s, "side": side, "quantity": q, "price": p, "order_id": str(f.get("order_id", ""))[:64], "status": str(f.get("status", "filled"))[:20]})
-    done = {(f["symbol"], f["side"]) for f in clean if f["quantity"] > 0}
-    status = "filled" if done >= set(by) and not issues else ("partially_filled" if done else "unfilled")
+        clean.append({"symbol": s, "side": side, "quantity": q, "price": p, "order_id": oid, "status": str(f.get("status", "filled"))[:20]})
+    complete = all(abs(total.get(k, 0.0) - o["quantity"]) < 1e-9 for k, o in by.items())
+    status = "filled" if complete and not issues else ("partially_filled" if any(v > 0 for v in total.values()) else "unfilled")
     prev = _fills()[-1]["hash"] if _fills() else "0" * 64
     e = {"seq": len(_fills()) + 1, "ticket": tid, "mode": t["mode"], "ts_utc": (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"),
          "fills": clean, "issues": issues, "status": status, "prev": prev}
@@ -342,6 +394,8 @@ def paper_account(start_cash: float = 100_000.0) -> dict:
 def paper_fill(tid: str) -> dict:
     """Paper mode: fill every order at its limit price in the paper account and record the fills."""
     t = load_ticket(tid)
+    if t.get("status") or any(e.get("ticket") == tid for e in _fills()):
+        raise ValueError(f"ticket {tid} has already been filled; plan again for a new ticket")
     if t["mode"] != "paper":
         raise ValueError("paper_fill is for paper tickets; live tickets are filled at Robinhood")
     if not t["all_checks_pass"]:

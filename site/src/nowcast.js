@@ -13,6 +13,8 @@
   const N27_WIN = { event: "report day (3 days)", runup: "10 days before", drift: "60 days after" };
   const n27Date = (d) => { try { return new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }); } catch (e) { return d; } };
 
+  const N27_ANNOUNCED = { NVIDIA: "2026-11-17" };       // NVIDIA's own notice of its Q3 FY2027 call (nvidianews.nvidia.com)
+
   function renderNowcast() {
     const O = N27(), tiles = $("#nc-tiles");
     if (!tiles) return;
@@ -20,22 +22,26 @@
     const EV = O.events, DC = EV.date_check || {}, T = O.tests, acc = T.filter((t) => t.kind === "accuracy"), ret = T.filter((t) => t.kind === "returns");
     const best = acc.filter((t) => fin(t.r2_oos)).sort((a, b) => b.r2_oos - a.r2_oos)[0];
     const passR = ret.filter((t) => t.pass_bh), F = O.fakes;
-    const book = O.today.filter((x) => x.in_book && !x.already_reported && fin(x.nowcast_yoy)).sort((a, b) => a.next_report_expected.localeCompare(b.next_report_expected));
+    // v0.39.1: a date the company has announced replaces the one-year-later estimate, and a date already past counts as reported
+    const today = new Date().toISOString().slice(0, 10);
+    const dated = (x) => ({ ...x, next_report_expected: N27_ANNOUNCED[x.name] || x.next_report_expected, announced: !!N27_ANNOUNCED[x.name] });
+    const book = O.today.filter((x) => x.in_book && !x.already_reported && fin(x.nowcast_yoy)).map(dated).filter((x) => x.next_report_expected >= today)
+      .sort((a, b) => a.next_report_expected.localeCompare(b.next_report_expected));
     const nxt = book[0];
     rsKpi(tiles, [[EV.n.toLocaleString("en-US"), "Company quarters, dated by their releases", `${Object.keys(O.universe.targets).length} companies, ${EV.from.slice(0, 4)} to ${EV.to.slice(0, 4)}; ${DC.verified_on_record} of ${(DC.verified || []).length} independently verified dates on record`],
       best ? [n27Pct(best.r2_oos), "Best forecast gain over persistence", `${{ tsmc: "TSMC", capex: "hyperscaler capex", peers: "peers already out this season", peers_80d: "peers' reports in the last 80 days", all: "all three signals" }[best.model]} for ${N27_GROUP[best.group]} (t ${n27S(best.t, 1)}, clustered ${n27S(best.t_clustered, 1)}); ${best.pass_bh ? "passes" : "does not pass"} the multiple-testing cut`] : ["n/a", "Forecast gain", ""],
       [`${passR.length} of ${ret.length}`, "Return tests that pass", `placebos: ${F.passed_at_cut} of ${F.tried}; the tests could see correlations of about ${n27S(O.power.min_detectable_corr)} or more, not smaller`],
-      nxt ? [n27Date(nxt.next_report_expected), `${nxt.name} reports next (expected)`, `revenue growth ${n27Log(nxt.nowcast_yoy)} a year ${String(nxt.nowcast_basis || "").startsWith("persistence") ? "(persistence)" : "(nowcast)"}, typical miss ${n27Pts(nxt.rmse_oos)}; last ${n27Log(nxt.last_yoy)}`] : ["n/a", "Next report", ""]]);
+      nxt ? [n27Date(nxt.next_report_expected), `${nxt.name} reports next (${nxt.announced ? "announced" : "expected"})`, `revenue growth ${n27Log(nxt.nowcast_yoy)} a year ${String(nxt.nowcast_basis || "").startsWith("persistence") ? "(persistence)" : "(nowcast)"}, typical miss ${n27Pts(nxt.rmse_oos)}; last ${n27Log(nxt.last_yoy)}`] : ["n/a", "Next report", ""]]);
     // 1. next reports
     $("#nc-next-p").textContent = `For each company, the next quarter's report is expected about a year after the same quarter's last one. The nowcast is last quarter's year-over-year revenue growth plus the predicted change in it, from the signals already published (TSMC counts only once the quarter's own months are out, by the 11th of the next month); where a group's model has not beaten persistence out of sample (${Object.entries(O.models).filter(([, m]) => !m.beats_persistence).map(([g]) => N27_GROUP[g]).join(", ") || "none"}), the nowcast is persistence. The typical miss is the out-of-sample error on past quarters, in points of log growth. ${passR.length ? "" : "No pricing test below found the early data mispriced, so this is a forecast of the report, not a trade on it. "} The "drift" column shows which way a post-report drift position would lean; that drift did not pass the tests either, so it is shown, not recommended.`;
-    const rows = O.today.slice().sort((a, b) => (b.in_book - a.in_book) || a.next_report_expected.localeCompare(b.next_report_expected));
+    const rows = O.today.map((x) => ({ ...x, next_report_expected: N27_ANNOUNCED[x.name] || x.next_report_expected })).sort((a, b) => (b.in_book - a.in_book) || a.next_report_expected.localeCompare(b.next_report_expected));
     fillTable($("#nc-next"), ["Company", "Next report (expected)", "Last revenue growth", "Nowcast", "Typical miss (growth points)", "Signals in hand", "Drift (research only)"], rows.map((x) => {
       const S = x.signals || {}, parts = [];
       parts.push(fin(S.d_tsmc) ? `TSMC ${S.d_tsmc >= 0 ? "accelerating" : "slowing"} (${n27S(S.d_tsmc * 100, 1)} pts)` : "TSMC: quarter not out yet");
       if (fin(S.d_capex)) parts.push(`capex ${S.d_capex >= 0 ? "accelerating" : "slowing"} (${n27S(S.d_capex * 100, 1)} pts)`);
       if (fin(S.peer)) parts.push(`peers ${S.peer >= 0 ? "accelerating" : "slowing"} (${(S.peers_reported || []).map((t) => t.toUpperCase()).join(", ")})`);
       const nm = h("span", null, `${x.name}${x.in_book ? " · book" : ""}`);
-      const due = x.next_report_expected < O.data_through;
+      const due = x.next_report_expected < new Date().toISOString().slice(0, 10);
       return [nm, x.already_reported ? "reported; filings pending" : due ? `due (about ${n27Date(x.next_report_expected)}); not on record yet` : n27Date(x.next_report_expected), n27Log(x.last_yoy), fin(x.nowcast_yoy) ? n27Log(x.nowcast_yoy) + (String(x.nowcast_basis || "").startsWith("persistence") ? " (persistence)" : "") : "n/a", n27Pts(x.rmse_oos), parts.join("; "),
         x.drift_position ? `${x.drift_position.side}, ${Math.max(0, x.drift_position.days_left)} day${Math.max(0, x.drift_position.days_left) === 1 ? "" : "s"} left` : "none"];
     }), 1);
@@ -82,7 +88,9 @@
   function renderNowcastToday() {
     const el = $("#t7-nowcast"), O = N27();
     if (!el || !O) return;
-    const book = O.today.filter((x) => x.in_book && !x.already_reported && fin(x.nowcast_yoy)).sort((a, b) => a.next_report_expected.localeCompare(b.next_report_expected)).slice(0, 4);
+    const today = new Date().toISOString().slice(0, 10);
+    const book = O.today.filter((x) => x.in_book && !x.already_reported && fin(x.nowcast_yoy)).map((x) => ({ ...x, next_report_expected: N27_ANNOUNCED[x.name] || x.next_report_expected }))
+      .filter((x) => x.next_report_expected >= today).sort((a, b) => a.next_report_expected.localeCompare(b.next_report_expected)).slice(0, 4);
     const ret = O.tests.filter((t) => t.kind === "returns");
     el.replaceChildren();
     const a = h("a", null, "The nowcast →"); a.href = "#nowcast";

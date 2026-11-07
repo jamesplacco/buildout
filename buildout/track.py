@@ -155,6 +155,13 @@ def month_ends(idx: pd.DatetimeIndex, start: str = START) -> list[pd.Timestamp]:
     return [d for d in me if d >= pd.Timestamp(start) - pd.offsets.MonthEnd(1)]
 
 
+def _next_vm(vm: pd.Series, t: pd.Timestamp) -> float | None:
+    """The volatility-managed exposure for the month after t (exposure_path already sets it at t's close). Taking the
+    value held during t's own month and then holding it a further month, as before v0.39.1, lagged the rule twice."""
+    nxt = vm[vm.index > t]
+    return None if not len(nxt) or pd.isna(nxt.iloc[0]) else float(nxt.iloc[0])
+
+
 def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, turn_names: pd.Series | None = None) -> dict:
     """Monthly decisions frozen at each month-end close; daily returns with and without costs for each policy.
     r: the book's daily return; qx: QQQ in excess of cash (the futures leg); bond: 20-year par bond total return."""
@@ -173,7 +180,7 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
         vt = bk.VOL_TARGET / L["sigma"]
         product = min(vt, kelly, bk.MAX_GROSS)
         dec.append({"date": str(t.date()), "size": L["size"], "binding": L["binding"], "sigma": L["sigma"], "es": L["es"], "short": h,
-                    "vol_target": vt, "kelly": kelly, "product": product, "vm_rule": float(vm.reindex([t]).iloc[0]) if t in vm.index and not pd.isna(vm.get(t)) else None,
+                    "vol_target": vt, "kelly": kelly, "product": product, "vm_rule": _next_vm(vm, t),
                     "es_size": L["sizes"]["es"], "dd_size": L["sizes"]["dd"]})
     D = pd.DataFrame(dec).set_index(pd.to_datetime([d["date"] for d in dec]))
     # hold each decision through the next month
@@ -536,10 +543,12 @@ def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
     x = rb[rb.index >= eff[0][0]]
     if not len(x):
         return {"calls": len(rows), "marked_days": 0, "first_call": rows[0]["ts_utc"], "note": "Calls logged; prices after the first call's effective date have not arrived yet."}
-    size = pd.Series([s for _, s in eff], index=[d for d, _ in eff]).reindex(x.index, method="ffill")
+    size = pd.Series([s for _, s in eff], index=[d for d, _ in eff])
+    size = size.groupby(level=0).last().reindex(x.index, method="ffill")        # two calls effective the same day: the newer one governs
     cash = P["cash"].reindex(x.index).fillna(0)
     ret = size * x + (1 - size) * cash
-    return {"calls": len(rows), "marked_days": int(len(ret)), "first_call": rows[0]["ts_utc"], "stats": stats(ret, cash)}
+    return {"calls": len(rows), "marked_days": int(len(ret)), "first_call": rows[0]["ts_utc"], "first_effective": rows[0]["effective_from"],
+            "last_mark": str(ret.index[-1].date()), "stats": stats(ret, cash) if len(ret) >= 20 else None, "total": float((1 + ret).prod() - 1)}
 
 
 def synthetic_check(seed: int = 38) -> dict:

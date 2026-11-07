@@ -8,7 +8,7 @@ on:
     types: [completed]
   push:
     branches: [main]
-    paths: ["site/**", "scripts/build_site.py"]
+    paths: ["site/**", "ledger/**", "scripts/build_site.py"]
   workflow_dispatch:
 
 permissions:

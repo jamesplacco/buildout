@@ -48,7 +48,7 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
         blocks = [("1. Backtest (in-sample)", f"Size {T['backtest']['size']:.2f}x, chosen with the whole history and applied to it: hindsight on the names and the size. "
                    f"CAGR {pct(T['backtest']['stats'].get('cagr'))}, volatility {pct(T['backtest']['stats'].get('vol'))}, max drawdown {pct(T['backtest']['stats'].get('maxdd'))}."),
                   ("2. Walk-forward (out-of-sample)", f"Size and hedge recomputed each month-end from data to that close, held the next month, costs charged; universe chosen point in time each January. {W['policies']['call']['net']['from']} to {W['policies']['call']['net']['to']}."),
-                  ("3. Live paper", (f"{T['live']['calls']} call(s) in the hash-chained ledger since {str(T['live'].get('first_call') or '2026-11-03')[:10]}; " + (f"{T['live']['marked_days']} days marked." if T['live'].get('marked_days') else "no day of marks yet.")))]
+                  ("3. Live paper", (f"{T['live']['calls']} call(s) in the hash-chained ledger, the first governing from {str(T['live'].get('first_effective') or T['live'].get('first_call') or '2026-11-04')[:10]}; " + (f"{T['live']['marked_days']} days marked." if T['live'].get('marked_days') else "no day of marks yet.")))]
         import textwrap
         for title, text in blocks:
             fig.text(0.06, y, title, fontsize=10, weight="bold", color=accent)
@@ -137,8 +137,11 @@ def main(argv: list[str]) -> None:
         T["vix"] = json.loads(Path(arg("--vix-json")).read_text())
     rows = ledger.read()
     T["ledger"] = {"verify": ledger.verify(), "entries": rows}
+    if rows and T.get("live"):
+        T["live"]["calls"] = len(rows)
+        T["live"]["first_effective"] = rows[0]["effective_from"]
     if rows and not T.get("live", {}).get("marked_days"):      # calls logged after the build's last price: none marked yet
-        T["live"] = {"calls": len(rows), "marked_days": 0, "first_call": rows[0]["ts_utc"],
+        T["live"] = {"calls": len(rows), "marked_days": 0, "first_call": rows[0]["ts_utc"], "first_effective": rows[0]["effective_from"],
                      "note": f"{len(rows)} call(s) logged; the first governs from {rows[0]['effective_from']}, after the last price in this build."}
     pdf = tearsheet_pdf(T, ROOT / "site" / "tearsheet.pdf")
     T["tearsheet_pdf_b64"] = base64.b64encode(pdf).decode()

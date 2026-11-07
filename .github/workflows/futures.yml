@@ -51,4 +51,4 @@ jobs:
             exit 0
           fi
           git commit -m "Futures engine $(date -u +%Y-%m-%d)"
-          git push
+          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep $((i * 10)); done; exit 1

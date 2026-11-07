@@ -446,7 +446,7 @@
     const fb = w.querySelector("button[data-w=full]");
     if (fb) fb.textContent = `Whole brain · ${M.n} nodes`;
     const mb = w.querySelector("button[data-w=mind]");
-    if (mb && typeof MIND_SNAP !== "undefined") mb.textContent = `The mind · ${MIND_SNAP.nodes.length.toLocaleString()} nodes`;
+    if (mb && typeof SNAP14 !== "undefined" && SNAP14.stats) mb.textContent = `The mind · ${Number(SNAP14.stats.nodes).toLocaleString()} nodes`;
     setHeroBrain(AH.mode);
   }
 

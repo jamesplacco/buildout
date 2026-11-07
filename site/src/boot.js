@@ -322,6 +322,20 @@
     if (fd && feedsOk(fd)) { LIVE.feeds = fd; guard("Noteworthy", buildNoteworthy, $("#nw-grid")); } else if (fd) LIVE.problems.push("feeds.json did not match the expected shape");
     if (so && fin(so.count)) { LIVE.sources = so; const c = $("#chip-sources"); if (c) c.textContent = `${so.count} sources`; }
   });
+  // v0.39.1: the day's call and the ledger, when the published site carries newer ones than this build's snapshot
+  const bookOk = (b) => !!(b && typeof b.asof === "string" && fin(b.size) && b.sizes && b.tail && Array.isArray(b.frontier) && b.weights && b.keep_names_hedge);
+  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json")]).then(([bkj, cl]) => {
+    let changed = false;
+    if (bkj && bookOk(bkj) && typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && bkj.asof > SNAP30.book.asof) { SNAP30.book = bkj; LIVE.book = bkj; changed = true; }
+    else if (bkj && !bookOk(bkj)) LIVE.problems.push("book.json did not match the expected shape; the page keeps the call in its snapshot");
+    const T = typeof SNAP38 !== "undefined" ? SNAP38 : null;
+    if (cl && T && cl.verify && cl.verify.ok && Array.isArray(cl.entries) && cl.entries.length > ((T.ledger && T.ledger.entries) || []).length) {
+      T.ledger = { verify: cl.verify, entries: cl.entries };
+      T.live = { ...(T.live || {}), calls: cl.entries.length, first_effective: cl.entries[0].effective_from };
+      changed = true;
+    }
+    if (changed && current && RENDER[current]) guard(TAB_NAME[current], RENDER[current]);
+  });
   loadJSON("data/atlas.json").then((at) => {
     if (at && atlasOk(at)) { LIVE.atlas = at; AT_M = null; if (current === "atlas") guard("The atlas", renderAtlasDesk, $("#atv-tiles")); }
     else if (at) LIVE.problems.push("atlas.json did not match the expected shape; the page keeps the atlas snapshot");

@@ -23,7 +23,8 @@
     return { B, size, engine: N.exposure, cut: size < N.exposure - 1e-9, binding: B.binding, bindingName: B30_LIMIT_LC[B.binding] || B.binding,
       breaches: ["es_budget", "vol_target", "drawdown_cap"].filter((x) => B.sizes[x] < 1 - 1e-9).length,
       keep: k.meets_all && fin(k.short_nasdaq_frac) ? k.short_nasdaq_frac : null,
-      menu: FR.length ? { lo: FR[0], hi: FR[FR.length - 1], n: FR.length } : null };
+      // v0.39.1: the menu's full-size row carries the exact keep-every-name short, so every desk quotes one figure
+      menu: FR.length ? { lo: FR[0], hi: (k.meets_all && fin(k.short_nasdaq_frac) && Math.abs(FR[FR.length - 1].gross - 1) < 1e-9) ? { ...FR[FR.length - 1], short: k.short_nasdaq_frac } : FR[FR.length - 1], n: FR.length } : null };
   }
 
   function renderBookRisk() {

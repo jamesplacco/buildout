@@ -32,9 +32,11 @@ jobs:
 
       - name: Install
         # exact pins for every dependency, then the package without re-resolving; databento is optional, so it goes last
+        env:
+          FRED_API_KEY: ""        # v0.39.1: no secret is in the environment while packages install
         run: |
           pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
-          pip install "databento>=0.40"
+          pip install "databento==0.88.0"
 
       - name: Smoke test the engine
         id: smoke
@@ -106,6 +108,9 @@ jobs:
             *) echo "::error::SEC_USER_AGENT must be a name and an email, e.g. 'Your Name you@example.com'."; exit 1 ;;
           esac
           python -m buildout capex GOOGL MSFT AMZN META ORCL NVDA TSLA CRWV SPCX --ua "$SEC_UA" --json site/data/capex.json
+          # v0.39.1: an empty pull is a failure, not a quiet green day (the SEC refused every company for three days)
+          n=$(python -c "import json; print(len(json.load(open('site/data/capex.json')).get('companies') or {}))")
+          if [ "$n" = "0" ]; then echo "::error::the SEC returned no company; check SEC_USER_AGENT (one line: a name, a space, an email)"; exit 1; fi
 
       - name: The atlas (every monthly series, FRED and GitHub mirrors; learned structure)
         id: atlas
@@ -193,7 +198,7 @@ jobs:
 
       - name: Book risk and the call ledger (validated prices; one hash-chained entry per new data date)
         id: ledger
-        if: always()
+        if: always() && steps.smoke.outcome == 'success'      # v0.39.1: a broken install never writes a call
         timeout-minutes: 15
         continue-on-error: true
         run: |
@@ -208,7 +213,7 @@ jobs:
 
       - name: Commit results
         id: commit
-        if: always()
+        if: always() && steps.smoke.outcome == 'success'      # v0.39.1: nothing is committed after a failed smoke test
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -218,7 +223,7 @@ jobs:
             exit 0
           fi
           git commit -m "Daily data $(date -u +%Y-%m-%d)"
-          git push
+          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep $((i * 10)); done; exit 1   # v0.39.1: another workflow may have pushed first
 
       # A failed data step is kept from blocking the steps after it (continue-on-error), which also keeps the job green.
       # The two steps below turn any failure back into a red run and an issue, so a broken day is never silent.

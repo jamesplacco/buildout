@@ -546,7 +546,8 @@ def download(cache: Path | None = None, book: dict[str, float] = BOOK, validate:
         out[f] = pd.read_csv(io.StringIO(text))
     if validate:
         from .data.validate import FATAL, validate_all
-        rep = validate_all(out)
+        newest = max((pd.to_datetime(df.iloc[:, 0], errors="coerce").max() for df in out.values() if len(df)), default=None)
+        rep = validate_all(out, asof=newest, stale_bdays=3)      # v0.39.1: one name lagging the others is stale, not silently re-weighted
         LAST_VALIDATION.clear(); LAST_VALIDATION.update({k: v for k, v in rep.items() if k != "results"})
         if not rep["ok"]:   # v0.38: a bad pull stops the run (and the daily job alerts) rather than sizing on it
             bad = [r for r in rep["results"] if not r["ok"]]

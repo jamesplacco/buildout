@@ -54,7 +54,7 @@
     fillTable($("#tr-three"), ["Record", "What it is", "Span", "Reading", "Can it have been fitted?"], [
       ["1. Backtest", `The full-history size (${xx(bt.size)}, ${bt.binding.replace(/_/g, " ")} binding) applied to the same history, on today's nine names`, `${isoNice(bt.stats.from)} to ${isoNice(bt.stats.to)}`, `CAGR ${tS(bt.stats.cagr)}, volatility ${tP(bt.stats.vol)}, worst drawdown ${tP(bt.stats.maxdd, 0)}`, "Yes: the names and the size were both chosen knowing the history"],
       ["2. Walk-forward", "Size and hedge recomputed at every month-end from data to that close, held the next month, costs charged, universe chosen point in time", `${isoNice(C.net.from)} to ${isoNice(C.net.to)}`, `CAGR ${tS(C.net.cagr)}, volatility ${tP(C.net.vol)}, worst drawdown ${tP(C.net.maxdd, 0)}, Sharpe ${fx(C.net.sharpe, 2)}`, "Only through the design: the rules and the limits were set in 2026"],
-      ["3. Live paper", "The calls written to the hash-chained ledger before the next bar, marked as prices arrive", L.first_call ? `since ${isoNice(L.first_call.slice(0, 10))}` : "starts Nov 3, 2026", L.marked_days ? `${L.marked_days} days marked: ${tS(L.stats.cagr)} annualized` : "No day of marks yet: the record starts now", "No: every call is timestamped before its first day"]], 1);
+      ["3. Live paper", "The calls written to the hash-chained ledger before the next bar, marked as prices arrive", (L.first_effective || L.first_call) ? `from ${isoNice((L.first_effective || L.first_call).slice(0, 10))}` : "starts Nov 4, 2026", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked to ${isoNice(L.last_mark || T.asof)}: ${tS(L.total, 1)}${L.stats ? `, ${tS(L.stats.cagr)} annualized` : " (too short to annualize)"}` : "No day of marks yet: the record starts now", "No: every call is timestamped before its first day"]], 1);
     $("#tr-three-p").textContent = `A portfolio manager judges an analyst by calls made in advance, sized sensibly, and honest when wrong. These are three different records and they never share a chart. The backtest shows the rule with hindsight; the walk-forward record is the honest estimate; the live record is the only one that cannot have been fitted, and it starts today.`;
     // the walk-forward record
     trackCurve($("#tr-curve"), W, ["call", "call_short", "hold", "qqq"], "Walk-forward growth of $1, net of costs, point-in-time universe");
@@ -131,6 +131,14 @@
     const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null, BC = N && typeof bookCall === "function" ? bookCall(N) : null;
     $("#hm-call").textContent = BC && BC.menu ? `Hold ${xx(BC.menu.lo.gross)} of the book, or ${xx(BC.menu.hi.gross)} with ${pct0(BC.menu.hi.short)} of NAV short Nasdaq-100 futures. No bond hedge.` : "The call is on the Desk.";
     $("#hm-why").textContent = BC ? `${(BC.bindingName || "the binding limit").replace(/^the /, "The ")} sets the size, measured on the nine names' own risk; the forecast has not earned the right to move it. Long bonds stay off while stocks and bonds fall together.` : "";
+    const wh = $("#hm-when"), B = typeof B30 === "function" ? B30() : null;
+    if (wh && B) {
+      const E0 = (T38() && T38().ledger && T38().ledger.entries) || [], ent = E0.filter((e) => e.data_asof === B.asof).pop();
+      const bd = (a, b) => { let n = 0; const d = new Date(a + "T12:00:00Z"), e = new Date(b + "T12:00:00Z"); while (d < e) { d.setUTCDate(d.getUTCDate() + 1); if (d.getUTCDay() % 6) n++; } return n; };
+      const age = bd(B.asof, new Date().toISOString().slice(0, 10));
+      wh.textContent = `On prices through ${isoNice(B.asof)}${ent ? `; logged in the ledger, in force from ${isoNice(ent.effective_from)}` : ""}.${age > 3 ? ` This build's call is ${age} business days old: the Track record and the published site carry newer ones.` : ""}`;
+      wh.classList.toggle("hm-stale", age > 3);
+    }
     const ct = $("#hm-contact");
     ct.replaceChildren();
     CONTACT.links.forEach(([k, u]) => { const a = h("a", null, k); a.href = u; a.target = "_blank"; a.rel = "noopener"; ct.append(a); });
@@ -153,8 +161,8 @@
     const A = T.alternatives, puts = A ? A.rows.map((r) => r.h.put && r.h.put.var_cut).filter(fin) : [];
     const items = [
       [sgn2(r21.corr), "Long Treasuries have stopped hedging", `Since 2021 stocks and bonds have moved together; a 30% bond position ${fin(r21.var_cut_30) && r21.var_cut_30 < 0 ? `added ${tP(-r21.var_cut_30, 0)} to` : "barely changed"} stock variance. Since 1962 bonds hedged below 3% inflation and failed above it (correlation ${sgn2(hi.corr)}).`, "#hedgetest", "Hedge test"],
-      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Limits, not forecasts, made the record", `The same Sharpe as holding the book, with the worst drawdown cut by more than half: size falls when the book's own risk rises, before the loss, not after.`, "#track", "Track record"],
-      [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modelled one-month, 90% put on the Nasdaq-100 removed that share of its variance in every inflation and policy regime since 2000, and was the only hedge that paid in 2022. It costs a premium; the bond's failure costs more.`, "#hedgetest", "Hedge test"]];
+      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Limits, not forecasts, made the record", `A Sharpe ratio of ${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)} for holding the book, with the worst drawdown cut by more than half: size falls when the book's own risk rises, before the loss, not after.`, "#track", "Track record"],
+      [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modelled one-month, 90% put on the Nasdaq-100 removed that share of its variance in every inflation and policy regime since 2000, and, of the overlays that add to the book (bonds, 2-year notes, gold, puts), was the only one that paid in 2022; the call's own hedge, a Nasdaq-100 short, did more. It costs a premium; the bond's failure costs more.`, "#hedgetest", "Hedge test"]];
     const ol = $("#hm-find"); ol.replaceChildren();
     items.forEach(([big, t, p, href, lab]) => { const li = h("li"), a = h("a", null, lab); a.href = href; li.append(h("span", "hm-big", big), h("h3", null, t), h("p", null, p), a); ol.append(li); });
   }

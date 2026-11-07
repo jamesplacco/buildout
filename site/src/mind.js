@@ -5,8 +5,9 @@
      weighed in log-odds with a dependence discount, leave-one-family-out ranges, causal chains to the book over the
      atlas's own links, and a proposed action that is never executed.
      ===================================================================================== */
-  const MD = MIND_SNAP;
-  const MP = MD.params;
+  // v0.39.1: the mind graph is parsed the first time a desk reads it, not at boot
+  Object.defineProperty(globalThis, "MD", { get: () => MIND_SNAP, configurable: true });
+  Object.defineProperty(globalThis, "MP", { get: () => MIND_SNAP.params, configurable: true });
   let MIND = null;
   function mindOk(s) {
     try {

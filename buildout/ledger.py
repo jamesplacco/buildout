@@ -37,13 +37,28 @@ def entry_hash(e: dict) -> str:
 def read(path: Path = PATH) -> list[dict]:
     if not path.exists():
         return []
-    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    out = []
+    for n, line in enumerate(path.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            out.append(json.loads(line))
+        except json.JSONDecodeError as exc:            # a torn or edited line: verify() reports it, read() never guesses
+            raise LedgerError(f"line {n} of {path.name} is not valid JSON") from exc
+    return out
+
+
+class LedgerError(ValueError):
+    pass
 
 
 def verify(path: Path = PATH) -> dict:
     """Recompute the chain. ok is False if any entry's hash is wrong, any link is broken, the sequence skips, or the
     write times go backwards."""
-    rows = read(path)
+    try:
+        rows = read(path)
+    except LedgerError as exc:
+        return {"ok": False, "entries": None, "head": None, "problems": [str(exc)]}
     prev, problems = GENESIS, []
     for i, e in enumerate(rows):
         if e.get("seq") != i + 1:

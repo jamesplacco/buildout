@@ -5,7 +5,8 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 46;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TESTS_PASSING = 750;     // the shipped test count (the chip and the hood tile read it)
+  const TEST_FILES = 59;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TESTS_PASSING = 768;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -51,6 +52,9 @@
       ? (M ? `Cut the book to about ${xx(M.lo.gross)}${M.lo.short ? ` with a ${pct0(M.lo.short)} Nasdaq-100 short` : ""}, or keep it at ${xx(M.hi.gross)} and short ${pct0(M.hi.short)} of NAV in Nasdaq-100 futures; ${hw || "no bond hedge"}.`
         : `Run the book at ${xx(BC.size)}${BC.keep != null ? `, or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures` : ""}${hw ? "; " + hw : ""}.`)
       : `Hold equity at ${xx(N.exposure)}${hw ? " with " + hw : ""}${tail ? "; " + tail : ""}.`;
+    // v0.39.1: a catalyst whose date has passed is marked as passed rather than shown as upcoming
+    const todayIso = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll(".cal li[data-date]").forEach((li) => { if (li.dataset.date < todayIso) { const b = li.querySelector("b"); if (b && !/passed/.test(b.textContent)) b.textContent += " (passed)"; li.classList.add("cal-past"); } });
     const eb = $("#t7-eyebrow");
     if (eb) eb.textContent = `The engine's call · model book · data to ${isoNice(latestDataDate())}`;
   }
@@ -229,12 +233,13 @@
       if (href) { d.style.cursor = "pointer"; d.addEventListener("click", () => { location.hash = href; }); }
       return d;
     };
-    const code = typeof CODE_SNAP !== "undefined" && Array.isArray(CODE_SNAP) ? CODE_SNAP : [];
-    const lines = code.reduce((a, f) => a + (f.lines || 0), 0);
+    const S14s = typeof SNAP14 !== "undefined" && SNAP14 && SNAP14.stats ? SNAP14.stats : {};      // counts only: the source itself parses when the Code desk opens
+    const code = { length: S14s.code_files || 0 };
+    const lines = S14s.code_lines || 0;
     const engines = typeof ENGINES_SNAP !== "undefined" && Array.isArray(ENGINES_SNAP) ? ENGINES_SNAP.length : 0;
     const st = typeof SNAP14 !== "undefined" && SNAP14 && SNAP14.stats ? SNAP14.stats : null;
     box.append(
-      kpi(String(code.length), "Source files on the source desk", `${kcount(lines)} lines of the engine's modules and scripts, each readable here; the repository also carries 37 test files`, "code"),
+      kpi(String(code.length), "Source files on the source desk", `${kcount(lines)} lines of the engine's modules and scripts, each readable here; the repository also carries ${TEST_FILES} test files`, "code"),
       kpi(String(TESTS_PASSING), "Tests passing", "parity between the engine and the page, every release", "code"),
       kpi(String(engines), "Engines", "pure functions of dated files, registered for the daily run; none has run live in this snapshot", "engines"),
       kpi(String(MCP_TOOLS), "MCP tools", "the engine as a server; none places an order", "cd-flow-t"),

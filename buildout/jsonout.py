@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +18,12 @@ def series(s: pd.Series, freq: str | None = "W-FRI") -> dict:
     return {"dates": [d.strftime("%Y-%m-%d") for d in s.index], "values": [round(float(v), 6) for v in s]}
 
 
+EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+")
+
+
 def clean(o):
+    if isinstance(o, str):          # v0.39.1: no email address (a contact User-Agent echoed in an error) reaches a published file
+        return EMAIL.sub("[email removed]", o) if "@" in o else o
     if isinstance(o, dict):
         return {str(k): clean(v) for k, v in o.items()}
     if isinstance(o, (list, tuple)):

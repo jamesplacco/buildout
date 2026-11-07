@@ -161,6 +161,7 @@
   const LIVE = { macro: null, report: null, btSeries: null, capex: null, capexPick: null, status: null, problems: [] };
   // fetch with a timeout; a missing, slow or malformed file yields null and a note, never an exception
   async function loadJSON(path, ms = 10000) {
+    if (typeof location !== "undefined" && location.protocol === "file:") return null;   // v0.39.1: a page opened from disk keeps its snapshots, quietly
     const ctl = typeof AbortController === "function" ? new AbortController() : null;
     const timer = ctl ? setTimeout(() => ctl.abort(), ms) : 0;
     try {

@@ -43,6 +43,20 @@ def erc(cov: pd.DataFrame, budget: pd.Series | None = None) -> pd.Series:
     return pd.Series(res.x / res.x.sum(), index=cov.index)
 
 
+_PATHS: dict = {}
+
+
+def _brownian(n_paths: int, steps: int, seed: int) -> np.ndarray:
+    """Cumulative standard normal paths, drawn once per (paths, steps, seed) and reused: every call with the same seed
+    drew these same numbers before v0.39.1, so caching changes no result, only the time."""
+    key = (n_paths, steps, seed)
+    if key not in _PATHS:
+        z = np.random.default_rng(seed).standard_normal((n_paths, steps))
+        _PATHS[key] = np.cumsum(z, axis=1)
+        _PATHS[key].setflags(write=False)
+    return _PATHS[key]
+
+
 def drawdown_quantile(mu: float, sigma: float, leverage: float, years: float = 1.0, q: float = 0.95,
                       cash_rate: float = 0.04, borrow_spread: float = 0.01, n_paths: int = 4000,
                       seed: int = 0) -> float:
@@ -51,24 +65,26 @@ def drawdown_quantile(mu: float, sigma: float, leverage: float, years: float = 1
     Borrowed money (leverage above 1) pays cash_rate + borrow_spread.
     """
     steps = int(252 * years)
-    rng = np.random.default_rng(seed)
-    z = rng.standard_normal((n_paths, steps))
+    W = _brownian(n_paths, steps, seed)
     ann_mu = leverage * mu + (1 - leverage) * cash_rate - max(leverage - 1, 0) * borrow_spread
     ann_sig = leverage * sigma
     dt = 1 / 252
-    logp = np.cumsum((ann_mu - 0.5 * ann_sig ** 2) * dt + ann_sig * np.sqrt(dt) * z, axis=1)
+    t = np.arange(1, steps + 1)
+    logp = (ann_mu - 0.5 * ann_sig ** 2) * dt * t + ann_sig * np.sqrt(dt) * W
     logp = np.concatenate([np.zeros((n_paths, 1)), logp], axis=1)
     dd = 1 - np.exp(logp - np.maximum.accumulate(logp, axis=1))
     return float(np.quantile(dd.max(axis=1), q))
 
 
 def max_leverage(mu: float, sigma: float, max_dd: float, years: float = 1.0, q: float = 0.95,
-                 cash_rate: float = 0.04, borrow_spread: float = 0.01, hi: float = 5.0) -> float:
-    """Largest leverage whose q-quantile one-year drawdown stays inside max_dd (bisection, common seed)."""
+                 cash_rate: float = 0.04, borrow_spread: float = 0.01, hi: float = 5.0, tol: float = 1e-4) -> float:
+    """Largest leverage whose q-quantile one-year drawdown stays inside max_dd (bisection to `tol`, common seed)."""
     lo = 0.0
     if drawdown_quantile(mu, sigma, hi, years, q, cash_rate, borrow_spread) <= max_dd:
         return hi
     for _ in range(40):
+        if hi - lo < tol:
+            break
         mid = (lo + hi) / 2
         if drawdown_quantile(mu, sigma, mid, years, q, cash_rate, borrow_spread) <= max_dd:
             lo = mid

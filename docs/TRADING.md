@@ -55,6 +55,6 @@ Tickets expire after 15 minutes. Change the limits under `[trading]` in `config.
 ## The VIX sleeve, honestly
 
 From Feb 2006 to Mar 2024, long VIX futures lost about 20% a year on average and lost money in about two months in three.
-They paid in crashes: at 10% of the book's value they cut the Feb 19 to Mar 23, 2020 loss from 29% to 18%. They did
+They paid in crashes: at 10% of the book's value they cut the Feb 19 to Mar 23, 2020 loss from 29% to 18%. On the book's own days the cost swings with the window (1.5 points of growth a year from 2017, none from 2018, which starts just before the February 2018 spike), so plan on the long-run carry. They did
 almost nothing in the slow 2022 bear market, where the index short did the work. The default sleeve is 5% of equity
 (a little under 1% a year of expected cost on the 2017 to 2024 record); set `vix_share = 0` to turn it off.

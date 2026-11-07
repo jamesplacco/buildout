@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.39</span>
+      Buildout <span class="ver">v0.39.1</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -30,11 +30,11 @@
 <main class="page" id="main" tabindex="-1">
 
 <!-- ======================= DESK ======================= -->
-<section class="view" id="view-desk" aria-labelledby="desk-title">
+<section class="view" id="view-desk" hidden aria-labelledby="desk-title">
   <div class="t7" id="today7">
     <div class="t7-head">
-      <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Oct 23, 2026</p>
-      <h1 id="desk-title">Run the book at 0.59x, or keep every name and short 86% of NAV in Nasdaq-100 futures; no bond hedge.</h1>
+      <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Nov 5, 2026</p>
+      <h1 id="desk-title">Run the book at 0.53x, or keep every name and short 86% of NAV in Nasdaq-100 futures; no bond hedge.</h1>
       <div class="t7-answer" id="t7-answer"></div>
       <p class="t7-status" id="t7-status"></p>
     </div>
@@ -53,12 +53,11 @@
       <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
         <ul class="cal cal-compact">
           <li><b>Done</b><span>Oct 28: the Fed held at 3.75 to 4.00%, 10 to 2, two dissents for a hike. Microsoft: revenue $92.3B (+19%), Azure +48%, capex $39.4B. Alphabet: Cloud $30.7B (+103%), capex $51.4B, free cash flow −$9.1B, 2026 guide $195 to 205B kept; shares fell about 8% after hours. Oct 29, Amazon: AWS $46.0B (+39%), capex $77.3B in the quarter, about $220B for 2026 kept. <a class="src" href="https://www.xtb.com/en/market-analysis/news-and-research/alphabet-disappoints-wall-street-despite-record-results-shares-plunge-over-8-and-test-300">XTB</a> · <a class="src" href="https://www.datastudios.org/post/amazon-q3-2026-results-aws-39-percent-growth-46-billion-220-billion-capex">Amazon summary</a></span></li>
-          <li><b>Nov 3</b><span>US midterm elections; reported US and Israeli strike plans on Iran are dated after the vote. Apollo reports Q3.</span></li>
-          <li><b>Nov 4</b><span>OBDC reports after the close: Blue Owl's listed fund's NAV, non-accruals and PIK (Private credit desk).</span></li>
-          <li><b>Nov 10</b><span>October CPI, 8:30 ET. September printed 3.7% headline and 2.6% core.</span></li>
-          <li><b>Nov 17</b><span>NVIDIA reports, 5 pm ET; the largest weight in the book with Microsoft, Amazon and Alphabet.</span></li>
-          <li><b>Dec 8</b><span>The last scheduled SpaceX lockup release (a tranche of about 1.3 billion shares already unlocked around Oct 22, after its Q3 results; Musk's stake stays locked to June 2027). <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
-          <li><b>Dec 9</b><span>FOMC decision; markets priced a December hike near 85% after the Oct 28 meeting.</span></li>
+          <li><b>Done</b><span>Nov 4: OBDC, Blue Owl's listed fund, reported Q3: NAV $14.32 a share (up from $14.26), non-accruals 2.9% of cost and 0.8% of fair value (2.8% and 0.8% in Q2), net investment income $0.34 against $0.32 of dividends (Private credit desk). <a class="src" href="https://www.sec.gov/Archives/edgar/data/0001655888/000165588826000070/exhibit991pressrelease-ann.htm">Release</a></span></li>
+          <li data-date="2026-11-10"><b>Nov 10</b><span>October CPI, 8:30 ET. September printed 3.7% headline and 2.6% core.</span></li>
+          <li data-date="2026-11-17"><b>Nov 17</b><span>NVIDIA reports, 5 pm ET; the largest weight in the book with Microsoft, Amazon and Alphabet.</span></li>
+          <li data-date="2026-12-08"><b>Dec 8</b><span>The last scheduled SpaceX lockup release (a tranche of about 1.3 billion shares already unlocked around Oct 22, after its Q3 results; Musk's stake stays locked to June 2027). <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
+          <li data-date="2026-12-09"><b>Dec 9</b><span>FOMC decision; markets priced a December hike near 85% after the Oct 28 meeting.</span></li>
         </ul>
       </section>
     </div>
@@ -1789,8 +1788,8 @@
       </div>
       <figure class="panel chart" style="margin:0">
         <div class="chart-head"><span class="chart-title">Are bonds hedging stocks?</span><span class="src">Stock-bond return correlation, one-year window</span></div>
-        <div class="svgbox" id="gauge" role="img" aria-label="Stock-bond return correlation: about -0.6 in 2020, about +0.05 on average after 2021, +0.21 on July 31, 2026."></div>
-        <p class="hint">S&amp;P 500 against the 10-year Treasury. The Fed reports stock returns against yield changes; the sign is flipped so that negative means bonds rose when stocks fell. Source: <a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve, FEDS Notes, Oct 16, 2026</a>.</p>
+        <div class="svgbox" id="gauge" role="img" aria-label="Stock-bond return correlation, daily returns over one year: about -0.6 in 2020, about +0.05 on average from 2022 to 2026, +0.21 on July 31, 2026."></div>
+        <p class="hint">S&amp;P 500 against the 10-year Treasury, daily returns over a one-year window, a different measure from the Hedge test desk's monthly correlation of the same two series (about +0.35 from January 2021, a window that starts before the 2022 selloff). The Fed reports stock returns against yield changes; the sign is flipped so that negative means bonds rose when stocks fell. Source: <a href="https://www.federalreserve.gov/econres/notes/feds-notes/government-bonds-safe-haven-property-and-inflationary-pressures-accessible-20261016.htm">Federal Reserve, FEDS Notes, Oct 16, 2026</a>.</p>
         <dl class="dlist glist">
           <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
           <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
@@ -2455,7 +2454,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 30,000 lines including tests, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 59 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2509,7 +2508,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, every one of its 42 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 46 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2747,11 +2746,20 @@
 </section>
 <section class="view" id="view-home" data-guide="off" hidden aria-labelledby="hm-title">
   <header class="hm-hero">
+   <div class="hm-lead">
     <p class="hm-kicker"><span class="hm-who">James Placco</span><span>Buildout research</span><span id="hm-asof">Data through Oct 23, 2026</span></p>
     <h1 id="hm-title">Own the AI buildout at the size its risk allows. <em>Prove it out of sample.</em></h1>
     <p class="hm-dek">A risk, sizing and hedging engine for a concentrated nine-name AI book. Every limit is measured on the names' own prices, every rule is walked forward before it may move the size, and every call is logged before it trades.</p>
     <div class="hm-cta"><a class="btn" href="#desk">Today's call and why</a><a class="btn ghost" href="#track">Track record</a><button type="button" class="btn ghost" id="hm-pdf">Tear sheet (PDF)</button></div>
     <p class="hm-note" id="hm-pdf-note" aria-live="polite"></p>
+   </div>
+   <aside class="hm-callbox" aria-labelledby="hm-call-t">
+      <h2 class="hm-label" id="hm-call-t">Today's call</h2>
+      <p class="hm-call" id="hm-call"></p>
+      <p class="hm-when" id="hm-when"></p>
+      <p class="hm-why" id="hm-why"></p>
+      <a class="hm-more" href="#desk">The three steps behind it</a>
+   </aside>
   </header>
 
   <section class="hm-band" aria-labelledby="hm-figs-t">
@@ -2761,12 +2769,6 @@
   </section>
 
   <div class="hm-pair">
-    <section class="hm-callbox" aria-labelledby="hm-call-t">
-      <h2 class="hm-label" id="hm-call-t">The call</h2>
-      <p class="hm-call" id="hm-call"></p>
-      <p class="hm-why" id="hm-why"></p>
-      <a class="hm-more" href="#desk">The three steps behind it</a>
-    </section>
     <section class="hm-chartbox" aria-labelledby="hm-curve-t">
       <h2 class="hm-label" id="hm-curve-t">Growth of $1, walk-forward</h2>
       <div class="hm-curve" id="hm-curve"></div>
@@ -3728,8 +3730,16 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
   </section>
+  <section class="section" aria-labelledby="ag-v39-t">
+    <div class="section-head"><p class="eyebrow">v0.37 to v0.39.1</p><h2 id="ag-v39-t">Release metrics, v0.37 to v0.39.1</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>2</b><span>Independent auditors</span><small>front end and back end, each on a copy, neither shown the other's findings</small></div>
+      <div class="at-kpi"><b>32</b><span>Findings fixed in v0.39.1</span><small>the engine's pinned by tests in tests/test_v39_1.py</small></div>
+      <div class="at-kpi"><b>7 min to 49 s</b><span>The track build</span><small>the drawdown simulation draws its random paths once</small></div>
+      <div class="at-kpi"><b>269 to 77 ms</b><span>Script time at first load</span><small>the mind graph and the source parse when their desks open</small></div></div>
+    <p class="prose">v0.37 cleaned the desks; v0.38 turned the model into a dated record (walk-forward, a hash-chained ledger, a tear sheet); v0.39 added the VIX as a hedge and the Robinhood ticket planner. For v0.39.1 two agents audited the page and the engine without seeing each other's work. The back-end audit found a contact email echoed into published data, a live record that would break on two calls effective the same day, a paper ticket that could fill twice, fill checks that did not add up across reports, a ticket hash that left out the fields deciding execution, and a volatility rule lagged twice. The front-end audit found the call two weeks stale against the ledger, the hedge quoted as 85% on some desks and 86% on others, the wrong desk painted first, counts that disagreed, and dates already past shown as upcoming. Each is fixed and tested.</p>
+  </section>
   <section class="section" aria-labelledby="ag-v36-t">
-    <div class="section-head"><p class="eyebrow">v0.36</p><h2 id="ag-v36-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.36</p><h2 id="ag-v36-t">Release metrics, v0.36</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>130</b><span>Checked sources in the Reading room</span><small>research, data, books and history, and the other side</small></div>
       <div class="at-kpi"><b>6</b><span>Agents in parallel</span><small>four source lanes, two independent checkers</small></div>
       <div class="at-kpi"><b>0.93x</b><span>The railway test today</span><small>one year of capex needs 93% of what the clouds bill; the mania stood near 4x</small></div>
@@ -3737,7 +3747,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The user asked for the range of a senior reading list. Four agents each took a lane (research and policy, data that moves first, books and history, dissent) with one rule: open every source, invent nothing, and say what it changes. Two more checked about 300 claims on the desks the first pass had not covered, without seeing the lead agent's conclusions. The lead agent rewrote the Desk's reasoning, built the railway test, and let the dissent change three theses rather than decorate them.</p>
   </section>
   <section class="section" aria-labelledby="ag-v35-t">
-    <div class="section-head"><p class="eyebrow">v0.35</p><h2 id="ag-v35-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.35</p><h2 id="ag-v35-t">Release metrics, v0.35</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>8 + 4</b><span>Funds through the same gauges</span><small>eight non-traded funds from seven sponsors; four funds' marks and dividend cover</small></div>
       <div class="at-kpi"><b>2 of 2</b><span>Inversions that check</span><small>cap divided by fill equals the requests Apollo and Blue Owl reported</small></div>
       <div class="at-kpi"><b>39% vs 10 to 15%</b><span>Blue Owl's queue against the peers'</span><small>none at Goldman or Golub</small></div>
@@ -3745,7 +3755,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The question a portfolio manager asks after v0.34 is whether the reading is one manager or the market. The lead agent put the cohort through the same arithmetic rather than new arithmetic, inferred what was not reported from what was (and said so in the table), and checked the inference where it could be checked. Blue Owl's queue is the outlier; its marks are the sector's.</p>
   </section>
   <section class="section" aria-labelledby="ag-v34-t">
-    <div class="section-head"><p class="eyebrow">v0.34</p><h2 id="ag-v34-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.34</p><h2 id="ag-v34-t">Release metrics, v0.34</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>29.8% and 12.8%</b><span>Fill rates the queue model predicts</span><small>5% cap divided by requests; Blue Owl reported 29.8% and 12.8%</small></div>
       <div class="at-kpi"><b>11% vs 0.8%</b><span>Market's markdown on OBDC's loans against its booked non-accruals</span><small>77% of NAV after 1.11x leverage</small></div>
       <div class="at-kpi"><b>0.6%</b><span>Fitch's software default rate, the lowest sector</span><small>industrials and consumer 9.7%; the fear and the defaults are in different places</small></div>
@@ -3753,14 +3763,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">A lens the user asked for by name. The lead agent fetched Blue Owl's Q3 results and call, OBDC's June results and 10-Q schedules, the funds' tender filings and Fitch's 3Q26 monitor, kept only figures with a date and a filing, and built the arithmetic on them: a queue model checked against the reported fills, a markdown identity, a cash-cover estimate labelled as one. Two things it could not get: a live OBDC price (the price mirror carries no BDC tickers, so the fund's own June buyback prices stand in) and the Hyperion deal's current valuation. Both are listed on the desk as limits.</p>
   </section>
   <section class="section" aria-labelledby="ag-v33-t">
-    <div class="section-head"><p class="eyebrow">v0.33</p><h2 id="ag-v33-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.33</p><h2 id="ag-v33-t">Release metrics, v0.33</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>&gt; 60 min &rarr; 20 s</b><span>A data step with a blocked site</span><small>the downloader stops asking a site after two failed files in a row</small></div>
       <div class="at-kpi"><b>20</b><span>Data steps with their own time limit</span><small>none blocks the steps after it</small></div>
       <div class="at-kpi"><b>1</b><span>Plain error for a bad SEC contact string</span><small>the filings run names it before downloading anything</small></div></div>
     <p class="prose">The scheduled runs after v0.32 committed only their status file. The lead agent read the run logs the user sent, reproduced the hang (a site that never answers, three tries at 30 seconds, about 50 files) and fixed the cause rather than the symptom.</p>
   </section>
   <section class="section" aria-labelledby="ag-v32-t">
-    <div class="section-head"><p class="eyebrow">v0.32</p><h2 id="ag-v32-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.32</p><h2 id="ag-v32-t">Release metrics, v0.32</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>5</b><span>Size-and-hedge mixes that meet the limits</span><small>0.59x unhedged to 1.00x with an 85% short, all near 15% volatility</small></div>
       <div class="at-kpi"><b>1.76 vs 1.66</b><span>The volatility rule's utility t against the bar</span><small>Nasdaq-100 future since 1999, best of 12 variants deflated for</small></div>
       <div class="at-kpi"><b>0.89</b><span>The same t from 2003 on</span><small>the gain lives in the dot-com and 2008 crashes</small></div>
@@ -3768,7 +3778,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The lead agent's own review of the v0.30 call found it more precise than its inputs (one point from a simulated drawdown) and silent on the real choice (the market, or these names against it). The menu makes the choice visible. The volatility rule went through the engine's standard test and a timing bug found by the new tests changed its verdict: with exposure set only at month ends, as published, it clears the bar on the long record. The sub-period and cost checks that qualify that verdict are on the desk beside it.</p>
   </section>
   <section class="section" aria-labelledby="ag-v31-t">
-    <div class="section-head"><p class="eyebrow">v0.31</p><h2 id="ag-v31-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.31</p><h2 id="ag-v31-t">Release metrics, v0.31</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>6 &rarr; 5</b><span>Navigation groups</span><small>Today, Evidence, Markets, Engine, and a Library index for the rest</small></div>
       <div class="at-kpi"><b>26 + 30</b><span>Desks on the main path, and in the Library</span><small>nothing deleted; each still opens by link or search</small></div>
       <div class="at-kpi"><b>16.5k &rarr; 7.2k</b><span>Characters on the Desk</span><small>the derivation folds under one line</small></div>
@@ -3776,7 +3786,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">A pass for a reader with ten minutes: a portfolio manager, a managing director, an engineer. The lead agent measured every desk on the main path, cut what a decision does not need from the first screen, and folded it rather than deleting it. The governing size now comes from one function on every desk, so no desk can quote the old index call against the book's.</p>
   </section>
   <section class="section" aria-labelledby="ag-v30-t">
-    <div class="section-head"><p class="eyebrow">v0.30</p><h2 id="ag-v30-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.30</p><h2 id="ag-v30-t">Release metrics, v0.30</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>5</b><span>Independent reviews of the whole system</span><small>product, decision core, risk layer, research claims, news; the last two stopped early on a spend limit, the risk report already written</small></div>
       <div class="at-kpi"><b>1.00x &rarr; 0.59x</b><span>The Desk's call, measured on the book</span><small>the book at 1.00x broke all three of its limits; the drawdown cap binds</small></div>
       <div class="at-kpi"><b>90% vs 3%</b><span>Variance cut: index short against long bond</span><small>walked forward on the book's own days since 2017</small></div>
@@ -3786,7 +3796,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
   <details class="ag-earlier" id="ag-earlier">
     <summary>Earlier releases, v0.14 to v0.29</summary>
   <section class="section" aria-labelledby="ag-v29-t">
-    <div class="section-head"><p class="eyebrow">v0.29</p><h2 id="ag-v29-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.29</p><h2 id="ag-v29-t">Release metrics, v0.29</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>39</b><span>CME futures markets</span><small>37 in the long record, January 1990 to March 2024</small></div>
       <div class="at-kpi"><b>3 of 12</b><span>Signal tests that still work</span><small>carry across markets, and the 12-month trend across markets and over time</small></div>
       <div class="at-kpi"><b>0.4%</b><span>False alarms in worlds with no edge</span><small>240 signal tests in 20 synthetic worlds; 6.0% of 1,000 random-signal runs</small></div>
@@ -3794,7 +3804,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The lead agent wrote the futures engine and validated it on synthetic markets with a planted carry edge before running it on pysystemtrade's published prices. An independent audit then found that a run starting in 2010 could never be judged on both halves against a fixed 2007 split, that basis momentum compared chains on different days, that stale deferred quotes produced carry, and that months when the CFTC was shut leaked positions forward. Each was fixed and tested; basis momentum fell to chance once the comparison used the same day.</p>
   </section>
   <section class="section" aria-labelledby="ag-v28-t">
-    <div class="section-head"><p class="eyebrow">v0.28</p><h2 id="ag-v28-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.28</p><h2 id="ag-v28-t">Release metrics, v0.28</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>~500</b><span>Stocks a month since 2009</span><small>every S&amp;P 500 member at each month end, including those that later left</small></div>
       <div class="at-kpi"><b>2</b><span>Independent audits before the first run</span><small>the first found a test that called factor tilts significant; the second checked the fixes</small></div>
       <div class="at-kpi"><b>47.5% &rarr; 0%</b><span>Factor tilts called significant</span><small>the old reassignment test against the equal-weighted cosine test, in synthetic worlds</small></div>
@@ -3802,7 +3812,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The filings engine was built for breadth: about five hundred stocks a month, so that a small edge on each becomes measurable. The first audit found a reassignment permutation that called factor-tilted noise significant almost half the time, a crash on two share classes, a look-ahead at weekend month ends and split errors; the second found an oversized p-value in short series and an event-study t that ran too large. The real run waits on the SEC, which the build workspace cannot reach, so the desk shows its validation and calibration until then.</p>
   </section>
   <section class="section" aria-labelledby="ag-v27-t">
-    <div class="section-head"><p class="eyebrow">v0.27</p><h2 id="ag-v27-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.27</p><h2 id="ag-v27-t">Release metrics, v0.27</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>552</b><span>Company quarters tested</span><small>the book and the AI supply chain since 2017</small></div>
       <div class="at-kpi"><b>599</b><span>Earnings releases dated</span><small>SEC Form 8-K dates plus 100 read from the releases; 36 confirmed by hand</small></div>
       <div class="at-kpi"><b>0 of 51</b><span>Hypotheses that pass</span><small>the best lead cuts forecast error 19% for chip makers, short of the cut</small></div>
@@ -3810,7 +3820,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The nowcast asks whether facts published early (TSMC's monthly revenue, hyperscaler capital spending, peers that report first) forecast the book's next reports, and whether the market had priced them. Two independent audits replaced volume-based dating with release dates and removed two results that depended on how a season was drawn. Nothing passed, and the desk says so.</p>
   </section>
   <section class="section" aria-labelledby="ag-v26-t">
-    <div class="section-head"><p class="eyebrow">v0.26</p><h2 id="ag-v26-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.26</p><h2 id="ag-v26-t">Release metrics, v0.26</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>43,247</b><span>Candidate edges invented</span><small>70 world markets, every other market and 89 unusual series</small></div>
       <div class="at-kpi"><b>129,741</b><span>Fake-market hypotheses</span><small>the calibration behind every p-value, with 300 fake signals</small></div>
       <div class="at-kpi"><b>65 &rarr; 5</b><span>Survivors after the audit</span><small>against fewer than one expected by luck</small></div>
@@ -3818,7 +3828,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">A hypothesis factory invented tens of thousands of candidate edges and a gauntlet tried to kill each one, with p-values calibrated on fake markets run beside the real ones. An independent audit and a second pass before release cut the first run's 65 survivors to 5, and the desk shows the before and the after.</p>
   </section>
   <section class="section" aria-labelledby="ag-v25-t">
-    <div class="section-head"><p class="eyebrow">v0.25</p><h2 id="ag-v25-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.25</p><h2 id="ag-v25-t">Release metrics, v0.25</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>5 + 5</b><span>Research agents and independent checkers</span><small>Taleb, the legendary traders, actuarial science, weather forecasting, big data; 532 entries checked, 49 corrected, 5 failed</small></div>
       <div class="at-kpi"><b>2 of 43</b><span>Legendary rules that hold in both halves</span><small>of 156 years, after testing for many; 3 hold in one era only, 1 reversed</small></div>
       <div class="at-kpi"><b>0 of 5</b><span>Borrowed upgrades adopted by the core</span><small>EMOS, textbook EMOS, BMA, credibility, an EVT floor: none beat it cleanly</small></div>
@@ -3826,7 +3836,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">Two builder agents wrote the reasoning engine (deduction with proofs, rule induction walked forward, abduction, concept invention) and the cross-field library (forecast verification, recalibration, model averaging, generalized Pareto tails, tail backtests, ruin, credibility), each with tests against known answers. A third iterated the ML and RL engines in its own copy of the repository and tried 29 variants, adopting three that cleared rules written first. Every sizing variant tried now counts in the evidence gate: 28 strategies, so the engine's record must reach t 1.80 before the book moves off 1x.</p>
   </section>
   <section class="section" aria-labelledby="ag-v24-t">
-    <div class="section-head"><p class="eyebrow">v0.24</p><h2 id="ag-v24-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.24</p><h2 id="ag-v24-t">Release metrics, v0.24</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>217</b><span>Research checks by independent agents</span><small>175 facts and 35 quotes, plus 7 reopened; 20 corrected, 1 failed and dropped</small></div>
       <div class="at-kpi"><b>70</b><span>Audit findings, read like a PM</span><small>5 blockers and 25 majors; the blockers and most majors fixed here</small></div>
       <div class="at-kpi"><b>0.50 &rarr; none</b><span>Trend overlay withdrawn</span><small>walked forward, the rule's own choice cost utility (t &minus;2.29)</small></div>
@@ -3834,7 +3844,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">Five research agents each gathered 35 dated, linked items on one question (the tape, capex and earnings, AI credit, the Fed and inflation, power), a sixth gathered 35 verbatim quotes, and a separate checker per file reopened every source without seeing the researcher's reasoning: 20 items came back corrected and 1 failed. An auditor agent then read every desk as a portfolio manager would and returned 70 ranked findings. The first major finding was the engine's own: the trend overlay's factor had been chosen on the full record, with the factors tried left out of the deflation. Walked forward (a 10-year burn-in, the factor re-chosen every twelve months on the record to date), the same rule averaged a 0.56 scaling, changed 18 times and cost a risk-averse investor expected utility against holding (t &minus;2.29), so the overlay is withdrawn, its four scalings now count among the strategies the gate discounts (12, so t0 1.38), and the trend rule runs through one code path everywhere.</p>
   </section>
   <section class="section" aria-labelledby="ag-v23-t">
-    <div class="section-head"><p class="eyebrow">v0.23</p><h2 id="ag-v23-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.23</p><h2 id="ag-v23-t">Release metrics, v0.23</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>22</b><span>Parameter objects inventoried</span><small>shape, optimiser, objective, data, refit, destination</small></div>
       <div class="at-kpi"><b>0.50</b><span>Trend overlay chosen, then rejected</span><small>chosen by a rule written first; withdrawn in v0.24 when the rule failed walked forward</small></div>
       <div class="at-kpi"><b>14 to 5</b><span>Screens on Today</span><small>one call, six stages, the counts, the fund block</small></div>
@@ -3842,7 +3852,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The lead agent took the review's structural findings (a fourteen-screen landing page, five navigation layers, a trend rule that beat holding on Sharpe and drawdown while the gate benchmarked against holding) and resolved each on the record rather than by taste: the overlay factor is chosen by a rule stated before the result, the landing page became the call and the engine's stages, and every parameter the engine learns was inventoried from the engines' own outputs so the page cannot disagree with the run. No subagents were used for this release; the checks were the test suite, the stress harness and screenshots at three widths in both themes.</p>
   </section>
   <section class="section" aria-labelledby="ag-v22-t">
-    <div class="section-head"><p class="eyebrow">v0.22</p><h2 id="ag-v22-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.22</p><h2 id="ag-v22-t">Release metrics, v0.22</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>40 + 60</b><span>Findings from two independent review agents</span><small>a real bug, stale counts and dates, column bugs, register; most fixed here</small></div>
       <div class="at-kpi"><b>1 of 8</b><span>Geometric claims that survive</span><small>walked forward, corrected for testing many</small></div>
       <div class="at-kpi"><b>&minus;0.2</b><span>The placebo's t</span><small>nearest analogs against random ones</small></div>
@@ -3850,7 +3860,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">An auditor agent read every desk and source file without editing anything and returned a ranked list: a Games desk left empty by two functions sharing a name, status chips and FAQ answers still carrying older counts, an Engine room registry missing half its engines, the decision engine's bonds stopping in 2023, unread snapshot payloads and dead code. The lead fixed most of them, added a build check that makes the name clash impossible, and built the geometry engine, its tests on planted data (a circle has one loop, pure noise stays inside the Marchenko-Pastur edges, the distance ignores units) and the placebo that decided how the decision engine uses it.</p>
   </section>
   <section class="section" aria-labelledby="ag-v21-t">
-    <div class="section-head"><p class="eyebrow">v0.21</p><h2 id="ag-v21-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.21</p><h2 id="ag-v21-t">Release metrics, v0.21</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>93 s to 33 s</b><span>The decision engine</span><small>the same decision, every digit</small></div>
       <div class="at-kpi"><b>0.0</b><span>Batched ensemble against sequential</span><small>largest difference in any weight, measured by the builder agent</small></div>
       <div class="at-kpi"><b>11</b><span>Rounds for 1,868 months</span><small>the regime filter as a scan of matrix products</small></div>
@@ -3858,7 +3868,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">A subagent rebuilt the neural ensemble so its five networks train side by side through batched matrix products, reproducing the sequential training bit for bit (same random streams, separate early stopping) and about twice as fast. The lead turned the regime filter into a scan, batched every random start of each fit, put the mind's graph into one sparse matrix so many questions think at once, built the board, the spectral map, the shortcut desk and the Pearl section from two sources it read, and kept the step-by-step versions as references the tests check against.</p>
   </section>
   <section class="section" aria-labelledby="ag-v20-t">
-    <div class="section-head"><p class="eyebrow">v0.20</p><h2 id="ag-v20-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.20</p><h2 id="ag-v20-t">Release metrics, v0.20</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>41</b><span>Desks reviewed by an agent</span><small>at three widths and both themes; 25 findings, most fixed here</small></div>
       <div class="at-kpi"><b>8</b><span>Policies walked forward</span><small>plus a learner over six of them, since 1940</small></div>
       <div class="at-kpi"><b>5,000</b><span>Simulated decades</span><small>from today's regime odds, with real historical months</small></div>
@@ -3866,7 +3876,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">A reviewer agent opened every desk at 1366 and 390 pixels in light and dark, measured overflow, overlap, empty panels, unreadable charts and the code viewer, and reported 25 issues with the selectors it verified. The lead built the portfolio engine, the multivariate regime model and the learner, the decision engine in the page, the mind's decision answers and the new code reader, and fixed the review's findings: a chart drawn at the wrong size, raw exception names, unreadable spiky series, stretched panels, a see-through header, wrapping navigation, a dock that covered content, the mind's 577-item list.</p>
   </section>
   <section class="section" aria-labelledby="ag-v19-t">
-    <div class="section-head"><p class="eyebrow">v0.19</p><h2 id="ag-v19-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.19</p><h2 id="ag-v19-t">Release metrics, v0.19</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>1</b><span>Builder agent</span><small>the neural-network library, gradient-checked, with 21 tests</small></div>
       <div class="at-kpi"><b>5 stages</b><span>One decision pipeline</span><small>data, features, models, inference, decision</small></div>
       <div class="at-kpi"><b>1,041</b><span>Months walked forward</span><small>every decision from 1940 on, with costs</small></div>
@@ -3874,7 +3884,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">A subagent wrote the network library (multi-layer perceptrons, deep ensembles, quantile and logistic losses, early stopping on the newest data, a purged walk-forward) to a written specification and its own tests. The lead wrote inference (regimes, changepoints, Kalman, stacking), the decision engine and its desk, with tests that plant the answer: two regimes recovered, a changepoint found within six months, a drifting slope tracked, a hedge chosen by context, and every walked-forward step shown not to see the future.</p>
   </section>
   <section class="section" aria-labelledby="ag-v18-t">
-    <div class="section-head"><p class="eyebrow">v0.18</p><h2 id="ag-v18-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.18</p><h2 id="ag-v18-t">Release metrics, v0.18</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>2</b><span>Builder agents</span><small>the Vim and Emacs clients, and the reading guide for 40 desks</small></div>
       <div class="at-kpi"><b>12 s to 1.6 s</b><span>Mind rebuild</span><small>with the content-addressed cache warm</small></div>
       <div class="at-kpi"><b>0.40 s to 0.05 s</b><span>A question, in Python</span><small>vectorized recall and spreading activation</small></div>
@@ -3882,7 +3892,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The lead wrote the framework (cache, runner, contracts, doctor, bench), the faster mind in both languages, the lazy page boot and the type system, with tests that plant faults: an engine that crashes, one that hangs, one that writes a number that is not finite, a corrupted cache entry, an unwritable cache folder, a flaky source that fails once.</p>
   </section>
   <section class="section" aria-labelledby="ag-v17-t">
-    <div class="section-head"><p class="eyebrow">v0.17</p><h2 id="ag-v17-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.17</p><h2 id="ag-v17-t">Release metrics, v0.17</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>8</b><span>Concept writers</span><small>each a domain, 500 entries, checked against the existing 630 by script</small></div>
       <div class="at-kpi"><b>3,665</b><span>Concepts kept</span><small>of 4,000 written; 335 duplicates across writers dropped</small></div>
       <div class="at-kpi"><b>958 / 4</b><span>Audited / fixed</span><small>a fact checker read every dated, numbered or historical entry and a random 250</small></div>
@@ -3891,14 +3901,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <p class="prose">The lead wrote the bond lab and its mirror in the page, the complexity study, the chronicle and the mind's bond and history answers, with tests that plant the answer (a zero-coupon ladder's duration, the curve move landing exactly on the 10-year and 30-year, Python and the page agreeing to the twelfth decimal).</p>
   </section>
   <section class="section" aria-labelledby="ag-v16-t">
-    <div class="section-head"><p class="eyebrow">v0.16</p><h2 id="ag-v16-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.16</p><h2 id="ag-v16-t">Release metrics, v0.16</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>1</b><span>Research agent</span><small>the distribution metrics each company discloses, and the case for and against distribution as a moat</small></div>
       <div class="at-kpi"><b>36</b><span>Items found</span><small>30 company metrics and 6 on the idea, each confirmed on its page</small></div>
       <div class="at-kpi"><b>35 / 1 / 0</b><span>Confirmed / corrected / failed</span><small>by a second agent that reopened every page; the one fix was a date</small></div></div>
     <p class="prose">The lead wrote the data hub, the technical and fundamental analysis, the reinforcement-learning agent and the faster layout, with synthetic data that plants the answer for every test. The build workspace can reach only GitHub and the package registries, so Databento, the SEC and the quote services are exercised in the daily Action, not here.</p>
   </section>
   <section class="section" aria-labelledby="ag-v15-t">
-    <div class="section-head"><p class="eyebrow">v0.15</p><h2 id="ag-v15-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.15</p><h2 id="ag-v15-t">Release metrics, v0.15</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>3</b><span>Research agents</span><small>information-edge sources, model risk and failures, machine learning in finance</small></div>
       <div class="at-kpi"><b>150</b><span>Items found</span><small>55, 50 and 45, each confirmed on its page by the agent that wrote it</small></div>
       <div class="at-kpi"><b>3</b><span>Independent checkers</span><small>one per file, re-opening every source</small></div>
@@ -3911,7 +3921,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     </ol>
   </section>
   <section class="section" aria-labelledby="ag-v14-t">
-    <div class="section-head"><p class="eyebrow">v0.14</p><h2 id="ag-v14-t">Release metrics</h2></div>
+    <div class="section-head"><p class="eyebrow">v0.14</p><h2 id="ag-v14-t">Release metrics, v0.14</h2></div>
     <div class="at-tiles"><div class="at-kpi"><b>6</b><span>Research agents</span><small>private markets, asset management, indicators and valuation, commodities, games and statistics, trading structure</small></div>
       <div class="at-kpi"><b>125 of 168</b><span>Web searches used</span><small>a shared budget of 200 per turn; each researcher was capped at 28</small></div>
       <div class="at-kpi"><b>268</b><span>Items found</span><small>each confirmed on its page by the agent that wrote it</small></div>

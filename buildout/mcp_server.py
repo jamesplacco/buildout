@@ -962,8 +962,11 @@ def technical_analysis(ctx: Context, args: dict) -> dict:
 def fundamental_analysis(ctx: Context, args: dict) -> dict:
     t = str(args.get("ticker", "")).upper().strip()
     C = (ctx.load("statements") or {}).get("companies") or {}
-    if t not in C:
-        C = _snap16("statements").get("companies", {})
+    if t in C and C[t].get("ok", True) is not False:
+        return C[t]
+    S = _snap16("statements").get("companies", {})       # v0.39.1: a failed live pull falls back to the last good reading, labelled
+    if t in S:
+        return {**S[t], "source_note": "the latest run could not read this company's filings; this is the last good reading, from the page's snapshot"} if t in C else S[t]
     if t in C:
         return C[t]
     if args.get("live"):
@@ -1552,7 +1555,7 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                          "quotes": {"type": "object", "description": "{SYMBOL: {bid, ask, last}} for every book name, PSQ and VIXY"},
                          "variant": {"type": "string", "enum": ["unhedged", "hedged"]},
                          "vix_share": {**NUM, "description": "VIX sleeve as a share of equity, 0 to 0.2 (default from config, 0.05)"}}, ["account", "quotes"]),
-                   {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False}),
+                   {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False}),
     "record_fills": (record_fills, "Record the fills Robinhood reported for a ticket: each checked against the ticket's orders (symbol, side, no more shares, "
                      "not through the limit) and appended to a hash-chained private log.",
                      _obj({"ticket_id": {"type": "string"}, "fills": {"type": "array", "items": {"type": "object"}}}, ["ticket_id", "fills"]),
