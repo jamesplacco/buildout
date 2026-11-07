@@ -1,17 +1,1710 @@
 {
  "schema": 2,
  "units": "USD billions",
- "companies": {},
- "ttm": {},
- "skipped": [
-  "GOOGL: Invalid header value b'James Placco\\r\\[email removed]'",
-  "MSFT: Invalid header value b'James Placco\\r\\[email removed]'",
-  "AMZN: Invalid header value b'James Placco\\r\\[email removed]'",
-  "META: Invalid header value b'James Placco\\r\\[email removed]'",
-  "ORCL: Invalid header value b'James Placco\\r\\[email removed]'",
-  "NVDA: Invalid header value b'James Placco\\r\\[email removed]'",
-  "TSLA: Invalid header value b'James Placco\\r\\[email removed]'",
-  "CRWV: Invalid header value b'James Placco\\r\\[email removed]'",
-  "SPCX: Invalid header value b'James Placco\\r\\[email removed]'"
- ]
+ "companies": {
+  "GOOGL": [
+   {
+    "index": 0,
+    "quarter_end": "2023-12-31",
+    "ocf": 18.915,
+    "capex": 11.019,
+    "long_term_debt": 11.87,
+    "cash": 24.048,
+    "fcf": 7.896,
+    "capex_to_ocf": 0.582554
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-03-31",
+    "ocf": 28.848,
+    "capex": 12.012,
+    "long_term_debt": null,
+    "cash": 24.493,
+    "fcf": 16.836,
+    "capex_to_ocf": 0.416389
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-06-30",
+    "ocf": 26.64,
+    "capex": 13.186,
+    "long_term_debt": null,
+    "cash": 27.225,
+    "fcf": 13.454,
+    "capex_to_ocf": 0.49497
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-09-30",
+    "ocf": 30.698,
+    "capex": 13.061,
+    "long_term_debt": null,
+    "cash": 19.959,
+    "fcf": 17.637,
+    "capex_to_ocf": 0.425467
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-12-31",
+    "ocf": 39.113,
+    "capex": 14.276,
+    "long_term_debt": 10.883,
+    "cash": 23.466,
+    "fcf": 24.837,
+    "capex_to_ocf": 0.364994
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-03-31",
+    "ocf": 36.15,
+    "capex": 17.197,
+    "long_term_debt": 10.886,
+    "cash": 23.264,
+    "fcf": 18.953,
+    "capex_to_ocf": 0.475712
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-06-30",
+    "ocf": 27.747,
+    "capex": 22.446,
+    "long_term_debt": 23.607,
+    "cash": 21.036,
+    "fcf": 5.301,
+    "capex_to_ocf": 0.808952
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-09-30",
+    "ocf": 48.414,
+    "capex": 23.953,
+    "long_term_debt": 21.607,
+    "cash": 23.09,
+    "fcf": 24.461,
+    "capex_to_ocf": 0.494754
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-12-31",
+    "ocf": 52.402,
+    "capex": 27.851,
+    "long_term_debt": 46.547,
+    "cash": 30.708,
+    "fcf": 24.551,
+    "capex_to_ocf": 0.531487
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-03-31",
+    "ocf": 45.79,
+    "capex": 35.674,
+    "long_term_debt": 77.501,
+    "cash": 38.063,
+    "fcf": 10.116,
+    "capex_to_ocf": 0.779078
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-06-30",
+    "ocf": 39.069,
+    "capex": 44.924,
+    "long_term_debt": 98.165,
+    "cash": 55.911,
+    "fcf": -5.855,
+    "capex_to_ocf": 1.149863
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-09-30",
+    "ocf": 42.29,
+    "capex": 51.355,
+    "long_term_debt": 125.102,
+    "cash": 56.334,
+    "fcf": -9.065,
+    "capex_to_ocf": 1.214353
+   }
+  ],
+  "MSFT": [
+   {
+    "index": 0,
+    "quarter_end": "2023-12-31",
+    "ocf": 18.853,
+    "capex": 9.735,
+    "long_term_debt": 44.928,
+    "cash": 17.305,
+    "fcf": 9.118,
+    "capex_to_ocf": 0.516363
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-03-31",
+    "ocf": 31.917,
+    "capex": 10.952,
+    "long_term_debt": 42.658,
+    "cash": 19.634,
+    "fcf": 20.965,
+    "capex_to_ocf": 0.34314
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-06-30",
+    "ocf": 37.195,
+    "capex": 13.873,
+    "long_term_debt": 42.688,
+    "cash": 18.315,
+    "fcf": 23.322,
+    "capex_to_ocf": 0.37298
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-09-30",
+    "ocf": 34.18,
+    "capex": 14.923,
+    "long_term_debt": 42.868,
+    "cash": 20.84,
+    "fcf": 19.257,
+    "capex_to_ocf": 0.4366
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-12-31",
+    "ocf": 22.291,
+    "capex": 15.804,
+    "long_term_debt": 39.722,
+    "cash": 17.482,
+    "fcf": 6.487,
+    "capex_to_ocf": 0.708986
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-03-31",
+    "ocf": 37.044,
+    "capex": 16.745,
+    "long_term_debt": 39.882,
+    "cash": 28.828,
+    "fcf": 20.299,
+    "capex_to_ocf": 0.45203
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-06-30",
+    "ocf": 42.647,
+    "capex": 17.079,
+    "long_term_debt": 40.152,
+    "cash": 30.242,
+    "fcf": 25.568,
+    "capex_to_ocf": 0.400474
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-09-30",
+    "ocf": 45.057,
+    "capex": 19.394,
+    "long_term_debt": 35.376,
+    "cash": 28.849,
+    "fcf": 25.663,
+    "capex_to_ocf": 0.430433
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-12-31",
+    "ocf": 35.758,
+    "capex": 29.876,
+    "long_term_debt": 35.425,
+    "cash": 24.296,
+    "fcf": 5.882,
+    "capex_to_ocf": 0.835505
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-03-31",
+    "ocf": 46.679,
+    "capex": 30.876,
+    "long_term_debt": 31.423,
+    "cash": 32.105,
+    "fcf": 15.803,
+    "capex_to_ocf": 0.661454
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-06-30",
+    "ocf": 55.441,
+    "capex": 35.802,
+    "long_term_debt": 31.067,
+    "cash": 20.935,
+    "fcf": 19.639,
+    "capex_to_ocf": 0.645768
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-09-30",
+    "ocf": 58.0,
+    "capex": 39.367,
+    "long_term_debt": 31.09,
+    "cash": 20.281,
+    "fcf": 18.633,
+    "capex_to_ocf": 0.678741
+   }
+  ],
+  "AMZN": [
+   {
+    "index": 0,
+    "quarter_end": "2023-12-31",
+    "ocf": 42.465,
+    "capex": 14.588,
+    "long_term_debt": 58.314,
+    "cash": 73.387,
+    "fcf": 27.877,
+    "capex_to_ocf": 0.34353
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-03-31",
+    "ocf": 18.989,
+    "capex": 14.925,
+    "long_term_debt": 57.634,
+    "cash": 72.852,
+    "fcf": 4.064,
+    "capex_to_ocf": 0.785981
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-06-30",
+    "ocf": 25.281,
+    "capex": 17.62,
+    "long_term_debt": 54.889,
+    "cash": 71.178,
+    "fcf": 7.661,
+    "capex_to_ocf": 0.696966
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-09-30",
+    "ocf": 25.971,
+    "capex": 22.62,
+    "long_term_debt": 54.89,
+    "cash": 75.091,
+    "fcf": 3.351,
+    "capex_to_ocf": 0.870971
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-12-31",
+    "ocf": 45.636,
+    "capex": 27.834,
+    "long_term_debt": 52.623,
+    "cash": 78.779,
+    "fcf": 17.802,
+    "capex_to_ocf": 0.609913
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-03-31",
+    "ocf": 17.015,
+    "capex": 25.019,
+    "long_term_debt": 53.374,
+    "cash": 66.207,
+    "fcf": -8.004,
+    "capex_to_ocf": 1.470408
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-06-30",
+    "ocf": 32.515,
+    "capex": 32.183,
+    "long_term_debt": 50.718,
+    "cash": 57.741,
+    "fcf": 0.332,
+    "capex_to_ocf": 0.989789
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-09-30",
+    "ocf": 35.525,
+    "capex": 35.095,
+    "long_term_debt": 50.742,
+    "cash": 66.922,
+    "fcf": 0.43,
+    "capex_to_ocf": 0.987896
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-12-31",
+    "ocf": 54.459,
+    "capex": 39.522,
+    "long_term_debt": 65.648,
+    "cash": 86.81,
+    "fcf": 14.937,
+    "capex_to_ocf": 0.72572
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-03-31",
+    "ocf": 26.032,
+    "capex": 44.203,
+    "long_term_debt": 119.074,
+    "cash": 101.816,
+    "fcf": -18.171,
+    "capex_to_ocf": 1.698026
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-06-30",
+    "ocf": 45.387,
+    "capex": 54.208,
+    "long_term_debt": 128.894,
+    "cash": 78.213,
+    "fcf": -8.821,
+    "capex_to_ocf": 1.194351
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-09-30",
+    "ocf": 42.422,
+    "capex": 77.259,
+    "long_term_debt": 173.125,
+    "cash": 55.783,
+    "fcf": -34.837,
+    "capex_to_ocf": 1.821201
+   }
+  ],
+  "META": [
+   {
+    "index": 0,
+    "quarter_end": "2023-12-31",
+    "ocf": 19.404,
+    "capex": 7.592,
+    "long_term_debt": 18.385,
+    "cash": 41.862,
+    "fcf": 11.812,
+    "capex_to_ocf": 0.39126
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-03-31",
+    "ocf": 19.246,
+    "capex": 6.4,
+    "long_term_debt": 18.387,
+    "cash": 32.307,
+    "fcf": 12.846,
+    "capex_to_ocf": 0.332537
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-06-30",
+    "ocf": 19.37,
+    "capex": 8.173,
+    "long_term_debt": 18.389,
+    "cash": 32.045,
+    "fcf": 11.197,
+    "capex_to_ocf": 0.421941
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-09-30",
+    "ocf": 24.724,
+    "capex": 8.258,
+    "long_term_debt": 28.823,
+    "cash": 43.852,
+    "fcf": 16.466,
+    "capex_to_ocf": 0.334007
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-12-31",
+    "ocf": 27.988,
+    "capex": 14.425,
+    "long_term_debt": 28.826,
+    "cash": 43.889,
+    "fcf": 13.563,
+    "capex_to_ocf": 0.515399
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-03-31",
+    "ocf": 24.026,
+    "capex": 12.941,
+    "long_term_debt": 28.829,
+    "cash": 28.75,
+    "fcf": 11.085,
+    "capex_to_ocf": 0.538625
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-06-30",
+    "ocf": 25.561,
+    "capex": 16.538,
+    "long_term_debt": 28.832,
+    "cash": 12.005,
+    "fcf": 9.023,
+    "capex_to_ocf": 0.647001
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-09-30",
+    "ocf": 29.999,
+    "capex": 18.829,
+    "long_term_debt": 28.834,
+    "cash": 10.187,
+    "fcf": 11.17,
+    "capex_to_ocf": 0.627654
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-12-31",
+    "ocf": 36.214,
+    "capex": 21.383,
+    "long_term_debt": 58.744,
+    "cash": 35.873,
+    "fcf": 14.831,
+    "capex_to_ocf": 0.590462
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-03-31",
+    "ocf": 32.226,
+    "capex": 18.997,
+    "long_term_debt": 58.748,
+    "cash": 23.426,
+    "fcf": 13.229,
+    "capex_to_ocf": 0.589493
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-06-30",
+    "ocf": 31.862,
+    "capex": 30.116,
+    "long_term_debt": 83.664,
+    "cash": 15.462,
+    "fcf": 1.746,
+    "capex_to_ocf": 0.945201
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-09-30",
+    "ocf": 32.785,
+    "capex": 33.942,
+    "long_term_debt": 80.922,
+    "cash": 11.222,
+    "fcf": -1.157,
+    "capex_to_ocf": 1.035291
+   }
+  ],
+  "ORCL": [
+   {
+    "index": 0,
+    "quarter_end": "2023-11-30",
+    "ocf": 0.143,
+    "capex": 1.08,
+    "long_term_debt": null,
+    "cash": 8.244,
+    "fcf": -0.937,
+    "capex_to_ocf": 7.552448
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-02-29",
+    "ocf": 5.475,
+    "capex": 1.674,
+    "long_term_debt": null,
+    "cash": 9.481,
+    "fcf": 3.801,
+    "capex_to_ocf": 0.305753
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-05-31",
+    "ocf": 6.081,
+    "capex": 2.798,
+    "long_term_debt": null,
+    "cash": 10.454,
+    "fcf": 3.283,
+    "capex_to_ocf": 0.460122
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-08-31",
+    "ocf": 7.427,
+    "capex": 2.303,
+    "long_term_debt": null,
+    "cash": 10.616,
+    "fcf": 5.124,
+    "capex_to_ocf": 0.310085
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-11-30",
+    "ocf": 1.304,
+    "capex": 3.97,
+    "long_term_debt": null,
+    "cash": 10.941,
+    "fcf": -2.666,
+    "capex_to_ocf": 3.044479
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-02-28",
+    "ocf": 5.933,
+    "capex": 5.862,
+    "long_term_debt": null,
+    "cash": 17.406,
+    "fcf": 0.071,
+    "capex_to_ocf": 0.988033
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-05-31",
+    "ocf": 6.157,
+    "capex": 9.08,
+    "long_term_debt": null,
+    "cash": 10.786,
+    "fcf": -2.923,
+    "capex_to_ocf": 1.474744
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-08-31",
+    "ocf": 8.14,
+    "capex": 8.502,
+    "long_term_debt": null,
+    "cash": 10.445,
+    "fcf": -0.362,
+    "capex_to_ocf": 1.044472
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-11-30",
+    "ocf": 2.066,
+    "capex": 12.033,
+    "long_term_debt": null,
+    "cash": 19.241,
+    "fcf": -9.967,
+    "capex_to_ocf": 5.824298
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-02-28",
+    "ocf": 7.151,
+    "capex": 18.635,
+    "long_term_debt": null,
+    "cash": 38.455,
+    "fcf": -11.484,
+    "capex_to_ocf": 2.605929
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-05-31",
+    "ocf": 14.62,
+    "capex": 16.493,
+    "long_term_debt": null,
+    "cash": 31.289,
+    "fcf": -1.873,
+    "capex_to_ocf": 1.128112
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-08-31",
+    "ocf": 23.103,
+    "capex": 28.499,
+    "long_term_debt": null,
+    "cash": 36.369,
+    "fcf": -5.396,
+    "capex_to_ocf": 1.233563
+   }
+  ],
+  "NVDA": [
+   {
+    "index": 0,
+    "quarter_end": "2023-10-29",
+    "ocf": 7.332,
+    "capex": 0.278,
+    "long_term_debt": 8.457,
+    "cash": 5.519,
+    "fcf": 7.054,
+    "capex_to_ocf": 0.037916
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-01-28",
+    "ocf": 11.499,
+    "capex": 0.254,
+    "long_term_debt": 8.459,
+    "cash": 7.28,
+    "fcf": 11.245,
+    "capex_to_ocf": 0.022089
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-04-28",
+    "ocf": 15.345,
+    "capex": 0.369,
+    "long_term_debt": 8.46,
+    "cash": 7.587,
+    "fcf": 14.976,
+    "capex_to_ocf": 0.024047
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-07-28",
+    "ocf": 14.488,
+    "capex": 0.977,
+    "long_term_debt": 8.461,
+    "cash": 8.563,
+    "fcf": 13.511,
+    "capex_to_ocf": 0.067435
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-10-27",
+    "ocf": 17.627,
+    "capex": 0.813,
+    "long_term_debt": 8.462,
+    "cash": 9.107,
+    "fcf": 16.814,
+    "capex_to_ocf": 0.046122
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-01-26",
+    "ocf": 16.629,
+    "capex": 1.077,
+    "long_term_debt": 8.463,
+    "cash": 8.589,
+    "fcf": 15.552,
+    "capex_to_ocf": 0.064766
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-04-27",
+    "ocf": 27.414,
+    "capex": 1.227,
+    "long_term_debt": 8.464,
+    "cash": 15.234,
+    "fcf": 26.187,
+    "capex_to_ocf": 0.044758
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-07-27",
+    "ocf": 15.365,
+    "capex": 1.895,
+    "long_term_debt": 8.466,
+    "cash": 11.639,
+    "fcf": 13.47,
+    "capex_to_ocf": 0.123332
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-10-26",
+    "ocf": 23.751,
+    "capex": 1.636,
+    "long_term_debt": 7.468,
+    "cash": 11.486,
+    "fcf": 22.115,
+    "capex_to_ocf": 0.068881
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-01-25",
+    "ocf": 36.188,
+    "capex": 1.284,
+    "long_term_debt": 7.469,
+    "cash": 10.605,
+    "fcf": 34.904,
+    "capex_to_ocf": 0.035481
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-04-26",
+    "ocf": 50.344,
+    "capex": 1.757,
+    "long_term_debt": 7.47,
+    "cash": 13.237,
+    "fcf": 48.587,
+    "capex_to_ocf": 0.0349
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-07-26",
+    "ocf": 24.077,
+    "capex": 2.677,
+    "long_term_debt": 32.366,
+    "cash": 22.443,
+    "fcf": 21.4,
+    "capex_to_ocf": 0.111185
+   }
+  ],
+  "TSLA": [
+   {
+    "index": 0,
+    "quarter_end": "2023-12-31",
+    "ocf": 4.37,
+    "capex": 2.307,
+    "long_term_debt": 2.682,
+    "cash": 16.398,
+    "fcf": 2.063,
+    "capex_to_ocf": 0.527918
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-03-31",
+    "ocf": 0.242,
+    "capex": 2.777,
+    "long_term_debt": 2.739,
+    "cash": 11.805,
+    "fcf": -2.535,
+    "capex_to_ocf": 11.475207
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-06-30",
+    "ocf": 3.612,
+    "capex": 2.272,
+    "long_term_debt": 5.338,
+    "cash": 14.635,
+    "fcf": 1.34,
+    "capex_to_ocf": 0.629014
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-09-30",
+    "ocf": 6.255,
+    "capex": 3.513,
+    "long_term_debt": 5.275,
+    "cash": 18.111,
+    "fcf": 2.742,
+    "capex_to_ocf": 0.561631
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-12-31",
+    "ocf": 4.814,
+    "capex": 2.78,
+    "long_term_debt": 5.535,
+    "cash": 16.139,
+    "fcf": 2.034,
+    "capex_to_ocf": 0.577482
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-03-31",
+    "ocf": 2.156,
+    "capex": 1.492,
+    "long_term_debt": 5.08,
+    "cash": 16.352,
+    "fcf": 0.664,
+    "capex_to_ocf": 0.692022
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-06-30",
+    "ocf": 2.54,
+    "capex": 2.394,
+    "long_term_debt": 4.994,
+    "cash": 15.587,
+    "fcf": 0.146,
+    "capex_to_ocf": 0.94252
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-09-30",
+    "ocf": 6.238,
+    "capex": 2.248,
+    "long_term_debt": 5.609,
+    "cash": 18.289,
+    "fcf": 3.99,
+    "capex_to_ocf": 0.360372
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-12-31",
+    "ocf": 3.813,
+    "capex": 2.393,
+    "long_term_debt": 6.584,
+    "cash": 16.513,
+    "fcf": 1.42,
+    "capex_to_ocf": 0.62759
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-03-31",
+    "ocf": 3.937,
+    "capex": 2.493,
+    "long_term_debt": 7.645,
+    "cash": 16.603,
+    "fcf": 1.444,
+    "capex_to_ocf": 0.633223
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-06-30",
+    "ocf": 4.697,
+    "capex": 5.789,
+    "long_term_debt": 7.721,
+    "cash": 15.219,
+    "fcf": -1.092,
+    "capex_to_ocf": 1.232489
+   },
+   {
+    "index": 11,
+    "quarter_end": "2026-09-30",
+    "ocf": 6.263,
+    "capex": 4.732,
+    "long_term_debt": 7.956,
+    "cash": 17.853,
+    "fcf": 1.531,
+    "capex_to_ocf": 0.755548
+   }
+  ],
+  "CRWV": [
+   {
+    "index": 0,
+    "quarter_end": "2023-12-31",
+    "ocf": null,
+    "capex": null,
+    "long_term_debt": null,
+    "cash": 0.217,
+    "fcf": null,
+    "capex_to_ocf": null
+   },
+   {
+    "index": 1,
+    "quarter_end": "2024-03-31",
+    "ocf": 2.039038,
+    "capex": 1.741935,
+    "long_term_debt": null,
+    "cash": 1.306872,
+    "fcf": 0.297103,
+    "capex_to_ocf": 0.854293
+   },
+   {
+    "index": 2,
+    "quarter_end": "2024-06-30",
+    "ocf": -0.117824,
+    "capex": 2.247161,
+    "long_term_debt": null,
+    "cash": 1.028044,
+    "fcf": -2.364985,
+    "capex_to_ocf": -19.072184
+   },
+   {
+    "index": 3,
+    "quarter_end": "2024-09-30",
+    "ocf": 0.641222,
+    "capex": 1.215155,
+    "long_term_debt": null,
+    "cash": 1.355216,
+    "fcf": -0.573933,
+    "capex_to_ocf": 1.895061
+   },
+   {
+    "index": 4,
+    "quarter_end": "2024-12-31",
+    "ocf": 0.186564,
+    "capex": 3.497749,
+    "long_term_debt": 5.458,
+    "cash": 1.361,
+    "fcf": -3.311185,
+    "capex_to_ocf": 18.748253
+   },
+   {
+    "index": 5,
+    "quarter_end": "2025-03-31",
+    "ocf": 0.061,
+    "capex": 1.407,
+    "long_term_debt": 4.935071,
+    "cash": 1.276,
+    "fcf": -1.346,
+    "capex_to_ocf": 23.065574
+   },
+   {
+    "index": 6,
+    "quarter_end": "2025-06-30",
+    "ocf": -0.251,
+    "capex": 2.453,
+    "long_term_debt": 7.423837,
+    "cash": 1.153,
+    "fcf": -2.704,
+    "capex_to_ocf": -9.772908
+   },
+   {
+    "index": 7,
+    "quarter_end": "2025-09-30",
+    "ocf": 1.689051,
+    "capex": 2.389239,
+    "long_term_debt": 10.322757,
+    "cash": 1.894399,
+    "fcf": -0.700188,
+    "capex_to_ocf": 1.414545
+   },
+   {
+    "index": 8,
+    "quarter_end": "2025-12-31",
+    "ocf": 1.558949,
+    "capex": 4.059761,
+    "long_term_debt": 14.665,
+    "cash": 3.127,
+    "fcf": -2.500812,
+    "capex_to_ocf": 2.604165
+   },
+   {
+    "index": 9,
+    "quarter_end": "2026-03-31",
+    "ocf": 2.984,
+    "capex": 7.695,
+    "long_term_debt": 17.312,
+    "cash": 2.244,
+    "fcf": -4.711,
+    "capex_to_ocf": 2.578753
+   },
+   {
+    "index": 10,
+    "quarter_end": "2026-06-30",
+    "ocf": 0.679,
+    "capex": 6.422,
+    "long_term_debt": null,
+    "cash": 5.524,
+    "fcf": -5.743,
+    "capex_to_ocf": 9.458027
+   }
+  ],
+  "SPCX": [
+   {
+    "index": 0,
+    "quarter_end": "2025-09-30",
+    "ocf": 3.769,
+    "capex": 6.881,
+    "long_term_debt": null,
+    "cash": null,
+    "fcf": -3.112,
+    "capex_to_ocf": 1.825683
+   },
+   {
+    "index": 1,
+    "quarter_end": "2025-12-31",
+    "ocf": null,
+    "capex": null,
+    "long_term_debt": 21.659,
+    "cash": 24.747,
+    "fcf": null,
+    "capex_to_ocf": null
+   },
+   {
+    "index": 2,
+    "quarter_end": "2026-06-30",
+    "ocf": null,
+    "capex": null,
+    "long_term_debt": 38.285,
+    "cash": 93.522,
+    "fcf": null,
+    "capex_to_ocf": null
+   },
+   {
+    "index": 3,
+    "quarter_end": "2026-09-30",
+    "ocf": 9.631,
+    "capex": 19.593,
+    "long_term_debt": 37.861,
+    "cash": 51.294,
+    "fcf": -9.962,
+    "capex_to_ocf": 2.034368
+   }
+  ]
+ },
+ "ttm": {
+  "GOOGL": {
+   "quarter_end": "2026-09-30",
+   "revenue": 471.098,
+   "ocf": 179.551,
+   "capex": 159.804,
+   "leases": 3.604,
+   "da": 27.995,
+   "op_income": 156.976,
+   "nonop": 130.661,
+   "net_income": 235.694,
+   "interest": 3.076,
+   "buybacks": 5.899,
+   "sbc": 30.409,
+   "capex_last_q": 51.355,
+   "capex_last_q_yoy": 1.14399,
+   "capex_yoy_prev_q": 1.001426,
+   "capex_accel": 0.142565,
+   "revenue_growth": 0.222117,
+   "revenue_last_q": 127.577,
+   "revenue_last_q_yoy": 0.246526,
+   "op_income_last_q_yoy": 0.299347,
+   "debt": 125.102,
+   "debt_date": "2026-09-30",
+   "cash": 265.098,
+   "cash_date": "2026-09-30",
+   "rpo": 567.7,
+   "rpo_date": "2026-09-30",
+   "receivables": 72.784,
+   "receivables_yoy": 0.273605,
+   "debt_yoy": 4.789883,
+   "fcf": 19.747,
+   "capex_to_ocf": 0.89002,
+   "capex_to_da": 5.708305,
+   "nonop_share": 0.454257,
+   "net_cash": 139.996,
+   "rpo_years": 1.205057,
+   "ocf_to_interest": 58.371586,
+   "stage": "hedge",
+   "coverage": "self_funded",
+   "funding_gap": 0.0,
+   "gap_cover_years": null,
+   "fcf_to_ni": 0.083782,
+   "sbc_to_rev": 0.064549,
+   "recv_minus_rev": 0.051488,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 5.708305,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": 0.083782,
+     "grade": "red"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.064549,
+     "grade": "watch"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": 0.051488,
+     "grade": "watch"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "MSFT": {
+   "quarter_end": "2026-09-30",
+   "revenue": 346.445,
+   "ocf": 195.878,
+   "capex": 135.921,
+   "leases": 20.653,
+   "da": 38.3,
+   "op_income": 163.191,
+   "nonop": 14.395,
+   "net_income": 142.631,
+   "interest": 3.223,
+   "buybacks": 21.0,
+   "sbc": 12.556,
+   "capex_last_q": 39.367,
+   "capex_last_q_yoy": 1.029855,
+   "capex_yoy_prev_q": 1.096259,
+   "capex_accel": -0.066404,
+   "revenue_growth": 0.179138,
+   "revenue_last_q": 92.279,
+   "revenue_last_q_yoy": 0.188045,
+   "op_income_last_q_yoy": 0.209531,
+   "debt": 35.481,
+   "debt_date": "2026-09-30",
+   "cash": 64.509,
+   "cash_date": "2026-09-30",
+   "rpo": 683.0,
+   "rpo_date": "2026-09-30",
+   "receivables": 62.084,
+   "receivables_yoy": 0.173744,
+   "debt_yoy": -0.178833,
+   "fcf": 59.957,
+   "capex_to_ocf": 0.693906,
+   "capex_to_da": 3.548851,
+   "nonop_share": 0.081059,
+   "net_cash": 29.028,
+   "rpo_years": 1.971453,
+   "ocf_to_interest": 60.775054,
+   "stage": "hedge",
+   "coverage": "self_funded",
+   "funding_gap": 0.0,
+   "gap_cover_years": null,
+   "fcf_to_ni": 0.420364,
+   "sbc_to_rev": 0.036242,
+   "recv_minus_rev": -0.005395,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 3.548851,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": 0.420364,
+     "grade": "red"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.036242,
+     "grade": "healthy"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": -0.005395,
+     "grade": "healthy"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "AMZN": {
+   "quarter_end": "2026-09-30",
+   "revenue": 797.455,
+   "ocf": 168.3,
+   "capex": 215.192,
+   "leases": 4.543,
+   "da": 79.353,
+   "op_income": 104.366,
+   "nonop": 69.799,
+   "net_income": 134.779,
+   "interest": 4.484,
+   "buybacks": null,
+   "sbc": 19.873,
+   "capex_last_q": 77.259,
+   "capex_last_q_yoy": 1.201425,
+   "capex_yoy_prev_q": 0.684368,
+   "capex_accel": 0.517057,
+   "revenue_growth": 0.153508,
+   "revenue_last_q": 201.944,
+   "revenue_last_q_yoy": 0.120859,
+   "op_income_last_q_yoy": 0.611526,
+   "debt": 180.887,
+   "debt_date": "2026-09-30",
+   "cash": 21.531,
+   "cash_date": "2017-03-31",
+   "rpo": 41.0,
+   "rpo_date": "2020-06-30",
+   "receivables": 98.242,
+   "receivables_yoy": 0.605917,
+   "debt_yoy": 2.283064,
+   "fcf": -46.892,
+   "capex_to_ocf": 1.278622,
+   "capex_to_da": 2.711832,
+   "nonop_share": 0.400764,
+   "net_cash": -159.356,
+   "rpo_years": 0.051414,
+   "ocf_to_interest": 37.533452,
+   "stage": "speculative",
+   "coverage": "funding_gap",
+   "funding_gap": 46.892,
+   "gap_cover_years": 0.459161,
+   "fcf_to_ni": -0.347918,
+   "sbc_to_rev": 0.024921,
+   "recv_minus_rev": 0.452409,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 2.711832,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": -0.347918,
+     "grade": "red"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.024921,
+     "grade": "healthy"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": 0.452409,
+     "grade": "red"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "META": {
+   "quarter_end": "2026-09-30",
+   "revenue": 241.606,
+   "ocf": 133.087,
+   "capex": 104.438,
+   "leases": null,
+   "da": 24.92,
+   "op_income": 79.38,
+   "nonop": -0.517,
+   "net_income": 75.249,
+   "interest": null,
+   "buybacks": 0.0,
+   "sbc": 26.943,
+   "capex_last_q": 33.942,
+   "capex_last_q_yoy": 0.802645,
+   "capex_yoy_prev_q": 0.821018,
+   "capex_accel": -0.018373,
+   "revenue_growth": 0.275255,
+   "revenue_last_q": 64.601,
+   "revenue_last_q_yoy": 0.260704,
+   "op_income_last_q_yoy": -0.367519,
+   "debt": 80.922,
+   "debt_date": "2026-09-30",
+   "cash": 82.449,
+   "cash_date": "2026-09-30",
+   "rpo": null,
+   "rpo_date": null,
+   "receivables": 22.716,
+   "receivables_yoy": 0.313291,
+   "debt_yoy": 1.806478,
+   "fcf": 28.649,
+   "capex_to_ocf": 0.784735,
+   "capex_to_da": 4.190931,
+   "nonop_share": -0.006556,
+   "net_cash": 1.527,
+   "rpo_years": null,
+   "ocf_to_interest": null,
+   "stage": "hedge",
+   "coverage": "self_funded",
+   "funding_gap": 0.0,
+   "gap_cover_years": null,
+   "fcf_to_ni": 0.380723,
+   "sbc_to_rev": 0.111516,
+   "recv_minus_rev": 0.038036,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 4.190931,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": 0.380723,
+     "grade": "red"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.111516,
+     "grade": "watch"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": 0.038036,
+     "grade": "healthy"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "ORCL": {
+   "quarter_end": "2026-08-31",
+   "revenue": 71.777,
+   "ocf": 46.94,
+   "capex": 75.66,
+   "leases": null,
+   "da": 9.428,
+   "op_income": 23.056,
+   "nonop": null,
+   "net_income": 18.92,
+   "interest": 5.104,
+   "buybacks": null,
+   "sbc": 4.814,
+   "capex_last_q": 28.499,
+   "capex_last_q_yoy": 2.352035,
+   "capex_yoy_prev_q": 0.81641,
+   "capex_accel": 1.535625,
+   "revenue_growth": 0.216188,
+   "revenue_last_q": 19.345,
+   "revenue_last_q_yoy": 0.296061,
+   "op_income_last_q_yoy": 0.573065,
+   "debt": 0.0,
+   "debt_date": "2022-05-31",
+   "cash": 37.077,
+   "cash_date": "2026-08-31",
+   "rpo": 664.0,
+   "rpo_date": "2026-08-31",
+   "receivables": 11.394,
+   "receivables_yoy": 0.288477,
+   "debt_yoy": null,
+   "fcf": -28.72,
+   "capex_to_ocf": 1.611845,
+   "capex_to_da": 8.025032,
+   "nonop_share": null,
+   "net_cash": 37.077,
+   "rpo_years": 9.250874,
+   "ocf_to_interest": 9.196708,
+   "stage": "speculative",
+   "coverage": "funding_gap",
+   "funding_gap": 28.72,
+   "gap_cover_years": 1.290982,
+   "fcf_to_ni": -1.51797,
+   "sbc_to_rev": 0.067069,
+   "recv_minus_rev": 0.072288,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 8.025032,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": -1.51797,
+     "grade": "red"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.067069,
+     "grade": "watch"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": 0.072288,
+     "grade": "watch"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "NVDA": {
+   "quarter_end": "2026-07-26",
+   "revenue": 302.969,
+   "ocf": 134.36,
+   "capex": 7.354,
+   "leases": null,
+   "da": 3.687,
+   "op_income": 197.579,
+   "nonop": 32.165,
+   "net_income": 192.879,
+   "interest": 0.463,
+   "buybacks": 55.315,
+   "sbc": 7.241,
+   "capex_last_q": 2.677,
+   "capex_last_q_yoy": 0.412665,
+   "capex_yoy_prev_q": 0.431948,
+   "capex_accel": -0.019283,
+   "revenue_growth": 0.833753,
+   "revenue_last_q": 96.221,
+   "revenue_last_q_yoy": 1.058511,
+   "op_income_last_q_yoy": 1.240999,
+   "debt": 33.366,
+   "debt_date": "2026-07-26",
+   "cash": 71.565,
+   "cash_date": "2026-07-26",
+   "rpo": 3.2,
+   "rpo_date": "2026-07-26",
+   "receivables": 63.059,
+   "receivables_yoy": 1.267657,
+   "debt_yoy": 2.941176,
+   "fcf": 127.006,
+   "capex_to_ocf": 0.054734,
+   "capex_to_da": 1.994576,
+   "nonop_share": 0.140004,
+   "net_cash": 38.199,
+   "rpo_years": 0.010562,
+   "ocf_to_interest": 290.194384,
+   "stage": "hedge",
+   "coverage": "self_funded",
+   "funding_gap": 0.0,
+   "gap_cover_years": null,
+   "fcf_to_ni": 0.658475,
+   "sbc_to_rev": 0.0239,
+   "recv_minus_rev": 0.433904,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 1.994576,
+     "grade": "watch"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": 0.658475,
+     "grade": "watch"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.0239,
+     "grade": "healthy"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": 0.433904,
+     "grade": "red"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "TSLA": {
+   "quarter_end": "2026-09-30",
+   "revenue": 103.57,
+   "ocf": 18.71,
+   "capex": 15.407,
+   "leases": 0.098,
+   "da": 5.67,
+   "op_income": 3.466,
+   "nonop": null,
+   "net_income": 3.218,
+   "interest": 0.348,
+   "buybacks": null,
+   "sbc": 4.3,
+   "capex_last_q": 4.732,
+   "capex_last_q_yoy": 1.104982,
+   "capex_yoy_prev_q": 1.418129,
+   "capex_accel": -0.313146,
+   "revenue_growth": 0.082994,
+   "revenue_last_q": 28.046,
+   "revenue_last_q_yoy": -0.001744,
+   "op_income_last_q_yoy": -0.557882,
+   "debt": 7.956,
+   "debt_date": "2026-09-30",
+   "cash": 0.2436,
+   "cash_date": "2012-03-31",
+   "rpo": 10.73,
+   "rpo_date": "2026-09-30",
+   "receivables": 4.636,
+   "receivables_yoy": -0.014246,
+   "debt_yoy": 0.418435,
+   "fcf": 3.303,
+   "capex_to_ocf": 0.823463,
+   "capex_to_da": 2.717284,
+   "nonop_share": null,
+   "net_cash": -7.7124,
+   "rpo_years": 0.103601,
+   "ocf_to_interest": 53.764368,
+   "stage": "hedge",
+   "coverage": "self_funded",
+   "funding_gap": 0.0,
+   "gap_cover_years": null,
+   "fcf_to_ni": 1.026414,
+   "sbc_to_rev": 0.041518,
+   "recv_minus_rev": -0.097241,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 2.717284,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": 1.026414,
+     "grade": "healthy"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.041518,
+     "grade": "healthy"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": -0.097241,
+     "grade": "healthy"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "CRWV": {
+   "quarter_end": "2026-06-30",
+   "revenue": 7.58958,
+   "ocf": 6.911,
+   "capex": 20.566,
+   "leases": null,
+   "da": 3.991,
+   "op_income": -0.230739,
+   "nonop": null,
+   "net_income": -1.92785,
+   "interest": 1.619467,
+   "buybacks": null,
+   "sbc": 0.619,
+   "capex_last_q": 6.422,
+   "capex_last_q_yoy": 1.618019,
+   "capex_yoy_prev_q": 4.469083,
+   "capex_accel": -2.851064,
+   "revenue_growth": 1.153106,
+   "revenue_last_q": 2.575,
+   "revenue_last_q_yoy": 1.124587,
+   "op_income_last_q_yoy": -3.578947,
+   "debt": 24.859,
+   "debt_date": "2026-03-31",
+   "cash": 5.539,
+   "cash_date": "2026-06-30",
+   "rpo": 103.7,
+   "rpo_date": "2026-06-30",
+   "receivables": 2.541,
+   "receivables_yoy": 0.314062,
+   "debt_yoy": 1.85353,
+   "fcf": -13.655,
+   "capex_to_ocf": 2.975836,
+   "capex_to_da": 5.153094,
+   "nonop_share": null,
+   "net_cash": -19.32,
+   "rpo_years": 13.66347,
+   "ocf_to_interest": 4.267453,
+   "stage": "ponzi",
+   "coverage": "interest_uncovered",
+   "funding_gap": 13.655,
+   "gap_cover_years": 0.405639,
+   "fcf_to_ni": null,
+   "sbc_to_rev": 0.081559,
+   "recv_minus_rev": -0.839043,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": 5.153094,
+     "grade": "red"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": null,
+     "grade": "n/a"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": 0.081559,
+     "grade": "watch"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": -0.839043,
+     "grade": "healthy"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  },
+  "SPCX": {
+   "quarter_end": "2026-09-30",
+   "revenue": null,
+   "ocf": null,
+   "capex": null,
+   "leases": null,
+   "da": null,
+   "op_income": null,
+   "nonop": null,
+   "net_income": null,
+   "interest": null,
+   "buybacks": null,
+   "sbc": null,
+   "capex_last_q": 19.593,
+   "capex_last_q_yoy": 1.847406,
+   "capex_yoy_prev_q": null,
+   "capex_accel": null,
+   "revenue_growth": null,
+   "revenue_last_q": 14.575,
+   "revenue_last_q_yoy": 1.613881,
+   "op_income_last_q_yoy": null,
+   "debt": 37.861,
+   "debt_date": "2026-09-30",
+   "cash": 89.855,
+   "cash_date": "2026-09-30",
+   "rpo": 62.959,
+   "rpo_date": "2026-09-30",
+   "receivables": 4.772,
+   "receivables_yoy": null,
+   "debt_yoy": null,
+   "fcf": null,
+   "capex_to_ocf": null,
+   "capex_to_da": null,
+   "nonop_share": null,
+   "net_cash": 51.994,
+   "rpo_years": null,
+   "ocf_to_interest": null,
+   "stage": null,
+   "coverage": null,
+   "funding_gap": null,
+   "gap_cover_years": null,
+   "fcf_to_ni": null,
+   "sbc_to_rev": null,
+   "recv_minus_rev": null,
+   "red_flags": [
+    {
+     "key": "capex_to_dep",
+     "test": "Capex / depreciation",
+     "value": null,
+     "grade": "n/a"
+    },
+    {
+     "key": "fcf_to_ni",
+     "test": "Free cash flow / net income",
+     "value": null,
+     "grade": "n/a"
+    },
+    {
+     "key": "sbc_to_rev",
+     "test": "Stock compensation / revenue",
+     "value": null,
+     "grade": "n/a"
+    },
+    {
+     "key": "recv_minus_rev",
+     "test": "Receivables growth minus revenue growth",
+     "value": null,
+     "grade": "n/a"
+    },
+    {
+     "key": "top3_customers",
+     "test": "Top three customers / revenue",
+     "value": null,
+     "grade": "n/a"
+    }
+   ]
+  }
+ },
+ "skipped": []
 }

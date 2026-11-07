@@ -6,7 +6,7 @@
   "oil": null,
   "vix": null,
   "hy": null,
-  "capex": null,
+  "capex": true,
   "curve": null
  },
  "params": {
@@ -209,15 +209,25 @@
    0.04
   ],
   "posterior": [
-   0.52,
-   0.12,
-   0.1,
-   0.09,
-   0.07,
-   0.06,
-   0.04
+   0.490566,
+   0.090566,
+   0.113208,
+   0.118868,
+   0.092453,
+   0.056604,
+   0.037736
   ],
-  "log_contrib": {}
+  "log_contrib": {
+   "ai": [
+    -0.693147,
+    -0.916291,
+    -0.510826,
+    -0.356675,
+    -0.356675,
+    -0.693147,
+    -0.693147
+   ]
+  }
  },
  "alternatives": {
   "keep": {
@@ -236,12 +246,12 @@
     -0.2325,
     -0.333
    ],
-   "elog": 0.010459,
-   "ce": 0.010514,
+   "elog": -0.001959,
+   "ce": -0.001958,
    "worst": -0.333,
-   "mean": 0.02433,
+   "mean": 0.012964,
    "feasible": false,
-   "max_regret": 0.188925
+   "max_regret": 0.3041
   },
   "reduce": {
    "port": [
@@ -259,10 +269,10 @@
     -0.09885,
     -0.144075
    ],
-   "elog": 0.014004,
-   "ce": 0.014103,
+   "elog": 0.008722,
+   "ce": 0.00876,
    "worst": -0.144075,
-   "mean": 0.016724,
+   "mean": 0.011609,
    "feasible": true,
    "max_regret": 0.125125
   },
@@ -282,35 +292,35 @@
     -0.2278,
     -0.3383
    ],
-   "elog": 0.010768,
-   "ce": 0.010826,
+   "elog": -0.001538,
+   "ce": -0.001537,
    "worst": -0.3383,
-   "mean": 0.02454,
+   "mean": 0.013251,
    "feasible": false,
-   "max_regret": 0.194225
+   "max_regret": 0.3094
   },
   "optimal": {
    "port": [
-    0.45,
+    0.1,
     0.0,
     0.0,
     0.1
    ],
    "rets": [
-    0.045775,
-    0.05645,
-    0.111825,
-    -0.060675,
-    -0.107375,
-    -0.0939,
-    -0.149125
+    0.0183,
+    0.02145,
+    0.0322,
+    -0.0038,
+    -0.0134,
+    -0.00885,
+    -0.0289
    ],
-   "elog": 0.014504,
-   "ce": 0.014609,
-   "worst": -0.149125,
-   "mean": 0.017184,
+   "elog": 0.011097,
+   "ce": 0.011158,
+   "worst": -0.0289,
+   "mean": 0.011283,
    "feasible": true,
-   "max_regret": 0.126175
+   "max_regret": 0.2058
   },
   "minimax_regret": "reduce"
  },
@@ -323,9 +333,9 @@
   ],
   "mix": [
    0.0,
-   1.0,
    0.0,
-   0.0
+   0.0,
+   1.0
   ],
   "nature": [
    0.0,
@@ -336,22 +346,22 @@
    0.0,
    1.0
   ],
-  "value": -0.144075,
+  "value": -0.0289,
   "mixed_port": [
-   0.45,
+   0.1,
    0.0,
    0.0,
-   0.0
+   0.1
   ]
  },
  "value_of_info": {
-  "evpi_bp": 438.453778,
+  "evpi_bp": 459.498634,
   "signals": [
    {
     "id": "vix",
     "name": "VIX at or above 20",
-    "p_on": 0.305,
-    "evsi_bp": 129.842301,
+    "p_on": 0.320755,
+    "evsi_bp": 140.926944,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -370,8 +380,8 @@
    {
     "id": "hy",
     "name": "High-yield spread at or above 4.5%",
-    "p_on": 0.232,
-    "evsi_bp": 127.818399,
+    "p_on": 0.244151,
+    "evsi_bp": 134.675885,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -390,8 +400,8 @@
    {
     "id": "curve",
     "name": "2s10s curve inverted",
-    "p_on": 0.2955,
-    "evsi_bp": 46.049017,
+    "p_on": 0.295943,
+    "evsi_bp": 55.01173,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -410,8 +420,8 @@
    {
     "id": "oil",
     "name": "Brent at or above 1.3x its 5-year average",
-    "p_on": 0.1995,
-    "evsi_bp": 37.414418,
+    "p_on": 0.200283,
+    "evsi_bp": 25.992985,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -421,7 +431,7 @@
      0.1
     ],
     "choice_if_off": [
-     0.45,
+     0.4,
      0.0,
      0.0,
      0.1
@@ -430,8 +440,8 @@
    {
     "id": "infl",
     "name": "36-month inflation at or above 2.75%",
-    "p_on": 0.439,
-    "evsi_bp": 19.932641,
+    "p_on": 0.445094,
+    "evsi_bp": 20.150875,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -450,8 +460,8 @@
    {
     "id": "corr",
     "name": "Stocks and bonds moving together (correlation above 0)",
-    "p_on": 0.4565,
-    "evsi_bp": 18.053713,
+    "p_on": 0.463491,
+    "evsi_bp": 18.82915,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -472,8 +482,8 @@
     "name": "Builders' capex above 80% of operating cash flow",
     "p_on": 0.53,
     "evsi_bp": 9.451837,
-    "observed": null,
-    "flip_changes_choice": null,
+    "observed": true,
+    "flip_changes_choice": true,
     "choice_if_on": [
      0.1,
      0.0,
@@ -614,7 +624,187 @@
   "cov": "Estimated"
  },
  "games": {
-  "capex": null,
-  "basis": "capex.json unavailable"
+  "capex": {
+   "tickers": [
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "ORCL"
+   ],
+   "capex": [
+    135.921,
+    159.804,
+    215.192,
+    104.438,
+    75.66
+   ],
+   "costs": [
+    0.256667,
+    0.256667,
+    0.29,
+    0.271818,
+    0.31
+   ],
+   "p_obs": 0.4,
+   "model": {
+    "calibration": {
+     "a": 1.014848,
+     "b": 0.00089,
+     "Q_obs": 691.015,
+     "p_obs": 0.4
+    },
+    "nash": {
+     "q": [
+      161.089253,
+      161.089253,
+      123.626636,
+      144.060791,
+      101.149066
+     ],
+     "Q": 691.015,
+     "P": 0.4,
+     "profit": [
+      23.08946,
+      23.08946,
+      13.59893,
+      18.465974,
+      9.103416
+     ],
+     "active": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    "collusive_Q": 426.052127,
+    "collusive_P": 0.635758,
+    "joint_profit_max": 161.512488,
+    "overbuild": 1.621902,
+    "profit_share_kept": 0.540808,
+    "with_entrant": {
+     "q": [
+      141.345968,
+      141.345968,
+      103.883351,
+      124.317505,
+      81.40578,
+      118.459714
+     ],
+     "Q": 710.758286,
+     "P": 0.382433,
+     "profit": [
+      17.77655,
+      17.77655,
+      9.602239,
+      13.751346,
+      5.896457,
+      12.485962
+     ],
+     "active": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "entrant_cut": -0.258097,
+    "symmetric_overbuild": 1.666667,
+    "symmetric_profit_share": 0.555556
+   },
+   "dilemma": {
+    "names": [
+     "restrain",
+     "race"
+    ],
+    "n": 5,
+    "q": {
+     "restrain": 82.9218,
+     "race": 138.203
+    },
+    "A": [
+     [
+      30.590606,
+      14.275616
+     ],
+     [
+      44.186431,
+      16.994781
+     ]
+    ],
+    "race_dominant": true,
+    "everyone_restrains": 30.590606,
+    "everyone_races": 16.994781,
+    "cost_of_racing": 0.444444,
+    "temptation": 0.444444,
+    "duopoly": {
+     "A": [
+      [
+       76.476515,
+       63.730429
+      ],
+      [
+       84.973905,
+       67.979124
+      ]
+     ],
+     "B": [
+      [
+       76.476515,
+       84.973905
+      ],
+      [
+       63.730429,
+       67.979124
+      ]
+     ],
+     "analysis": {
+      "equilibria": [
+       {
+        "x": [
+         0.0,
+         1.0
+        ],
+        "y": [
+         0.0,
+         1.0
+        ],
+        "u_row": 67.979124,
+        "u_col": 67.979124,
+        "pure": true
+       }
+      ],
+      "dominated_rows": [
+       0
+      ],
+      "dominated_cols": [
+       0
+      ],
+      "pareto": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        1
+       ],
+       [
+        1,
+        0
+       ]
+      ],
+      "welfare_best": 152.953029,
+      "welfare_worst_eq": 135.958248,
+      "price_of_anarchy": 1.125
+     }
+    }
+   }
+  },
+  "basis": "builders' trailing-twelve-month capex from SEC filings (capex.json)"
  }
 }

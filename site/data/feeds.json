@@ -1,215 +1,26 @@
 {
  "schema": 1,
- "generated_utc": "2026-11-06T18:03:52Z",
- "bluf": "Noteworthy: Fed second hike (heat 8.5 sigma); Consumer strain (heat 7.5 sigma).",
+ "generated_utc": "2026-11-07T16:54:46Z",
+ "bluf": "Nothing unusual today; the busiest theme is physical oil premium (92 mentions in 72 hours).",
  "themes": [
-  {
-   "id": "fed-hike",
-   "name": "Fed second hike",
-   "count24": 13,
-   "count72": 17,
-   "heat": 8.485281,
-   "breadth": 2,
-   "platforms": [
-    "news",
-    "telegram"
-   ],
-   "asymmetry": -0.565468,
-   "novelty": 0.876543,
-   "lead_days": null,
-   "noteworthy": true,
-   "series": [
-    1,
-    1,
-    13
-   ],
-   "top": [
-    {
-     "title": "US JOBS REPORT SMASHES FORECASTS \u2014 FED RATE HIKE ODDS IN FOCUS The US economy added 165,000 jobs in October, nearly triple the 59,000 expected, while unemployment fell to 4.1%, bea",
-     "url": "https://t.me/WalterBloomberg/38004",
-     "source": "Walter Bloomberg",
-     "platform": "telegram",
-     "tier": "mainstream",
-     "time": "2026-11-06T13:35:56+00:00",
-     "engagement": 2360,
-     "themes": [
-      "fed-hike"
-     ]
-    },
-    {
-     "title": "St. Louis Fed President Warns Inflation Is a \"Regressive Tax\"; December Rate Hike Expectations Strengthen - BigGo Finance",
-     "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBGSDI4NE5ES1RjamNuaW13MjN0aEY3clZwWXFXZ3k2YnctZkxhMjdPQV96ekZabFh1NTltdjdreEx6UVRwOEZEY0JaRGM2ZGQ1eUhIU2VWVExJQUZVanFLZVhkV2NOZkF0ekVkenJuZGRJREVIQXc?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T16:55:00+00:00",
-     "engagement": 0,
-     "themes": [
-      "fed-hike"
-     ]
-    },
-    {
-     "title": "Fed seen sticking to December rate hike after jobs data - Reuters",
-     "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQMF93ekZ4N2wtdW4zX1llS2FoZWpNVlhMLTRNOGVJTUktZmpLQUNBSzY2bW16Mm9mb3lrZERqNFZ6WkRmYkhBTG00Z2k2NFYyNTVLcmVBSkV5eVJRU1RwZFc5blM4MkRmcUxYU2hadXRWbVh0VXpjektqM1BGS3ZlZlNMeW43VWxmeE5TQm13d0E3bTVwUnp5dzFFNA?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T16:04:55+00:00",
-     "engagement": 0,
-     "themes": [
-      "fed-hike"
-     ]
-    },
-    {
-     "title": "Much Stronger-Than-Expected October Jobs Report Fuels Fed Rate Hike Expectations - SSBCrack",
-     "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPQnpzdWJNaHQtX1NwWEUxVUlWT3NRb1RYdFJFZDVXYkNaVTdXZGpyYnVSa2dqdW85T1ZaandqLTFVNW9heEdlc0VjRE1GX2tXVDdMYjhPVUFKcXI3VVE3dTdQOUFDc3JfLUdwWDI4QWtqandYXzkwOHVjNjg2Q2o5LS15dDA2RldyTG4wNFFLbnpSV1F3OXVEV2V5TjZfUHB0U3dhUnRSUkdlRVE?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T15:08:13+00:00",
-     "engagement": 0,
-     "themes": [
-      "fed-hike"
-     ]
-    },
-    {
-     "title": "October jobs shock seals case for December Fed rate hike - Mortgage Professional America",
-     "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNd0tla2IzWnVBb3MwUDB3QVRpOXZwczZndVJKQU5TaTNqY1NqdlU2QU9sa1JEcmFpem16S3czXzQtSHkzaDM2b05hZ2laNnlVNzRmNzRBb01Qb3Z3aGo1YjBaTktpREJHSUV2RWRSdmQ5czM3dkp1LW4wSXE0Q2VtQ0pNMVV3My1tQlEtSHY0b01nM0hWclVRZHdNTDhuM0tPTmFQWVNvMmg5UnRYZzBEaG9XR1pGdEJMcXpHNklOc1U?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T14:59:57+00:00",
-     "engagement": 0,
-     "themes": [
-      "fed-hike"
-     ]
-    },
-    {
-     "title": "Robust US jobs market boosts December rate hike chances - ing think",
-     "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNMnEzSUd2ak0wTmsxb3lueDFDVG94RHZOLVNTZ3ZMeVB5QVY3NGNHUHdaVzJwMkEwT3BXWlhCSlV3MkFEdWc4a2szSUE3bExWTmdXV3c2UTJFSjBXTGYxV1FxYmF4YjhVUTE1bmp1QzlCdmJwNHN5Y001ZWU0SHNobldsVk90T0hUT2xWM2VFenM?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T14:48:19+00:00",
-     "engagement": 0,
-     "themes": [
-      "fed-hike"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "consumer",
-   "name": "Consumer strain",
-   "count24": 27,
-   "count72": 38,
-   "heat": 7.485542,
-   "breadth": 2,
-   "platforms": [
-    "news",
-    "telegram"
-   ],
-   "asymmetry": -0.565468,
-   "novelty": 0.742647,
-   "lead_days": null,
-   "noteworthy": true,
-   "series": [
-    7,
-    6,
-    27
-   ],
-   "top": [
-    {
-     "title": "US CONSUMER SENTIMENT BEATS EXPECTATIONS AS INFLATION FEARS EASE University of Michigan consumer sentiment rose to 51.0 in November, beating expectations of 48.0. \ud83d\udd38 Consumer sentim",
-     "url": "https://t.me/WalterBloomberg/38015",
-     "source": "Walter Bloomberg",
-     "platform": "telegram",
-     "tier": "mainstream",
-     "time": "2026-11-06T15:00:43+00:00",
-     "engagement": 2940,
-     "themes": [
-      "consumer"
-     ]
-    },
-    {
-     "title": "Dow Jones Midday Report: DJIA Muted Despite Upbeat Jobs Report and Improving Consumer Sentiment - TipRanks",
-     "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQbFhUd09idmYyUmpVVmlTaUpzb2piY2RxS2VoeU9jbU9acjZUaDh4bU9wdW8xQjRWdTY0RERmN2dXNkVLNkhRcU01YzdHQVo1VXZudWp2OExsRFMxT3hUbjMzNkdOeXNoWXRhalUyX01vUG5fZDJ1emV6WVE4WTRyek10d3czakhGaG1VRHVGTS1MbU1ueEZEcHdxYm0tN1pkMndXVjZtb2F4bk1TZEpOX2pjMEc4WEdncGJib0hR?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T17:47:25+00:00",
-     "engagement": 0,
-     "themes": [
-      "consumer"
-     ]
-    },
-    {
-     "title": "Consumer Sentiment Rises 6.3% to Three-Month High in Preliminary November Reading - CollisionWeek",
-     "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOWEIwV0NBOGg1TGhIOWZmQnZDOExnek5lLWpWRFctNkJDS1FNdERQOVhJTlRIQmEwdE15bXgxSjR4WWZiNmZLcllNbjZXYUpQX2RxSnlrZlBWS0UwSi0yX1NLZDNDRmxoWG1JRUFjaDlDZmpZUEllTFdHUVBoYzFlUlhYeURTYkZFRzBfZmRnNkRlX3BsdmVTRmI3bWlZaVVmeU8wTHowRzhiZ0l0aXktUExR?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T17:37:10+00:00",
-     "engagement": 0,
-     "themes": [
-      "consumer"
-     ]
-    },
-    {
-     "title": "Consumer Sentiment Rebounds to a Three-Month High as Inflation Expectations Ease - RealMoney Pro",
-     "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOX09laldWb3JOOFNnU3h4VTlZTE1pWlVhWk1wLWFCcWZTYWFGd0txNlY0NWlWcUpDelNsRThFbGJvMXJuOHg3YkgtMkV6cVYxaGZrY0ctaTNQQ1VwSjlreXAwYWFtTHNZYU9MQXJ3Zi1Da1czNUs2UXNVRndQbzROaFV4dnRKX0p4X2VGNVp2S1dRUTJzeGhZY0gtajYwaER6bUVRSzJmcDRzMHNvRW9LeGYxNGZQMmFFeER2NVFvbUt2dzk1Z1VGczlB?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T17:15:00+00:00",
-     "engagement": 0,
-     "themes": [
-      "consumer"
-     ]
-    },
-    {
-     "title": "FHA drives rise in mortgage delinquencies above pre-pandemic levels - Mortgage Professional America",
-     "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPRkxaTVloZDVqUkZONENYYmxHZFh0eWVLNGFHZ2NLMDE0TldoSVJYbVV6dlNZVFN4ODRIVl9ORERRYWo3dlNPbXlOYmpOdV9tRExROUs2LUZmU2VObVB2aHhYZ24zdU5pR2hkSktRU0hBMDdYYWdkVUZ1blVYSFhxTzlzMkZJNTVFaVFqY21pcThPYmJ4Q2RQSXdVUmtMTjZrNEdBRXBxWkZac1hUN09Na2ppOFQxVUlDeGZveUt2c1lnMTZVR3hEVGtDQ1hLZw?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T16:50:26+00:00",
-     "engagement": 0,
-     "themes": [
-      "consumer"
-     ]
-    },
-    {
-     "title": "U.S. Consumer Sentiment Unexpectedly Improves to 51.0 in November Preliminary Reading; Inflation Expectations Ease - BigGo Finance",
-     "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1nNjdYZERuRlVCb1l0a2QxbVF6aExLbGdwNEk5cmJuMmE3ME5kR011RVlkOFdEbFpQaVp4VjFTQk43NTBpNnpZRm03WUlWY3ptNm1LVFgyOV85aEFYVGVMNUVzc3VnS3ptdDZKVkZVd3oxeERjRHc?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T15:58:52+00:00",
-     "engagement": 0,
-     "themes": [
-      "consumer"
-     ]
-    }
-   ]
-  },
   {
    "id": "pods",
    "name": "Pod shop costs and crowding",
    "count24": 1,
    "count72": 1,
-   "heat": 1.0,
+   "heat": 0.57735,
    "breadth": 1,
    "platforms": [
     "rss"
    ],
-   "asymmetry": 0.434532,
-   "novelty": 1.0,
+   "asymmetry": 0.936102,
+   "novelty": 0.0,
    "lead_days": null,
    "noteworthy": false,
    "series": [
     0,
     0,
+    1,
     1
    ],
    "top": [
@@ -228,23 +39,445 @@
    ]
   },
   {
-   "id": "power",
-   "name": "Grid power ceiling",
-   "count24": 3,
-   "count72": 7,
-   "heat": 0.948683,
+   "id": "fed-hike",
+   "name": "Fed second hike",
+   "count24": 5,
+   "count72": 11,
+   "heat": 0.0,
    "breadth": 1,
    "platforms": [
     "news"
    ],
-   "asymmetry": -0.565468,
-   "novelty": 0.769231,
+   "asymmetry": -0.063898,
+   "novelty": 0.35,
+   "lead_days": null,
+   "noteworthy": false,
+   "series": [
+    1,
+    1,
+    13,
+    5
+   ],
+   "top": [
+    {
+     "title": "October jobs surge raises odds of December Fed rate hike - Crypto Briefing",
+     "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOOUJvQ3VyaHdQd2QyeTlOeFQ0NWllNDA4QkZOdWpWdEZvMFotZFVIQWNpRDVpaVNlcXEtOGRTRm5TekJOMGtJZTJGZlNSbjJiUGtiZFYyLVVjLWNKRUxqR3ctQmF4NldKUjRGb0dMWlYwOGxSdWd1ZW4xSEZsODBnVjdxZEJwTmdIY3B4TA?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T13:28:19+00:00",
+     "engagement": 0,
+     "themes": [
+      "fed-hike"
+     ]
+    },
+    {
+     "title": "Crypto Market Faces Volatility Amid Strong US Job Report and Fed Rate Hike Woes - CryptoRank",
+     "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQT05rNnYtUEl1WmpfT0RwS3d0Q1hKbzQ0VHpyeVNzUmxHSG5wR01PaTF2ZnNVd2Z6YmZIRnFreUoxS3BBTmFzdnYwRTlQZ1VEbzJRTG95V2dGU2s4THBqeV92M2xsMEdsQ3NpdTJPNlZUd1VIRTBvdUVXYnV5WTBlcmpvRmd1VnF6c1dLRlpRdG1XOTl0SWpqQm9fZXNFVkltcS0xSXE2dUFJSXhkV24xRnJoQ3Bxdkxu?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T01:19:40+00:00",
+     "engagement": 0,
+     "themes": [
+      "fed-hike"
+     ]
+    },
+    {
+     "title": "US employers add 165,000 jobs in October as Fed rate hike bets jump - Mix Vale",
+     "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOOWlyZENUalhvRndkTTZ2MFUtTXlvRldobVlpTkg3YVFUVjhlMkxJQ1dkajRXOWtheGk2S3F3TjZTMG5jNUluZnVkY2FEUC1XWkN1YmQ5ZUlNRjA1YjZ1amJDN3ZmYlRTNnJfc25sYVJ4Z3lPZ0Etem1tVjRvT2VhU0Z2RFAzZ0xBRU03YWh6SFBFNUUzOGlnSGlQenFONXdxZ2dZR3FETFc?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T18:49:00+00:00",
+     "engagement": 0,
+     "themes": [
+      "fed-hike"
+     ]
+    },
+    {
+     "title": "US Jobs Surge 165,000, Nearly Triple Forecasts, as Fed Rate Hike Odds Hit 80% - Coinpaper",
+     "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOd0sxcDAwWE9jN1JrMlJIQTBfMmdlLXAtUnJaSHFwbXN3RTM3UVFuNlJoTDR5a1FuS0o3enJaSlFpU1JZMjltT1FBWWFPZ2FqT09kc0pqc2paaEZwd3RnTWt2RW5GYWdtTUNIWTRhdFUwc3V3aWREVW9IVXNiaWJOV3g1Z1J0SXVQTFhFOXktdnU2NEZGelUyblBSc3NlZm1JVUVSVQ?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T18:21:08+00:00",
+     "engagement": 0,
+     "themes": [
+      "fed-hike"
+     ]
+    },
+    {
+     "title": "St. Louis Fed President Warns Inflation Is a \"Regressive Tax\"; December Rate Hike Expectations Strengthen - BigGo Finance",
+     "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBGSDI4NE5ES1RjamNuaW13MjN0aEY3clZwWXFXZ3k2YnctZkxhMjdPQV96ekZabFh1NTltdjdreEx6UVRwOEZEY0JaRGM2ZGQ1eUhIU2VWVExJQUZVanFLZVhkV2NOZkF0ekVkenJuZGRJREVIQXc?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T16:55:00+00:00",
+     "engagement": 0,
+     "themes": [
+      "fed-hike"
+     ]
+    },
+    {
+     "title": "Much Stronger-Than-Expected October Jobs Report Fuels Fed Rate Hike Expectations - SSBCrack",
+     "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPQnpzdWJNaHQtX1NwWEUxVUlWT3NRb1RYdFJFZDVXYkNaVTdXZGpyYnVSa2dqdW85T1ZaandqLTFVNW9heEdlc0VjRE1GX2tXVDdMYjhPVUFKcXI3VVE3dTdQOUFDc3JfLUdwWDI4QWtqandYXzkwOHVjNjg2Q2o5LS15dDA2RldyTG4wNFFLbnpSV1F3OXVEV2V5TjZfUHB0U3dhUnRSUkdlRVE?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T15:08:13+00:00",
+     "engagement": 0,
+     "themes": [
+      "fed-hike"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "depreciation",
+   "name": "GPU useful-life reset",
+   "count24": 0,
+   "count72": 0,
+   "heat": 0.0,
+   "breadth": 0,
+   "platforms": [],
+   "asymmetry": 0.0,
+   "novelty": null,
+   "lead_days": null,
+   "noteworthy": false,
+   "series": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "top": []
+  },
+  {
+   "id": "consumer",
+   "name": "Consumer strain",
+   "count24": 12,
+   "count72": 39,
+   "heat": -0.112553,
+   "breadth": 1,
+   "platforms": [
+    "news"
+   ],
+   "asymmetry": -0.063898,
+   "novelty": 0.347222,
+   "lead_days": null,
+   "noteworthy": false,
+   "series": [
+    7,
+    6,
+    27,
+    12
+   ],
+   "top": [
+    {
+     "title": "Consumer Sentiment Improves Despite Inflation Concerns - InkFreeNews.com",
+     "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQU1NwOGZyVEZ4MWphSFNreGp0eDF0NlRpVVd0bGhYMllIVThmSUtubUE1aTJJTDk3cjY0cElSeV8zYVhPWGMwb2hqeEFSSlhVSXEwc3VqZHdPX1hpOFVjUUI5SXJER1ROTnozOGUzaEdOWGs0UjczTmt3cUdfR05VSEhmUGhTQk1sbXozS0pzTXhiQXJXWURMRTFn?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T14:30:58+00:00",
+     "engagement": 0,
+     "themes": [
+      "consumer"
+     ]
+    },
+    {
+     "title": "U.S. consumer sentiment improves as inflation expectations ease - Macau Business",
+     "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQSFoyalFoMnpndUhXTm9naFZYVkZzR21ud1BsQ2dtVlFpemt3WlpzOHVxdTZxTktySzBfTmpjVGJXNEpBTEY3YVRrYTR1SF85Y25CSFA4XzktOVVZeXdnb1dPS0tveEdTcFhvZ3dzQ0RxZmFKUXJPcU0yZElvdy1hbGZ6bVpUWUxybFdLbGFxR3BqT28?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T08:20:45+00:00",
+     "engagement": 0,
+     "themes": [
+      "consumer"
+     ]
+    },
+    {
+     "title": "U.S. November Consumer Sentiment at 51.0\u2026 Rebounds, Exceeding Market Forecasts : Global : JKN - \uc7ac\uacbd\uc77c\ubcf4",
+     "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE44MllFTXBJM2Vyd3pJdlZDMmk3TGNDLW1uREZENUpvTHNRTFdLTXFON3pWSENrQ3pVYVZ1RTdNWkFQV0RuR3ZaRVJ1eFpnQlpZUDB5YVRFZXhlM1BJWEVCU1F3?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T02:00:08+00:00",
+     "engagement": 0,
+     "themes": [
+      "consumer"
+     ]
+    },
+    {
+     "title": "US Consumer Sentiment Ticked Up, But Retail Winners Split - Finimize",
+     "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOQjRBMW1ES0dzeG1BSVJJSFRVbW1YV09FdkU0REhNV19OWkV6RzVzZ3c1RlFTeVI5LW1NaURDNEZ1Q3BYNGhJejJXdW43VjR3V2hIaEc0SVdpUUFjUXBoX1Q4a2xrclVFZmxJWTRiWmxpRFRIUWY1dHZnOXVEUnQwcjhKbzBQcm5jX2F5dDRn?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T01:45:49+00:00",
+     "engagement": 0,
+     "themes": [
+      "consumer"
+     ]
+    },
+    {
+     "title": "GSE delinquencies climb: Don't shift staff solely to FHA - National Mortgage News",
+     "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQRXJaR3huSU52UDdYMEJFU2lRcDNvX1NTUXZLSnhKYVZDX0RYMExucFZIMjRJUnBBNzh2TTVXYTdGWXpzcnN1RmtCa1hXTlpHbmZHZHFzV1lMVVppZ2ZKMDRSMjBwcHhkcDBiQUxncUJFemltS3F1aFZrYW8xM3BTTVpScFZ4ay0wdkFsZ2NmSzRZM0FCRERRcTNudTA?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T21:11:00+00:00",
+     "engagement": 0,
+     "themes": [
+      "consumer"
+     ]
+    },
+    {
+     "title": "Florida consumer sentiment rises for second consecutive month in October - The Capitolist",
+     "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPZmU3N2lhYllDY0RMUXFqSGU5SktLdzRJTnpyUGpUZGdHbGtncFN2Wm5zM1NZREJxNFRHMzdXZ0VMbzFLR0Y2aEpJblE1eFdfR2FTeVB2UWRKRUFNYUUzbS1fOC1XUjl2SF9WVU0xRHMxT0tPWUxacmYzN2NaTHQwa0FVUC1QSTBoWDdoNDVlZi1wX0ZaRHZ5bFcyYTdMVUE40gGmAUFVX3lxTE5HUkNrM2sxUFVCMjRhR2xNaGxpc0VTVUZTSXA1LXhBSWZnVGlXS3ZMUV9HLXVhZ3FEWXhMN1hnVWFGV1RDRHJsZWZaZEM0bFBiUkE2UE05Xzl3M09RS1F0ZU0tdGtCUmNSNTdtZWVvQmRXbnk1LVdsaXdLVlNqc2pGUHpIQThTa2d5U1Uzazk5RVc5M0FSdHNTLURhcXhXRWZieFllUEE?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T21:09:09+00:00",
+     "engagement": 0,
+     "themes": [
+      "consumer"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "market-structure",
+   "name": "Market structure shift",
+   "count24": 1,
+   "count72": 7,
+   "heat": -0.870388,
+   "breadth": 1,
+   "platforms": [
+    "news"
+   ],
+   "asymmetry": -0.063898,
+   "novelty": 0.882353,
+   "lead_days": null,
+   "noteworthy": false,
+   "series": [
+    3,
+    3,
+    2,
+    1
+   ],
+   "top": [
+    {
+     "title": "Maxwell Engineering Solutions lists at a 90% premium on NSE Emerge; JDA Capital acts as Book Running Lead Manager and Market Maker - The Tribune",
+     "url": "https://news.google.com/rss/articles/CBMiggJBVV95cUxNeHZCeG9sOTUwNU1yNjRYWlEwTGVWRzdqNmdfOW1yR3NPTzEwUU5ESTZzN0t6Q1NxMjdaX0tGWE83SFJVelVEMzM5aFgyOEV1RGFpTzd5UFVWV1dhdGl0WUxrdERDVlNjV2NoZVlkT3h0eTNINVVwN0wxaTRfbHdqUTBUWG9rcExaOXlwT3E5RUVPcVNyRnJ1a0xzbVBQQ2xocUZlZmJBMWZzMGo4WkJkNmV0bXBKTU81UTRVRVNGMnRxNzBVUkhEZlZBWXRMS1hSak13VHpFckNnVlctZDY1TU50b3VfVkROUUozdzJJYVp1VkFja011QWpWRXJhOHVJRXfSAYYCQVVfeXFMT25wek1HNHgzT2NLT1dhRXhqbS1nSTVVLVJZc3Vyc0RaemhIbzgxM2V4TVRGVWswY1UxaFNFcWpoRWhaZDNFTjdJN2thenBHZTV3bDFkcDVKT3E3eG90eHNBNkZKVXlvb0U0UWNxZFZkeE1DTGxRRWJCUThxQzM5MEdQc3oyZUNDZElFZXRHNVlpVjBIRkg1djZUS3Naa3lTMDZsMUQxbF85VUNRNWhwZURaTW5pdzJsdFlhSl9fZlZQb0dkcUExQmZWVG9qUlcyanN5Zm00d0UzanR5NFdiWlBfNW5PdzlEVk1kbEpwUDBDcU5QRlJSdk4xWjA4a2JnX1liODVlUQ?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T09:34:46+00:00",
+     "engagement": 0,
+     "themes": [
+      "market-structure"
+     ]
+    },
+    {
+     "title": "[0DTE Options Recap] SPX Put Vertical Spread Strategy in a Strong Bullish Trend - Moomoo",
+     "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNbFVSTjdUVUFTY2JfMkliNlRuRUhYQ1htdjVRdmprVUsxZnFQMkpxVk9CSHNCWmdEMHA5Qm81dU5rSXp0WVVfdTBEeXJzdVZSTVotMEdsU0lxVWhzb09fMW1lQzVOZi1rdlpUOWZJTkNYbVFmNDRfb21DTUt6QzRaenp2d1p3UHl4WmxYZUpGSnVFUHBrQ25NWktISmFsdEVJN255OGU5Z3BMYUN4LUdz?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T15:21:55+00:00",
+     "engagement": 0,
+     "themes": [
+      "market-structure"
+     ]
+    },
+    {
+     "title": "Beijing Stock Exchange market maker roster expands to 31 as lower entry bar reshapes Chinese brokerage competition - BigGo Finance",
+     "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5naXh3WUUwRUN6M2RjWFRLUDhsdFo1UkRNVVlBRVVDU1RXXzZpa1ZERDZUb0liSkZpRzR3dm1tMWpfX1NsVzNaWlJaTF9JRVlMRU5lVGcwc1RZd09MOWJicEh6U0RsMW0taFRVeU9DS2JGTXZvT3c?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T02:58:44+00:00",
+     "engagement": 0,
+     "themes": [
+      "market-structure"
+     ]
+    },
+    {
+     "title": "Options and the 0DTE daily outlook for Thu Nov 5, 2026 - The Globe and Mail",
+     "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPVmpKTHp3UE15VmNMVXM5RjRzSUZTd1Y3X2k0ZXE2a0ZaV1JvdVNqRG9CV2dVRXI3aDY1NFdfWmhNSG1XSi1CaS12TlZBbi1TdXN0cWpBUXhnNjFUWFVrZ0RObzhHYkJ4aUdEME51OWlPaTVUd0l0dVNNY2tUSnE5QWVkZFM0RHV1M3BFS1hYRmZCZEFzSWVwN2t4YUJWRG4wdE5FcXpKTU5JOGJ3R0I1SVFMd3FjTm03SWxwR3Z3RjBSaEVBZ24yLWFwelYxaWtOcjNnOGh3?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T02:11:40+00:00",
+     "engagement": 0,
+     "themes": [
+      "market-structure"
+     ]
+    },
+    {
+     "title": "Best Crypto Exchanges for Institutional Off-Exchange Settlement: Bitget vs Binance vs OKX Compared (2026 Review) - Yellow.com",
+     "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxPdjBWVmk0V3MxclRfMU5uMXhwbS14eHJoR2lTYmdvSlVkRnU4UmNvVWtXOFVyaFg1eTFaSlA2V0FrSXpsWHVpSTlqSl9kQXJoMFlXQUItYXlDaDd4eUl2cjd1SXRWVDktMkpRcW50QUZ0T08wWnFPcF85M3A0c3M2V1ptVG5qa1ZKay12Vy1ZSUVwY1k?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-05T16:20:41+00:00",
+     "engagement": 0,
+     "themes": [
+      "market-structure"
+     ]
+    },
+    {
+     "title": "Options and the 0DTE daily outlook for Thu Nov 5, 2026 - Barchart.com",
+     "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxORkd2ejZTOGg0RmhfSTY1eWVhZTFjQWJCaVY5RUF5dWtMN2F0b19LNkpUQUlCNm05aGFZNTc3a0dFZEJGZUpoeFZNZ3V2Rko5ZHIzSm5nUTNIbng0d25qQXFrbzNSaHlpcWdkNE1PTnlTT0MxOUtXaWpoX2tZZ0kzWGhMLWg4cEZJQVByc0djX1pqY2xwSnZVbXc4UUQtdw?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-05T14:02:55+00:00",
+     "engagement": 0,
+     "themes": [
+      "market-structure"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "private-credit",
+   "name": "Private credit gates",
+   "count24": 0,
+   "count72": 0,
+   "heat": -0.872872,
+   "breadth": 0,
+   "platforms": [],
+   "asymmetry": 0.0,
+   "novelty": null,
+   "lead_days": null,
+   "noteworthy": false,
+   "series": [
+    3,
+    1,
+    0,
+    0
+   ],
+   "top": []
+  },
+  {
+   "id": "memory",
+   "name": "Memory supercycle",
+   "count24": 3,
+   "count72": 20,
+   "heat": -1.072222,
+   "breadth": 2,
+   "platforms": [
+    "news",
+    "reddit"
+   ],
+   "asymmetry": -0.063898,
+   "novelty": 0.428571,
+   "lead_days": null,
+   "noteworthy": false,
+   "series": [
+    5,
+    12,
+    5,
+    3
+   ],
+   "top": [
+    {
+     "title": "DDR5 RAM Price: $8.70 Chip Now $48, Up 450% [2026] - shattered.io",
+     "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNcUJPRTJqd05IZ0p5VFNXeVczVHg4WXhMeDhDVmVMTXRmYmprNzNCM1d5ajZDTjF1Uk9ReWd6UUJLMm94T2Fwc1FxVGVSUThsR0ZSd1FsczZjaHE2WnpkRkJfanFEa3hVODNYenRfQ0RsaUkzRVZ3Vlg1ZkU5d3hVUkxCR3psTWhzZnhOVA?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-07T02:08:33+00:00",
+     "engagement": 0,
+     "themes": [
+      "memory"
+     ]
+    },
+    {
+     "title": "Micron Stock Price Forecast: Data Center Construction Curbs Weigh on Valuation, but Long-Term Agreements and HBM Price Hikes to Support Earnings Delivery - TradingKey",
+     "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxQbVBYeUlTOWplYXVhTWtzYzdGZjVVMGg5UVNmWTdRTDZmRklPWkdlZlRtNkNsUlFvaGdrY3RaX3ZBSUswNnFxTEMyUEtmVG93TEQ2elVJUVN5bjJPUHVfMThVZUFFbzdjNnJKWjJQRER3LVRBRTVMSm80eXlLR3k3MFRVUHR1WkU2N1NyY01vVFl3cWlMWFF6bkU3N2ptYjBRV3BESkNjSnF5amVVa3llUi1RRWNwaGF6OTh1YW84TTdkVEo1N3VMM0dodXNGTHRscVhjdENMSDlmM1hscTBieg?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T22:08:55+00:00",
+     "engagement": 0,
+     "themes": [
+      "memory"
+     ]
+    },
+    {
+     "title": "Micron: The Contracts Lift The Floor, And The New Fabs Arrive In 2027 (NASDAQ:MU) - Seeking Alpha",
+     "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNRkZveXdNLTlBRmtwV1dCUGdTQVJrSDkzbWwtQXVsVE1GeHp4MXlkTWh2WFpfNHF2aHlWZ0NVdUY1ZFhxQm1zTVVRdkhoTXdyLUhqcEdNNFZuS1d2VTRDa2lHc3FKay1BMVgxOC1PQVh6WTdFbmJiUDBjMFhrWHJKV2dDbVNNSkxXei1fNXRoM01HYVluQ2E4c1pjUnJUUkpzVE44QlhiVmVCbjdk?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T20:05:36+00:00",
+     "engagement": 0,
+     "themes": [
+      "memory"
+     ]
+    },
+    {
+     "title": "Nvidia Taps TSMC to Build 3D DRAM, Threatening to Reshuffle Memory Supply Chain - BigGo Finance",
+     "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE4xejJhX25OVGxSQlJTRGJsUlJic1lxSEtkVy1GRWpnOWttVC1PUkNwN2dBc1pXRWJUWUxReE1jbFo2Q3dScWJZa1IzNjZLTjViNngxTXdXckE5T0xlTEtFRldIalBNendpdTVocXZlM2JlOFlNVUE?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T15:25:00+00:00",
+     "engagement": 0,
+     "themes": [
+      "memory"
+     ]
+    },
+    {
+     "title": "Chip stocks fell 9\u201317% today on fears of a slower data center buildout. The buyers' own filings show Q3 capex doubled to about $202bn, and Microsoft, Meta and Alphabet closed $52.5",
+     "url": "https://www.reddit.com/r/investing/comments/1xpct6i/chip_stocks_fell_917_today_on_fears_of_a_slower/",
+     "source": "r/investing",
+     "platform": "reddit",
+     "tier": "mainstream",
+     "time": "2026-11-06T13:29:14+00:00",
+     "engagement": 0,
+     "themes": [
+      "memory"
+     ]
+    },
+    {
+     "title": "High DRAM Prices Boost Reballed Memory Adoption in Smartphones - I-Connect007",
+     "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOZW1kRlh2YnUyU1NPU2M0QzBCbkJFcm8yemt4ZXBVdk1MLThvM0xNVUFCS2hCOVBqU3VQUUZ3UG9Kd3psUWt3Q3NUV0RFWEpPdmdRekFkaTA0elNVbjRtTkdzUFlUdGJSVVM4OUZxeGVnNVl5aXUzeDJMQnVMaDk3Y0ZJcEdhbGk4MEZFaFFPMDY3bU1jMHlQbHZzaHhjSUVKanpYVTQtOHBNcWxBMENLcjlB?oc=5",
+     "source": "Google News",
+     "platform": "news",
+     "tier": "mainstream",
+     "time": "2026-11-06T12:33:00+00:00",
+     "engagement": 0,
+     "themes": [
+      "memory"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "power",
+   "name": "Grid power ceiling",
+   "count24": 0,
+   "count72": 6,
+   "heat": -1.154701,
+   "breadth": 1,
+   "platforms": [
+    "news"
+   ],
+   "asymmetry": -0.063898,
+   "novelty": null,
    "lead_days": null,
    "noteworthy": false,
    "series": [
     1,
     2,
-    3
+    3,
+    0
    ],
    "top": [
     {
@@ -260,24 +493,24 @@
      ]
     },
     {
-     "title": "PJM Interconnection prepared for winter demand \u2013 even as demand grows - www.dominionpost.com",
-     "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOZHcwZVoxRy1DOXFXQ1NzNXBUYm5ubnVYaWxSclJMbGFROTlwb0VOUnBOc2dXeWUwejZBRzI3bjlpbFlFcG54NGNTMVNJZHhIQ1ZaV0QyWWVLUWdnUFhuS0k2QzlxUTc1RWRqc1I0RFBKVEZDc05ZVFpJQ21sdmxRRHpsZFZCeElVeDRNY3g0UmJQODZOZU8zalF0WC01RmNjaU5VTkUzQlJERFJP?oc=5",
+     "title": "Exelon files FERC complaint against PJM\u2019s \u2018unreasonable\u2019 customer costs - Daily Energy Insider",
+     "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPcEtoVjVwWU9SVTR3dXNTc3lUOVk4VmpVakZIUlh2MFUwOW83SGtTQ2NNbUdSbUNGR2x5OFlHNE1MWEFBR0MwS0loYWhrQ3M2cGRJU2o2a1dGVzUweVZFakNNSS1RUXdrNVFzWlJqQXA1WWw5ZWl2VW5adjdOc01XVTNTQXJwYV8zSXVFUkRzcHQ5MUZDcnd3TS1abUQ5dmNEajhuOTFhSlFpb2tvRUVyWg?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T00:51:03+00:00",
+     "time": "2026-11-06T12:54:39+00:00",
      "engagement": 0,
      "themes": [
       "power"
      ]
     },
     {
-     "title": "Shapiro Administration: PJM Interconnection Selects 3 PA Projects In Expedited Program To Add 1.7 GW Of Generation, Energy Storage To Grid; DEP Accepting New Proposals By Nov. 16 -",
-     "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNRS13WXp1OUgtenNNSzN1WkNEdmo0RnFMbFMtWFFESkJUZGd3emR4cHhQT2Mwa1h0cllhR3I0bEo0SVRteFJwUGZRSFdScGduZzUyRlBuRWU2Yk8xTWRxVGdpd1JnS0dJUlQzRng5MHRwZlVfZkJaUnFaZHdOU0syTUlPblQ?oc=5",
+     "title": "PJM Interconnection prepared for winter demand \u2013 even as demand grows - www.dominionpost.com",
+     "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOZHcwZVoxRy1DOXFXQ1NzNXBUYm5ubnVYaWxSclJMbGFROTlwb0VOUnBOc2dXeWUwejZBRzI3bjlpbFlFcG54NGNTMVNJZHhIQ1ZaV0QyWWVLUWdnUFhuS0k2QzlxUTc1RWRqc1I0RFBKVEZDc05ZVFpJQ21sdmxRRHpsZFZCeElVeDRNY3g0UmJQODZOZU8zalF0WC01RmNjaU5VTkUzQlJERFJP?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-05T21:33:00+00:00",
+     "time": "2026-11-06T00:51:03+00:00",
      "engagement": 0,
      "themes": [
       "power"
@@ -322,395 +555,93 @@
    ]
   },
   {
-   "id": "depreciation",
-   "name": "GPU useful-life reset",
-   "count24": 0,
-   "count72": 0,
-   "heat": 0.0,
-   "breadth": 0,
-   "platforms": [],
-   "asymmetry": 0.0,
-   "novelty": null,
-   "lead_days": null,
-   "noteworthy": false,
-   "series": [
-    0,
-    0,
-    0
-   ],
-   "top": []
-  },
-  {
-   "id": "saas",
-   "name": "Agents eat seat-based software",
-   "count24": 30,
-   "count72": 30,
-   "heat": -0.431934,
-   "breadth": 1,
-   "platforms": [
-    "rss"
-   ],
-   "asymmetry": 0.434532,
-   "novelty": 0.758974,
-   "lead_days": null,
-   "noteworthy": false,
-   "series": [
-    35,
-    30,
-    30
-   ],
-   "top": [
-    {
-     "title": "Formalizing inverse problems in the age of AI: possibilities, pitfalls, and an invitation",
-     "url": "https://arxiv.org/abs/2611.06962",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "saas"
-     ]
-    },
-    {
-     "title": "Autonomous AI Agents Systematically Diverge From Human Preferences in Proof Formalization",
-     "url": "https://arxiv.org/abs/2611.06995",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "saas"
-     ]
-    },
-    {
-     "title": "Trust Responsive Runtime Authorization for Agentic AI with Empirical Characterization of Policy Behavior and Parameter Sensitivity",
-     "url": "https://arxiv.org/abs/2611.06996",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "saas"
-     ]
-    },
-    {
-     "title": "Adapting the Process of Adaptation: Darwinian, Lamarckian, and Agent-Directed Evolution in AI",
-     "url": "https://arxiv.org/abs/2611.07048",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "saas"
-     ]
-    },
-    {
-     "title": "Goal Revelation as a Bridge Between Information-Theoretic Empowerment and Capability-Based Human Power",
-     "url": "https://arxiv.org/abs/2611.07247",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "saas"
-     ]
-    },
-    {
-     "title": "DelegateEval: Evaluating Platforms for Personal External Service Agents",
-     "url": "https://arxiv.org/abs/2611.07508",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "saas"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "market-structure",
-   "name": "Market structure shift",
-   "count24": 2,
-   "count72": 10,
-   "heat": -0.5,
-   "breadth": 1,
-   "platforms": [
-    "news"
-   ],
-   "asymmetry": -0.565468,
-   "novelty": 0.75,
-   "lead_days": null,
-   "noteworthy": false,
-   "series": [
-    3,
-    3,
-    2
-   ],
-   "top": [
-    {
-     "title": "[0DTE Options Recap] SPX Put Vertical Spread Strategy in a Strong Bullish Trend - Moomoo",
-     "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNbFVSTjdUVUFTY2JfMkliNlRuRUhYQ1htdjVRdmprVUsxZnFQMkpxVk9CSHNCWmdEMHA5Qm81dU5rSXp0WVVfdTBEeXJzdVZSTVotMEdsU0lxVWhzb09fMW1lQzVOZi1rdlpUOWZJTkNYbVFmNDRfb21DTUt6QzRaenp2d1p3UHl4WmxYZUpGSnVFUHBrQ25NWktISmFsdEVJN255OGU5Z3BMYUN4LUdz?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T15:21:55+00:00",
-     "engagement": 0,
-     "themes": [
-      "market-structure"
-     ]
-    },
-    {
-     "title": "Beijing Stock Exchange market maker roster expands to 31 as lower entry bar reshapes Chinese brokerage competition - BigGo Finance",
-     "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5naXh3WUUwRUN6M2RjWFRLUDhsdFo1UkRNVVlBRVVDU1RXXzZpa1ZERDZUb0liSkZpRzR3dm1tMWpfX1NsVzNaWlJaTF9JRVlMRU5lVGcwc1RZd09MOWJicEh6U0RsMW0taFRVeU9DS2JGTXZvT3c?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T02:56:00+00:00",
-     "engagement": 0,
-     "themes": [
-      "market-structure"
-     ]
-    },
-    {
-     "title": "Best Crypto Exchanges for Institutional Off-Exchange Settlement: Bitget vs Binance vs OKX Compared (2026 Review) - Yellow.com",
-     "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxPdjBWVmk0V3MxclRfMU5uMXhwbS14eHJoR2lTYmdvSlVkRnU4UmNvVWtXOFVyaFg1eTFaSlA2V0FrSXpsWHVpSTlqSl9kQXJoMFlXQUItYXlDaDd4eUl2cjd1SXRWVDktMkpRcW50QUZ0T08wWnFPcF85M3A0c3M2V1ptVG5qa1ZKay12Vy1ZSUVwY1k?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-05T16:20:41+00:00",
-     "engagement": 0,
-     "themes": [
-      "market-structure"
-     ]
-    },
-    {
-     "title": "Options and the 0DTE daily outlook for Thu Nov 5, 2026 - Barchart.com",
-     "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxORkd2ejZTOGg0RmhfSTY1eWVhZTFjQWJCaVY5RUF5dWtMN2F0b19LNkpUQUlCNm05aGFZNTc3a0dFZEJGZUpoeFZNZ3V2Rko5ZHIzSm5nUTNIbng0d25qQXFrbzNSaHlpcWdkNE1PTnlTT0MxOUtXaWpoX2tZZ0kzWGhMLWg4cEZJQVByc0djX1pqY2xwSnZVbXc4UUQtdw?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-05T14:02:55+00:00",
-     "engagement": 0,
-     "themes": [
-      "market-structure"
-     ]
-    },
-    {
-     "title": "Bitget Widens Off-Exchange Custody Network to Six Providers - FinanceX Magazine",
-     "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxOMzV5YUxaQk1JeGNXUGhhQnllT21YQ2dXTVlsV21WUGJfUUtfVU5vQ0Yybm5OLXNic2hoUEdoV0I3U3ZjOXJwQUY2VVRfVExDM1IwUTBwSjJqTXRkUEFCLXQyMjRKZzZuTXROVVdjN0phb2xYUjNsaTFqbThCazVEeXJGMnlvRTBocDJ4UndiTHBZVWcyZWNPQzQ2X1pSdw?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-05T13:50:10+00:00",
-     "engagement": 0,
-     "themes": [
-      "market-structure"
-     ]
-    },
-    {
-     "title": "[Market Rider] SEC\u2019s market maker push and how it can boost PH stock trading - Rappler",
-     "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNYTNpWGJfS01VY3FOWnNXMnFSSVhGMkFVS1h5cXhFSlNiT05yeVpiQjhiRTIyOHJyTDZKc2hwbFNJQ3c5WTJuamRleVdNUll1VHRfRUpzUzBFTm1MZXg4c3M0UGNWNmtGUU5seUQwR2NBRl9MeFhucVlDdFR5Ukk3UFhQWjhEMWtKamNHMU9ZeWRYbExXLXotcFBkbExVcDA5dVZz?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-05T07:40:06+00:00",
-     "engagement": 0,
-     "themes": [
-      "market-structure"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "memory",
-   "name": "Memory supercycle",
-   "count24": 5,
-   "count72": 20,
-   "heat": -0.707107,
-   "breadth": 3,
-   "platforms": [
-    "news",
-    "reddit",
-    "rss"
-   ],
-   "asymmetry": -0.515468,
-   "novelty": 0.679245,
-   "lead_days": null,
-   "noteworthy": false,
-   "series": [
-    5,
-    12,
-    5
-   ],
-   "top": [
-    {
-     "title": "Chip stocks fell 9\u201317% today on fears of a slower data center buildout. The buyers' own filings show Q3 capex doubled to about $202bn, and Microsoft, Meta and Alphabet closed $52.5",
-     "url": "https://www.reddit.com/r/investing/comments/1xpct6i/chip_stocks_fell_917_today_on_fears_of_a_slower/",
-     "source": "r/investing",
-     "platform": "reddit",
-     "tier": "mainstream",
-     "time": "2026-11-06T13:29:14+00:00",
-     "engagement": 0,
-     "themes": [
-      "memory"
-     ]
-    },
-    {
-     "title": "Micron's Memory Revenue Catches Up to TSMC, but Gross Margin Dragged Down by HBM: Why the Shortage Could Last Until 2028 - BigGo Finance",
-     "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE8zMDBfY01lRVhtNm5fV1RJeTg4S01iUDM3WEVVWTF1UmtwRUwwY1UxVDFEZTQzS24xMGpIX0Z6OGx6cFFoRk5wcmtBbTEwMTdRdzBGR1NpLU9KcHM?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T11:14:03+00:00",
-     "engagement": 0,
-     "themes": [
-      "memory"
-     ]
-    },
-    {
-     "title": "Rising DRAM prices push smartphone brands towards reballed memory - Communications Today",
-     "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPTmhvSzBsRFJ2cHp0Uy1MTlRJRDA1VVR4UkdQUkVaR2V4QV9kdTV6UDhyMlFFdVd0Z25XQ0kyVDZ3VGVQM3VteWpkOHVMeHM0SW52d0x5ZjVheTJLUDhUanJkZzVUa1I2M2Z3RkxVTndRSWZPN0lxbWVvcVBkejRXZk5TUTAwYjZ1akhDa1h2Nm5iYjNCeHdkR3FkMUl0YjE0Ykx0XzdsQQ?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-06T10:33:32+00:00",
-     "engagement": 0,
-     "themes": [
-      "memory"
-     ]
-    },
-    {
-     "title": "FlashOffloading: Low-Latency KV Cache Offloading for Long-Context LLM Serving",
-     "url": "https://arxiv.org/abs/2611.07542",
-     "source": "arXiv cs.AI (new AI papers)",
-     "platform": "rss",
-     "tier": "niche",
-     "time": "2026-11-06T00:00:00-05:00",
-     "engagement": 0,
-     "themes": [
-      "memory"
-     ]
-    },
-    {
-     "title": "AI capex and semiconductor companies",
-     "url": "https://www.reddit.com/r/investing/comments/1xoyjpr/ai_capex_and_semiconductor_companies/",
-     "source": "r/investing",
-     "platform": "reddit",
-     "tier": "mainstream",
-     "time": "2026-11-06T00:07:42+00:00",
-     "engagement": 0,
-     "themes": [
-      "memory"
-     ]
-    },
-    {
-     "title": "Micron's Taiwan union stages first chip strike as memory boom bonus fight drags on - Startup Fortune",
-     "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPU0pWM0EzWE5aOVEyVGNROEE5TWJZQ2lpakctR0ZrRmQxUXE4REhTdWVJTzdaLXhwaFdNMHEyTGdUTTFITkRzNy05OXpZeXAtN1pvV2JsRk5NNkI5TGUwSjhYM0Y3MGNtTk1naWZvQmlpVUZSYU9KZVJrSFdEVUdxYmNLOERBZ1RLVzN5aHhtelUtUUJXWEFQYkpMNkpTSXhXSUJjaVA4UE9ybkUtOGc?oc=5",
-     "source": "Google News",
-     "platform": "news",
-     "tier": "mainstream",
-     "time": "2026-11-05T15:00:00+00:00",
-     "engagement": 0,
-     "themes": [
-      "memory"
-     ]
-    }
-   ]
-  },
-  {
    "id": "oil-physical",
    "name": "Physical oil premium",
-   "count24": 71,
-   "count72": 95,
-   "heat": -1.08423,
+   "count24": 47,
+   "count72": 92,
+   "heat": -3.161402,
    "breadth": 1,
    "platforms": [
     "news"
    ],
-   "asymmetry": -0.565468,
-   "novelty": 0.598886,
+   "asymmetry": -0.063898,
+   "novelty": 0.540909,
    "lead_days": null,
    "noteworthy": false,
    "series": [
     75,
     90,
-    71
+    71,
+    47
    ],
    "top": [
     {
-     "title": "IRGC Says Two Oil Tankers Hit Mines, Catch Fire Near Strait of Hormuz: 5 outlets compared - NewsCord",
-     "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxQbkMzV2pVNXhzaUJtZEctalgzQ1lwYlI1S1FjX05CUDFaOTNSVFhqc1g0OE1iRTBnd0tlQTNoVExmWTRybkNiMHFIWlRiVVl6RTN6VWlPYjc5YnlkWlJkaEZQRWFEQm11WUhqSzhNY1E2YjJ1c0pIX0FqRE9jN0tuUldMYXZnX2duU3p4b3J4N3VsN0o5NmZlSjkyNEpBb2NFdHlEakpTZFhSUU9uZlRUbVY5bDBlaEhRRW9Sb0tRM2ZnQkhHcWw0Z0gzOGE4WmpvY3dBYmszYXYwQQ?oc=5",
+     "title": "Iran: \u2018Stronger than at the start of the war\u2019. Hormuz: oil tanker catches fire after hitting a mine - Il Sole 24 ORE",
+     "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOTTRGVnZVT2UweUxZUG1tRFMwRFU4d0tJNHJuVHc1cFV0MjRuaTdBd0I3dlRFMTVvRzZEbFJVeVFMcFpENll2cnlicElQck5qdjJkSzk1cDZ5TTlDTmZVSW1xRlhLNzk0UzdwczdLT0V2NzVacFVyOHF6a2ZzRG5pazBMV095WXlBU3dNZUNNNFVEWHhPa3RZSzJxQnZaX0liM2cxXzFxVm9kY0wtOXRaMHpB?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T17:31:20+00:00",
+     "time": "2026-11-07T16:22:28+00:00",
      "engagement": 0,
      "themes": [
       "oil-physical"
      ]
     },
     {
-     "title": "US strikes Iran\u2019s Qeshm Island in Strait of Hormuz - Panay News",
-     "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQN1owMWZDMWIybHVJa1pMU3FYb2NtTUVNVDd5ZFV2VmFFODVJSEFxMWFmaVFBU2xaOTVpTUM1Y2pEcXdpY2huakM4Sy10LU9DV01fd3A3TjlEVnJvU3FlLVFNNFRxZndsajZxNjBSUHFkd084TjF3V0g5RnBHN18xeFBR?oc=5",
+     "title": "Trump confirms new US strikes on Iran near Strait of Hormuz - WGXA",
+     "url": "https://news.google.com/rss/articles/CBMiiwNBVV95cUxOUWxWYUowc0YyYnJodjcxeUdFaXBEbnk3MHZfYktWbE9HRUpOZDlYNzVpX2tIdkJOWUNjSmtxRjBvNnQtLXpmUS14Umk5dFY0ZXlCM0VOTGhvd3F2MzNxUVdpeUFUTmh6dzhudUVscXRRblFVNVVhZnhaN3luY2VDWjh5dUpGeDJZUFhaR0RMYnBvV0JhMHA5YzdaeFhSLWpfOXBrR3ctQ1Q2WVJ6cmFGV090RmVRdVY1WkdsT3hQeUVUOThsdzRPeGl4WDlGOXYtTXRUV2Z0dFNpZ0RiRFdNSHh3T1pIdktkWmc0UURrazhCaHE2NG51YVBWaGxGRWtkaWRzV0pZQVJZWkw1ejd4eC02bVdsWDZXalNWaWtBbjE1OXVvenhwd2NEU2Q2ZVduaWZteHJjRmxWS1FxamZZcGpNQ0tjeXdfYXJlcnJuZUtGWVpOU0ZNN1F6Unl4Y1ljZWVpMVgwXzNMelNTWWI3UHZCWEU3aHNibGNjRUlCY01wRTZUQTBNSFFzNA?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T17:04:00+00:00",
+     "time": "2026-11-07T13:43:27+00:00",
      "engagement": 0,
      "themes": [
       "oil-physical"
      ]
     },
     {
-     "title": "Two tankers strike mines in Strait of Hormuz: IRGC Navy - Tehran Times",
-     "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPTi16VVZPeTRtWURhUTlsamx6RnUxMkNoU3IzLVRtc3FGM0M5LUp4bjMwMGVwOW5kVHpMTURTeUl3MTM2TXRvM0xrZG9sd2h3ZE1fSVhlSU92SzBKZ2Q5VWkyazhPUXlBaDhpcU9vSzZIVTQ4R2IwZnpja1VYR2RoYVRfSVRoZmFGaDhHNFRhRTd4bmJlQ1J6T1JB?oc=5",
+     "title": "Trump confirms new US strikes on Iran near Strait of Hormuz - 13WHAM-TV",
+     "url": "https://news.google.com/rss/articles/CBMihgNBVV95cUxQMUJ6c0tiWmtTekNXX2Q0NlVISkNic0VMTjRqSllOOFFYNWNwMlExdERsTDhVVkRRUzRCcWk2a09sYV9FLWdHQkpjaEFQem5WUm01R2dMVkMwaVJjMGNEMGotRG9fbTZfa1dWUm1rdW9Wanl2V1FVR2hHQ0JzbWUyV2lDakh0VUxlLWFNdE1nTHF6SXBxZjRMWUFjMURUdEY0dXFGZmI5R29fNmpzbUt5NmtwSzdvQVlMMm5KRkZtR18tdnM3S2p1YWtIZFpnZ0xWUDJtRi11bnZOWVVxaXlQS0dITDVoUTlWendwTnlJQmdKR0NMdFN0ODZIMmtJS3dxWC1GaXpvTFN3eUtCQTh4cjNVc3lmb3ZfVWZsTm4zYmJVSGhpY1M3SjdDbWJ4R0wtMkxBb0hyTFdEdWpKWXpybXpQcEFWNGpJbjV2UEF2YVpUckZTSExRMzFBVWVHX1pfWXl1YUN4SVd6RjhCMXFaWTY0bXFHa080Mk1KbGtfU3RtXzVVaGc?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T16:35:03+00:00",
+     "time": "2026-11-07T13:43:04+00:00",
      "engagement": 0,
      "themes": [
       "oil-physical"
      ]
     },
     {
-     "title": "Iran's seven conditions essential to reopening Strait of Hormuz: army spokesman - Tehran Times",
-     "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPY2hDeXY1NUdqdmFxYjF6NjJWY3EyMHJnWnhvcGo0UjYzeHVyR21VckVPUEhPaHh1RnpBbmdrcWdPeDFyTVlLekZVTEhyN2IxZDZ1OEY3c3EyaThZRDN4QUVERk9mY3EyWENVWXkyVmdBOHJrNm1GUFpQdFg1M1VHeHEwSjdFb1AzTzgzcE40WVctdGszc0ZBZUc0U3pIOUFhWDk3Smh3?oc=5",
+     "title": "Iran Army Spokesman Says Hormuz Stays Closed Until US Accepts 7 Conditions - https://houseofsaud.com/",
+     "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBOX2JBMDdmLVJ0MTRYODV4OC1CaGZMdmE5c3UtSmdJMm1JYk5mRkltdkNmNlNnSHc4OXRUTDFZM2s5MUdKakhnd21NYk5DcENDREpFVlpyMGlrU0NmcTZ4Wkc2eGY3eEQ2?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T16:24:37+00:00",
+     "time": "2026-11-07T13:41:33+00:00",
      "engagement": 0,
      "themes": [
       "oil-physical"
      ]
     },
     {
-     "title": "Rerouting Hormuz Infrastructure Lifelines Redistributes Vulnerabilities Across Regional Urban Networks - Bioengineer.org",
-     "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNTE83NTNKX01XNGdjQ2ZReXBTSXJfNlhqQmViNFpuRzBDLXRVYko4TElYblBYbjVldVFrXzVlbHctdEhyQTlIYWFSU0FwUkRqR01VSXRTNVA3d25jNmg4RXZXWXN3Q2lwVGhNX2NGMEdZOWJBMVFWOE9XRVJocS1zTEo4Y1RZNFltNFpqNHVhZW5Icm94LUNoZEc2UTR0bG1WdEtUbXNVVURuU1ZOY0V2SDRtSGNnaVNHYzgzd0hOU21jbFdsZmc?oc=5",
+     "title": "Citi Raises Brent Forecast for 2026; Sees $150 Oil if Hormuz Disruption Persists - EnergyNow.com",
+     "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQdk5UVWpBQWFNVy1reG1ZeFlEdlQxcWlxWkMzTFNfUmFKdVFZaWRqNm4zTFo5V05Pd2o5b3hpOXNLeWJ3Tm9XdzR1aEk1VWd1S29vaW1GUVZ1OTU5c0hsUE5fWnhUV1RoakRubVlGcW14cHBhaER0VzZmeDVFNGZkeEVUb2l6WGhtTVlBUXBMTFFYNkMwalRYZmYzQUItWEhDLUhiVkdaOFBoU0Q4Vnc?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T15:47:12+00:00",
+     "time": "2026-11-07T13:27:11+00:00",
      "engagement": 0,
      "themes": [
       "oil-physical"
      ]
     },
     {
-     "title": "FILE PHOTO: Vessels at the Strait of Hormuz, as seen from Musandam - The Daily News | Texas' Oldest Newspaper",
-     "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNeFEzakZhNXFzTHYzVm8xS29kdE5DY2M0YkdNaWlzUnBBdklmb1NYZjN5cWthdXdkV0g2X294S0x4eF9sdUl3RnE4aVh0M1hrQXhJQm1SczdFMDB6Z3pSX3lQQzB2dHI3MTdUMmUzb0dMOGY4Ni1hZEtqN3owR3B5c1FsYmdabU9QaVN1V09oUGNXYmt0TGRJRGFfOHdwSHRSQnlpRVNURUYyYWdRMDVJVGtCbE5Mdk9kT19hcV9pa2JYUHhZdFFBVnlRNng5cHNaYmo0ZUYtbkpsSVl0a1dWaDdQMm5mbVBaQjlBSWJUT0c?oc=5",
+     "title": "Oil tanker on fire in Strait of Hormuz after mine collision - Middle East Eye",
+     "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNOG1jOUlLV1E3anZOMFd3dnJPMTVZNEpldVhaR2xjbHR2ODZMLWRrTnNKaWp5QWhjNUlUdGh0eWE3a2V6REFZM1B1SE80d3hoaWxwMDBfaTJELWVRWEloUjExcXNKOER6ZUFNOHJZb0kzVHZoOW1HQ0w3QVRSNC0xUmxabEZETXR6VHhkZU9VR3hlak4xX2tEeHBXS1Zncjg3RXpvYlF0bjNYWTA?oc=5",
      "source": "Google News",
      "platform": "news",
      "tier": "mainstream",
-     "time": "2026-11-06T15:46:05+00:00",
+     "time": "2026-11-07T13:20:00+00:00",
      "engagement": 0,
      "themes": [
       "oil-physical"
@@ -719,11 +650,11 @@
    ]
   },
   {
-   "id": "private-credit",
-   "name": "Private credit gates",
+   "id": "saas",
+   "name": "Agents eat seat-based software",
    "count24": 0,
    "count72": 0,
-   "heat": -1.154701,
+   "heat": -5.540513,
    "breadth": 0,
    "platforms": [],
    "asymmetry": 0.0,
@@ -731,14 +662,747 @@
    "lead_days": null,
    "noteworthy": false,
    "series": [
-    3,
-    1,
+    35,
+    30,
+    30,
     0
    ],
    "top": []
   }
  ],
  "items": [
+  {
+   "title": "Iran: \u2018Stronger than at the start of the war\u2019. Hormuz: oil tanker catches fire after hitting a mine - Il Sole 24 ORE",
+   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOTTRGVnZVT2UweUxZUG1tRFMwRFU4d0tJNHJuVHc1cFV0MjRuaTdBd0I3dlRFMTVvRzZEbFJVeVFMcFpENll2cnlicElQck5qdjJkSzk1cDZ5TTlDTmZVSW1xRlhLNzk0UzdwczdLT0V2NzVacFVyOHF6a2ZzRG5pazBMV095WXlBU3dNZUNNNFVEWHhPa3RZSzJxQnZaX0liM2cxXzFxVm9kY0wtOXRaMHpB?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T16:22:28+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Consumer Sentiment Improves Despite Inflation Concerns - InkFreeNews.com",
+   "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQU1NwOGZyVEZ4MWphSFNreGp0eDF0NlRpVVd0bGhYMllIVThmSUtubUE1aTJJTDk3cjY0cElSeV8zYVhPWGMwb2hqeEFSSlhVSXEwc3VqZHdPX1hpOFVjUUI5SXJER1ROTnozOGUzaEdOWGs0UjczTmt3cUdfR05VSEhmUGhTQk1sbXozS0pzTXhiQXJXWURMRTFn?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T14:30:58+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Trump confirms new US strikes on Iran near Strait of Hormuz - WGXA",
+   "url": "https://news.google.com/rss/articles/CBMiiwNBVV95cUxOUWxWYUowc0YyYnJodjcxeUdFaXBEbnk3MHZfYktWbE9HRUpOZDlYNzVpX2tIdkJOWUNjSmtxRjBvNnQtLXpmUS14Umk5dFY0ZXlCM0VOTGhvd3F2MzNxUVdpeUFUTmh6dzhudUVscXRRblFVNVVhZnhaN3luY2VDWjh5dUpGeDJZUFhaR0RMYnBvV0JhMHA5YzdaeFhSLWpfOXBrR3ctQ1Q2WVJ6cmFGV090RmVRdVY1WkdsT3hQeUVUOThsdzRPeGl4WDlGOXYtTXRUV2Z0dFNpZ0RiRFdNSHh3T1pIdktkWmc0UURrazhCaHE2NG51YVBWaGxGRWtkaWRzV0pZQVJZWkw1ejd4eC02bVdsWDZXalNWaWtBbjE1OXVvenhwd2NEU2Q2ZVduaWZteHJjRmxWS1FxamZZcGpNQ0tjeXdfYXJlcnJuZUtGWVpOU0ZNN1F6Unl4Y1ljZWVpMVgwXzNMelNTWWI3UHZCWEU3aHNibGNjRUlCY01wRTZUQTBNSFFzNA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:43:27+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Trump confirms new US strikes on Iran near Strait of Hormuz - 13WHAM-TV",
+   "url": "https://news.google.com/rss/articles/CBMihgNBVV95cUxQMUJ6c0tiWmtTekNXX2Q0NlVISkNic0VMTjRqSllOOFFYNWNwMlExdERsTDhVVkRRUzRCcWk2a09sYV9FLWdHQkpjaEFQem5WUm01R2dMVkMwaVJjMGNEMGotRG9fbTZfa1dWUm1rdW9Wanl2V1FVR2hHQ0JzbWUyV2lDakh0VUxlLWFNdE1nTHF6SXBxZjRMWUFjMURUdEY0dXFGZmI5R29fNmpzbUt5NmtwSzdvQVlMMm5KRkZtR18tdnM3S2p1YWtIZFpnZ0xWUDJtRi11bnZOWVVxaXlQS0dITDVoUTlWendwTnlJQmdKR0NMdFN0ODZIMmtJS3dxWC1GaXpvTFN3eUtCQTh4cjNVc3lmb3ZfVWZsTm4zYmJVSGhpY1M3SjdDbWJ4R0wtMkxBb0hyTFdEdWpKWXpybXpQcEFWNGpJbjV2UEF2YVpUckZTSExRMzFBVWVHX1pfWXl1YUN4SVd6RjhCMXFaWTY0bXFHa080Mk1KbGtfU3RtXzVVaGc?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:43:04+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran Army Spokesman Says Hormuz Stays Closed Until US Accepts 7 Conditions - https://houseofsaud.com/",
+   "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBOX2JBMDdmLVJ0MTRYODV4OC1CaGZMdmE5c3UtSmdJMm1JYk5mRkltdkNmNlNnSHc4OXRUTDFZM2s5MUdKakhnd21NYk5DcENDREpFVlpyMGlrU0NmcTZ4Wkc2eGY3eEQ2?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:41:33+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "October jobs surge raises odds of December Fed rate hike - Crypto Briefing",
+   "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOOUJvQ3VyaHdQd2QyeTlOeFQ0NWllNDA4QkZOdWpWdEZvMFotZFVIQWNpRDVpaVNlcXEtOGRTRm5TekJOMGtJZTJGZlNSbjJiUGtiZFYyLVVjLWNKRUxqR3ctQmF4NldKUjRGb0dMWlYwOGxSdWd1ZW4xSEZsODBnVjdxZEJwTmdIY3B4TA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:28:19+00:00",
+   "engagement": 0,
+   "themes": [
+    "fed-hike"
+   ]
+  },
+  {
+   "title": "Citi Raises Brent Forecast for 2026; Sees $150 Oil if Hormuz Disruption Persists - EnergyNow.com",
+   "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQdk5UVWpBQWFNVy1reG1ZeFlEdlQxcWlxWkMzTFNfUmFKdVFZaWRqNm4zTFo5V05Pd2o5b3hpOXNLeWJ3Tm9XdzR1aEk1VWd1S29vaW1GUVZ1OTU5c0hsUE5fWnhUV1RoakRubVlGcW14cHBhaER0VzZmeDVFNGZkeEVUb2l6WGhtTVlBUXBMTFFYNkMwalRYZmYzQUItWEhDLUhiVkdaOFBoU0Q4Vnc?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:27:11+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Oil tanker on fire in Strait of Hormuz after mine collision - Middle East Eye",
+   "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNOG1jOUlLV1E3anZOMFd3dnJPMTVZNEpldVhaR2xjbHR2ODZMLWRrTnNKaWp5QWhjNUlUdGh0eWE3a2V6REFZM1B1SE80d3hoaWxwMDBfaTJELWVRWEloUjExcXNKOER6ZUFNOHJZb0kzVHZoOW1HQ0w3QVRSNC0xUmxabEZETXR6VHhkZU9VR3hlak4xX2tEeHBXS1Zncjg3RXpvYlF0bjNYWTA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:20:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz could reopen under Qatari plan to end US war with Iran - The Independent",
+   "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxOOGFzU0dxR3pvaFVXa1VWS1dIM1FoRi1YUkpTWDM0V0lENWprRF9BcWlEeDNGTU16Z1BkSFVrR0Fsek9wTjgtZEV6cWJ4N0lfNk5ONkZWQm5BdkJLNHVNTUNFRWwxdURDWDE4d2tCTVI4WWs2cXhhNDRYem9vX19YNkNWVEVHU2VDSHQxYTc1S1hXeFZWVUFteDh3?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T13:10:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Qeshm island and Hormuz hit, as mediators try to prevent US-Iran escalation - Al Jazeera",
+   "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNMjV6aVJxVlA0d3ZHU0VBY1JjTHBjcDF3dXF6dy0wV21mdkpERXp3WmtXc1VkNEx2bnlBN3h5YlRKWndGS3RKUGotSklFc2doeV9VWmYxWTlWOEZSeENUajB1STE4RVMxYW5DZ21acUxZMGtXN1M1UngyaFFtU0NUQTB1elJSZTctYVlxaE9UeWNVellKbFZUUUdmemZxdnNsTnpZMmloV3VRTUpZZzBzZ2pOZGdPd9IBuwFBVV95cUxQSDh5VUM3TVRybThfVllFeG05YjJHQXRLZWtFUWFraWg3T1dvRHFhdHlBNzZrMmVsSlpTVk9hcE1JbjYydXlOUmNSeXF2TTQ0RU1qSHQ3WDN6a3BOcXlmS0xVR3JqRFRvY3RiYV9iNXdtZXJPdUczeU1ucUZBM2ktY3duRzYwT3YyM2ZaSmh1NjRNbG56RzBabG5vWUtSM25MUUV2MEJwVWNMY3c0ZmV5VmVOWmJEbFJCTllJ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T12:27:35+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Trump Insists On Strait Of Hormuz Blockade, Claims 'Nothing Is Going To Iran, No Oil Going There' - Sahara Reporters",
+   "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPMFVpdGozdEFzdG5vQmhFczY1aEk2UWNyTHFKajhPYWtKQTc3VlRvZ2QxRkdKOS1NME96WVFuTVBGQ1lMWTdqaUdWd2k5ZjV1QnFFUHhoeFgta2ZBSHlVN1dJZzFrc1FqeFF5VjNrV0NNYWFSWUtGNGNZYlpFT2RNNE5FRktZRnY4bnBuT1J5Z0xHcU9jUXBVci1uZnBpLVpmQkV3UEt0MXViUmpPRlpHUjB0cjExRFdDOWVvSA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T12:00:45+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "An oil tanker has caught fire east of the Strait of Hormuz after striking a naval mine, amid rising regional tensions - \u0635\u0648\u062a \u0627\u0644\u0625\u0645\u0627\u0631\u0627\u062a",
+   "url": "https://news.google.com/rss/articles/CBMiggJBVV95cUxQcWlqaVFLZFZSN0swaERkWHJZNWdjSkczemlZTHZ1SGJ1SnNLbnRNUWR0MVdUdnRBc3hVSTg1ZmRMaFZPMzRGWnBPZkNDTkhrZGc2LUZqelAxcE95SFBxWklLOS1ON1hHcHNLamV6VndJajBXQWNZbGtuZF80WmJvMXhWR2RFazNwbnlfb2FxeHp0SjR6VWpoWGxjR3VobUl1akJwdkNTNmYxWkQ0MFEyZGRDYnpEWWtXSmhXZmh5TFlLaFVPWFJqVlU5VlZjcjdPa0JaT1FySS1XYk12cko5TlA2dENBb3hSbldyT1RwOU5PVlBZQTF2MmJ5TDQwMnQtSGc?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T11:56:45+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Army Reports Oil Tanker Fire in Eastern Strait of Hormuz - WANA News Agency",
+   "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNMHkzMGJoTTB3MkwtYm1scXhzeTVJT0g5dzc5eXVrUU9MUGZwUnBOdkhURkF1emFJbEJKV2xJYUVCTWJiRjVUcGNCRGRkbllTdmtqRGg2NDRVcUhzTm9nUW9fdU9YU1I2alo4VF9LdjNnUHBsWlhMa3p6WGI0UGFyZVZR?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T11:46:58+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran\u2019s Army Navy reports a tanker catches fire on east Hormuz - Mehr News Agency",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxOWXExNG5QSk9DdGNSQnFzOW4xUklralpGZHNXa29YZkFrRmdyeHp4LWlkMHFTRWJBOTY2NVo2Z1k2OEFtN1o3dFdIUnRUOFJ0QWU1TmpXdjJUcWhmaExCcm9oRnQ1c3FablFod2F5TXZYYUNielB6M0Q2Rmd6Yy1sbllIOVBaSlp3UE1kbmdmTlBEQXJTSmtqVFpjaVpsZw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T11:35:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Violating Tanker Hits Sea Mine in Strait of Hormuz: Iran\u2019s Navy - \u062a\u0633\u0646\u06cc\u0645",
+   "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNOG5kZVhMTE9DZE5pUG8wUnB2WUM3aWx6LUZ5TTdyTE5SWEJqQndEZlZDRGNYWkdMMWFoU2E1Q2E4cnljbnhVRjAydHlyRFlyd1VILWlLLUV2QmVkZmp3QzJxdnZnTzNYeUNIN3g2SExsQTdEUUFTc0RuelpQczRmWTMycHZENW96TVNWaXdxLVNLOWhQSHVLOGZVdVlMY29Nb25MclV1VzRuTFkybVFMNFpOLUJfd9IBuwFBVV95cUxOYThJQVgtZXpsZU5KWUI1T0s3dHJjLW44N1UyYkgzTVhYcHNONXpJQTBCc1FTNW83TThLYW5PaEdjalBQRHh5TkFMU08wOWpWRkJsWFV0enFZTWFGOEFhSDByTXR5LWlrTmF3eDVid1RmYVI1aURVLWZTUHhJbks2U29LdjBZOWxsQTh4TGFaMXpweDltSTJwVnRlQzZ1NURYVUQtXy1xWExubmY5SFNnY2pvUGNBRWtyT293?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T11:31:56+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran navy says tanker hits mine, catches fire in Hormuz - Al Arabiya English",
+   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQMDRnUEg2QTB1blV5ckVFRXg1Q0JXcUpTZ2liS2RHYlRvQ01MQjNVSHp4NVpMRGc0dW1HQTQ3WFpqNy0yWGhGZlkzMm9Jckg1aUZPU09tT21oTDFaZy1lQlpiY3cwY3BPTE1vTHlacTNIWXI0STltdURYcGdwdUozaTNXd1dEd1N4VlFjQUFTTUxyNVpUNlVuM1pjQUQtbGxFclBGZU54cDJoUWtRZXg1d2NB0gG3AUFVX3lxTE1BN2RnTzhyNWZtU0tGWmlvQ1E4MHRwOE5XQlE0NmVuM2ZVRVFlS2RKUnJKSDE2Nk1fb25IbXRVZ3Vxb1NSdXByWlM1UFBySHVaTTRBeXRveVl4NW1DSXhMM3h5NmJLUmN4NmI5aDBvRDFMbWpPNTFmcHJnSjE0RmVBa1U1c214S0hxcGVlTm1JaDdGc2I2czdFU3cxLUtuNElaS2lCbDYyVWFDbFRHQTN4YWhlMXZSWQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T11:14:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Attack in the Strait of Hormuz; are the US and Iran heading back toward war? - The Business Standard",
+   "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQOUEtQmlEb1hUazEzVGZrX0dTeWRLWllqZWVjMTFvT09xUEREcXVyelh2eGVUZHZyTm1oMDZrSzVZNTJHRURkZkY1UkpvazROLXVsV3pYRVJORmZUQVdiX040TWhLbWsyZ2p2MzUyaWdrZzBoSXhMV2pKMXZKRTlGbEtkb3c1NVdOSHFJTUloUFN4bHN0ejhkQWNkM2F4bzV5?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T11:00:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran: Oil tanker hits mine in Hormuz strait - Breakingthenews.net",
+   "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNQ1RqOGt6Z1VZamJsNGxDMjJPakJyZTIyRlk0c3hXVUUtMzFfVmJYQTA4bVNsX2FpVlBQekR5aExnWnZVWHd4d0VSN1BfZEIxUEc5Q0ZwZllFMjVWb0RRNzFjM3hFSW52NWdiblhreEpPeWtlTG5PTEJ6eFVUbEI0cnlrMTR5aXczY3U2SXBXSTQ2UQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T10:55:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran navy says tanker hits mine, catches fire in Hormuz - A News",
+   "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPY0NnNnZWdFJfdVY3akNqcGxLQzdWbjh0dzRyaDRnYlpkaGU4eTM3Q1ExdVI2WlBycnRVMVRHcXJsTC1OR2VONHRfYVlGX1JUTUNIbmk4anVrbVhuWGdIUlRkLWVVTVFMRGRDQldSQ0h4VVpUa1dDWVpNUlFhWF9ON2VKT1dOSTQ3bm95Z3hieVp2VmUyQWVFYW9ReWLSAaIBQVVfeXFMTV9Ca3BaOHJ0OTFmTTlLSXlfSi03eVM5UkFEUk1INWV2ZlFVdE9QbzJyQ1RDR2hNaUhvcEtncGxxOXVXcVAzaTdLUm5jNGlUSkM2djJlQ1FNTDVwRVVxUW9yY3M5NW0wN1VLY3Ytd295NkRKVEIxZGk5Z1J6dEd2alN5SHNHeVlaMVROZlM5SVNOSUtCQUVGd21Ob0tKTFlnUE5B?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T10:43:14+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Oil tanker said to catch fire after hitting naval mine in Strait of Hormuz - The Times of Israel",
+   "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOU2FIb01FNHNWRmZFVFQ3dVhqZUpnckhnVUU5TXVDYnRPeWQ2Snh3NUZTWkNzMEZETE5RVXE4Si1zZWdXazF2VVYtUGp2TmZsbEtBN2dvNUlFY05QSmVONzFKUi1aaWFldWdSTGxpQjZETGNhMWNrd1hPdi1DLXVrSEFNcnFYZEpIYUxTV1MtYVF6MDhzR1FWaUpuSHhvdWNmSUJkZVN6X2oyeFlEZHoycUphWExOVUtqdG9veA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T10:42:32+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran reports oil tanker blaze in Strait of Hormuz - Latest news from Azerbaijan",
+   "url": "https://news.google.com/rss/articles/CBMiekFVX3lxTE11eVpWZmFHQTc1TE9aWndNb1BUVEM2VlVGeVRrS0dFczVLWnZ5Zzc2bkhrYWtLai1LTTIydTNGT2VhTEozUE9yZzJsQUJGcHk4MUU5UnpRd3NTTDZkdDNlMXNfclZUOW5mSkJfZk5jekJXNFFoQ1RremhR?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T10:20:45+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Maxwell Engineering Solutions lists at a 90% premium on NSE Emerge; JDA Capital acts as Book Running Lead Manager and Market Maker - The Tribune",
+   "url": "https://news.google.com/rss/articles/CBMiggJBVV95cUxNeHZCeG9sOTUwNU1yNjRYWlEwTGVWRzdqNmdfOW1yR3NPTzEwUU5ESTZzN0t6Q1NxMjdaX0tGWE83SFJVelVEMzM5aFgyOEV1RGFpTzd5UFVWV1dhdGl0WUxrdERDVlNjV2NoZVlkT3h0eTNINVVwN0wxaTRfbHdqUTBUWG9rcExaOXlwT3E5RUVPcVNyRnJ1a0xzbVBQQ2xocUZlZmJBMWZzMGo4WkJkNmV0bXBKTU81UTRVRVNGMnRxNzBVUkhEZlZBWXRMS1hSak13VHpFckNnVlctZDY1TU50b3VfVkROUUozdzJJYVp1VkFja011QWpWRXJhOHVJRXfSAYYCQVVfeXFMT25wek1HNHgzT2NLT1dhRXhqbS1nSTVVLVJZc3Vyc0RaemhIbzgxM2V4TVRGVWswY1UxaFNFcWpoRWhaZDNFTjdJN2thenBHZTV3bDFkcDVKT3E3eG90eHNBNkZKVXlvb0U0UWNxZFZkeE1DTGxRRWJCUThxQzM5MEdQc3oyZUNDZElFZXRHNVlpVjBIRkg1djZUS3Naa3lTMDZsMUQxbF85VUNRNWhwZURaTW5pdzJsdFlhSl9fZlZQb0dkcUExQmZWVG9qUlcyanN5Zm00d0UzanR5NFdiWlBfNW5PdzlEVk1kbEpwUDBDcU5QRlJSdk4xWjA4a2JnX1liODVlUQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T09:34:46+00:00",
+   "engagement": 0,
+   "themes": [
+    "market-structure"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz crisis: How global LNG shortage could hit India\u2019s power bills and gas supply - Open Magazine",
+   "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNOHlrN0NVRWhhYnBPd0JuQWJkRDJ6VVdNYzZqQVdjdWR6cHhrUVAza0swTXU1eG9mb1RUOF9fWHJoSmhLcjV6Q2RENENqZlBVV3FHcXg3amo5VVRyOEw2T3lTU3NTR0EzVUlNenkxVnpaa0pLMlJRdFVsSk9NV0pNMVhJbWstWDFTM0dwSmhVa2VGSkJWUTVqUlZaejFOMzczb2dZTnI4UjA3Z0NQM0E5VTVkdUg1NjdyUkx4SFQtb2hsbUU?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T09:11:01+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "IRGC militiaman killed in Strait of Hormuz as Trump confirms fresh US strikes on Iran - Rudaw",
+   "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9SUmF6TVdxTkNPbko0Z0JEaWwwMndpSWktN3F3d2NONVRGNGt6MXNMX2gwaFI3b2lUd3E0bzhjN3JEWmlta1I3cjRoYmlQT0ZzVlUwbmdNcWtGODZjQkE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T09:04:47+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iranian Army spokesman: Strait of Hormuz can only reopen if US accepts Iran's conditions - Pars Today",
+   "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNOFM0a1RFY1ZXUHk1T3FFSVNPRzNxaExCTng0ZmNFbFJIUHVVcnotV25sNng0dURST04xVEZqb0ttNlBERFpvUklzcUJUMHloTkp5LVJFMWQzTTNfejdDUGtXcU81cm14VGRBWkhLSXRoOU1nUE5DTmxmMEN4MU1lZjdkVkNhT2dtUTNXbUZVUkNFZG1WZDM5bi1YSnNhamhTX1BySmRWbzJ2dlV6OXRZRmZGSnNOSEppMl9GdVhpZFpTQzBrbEtXUQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T08:56:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz will stay closed until US accepts Iran\u2019s terms - Free Malaysia Today",
+   "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxOdnBheWY4OEoxUTBGV1dJZmpVcEVraDhvVEhvYUxURVJmTWZ3djlYSTRVMDR2YzlKQVh5WGpCcURtRWpTWVVidHN0UWRzb1ozdjVRcmNUYnZjYk81dWxleFVWTWJoTThiRVNRSVBJN0N2ZER4MzFLbjg5eW1BYVVDZXpHY05FVXZUWjRMU0xTWThjT0VKZ0ZGdHY4akg2ZXFfNW1zbk1CT0hsR2xkLWlIOVJjQzMxRWhKV1VLdTZXRGY?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T08:30:35+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Tehran vows a 'limitless' response and sets conditions for navigation in Hormuz, coinciding with Washington offering financial rewards - \u062c\u0631\u064a\u062f\u0629 \u0627\u0644\u0642\u062f\u0633",
+   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNRnVtWkxwWWxuVF9iRUdXUWNzeFE1UEcxRDB3M3FCWHd3TlBLS1BTVnRXNUIyWmtRVncySzQ5RWdtSDc1ZlRIV1VNYm1hUWQ0X196WmdCd1hWMjNkQ1ZuRU1EM0pfRE8yaFQyZlBkZ3k0VEFhU1ZEVk15aDZKeXBlX1hKU1JxalZvRHZ3QXFLcy1pYVZ2QklTeS03M0d2dTRQZk9oNzRGRHVwejlmZWxHOGJn?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T08:25:32+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz will stay closed until US accepts its terms \u2013 Iran - The Malaysian Reserve",
+   "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNSVBOYTRFa05FWG15RGdxbkRpSkNzTm13TEVvMEEzekF0QU1ndzByOEI2bTFKbVd0ZVJXZGRXX293c2pPakNXbUhNX1FzWkVJQlhCS0c4blFjS3pIM204MGRlb0FDZUpYNW1DXzZMNEJ0V1M2M1BIZ2h4WkNHYk91NExQQ1hPYm1ObHViV0F1eDZIbUpFUWoxeUlyaHJpdUlSSXBFQllOXzBqbWpYN3c?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T08:24:19+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "U.S. consumer sentiment improves as inflation expectations ease - Macau Business",
+   "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQSFoyalFoMnpndUhXTm9naFZYVkZzR21ud1BsQ2dtVlFpemt3WlpzOHVxdTZxTktySzBfTmpjVGJXNEpBTEY3YVRrYTR1SF85Y25CSFA4XzktOVVZeXdnb1dPS0tveEdTcFhvZ3dzQ0RxZmFKUXJPcU0yZElvdy1hbGZ6bVpUWUxybFdLbGFxR3BqT28?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T08:20:45+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "IMO Says 25 Seafarers Killed in Hormuz Since US-Iran War Began - https://houseofsaud.com/",
+   "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE94YmFocUVQSEpNak5qNDZURVBCdVJzVWtfTmlneWM4cGlFVmVKQ2g0YXlfQU9wNzVrd0xxaEN5LUNDdWhVenNVR0JfRDNyQ1BTMlE4bnZRRE5iR1M2SFZtTHFnMA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T07:56:33+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Trump Says Strait of Hormuz Is Reopening as US Confirms New Strikes on Iran - Khaama Press",
+   "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9KcnpzMlBSMjU4cm45a0tCQURETHdpb2V2NVUtaF9CR0hqeTV0MEtBVDVNNzNWeWtMbklJODZGRjV3TG1lQXJkNm5uUjdTNWtwN1o5UWNKcGlnVVR3QWY3RjZXWEF2TmptTjhCVERTcw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T07:50:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz could reopen as part of Qatari plan for Iran nuclear inspections - inkl",
+   "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPRzgyaUJUdTBjZHl4UUVPbHNjOC1FX3FkSzhqS21EMTZjNmJPQ3dCUUhubl9hLXlDWmlJYmhsQ0htTkJ5WTdTbE00UG5lazBGTi12MjViZEcyWVEwbzhJeDdTS3lUZktfZnlEemVCOUt3NDVmbU92N0dzQlVaWTh1Ny1ndk1jb1NPR21OVnpwX1ZzV0VfbVFwdGFtMUgtb3gtM2V0NDV4akNNaVE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T07:19:52+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz could reopen as part of Qatari plan for Iran nuclear inspections - The Guardian",
+   "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxOMFNrLUQ1dG9iaVNVYWYzRjRlbmNnVEFHR29rcWh5NnFpaEx5UWs1RjNTbWZoc3oxd2RQWUdBaXFaNzJENjlUWVdNOHNsQzlWOFVYdDZHVTFvQmpGWEpSSlZFLXRVTUxWX2lQaHl6VjJMVDViVEM2NXF4cnZJcUo1aWJHc3MtdTZFdFRhLTF5cXBTallDMFVZY1dlMkd5RFU?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T07:02:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Trump Says US and Iran Are Talking as Hormuz Mine Attacks Continue - https://houseofsaud.com/",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9kZXI4TlFQNlNoNm1lb1E4UC1feWdmVWdteXBsdEZtS2NDbkxGXzZlb09yQnFPRFJaLVMzUUlWaTJNNkgtR3FjUjVURGp5elE1aTBqcnNITW5HTFhoNkZOdm9FamVQSmVlV05wMFVLYTg?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T06:23:16+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Hormuz not to be reopened until Iran\u2019s 7 conditions are met - Mehr News Agency",
+   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOeWFtNXloTlRYUUg5cVRmZElOSW5ac191YXVZUExCaGJXRzBIbmthMXJQTlIwREZsaGVQQk9GUjRRYXh5TEVFbDdIVUt5VmFsVGhvbExFYWRBQ0VUWE9jQ2gyMkVMeG1QeklFeUJCSnRpeG9OUFFROTBiRWhKVmRxYjZYanBIX2VRbEZ4STljQjhnQVNmRUdJcGw4dw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T05:21:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Global gas supplies could tighten in winter amid unprecedented Strait of Hormuz supply shock: IEA - BusinessLine",
+   "url": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxPdHFFT0k0MXZ4WUdpdUlkNzFGWFg5TE5JRWZVd0NOa2F3eHoyNVBjRjdmS3ZSZE9pOFl5Q1A4LTlDVDhjdkxCM0RDZlZ5c3Vya2NSenlMblE5bjZfYkdLaFNrcExRTXpnOVItaC1paFN3MHNJeWV2enJoSWxWQ0dmMXV0aHktUk1HMGZERWp0Qkk5dXQ4c00zc2tyUC1zREt1MlFGN1FHZVlOQjdRYU1XQmhPZU1sRnhXZk9EaGtSLURYYnJ3RHlNZlFpZ0lSWlRCenRJbWJ5MFdnOXpPVXJnRkxTaDl1LWxHTHV2RjhpRUVpUHPSAfoBQVVfeXFMT2J4LXd3dVFSby1hNDQ2ZGdYNXZNVGxWNXQ3ZTdWR0pDYU9iX1VMUWxjeHhVMmhPV2dUYWVXUzBMTURfc09nZmljVmd0cFR5a19qNGRvWlItWFQ4YjFlcVVhT0Fobndac3JJZUcySldNeUIwQXV4em5iVk5JOEhOSE5JX19tZC1BZ2k3VUtkYWxaMkhTa2dhNVMyN21XaF80S1FvUHYzWmRwYkVTQzJrdEdMV1VGQVU1MV9raDZIM0RDekVndC1fNmZMVmNYRlc5UDRjVy1XRE5qdkppQkZfbS1xREZ3ZnZDcWpPc2hzZzgxeVZkaFBUSHBTUQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T05:20:58+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Trump signals Iran peace progress as Hormuz attacks threaten talks - Investing.com",
+   "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQQ3VqRjN1dkVMeHNMdkZlUTJ1ZDdiNnMzNm5kLW9KeFJPYkR0YkdvZFBuLVlPS3d0UUo1c3pseHpxbmVDaS0wWkd2WGxHVmJQNEtETDNvMHdNUmt0U2ZlNHJDc0tzS1BoN1BzdmpWdk01VmFOTWZtcGFtbElyejNIbVJVdDNWSDdMWGhGS1ZwQnUyY3Q4Vld1Rm01SldHMWREWVlqQWFOV2VObjJ4Mk5vX3ozWC1ockRRWFE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T04:41:10+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "US \u2013 Strait of Hormuz Reax - 930 WFMD Free Talk",
+   "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5HVjZmdVItLVFsbnRVeDRuYmJUdE1jZ0JxNkpOWjNUTml0aG03djJ1azI0ajNXenhGRFlseVhiN19MSWtpZXo0WVlnLXp4Z3QzTHBIWG1MamN5aVRLbkRVT3lPbFNmR0Rk?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T02:51:21+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "UKMTO says 11 ships attacked in week to 4 Nov in Hormuz, Arabian Gulf - Middle East Eye",
+   "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxOUHVyQ19HZ1F6UmpoRDY5Z0x5M3IxaVhuMDY0NXpoanRBcmFEODluM2l1VVRnc01WOGVHZjJiV3NlSFFRYkRYZXpuQ3JYa1pjSjVpblB2N1ZpQTRDYU0zQ1NZdHVFTll3dV9IQlotRGhGZ2lILXp2a0ZVbXZqN04tZmJWblRiUkIzZFRjM2lvZEdBTFkxNHkxTUs3UXM5by1SNEx3dUFxai04dG5ISWFuMDJhM2hDRTQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T02:25:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "DDR5 RAM Price: $8.70 Chip Now $48, Up 450% [2026] - shattered.io",
+   "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNcUJPRTJqd05IZ0p5VFNXeVczVHg4WXhMeDhDVmVMTXRmYmprNzNCM1d5ajZDTjF1Uk9ReWd6UUJLMm94T2Fwc1FxVGVSUThsR0ZSd1FsczZjaHE2WnpkRkJfanFEa3hVODNYenRfQ0RsaUkzRVZ3Vlg1ZkU5d3hVUkxCR3psTWhzZnhOVA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T02:08:33+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
+   ]
+  },
+  {
+   "title": "U.S. November Consumer Sentiment at 51.0\u2026 Rebounds, Exceeding Market Forecasts : Global : JKN - \uc7ac\uacbd\uc77c\ubcf4",
+   "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE44MllFTXBJM2Vyd3pJdlZDMmk3TGNDLW1uREZENUpvTHNRTFdLTXFON3pWSENrQ3pVYVZ1RTdNWkFQV0RuR3ZaRVJ1eFpnQlpZUDB5YVRFZXhlM1BJWEVCU1F3?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T02:00:08+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "US Consumer Sentiment Ticked Up, But Retail Winners Split - Finimize",
+   "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOQjRBMW1ES0dzeG1BSVJJSFRVbW1YV09FdkU0REhNV19OWkV6RzVzZ3c1RlFTeVI5LW1NaURDNEZ1Q3BYNGhJejJXdW43VjR3V2hIaEc0SVdpUUFjUXBoX1Q4a2xrclVFZmxJWTRiWmxpRFRIUWY1dHZnOXVEUnQwcjhKbzBQcm5jX2F5dDRn?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T01:45:49+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Crypto Market Faces Volatility Amid Strong US Job Report and Fed Rate Hike Woes - CryptoRank",
+   "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQT05rNnYtUEl1WmpfT0RwS3d0Q1hKbzQ0VHpyeVNzUmxHSG5wR01PaTF2ZnNVd2Z6YmZIRnFreUoxS3BBTmFzdnYwRTlQZ1VEbzJRTG95V2dGU2s4THBqeV92M2xsMEdsQ3NpdTJPNlZUd1VIRTBvdUVXYnV5WTBlcmpvRmd1VnF6c1dLRlpRdG1XOTl0SWpqQm9fZXNFVkltcS0xSXE2dUFJSXhkV24xRnJoQ3Bxdkxu?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T01:19:40+00:00",
+   "engagement": 0,
+   "themes": [
+    "fed-hike"
+   ]
+  },
+  {
+   "title": "Tanker reports explosion while leaving Strait of Hormuz - \u5df4\u58eb\u7684\u5831",
+   "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNOElJcG1rLU8zdVhEOEtoSkJWZWY0Y244NWRKa3RSYkdWRnBVSmNTbUMwVjRwNHdFRkNLOWhjRGhDRm4tRDJNVE4yWWJDRnA5Zl9iZ3ZWdk1aRThwSmZnV2lZQ1dab3hMVG9QZjhtcDRCNlEwSzdHcXNGX2ZaR1ctaDIzMng2YjdQcWo3ZVE4TmpONGRERDA0Q3l2MUFZSmhtY0hBbkhGc050MGs?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T01:09:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz Attacks Increase Marine War-Risk Insurance Concerns - Beinsure",
+   "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBvdTNFVm02Sk1tYXdhMWg4T3JBOHhxcXBKLWJBelBWaXdUTThDMC12ZXpIekhOMjhQZnNGRG5EajlCQV9mekVIX1BEbURlclVuMzRnbmJBaGNjaFBKX01fR3E3R0tKSGhCRWsyUk1XQm5LLTJiNmhXWWxxLVA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-07T00:00:36+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Oil Steady as Investors Focus on Hormuz Flows After Peace Talks - EnergyNow",
+   "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNZDExRW9IRmNsOTlpZ3JXdDlRWFBFOXdpbFZuUGFNZi10UTUzcjRNTEctTHFXelozS1NnVjdUZlk3Y1RQQ01yQWtLSHk5Smp6dGxrdTdQOG8zQWtBQkNfRzlrUmJGdWpIYmNoTVBlZzlKQjRmWWE0bnBPUmdRRHNnVFN5Y2szTzJyQm9qLUdfMGxNWlFzTkFMd0xuN2g4Vk1kY3c?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T22:56:39+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Micron Stock Price Forecast: Data Center Construction Curbs Weigh on Valuation, but Long-Term Agreements and HBM Price Hikes to Support Earnings Delivery - TradingKey",
+   "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxQbVBYeUlTOWplYXVhTWtzYzdGZjVVMGg5UVNmWTdRTDZmRklPWkdlZlRtNkNsUlFvaGdrY3RaX3ZBSUswNnFxTEMyUEtmVG93TEQ2elVJUVN5bjJPUHVfMThVZUFFbzdjNnJKWjJQRER3LVRBRTVMSm80eXlLR3k3MFRVUHR1WkU2N1NyY01vVFl3cWlMWFF6bkU3N2ptYjBRV3BESkNjSnF5amVVa3llUi1RRWNwaGF6OTh1YW84TTdkVEo1N3VMM0dodXNGTHRscVhjdENMSDlmM1hscTBieg?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T22:08:55+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
+   ]
+  },
+  {
+   "title": "GSE delinquencies climb: Don't shift staff solely to FHA - National Mortgage News",
+   "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQRXJaR3huSU52UDdYMEJFU2lRcDNvX1NTUXZLSnhKYVZDX0RYMExucFZIMjRJUnBBNzh2TTVXYTdGWXpzcnN1RmtCa1hXTlpHbmZHZHFzV1lMVVppZ2ZKMDRSMjBwcHhkcDBiQUxncUJFemltS3F1aFZrYW8xM3BTTVpScFZ4ay0wdkFsZ2NmSzRZM0FCRERRcTNudTA?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T21:11:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Florida consumer sentiment rises for second consecutive month in October - The Capitolist",
+   "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPZmU3N2lhYllDY0RMUXFqSGU5SktLdzRJTnpyUGpUZGdHbGtncFN2Wm5zM1NZREJxNFRHMzdXZ0VMbzFLR0Y2aEpJblE1eFdfR2FTeVB2UWRKRUFNYUUzbS1fOC1XUjl2SF9WVU0xRHMxT0tPWUxacmYzN2NaTHQwa0FVUC1QSTBoWDdoNDVlZi1wX0ZaRHZ5bFcyYTdMVUE40gGmAUFVX3lxTE5HUkNrM2sxUFVCMjRhR2xNaGxpc0VTVUZTSXA1LXhBSWZnVGlXS3ZMUV9HLXVhZ3FEWXhMN1hnVWFGV1RDRHJsZWZaZEM0bFBiUkE2UE05Xzl3M09RS1F0ZU0tdGtCUmNSNTdtZWVvQmRXbnk1LVdsaXdLVlNqc2pGUHpIQThTa2d5U1Uzazk5RVc5M0FSdHNTLURhcXhXRWZieFllUEE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T21:09:09+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Consumer sentiment rebounds from second-lowest level on record - Fox Business",
+   "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1NdGlpNF94eTMtVm1NbXViNXlEZ3ZBeGRQcG9MQ0pLOUViRmJTSjBEcC1JTEEyT3I5c1RZN2t5amF6STdta2ZTOHZqS1V4c2RnVGl5UHR1VHMxYlk?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T21:03:12+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Consumer Sentiment Recovers Significantly in November - Advisor Perspectives",
+   "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxOenVPWEg5ZWhka2NjdG9majNoR1FNV0RhWmFhXzBMZnZxYjlQcmFSX0hOX3QtS2JsVF9xVVVuZDg4dF9tZzdsWVVjbE5seFRBTGNRRjlLd2xadmVzTjVSUkFEMUpQZkJXWHh1ejVOTjBqS3c2a19nMGttSkFKYUFFckRHYkptSnRPRGpUa3M5WTNmSHJMVmp6a21DS2NCRjYtVkVza2h3?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T20:25:57+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Micron: The Contracts Lift The Floor, And The New Fabs Arrive In 2027 (NASDAQ:MU) - Seeking Alpha",
+   "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNRkZveXdNLTlBRmtwV1dCUGdTQVJrSDkzbWwtQXVsVE1GeHp4MXlkTWh2WFpfNHF2aHlWZ0NVdUY1ZFhxQm1zTVVRdkhoTXdyLUhqcEdNNFZuS1d2VTRDa2lHc3FKay1BMVgxOC1PQVh6WTdFbmJiUDBjMFhrWHJKV2dDbVNNSkxXei1fNXRoM01HYVluQ2E4c1pjUnJUUkpzVE44QlhiVmVCbjdk?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T20:05:36+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
+   ]
+  },
+  {
+   "title": "Strait of Hormuz disruption \u2018to keep oil prices high\u2019 - The Times",
+   "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQTHZWMGltMHdVelNuSG9yWG9VdDV5czg2Y01HUk42WUwyWlRkejZsbVQ0c3dwRzdfQ3RqR2M1SUxQY1l5THdRTENwVUFZczNNbWFsRDEtOXRtdG9BdnVXOXd4d3pkYkNtMWgtSHlELUtvZ19DV3NDVHpxQzNDYXNFcy1TMFZGdklJbW1EejNjZndKUGl2M1RPaDZ0VTJ5S3Q0?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T19:45:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "US employers add 165,000 jobs in October as Fed rate hike bets jump - Mix Vale",
+   "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOOWlyZENUalhvRndkTTZ2MFUtTXlvRldobVlpTkg3YVFUVjhlMkxJQ1dkajRXOWtheGk2S3F3TjZTMG5jNUluZnVkY2FEUC1XWkN1YmQ5ZUlNRjA1YjZ1amJDN3ZmYlRTNnJfc25sYVJ4Z3lPZ0Etem1tVjRvT2VhU0Z2RFAzZ0xBRU03YWh6SFBFNUUzOGlnSGlQenFONXdxZ2dZR3FETFc?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:49:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "fed-hike"
+   ]
+  },
+  {
+   "title": "Weekly Graphic: Making Sense of Hormuz Traffic Data - Geopolitical Futures",
+   "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxQamZnRFdEbk84TE1Ha2NJMG56ajk1VExET3BoLUYwUmxZMUt2MVBxQzViR2JuSFRwZjBjT1VubEk3SXY3Nko5bmhfNFpfd2VpODJwWXdJY2t1SFVqNklBUXdueUgxdjhjZUxwN2N3WTJsSHpRRmswRUExZjVPZURWLW16YWZqZjYzWEs0?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:47:37+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran Says Two Tankers Hit Mines In Strait Of Hormuz - Eurasia Review",
+   "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPQkhydUFWRnZ0N2l1TUc5LTNrTDVfTkhvSWFNOG1VYS1QYWdPMTNTM3ZKTTcxSTNpdUxGVEN4NjdpaFpaMThQcVFIeFNkaWFWWFVUSS00dlVTNFB1cnRBYVN2cGNRemRHc2xnVlhZWDF2VjZTaVR3eDVJbzFDcDljS1ZSdmJyNlhPbEFZcjhGaFFTaWpQa2c?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:31:16+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "US Jobs Surge 165,000, Nearly Triple Forecasts, as Fed Rate Hike Odds Hit 80% - Coinpaper",
+   "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOd0sxcDAwWE9jN1JrMlJIQTBfMmdlLXAtUnJaSHFwbXN3RTM3UVFuNlJoTDR5a1FuS0o3enJaSlFpU1JZMjltT1FBWWFPZ2FqT09kc0pqc2paaEZwd3RnTWt2RW5GYWdtTUNIWTRhdFUwc3V3aWREVW9IVXNiaWJOV3g1Z1J0SXVQTFhFOXktdnU2NEZGelUyblBSc3NlZm1JVUVSVQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:21:08+00:00",
+   "engagement": 0,
+   "themes": [
+    "fed-hike"
+   ]
+  },
+  {
+   "title": "As Iran Chokes Hormuz, Egypt\u2019s Energy Crisis Could Become Israel\u2019s Problem - Middle East Forum",
+   "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOM3lSMXJreE04Q0s5cnpxVEwxR0xxbldka3BKc2ZkVWZEWU1iODlTUjJZUGx4OS1iMmltY19qeG5RaklZYjhURGRmOFBValhEYXlYTDFZeWl3MF84MmZRWHhxN2dzNk5CQjFxVEpDQnVSOGNNSE0yY1RLOWFEVUhTTmQ5WnJnMUdvR0lDbXNzRnBBMGU3NTdwN3JDREhIUjRIMG9YTXMtZzBqZw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:18:25+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Seafarer killed in Gulf as Iran says ships ablaze in Hormuz - Middle East Eye",
+   "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOdlA3SFBiQ2U5TjF2YmxoX1BCT1lIRnYxcW5sdkZUbkhpQUZHWW9kVjdEbFRMeTlJYzBEYVFTUkkwZkVTcXpnc1Q2VlNUT1paeFl4TVFEeVE2amNQd2hVS1dHWmZjUUdScDBwNTJ0Z3A1Y0hvNVhLa212RE1RY0NuZEZjS3l1WHcwVnVPT0t6eUNqUUR0Zk5Xa3lnN0txQkhuQ1NFZVkyUGdwM0U?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:16:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Iran war: Gulf tanker attacked, 1 seaferer killed - DW.com",
+   "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPNk1KUEc4UEU2TzQ4eFRSaUozNGM0LWxCeXNJYUpzWmtSUkxOWW53a2M3ekpFTzRiTElScWJfUHFWM2FoNDkzSTQwTXB3bmkzYVNFa0liaG40T29Kcld6RHdkQnNHbWZETTZlZFVRYXNuenFZR3NLZ2l5WUtrTjRSc1dEVXRIMGfSAYcBQVVfeXFMTy1wLTlEdy1RajY3bE1BdjllT1RmQktJOXF6MXppQUxfVUd5QXVIWTYyQTJZTG5fR0p1QUY4Ql9YSklLdlBDZ3BCbzZfZDJ3cE1sb2o3M0U4cHhZQy1TRG9rREczTnQ5b1dPYi1OZFduNmRKQ3A3VkxFWkNYS1Z5TlFHMF9pc1lB?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:10:47+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "US Consumer Sentiment Rises to 51.0 as Inflation Expectations Ease and AI Bubble Worries Grow - CEO Magazyn",
+   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPZXFjbXNfZW1RcW5vTjZQUmROaUlnem5CUXl6NHVFaDd6SDdJUXNQNHlwYklyNVYzV2ZXYV9YbEhxd0h0b2lEcWRKa2pwdVVvMjNNRmZYYXBVd1ZQVWFXSnVkclFjX3V3NEVVVEFST0JuaXJrVzdadDhHUjRfQ3B3N3J4N0Y?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T18:07:24+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
   {
    "title": "The Insatiable Demand for Alpha",
    "url": "https://www.netinterest.co/p/the-insatiable-demand-for-alpha",
@@ -749,6 +1413,18 @@
    "engagement": 0,
    "themes": [
     "pods"
+   ]
+  },
+  {
+   "title": "Two oil tankers struck by mines in Strait of Hormuz - NewsNation",
+   "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE5ybjUtX3JLMmFGeWNyN0JmTU9xUm5MbGhKb2FjMXAwM3NZM2FxUUN4Sk1oZnowbkswSVBVMDlZMjBrZTJHTjFERVhHOERmcXBaUm1kTlJSOUItQVlFczE1Y2hKSF9mR1NPcHo1dndWTXRtQWlycGs0amZLVdIBgAFBVV95cUxPUVpoWGtMRVYzVjFBaWNLLXhWWUo0cFRJTl82bzFwM3YyU040MWRPMF96dmJNU1VkNEVEczVXWFpyeWFXaEM1SFU0bUd5aTBQcjlQV1laSlBwckpnQmxwV1l0MmpRTU00Zl9Dd1J2MmNqOTBlTnI5NmpoUDNndVFRYw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T17:54:39+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
    ]
   },
   {
@@ -789,7 +1465,7 @@
   },
   {
    "title": "Consumer Sentiment Rebounds to a Three-Month High as Inflation Expectations Ease - RealMoney Pro",
-   "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOX09laldWb3JOOFNnU3h4VTlZTE1pWlVhWk1wLWFCcWZTYWFGd0txNlY0NWlWcUpDelNsRThFbGJvMXJuOHg3YkgtMkV6cVYxaGZrY0ctaTNQQ1VwSjlreXAwYWFtTHNZYU9MQXJ3Zi1Da1czNUs2UXNVRndQbzROaFV4dnRKX0p4X2VGNVp2S1dRUTJzeGhZY0gtajYwaER6bUVRSzJmcDRzMHNvRW9LeGYxNGZQMmFFeER2NVFvbUt2dzk1Z1VGczlB?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPRkJEM3c3LURxeGp4aFVqclBJWU1Nc1c3aklTNzVCME5uY0VOYXlxcU5JRXc4bnZydmtxUElLejlIZWt5aG9LRDNSV21ENWdsYWlkRDhia285LWw1OUNEX19rb09XUzdTZXFfZjN4X1ZKd0tzb19NVjdGQU1Gc0FVMTUzSlF5bGs0NUt2MzMwVWg0cVFQQTlwNGVOSTZIRmQ4Rmg1cUJCTHluYWZuVjNCV2p3bm9GOVp6UDZCQVRKWkJTUQ?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
@@ -800,12 +1476,12 @@
    ]
   },
   {
-   "title": "US strikes Iran\u2019s Qeshm Island in Strait of Hormuz - Panay News",
-   "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQN1owMWZDMWIybHVJa1pMU3FYb2NtTUVNVDd5ZFV2VmFFODVJSEFxMWFmaVFBU2xaOTVpTUM1Y2pEcXdpY2huakM4Sy10LU9DV01fd3A3TjlEVnJvU3FlLVFNNFRxZndsajZxNjBSUHFkd084TjF3V0g5RnBHN18xeFBR?oc=5",
+   "title": "Traders Place $760 Million Bet on Falling Oil Ahead of Hormuz Announcement - EnergyNow.com",
+   "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNaDdVU2NxNHdNSC11d3lLaEhabERiamczVGhtNy1TaXNPb0ZHa1A4Mk5aeThSZTRRSTExOW9lRER6RDRfTG9XOG43NVF1dnNQcHZCQmhDXzA1R05xQlJrSGF6X3lBWm1iZ3cyNUtxdEVlVmlwRWUycEpjREFnTmFxNXpWUWR1R3hKdW43Q21nc0JGUXE3TGhIbkdWUlVqeDNsV0RSTkZuSQ?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T17:04:00+00:00",
+   "time": "2026-11-06T16:56:40+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -836,87 +1512,15 @@
    ]
   },
   {
-   "title": "Two tankers strike mines in Strait of Hormuz: IRGC Navy - Tehran Times",
-   "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPTi16VVZPeTRtWURhUTlsamx6RnUxMkNoU3IzLVRtc3FGM0M5LUp4bjMwMGVwOW5kVHpMTURTeUl3MTM2TXRvM0xrZG9sd2h3ZE1fSVhlSU92SzBKZ2Q5VWkyazhPUXlBaDhpcU9vSzZIVTQ4R2IwZnpja1VYR2RoYVRfSVRoZmFGaDhHNFRhRTd4bmJlQ1J6T1JB?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T16:35:03+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran's seven conditions essential to reopening Strait of Hormuz: army spokesman - Tehran Times",
-   "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPY2hDeXY1NUdqdmFxYjF6NjJWY3EyMHJnWnhvcGo0UjYzeHVyR21VckVPUEhPaHh1RnpBbmdrcWdPeDFyTVlLekZVTEhyN2IxZDZ1OEY3c3EyaThZRDN4QUVERk9mY3EyWENVWXkyVmdBOHJrNm1GUFpQdFg1M1VHeHEwSjdFb1AzTzgzcE40WVctdGszc0ZBZUc0U3pIOUFhWDk3Smh3?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T16:24:37+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Fed seen sticking to December rate hike after jobs data - Reuters",
-   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQMF93ekZ4N2wtdW4zX1llS2FoZWpNVlhMLTRNOGVJTUktZmpLQUNBSzY2bW16Mm9mb3lrZERqNFZ6WkRmYkhBTG00Z2k2NFYyNTVLcmVBSkV5eVJRU1RwZFc5blM4MkRmcUxYU2hadXRWbVh0VXpjektqM1BGS3ZlZlNMeW43VWxmeE5TQm13d0E3bTVwUnp5dzFFNA?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T16:04:55+00:00",
-   "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
-   "title": "U.S. Consumer Sentiment Unexpectedly Improves to 51.0 in November Preliminary Reading; Inflation Expectations Ease - BigGo Finance",
+   "title": "US Consumer Sentiment Unexpectedly Improves to 51.0 in November Preliminary Reading; Inflation Expectations Ease - BigGo Finance",
    "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1nNjdYZERuRlVCb1l0a2QxbVF6aExLbGdwNEk5cmJuMmE3ME5kR011RVlkOFdEbFpQaVp4VjFTQk43NTBpNnpZRm03WUlWY3ptNm1LVFgyOV85aEFYVGVMNUVzc3VnS3ptdDZKVkZVd3oxeERjRHc?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T15:58:52+00:00",
+   "time": "2026-11-06T15:55:00+00:00",
    "engagement": 0,
    "themes": [
     "consumer"
-   ]
-  },
-  {
-   "title": "Rerouting Hormuz Infrastructure Lifelines Redistributes Vulnerabilities Across Regional Urban Networks - Bioengineer.org",
-   "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNTE83NTNKX01XNGdjQ2ZReXBTSXJfNlhqQmViNFpuRzBDLXRVYko4TElYblBYbjVldVFrXzVlbHctdEhyQTlIYWFSU0FwUkRqR01VSXRTNVA3d25jNmg4RXZXWXN3Q2lwVGhNX2NGMEdZOWJBMVFWOE9XRVJocS1zTEo4Y1RZNFltNFpqNHVhZW5Icm94LUNoZEc2UTR0bG1WdEtUbXNVVURuU1ZOY0V2SDRtSGNnaVNHYzgzd0hOU21jbFdsZmc?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:47:12+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "FILE PHOTO: Vessels at the Strait of Hormuz, as seen from Musandam - The Daily News | Texas' Oldest Newspaper",
-   "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNeFEzakZhNXFzTHYzVm8xS29kdE5DY2M0YkdNaWlzUnBBdklmb1NYZjN5cWthdXdkV0g2X294S0x4eF9sdUl3RnE4aVh0M1hrQXhJQm1SczdFMDB6Z3pSX3lQQzB2dHI3MTdUMmUzb0dMOGY4Ni1hZEtqN3owR3B5c1FsYmdabU9QaVN1V09oUGNXYmt0TGRJRGFfOHdwSHRSQnlpRVNURUYyYWdRMDVJVGtCbE5Mdk9kT19hcV9pa2JYUHhZdFFBVnlRNng5cHNaYmo0ZUYtbkpsSVl0a1dWaDdQMm5mbVBaQjlBSWJUT0c?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:46:05+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "IRGC Claims 2 More Tankers Hit Mines in Hormuz, Oil Near $99 - https://houseofsaud.com/",
-   "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE1sbUNVVjVyV0EzT2pkanVDQ2tkMkNTTWJUeU9aNTlMM0dhZER6bHk5R3lUd21CZGdxd0J4c29GaGd4OC1iVHBURGIwS0VldGdIYktZV3JTUkJSTWRxSGc?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:43:38+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
    ]
   },
   {
@@ -944,18 +1548,6 @@
    ]
   },
   {
-   "title": "Watch Consumer Sentiment Still Very Negative: University of Michigan's Hsu - Bloomberg.com",
-   "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNdkFkMWNFS25wN2w4VmtXc2J1eFRNa3RQMUUzWlFscGRZbVE3MTdxZ1NTb1ZmUk9oY2RKMWRmMEREVXo5WDQ5Y1llc2l0dVl6UVZldjI2aXl3MHNRLWxFSk9raVVoU21vQ1c4OGRhSjhRZG54cDFHV3hhOEliR1ZpRmdDUjJfMFhuN2VKRnNpd3ZHSmI1UWFWSUpqRmRTbkFSSDJHRmwyalFYcEpnZXJB?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:41:55+00:00",
-   "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
    "title": "Exelon asks FERC to scrap PJM's three-year-ahead capacity auctions; Invenergy targets MISO over HVDC lines - MLQ.ai",
    "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxOVENTMnlqVHQ1NV9xY04tcGhSZ0xNbWVNUTJ5bGRzUDdxMDlZTF9Ick4yWFA5TXlNOFN2bFBDUG5CTVRSMk1ReTRqaGJXRFBnTXVkTWx3LXI4LTJod0tQZjVqSkxnRVNfN3I5VTF6QmowdkxNQzV0U1VoVlhwRzBwTjZTZXRnaWN6QU1QZ2VqOTU4clFvZnNKVE1xYldTQmR6ejU1c25fakNUT3d5UUNqTjNDUXZqbGVTMTVxVU1vcm1Pa0E?oc=5",
    "source": "Google News",
@@ -968,24 +1560,24 @@
    ]
   },
   {
+   "title": "US Consumer Sentiment Improves, Fueled by Independents - Bloomberg.com",
+   "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOdjVkYzdodDZzaC1yT2NsMjFsSVhUVHl4Z2lyQU4weXJZaVRxNHVEZjRiT2c4SExJMWlpcy1VSWw0SmpBcnRnSm5DbWNsc05sVmtCZWxjbEwzR1NIYWZOV1haRzU4c1cwSHJXU0IyVmlaWXo5bjRtWVlKWEttYlQwUklqX2ZPdV9qa1B2aVpzV3Budm9GN3RzQVRmVUtvY1E0dFktcm5uVWE1c1BTU205c1RTaGk?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T15:35:36+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
    "title": "Shafaq News..IRGC downs US drone near Hormuz - \u0634\u0641\u0642 \u0646\u064a\u0648\u0632",
    "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9FNEZnX182VVhJTDZyMDJQNHlqWW9EMWU2ZjkybXZLMVAtbWZNNUM0UVRwVWxEcTB2MDVyUTJJSjRkYV94OVZEUEJMMVBtSjJhSENTM2tnZjBsZEQtT2RERVRDaTZYUkJZUWxzRGhka08xdEk?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
    "time": "2026-11-06T15:34:34+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran claims it downed US drone over Hormuz\u2019s Qeshm Island - The Times of Israel",
-   "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOa2RoQVVWYjR5OG51UjVZdTlsQW54UDNVcW1ZZVVVU0dGS1N3TzRQMl9tM1hHZVNJSGZDb25Fd0laeHhmRWdLUXRFeU5PbzFXc1N5Q0QtRHNLV0gwdFFWdUVGcmI0RUZWQk8zQXNKS1JMOFJlQllZVVluMXlWeUtyWTdFWW1SdmZsaGRDT2RROGg1dEt3NVpxV2JxZmc0SU5QUHlmcg?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:32:35+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -1004,12 +1596,24 @@
    ]
   },
   {
-   "title": "US consumer sentiment rises beyond expectations, easing inflation worries and lifting gold from lows. - Pluang",
-   "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNUS1LaGtMTjV1OWltcnBWaEhkVmZpUlFkQkh6Yjk5Tko0MG1tQ2pwblc2RFdCZ3d4cW5tMWhfdWFRZEJzZXlfNkNOd0lmZVZVYXRRTW5SSExnd21MOV9QemFvX3VQc0dwWHRkcS1uTFBjTzNJTEtJOXZhVTJ0cDZ4X3drUEttUVZiSWVjZGZqcmhwcXEzaU1OeGJBSFBLZWFCM0tlcndlVkJJeVU?oc=5",
+   "title": "Nvidia Taps TSMC to Build 3D DRAM, Threatening to Reshuffle Memory Supply Chain - BigGo Finance",
+   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE4xejJhX25OVGxSQlJTRGJsUlJic1lxSEtkVy1GRWpnOWttVC1PUkNwN2dBc1pXRWJUWUxReE1jbFo2Q3dScWJZa1IzNjZLTjViNngxTXdXckE5T0xlTEtFRldIalBNendpdTVocXZlM2JlOFlNVUE?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T15:23:34+00:00",
+   "time": "2026-11-06T15:25:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
+   ]
+  },
+  {
+   "title": "Michigan Consumer Sentiment Ticked Up In November - Finimize",
+   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNaUNVbUdlU3U3XzBvRGpiODFlZ2ptdHU4emtSSjRubDY4RkhjQzdmWm9IbUZLLVhRZDFSOVBnRE4wVEpIMC1OSjROSUpvWjVrM3FhS2d6UjlFSmw1Y0hMLUc5VmJ3Z0ZubVBFdUdXM3VVN2xLREVvMkVZeFZHamdtV2JvNEg?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T15:22:55+00:00",
    "engagement": 0,
    "themes": [
     "consumer"
@@ -1052,15 +1656,15 @@
    ]
   },
   {
-   "title": "U.S. Consumer Sentiment Unexpectedly Improves In November - RTTNews",
-   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxORDVyRVlKSWNyUE1LQmo4Z1NQMklEdE9JMW13YXRHdVNXQVhmZ1RIczdjcjQ1VjFkME9pamlWREFXckl3M09tSzJaSHhDdk5VVG00Zm5GSUp4QnpKZHZKTFZrZTBEUGRJMkM2V2dHVEFLNjR4UUhJR2FxeC1vc2NaanBJVDBPY1B4cGxlaVVUSXFVUFNaRFJJeEVvTHk2UQ?oc=5",
+   "title": "Seafarer fatality in Gulf tanker attack, VLCC struck in Hormuz - Seatrade Maritime News",
+   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPNUgtMHVHSlAxRHp5VkJ2ZUJQa1FQTnRqVmpyNG1DVHZjSWJFQkhiMGpBc0F0bTJmbkluX3M2OU5VWDE0bkJXY0cyWUlnb0RxaEJ6akJJRXFiZEh6WU52cVRReVJqTDFTN2tRNGNzLU1ReDdVX0p1dm5uRlZaZkd5Z3U4SFdWWTVleFJZX0pzYTN2Q0xnOXZlcmZ3cw?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T15:18:00+00:00",
+   "time": "2026-11-06T15:11:41+00:00",
    "engagement": 0,
    "themes": [
-    "consumer"
+    "oil-physical"
    ]
   },
   {
@@ -1100,18 +1704,6 @@
    ]
   },
   {
-   "title": "Consumer sentiment unexpectedly rises in November's initial print - TradingView",
-   "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQeEZ0S1c2Zy1yc1U1TTBDYUplaGszTU4wWU1DQ1N4TEVTbVprc3N3cWlrNnBlRjFSNC1uWEdfMTJOQzhmVnYzOER0TjRBb0VmMGZCVnAybGo2eVdEUHdaVmc1bnFsS2tsU0JMS19rZmJsVHFFeWtrTXNVejk4RFBrcE9zSTNMWDhJNWp1dWllSG4wZFBrWG5xVTdsak9Edl9VZkpCMXgzTjhZa0Jjd1RvVWV5cGZDMnRGb2w3VDZCM19OY3RhQVI4?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:03:19+00:00",
-   "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
    "title": "MORE US CONSUMER SENTIMENT FROM U. OF MICHIGAN: 1-YEAR INFLATION EXPECTATIONS DOWN TO LOWEST SINCE AUG. BUT REMAINS ABOVE 3.4% PRE-IRAN WAR - TradingView",
    "url": "https://news.google.com/rss/articles/CBMinwJBVV95cUxOWVI2ZTNEallfOGJ2VUZ3UXlNQloxSDhhdnBYbTJyV2J3OUR6d2RZQVBuOVdWS3FxbVhjUFpReGhCek9jREZzMUktZjNsbGM2bGZVT0NxOEJqOGF5WVExWG5oTGFGOVlsOVk3ekd5TUtORVJJanZodnFIV25Oc0o2bmV5R0xvdGVsSkVfSm5JOHdwMVZCcTIwYTFQeE1iOXIzRTk2WF8tZG15a1R4VGJ6eVlFLVFsU01aOUdkVEk5M3p5aUN4Q0ktdGZUcEtBV01VMElENzVidU1vZHItUGxER1hobWk2bnMxNlJHM2dXdW1vYU4wMVVIaGw0Xy1yT3pwVzUxSnZKamVYNXJGLWFOZHg1SGI0WVhzeUJLM1V2SQ?oc=5",
    "source": "Google News",
@@ -1119,18 +1711,6 @@
    "tier": "mainstream",
    "time": "2026-11-06T15:03:00+00:00",
    "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
-   "title": "US CONSUMER SENTIMENT BEATS EXPECTATIONS AS INFLATION FEARS EASE University of Michigan consumer sentiment rose to 51.0 in November, beating expectations of 48.0. \ud83d\udd38 Consumer sentim",
-   "url": "https://t.me/WalterBloomberg/38015",
-   "source": "Walter Bloomberg",
-   "platform": "telegram",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:00:43+00:00",
-   "engagement": 2940,
    "themes": [
     "consumer"
    ]
@@ -1154,18 +1734,6 @@
    "platform": "news",
    "tier": "mainstream",
    "time": "2026-11-06T15:00:03+00:00",
-   "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
-   "title": "US Consumer Sentiment Unexpectedly Rises, Fueled by Independents - Bloomberg.com",
-   "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOdjVkYzdodDZzaC1yT2NsMjFsSVhUVHl4Z2lyQU4weXJZaVRxNHVEZjRiT2c4SExJMWlpcy1VSWw0SmpBcnRnSm5DbWNsc05sVmtCZWxjbEwzR1NIYWZOV1haRzU4c1cwSHJXU0IyVmlaWXo5bjRtWVlKWEttYlQwUklqX2ZPdV9qa1B2aVpzV3Budm9GN3RzQVRmVUtvY1E0dFktcm5uVWE1c1BTU205c1RTaGk?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T15:00:00+00:00",
    "engagement": 0,
    "themes": [
     "consumer"
@@ -1208,39 +1776,27 @@
    ]
   },
   {
-   "title": "U.S. October Payrolls Rise 165,000, Beating Forecasts; December Rate Hike Odds Climb to 80% - BigGo Finance",
-   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5vc1ZVX1pZeHg2OVJBV0dXLUctelZmNTNJRlh0REw0YmQxSDVEY1Jac2NBd1VSNTVHRzliaVhfX054dC1MeFBkTVNUTE9Hc1NSSUlhUHFILTFxZFRrTG5xUW5nSlJhbjFyTEh5bDN6SkVNRldYSUE?oc=5",
+   "title": "China's Q3 emissions post biggest drop since pandemic as Hormuz crisis curbs fossil fuel use - Reuters",
+   "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOek9mbzZtNDlzcFBXWjJQMnYtQUJvNHdkUkZTUzFHUDhvSVlaRy1xemJ0a3BhRlVlZDhKTkVrdzFqYTRBYUYxTFRGN1VRZ21uUS01VGlMOWRJUXVfWVZwamllNExNLW00U0dKWVhnQWNCY1lQWHp0cDRSQ1ZRSVFOR0hjR3gwYUpQX2owYVJYVDFqRmlBV05tWkpPRDE5OUphVjNzTDdSOHRoaXRwNDEzVXZjc3VCRWhlRGlxTWJtZnRZcjhMRE1nLXoxaw?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T14:35:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
-   "title": "Job Creation Blew Past Expectations in October. Odds of a Fed Rate Hike Climbed. - Yahoo Finance",
-   "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNMFBGNmhKbE9pbFl5VWp4eTB0cUV1X3BsMVJfcHJyZTN6R3RpVXpqV29PMVdrWnM0U0ZKVm8tZkRkTV9qSktGVTRNREdpdlcxUG9ZMGxFQ3lnNDNIX013NkR5Yk5sd1Q5bUlabGRWeGdBLUFhSEJmYzFhOGhCdVBfMVdYVjhua0lZdjJ3MGVSdmhJSDFDMlc1eDYzX05tbDNmNVE?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T13:54:23+00:00",
-   "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
-   "title": "Two other oil tanker on fire afte hitting mines in Hormuz - Mehr News Agency",
-   "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOUGF5UEF4TVo4anJBUEFkVDVyS2F5MXBqd2dIUnN4MHNsTXFIVEVhS2x1bjQ5SmF0cHc5cS1KTGlmRnlVby0xczBzTHdGMml6MEdKMTN0bnJrTmVqSFlNSjFQblBwYXdJSEJNMTZMVHpKVTgxcjZhUjNqTC1NcWpxb0h5cjVtNkVuSEVEbWk5aWpXTEFkdXBocg?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T13:54:00+00:00",
+   "time": "2026-11-06T14:25:26+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
+   ]
+  },
+  {
+   "title": "Blockbuster October jobs report keeps Fed rate hike in play for December - Yahoo Finance",
+   "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOc0R5ZFBCUkh0a19wSEtSNVNScTZ0ZFY3R3ExWDNVRi1IY25lU1Z5WklDT05nMk1UWFVzWm1qN1FWbXVoWVo1aTFxdjNGYTF1X3U3S1pPZXdyaGNja0VYbFBnZ0FWRjBUd1NHX3l2WUlxZWJTN250NXoxM0F3SmZnSUxoZ2lDZTYxT0JUZlpIcEd3MXhvdFV6QnAzODZZZHNpa3ZZZGdkd2s2WUgwNUwwcWZzTmpydjV2TDk4N0l5R0N1bm43NHk5Y0laNlRZd29xYUE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T13:53:25+00:00",
+   "engagement": 0,
+   "themes": [
+    "fed-hike"
    ]
   },
   {
@@ -1251,42 +1807,6 @@
    "tier": "mainstream",
    "time": "2026-11-06T13:53:25+00:00",
    "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
-   "title": "Blockbuster October jobs report keeps Fed rate hike in play for December - AOL.com",
-   "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxORW1NVUNPNUsyVWp0OHdncmZYSGpIOTBtbGk3MUFTallnZVJvR3lhT3RNemxzT3U3aXRfUDdCWHBMM1lOMzZKQ05sOUZkT3NvbHY3LTlVcW04OVRyT1NSWVlsOG42SVZMWTBWeFc3OXdHLXdRMkFreWZMbW1GZndud3hZX1Z1czBp?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T13:53:25+00:00",
-   "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
-   "title": "Traders raise bets of Fed rate hike after jobs report - Yahoo Finance",
-   "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPZkJXSFFvWTE1ZHlObTRpejBSRHp6dkFwR0w0RC1MM1J0T2czdVVUTWJpNXVXWHFWYVNBVDdQd3ZlNW9IbTNqSkpadmN1Q2pkdmdqVUExTlI5RTlIYk9faUQ1NHJLUEdUMzVRb1JYRmRBQ1BnaHEtcXljOVBCREFwOE9ucWh2ZW94WUV3a19JcjY3aXpOWXd3?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T13:44:02+00:00",
-   "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
-   "title": "US JOBS REPORT SMASHES FORECASTS \u2014 FED RATE HIKE ODDS IN FOCUS The US economy added 165,000 jobs in October, nearly triple the 59,000 expected, while unemployment fell to 4.1%, bea",
-   "url": "https://t.me/WalterBloomberg/38004",
-   "source": "Walter Bloomberg",
-   "platform": "telegram",
-   "tier": "mainstream",
-   "time": "2026-11-06T13:35:56+00:00",
-   "engagement": 2360,
    "themes": [
     "fed-hike"
    ]
@@ -1316,6 +1836,18 @@
    ]
   },
   {
+   "title": "Exelon files FERC complaint against PJM\u2019s \u2018unreasonable\u2019 customer costs - Daily Energy Insider",
+   "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPcEtoVjVwWU9SVTR3dXNTc3lUOVk4VmpVakZIUlh2MFUwOW83SGtTQ2NNbUdSbUNGR2x5OFlHNE1MWEFBR0MwS0loYWhrQ3M2cGRJU2o2a1dGVzUweVZFakNNSS1RUXdrNVFzWlJqQXA1WWw5ZWl2VW5adjdOc01XVTNTQXJwYV8zSXVFUkRzcHQ5MUZDcnd3TS1abUQ5dmNEajhuOTFhSlFpb2tvRUVyWg?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-06T12:54:39+00:00",
+   "engagement": 0,
+   "themes": [
+    "power"
+   ]
+  },
+  {
    "title": "Iran challenges US naval blockade by granting China and 3 other countries passage through Hormuz as African economies monitor shipping disruption - Business Insider Africa",
    "url": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxQZGRwNWtoTkZEUjVXZTBBRkZMdDg1TjQxXy1oZS1NSUpTM1FnQWJnSThLSVctRW1yS0lBR213MC1ibmNiVng4a2VoU29zWEplTmlsZEhzcE5aaFp2N3JLZ2dtT0NUVkd1ZFNJTl9PaGdTQ1J1M2Rsa0RJUzJKMmN5V3g4UGlSejBPdnF3QVdzUXFuN3Q4dEgtR3p3alI4QlFkWFE0SF9ERGVBaE8wX2JDMkVDZHZ1anN0TzVhNkM0Rlpxb3J2MmQwRzRiSWhjU2lhTDE3OA?oc=5",
    "source": "Google News",
@@ -1328,63 +1860,27 @@
    ]
   },
   {
-   "title": "UAE boosts investment in Oman after Hormuz closure - TradingView",
-   "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxQMlBXaWF3eXlvcDdFQU5aTUtObGU4OWxzNzhyRGo5bWRMUHp3bTFQOXF0MmFVNldHVFVfdVVxR3cwLU5laGM0U2F3aVNCOHQ4LU9xeEFGTnM4UlNnMi0tbDRKdzFRRU5FQ2VnM1hvRlpWTUVvZkI0d09IRzNZX0FZZElBOHdDbXhwN1JEeFNTTlNlYUliZXJYWDhOTHQ2WG5MVjJQV2pOdnBtLUQyRHE0RVk2QzNWeHdtWGVnRXJQTU1GZW16?oc=5",
+   "title": "Tech selloff wipes out hedge fund gains, prompting risk cuts and layoffs - Reuters",
+   "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNMlRzQUpxeXE0WUdkVERWLW1QM1AxWDhXM1l3Vld6RG1ZQnZGLW56REV5U1JLREVGSExIQW4yTnE4OWI1QU5pVjgtVzZfUXZSaEEwekQxUWpPQ2hzX1ZKYjNlNnItSFBBNlBSTWpKSDBMTzZObTUyTlo3bmZFcW1HTmU3MkNlcEwxdEw5OENXaVNEN25KVloxYl9JTmptVjI3Ry1ZTGtWdU5xTjBvQnprbEFjYmZjdw?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T12:48:26+00:00",
+   "time": "2026-11-06T12:51:35+00:00",
    "engagement": 0,
    "themes": [
-    "oil-physical"
+    "consumer"
    ]
   },
   {
-   "title": "Explosion hits tanker off Oman near Strait of Hormuz - Latest news from Azerbaijan",
-   "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTE5pQzVFZnYwR05JWFRXZXBRNTZibEVKVS1wVllCR0pkRnFud0NVNTd0LTVjQkdobXVpaDhENUdYbWUwN04wNTRXMnJqejRlRFViUlkzTHM1S19DWGZ2bTBtTDZBT2t0T3h0Y2dDRHRnWk43S1FHRHNucWFYdXcyZw?oc=5",
+   "title": "High DRAM Prices Boost Reballed Memory Adoption in Smartphones - I-Connect007",
+   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOZW1kRlh2YnUyU1NPU2M0QzBCbkJFcm8yemt4ZXBVdk1MLThvM0xNVUFCS2hCOVBqU3VQUUZ3UG9Kd3psUWt3Q3NUV0RFWEpPdmdRekFkaTA0elNVbjRtTkdzUFlUdGJSVVM4OUZxeGVnNVl5aXUzeDJMQnVMaDk3Y0ZJcEdhbGk4MEZFaFFPMDY3bU1jMHlQbHZzaHhjSUVKanpYVTQtOHBNcWxBMENLcjlB?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T12:48:08+00:00",
+   "time": "2026-11-06T12:33:00+00:00",
    "engagement": 0,
    "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "UAE Stocks Slip As Traders Watch The Strait Of Hormuz - Finimize",
-   "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPN2tjc1d1dU05MkdvVVVoZ1lPTjNZYXF5eWZyelp2X3VaQ0t3NTJCZWtaYXFCeU91T3hzWkNVaTFvYmxZVXo5b2YzZlMyaEJDNkJmbmlWbEVCdGZWeGxWQ1FRMVVCYXZDWFFZV0o1Y3VZWEtwckU1SEhLd056RXNMZjBGN3FSU2FtLXc?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T12:41:02+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Two oil tankers struck by mines in Strait of Hormuz - NewsNation",
-   "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE5ybjUtX3JLMmFGeWNyN0JmTU9xUm5MbGhKb2FjMXAwM3NZM2FxUUN4Sk1oZnowbkswSVBVMDlZMjBrZTJHTjFERVhHOERmcXBaUm1kTlJSOUItQVlFczE1Y2hKSF9mR1NPcHo1dndWTXRtQWlycGs0amZLVdIBgAFBVV95cUxPUVpoWGtMRVYzVjFBaWNLLXhWWUo0cFRJTl82bzFwM3YyU040MWRPMF96dmJNU1VkNEVEczVXWFpyeWFXaEM1SFU0bUd5aTBQcjlQV1laSlBwckpnQmxwV1l0MmpRTU00Zl9Dd1J2MmNqOTBlTnI5NmpoUDNndVFRYw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T12:35:46+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Tanker reports explosion near Oman\u2019s Khasab while transiting Strait of Hormuz, UKMTO says - Arab News",
-   "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOSF8wV2F6T1VYVGxHQS1pTkR4QjVjTHVLbFRmRW1HLWw0LWltbm1kSDVObWxwNkJIWlhZdEdBNWxRWmJRb0NjbThsaUQtN18tM3RaU21mb1lVRV9WMWJoODFPZHpiVlh5MU1SV09kU2ZvdDc1MUppYWpCVjBnaDFsZExyMjVoNFhRbFhpUW5kVmFkUzRXNE44Q2VaeHlnMnZjeU5TYWsyd3BESmxHSjZWeXhSZUNSaUlTUm1raXlSYlVUdkxfUXMzZlB4UkQ?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T12:24:36+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
+    "memory"
    ]
   },
   {
@@ -1412,12 +1908,12 @@
    ]
   },
   {
-   "title": "HPCL Struggles To Book Tankers For Hormuz Crude - TradingView",
-   "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOeW5pNGdXUFpTMndyVWQ2eXRmY2V0MXJZd0hMUk5fSkFBQWNUR0NQQzJJM1VPM1QybmRpMDBLMkdFRWJzc2lmT0t0OWUzYW1iUEJWcG5Scnc4Rk4tT2VHVkJrNHVBWENVTkJET2lySnA1LThQdFdQUE1YbGxPTmtJYjVsYU90NlhiX0FrQTU4UmxkQkdrQ09QUlBVTkRlYVd5LW9faHlKNA?oc=5",
+   "title": "Stock Drawdowns And Tight Supply Extend Oil's Backwardation - Seeking Alpha",
+   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOTVBYSk5HUGxsWUNpaDFrVDA2X2ZXeFVIWHl4eFo4U05sR0ZMUUtKaFhEMjh1OW0tMXkwajNjOHZEdmEtTnpCMGdUdV8tVXlONkhmWEM2VDZnWXNBaVFKSTJ0V0JfS3BibHBseEk4NXEzWTJrdGU5NzNiNTVBSXRmYTJGNENHUHM3NldLTEk0M1l3d0dUdXJTTkdsQQ?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T11:31:42+00:00",
+   "time": "2026-11-06T11:50:00+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -1441,7 +1937,7 @@
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T11:14:03+00:00",
+   "time": "2026-11-06T11:08:00+00:00",
    "engagement": 0,
    "themes": [
     "memory"
@@ -1484,84 +1980,12 @@
    ]
   },
   {
-   "title": "IRGC says tankers caught fire in Hormuz after striking mines - Yeni \u015eafak English",
-   "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPcWdJdF9Ob2thNWdESlVucVZFRlhIT2QzU3lnZHROMDJWeVplQnNnazdZVS1KNE9LM3RiZWJxY09SS3VjeFVFRFZtMGdkYWt4R0R1b09LNGVycmM3dDBzV0lMaTlxVHhrSEtfblBfczBmYk5keXU2azd4MkpaOWFEMWpSZk9xejk3V1lRY250RTV5QklCbDNoSVNBU2FNMWVQ?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T10:42:12+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Rising DRAM prices push smartphone brands towards reballed memory - Communications Today",
-   "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPTmhvSzBsRFJ2cHp0Uy1MTlRJRDA1VVR4UkdQUkVaR2V4QV9kdTV6UDhyMlFFdVd0Z25XQ0kyVDZ3VGVQM3VteWpkOHVMeHM0SW52d0x5ZjVheTJLUDhUanJkZzVUa1I2M2Z3RkxVTndRSWZPN0lxbWVvcVBkejRXZk5TUTAwYjZ1akhDa1h2Nm5iYjNCeHdkR3FkMUl0YjE0Ykx0XzdsQQ?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T10:33:32+00:00",
-   "engagement": 0,
-   "themes": [
-    "memory"
-   ]
-  },
-  {
    "title": "Iran exempts Iraq from Strait of Hormuz restrictions as oil exports rise - IraqiNews",
    "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPc2hXOVBSSGg1d0hoYTExYUFKZmp3RmVnVDFkV1huaEFEZzZHaWdRd0lUZ0dkblpwM0xURnVITWhCTHJVTWhMeHJyNDZNQVhLb1VWWUpkaXU0ck5xQnBrS2hnMlpleDU2SkJJWGxvUGdNaWI1cHM0UTIyM2x3d25oWXpuTFlzWkZ6U3VtZDhVWS13d0hrRWdtUHo5cjZ1UUQ0Z0MzN0VJVQ?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
    "time": "2026-11-06T10:23:58+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "LNG volumes via Hormuz rise 15% in October as confidence grows - Montel News",
-   "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxQMGF0UHhFcGZUbG16ZVBkdmdzUTZMRThOOFBEc3R0MXp3M1o5N01Rbmllc0x3d1JFc3hoT3A2MXM5NWh2UnRnWGhpeW1leGhGaElqMHNuenhVeHF4dW1sVmNjMmFIUWVtQ1ZEUGN5VDNwRkxpZ1Nnc2dHRUZDek9ydzZyN0pOaTVLVDZ3Zzhjc3dwUTliNDVYdkZhTi1hbnNSTDFoZG9wWGtZbTFMSWNLS2lYUUw4UlB1MHgwQUs5MFMxWWZu?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T10:20:37+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran Exempts India, China, Iraq and Qatar From Hormuz Transit Restrictions - https://houseofsaud.com/",
-   "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOVE9IY2o2Vk9LM2RNTXQ1STZucWdxMThoRlE0aldwNmNxc2lHV2d3SW93UGpMR2lKaTNORzdnTE5hR2JfLXg0UkZUOEg3N0Y0SWhCT1FubzZmY3RoYk13aWRXNnZ0alZuUDk1YWV4Wlc0cDdOR1Q4am9mckU3WU5mZ1BpMFZaSG1kc0pQcmU5Rkp3dw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T09:56:26+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran tells Putin Strait of Hormuz will remain closed until US meets seven conditions - Latest news from Azerbaijan",
-   "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQSFljdU5wX01VaEFIVzl2X1RjLURLOWVzalhlTHpYanVYZVVVX19TSjZ3eE5sU3hNRzF4WVRxbnVfTnFWZXlqSm54RlJkako1aTNEUEdNTU4zeXRfU2lOanBwNDJMeU9WLVN0ZGRMaUlPX3JaSWNoTDVOWlNfWTZlOWxJNGhLNkRPamt4XzJ2TzBYQ3pqRXVCMndrMmp5ZmJWSU1EY2I5c3dZdw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T09:43:24+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Seafarer missing in Gulf tanker strike as Iran redraws Hormuz blacklist - Splash247",
-   "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQVDEzeS1sOHFCdGhsSFUzQ1BzYzhibXYzTWZOTUp0SDBFbVpidjVVX2pNbE9rX3hIeDhfNXBubU9ZeV9vYVQybGNoUG1GVDNsLTRhOGc5Uy1Ub1pldmVHNURCQWI0VlVVNGYtWjhOWExWNktvTGUycHVDUGdNSlhKUkFScXBhRkFRWGZxNDlGMlJJTC1LaFBLZElB?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T09:21:49+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -1592,27 +2016,15 @@
    ]
   },
   {
-   "title": "Iran's IRGC claims two more tankers hit mines in Hormuz - IntelliNews",
-   "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNb3NnVm9nZER5WFFCYlp5V0NleVlMUzN4RHpYUENjTzhqRGRWbDMxWFRvN1FocEs4ZC1ZYjZtSFhTZUtuMFpPblNkeHJtcDFnNTZlNTRoT3pIc2F5NUstX3dsQmhTUlQ5STIxWHdacGdQRmhXR0lzN1FwQ1UydUpteXBabURLOW9SZWc5bXJKRmpxVmkyVUE?oc=5",
+   "title": "Swiss consumer sentiment lower than a year ago - Forex Factory",
+   "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPamJSUF9WZGtZRmVSMkJGaV84ZVVZOG5lRmxORFlBaDdNYktTT0E2OHg4dEZveE9seTRzRGlNRndaWnpja1BqZ25oVExhWXdEQ3d4WnBkd29KMFh5eEo1dmhZX0poYVFORXBYeC1CZ2ZMemk0RlhMekdOcHE0bms0LW5JSUhlMk9FTFVUVkI3VlhiZ9IBlwFBVV95cUxPblJXOFc3NGVtVUFHakNzNzlWMmhfOV9jUjFmbkVEbW51dmJ6enBLV0FBd3RBS01mQmtMV0hPVEZ4ZWEzNmJzQlFsV0pOb3BpUnJTM0QzZFAtLUlaQmhGRFFwdEY0cnJpSGNBTktVUzBkUnR4QktLcHVVUGlJRzBIMnNtdDM5YUp0VUpPYUYxX3ZudDd3d1I0?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T09:16:23+00:00",
+   "time": "2026-11-06T08:53:55+00:00",
    "engagement": 0,
    "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran's IRGC says two tankers catch fire after hitting mines in Hormuz - Latest news from Azerbaijan",
-   "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPNTdBbGp2ZmFvZDhFRXg5ODJwZGQtcWRzNmNlMmlaazFPQ0V0SldBNmVMMWpGaGVqbFYxSnA3ODl0dDN4dWpSb25FcmtVNVNvQVJONTIzVjNzQlRSdXA2VEJDVTRRVHpWZDVETTdwaV9SVVpwX3V1Y3N1Q2VkZk9lOVdVdGY2U01DYWxUMVNGejBhdGtF?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T08:53:53+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
+    "consumer"
    ]
   },
   {
@@ -1622,30 +2034,6 @@
    "platform": "news",
    "tier": "mainstream",
    "time": "2026-11-06T08:36:22+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Gulf producers look to pipelines, overseas storage to bypass Hormuz: Energy expert - TradingView",
-   "url": "https://news.google.com/rss/articles/CBMi7AFBVV95cUxOeG40aE5qQlNGaE9scDd4R1B4X20zS3N1OUpLSG1DeTVpcXZ5cFlCT0pCcklKWjZwWDdjcFlBRnl4RlJNR3AzZWtjLTRHR001QVFFVEpDN1N5S1NhSHR3MXJYSVpfU0xUWjc3THlJNVk1UjQ3dEhTN1E4TkNWaU1CcThGNl93bE1vSExBaE94cG1Kc29OMi10cURFT2FVWDJrZ0hqVXA2ejFUU3J2SnZPVDZqQ0JWQjlQdU5NaTNibG42UU52WWxuUE9uX1NjRGtMUzZUUlZkeURXVWFKWVFKSklUcGVtU3VDZ3JCZw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T08:31:30+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Oil Pollution Returns to Coasts of Qeshm and Hormuz Islands - IranWire",
-   "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNQmhsbTExNWtHeHVFTXRla1czM0RVTmdjRVBrcUZGQjRDQkRZOW90VjN0TTBNM1V4YjNheFdLSGNqNEhNVnlaM0lTLWRGTzVnZHNQTGtTQkx3Y3dQQ2VDTktEdjRYaTl1b2pkSmlsWllicU54VTVFdWI5VUY3TGZhTHN3RUEzU08tdlp1dHlOeC0xbFhrUGw4SWgwQXY?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T08:24:36+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -1664,12 +2052,12 @@
    ]
   },
   {
-   "title": "Naphtha prices rebound from previous loss in steep backwardation - TradingView",
-   "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxNTEI1dEw2US1xMjd0Zkd3enJ1Yk43ZDlkSlhnSGI4WG9nNlpiUUlvZlVsYmxjME5YM3ZZMEJUOURRejNlcDlyTXFlbW00UTAxQ096Y3Fkem1LWDhGaFd2LXV0VU43MllBR3pTc2pFS3NBM1V0YVU0U2FkMU9aank4a0ZXOGlhTEtvdk5vTG9yQ0l2U0NUb29ZV1Y5S1VFS1hPRHB5QjFtYzd2djhrNTBmUkRMM3YwZVUwaVltMWVRc2lJcmYwWlBub2paVnpyV2s?oc=5",
+   "title": "2026 Iran war | Oil, Explained, United States, Israel, Strait of Hormuz, Map, & Conflict - Britannica",
+   "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5nTzlhOGZTS180cWNtVG91c2VWRVJFYlk0cW5Ba1RHUEFOSEtldU15QktQT0EzRVY1ZVdZZ0VTRHVWTVhyN1IzeU1wbmlDMUhrQ3Roc1YxcmdMUQ?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T08:04:26+00:00",
+   "time": "2026-11-06T08:00:00+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -1688,15 +2076,15 @@
    ]
   },
   {
-   "title": "Shafaq News..IRGC reports two more tankers ablaze in Hormuz - \u0634\u0641\u0642 \u0646\u064a\u0648\u0632",
-   "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE0yUGxLcUJDaGJQVFRZakdYUV9kWFR0bmlfWThVY1NRTi1tVUtwVGRlT0hVaTdkaUxWZC1HTE5FcXktZGVqSldoVWZfWGtVR3VwdmVmOXB5UklFb0xLNTFVT09zNGwwNl9Bd25qM0VJZl8zXzZwRFpaWjAyS19meDg?oc=5",
+   "title": "Tech sell-off wipes out hedge fund gains, prompting layoffs and risk cuts - The Business Times",
+   "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxQeFhZR09maDNMVUg3bVBybFp3S1hrTmI2RnZFeUlKVlFPekFScDBXMS1yX0poZC01cDFDQ1FWdVVXSzJEMi13UVBheWZiUkJQenN2N3hPS2tuS081ZVZWWF9VdUZMQ1dUb2Z4XzF0UGhRck1xbmo1aDhIWGpHTVZBbWdYOE4wQm9TZjNmV3BwbFlxcHIzWjZBcEU3MUctc24wTnBETDJtc1BEZjdZQk1oanBuVUM0RFZGSEdkR0V0bG1QUmpqTzI2a2J3ZmJ6Z2FxVFUxTlNsY3ZMcnZlVDhr?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T07:57:32+00:00",
+   "time": "2026-11-06T07:55:00+00:00",
    "engagement": 0,
    "themes": [
-    "oil-physical"
+    "consumer"
    ]
   },
   {
@@ -1712,132 +2100,12 @@
    ]
   },
   {
-   "title": "Oil surges towards $100 as fresh tanker attacks threaten Hormuz shipping - TradeArabia",
-   "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOZlVqaDVBWkh0Z3BFNDg2NHFhQjFUaXVUQW9aRC13ejZyRm8zMmRETTNWbk9renJtdXhBR0QxdEZDWF9vYzJWcHNwbmstZTA4NlNONXJWV29lZnFfRkFpSGVzaU5HRDVoejk3bjZKc1JvZVFueGxkcEFQSk82b0FWRE93WU1LSEo1WFN3OEVxWDZldE9sSk1nZ0t4aTNNU0g0cWJyMUpHRm4tUXIw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T07:44:10+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Two tankers hit mines in the Strait of Hormuz: Ships catch fire - TodayPress.tv",
-   "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNckhsU3VPNWsyMlVYbHNLNjhRUDliLTMtR3I5X3dZTE5Ta0N6R0daVUpydUh6d0daR3BVbjlMcXJRbEFwcTByTkdwZGxlRktpQlZMTG5KNHM1MmVmQk9hVFhnY0V3NlBRN2NtczhCUnZvMGRtQVd1WGdsaW5pdVM1OXY4b1oyNUJLSWg1MEdxMDlVRS1sSEhmQw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T07:44:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran\u2019s IRGC says two oil tankers hit mines, catch fire in Strait of Hormuz - Al Arabiya English",
-   "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQRVBhQUVzcVlMU3E5blZkTmVJWEhKanV2a0owd1o5NUt0a1BCaWI2WUtJbThTSDFYWDFtNVBwemNXVi1JeVdoV3BVMGxpdzhpdENwZVdYbHAwV0NSVVNuVmpELUpKbTR2U0xWLVpNQ0VwOUl3LUQ2enJZZzBsOHJTaE5fNHEzYXJvbzlDYVVCbXFCekhaY2Y0NU8yVzBxS1lxV3Bka0NHd05nem04SUdjanJKUm9HVWYzUi1wWTlUWFVidnBtZEpkZEVNONIB0AFBVV95cUxQcDBjTUlQZzVEOTlwT19obUlNTWxOdjkwUjFhWmV1SG81bFE1ZVpHOEI4S0FSRHVhT2ZlSGpzQ3FKbjYtWnVZMnNKaGxnTnVrajNVeEV3ZExpZ3dKaTd6TzNjQld6TV9PdzJ3eFhBX3ZhcVdlR3J5SEpHVmVDVEs5UURIYkhTbmlZb2lIdVZZNnJEdnRCOGR6c1Z2Y0EzUGdJUlJmQm83RjBsYjdBSFRHU0YyempiZTlFcFlmbDk5bHF2ZUtDVnc2REhJV1gwYjYx?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T07:33:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Iran Says Tankers Caught Fire Near the Strait of Hormuz After Hitting Mines - energynews.pro",
-   "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNd3BLMEtOX3EyOENKSThCUE5rUHBjVlNkU3hySUVjc1ZIRWFaVUpObWhZOGZQUVp5WHY4WEpSZ3JNTHFPTG1ZdTFEOGNabUNaWU5JT1BZLWRYQVhlMlBSTjlobTBDelNkVDdTaGdXaU5PRVEtU3loblVKTTFpdlJsaW9PVmVFdEtDb3dWWFRnbWstT3BpSmZHZ3FqZGNlTHRiYmpr?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T07:02:19+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "[SMM Middle East Weekly Review] Talks stalemate and Hormuz disruption keep Iranian export offers flat - Shanghai Metals Market",
-   "url": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxPUEl3TXdqcjRmQjh2akRLOHpLY1NVM1Y5VEdwWXRHczRoOWpESWhCM3R1YndYbXJwaU5KU2FvUURzLUh4TEZuUmhMZUNwckFtejRkR3hiTWFxSkJEbVE1b2p4LTgtNWtpNHNMRFQ5QUJsNTNWQWxpQlFnLUNlRjlPTllLSkhWX3hfYk1Cc1RiMEtjNzRRVVl4b0FOR0dwaVFKMXZIcS1nQUQ1QXNHTWxxRVFNcXFZcnBzOXNESElzRW41RkpnQ1JpUkZiYi1rTjJWRVc0R1NJeGE0RTR4?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T07:01:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Tech selloff wipes out hedge fund gains, prompting risk cuts and layoffs - Reuters",
-   "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNMlRzQUpxeXE0WUdkVERWLW1QM1AxWDhXM1l3Vld6RG1ZQnZGLW56REV5U1JLREVGSExIQW4yTnE4OWI1QU5pVjgtVzZfUXZSaEEwekQxUWpPQ2hzX1ZKYjNlNnItSFBBNlBSTWpKSDBMTzZObTUyTlo3bmZFcW1HTmU3MkNlcEwxdEw5OENXaVNEN25KVloxYl9JTmptVjI3Ry1ZTGtWdU5xTjBvQnprbEFjYmZjdw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T06:55:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
-   "title": "Oil prices edge up on Iranian demands to open Strait of Hormuz - Montel News",
-   "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNRkZaWUl6Q3d1R3ZZNlFoNW9hQlR6SmR5VzFVUlhYcGQ5MFh3VU1jRnZQdjNmX3ZKMno2Y0FOb3dUUnQ0QXItbU8zejBOdER5a05mQXFmeTFhVmxJRGZwQjFielUtQW0xNi1WaDh4eFB2YVVKV1lESnFOQkhOQzVXWlE2RFNEdzB6bzc0cmcxOGtKdXh0RkkwYTNLd1R2WFJPRXlCT3VaQmxlclJzRGdXUTJ4S3NfLVk4TTViRUFORm4zaFp1OEE?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T06:28:13+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
    "title": "Why is Iran exempting India, China, Qatar, Iraq from Hormuz restrictions? - Al Jazeera",
    "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQREVEWGlac01nYWJUY3lwTUdnLXI2WW9mbWlmYkZzOVNxc2hoVWdnWXFtVWNXUVZ4cnpuUnFySWo0cDMwYU9HVndHRmt0ZTg5Uy02TDdxa0x4RXlLY1NQMUdSUkxGV2l5emNVX0dKaUlsV0F4dXkzUzRBQVdldGRxYlkweEZ6OUVOYXE0Ymtla3VCLVYtbzhucXNIYlp6OGkzNDdTTEg0eWlDUnp1c09B0gG0AUFVX3lxTFBzbG90aHg5TTdmRVd6bEI2Y2NsVUJUa1c4Ml81eno0LWVSbXM1R3RMVl9CR1RrNzBVeEk5UVpRQy0xU2xkZ0dPQm1VT0NTeFAyVXVySmJIYlRJNzBOb01oaklFeHdQeTdRcTFlS1BPb3oyWm5OS3BsZXZEc3dPLWNPbURLZXJTTEg3Nk1kN2ZCTUZFQnFPbWZYWVFpaERtY2tWTFN2NlhMa0g0dHFuRHVPNzVraw?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
    "time": "2026-11-06T06:13:36+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Natural Gas and Oil Forecast: Hormuz Risks Persist, Can Brent Reclaim $104? - FXEmpire",
-   "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxNa1o3ZDJzQVhuRzRsRXJkZndYMVBJX2ZpSWtWamJNaHowUThOT0pVRU9FUU9CMVNyeXVoRUFBWDMwZHVDRkFJTWRPWnA4WEVQLXVmSElHcDdpS1Bad09zSnFNNDlRU1U2WnZKNFRsdmRVQmtBQ1ctU3JRc1BCNW1xTEtVUTBkOGNzeFFGWE8xYVg1YmJ5SXkxanVzby1QZXpER1B3T1R1d3NpejRadERQeTRSQnd3V2FwZDlFYldjSQ?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T06:08:45+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Tanker Attacks in the Strait of Hormuz Push Brent Crude Toward $100 Mark - BigGo Finance",
-   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5KT09zYWw1RkJYVzBWMmZXNkJNMzNwVDFjb1UtLWNHTXJJQWpYMUdaWVcxVWdrbV9XcGxqTzF4TlZQX3phZ2FXR2ExNWNSLVcwSlhTbm9iZDBta0JaNk5aeWFxV29yZnNWc3VycTJVZjlRT0tCQ0E?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T06:05:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Can Multilateral Approaches Do More for Free Passage in the Strait of Hormuz? - ORF Middle East",
-   "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPejRpbnE4Y19GWG0tbHAzTk1UWTVERHVJQUVXZTJ4SzRXYU1KbzJHRkV0T1M1ZXBDdGtWbkZiLWQxMVQ3blpKaU91eFVrLWhHYjI5R3VZNDhJNHpsRXJReWZOWE5ycDZYTDdsaU92cG9rRHpCdG1KbVVUS05yOXNGaHdQTWhEOERPa1o2WUExR1duMGswRVNvOTVaQjlzWDFXN29OSlNacWtIZHZt?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T05:35:48+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -1868,432 +2136,12 @@
    ]
   },
   {
-   "title": "Is the Strait of Hormuz Really Safe After the Iran War? - Modern Diplomacy",
-   "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQU0JHTjhaenZJV0dHMmNCQTNydDVHZWNoYS1yREl5dWFVWWUtUHFuZ1dNby1YUVlPMFBlRjdsMWZNTkdBWUZpVFQ1a1dsQ3dRc3BvcWs4LUl2allneFhWMGExcHQyeWhlUGFPWk5tMlNzel9xTF9uUnRYUHhWMWZnM3d5enRyYVdXQnlZQ0J6aVlseWhYVGFtXw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T05:00:57+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Formalizing inverse problems in the age of AI: possibilities, pitfalls, and an invitation",
-   "url": "https://arxiv.org/abs/2611.06962",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Autonomous AI Agents Systematically Diverge From Human Preferences in Proof Formalization",
-   "url": "https://arxiv.org/abs/2611.06995",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Trust Responsive Runtime Authorization for Agentic AI with Empirical Characterization of Policy Behavior and Parameter Sensitivity",
-   "url": "https://arxiv.org/abs/2611.06996",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Adapting the Process of Adaptation: Darwinian, Lamarckian, and Agent-Directed Evolution in AI",
-   "url": "https://arxiv.org/abs/2611.07048",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Goal Revelation as a Bridge Between Information-Theoretic Empowerment and Capability-Based Human Power",
-   "url": "https://arxiv.org/abs/2611.07247",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "DelegateEval: Evaluating Platforms for Personal External Service Agents",
-   "url": "https://arxiv.org/abs/2611.07508",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "FlashOffloading: Low-Latency KV Cache Offloading for Long-Context LLM Serving",
-   "url": "https://arxiv.org/abs/2611.07542",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "memory"
-   ]
-  },
-  {
-   "title": "Who Should Know What? Empirical Information Design for Multi-Agent LLM Economies",
-   "url": "https://arxiv.org/abs/2611.07667",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "ChemE-as-Code: An Open-Source Platform for Agentic AI in Chemical Engineering",
-   "url": "https://arxiv.org/abs/2611.07947",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Enhancing Local and Global Structure in Compressed AI Agent Memory",
-   "url": "https://arxiv.org/abs/2611.08341",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "The Power of Meta Access in the Software of the Future --- Demonstrated on LLM Chat UIs and Chat AI",
-   "url": "https://arxiv.org/abs/2611.08428",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "SwarmEvolve: Latent Agent Swarms for Evolutionary Discovery and Optimization",
-   "url": "https://arxiv.org/abs/2611.08483",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Reclassification Is All You Missed: Surfacing Variant Reinterpretation Need in Online Health Communities at Population Scale",
-   "url": "https://arxiv.org/abs/2611.07054",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "How Should Agents See Code? Rethinking Code Representations for Agentic Software Engineering",
-   "url": "https://arxiv.org/abs/2611.07286",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "PSGAgent: Enhancing MLLMs' Dynamic Visual Perception for Panoptic Scene Graph Generation via Agentic Reasoning",
-   "url": "https://arxiv.org/abs/2611.07408",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Signed but Not Safe: Requirement Integrity in Multi-Agent LLM Handoffs",
-   "url": "https://arxiv.org/abs/2611.07483",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "ReferClaw: Disambiguating User Intent for Egocentric Assistance",
-   "url": "https://arxiv.org/abs/2611.07683",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Instantiating the Knowledge Plane",
-   "url": "https://arxiv.org/abs/2611.07827",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "AttnSR: Attention Step Reward for Long-Horizon Agentic RL",
-   "url": "https://arxiv.org/abs/2611.07932",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "tok: a textual concrete syntax of BPMN and DMN for humans and AI agents",
-   "url": "https://arxiv.org/abs/2611.07945",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Position: Agentic Evolution is the Path to Evolving LLMs",
-   "url": "https://arxiv.org/abs/2602.00359",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "ProCompNav: Proactive Instance Navigation with Comparative Judgment for Ambiguous User Queries",
-   "url": "https://arxiv.org/abs/2605.06223",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "TSQAgent: Rating Time Series Data Quality via Dedicated Agentic Reasoning",
-   "url": "https://arxiv.org/abs/2606.03629",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Agentic Abstention: Do Agents Know When to Stop Instead of Act?",
-   "url": "https://arxiv.org/abs/2606.28733",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "From Siloed Algorithms to Compliance-First Agentic Platforms: A Multi-Layered Architecture for Hospital AI Systems",
-   "url": "https://arxiv.org/abs/2608.06112",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Screen Before You Serve: Simulation for Production Customer Experience AI Agents at 140M Scale",
-   "url": "https://arxiv.org/abs/2609.30137",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "MOF-VERIFY: A Failure-Aware Agentic Harness for MOF Hypothesis Verification",
-   "url": "https://arxiv.org/abs/2610.03056",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Constraining the Commit Boundary: A DIO/ODI-Informed Authorization Guardrail for Agentic Entity Resolution",
-   "url": "https://arxiv.org/abs/2610.37407",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "MIND: AI Co-Scientist for Material Research",
-   "url": "https://arxiv.org/abs/2604.13699",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "EcoGEO: Trajectory-Aware Evidence Ecosystems for Web-Enabled LLM Search Agents",
-   "url": "https://arxiv.org/abs/2605.12887",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "LatentGym: A Testbed For Cross-Task Experiential Learning With Controllable Latent Structure",
-   "url": "https://arxiv.org/abs/2606.15306",
-   "source": "arXiv cs.AI (new AI papers)",
-   "platform": "rss",
-   "tier": "niche",
-   "time": "2026-11-06T00:00:00-05:00",
-   "engagement": 0,
-   "themes": [
-    "saas"
-   ]
-  },
-  {
-   "title": "Tankers hit in Hormuz as Iran keeps up pressure after US vote - Red Lake Nation News",
-   "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxONWpSa1BTUV8tUXB0WFIzR0xoX0dhU2kzUW5RRkwzMXJlRDdsdWIxRmpad3hLaWM1bnY0UW1fQlV4dmVxQVlpcHZlOE9scXlSZE14RXgxNko2U1N4YlZRSC00Um5XQkJxdWxLczlxS1pOVG9GTlVUcDFUdFFZUk5hMmNtNFFJRFRsUjJOOHhsbjRnMGFZNHhyYWxpdXVUU1R3OE5zUnhDMnlNREVDUjBXeGxwUmZQanVwUGlzZ3B2MDlISlN2WFVRNA?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T04:57:04+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "South Korea Expands Navy Patrols Near Strait of Hormuz as Somali Piracy Rises - The SOFX Report",
-   "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPWjM0Ymx0dm1lc2NYRC1Kam05RUlNUTNYRWsySFdWZ2FOQ3B1UkFkNkNvV0Z1WFB4LUZMVFhTejI2Xzl4bEZ2aGZhaV9RYlhTWDhyNFBBUVNfUmI3VTBDNmk1RXhSeXU1clQzYjhZbFZnSE9fc0pJSFpuN2IzTW8yTEdhdTBWUTlCM3ZEdWFUT1RSckJYMjdGSjR3UEEyX2Vu?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T04:42:14+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
    "title": "Iran\u2019s Hormuz toll regime to punish weakened Trump\u2019s Asian allies - Asia Times",
    "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPbjBzNF9WVlZCcXhEU1NTWUV2b3Z0cW5sVFJ5RnNXVXNjUUJrODd1YVlteEUxMjdEZGtFcGtwYll3MGxUQXVxbXYzdmZEd0ZqcklNdDJUM1NhY043c3dyb0stWnR0ZER6MURZRi1oTTJnUzZzVlgtX0dST051azIyVk11RVhhSHFsbnZ0eXIxMWN2UnlMMXo0eE5n?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
    "time": "2026-11-06T04:36:01+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "China's Q3 emissions post biggest drop since pandemic as Hormuz crisis curbs fossil fuel use - Reuters",
-   "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOek9mbzZtNDlzcFBXWjJQMnYtQUJvNHdkUkZTUzFHUDhvSVlaRy1xemJ0a3BhRlVlZDhKTkVrdzFqYTRBYUYxTFRGN1VRZ21uUS01VGlMOWRJUXVfWVZwamllNExNLW00U0dKWVhnQWNCY1lQWHp0cDRSQ1ZRSVFOR0hjR3gwYUpQX2owYVJYVDFqRmlBV05tWkpPRDE5OUphVjNzTDdSOHRoaXRwNDEzVXZjc3VCRWhlRGlxTWJtZnRZcjhMRE1nLXoxaw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T04:34:00+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -2312,51 +2160,15 @@
    ]
   },
   {
-   "title": "Oil Rebounds but Still Set for 12% Weekly Drop; Strait of Hormuz Supply Fears Underpin Prices - BigGo Finance",
-   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1hWDNRWkU5TnVzZkY5ZVhKTFZfWVZXM2dpamxpTDdsWGE3b2Q1N0JIZE9jZ0lpQnpjX0J2V0RIbkFEQURLX1ZXcjEyeDVVZldqdmI3dkNDYmxtdjFTR0dXNmdvN0RaWGxSNmRUX2hFWWhYVTl4emc?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T04:09:03+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Despite strong pressure from officials, the market is still reducing its bets on a Fed interest rate hike in December. Why? - Vietnam.vn",
-   "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxOeFpYSk1hQVZVVUhjX1JhU2JicVA0SGUzdVBibDBZRWhJVTY3ajRFMkJlNDY1YXhlVkgyY2ZtSGUyNTVFMXJfUWowY0hvQmxON0J6MUdPcXlfQWZPOUl4MENULWd4ZGJteVdtZjVQQndzRUp4dVhWQmdsRjA4STl0YWdQejdLNUh2ZERkYmZLRjlhckRCalJnUndSOFlEaEx3My1SQy1jWTRUbzdkUWc?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T03:27:38+00:00",
-   "engagement": 0,
-   "themes": [
-    "fed-hike"
-   ]
-  },
-  {
    "title": "Beijing Stock Exchange market maker roster expands to 31 as lower entry bar reshapes Chinese brokerage competition - BigGo Finance",
    "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5naXh3WUUwRUN6M2RjWFRLUDhsdFo1UkRNVVlBRVVDU1RXXzZpa1ZERDZUb0liSkZpRzR3dm1tMWpfX1NsVzNaWlJaTF9JRVlMRU5lVGcwc1RZd09MOWJicEh6U0RsMW0taFRVeU9DS2JGTXZvT3c?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T02:56:00+00:00",
+   "time": "2026-11-06T02:58:44+00:00",
    "engagement": 0,
    "themes": [
     "market-structure"
-   ]
-  },
-  {
-   "title": "\ud83c\uddfa\ud83c\uddf8 \ud83c\uddee\ud83c\uddf7 Trump is blaming Iran\u2019s grip on Hormuz and high oil prices for the midterm wipeout... and that anger could shape his next move. Trita Parsi, executive vice president of the Q",
-   "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5hVTZxeXpOeXNnT1FzWlEyZmZLaWIzVkhtSVRwYWNNSHZ4YWNaakwzZGVDLVBCYUhtTVd1dVJIbVlIMktrbVJqZVAxUXhzUkxRU3RHRm5iand3Zy1RWXQ3WHRmVVlTYlFKNl84Zw?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T02:54:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
    ]
   },
   {
@@ -2372,15 +2184,15 @@
    ]
   },
   {
-   "title": "Hormuz attacks rise as Iran steps up pressure on shipping, UKMTO warns - Gulf News",
-   "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOcEhLcXhyaEwzclJBZ3dWQXVMT0ZfeWJxNmNLTzBjTzB5R2V2U1RIeTRQMFRDbmdXTE9QWXE0U1hhMDc3T3N0TUpqdzZvcmFubkI2UTdYT1pQOHNMOXFpeFFYTE1nRUNCeEExeFlka0oxakpGanhPMlJaNGYzSXRZVC0wN1FWRVdtZjBkb2FVNlZuSTB0YWU3RHpnMXAySkt3S0VNMzVSUG9EUlptd05Wc2Z0WFhvVFV6OUE?oc=5",
+   "title": "Options and the 0DTE daily outlook for Thu Nov 5, 2026 - The Globe and Mail",
+   "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPVmpKTHp3UE15VmNMVXM5RjRzSUZTd1Y3X2k0ZXE2a0ZaV1JvdVNqRG9CV2dVRXI3aDY1NFdfWmhNSG1XSi1CaS12TlZBbi1TdXN0cWpBUXhnNjFUWFVrZ0RObzhHYkJ4aUdEME51OWlPaTVUd0l0dVNNY2tUSnE5QWVkZFM0RHV1M3BFS1hYRmZCZEFzSWVwN2t4YUJWRG4wdE5FcXpKTU5JOGJ3R0I1SVFMd3FjTm03SWxwR3Z3RjBSaEVBZ24yLWFwelYxaWtOcjNnOGh3?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-06T01:36:38+00:00",
+   "time": "2026-11-06T02:11:40+00:00",
    "engagement": 0,
    "themes": [
-    "oil-physical"
+    "market-structure"
    ]
   },
   {
@@ -2408,30 +2220,6 @@
    ]
   },
   {
-   "title": "Swiss consumer sentiment lower than a year ago - Forex Factory",
-   "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPamJSUF9WZGtZRmVSMkJGaV84ZVVZOG5lRmxORFlBaDdNYktTT0E2OHg4dEZveE9seTRzRGlNRndaWnpja1BqZ25oVExhWXdEQ3d4WnBkd29KMFh5eEo1dmhZX0poYVFORXBYeC1CZ2ZMemk0RlhMekdOcHE0bms0LW5JSUhlMk9FTFVUVkI3VlhiZ9IBlwFBVV95cUxPblJXOFc3NGVtVUFHakNzNzlWMmhfOV9jUjFmbkVEbW51dmJ6enBLV0FBd3RBS01mQmtMV0hPVEZ4ZWEzNmJzQlFsV0pOb3BpUnJTM0QzZFAtLUlaQmhGRFFwdEY0cnJpSGNBTktVUzBkUnR4QktLcHVVUGlJRzBIMnNtdDM5YUp0VUpPYUYxX3ZudDd3d1I0?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T00:29:46+00:00",
-   "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
-   "title": "Michigan Consumer Sentiment Ticked Up In November - Finimize",
-   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNaUNVbUdlU3U3XzBvRGpiODFlZ2ptdHU4emtSSjRubDY4RkhjQzdmWm9IbUZLLVhRZDFSOVBnRE4wVEpIMC1OSjROSUpvWjVrM3FhS2d6UjlFSmw1Y0hMLUc5VmJ3Z0ZubVBFdUdXM3VVN2xLREVvMkVZeFZHamdtV2JvNEg?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-06T00:22:02+00:00",
-   "engagement": 0,
-   "themes": [
-    "consumer"
-   ]
-  },
-  {
    "title": "AI capex and semiconductor companies",
    "url": "https://www.reddit.com/r/investing/comments/1xoyjpr/ai_capex_and_semiconductor_companies/",
    "source": "r/investing",
@@ -2444,51 +2232,15 @@
    ]
   },
   {
-   "title": "South Korea plans to expand naval mission toward Strait of Hormuz - upi",
-   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxOYjFqLS0yT3p6N1h4VVVneV90dW43N2Q1UW1ZbzUybmRaQU0wQVJmU0prbkltaF9QdVBNMUlla19OYkJjVHhaRkd4cW1kYUo1ZS1tUEExR3RYVkt2MUJWOHczVXkteG9sU0JkNWNoam43UHczUktZWjBJNHJ2OGkzWTlQQ1VzNGJ0bWw0cGtLUG5PZkxxd21CcGphRFZhd9IBowFBVV95cUxPNHZBaWJJV3ZpRmZwY0tUQ2N5N3NWaWNFMllDMGJiOVBhUGFJM1ZmbUdVOU1KZVo3Q0x3bnAzR3cyNzBjX3BTaTkxejNJeXYyWXRrY0hhRklzdkZnNV9JUkxCTDhTZmU0d1Q0UWZGSXhEWWJkbVkwZUJUMGx3c2NnbFBSekI4eE9zMFBkWm5XMDk2ZlphWENpYUlta0d1bnBqYzlV?oc=5",
+   "title": "Watch Consumer Sentiment Still Very Negative: University of Michigan's Hsu - Bloomberg.com",
+   "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNdkFkMWNFS25wN2w4VmtXc2J1eFRNa3RQMUUzWlFscGRZbVE3MTdxZ1NTb1ZmUk9oY2RKMWRmMEREVXo5WDQ5Y1llc2l0dVl6UVZldjI2aXl3MHNRLWxFSk9raVVoU21vQ1c4OGRhSjhRZG54cDFHV3hhOEliR1ZpRmdDUjJfMFhuN2VKRnNpd3ZHSmI1UWFWSUpqRmRTbkFSSDJHRmwyalFYcEpnZXJB?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-05T23:07:10+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Citi Raises Brent Forecast for 2026; Sees $150 Oil if Hormuz Disruption Persists - EnergyNow.com",
-   "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQdk5UVWpBQWFNVy1reG1ZeFlEdlQxcWlxWkMzTFNfUmFKdVFZaWRqNm4zTFo5V05Pd2o5b3hpOXNLeWJ3Tm9XdzR1aEk1VWd1S29vaW1GUVZ1OTU5c0hsUE5fWnhUV1RoakRubVlGcW14cHBhaER0VzZmeDVFNGZkeEVUb2l6WGhtTVlBUXBMTFFYNkMwalRYZmYzQUItWEhDLUhiVkdaOFBoU0Q4Vnc?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-05T22:42:22+00:00",
-   "engagement": 0,
-   "themes": [
-    "oil-physical"
-   ]
-  },
-  {
-   "title": "Multifamily CMBS delinquency rate continues rise in October - Yield PRO",
-   "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNZDAxd3RGZmxfODJ5UndvQnk5YXFUcUQ5Mk1HU3U0eXZIcUhSby1MTDhGSklNWXFXVzNkMmExWE05M3EwcGNXRERRa05XeXVGM0ZBVzlhVU1uOVRUbkxoU3JsMzczcmpHZTI1Sl9XeWRnc015WWhVbmNBX09UOTBwaHh3VG53QkphNjdqRG9kaDBtZ1E?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-05T22:08:39+00:00",
+   "time": "2026-11-06T00:00:00+00:00",
    "engagement": 0,
    "themes": [
     "consumer"
-   ]
-  },
-  {
-   "title": "Shapiro Administration: PJM Interconnection Selects 3 PA Projects In Expedited Program To Add 1.7 GW Of Generation, Energy Storage To Grid; DEP Accepting New Proposals By Nov. 16 -",
-   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNRS13WXp1OUgtenNNSzN1WkNEdmo0RnFMbFMtWFFESkJUZGd3emR4cHhQT2Mwa1h0cllhR3I0bEo0SVRteFJwUGZRSFdScGduZzUyRlBuRWU2Yk8xTWRxVGdpd1JnS0dJUlQzRng5MHRwZlVfZkJaUnFaZHdOU0syTUlPblQ?oc=5",
-   "source": "Google News",
-   "platform": "news",
-   "tier": "mainstream",
-   "time": "2026-11-05T21:33:00+00:00",
-   "engagement": 0,
-   "themes": [
-    "power"
    ]
   },
   {
@@ -2504,12 +2256,12 @@
    ]
   },
   {
-   "title": "Tanker struck by projectiles in the Persian Gulf off Qatar, and other Mideast news - Orlando Sentinel",
-   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPaU5qdGVBbTdCcU5YS19naVpzblNvUWxfTm40NEtKUEpVTjZOdnMyV0J5NkljdHRDZXFGc2x3ODg4aW5vcVVOLXFSeHI0YU1DbVg2R19qZGZKcWRJSHl2MndSOGwxSVFSSXlEckhOSU9UM3htWFp3VmZpb0ROY3ZDUVpFMVZHTldnTlF2dktxTmhKdFp4Wk5FN09iVQ?oc=5",
+   "title": "Another Hormuz? What to Know About the Houthi Threat to the Red Sea - Council on Foreign Relations",
+   "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxPVGJwUm9MbzR1RUREblM3dEQxcEVsSG11NGVPN1JTczJwY1JhNlIwaDE4MVFrTWo2WWZ6RTI0SlBwNGNEV1pjWlJPZmZLUHZpd3RpWjJZWnJRdlV3akNLR2lrS0N0VlFPRWg5OHc1bVhFdWE1NUhzQW8zRVRVdW1fd1J0bWxtdGFTeVNCV1RR?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-05T20:54:35+00:00",
+   "time": "2026-11-05T20:27:12+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
@@ -2528,15 +2280,195 @@
    ]
   },
   {
-   "title": "Tankers burn in Hormuz as fears grow of new US attack on Iran - The New Arab",
-   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxORmIybzBXZTRSbmdfMW1YTFpxUzlvYm9LTkdtN0IzZ0FMdWl2aW9OV09PUlZldHlOdm03NFQ0RFZBUkVfTVdveC15S1hYOXI1WmJ4b2lDSnFJYXlTckxKWGJmZldPNmxkMFFKU2l2LTQ5YUxESkh0ck9CUzlWeDA4OHVTU0k?oc=5",
+   "title": "FHA share of serious mortgage delinquencies hits 20-year high - Scotsman Guide",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxQa09HQVhYZGtLdC1zUkJwdHVsZTVqR3NzTXVJUmNRUGxWbmhsbXFLNDMtemw4eHhqMjZaNzZ3NE5GazJPb1JhTE9rTzI5U1hDSEw2cUlZT3M1SHkwdlVzeW93aFN2Tk1rNDFvX291Mi1SSmVfWFAyZGtfU0FSU0ozZDJ2T3o2MTREeW5pbzVWLTdZRjJhc1VRQlc2c0pMQQ?oc=5",
    "source": "Google News",
    "platform": "news",
    "tier": "mainstream",
-   "time": "2026-11-05T19:08:06+00:00",
+   "time": "2026-11-05T18:45:33+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Gold loan delinquencies doubled in five months amid sharp portfolio growth - Business Standard",
+   "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOdERCMU9wcm4yZnVOQXRXallKa2FhYU44UTU4VUFhb2pYMmhjbFd0Ml91VWdnaUlLOVhIT0lUTWhqZVV3MDBCMnd5MWFBSm9QSWJLZDYxaUptQmI0MFI5R1Fqa1dXTHQtcFRpbVRTTDBPLXdBQ0N2WF9aREozVF95djZPVzd2ZlQxTzA4eHpNNmUxNDJjTHlaN1ZOU2kwRy1EVkVTYlgxUGpQa2h1UjFkdVpGcWZrcWdFMnR2V0IwMTVfcnpEVjNqU292SGF5eV9K0gHWAUFVX3lxTE1DY256VXpMc3Y3TW8xSGJxQzM4N25DLVR0UUlsd1R6eS1pdG5GalZUYXNWTnRqb3BoN0tDT3pSWXQ5QURadkxIZ3NZeGEybUREcldqU2RnekNLR283c3o4WWZ3aE5FNnh2VmMyNGwwZjdlcExMSGRzRzhwOTl5WFJfVHR0aU12X2dqMWJfTVk2am9JeTlOMlVSYk5BREQ1SEExdmo4N3pBRlRTdEdwVjVsNTdPZjRudjhCYnRXalE4Y21lb1NDLXpLekF5VGVJLVlqbFFJd1E?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T18:41:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Despite Iran's warnings, South Korea announces military deployment off East Africa towards Strait of Hormuz after resisting US pressure to send warships - Business Insider Africa",
+   "url": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQOWhBajBzZzVTNHZEbWtLVjRFZ2Jrc1NNWWw2bkdWM005dFE0cVgtclcxZEhYdmY5SjFDSzUtWmNXenZMUFlWYTBHY1AtM1VPNTJnMm9JTWVVcnA1NVNkTU1FU3pWbmo3QVJ6R0pfeThIR1dEVXd2V0ZsNDhjU2xpa0QwakNyc0ZIUU1VX1ZablM4UUtGRDQ5Vlpnb05kTl9STGN5azd4YktYaGFNNjFsRjBqNUNQR3NWWDZZenRicUpOZHlzc1ZEQnVwM1BPVm9Pb19r?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T18:15:28+00:00",
    "engagement": 0,
    "themes": [
     "oil-physical"
+   ]
+  },
+  {
+   "title": "Seoul sends ships to Hormuz, but not to Trump\u2019s war - Tomorrow's Affairs",
+   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOLXZ0cEdCQW9PanAtcER5RXhuN1FEbTZFc0tlVktlMWRfaGpJeGxKR2E1VjNhYUhVckN4V3R5dmRzOGZ2a2NzT3l2U2p4YTRydlpEaGk4VWtpQ3hfZFd6SGR5cU5qT2F1UVhkUjc4akhYczhXc05jTXJteGxpcnVRRm83NzE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T17:31:01+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Energy briefs\u2013burning tankers in the Strait of Hormuz - Oklahoma Energy Today",
+   "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPUUpfY2VNbjNDNno1NnMyQVlOS29GTDdoTnJCZVFIaEpSdi1pUzVobEJoNjRhenY2MDJueTJnd3Q0cV8zMWs4MzgyaW0zdUE5TFpLaFlBOXgzWW41WUZNd3FwWk1SZUJHVmU3RjRDb0hpS2ZrVmxQa2VOVXo4UU5KOGc0MjZZMU5QR29WYm0tY3dEUQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T17:28:19+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "PJM Winter Outlook: Power Supplies Available to Serve Expected Cold Weather Conditions - Yahoo Finance",
+   "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxORFF4VnBlNUoyT05ja2cwSkdNaU0yZUFFd19Xd1NBNDhsYlZrN09vMjdnNi1YQVRnZFRmc3lGOGItZ2dXclBaZHRQVzNYOXp1OWRPY1lQMkRIQnVjREt5eVRKQnpLYm5FQzhYVEUyZmRzUkxYRmtBc2dsQUFqN3ZvdEFFbGFrVUNhX1pIZ0JraU5NWjh6?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T17:27:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "power"
+   ]
+  },
+  {
+   "title": "Tankers hit in Hormuz as Iran keeps up pressure after US vote - Reuters",
+   "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQS25WaGR6RHltaldweFlqblRLWTQwanRGbVY4Vm5YZXBVdUVacG5DSTU3SXd1N00zTDROTTlYaGlnQzZPQUlmeUNPRlExc01kSUUwTFkwQUpWTWlXZEtkdTZmQktpWXUwcGt6dVBHbjkyb25ISjB1N0tOaWNJRHBoNk9iSzBJMURrM2dlemVvVnU5aHplVko3aGlQc296enRpdDlLNWJDWGtLWDZZVWc?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T16:47:29+00:00",
+   "engagement": 0,
+   "themes": [
+    "oil-physical"
+   ]
+  },
+  {
+   "title": "Best Crypto Exchanges for Institutional Off-Exchange Settlement: Bitget vs Binance vs OKX Compared (2026 Review) - Yellow.com",
+   "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxPdjBWVmk0V3MxclRfMU5uMXhwbS14eHJoR2lTYmdvSlVkRnU4UmNvVWtXOFVyaFg1eTFaSlA2V0FrSXpsWHVpSTlqSl9kQXJoMFlXQUItYXlDaDd4eUl2cjd1SXRWVDktMkpRcW50QUZ0T08wWnFPcF85M3A0c3M2V1ptVG5qa1ZKay12Vy1ZSUVwY1k?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T16:20:41+00:00",
+   "engagement": 0,
+   "themes": [
+    "market-structure"
+   ]
+  },
+  {
+   "title": "Utah consumer sentiment falls to lowest point since 2022 - Utah Policy",
+   "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOYzF0R0lQQWZkNmR6aU9CR2szeWZSRGRSUTF0cjlPaFg3TFduUjhhLU1MazVtUGdXQXV0TlY1N0pjbUE5QlRZMlFpM1h0dkw3c0k1ZUg2RlY3cDVpdlM4R191eENWZGtzeE9scUZNLU1ncTlaTFU0SnM0YXh6R3dIUDQ4SENHTFdGSXRnVmZTcmo5U1hQNDgwbk1QRDlOZFc0WVhOMg?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T15:35:08+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Micron's Taiwan union stages first chip strike as memory boom bonus fight drags on - Startup Fortune",
+   "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPU0pWM0EzWE5aOVEyVGNROEE5TWJZQ2lpakctR0ZrRmQxUXE4REhTdWVJTzdaLXhwaFdNMHEyTGdUTTFITkRzNy05OXpZeXAtN1pvV2JsRk5NNkI5TGUwSjhYM0Y3MGNtTk1naWZvQmlpVUZSYU9KZVJrSFdEVUdxYmNLOERBZ1RLVzN5aHhtelUtUUJXWEFQYkpMNkpTSXhXSUJjaVA4UE9ybkUtOGc?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T15:00:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
+   ]
+  },
+  {
+   "title": "SOO GREEN HVDC LINK AND ONE NUCLEAR SIGN LETTER OF INTENT TO EXPLORE DELIVERING FIRM NUCLEAR ENERGY AND CAPACITY TO PJM - PR Newswire",
+   "url": "https://news.google.com/rss/articles/CBMihgJBVV95cUxOR01uZUlLS1ZhZVh5Qk9oVWFxVTJ0UGRZb0h0NVV4REtWTUhpU1FNbWgyMGdJdGlCZUJxZnkzYU9UcmVTd0VEaUdsNnROUWFpUUxkZ2lSelZpZkoxUEFuaE5Zd29fSzJqeTVFOTlsSGVyTWhLLUFseVdFWUJWVlF0T0ZwT3E5QmtqWkROcWtuWFQ4cWNjWkM2dGwxWFZPOWk4Y0dZRjJOTVpweDg5T1ZXYTl3M1c2eC1VU0F0WGtCZnZvTEh3Ylc3ZHQybDZPcDFJX01lMEZHdHdzUDVET0FtSkVZZm9Hdk92M19sVk16ajdjWHVoUGlhd09ydHRVWVk5V1ZVakVB?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T14:18:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "power"
+   ]
+  },
+  {
+   "title": "Utah consumer sentiment plunges to lowest level since 2022 - KSL",
+   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNOHhMVkRRakc0bENMcXFYbEFtREVFamZUM1RTanpUb1dKWmN6dXhnRUk1dVQ1SVdCb1dHWXF5cnBDejdLa0Z6LW1Kd2FNQ2FsTFhGMjF0ZlZwVEY5SEs5RTBObWdtZGxjZHR5SFNfR3ViZVpJWjhzdUEydHRsNTNKa3o1S29hWU5qblVESlVpekZ2NnkzektNY0VXdw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T14:13:01+00:00",
+   "engagement": 0,
+   "themes": [
+    "consumer"
+   ]
+  },
+  {
+   "title": "Options and the 0DTE daily outlook for Thu Nov 5, 2026 - Barchart.com",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxORkd2ejZTOGg0RmhfSTY1eWVhZTFjQWJCaVY5RUF5dWtMN2F0b19LNkpUQUlCNm05aGFZNTc3a0dFZEJGZUpoeFZNZ3V2Rko5ZHIzSm5nUTNIbng0d25qQXFrbzNSaHlpcWdkNE1PTnlTT0MxOUtXaWpoX2tZZ0kzWGhMLWg4cEZJQVByc0djX1pqY2xwSnZVbXc4UUQtdw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T14:02:55+00:00",
+   "engagement": 0,
+   "themes": [
+    "market-structure"
+   ]
+  },
+  {
+   "title": "Bitget Widens Off-Exchange Custody Network to Six Providers - FinanceX Magazine",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxOMzV5YUxaQk1JeGNXUGhhQnllT21YQ2dXTVlsV21WUGJfUUtfVU5vQ0Yybm5OLXNic2hoUEdoV0I3U3ZjOXJwQUY2VVRfVExDM1IwUTBwSjJqTXRkUEFCLXQyMjRKZzZuTXROVVdjN0phb2xYUjNsaTFqbThCazVEeXJGMnlvRTBocDJ4UndiTHBZVWcyZWNPQzQ2X1pSdw?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T13:50:10+00:00",
+   "engagement": 0,
+   "themes": [
+    "market-structure"
+   ]
+  },
+  {
+   "title": "How Worried Should Investors Be About Micron Right Now? - 24/7 Wall St.",
+   "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPS0s0aElaWUlwdVBrWlVYM2l5RVlnTFB4UVlzTi1TNm40S0dkLWhUc1JpSnlKR3ptaG9SU2lscUdEb3B3d2wyYWdzOGM3VU4zZjJ1QXU2SGhQdDdITXNwbk84RVplME5ncl8xQTdaUlNDaFdSaUNrYUlyYzNhOXlKdnU2ZVFxdGFaNmVJLXI2YWNJZVpQZGFHUjVnMElWaEE?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T13:45:00+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
+   ]
+  },
+  {
+   "title": "How rising memory prices will hit device refresh quotes - DevPro Journal",
+   "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPY1pBVDBrQjgtcjhtcmxRUjE4SVFxUTNNQ0VUb2RFdjZKM0FQMEpBX2RycExkampKWGtYZnNyZDVPY005ZnlfSUR3b2M5Rzc0dEpxazU1TFJsYXFIb0xMLTVCSVg1c2YwcGltSVgxcFlQUVhMd1FRUmI2cW9SOEhjNGxsUzhxcF9YN2VucC1EczVnckVEV0lLcG9QT1pyRFp2TWdpVVNZWQ?oc=5",
+   "source": "Google News",
+   "platform": "news",
+   "tier": "mainstream",
+   "time": "2026-11-05T13:10:30+00:00",
+   "engagement": 0,
+   "themes": [
+    "memory"
    ]
   }
  ],
@@ -2587,6 +2519,6 @@
     "error": "X_BEARER_TOKEN is not set; X sources skipped"
    }
   ],
-  "read": 1019
+  "read": 560
  }
 }
