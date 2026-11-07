@@ -33,7 +33,7 @@
     return { on, sizes, e: ok && fin(st.e) ? clamp(st.e, 0.2, 1.5) : 1.0, wired: false };
   })();
   const hbSave = () => LS.set("bo-hedges", { on: HBS.on, sizes: HBS.sizes, e: HBS.e });
-  // the scenario odds: the Solve desk's live posterior (one solver, one set of odds), else the shipped run, else the priors
+  // the scenario odds: the Allocation desk's live posterior (one solver, one set of odds), else the shipped run, else the priors
   function liveSolver() { try { return typeof runReasoner === "function" ? ((typeof RZ_LAST !== "undefined" && RZ_LAST) || runReasoner(false)) : null; } catch (e) { return null; } }
   function hbPost() {
     const R = liveSolver();
@@ -158,7 +158,7 @@
         nom = { port: R.alts.optimal.port, ce: R.alts.optimal.ce };
         const sr = typeof rzSolveRobust === "function" ? rzSolveRobust(R.post.posterior, RZ_SCENARIOS, R.P, 0.05) : null;
         if (sr && sr.port) rob = { port: sr.port, ce: sr.ce };
-        liveTxt = "the Solve desk's live solver, the same object that desk shows";
+        liveTxt = "the Allocation desk's live solver, the same object that desk shows";
       }
     } catch (e) { /* the shipped run stands */ }
     $("#oo-dec-t").textContent = nom && rob ? `The solver's choice is ${xx(nom.port[0])} equity (growth ${sPct(nom.ce, 2)} a quarter on its own odds); allowing modest doubt about those odds (KL 0.05) it chooses ${xx(rob.port[0])} equity (${sPct(rob.ce, 2)} guaranteed). Read from ${liveTxt}. ${govNote("The solver's choice", nom.port[0])} The positions below come from what each price requires.` : "";

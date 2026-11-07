@@ -158,7 +158,7 @@
       rule: "The Fundamentals desk classifies every builder by Minsky stage, from filings.", src: "Stabilizing an Unstable Economy (1986)" },
     { id: "lg-keynes", n: "John Maynard Keynes", who: "Economist and investor", g: "Thinkers", lens: "beauty",
       idea: "The beauty contest: investors win by anticipating what average opinion expects average opinion to be, the third degree and beyond. Second- to fourth-order thinking, eighty years early.",
-      rule: "The Decide desk's chains run each shock to the fourth order.", src: "The General Theory, chapter 12 (1936)" },
+      rule: "The Seven decisions desk's chains run each shock to the fourth order.", src: "The General Theory, chapter 12 (1936)" },
     { id: "lg-mackay", n: "Charles Mackay", who: "Journalist", g: "Thinkers", lens: "herd",
       idea: "Manias are social: they spread person to person and fade one person at a time.", quote: "Men, it has been well said, think in herds; it will be seen that they go mad in herds, while they only recover their senses slowly, and one by one.",
       rule: "Crowding is a risk factor: when everyone owns the trade, the exit is narrow.", src: "Extraordinary Popular Delusions and the Madness of Crowds (1841; the line is from the preface to the 1852 edition)" },

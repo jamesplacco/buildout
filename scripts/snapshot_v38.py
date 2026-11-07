@@ -22,7 +22,7 @@ from buildout import book as bk  # noqa: E402
 from buildout import ledger, track  # noqa: E402
 
 NAMES = track.POLICY_NAME
-SHORT = {"call": "The call (sized to the limits)", "call_short": "Full size, Nasdaq-100 short", "product": "Vol target + quarter Kelly + stop",
+SHORT = {"call": "The call (the live rule)", "call_short": "Full size, the call's short", "call_simple": "Simple limits (pre-v0.40)", "product": "Vol target + quarter Kelly + stop",
          "vm_rule": "Volatility-managed rule", "bond30": "Full size, 30% long bond", "hold": "Holding at 1.00x"}
 
 
@@ -67,7 +67,7 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
         ax.legend(frameon=False, fontsize=7, loc="upper left")
         ax.grid(alpha=0.2)
         rows = []
-        for k in ("call", "call_short", "product", "bond30", "hold"):
+        for k in [k for k in ("call", "call_short", "call_simple", "product", "bond30", "hold") if k in W["policies"]]:
             p = W["policies"][k]
             n, g = p["net"], p["gross"]
             ex = n.get("exposure", {})
@@ -88,7 +88,7 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
         sv, P = T["survivorship"], W["policies"]["product"]
         notes = ["Costs: stocks 5 bp per dollar traded; Nasdaq-100 futures 1 bp a trade plus 1 bp a quarter to roll; borrowing above 1.00x at cash plus 50 bp; the long bond 2 bp a trade. Sharpe is in excess of cash; betas from a daily regression on the Nasdaq-100 and the 20-year bond.",
                  f"Survivorship: today's nine held with hindsight grew {pct(sv['hindsight_hold_cagr'])} a year, the point-in-time nine {pct(sv['pit_hold_cagr'])} (gap {abs(sv['gap_cagr']) * 100:.1f} points); hindsight flatters risk more than return (worst drawdown {pct(T['hindsight']['policies']['hold']['net']['maxdd'], 0)} against {pct(W['policies']['hold']['net']['maxdd'], 0)}).",
-                 f"Sizing: vol target with quarter Kelly averaged {P['meta']['avg_gross']:.2f}x gross: the same bet, smaller. The call keeps the holding's Sharpe and cuts the worst drawdown from {pct(W['policies']['hold']['net']['maxdd'], 0)} to {pct(W['policies']['call']['net']['maxdd'], 0)}."]
+                 f"The call is sized by the live rule at every month-end (v0.40). It cut the worst drawdown from {pct(W['policies']['hold']['net']['maxdd'], 0)} to {pct(W['policies']['call']['net']['maxdd'], 0)} at a Sharpe of {W['policies']['call']['net']['sharpe']:.2f} against {W['policies']['hold']['net']['sharpe']:.2f} for holding; full size with its short earned {W['policies']['call_short']['net']['sharpe']:.2f}. Vol target with quarter Kelly averaged {P['meta']['avg_gross']:.2f}x gross: the same bet, smaller."]
         yy = 0.105
         for ntext in notes:
             for ln in textwrap.wrap(ntext, 150):

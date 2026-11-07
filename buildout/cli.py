@@ -182,6 +182,9 @@ def main(argv: list[str] | None = None) -> None:
     tkp = sub.add_parser("track", help="v0.38: the track record: walk-forward with costs, point-in-time universe, the hedge by regime, the weeks")
     tkp.add_argument("--out", default="out")
     tkp.add_argument("--cache", default=".cache/book")
+    lvp = sub.add_parser("live", help="v0.40: mark the ledger's calls to market and write live.json (the live paper record)")
+    lvp.add_argument("--out", default="site/data")
+    lvp.add_argument("--cache", default=".cache/book")
     trp = sub.add_parser("trade", help="v0.39: the call as an order ticket for a Robinhood Agentic account (never placed here); see docs/TRADING.md")
     trp.add_argument("action", choices=["plan", "status", "halt", "resume", "paper-fill", "fills"])
     trp.add_argument("--account", default=None, help="JSON file: {equity, cash, account_type, positions:[{symbol, quantity}]}")
@@ -564,6 +567,16 @@ def main(argv: list[str] | None = None) -> None:
         from .jsonout import write
         o = bk._clean(track.build(bk.download(a.cache), bk.treasury(), None, ledger.read()))
         print("wrote", write(o, a.out, "track.json"))
+        return
+    if a.cmd == "live":
+        from . import book as bk, jsonout, ledger, track
+        v = ledger.verify()
+        if not v["ok"]:
+            raise SystemExit(f"the ledger fails verification: {v['problems'][:2]}")
+        L = track.live_record(ledger.read(), bk.download(a.cache), bk.treasury())
+        L["ledger"] = {"ok": True, "entries": v["entries"], "head": v.get("head")}
+        p = jsonout.write(L, a.out, "live.json")
+        print(f"{p}: {L['calls']} calls, {L['marked_days']} days marked" + (f", {L['total']:+.2%} unhedged, {L['total_hedged']:+.2%} hedged" if L.get("marked_days") else ""))
         return
     if a.cmd == "trade":
         import json as _j

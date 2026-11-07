@@ -5,8 +5,8 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 46;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 59;      // tests/test_*.py, pinned by tests/test_v39_1.py
-  const TESTS_PASSING = 768;     // the shipped test count (the chip and the hood tile read it)
+  const TEST_FILES = 60;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TESTS_PASSING = 772;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -146,7 +146,7 @@
     }
     try {
       const R = typeof runReasoner === "function" ? (typeof RZ_LAST !== "undefined" && RZ_LAST) || runReasoner(false) : null, keep = R && R.alts && R.alts.keep;
-      if (keep && fin(keep.worst)) rows.push(["Scenario loss limit", "the Solve desk, a stress test", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} for the book as it stands against a ${RZS.loss}% limit`, keep.feasible ? "within" : "breached on that desk's scenarios", "#solve"]);
+      if (keep && fin(keep.worst)) rows.push(["Scenario loss limit", "the Allocation desk, a stress test", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} for the book as it stands against a ${RZS.loss}% limit`, keep.feasible ? "within" : "breached on that desk's scenarios", "#solve"]);
     } catch (e) { /* the solver is optional here */ }
     if (!BC) try {                          // v0.25: the actuarial cross-checks (crossfield.py, walked forward since 1940); v0.31: on the Borrowed methods desk once the book is measured
       const C = typeof SNAP25 !== "undefined" && SNAP25 && SNAP25.crossfield, tm = C && C.tail && C.tail.methods, ru = C && C.ruin && C.ruin["1.0"];
@@ -167,7 +167,7 @@
     t.append(tb);
     const cap = h("p", "t7-sizing");
     if (BC) {
-      cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode(`Measured on the nine names' own daily prices since ${BC.B.from.slice(0, 4)} (the Book risk desk), the book at 1.00x breaks ${BC.breaches === 3 ? "all three" : BC.breaches} of its limits; the tightest, ${BC.bindingName}, allows ${xx(BC.size)}, and that is the call. The decision engine finds no evidence for any size other than holding (its gate has stayed shut in every month on record), so it supplies the 1.00x baseline and the limits cut it. The index row describes the S&P 500 the decision engine models, not the book, and the scenario row is the Solve desk's stress test. When the book run updates, the call follows the binding limit.`));
+      cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode(`Measured on the nine names' own daily prices since ${BC.B.from.slice(0, 4)} (the Book risk desk), the book at 1.00x breaks ${BC.breaches === 3 ? "all three" : BC.breaches} of its limits; the tightest, ${BC.bindingName}, allows ${xx(BC.size)}, and that is the call. The decision engine finds no evidence for any size other than holding (its gate has stayed shut in every month on record), so it supplies the 1.00x baseline and the limits cut it. The index row describes the S&P 500 the decision engine models, not the book, and the scenario row is the Allocation desk's stress test. When the book run updates, the call follows the binding limit.`));
     } else {
       cap.append(h("strong", null, "Limits and breaches. "), document.createTextNode("The book run is not in this build, so the size is the index call; the book's own limits are not measured."));
     }

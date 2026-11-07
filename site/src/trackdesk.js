@@ -8,7 +8,8 @@
   const T38 = () => (typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.pit ? SNAP38 : null);
   const tP = (v, d = 1) => (fin(v) ? pctPlain(v, d) : "n/a");
   const tS = (v, d = 1) => (fin(v) ? pct(v, d) : "n/a");
-  const T_ORDER = ["call", "call_short", "product", "vm_rule", "bond30", "hold"];
+  const T_ORDER_ALL = ["call", "call_short", "call_simple", "product", "vm_rule", "bond30", "hold"];
+  const T_ORDER = T_ORDER_ALL;     // policies a build does not carry are skipped where the table is filled
   const CONTACT = { name: "James Placco", links: [["LinkedIn", "https://www.linkedin.com/in/james-placco/"]] };     // set in one place
 
   function trackCurve(box, W, keys, title, height = 260) {
@@ -20,7 +21,7 @@
 
   function policyTable(table, W, which) {
     fillTable(table, ["Policy", "CAGR, net of costs", "CAGR before costs", "Volatility", "Sharpe", "Max drawdown", "Months up", "Turnover a year", "Market beta", "Rates beta", "2022"],
-      T_ORDER.map((k) => { const p = W.policies[k], n = p[which], g = p.gross, ex = n.exposure || {};
+      T_ORDER.filter((k) => W.policies[k]).map((k) => { const p = W.policies[k], n = p[which], g = p.gross, ex = n.exposure || {};
         return [SNAP38.policy_name[k], tS(n.cagr), tS(g.cagr), tP(n.vol), fx(n.sharpe, 2), tP(n.maxdd, 0), tP(n.hit_month, 0), fin(n.turnover_yr) ? fx(n.turnover_yr, 1) + "x" : "n/a", fx(ex.market, 2), fx(ex.rates, 2), tS(n.y2022, 0)]; })
         .concat([["Nasdaq-100 (QQQ), for reference", tS(W.bench.cagr), tS(W.bench.cagr), tP(W.bench.vol), fx(W.bench.sharpe, 2), tP(W.bench.maxdd, 0), tP(W.bench.hit_month, 0), "", "1.00", "", tS(W.bench.y2022, 0)]]), 1);
   }
@@ -39,6 +40,28 @@
     }
   }
 
+  function renderLive(T) {
+    const L = T.live || {}, box = $("#tr-live-curve"), S = L.series || [];
+    if (!L.marked_days || !S.length) {
+      $("#tr-live-p").textContent = `${L.calls || 0} call(s) logged; no trading day has been marked yet. The record starts on the first call's effective date and grows every weekday.`;
+      fillTable($("#tr-live"), ["Date", "Size held", "Unhedged", "Hedged"], []);
+      if (box) box.replaceChildren();
+      return;
+    }
+    $("#tr-live-p").textContent = `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked, from ${isoNice(L.first_effective)} to ${isoNice(L.last_mark)}: ${tS(L.total, 1)} for the call as sized (the rest in cash) and ${tS(L.total_hedged, 1)} for full size with the call's Nasdaq-100 short, against ${tS(L.book_total, 1)} for the book held at 1.00x and ${tS(L.qqq_total, 1)} for the Nasdaq-100. Each day uses the call in force that day, after costs. ${L.marked_days < 20 ? "Too few days to annualize or to read anything into; it is here so the record cannot be chosen after the fact." : ""}`;
+    if (box) {
+      box.replaceChildren();
+      const xs = S.map((r) => Date.parse(r[0]));
+      xyChart(box, { series: [
+        { name: "The call, as sized", color: "var(--accent)", width: 2.2, pts: S.map((r) => [Date.parse(r[0]), r[1]]) },
+        { name: "Full size with the short", color: "var(--s2)", width: 1.6, pts: S.map((r) => [Date.parse(r[0]), r[2]]) },
+        { name: "The book at 1.00x", color: "var(--muted)", width: 1.2, pts: S.map((r) => [Date.parse(r[0]), r[3]]) }],
+        yfmt: (v) => "$" + fx(v, 3), xfmt: dateLabel, xticks: (xs.length > 1 ? [0, xs.length - 1] : [0]).map((i) => [xs[i], isoNice(S[i][0]).replace(/, \d{4}$/, "")]), label: `Live paper, growth of $1 since ${isoNice(L.first_effective)}: the call ${tS(L.total, 1)}, full size with the short ${tS(L.total_hedged, 1)}, the book ${tS(L.book_total, 1)}`, height: 200, snapXs: xs });
+    }
+    fillTable($("#tr-live"), ["Date", "Size held", "The call", "Full size with the short", "The book at 1.00x"],
+      S.slice(-10).reverse().map((r) => [isoNice(r[0]), xx(r[4]), tS(r[1] - 1, 2), tS(r[2] - 1, 2), tS(r[3] - 1, 2)]), 1);
+  }
+
   function renderTrack() {
     const T = T38(), tiles = $("#tr-tiles");
     if (!tiles) return;
@@ -48,7 +71,7 @@
       [String(L.calls || 0), "Calls in the ledger", V && V.ok ? `hash chain verified; the first governs from ${isoNice((T.ledger.entries[0] || {}).effective_from)}` : "ledger does not verify"],
       [fx(C.net.sharpe, 2), "Walk-forward Sharpe, the call", `${isoNice(C.net.from)} to ${isoNice(C.net.to)}, net of costs; holding: ${fx(Hd.net.sharpe, 2)}`],
       [tP(C.net.maxdd, 0), "Worst drawdown, the call", `holding the book: ${tP(Hd.net.maxdd, 0)}; the Nasdaq-100: ${tP(W.bench.maxdd, 0)}`],
-      [tS(C.net.y2022, 0), "2022, the call", `holding: ${tS(Hd.net.y2022, 0)}; with the Nasdaq-100 short: ${tS(CS.net.y2022, 0)}`]]);
+      [fx(CS.net.sharpe, 2), "Sharpe, full size with the call's short", `worst drawdown ${tP(CS.net.maxdd, 0)}; 2022 ${tS(CS.net.y2022, 0)} (holding ${tS(Hd.net.y2022, 0)})`]]);
     // the three records
     const bt = T.backtest;
     fillTable($("#tr-three"), ["Record", "What it is", "Span", "Reading", "Can it have been fitted?"], [
@@ -57,16 +80,18 @@
       ["3. Live paper", "The calls written to the hash-chained ledger before the next bar, marked as prices arrive", (L.first_effective || L.first_call) ? `from ${isoNice((L.first_effective || L.first_call).slice(0, 10))}` : "starts Nov 4, 2026", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked to ${isoNice(L.last_mark || T.asof)}: ${tS(L.total, 1)}${L.stats ? `, ${tS(L.stats.cagr)} annualized` : " (too short to annualize)"}` : "No day of marks yet: the record starts now", "No: every call is timestamped before its first day"]], 1);
     $("#tr-three-p").textContent = `A portfolio manager judges an analyst by calls made in advance, sized sensibly, and honest when wrong. These are three different records and they never share a chart. The backtest shows the rule with hindsight; the walk-forward record is the honest estimate; the live record is the only one that cannot have been fitted, and it starts today.`;
     // the walk-forward record
-    trackCurve($("#tr-curve"), W, ["call", "call_short", "hold", "qqq"], "Walk-forward growth of $1, net of costs, point-in-time universe");
+    const ev = (k) => { const c = W.curve[k]; return c && c.length ? "$" + fx(c[c.length - 1][1], 2) : "n/a"; };
+    trackCurve($("#tr-curve"), W, ["call", "call_short", "hold", "qqq"], `Walk-forward growth of $1, net of costs, point-in-time universe: the call ends at ${ev("call")}, full size with the short at ${ev("call_short")}, the book at 1.00x at ${ev("hold")}, the Nasdaq-100 at ${ev("qqq")}`);
     policyTable($("#tr-pol"), W, "net");
-    $("#tr-pol-p").textContent = `Each policy is decided at a month-end close from data to that close, frozen, and held through the next month. ${W.policies.call.meta ? `The call averaged ${xx(W.policies.call.meta.avg_gross)}; the hedged variant shorted ${tP(W.policies.call_short.meta.avg_short, 0)} of NAV on average.` : ""} Costs: stocks ${SNAP38.cost.stock_bp} bp per dollar traded, futures ${SNAP38.cost.fut_bp} bp a trade plus ${SNAP38.cost.roll_bp_q} bp a quarter to roll, borrowing above 1.00x at cash plus ${fx(SNAP38.cost.borrow_spread * 1e4, 0)} bp. The "before costs" column shows what they take.`;
+    const LR = T.live_rule, CSm = W.policies.call_simple;
+    $("#tr-pol-p").textContent = `${LR ? `Since v0.40 the call is sized by the live rule itself (book.build: factor-model volatility, three tail models, the drawdown simulation), run at each of ${LR.months} month-ends on that year's point-in-time names${LR.fallbacks ? `; ${LR.fallbacks} early month${LR.fallbacks === 1 ? "" : "s"} with too little history used the simple limits` : ""}. The simpler stand-in it replaced is kept as a row: the live rule earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(CSm ? CSm.net.sharpe : NaN, 2)} for the stand-in, so the record now reads lower and is the honest one. Read with the short, the same rule earned ${fx(CS.net.sharpe, 2)}: sizing down protects, the short keeps the return. ` : ""}Each policy is decided at a month-end close from data to that close, frozen, and held through the next month. ${W.policies.call.meta ? `The call averaged ${xx(W.policies.call.meta.avg_gross)}; the hedged variant shorted ${tP(W.policies.call_short.meta.avg_short, 0)} of NAV on average.` : ""} Costs: stocks ${SNAP38.cost.stock_bp} bp per dollar traded, futures ${SNAP38.cost.fut_bp} bp a trade plus ${SNAP38.cost.roll_bp_q} bp a quarter to roll, borrowing above 1.00x at cash plus ${fx(SNAP38.cost.borrow_spread * 1e4, 0)} bp. The "before costs" column shows what they take.`;
     // survivorship
     const sv = T.survivorship, mem = T.members, yrs = Object.keys(mem).sort();
     const gapPts = sv.gap_cagr * 100, Hh = T.hindsight.policies.hold.net, Hp = W.policies.hold.net;
     $("#tr-surv-p").textContent = `Today's nine names were not the obvious nine in 2018. The walk-forward record holds, each January, the nine names with the largest trailing-year dollar volume among sixteen AI buildout candidates, using only data before that January. Holding today's nine with hindsight grew ${tS(sv.hindsight_hold_cagr)} a year; the point-in-time nine grew ${tS(sv.pit_hold_cagr)}. ${Math.abs(gapPts) < 1 ? `The return gap is ${fx(Math.abs(gapPts), 1)} points a year, close to nothing: the rule kept picking the same leaders (Nvidia, Microsoft, Amazon, Meta, Alphabet and Tesla are in every year), and the semiconductor names it held instead of today's later arrivals (Intel, Micron, AMD) roughly offset each other. Hindsight here flatters the risk more than the return: the point-in-time book fell ${tP(Hp.maxdd, 0)} at worst against ${tP(Hh.maxdd, 0)}, and ${tS(Hp.y2022, 0)} in 2022 against ${tS(Hh.y2022, 0)}.` : `A gap of ${fx(gapPts, 1)} points a year that a backtest on today's names would have claimed as skill.`} The candidate list itself was chosen in 2026, so a company that failed and left the data cannot appear: that residual bias remains, and it points the same way.`;
     fillTable($("#tr-mem"), ["Year", "The nine names held, chosen the January before"], yrs.map((y) => [y, mem[y].join(", ")]), 2);
     const H2 = T.hindsight;
-    fillTable($("#tr-hind"), ["Policy, on today's nine (hindsight)", "CAGR, net", "Sharpe", "Max drawdown", "2022"], T_ORDER.map((k) => { const n = H2.policies[k].net; return [SNAP38.policy_name[k], tS(n.cagr), fx(n.sharpe, 2), tP(n.maxdd, 0), tS(n.y2022, 0)]; }), 1);
+    fillTable($("#tr-hind"), ["Policy, on today's nine (hindsight)", "CAGR, net", "Sharpe", "Max drawdown", "2022"], T_ORDER.filter((k) => H2.policies[k]).map((k) => { const n = H2.policies[k].net; return [({ call: "The call: the simple limits (the live rule is run on the point-in-time book only)", call_short: "Full size, the simple limits' Nasdaq-100 short" })[k] || SNAP38.policy_name[k], tS(n.cagr), fx(n.sharpe, 2), tP(n.maxdd, 0), tS(n.y2022, 0)]; }), 1);
     // sizing as the product
     const SP = T.sizing_path;
     if (SP && SP.length) {
@@ -89,6 +114,7 @@
     });
     // the ledger
     const E = (T.ledger && T.ledger.entries) || [];
+    renderLive(T);
     fillTable($("#tr-ledger"), ["#", "Written (UTC)", "Data through", "Governs from", "Size", "Binding limit", "Menu", "Hash"], E.map((e) => [String(e.seq), e.ts_utc.replace("T", " ").replace("Z", ""), isoNice(e.data_asof), isoNice(e.effective_from), xx(e.call.size), e.call.binding.replace(/_/g, " "),
       e.call.menu_low && e.call.menu_high ? `${xx(e.call.menu_low.gross)} unhedged to ${xx(e.call.menu_high.gross)} with ${tP(e.call.menu_high.short, 0)} short` : "", e.hash.slice(0, 12)]), 3);
     $("#tr-ledger-p").textContent = `Every call the engine makes is appended to ledger/calls.jsonl before the next bar and committed by the daily run, so git's history timestamps it twice. Each entry's SHA-256 hash covers its content and the previous entry's hash: editing or deleting any past line breaks every hash after it, and python -m buildout ledger verify says so. A call governs from the first trading day after it is written, never earlier. ${V ? (V.ok ? `Chain verified: ${V.entries} ${V.entries === 1 ? "entry" : "entries"}, head ${String(V.head).slice(0, 12)}.` : "The chain does not verify.") : ""}`;
@@ -149,19 +175,20 @@
     $("#hm-asof").textContent = "Data through " + isoNice(T.asof);
     const fig = (v, k, note) => { const d = h("div"); d.append(h("dt", null, k), h("dd", null, v), h("p", null, note)); return d; };
     box.replaceChildren(
-      fig(fx(C.net.sharpe, 2), "Sharpe ratio", `Nasdaq-100 ${fx(Q.sharpe, 2)}; holding the book ${fx(Hd.sharpe, 2)}`),
+      fig(fx(C.net.sharpe, 2), "Sharpe ratio", `holding the book ${fx(Hd.sharpe, 2)}; Nasdaq-100 ${fx(Q.sharpe, 2)}; full size with the call's short ${fx(W.policies.call_short.net.sharpe, 2)}`),
       fig(tP(C.net.maxdd, 0), "Worst drawdown", `holding the book ${tP(Hd.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`),
       fig(tS(C.net.y2022, 0), "In 2022", `holding the book ${tS(Hd.y2022, 0)}; Nasdaq-100 ${tS(Q.y2022, 0)}`),
       fig(tS(C.net.cagr, 1), "A year, compounded", `at ${xx(C.meta.avg_gross)} average exposure`),
-      fig(String(L.calls || E.length || 0), "Live calls logged", E.length ? `hash-chained; the first governs from ${isoNice(E[0].effective_from)}` : "hash-chained; the record starts now"));
+      fig(String(L.calls || E.length || 0), "Live calls logged", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked: ${tS(L.total, 1)} since ${isoNice(L.first_effective)}` : E.length ? `hash-chained; the first governs from ${isoNice(E[0].effective_from)}` : "hash-chained; the record starts now"));
     $("#hm-figs-note").textContent = `Walk-forward, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: each month sized from data to that close and held the next month, costs charged, the nine names chosen point in time each January. The results of a model, not of an account. The backtest, with hindsight, is reported separately on the Track record.`;
     const cv = $("#hm-curve");
-    if (cv && !cv.childElementCount) trackCurve(cv, W, ["call", "hold", "qqq"], "Walk-forward growth of $1, net of costs: the call, the book held at 1.00x, the Nasdaq-100", 230);
+    const endv = (k) => { const c = W.curve[k]; return c && c.length ? "$" + fx(c[c.length - 1][1], 2) : "n/a"; };
+    if (cv && !cv.childElementCount) trackCurve(cv, W, ["call", "hold", "qqq"], `Walk-forward growth of $1, net of costs, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: the call ends at ${endv("call")}, the book held at 1.00x at ${endv("hold")}, the Nasdaq-100 at ${endv("qqq")}`, 230);
     const R = (T.regimes && T.regimes.rows) || [], r21 = R.find((r) => /^2021 to/.test(r.regime)) || {}, hi = R.find((r) => r.regime === "Inflation above 3%") || {};
     const A = T.alternatives, puts = A ? A.rows.map((r) => r.h.put && r.h.put.var_cut).filter(fin) : [];
     const items = [
       [sgn2(r21.corr), "Long Treasuries have stopped hedging", `Since 2021 stocks and bonds have moved together; a 30% bond position ${fin(r21.var_cut_30) && r21.var_cut_30 < 0 ? `added ${tP(-r21.var_cut_30, 0)} to` : "barely changed"} stock variance. Since 1962 bonds hedged below 3% inflation and failed above it (correlation ${sgn2(hi.corr)}).`, "#hedgetest", "Hedge test"],
-      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Limits, not forecasts, made the record", `A Sharpe ratio of ${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)} for holding the book, with the worst drawdown cut by more than half: size falls when the book's own risk rises, before the loss, not after.`, "#track", "Track record"],
+      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Sizing down protects; the short keeps the return", `Walked forward with the live rule, the call cut the worst drawdown from ${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)} but earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)} for holding. Full size with the call's Nasdaq-100 short earned ${fx(W.policies.call_short.net.sharpe, 2)} with a ${tP(W.policies.call_short.net.maxdd, 0)} worst drawdown: the hedge, not the cash, is the better way to take the limits.`, "#track", "Track record"],
       [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modelled one-month, 90% put on the Nasdaq-100 removed that share of its variance in every inflation and policy regime since 2000, and, of the overlays that add to the book (bonds, 2-year notes, gold, puts), was the only one that paid in 2022; the call's own hedge, a Nasdaq-100 short, did more. It costs a premium; the bond's failure costs more.`, "#hedgetest", "Hedge test"]];
     const ol = $("#hm-find"); ol.replaceChildren();
     items.forEach(([big, t, p, href, lab]) => { const li = h("li"), a = h("a", null, lab); a.href = href; li.append(h("span", "hm-big", big), h("h3", null, t), h("p", null, p), a); ol.append(li); });

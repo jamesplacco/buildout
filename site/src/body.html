@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.39.1</span>
+      Buildout <span class="ver">v0.40</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -1794,7 +1794,7 @@
           <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
           <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
           <dt>Engine rule</dt><dd>Hold the long-bond hedge only after the correlation (63-day half-life) falls below −0.10, and drop it once it turns positive.</dd>
-          <dt>Measure in force</dt><dd>The policy's 63-day exponentially weighted correlation needs the daily price feed and is computed by the daily run; it is not computed in this copy. Until it is, the Decide desk reads the 36-month correlation of monthly S&amp;P 500 and 10-year Treasury returns from the Findings desk and says so beside the number. The Fed's one-year figure here and the Geometry desk's real-return figure are context, not inputs.</dd>
+          <dt>Measure in force</dt><dd>The policy's 63-day exponentially weighted correlation needs the daily price feed and is computed by the daily run; it is not computed in this copy. Until it is, the Seven decisions desk reads the 36-month correlation of monthly S&amp;P 500 and 10-year Treasury returns from the Findings desk and says so beside the number. The Fed's one-year figure here and the Geometry desk's real-return figure are context, not inputs.</dd>
         </dl>
         <p class="sentence" id="gauge-live" hidden></p>
       </figure>
@@ -2454,7 +2454,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 59 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 60 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2830,6 +2830,11 @@
   <section class="section" aria-labelledby="tr-weeks-t">
     <div class="section-head"><p class="eyebrow">The weeks</p><h2 id="tr-weeks-t">What each policy would have done, day by day, in the weeks that mattered</h2><p class="prose">Positions as each policy held them that week (decided at the previous month-end), net of costs. 2020's crash, 2022's inflation shocks, the 2024 carry unwind, the 2025 tariff week and October 2026's AI scare.</p></div>
     <div id="tr-weeks"></div>
+  </section>
+  <section class="section" aria-labelledby="tr-live-t">
+    <div class="section-head"><p class="eyebrow">Live paper</p><h2 id="tr-live-t">The logged calls, marked every trading day</h2><p class="prose" id="tr-live-p"></p></div>
+    <div class="chart" id="tr-live-curve"></div>
+    <div class="tablewrap"><table class="rs-table" id="tr-live"></table></div>
   </section>
   <section class="section" aria-labelledby="tr-ledger-t">
     <div class="section-head"><p class="eyebrow">The ledger</p><h2 id="tr-ledger-t">Every call, timestamped before the next bar and hash-chained</h2><p class="prose" id="tr-ledger-p"></p></div>

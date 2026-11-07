@@ -1264,7 +1264,7 @@ svg.lotus { color: var(--accent); overflow: visible; }
 .ms.overdue { border-left-color: var(--red); }
 .ms .pill { justify-self: start; }
 .ms-note { font-size: var(--t-xs); color: var(--muted); }
-.ms.overdue .ms-st { color: var(--red); }
+.ms.overdue .ms-st { color: var(--bad-ink); }      /* v0.40: text takes the ink shade (7:1 light, 7:1 dark); the red was 3.8:1 */
 
 /* v0.9 frontier brain */
 .bignum { font: 600 2.2rem/1.1 var(--f-display); color: var(--ink); margin: 6px 0 8px; font-variant-numeric: tabular-nums; }
@@ -1530,9 +1530,9 @@ svg.lotus { color: var(--accent); overflow: visible; }
 .tk-d { color: var(--code-dec); }
 .cd-view.full { position: fixed; inset: 0; z-index: 60; background: var(--paper); padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); grid-template-rows: auto minmax(0, 1fr); }
 .cd-view.full .cd-src { height: auto; min-height: 0; }
-:root { --code-bg: #f6f7f4; --code-ink: #1f2a25; --code-num-ink: #9aa59f; --code-kw: #7a3fb0; --code-str: #1c7a4a; --code-com: #6f7d76; --code-numl: #b45309; --code-fn: #1f5fbf; --code-dec: #b4235a; --code-hit: rgba(250, 178, 25, 0.22); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --code-bg: #0f1513; --code-ink: #dfe7e2; --code-num-ink: #5f6d66; --code-kw: #c9a2ff; --code-str: #8ee0ae; --code-com: #8a9991; --code-numl: #f5b56b; --code-fn: #8fc2ff; --code-dec: #ff9cc2; --code-hit: rgba(250, 178, 25, 0.2); } }
-:root[data-theme="dark"] { --code-bg: #0f1513; --code-ink: #dfe7e2; --code-num-ink: #5f6d66; --code-kw: #c9a2ff; --code-str: #8ee0ae; --code-com: #8a9991; --code-numl: #f5b56b; --code-fn: #8fc2ff; --code-dec: #ff9cc2; --code-hit: rgba(250, 178, 25, 0.2); }
+:root { --code-bg: #f6f7f4; --code-ink: #1f2a25; --code-num-ink: #626e68; --code-kw: #7a3fb0; --code-str: #1c7a4a; --code-com: #6f7d76; --code-numl: #b45309; --code-fn: #1f5fbf; --code-dec: #b4235a; --code-hit: rgba(250, 178, 25, 0.22); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --code-bg: #0f1513; --code-ink: #dfe7e2; --code-num-ink: #8a9991; --code-kw: #c9a2ff; --code-str: #8ee0ae; --code-com: #8a9991; --code-numl: #f5b56b; --code-fn: #8fc2ff; --code-dec: #ff9cc2; --code-hit: rgba(250, 178, 25, 0.2); } }
+:root[data-theme="dark"] { --code-bg: #0f1513; --code-ink: #dfe7e2; --code-num-ink: #8a9991; --code-kw: #c9a2ff; --code-str: #8ee0ae; --code-com: #8a9991; --code-numl: #f5b56b; --code-fn: #8fc2ff; --code-dec: #ff9cc2; --code-hit: rgba(250, 178, 25, 0.2); }
 
 @media print {
   .m-evl, .m-cl, .lb-read-grid, .cd-grid, .m-cols, .m-trace { display: block; }

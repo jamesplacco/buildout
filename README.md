@@ -3,6 +3,9 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.40 walks the call forward with the live sizing rule itself (`track.live_rule_path`) and marks the ledger's
+calls every trading day (`python -m buildout live`, `site/data/live.json`).
+
 Version 0.39.1 is an audit release: two independent reviews of the page and the engine, every finding fixed and pinned in
 `tests/test_v39_1.py`; the track build runs in under a minute.
 

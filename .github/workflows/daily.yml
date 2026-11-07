@@ -205,6 +205,7 @@ jobs:
           python -m buildout book --out site/data
           python -m buildout ledger append --book site/data/book.json
           python -m buildout ledger verify
+          python -m buildout live --out site/data       # v0.40: the ledger's calls marked to market, every day
 
       - name: Status (freshness and sanity checks for the page)
         id: status
