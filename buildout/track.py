@@ -206,10 +206,11 @@ def live_rule_path(prices: dict, ust: pd.DataFrame, members: dict, month_ends: l
 
 
 def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, turn_names: pd.Series | None = None,
-                 rule: pd.DataFrame | None = None) -> dict:
+                 rule: pd.DataFrame | None = None, rl_rule: pd.DataFrame | None = None) -> dict:
     """Monthly decisions frozen at each month-end close; daily returns with and without costs for each policy.
     r: the book's daily return; qx: QQQ in excess of cash (the futures leg); bond: 20-year par bond total return.
-    rule: the live rule's size and short at each month-end (live_rule_path); without it, the simple limits stand in."""
+    rule: the live rule's size and short at each month-end (live_rule_path); without it, the simple limits stand in.
+    rl_rule: v0.41, the deep RL sizer's exposure at each month-end (deeprl.book_rule); adds the policy call_rl."""
     idx = r.dropna().index
     mes = month_ends(idx)
     rf_ann = (cash.reindex(idx).fillna(0.0) * 252).rolling(21, min_periods=1).mean()
@@ -231,6 +232,11 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
                     "vol_target": vt, "kelly": kelly, "product": product, "vm_rule": _next_vm(vm, t),
                     "es_size": L["sizes"]["es"], "dd_size": L["sizes"]["dd"]})
     D = pd.DataFrame(dec).set_index(pd.to_datetime([d["date"] for d in dec]))
+    if rl_rule is not None:
+        Drl = rl_rule.reindex(D.index)
+        okm = Drl["ok"].fillna(False).astype(bool)
+        D["size_rl"] = Drl["size"].where(okm, D["size"])          # a month the sizer could not see falls back to the call, and is counted
+        D["rl_ok"] = okm.to_numpy()
     # hold each decision through the next month
     held = D.reindex(idx, method="ffill").shift(1)
     held = held.loc[held.index > D.index[0]]          # v0.40: from the first day a decision is held (the decision day itself held none)
@@ -274,6 +280,8 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
     pol["call_short"] = run(pd.Series(1.0, index=held.index), short=held["short"])
     if rule is not None:                                  # the stand-in rule, kept beside the live one so the change is visible
         pol["call_simple"] = run(held["size_simple"])
+    if rl_rule is not None:
+        pol["call_rl"] = run(held["size_rl"])
     pol["bond30"] = run(pd.Series(1.0, index=held.index), bondw=bk.STATIC_BOND)
     pol["product"] = run(held["product"].clip(upper=bk.MAX_GROSS), stop=True)
     pol["vm_rule"] = run(held["vm_rule"].fillna(1.0).clip(0, sizing_rules.HEADLINE["cap"]))
@@ -518,11 +526,13 @@ def weeks(pol: dict, bench: pd.Series) -> list[dict]:
 
 # ---------------------------------------------------------------- build
 POLICY_NAME = {"hold": "The book at 1.00x, unhedged", "call": "The call: the live rule's size", "call_short": "Full size, the live rule's Nasdaq-100 short",
-               "call_simple": "The simple limits (the stand-in before v0.40)",
+               "call_simple": "The simple limits (the stand-in before v0.40)", "call_rl": "The deep RL sizer (v0.41), unhedged",
                "bond30": "Full size, long bond 30% (the old TLT rule)", "product": "Vol target, quarter Kelly, drawdown stop", "vm_rule": "Volatility-managed rule (Moreira and Muir)"}
 
 
-def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | None = None, ledger_rows: list | None = None) -> dict:
+def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | None = None, ledger_rows: list | None = None, rl_nets: dict | None = None) -> dict:
+    """rl_nets (v0.41): deeprl.build()["nets"], the sizer trained through each year; adds the call_rl policy to the
+    point-in-time record and out["deeprl_book"]."""
     P = bk.panel(prices, ust)
     cal = P["R"].index
     cash, bond = P["cash"], P["bond"]
@@ -539,7 +549,14 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
             rule = live_rule_path(prices, ust, members, [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)])
             out["live_rule"] = {"months": int(len(rule)), "fallbacks": int((~rule["ok"].astype(bool)).sum()),
                                 "errors": rule.loc[~rule["ok"].astype(bool), "error"].dropna().head(3).tolist() if "error" in rule else []}
-        W = walk_forward(r, qx, bond, cash, tn, rule)
+        rl_rule = None
+        if name == "pit" and rl_nets:
+            from . import deeprl, labs
+            rl_rule = deeprl.book_rule(rl_nets, r, labs.shiller(labs.download()), [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)])
+            out["deeprl_book"] = {"months": int(rl_rule["ok"].astype(bool).sum()), "fallbacks": int((~rl_rule["ok"].astype(bool)).sum()),
+                                  "avg_exposure": float(rl_rule.loc[rl_rule["ok"].astype(bool), "action"].mean()), "time_out": float((rl_rule.loc[rl_rule["ok"].astype(bool), "action"] == 0).mean()),
+                                  "path": [[str(d.date()), float(v)] for d, v in rl_rule.loc[rl_rule["ok"].astype(bool), "size"].items()]}
+        W = walk_forward(r, qx, bond, cash, tn, rule, rl_rule)
         pol = W["policies"]
         recs[name] = W
         out[name] = {"policies": {k: {"gross": stats(g, W["cash"], None, F), "net": stats(n, W["cash"], m["turnover_yr"], F), "meta": m,

@@ -144,6 +144,9 @@ def main(argv: list[str] | None = None) -> None:
     hs.add_argument("query")
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
+    drl = sub.add_parser("deeprl", help="v0.41: the deep RL sizer, trained inside a learned market model and walked forward from 1940")
+    drl.add_argument("--out", default="out")
+    drl.add_argument("--quick", action="store_true", help="a tenth of the training, for a smoke test")
     bo = sub.add_parser("board", help="the mind's verdict on every claim it weighs, thought about at once as one matrix")
     bo.add_argument("--json", action="store_true")
     rel = sub.add_parser("related", help="nodes nearest a node in the mind's 64-number spectral map")
@@ -756,6 +759,14 @@ def main(argv: list[str] | None = None) -> None:
         from .jsonout import write
         o = rl.build(labs.download())
         print("wrote", write(o, a.out, "rl.json"))
+        for f in o["findings"]:
+            print(" ", f)
+        return
+    if a.cmd == "deeprl":
+        from . import deeprl
+        from .jsonout import write
+        o = deeprl.build(quick=a.quick)
+        print("wrote", write(o, a.out, "deeprl.json"))
         for f in o["findings"]:
             print(" ", f)
         return

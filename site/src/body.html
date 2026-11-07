@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.40.1</span>
+      Buildout <span class="ver">v0.41</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -2458,7 +2458,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 60 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 61 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -3478,6 +3478,49 @@ python -m buildout trade halt        # stop every ticket (private/HALT)</pre>
 </section>
 
 <!-- ======================= v0.15: THE ML LAB ======================= -->
+<section class="view" id="view-deeprl" hidden aria-labelledby="dr-title">
+  <div class="vhead"><p class="eyebrow">Deep reinforcement learning · trained inside a learned model</p><h1 id="dr-title">A sizing agent trained on imagined months, judged on real ones</h1>
+    <p class="lede">The market gives about 1,700 real months since 1881. This agent learns inside a model of the market instead: a mixture density network predicts next month's return from the state, a policy-value network is trained by PPO on millions of simulated months, and at each real month-end a planner tries each action in imagined futures (the lineage runs from World Models and Dreamer to MuZero). Retrained every year on earlier months only and judged from 1940, then set loose on the nine-name AI book, which it never saw. Everything is numpy with the backward passes written by hand and checked against finite differences; the recipe below is Karpathy's, each step run and measured.</p>
+    <p class="sentence" id="dr-sum"></p></div>
+  <div class="at-tiles" id="dr-tiles"></div>
+  <section class="section" aria-labelledby="dr-rec-title">
+    <div class="section-head"><p class="eyebrow">The recipe · run, not recited</p><h2 id="dr-rec-title">Karpathy's recipe for training neural networks, step by step</h2>
+      <p class="prose" id="dr-rec-p"></p></div>
+    <div class="panel"><div class="tablewrap"><table id="dr-rec"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="dr-wm-title">
+    <div class="section-head"><p class="eyebrow">The world model</p><h2 id="dr-wm-title">Does the learned model beat the baselines it must beat?</h2>
+      <p class="prose" id="dr-wm-p"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Held-out likelihood, averaged over every yearly refit</span><div class="tablewrap"><table id="dr-wm"></table></div><p class="hint">Negative log-likelihood per month on the newest tenth of each training window; lower is better. The volatility-scaled Gaussian is the baseline the mixture is built on, so the gap is what the network added.</p></div>
+      <div class="panel"><span class="panel-title">Do the imagined months look like the record?</span><div class="tablewrap"><table id="dr-tail"></table></div><p class="hint">Twenty thousand months sampled from the final model against the real months before it.</p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="dr-rec2-title">
+    <div class="section-head"><p class="eyebrow">The record · out of sample since 1940</p><h2 id="dr-rec2-title">The deep agent against holding, the trend rule and the tabular agent</h2>
+      <p class="prose" id="dr-rec2-p"></p></div>
+    <div class="panel"><div class="chart" id="dr-curve" role="img" aria-label="Log real wealth since 1940: the deep agent with and without planning, holding, the trend rule and the tabular agent"></div></div>
+    <div class="panel"><div class="tablewrap"><table id="dr-pol"></table></div><p class="hint" id="dr-pol-n"></p></div>
+    <div class="panel"><div class="chart" id="dr-expo" role="img" aria-label="The agent's exposure, quarterly samples since 1940"></div></div>
+  </section>
+  <section class="section" aria-labelledby="dr-map-title">
+    <div class="section-head"><p class="eyebrow">What it learned</p><h2 id="dr-map-title">The policy across the states the record has visited</h2>
+      <p class="prose" id="dr-map-p"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Mean exposure by trend, volatility and drawdown (from a 1.0x position)</span><div class="tablewrap"><table id="dr-map"></table></div></div>
+      <div class="panel"><span class="panel-title">Today</span><div class="tablewrap"><table id="dr-now"></table></div><p class="hint" id="dr-now-n"></p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="dr-book-title">
+    <div class="section-head"><p class="eyebrow">The book · data it never saw</p><h2 id="dr-book-title">The learned sizer on the nine-name AI book, 2018 to now</h2>
+      <p class="prose" id="dr-book-p"></p></div>
+    <div class="panel"><div class="tablewrap"><table id="dr-book"></table></div><p class="hint" id="dr-book-n"></p></div>
+  </section>
+  <section class="section" aria-labelledby="dr-lim-title">
+    <div class="section-head"><p class="eyebrow">Limits</p><h2 id="dr-lim-title">What this can and cannot claim</h2></div>
+    <div class="panel"><ul class="prose" id="dr-lim"></ul></div>
+  </section>
+</section>
 <section class="view" id="view-ml" hidden aria-labelledby="ml-title">
   <div class="vhead"><p class="eyebrow">Machine-learning lab</p><h1 id="ml-title">Return forecasting: only the simplest model outperforms the historical mean</h1>
     <p class="lede">Seven models, from one-variable CAPE regression to gradient boosting, forecast the S&amp;P 500's next twelve months each month since 1940, refit only on what was known at the time. The flexible ones lose to the plain historical average out of sample. The one that wins is the simplest: an average of eight one-variable forecasts with Campbell and Thompson's sign restrictions, by a small margin that is not yet statistically significant, which is what Rapach, Strauss and Zhou found on other data. A reinforcement-learning sizing agent, judged the same way, does not beat holding either. That is the useful finding: it says which model claims to distrust and why the engine leans on ranges, hedges and sizing rules instead of point forecasts.</p>
@@ -3531,7 +3574,7 @@ python -m buildout trade halt        # stop every ticket (private/HALT)</pre>
       <p class="sentence" id="rl-sum"></p></div>
     <div class="at-tiles" id="rl-tiles"></div>
     <div class="grid2"><div class="panel"><div class="svgbox" id="rlx-curve"></div><div class="legend" id="rlx-curve-l"></div></div>
-      <div class="panel"><div class="tablewrap"><table id="rl-cfg"></table></div><p class="hint">Four configurations were tried (with and without a loss penalty, with a light and a heavy prior); all four are shown, and the deflated chance counts all of them.</p></div></div>
+      <div class="panel"><div class="tablewrap"><table id="rl-cfg"></table></div><p class="hint">Four configurations were tried (with and without a loss penalty, with a light and a heavy prior); all four are shown, and the deflated chance counts all of them. The deep agent trained inside a learned market model (v0.41) is on the <a href="#deeprl">Deep RL desk</a>, with this tabular agent as one of its baselines.</p></div></div>
   </section>
   <section class="section" aria-labelledby="ml-use-title">
     <div class="section-head"><p class="eyebrow">Use</p><h2 id="ml-use-title">Implications for portfolio management</h2></div>
@@ -3738,6 +3781,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v41-t">
+    <div class="section-head"><p class="eyebrow">v0.40 to v0.41</p><h2 id="ag-v41-t">Release metrics, v0.40 to v0.41</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>175M</b><span>Simulated months the deep agent trained on</span><small>87 yearly refits in 19 minutes on two CPU cores; the real record holds 1,745</small></div>
+      <div class="at-kpi"><b>4e-8</b><span>Largest gradient error</span><small>hand-written backward passes against finite differences, both networks</small></div>
+      <div class="at-kpi"><b>0.88 against 0.64</b><span>Sharpe, the deep agent against holding</span><small>since 1940, out of sample; 0.49 against 0.78 on the book it never saw</small></div>
+      <div class="at-kpi"><b>0.77, not 0.87</b><span>The call's Sharpe, corrected</span><small>v0.40 sized the record with the live rule itself and the figure fell</small></div></div>
+    <p class="prose">v0.40 made the walk-forward record use the rule that makes the live call, which lowered its headline and was logged as a failure, and started marking the ledger's calls to market every day. v0.41 built the deep reinforcement-learning sizer: a world model, a policy-value network and a planner, trained at a scale the real record cannot offer and judged only on real months it never trained on. Its market result is the best on the desk; its book result is a loss, shown with its cause. Both releases were built by one lead agent with the work checked by a separate run of the tests and the browser stress suite.</p>
   </section>
   <section class="section" aria-labelledby="ag-v39-t">
     <div class="section-head"><p class="eyebrow">v0.37 to v0.39.1</p><h2 id="ag-v39-t">Release metrics, v0.37 to v0.39.1</h2></div>

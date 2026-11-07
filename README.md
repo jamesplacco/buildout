@@ -3,6 +3,13 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.41 adds deep reinforcement learning inside a learned market model (`buildout/deeprl.py`, `python -m buildout
+deeprl`): a mixture density network as the world model, a policy-value network trained by PPO on 175 million simulated
+months, a planner at decision time, all in numpy with hand-written and gradient-checked backward passes. Judged
+walk-forward since 1940 it beats holding, the trend rule and the tabular agent (Sharpe 0.88 with planning against
+0.64, 0.75 and 0.73); on the nine-name book it never saw, it loses to the call (0.49 against 0.78), and that is on the
+page too.
+
 Version 0.40.1 closes v0.40's open items: no heading skips on any desk, a 9 KB favicon and a
 logo a quarter of its old size (the page is 200 KB lighter), spacing for the folded sections, and Treasury
 yields through Nov 6 in the track build.

@@ -6,7 +6,7 @@
     evidence: { name: "Evidence", views: ["inventory", "memos", "theses", "reading", "levers", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
     markets: { name: "Markets", views: ["hedgetest", "hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
-    library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
+    library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "deeprl", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
   };
   const GROUP_ORDER = ["today", "evidence", "markets", "engine", "library"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -55,6 +55,7 @@
     labs: () => guard("The labs", renderLabsDesk, $("#lb-tiles")),
     analysis: () => guard("Technicals and fundamentals", renderAnalysisDesk, $("#an-tiles")),
     ml: () => { guard("The machine-learning lab", renderMlDesk, $("#ml-tiles")); guard("Complexity", renderComplexity, $("#cmx-tiles")); guard("The RL agent", renderRlBlock, $("#rl-tiles")); },
+    deeprl: () => guard("Deep RL", renderDeepRl, $("#dr-tiles")),
     reality: () => guard("The reality check", renderRealityDesk, $("#rt-tiles")),
     edge: () => { guard("The information edge", renderEdgeDesk, $("#ed-tiles")); guard("Distribution", renderDistribution, $("#ed-dist")); },
     cardroom: () => { guard("The labs", renderLabsDesk, $("#lb-tiles")); guard("The card room", drawYale, $("#cr-yale")); },

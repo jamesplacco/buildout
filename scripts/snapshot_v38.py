@@ -22,7 +22,7 @@ from buildout import book as bk  # noqa: E402
 from buildout import ledger, track  # noqa: E402
 
 NAMES = track.POLICY_NAME
-SHORT = {"call": "The call (the live rule)", "call_short": "Full size, the call's short", "call_simple": "Simple limits (pre-v0.40)", "product": "Vol target + quarter Kelly + stop",
+SHORT = {"call": "The call (the live rule)", "call_short": "Full size, the call's short", "call_simple": "Simple limits (pre-v0.40)", "call_rl": "Deep RL sizer (v0.41)", "product": "Vol target + quarter Kelly + stop",
          "vm_rule": "Volatility-managed rule", "bond30": "Full size, 30% long bond", "hold": "Holding at 1.00x"}
 
 
@@ -67,7 +67,7 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
         ax.legend(frameon=False, fontsize=7, loc="upper left")
         ax.grid(alpha=0.2)
         rows = []
-        for k in [k for k in ("call", "call_short", "call_simple", "product", "bond30", "hold") if k in W["policies"]]:
+        for k in [k for k in ("call", "call_short", "call_simple", "call_rl", "product", "bond30", "hold") if k in W["policies"]]:
             p = W["policies"][k]
             n, g = p["net"], p["gross"]
             ex = n.get("exposure", {})
@@ -135,6 +135,11 @@ def main(argv: list[str]) -> None:
         T = bk._clean(track.build(prices, bk.treasury(), frames, ledger.read()))
     if arg("--vix-json"):                       # v0.39: merge a VIX study run on its own (buildout/vixhedge.py)
         T["vix"] = json.loads(Path(arg("--vix-json")).read_text())
+    if arg("--deeprl-json"):                    # v0.41: the deep RL study; the page keeps one net (the last), not 87
+        R = json.loads(Path(arg("--deeprl-json")).read_text())
+        last = max(R["nets"])
+        R["nets"] = {last: R["nets"][last]}
+        T["deeprl"] = R
     rows = ledger.read()
     T["ledger"] = {"verify": ledger.verify(), "entries": rows}
     if rows and T.get("live"):

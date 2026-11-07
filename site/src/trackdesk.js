@@ -8,12 +8,12 @@
   const T38 = () => (typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.pit ? SNAP38 : null);
   const tP = (v, d = 1) => (fin(v) ? pctPlain(v, d) : "n/a");
   const tS = (v, d = 1) => (fin(v) ? pct(v, d) : "n/a");
-  const T_ORDER_ALL = ["call", "call_short", "call_simple", "product", "vm_rule", "bond30", "hold"];
+  const T_ORDER_ALL = ["call", "call_short", "call_simple", "call_rl", "product", "vm_rule", "bond30", "hold"];
   const T_ORDER = T_ORDER_ALL;     // policies a build does not carry are skipped where the table is filled
   const CONTACT = { name: "James Placco", links: [["LinkedIn", "https://www.linkedin.com/in/james-placco/"]] };     // set in one place
 
   function trackCurve(box, W, keys, title, height = 260) {
-    const col = { call: "var(--accent)", call_short: "var(--s2)", product: "var(--s3)", vm_rule: "var(--s4)", bond30: "var(--s5)", hold: "var(--muted)", qqq: "var(--warn)" };
+    const col = { call: "var(--accent)", call_short: "var(--s2)", product: "var(--s3)", vm_rule: "var(--s4)", bond30: "var(--s5)", call_rl: "#8e5bd1", call_simple: "#b07bd9", hold: "var(--muted)", qqq: "var(--warn)" };
     const series = keys.filter((k) => W.curve[k]).map((k) => ({ name: k === "qqq" ? "Nasdaq-100 (QQQ)" : SNAP38.policy_name[k], color: col[k], width: k === "call" ? 2.5 : 1.5, pts: W.curve[k].map(([d, v]) => [Date.parse(d), v]) }));
     const p0 = series[0].pts;
     xyChart(box, { series, yfmt: (v) => "$" + fx(v, 2), xfmt: dateLabel, xticks: yearTicks(p0[0][0], p0[p0.length - 1][0]), label: title, height, snapXs: p0.map((p) => p[0]) });

@@ -160,7 +160,8 @@ def on_book(book: pd.Series, cash: pd.Series, vxf: pd.DataFrame, frames: dict, v
     from . import futures as fu
     vd = fu.front_returns(vxf).dropna()
     nq = fu.front_returns(frames["NQ"]).dropna()
-    idx = book.dropna().index.intersection(vd.index).intersection(nq.index)
+    idx = book.dropna().index
+    idx = idx[idx.isin(vd.index) & idx.isin(nq.index)]                 # the days all three series share
     b, v, q = book.reindex(idx), vd.reindex(idx), nq.reindex(idx)
     hedges = {"vix_fut": (v - COST_BP / 1e4 / 21, SHARES),
               "vix_call": (option_daily(v, vov, "call", STRIKE), SHARES),
