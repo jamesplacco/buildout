@@ -32,6 +32,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PRIVATE = ROOT / "private"
+
+
+def state_root() -> Path:
+    """Where tickets, fills and the paper account live: private/ (git-ignored), or BUILDOUT_TRADER_STATE, which the
+    public paper bot (v0.42) points at paper/ so its record is committed."""
+    return Path(os.environ["BUILDOUT_TRADER_STATE"]) if os.environ.get("BUILDOUT_TRADER_STATE") else PRIVATE
+
+
 HEDGE_LABEL = {"PSQ": "Nasdaq-100 short through an inverse ETF (the call's index short)", "VIXY": "VIX sleeve (short-term VIX futures ETF)"}
 
 
@@ -73,8 +81,8 @@ def load_params(path: str | Path | None = None) -> TradingParams:
 def halted() -> str | None:
     if os.environ.get("BUILDOUT_TRADING_HALT"):
         return "BUILDOUT_TRADING_HALT is set"
-    if (PRIVATE / "HALT").exists():
-        return "private/HALT exists"
+    if (state_root() / "HALT").exists():
+        return f"{state_root().name}/HALT exists"
     return None
 
 
@@ -274,7 +282,7 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
 
 
 def _tickets_dir() -> Path:
-    d = PRIVATE / "tickets"
+    d = state_root() / "tickets"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -312,7 +320,7 @@ def _tickets_on(day: str) -> list[dict]:
 
 
 def _fills_path() -> Path:
-    return PRIVATE / "fills.jsonl"
+    return state_root() / "fills.jsonl"
 
 
 def _fills() -> list[dict]:
@@ -382,7 +390,7 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None) -> di
 
 
 def _paper_path() -> Path:
-    return PRIVATE / "paper_account.json"
+    return state_root() / "paper_account.json"
 
 
 def paper_account(start_cash: float = 100_000.0) -> dict:
@@ -411,7 +419,7 @@ def paper_fill(tid: str) -> dict:
     A["positions"] = [{"symbol": s, "quantity": q} for s, q in sorted(pos.items()) if q > 1e-9]
     marks = {s: (t["quotes"].get(s) or {}).get("last") or 0 for s in pos}
     A["equity"] = round(A["cash"] + sum(q * float(marks.get(s) or 0) for s, q in pos.items()), 2)
-    PRIVATE.mkdir(parents=True, exist_ok=True)
+    state_root().mkdir(parents=True, exist_ok=True)
     _paper_path().write_text(json.dumps(A, indent=1))
     return {"account": A, **record_fills(tid, fills)}
 

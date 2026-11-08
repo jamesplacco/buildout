@@ -43,6 +43,11 @@ record_fills logs what Robinhood reports. Trading limits are read from [trading]
   record_fills            v0.39: Robinhood's fills checked against the ticket, appended to a hash-chained private log
   trading_status          v0.39: paper or live, the halt switch, limits, today's tickets
   paper_fill              v0.39: paper mode, fill a ticket at its limits in the private paper account
+  trading_recommendation  v0.42: the model's recommendation, and one pass of the trader on the assistant route
+  approve_ticket          v0.42: approve a staged ticket, or give a standing approval (supervised mode)
+  trader_status           v0.42: the mandate, the halt switch, the journal, approvals, the fills chain
+  trading_halt            v0.42: the kill switch
+  trading_resume          v0.42: lift it
   brain_selfcheck         how far to trust the brain: honest error bars, the world model the data trusts, and what an
                           unseen cause would have to explain to erase each measured link
 """
@@ -1327,6 +1332,57 @@ def trading_status(ctx: Context, args: dict) -> dict:
     return _clean(ex.status())
 
 
+# ---------------------------------------------------------------- v0.42: the trader's tools (the assistant route)
+def trading_recommendation(ctx: Context, args: dict) -> dict:
+    """The model's recommendation today, and, given the account and quotes from Robinhood's MCP, the trader's pass:
+    the ticket, the mandate's verdict, and on the assistant route the orders to place."""
+    from . import broker as br, execution as ex, mandate as md, trader
+    rec = trader.recommendation()
+    acct, quotes = args.get("account"), args.get("quotes")
+    if not isinstance(acct, dict) or not isinstance(quotes, dict):
+        return _clean({**rec, "next": "pass account {equity, cash, account_type, positions} and quotes {SYMBOL: {bid, ask, last}} from Robinhood's Trading MCP to get the ticket and the mandate's verdict"})
+    M = md.load()
+    if M.broker != "assistant":
+        return _clean({**rec, "pass": None, "note": f"the mandate's broker is {M.broker!r}; the assistant route needs broker = \"assistant\" in private/mandate.toml"})
+    b = br.AssistantBroker(acct, quotes)
+    rep = trader.run_once(b, M, force_window=bool(args.get("force_window")))
+    out = {**rec, "pass": rep}
+    if rep.get("outcome") == "handed to the assistant":
+        out["instructions"] = ("The mandate authorizes these orders. Place each through Robinhood's Trading MCP in the Agentic account, sells first; "
+                               "then call record_fills with the ticket id and the fills as Robinhood reports them. Place nothing that is not on this list.")
+    return _clean(out)
+
+
+def approve_ticket(ctx: Context, args: dict) -> dict:
+    from . import trader
+    tid = str(args.get("ticket_id", ""))
+    try:
+        return _clean(trader.approve(tid, by=str(args.get("by", "the person"))[:60], standing_minutes=args.get("standing_minutes")))
+    except (KeyError, ValueError) as exc:
+        raise ToolError(str(exc)) from exc
+
+
+def trader_status(ctx: Context, args: dict) -> dict:
+    from . import execution as ex, mandate as md, trader
+    M = md.load()
+    return _clean({"mandate": {"mode": M.mode, "armed": M.armed, "broker": M.broker, "hash": M.hash(), "problems": M.problems(), "window": md.in_window(M)},
+                   "halted": ex.halted(), "journal": trader.journal(int(args.get("n", 20))), "approvals": trader._approvals(), "fills_chain": ex.verify_fills(),
+                   "places_orders": False, "note": "Buildout's MCP server places no order. The trader (python -m buildout trader) does, under the mandate, through a broker; on the assistant route the assistant places them through Robinhood's MCP."})
+
+
+def trading_halt(ctx: Context, args: dict) -> dict:
+    from . import execution as ex
+    ex.state_root().mkdir(parents=True, exist_ok=True)
+    (ex.state_root() / "HALT").write_text(f"halted through the MCP server: {str(args.get('reason', ''))[:200]}\n")
+    return {"halted": ex.halted()}
+
+
+def trading_resume(ctx: Context, args: dict) -> dict:
+    from . import execution as ex
+    (ex.state_root() / "HALT").unlink(missing_ok=True)
+    return {"halted": ex.halted()}
+
+
 def paper_fill(ctx: Context, args: dict) -> dict:
     from . import execution as ex
     try:
@@ -1564,6 +1620,18 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                        _obj({}), {"readOnlyHint": True, "openWorldHint": False}),
     "paper_fill": (paper_fill, "Paper mode only: fill a ticket at its limit prices in the private paper account and record the fills.",
                    _obj({"ticket_id": {"type": "string"}}, ["ticket_id"]), {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}),
+    "trading_recommendation": (trading_recommendation, "v0.42: the model's recommendation today (the call's size, the target holdings for an Agentic account, the deep RL view), and, "
+                               "with the account and quotes from Robinhood's Trading MCP, one pass of the trader: the ticket, the mandate's verdict and, when the mandate's "
+                               "mode allows, the orders for the assistant to place through Robinhood's MCP (sells first) and report back with record_fills.",
+                               _obj({"account": {"type": "object"}, "quotes": {"type": "object"}, "force_window": {"type": "boolean"}}), {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}),
+    "approve_ticket": (approve_ticket, "v0.42: approve a staged ticket by id (manual and supervised modes), or ticket_id 'standing' with standing_minutes for a standing approval "
+                       "(supervised). The approval is written for the trader; nothing is placed here.",
+                       _obj({"ticket_id": {"type": "string"}, "by": {"type": "string"}, "standing_minutes": {"type": "integer"}}, ["ticket_id"]), {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}),
+    "trader_status": (trader_status, "v0.42: the mandate (mode, armed, broker, problems, window), the halt switch, the trader's journal, approvals on file and the fills chain.",
+                      _obj({"n": {"type": "integer"}}), {"readOnlyHint": True, "destructiveHint": False, "openWorldHint": False}),
+    "trading_halt": (trading_halt, "v0.42: the kill switch: write the HALT file so no pass of the trader acts until trading_resume.",
+                     _obj({"reason": {"type": "string"}}), {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}),
+    "trading_resume": (trading_resume, "v0.42: remove the HALT file.", _obj({}), {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}),
 }
 
 

@@ -101,7 +101,7 @@
     home: () => guard("Home", renderHome, $("#hm-perf")),
     track: () => guard("Track record", renderTrack, $("#tr-tiles")),
     hedgetest: () => { guard("Hedge test", renderHedgeTest, $("#ht-tiles")); guard("VIX hedge", renderVix, $("#vx-tiles")); },
-    execution: () => guard("Execution", renderExecution, $("#ex-tiles")),
+    execution: () => { guard("Execution", renderExecution, $("#ex-tiles")); guard("The trader", renderTrader, $("#ex-modes")); },
     memos: () => guard("Memos", renderMemos, $("#mm-list")),
     levers: () => guard("Value creation", renderLevers, $("#lv-tiles")),
     library: () => guard("Library", renderLibrary, $("#lib-grid")),
@@ -325,7 +325,7 @@
   });
   // v0.39.1: the day's call and the ledger, when the published site carries newer ones than this build's snapshot
   const bookOk = (b) => !!(b && typeof b.asof === "string" && fin(b.size) && b.sizes && b.tail && Array.isArray(b.frontier) && b.weights && b.keep_names_hedge);
-  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json")]).then(([bkj, cl, lv]) => {
+  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json"), loadJSON("data/paper.json")]).then(([bkj, cl, lv, pp]) => {
     let changed = false;
     if (bkj && bookOk(bkj) && typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && bkj.asof > SNAP30.book.asof) { SNAP30.book = bkj; LIVE.book = bkj; changed = true; }
     else if (bkj && !bookOk(bkj)) LIVE.problems.push("book.json did not match the expected shape; the page keeps the call in its snapshot");
@@ -336,6 +336,7 @@
       changed = true;
     }
     if (lv && T && Number.isFinite(lv.marked_days) && lv.calls >= ((T.live && T.live.calls) || 0) && (lv.last_mark || "") >= ((T.live && T.live.last_mark) || "")) { T.live = lv; changed = true; }   // v0.40: the daily marks
+    if (pp && T && Number.isFinite(pp.equity) && Array.isArray(pp.equity_history) && Array.isArray(pp.positions)) { T.paper = pp; changed = true; }   // v0.42: the paper bot's account
     if (changed && current && RENDER[current]) guard(TAB_NAME[current], RENDER[current]);
   });
   loadJSON("data/atlas.json").then((at) => {

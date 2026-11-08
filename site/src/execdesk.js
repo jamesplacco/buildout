@@ -62,6 +62,47 @@
       ["Expiry and approval", "15 minutes; the person approves the ticket id", "the quotes and the person both have to be current"]], 3);
   }
 
+  function renderTrader() {
+    fillTable($("#ex-modes"), ["Mode", "What happens to a ticket that passes every check", "Who decides"], [
+      ["manual (default)", "Staged. It executes on a later pass only after the person approves its id (approve_ticket or trader --approve), within the approval's life.", "The person, every time"],
+      ["supervised", "Staged. It executes once approved, or at once under a standing approval the person gave for a window (trader --standing 120).", "The person, in advance"],
+      ["autonomous", "Executes without asking, if the mandate is armed. The person reads the digest and the journal; the HALT file stops it.", "The mandate"]], 3);
+    fillTable($("#ex-routes"), ["Route", "Who places the orders", "Credential", "Status"], [
+      ["paper", "The paper broker fills at the quote plus the collar in a model account.", "None", "Running: the public paper bot below, and private rehearsals"],
+      ["assistant", "The assistant holding Robinhood's Trading MCP (Claude with the Robinhood connector) places what the trader hands it and reports fills through record_fills.", "Robinhood's OAuth, held by the assistant", "Works today; every order is one the trader wrote"],
+      ["robinhood_mcp", "Buildout's own JSON-RPC client on Robinhood's Trading MCP, with OAuth in the standard library.", "Robinhood's OAuth, tokens in private/", "Built; the tool names Robinhood has not published are filled in from `broker probe`; untested against the live endpoint"]], 4);
+    $("#ex-tr-n").textContent = "Robinhood's own terms (support pages read Nov 8, 2026): an external agent trades only in the Agentic account; it can act without confirmation if the person has asked it to; and the person is responsible for the trades it places. The trader's modes sit inside those terms: manual and supervised keep the confirmation on Buildout's side, autonomous removes it under the mandate.";
+    fillTable($("#ex-mandate"), ["Term", "Default", "What it does"], [
+      ["mode", "manual", "manual, supervised or autonomous"], ["armed", "false", "nothing live is sent until true, over signed_by and signed_on"], ["broker", "paper", "paper, assistant or robinhood_mcp"],
+      ["max_order_usd / max_order_pct", "$10,000 / 25%", "one order at most this much"], ["max_day_turnover_pct", "60%", "one day's notional (a first build is exempt)"],
+      ["max_gross / cash_floor", "98% / 2%", "everything long at most 98% of equity; no borrowing"], ["max_equity_usd", "$250,000", "above this the trader refuses: the mandate was written for less"],
+      ["halt_drawdown / halt_day_loss", "20% / 5%", "from the account's recorded peak, or from the previous day: the trader stops"],
+      ["min_days_between_tickets", "1", "a rebalance, not a loop"], ["approval_ttl_min", "240", "how long an approval stays good"], ["window", "09:45 to 15:45 New York, weekdays", "when a pass may act"],
+      ["quiet_days", "none", "dates to sit out"], ["notes", "", "required for an armed autonomous mandate: why unattended trading is wanted"]], 3);
+    const T = typeof T38 === "function" ? T38() : null, Pp = T && T.paper;
+    const has = !!(Pp && Array.isArray(Pp.equity_history) && Pp.equity_history.length);
+    $("#ex-pb-grid").hidden = !has; $("#ex-pb-jp").hidden = !has;
+    if (!has) {
+      $("#ex-pb-p").textContent = "The paper bot starts with the first weekday run after v0.42 ships: each morning before the open the daily workflow runs one pass of the trader against a $100,000 model account, unhedged and without the VIX sleeve (PSQ and VIXY are not in the price mirror), filled at the prior close plus a 5 bp half-spread and the 10 bp collar. Its state is committed in paper/ and summarized to data/paper.json, which this section reads.";
+      rsKpi($("#ex-pb-tiles"), [["$100,000", "Opening cash", "the model account"], ["0", "Tickets filled", "none yet"], ["autonomous", "Mode", "paper broker, under a wide mandate"], ["weekdays", "Cadence", "one pass a day, 6:17 New York"]]);
+      $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice.";
+      return;
+    }
+    const eq = Pp.equity_history, first = eq[0][1], last = eq[eq.length - 1][1], ret = last / Pp.start_cash - 1;
+    rsKpi($("#ex-pb-tiles"), [[`$${Math.round(last).toLocaleString()}`, "Equity", `${ret >= 0 ? "+" : MINUS}${Math.abs(ret * 100).toFixed(2)}% since ${isoNice(Pp.opened)}`],
+      [String(Pp.tickets_filled), "Tickets filled", `${Pp.passes} passes; fills chain ${Pp.fills_chain && Pp.fills_chain.ok ? "verified" : "BROKEN"}`],
+      [`${Math.round((1 - Pp.cash / last) * 100)}%`, "Invested", `cash $${Math.round(Pp.cash).toLocaleString()}`],
+      [isoNice(Pp.marks_asof), "Marked at the close of", Pp.last ? `last pass: ${Pp.last.outcome || Pp.last.event}` : ""]]);
+    $("#ex-pb-p").textContent = `${Pp.note} ${Pp.mode}.`;
+    const lD = (s) => { const d = new Date(s + "T00:00:00Z"); return d.getUTCFullYear() + (d.getUTCMonth() + (d.getUTCDate() - 1) / 31) / 12; };
+    xyChart($("#ex-pb-curve"), { height: 180, label: "Equity, $", series: [{ pts: eq.map(([d, v]) => [lD(d), v]), color: "var(--s1)", name: "Paper account" }],
+      xticks: eq.length > 1 ? [[lD(eq[0][0]), isoNice(eq[0][0]).replace(/, \d{4}$/, "")], [lD(eq[eq.length - 1][0]), isoNice(eq[eq.length - 1][0]).replace(/, \d{4}$/, "")]] : [[lD(eq[0][0]), isoNice(eq[0][0])]],
+      yfmt: (v) => `$${Math.round(v / 1000)}k` });
+    fillTable($("#ex-pb-pos"), ["Symbol", "Shares"], (Pp.positions || []).map((p) => [p.symbol, String(p.quantity)]), 1);
+    fillTable($("#ex-pb-j"), ["When (UTC)", "Event", "Outcome", "Ticket", "Fills"], (Pp.recent || []).map((r) => [r.ts_utc, r.event, r.outcome || r.status || "", r.ticket || "", r.fills != null ? String(r.fills) : ""]), 4);
+    $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice. The account is marked at the last close in the price mirror.";
+  }
+
   function renderVix() {
     const T = typeof T38 === "function" ? T38() : null, V = T && T.vix;
     if (!V) { $("#vx-p").textContent = "The VIX study is not in this build."; return; }

@@ -1,19 +1,21 @@
 ---
-description: Turn today's Buildout call into Robinhood orders, with a ticket the person approves first
+description: One pass of Buildout's trader on the Robinhood Agentic account, under the mandate (manual or supervised: the ticket waits for approval)
 ---
-Rebalance the Robinhood Agentic account to today's Buildout call. Follow these steps in order and stop at the first failure.
+Run one pass of Buildout's trader for the Robinhood Agentic account. Follow these steps in order and stop at the first failure.
 
-1. Call `buildout` `trading_status`. If `halted` is set, stop and say why.
-2. From `robinhood-trading`, read the Agentic account only: equity (portfolio value), cash available to trade, and every position
-   (symbol, quantity). Never read or trade any other account.
+1. Call `buildout` `trader_status`. If `halted` is set, or the mandate lists `problems`, stop and say why. Note the mandate's `mode`.
+2. From `robinhood-trading`, read the Agentic account only: equity (portfolio value), cash available to trade, the account type, and
+   every position (symbol, quantity). Never read or trade any other account.
 3. From `robinhood-trading`, get a quote (bid, ask, last) for MSFT, AMZN, GOOGL, META, NVDA, AVGO, TSLA, SPCX, ORCL, PSQ, VIXY and every
-   symbol already held, and check each is tradable.
-4. Call `buildout` `trade_plan` with that account and those quotes (add `variant` or `vix_share` only if the person asked).
-5. Show the person the ticket: its id, mode, every order (seq, symbol, side, quantity, limit price, notional), the summary, and every check
-   with its result. Say plainly if any check failed or if `execute` is false.
-6. Place nothing unless all of these hold: `execute` is true, `all_checks_pass` is true, the ticket has not expired, and the person has
-   replied approving this exact ticket id in this conversation. In paper mode, call `buildout` `paper_fill` instead and stop.
-7. Place each order through `robinhood-trading` in `seq` order (sells first), as a limit order at `limit_price`, good for the day, for
-   exactly `quantity`. Do not change a quantity, a price or a symbol. If Robinhood rejects an order, stop and report it; do not retry it at
-   another price.
-8. Read back each order's status and fills from `robinhood-trading` and call `buildout` `record_fills` with them. Report any issue it flags.
+   symbol already held.
+4. Call `buildout` `trading_recommendation` with that account and those quotes. Show the person the recommendation (size, target weights,
+   reasons), the ticket id, every order (symbol, side, quantity, limit), every planner check and the mandate's verdict (`pass.authorization`).
+5. Read `pass.outcome`:
+   - "staged, awaiting approval" (manual) or "awaiting approval or a standing approval" (supervised): tell the person the ticket id and stop.
+     If they approve this exact id in this conversation, call `buildout` `approve_ticket` with it and their name, then start again at step 2.
+   - "handed to the assistant": the mandate authorizes the orders in `pass.handoff`. Go to step 6.
+   - anything else: report the reasons and stop. Do not work around a refusal.
+6. Place each hand-off order through `robinhood-trading` in order (sells first), as a limit order at its limit, good for the day, for exactly
+   its quantity, in the Agentic account. Change no quantity, price or symbol; add no order. If Robinhood rejects one, stop and report it.
+7. Read back each order's fills from `robinhood-trading` and call `buildout` `record_fills` with the ticket id and the fills (symbol, side,
+   quantity, price, order_id, status). Report any issue it flags, and the account's equity after.

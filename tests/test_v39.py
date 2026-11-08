@@ -159,7 +159,7 @@ def test_buildout_still_places_no_orders():
     cfg = json.loads((ROOT / ".mcp.json").read_text())["mcpServers"]
     assert cfg["robinhood-trading"]["url"] == "https://agent.robinhood.com/mcp/trading" and cfg["buildout"]["type"] == "stdio"
     cmd = (ROOT / ".claude" / "commands" / "rebalance.md").read_text()
-    assert "approving this exact ticket id" in cmd and "Place nothing unless" in cmd
+    assert "approve this exact id" in cmd and "Do not work around a refusal" in cmd        # v0.42: the mandate decides; the assistant never widens it
     assert "private/" in (ROOT / ".gitignore").read_text()
 
 

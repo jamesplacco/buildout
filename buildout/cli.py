@@ -54,6 +54,52 @@ def research_line(out_dir) -> tuple:
         return (None, "unavailable")
 
 
+def _trade(a) -> None:
+    import os
+    from pathlib import Path as _P
+    from . import broker as br, execution as ex, mandate as md, trader
+    if a.paper and not a.state:
+        a.state = str(ex.ROOT / "paper")
+    if a.state:
+        os.environ["BUILDOUT_TRADER_STATE"] = str(_P(a.state))
+    if a.init:
+        for p, tmpl in ((md.PRIVATE / "mandate.toml", md.template()), (br.PRIVATE / "broker.toml", br.broker_template())):
+            if not p.exists():
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(tmpl)
+                print("wrote", p)
+            else:
+                print("kept", p)
+        return
+    M = md.Mandate(mode="autonomous", broker="paper", max_order_usd=1e9, max_order_pct=1.0, max_equity_usd=1e9) if a.paper and not a.mandate else md.load(a.mandate)
+    if a.approve or a.standing:
+        print(json.dumps(trader.approve(a.approve or "standing", by=a.by, standing_minutes=a.standing), indent=1))
+        return
+    if a.status:
+        print(json.dumps({"recommendation": trader.recommendation(M=M), "journal": trader.journal(10), "halted": ex.halted()}, indent=1, default=str))
+        return
+    P = ex.load_params()
+    if a.paper:
+        P.vix_share = 0.0
+        P.variant = "unhedged"
+        P.mode = "paper"
+        b = br.PaperBroker(_P(os.environ["BUILDOUT_TRADER_STATE"]) / "paper_account.json", quote_fn=trader.paper_quote_fn(a.cache))
+    elif M.broker == "paper":
+        b = br.PaperBroker(quote_fn=trader.paper_quote_fn(a.cache))
+    elif M.broker == "robinhood_mcp":
+        b = br.MCPBroker()
+    else:
+        raise SystemExit("the assistant route runs through the MCP server's trading tools, not this command; see docs/TRADING.md")
+    if a.loop:
+        trader.loop(b, a.loop, M, P)
+        return
+    rep = trader.run_once(b, M, P, force_window=a.force_window or bool(a.paper))
+    print(json.dumps({k: v for k, v in rep.items() if k not in ("authorization",)}, indent=1, default=str))
+    if a.out:
+        from .jsonout import write
+        print("wrote", write(trader.paper_summary(os.environ["BUILDOUT_TRADER_STATE"]), a.out, "paper.json"))
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="buildout")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -145,6 +191,22 @@ def main(argv: list[str] | None = None) -> None:
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
     drl = sub.add_parser("deeprl", help="v0.41: the deep RL sizer, trained inside a learned market model and walked forward from 1940")
+    tr = sub.add_parser("trader", help="v0.42: the trader: the model's recommendation as orders, under a written mandate (paper by default); `trade` keeps v0.39's ticket tools")
+    tr.add_argument("--once", action="store_true", help="one pass")
+    tr.add_argument("--loop", type=int, metavar="MINUTES", help="a pass every N minutes until private/HALT or Ctrl-C")
+    tr.add_argument("--paper", action="store_true", help="the public paper bot: state in paper/, quotes from the price mirror")
+    tr.add_argument("--state", help="state folder (default private/, or paper/ with --paper)")
+    tr.add_argument("--mandate", help="mandate file (default private/mandate.toml)")
+    tr.add_argument("--approve", metavar="TICKET", help="approve a staged ticket, then exit")
+    tr.add_argument("--standing", type=int, metavar="MINUTES", help="supervised: a standing approval for the next N minutes")
+    tr.add_argument("--by", default="", help="who approves")
+    tr.add_argument("--init", action="store_true", help="write private/mandate.toml and private/broker.toml templates")
+    tr.add_argument("--status", action="store_true", help="the recommendation, the mandate, the journal's tail")
+    tr.add_argument("--force-window", action="store_true", help="ignore the trading window (rehearsals)")
+    tr.add_argument("--out", help="also write <out>/paper.json (the public paper record)")
+    tr.add_argument("--cache", default=".cache/book", help="price cache for paper quotes")
+    bp = sub.add_parser("broker", help="v0.42: Robinhood's Trading MCP: probe its tools, sign in")
+    bp.add_argument("action", choices=["probe", "login", "init"])
     drl.add_argument("--out", default="out")
     drl.add_argument("--quick", action="store_true", help="a tenth of the training, for a smoke test")
     bo = sub.add_parser("board", help="the mind's verdict on every claim it weighs, thought about at once as one matrix")
@@ -769,6 +831,29 @@ def main(argv: list[str] | None = None) -> None:
         print("wrote", write(o, a.out, "deeprl.json"))
         for f in o["findings"]:
             print(" ", f)
+        return
+    if a.cmd == "trader":
+        return _trade(a)
+    if a.cmd == "broker":
+        from . import broker as br
+        from pathlib import Path as _P
+        if a.action == "init":
+            p = br.PRIVATE / "broker.toml"
+            if not p.exists():
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(br.broker_template())
+            print("wrote", p)
+            return
+        b = br.MCPBroker()
+        if a.action == "probe":
+            print(json.dumps(b.probe(), indent=1, default=str))
+            return
+        disc = b.oauth.discover()
+        asm = disc.get("authorization_server")
+        if not asm:
+            raise SystemExit("no authorization server found behind the MCP endpoint; see docs/TRADING.md")
+        b.oauth.register(asm)
+        print(json.dumps(b.oauth.login(asm), indent=1))
         return
     if a.cmd == "positions":
         from . import datahub

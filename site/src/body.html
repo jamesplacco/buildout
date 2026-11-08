@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.41</span>
+      Buildout <span class="ver">v0.42</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -2458,7 +2458,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 61 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 62 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2512,7 +2512,7 @@
           <tr><td>The brain on planted causes, and on no movement at all</td><td class="r">cause recovered; noise only wins</td></tr>
           <tr><td>The brain's reasoning, Python and page, on the page's own graph</td><td class="r">agree to 1e-9</td></tr>
           <tr><td>Field desk: Bayes, information ranking, milestone states</td><td class="r">identical; uninformative evidence = 0 bits</td></tr>
-          <tr><td>MCP server: handshake, every one of its 46 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
+          <tr><td>MCP server: handshake, every one of its 51 tools, bad input, execution</td><td class="r">agrees with the engine; no order tool</td></tr>
           <tr><td>Your holdings through the MCP: model weights in, model answers out; nothing written</td><td class="r">identical to 1e-9; no files</td></tr>
           <tr><td>Free split table instead of the paid feed; a missing split</td><td class="r">NVDA's 10-for-1 seamless; run stops by name</td></tr>
           <tr><td>Which world, surprise, leave-one-out, against brute force</td><td class="r">exact to 1e-10; planted world found</td></tr>
@@ -2900,15 +2900,46 @@
     <div class="section-head"><p class="eyebrow">The checks</p><h2 id="ex-chk-t">Every ticket, every time</h2></div>
     <div class="tablewrap"><table class="rs-table" id="ex-chk"></table></div>
   </section>
+  <section class="section" aria-labelledby="ex-tr-t">
+    <div class="section-head"><p class="eyebrow">The trader · v0.42</p><h2 id="ex-tr-t">From the recommendation to orders, under a mandate, in one of three modes</h2>
+      <p class="prose">The trader is a separate program (<code>python -m buildout trader</code>) that can act for a person. Each pass runs the same way whatever the mode: is trading halted, is it inside the window, has it already acted today; read the account and quotes from the broker; build the ticket (the planner above, every check); check the ticket against the mandate's limits; then the mode decides whether it waits for a person or goes. Execution is sells first, buys from the proceeds, each order polled to its fill or cancelled at the ticket's expiry; the fills go to the hash-chained log; the account is marked; a journal line and a digest are written. One ticket a day, one order per id, the ticket's id covering every field: a pass can be repeated without repeating a trade.</p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">The three modes</span><div class="tablewrap"><table class="rs-table" id="ex-modes"></table></div></div>
+      <div class="panel"><span class="panel-title">Three routes to the market</span><div class="tablewrap"><table class="rs-table" id="ex-routes"></table></div></div>
+    </div>
+    <p class="note" id="ex-tr-n"></p>
+  </section>
+  <section class="section" aria-labelledby="ex-md-t">
+    <div class="section-head"><p class="eyebrow">The mandate</p><h2 id="ex-md-t">The terms the person writes and signs</h2>
+      <p class="prose">A small file (<code>private/mandate.toml</code>, never committed) that nothing in Buildout can write. Its hash goes into every ticket and journal line, so a change of terms shows in the record. Nothing trades for real until it says <code>armed = true</code> over a name and a date, and an armed autonomous mandate has to say in its notes why unattended trading is wanted. The limits below are the template's defaults.</p></div>
+    <div class="tablewrap"><table class="rs-table" id="ex-mandate"></table></div>
+  </section>
+  <section class="section" aria-labelledby="ex-pb-t">
+    <div class="section-head"><p class="eyebrow">The paper bot · public</p><h2 id="ex-pb-t">A model account the trader runs every weekday</h2>
+      <p class="prose" id="ex-pb-p"></p></div>
+    <div class="at-tiles" id="ex-pb-tiles"></div>
+    <div class="grid2" id="ex-pb-grid" hidden>
+      <div class="panel"><div class="chart" id="ex-pb-curve" role="img" aria-label="The paper account's equity by day"></div></div>
+      <div class="panel"><span class="panel-title">Holdings</span><div class="tablewrap"><table class="rs-table" id="ex-pb-pos"></table></div></div>
+    </div>
+    <div class="panel" id="ex-pb-jp" hidden><span class="panel-title">The journal, newest last</span><div class="tablewrap"><table class="rs-table" id="ex-pb-j"></table></div></div>
+    <p class="note" id="ex-pb-n"></p>
+  </section>
   <section class="section" aria-labelledby="ex-run-t">
-    <div class="section-head"><p class="eyebrow">Run it</p><h2 id="ex-run-t">Paper first, then live</h2></div>
+    <div class="section-head"><p class="eyebrow">Run it</p><h2 id="ex-run-t">Paper first, then supervised, then autonomous</h2></div>
     <pre class="code ex-pre" id="ex-run">git clone https://github.com/jamesplacco/buildout &amp;&amp; cd buildout
-claude                 # .mcp.json connects Buildout and Robinhood's Trading MCP; /mcp to sign in to Robinhood
-/rebalance             # reads the Agentic account, writes the ticket, waits for your approval
+python -m buildout trader --init          # mandate.toml and broker.toml templates in private/; edit, sign
+python -m buildout trader --once          # one pass (mode and broker from the mandate; paper by default)
+python -m buildout trader --approve tkt-… # manual, supervised: approve a staged ticket
+python -m buildout trader --loop 15       # a pass every 15 minutes in the window, until private/HALT
 
-python -m buildout trade status      # mode, limits, today's tickets, the halt switch
-python -m buildout trade halt        # stop every ticket (private/HALT)</pre>
-    <p class="note">Tickets, fills and the paper account live in <code>private/</code>, which git ignores: nothing about a real account reaches this page or the repository. Live mode is switched on only in <code>config.private.toml</code>.</p>
+claude                                    # assistant route: Buildout's MCP plus Robinhood's Trading MCP
+/rebalance                                # trading_recommendation: account in, mandate decides, assistant places
+
+python -m buildout broker probe           # direct route: list Robinhood's tools; fill private/broker.toml
+python -m buildout broker login           # sign in once; tokens stay in private/
+python -m buildout trade halt             # the kill switch, every route</pre>
+    <p class="note">Tickets, fills, approvals, the journal and the mandate live in <code>private/</code>, which git ignores: nothing about a real account reaches this page or the repository. The paper bot's state lives in <code>paper/</code>, committed, because it is a model account.</p>
   </section>
 </section>
 <section class="view" id="view-memos" hidden aria-labelledby="memo-title">

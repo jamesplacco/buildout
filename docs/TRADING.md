@@ -1,16 +1,88 @@
-# Trading the call through Robinhood
+# Trading the call: the trader, the mandate, and Robinhood
 
-Buildout decides **what** to trade and **whether it is allowed**. Robinhood's own Trading MCP places the orders, in the
-separate Robinhood Agentic account, after you approve the ticket. Buildout never holds a brokerage credential and has no
-tool that places, routes or cancels an order.
+Buildout decides **what** to trade and **whether it is allowed**. Since v0.42 it can also act: the trader
+(`python -m buildout trader`) takes the model's recommendation, builds the risk-checked ticket, checks it against a
+mandate you write and sign, and executes through a broker in one of three modes. Buildout's MCP server itself still
+places no order and holds no credential; the trader does, under the mandate, through the broker you chose.
 
 ```
 Buildout call (logged in ledger/calls.jsonl)
-  -> trade_plan: target holdings, limit orders, every check, a hashed ticket id   (Buildout MCP, nothing placed)
-  -> you approve the ticket id in the conversation
-  -> the assistant places each order                                                (Robinhood Trading MCP, OAuth)
-  -> record_fills: fills checked against the ticket, hash-chained private log      (Buildout MCP)
+  -> the trader: halted? in the window? acted today?                                    (one pass)
+  -> account and quotes from the broker
+  -> execution.plan: target holdings, limit orders, every check, a hashed ticket id
+  -> mandate.authorize: the ticket against your limits (order, day, account, losses)
+  -> the mode gate:   manual      wait for your approval of this ticket id
+                      supervised  wait for an approval, or act under a standing one
+                      autonomous  act, if the mandate is armed
+  -> sells first, then buys; each order polled to its fill or cancelled at expiry
+  -> record_fills: fills checked against the ticket, hash-chained log; journal; digest
 ```
+
+## The three modes
+
+| Mode | A ticket that passes every check | Approve with |
+|---|---|---|
+| `manual` (default) | is staged and waits; it executes on a later pass once you approve its id | `python -m buildout trader --approve tkt-…` or the MCP tool `approve_ticket` |
+| `supervised` | is staged; executes once approved, or at once under a standing approval you gave for a window | `--standing 120` (minutes), or `approve_ticket` with `ticket_id = "standing"` |
+| `autonomous` | executes without asking, if the mandate is armed; you read the digest and the journal | nothing; `trade halt` stops it |
+
+## The three routes (brokers)
+
+| `broker` | Who places the orders | Credential | Status |
+|---|---|---|---|
+| `paper` | the paper broker, in a model account filled at the quote plus the collar | none | running: the public paper bot (`paper/`, every weekday from the daily workflow) and private rehearsals |
+| `assistant` | the assistant that holds Robinhood's Trading MCP (Claude with the Robinhood connector) places exactly what the trader hands it and reports the fills through `record_fills` | Robinhood's OAuth, held by the assistant | works today |
+| `robinhood_mcp` | Buildout's own JSON-RPC client on `https://agent.robinhood.com/mcp/trading`, OAuth 2.1 with PKCE in the standard library | Robinhood's OAuth, tokens in `private/` (mode 600) | built; Robinhood has not published its tool names, so `python -m buildout broker probe` lists them and you fill `private/broker.toml`; untested against the live endpoint from this build |
+
+What Robinhood says (support pages read Nov 8, 2026): the agent trades only in the Agentic account; "before your agent
+takes action, you can review what it's about to do," but "if you've asked your agent to take action without asking
+your approval, it can place trades without your confirmation"; and "you are ultimately responsible for the trades your
+AI agent places in your account." The trader's modes sit inside those terms.
+
+## The mandate (`private/mandate.toml`)
+
+`python -m buildout trader --init` writes a template. Edit it by hand; nothing in Buildout can write it for you. The
+mandate's hash is written into every ticket and journal line.
+
+```toml
+[mandate]
+mode = "manual"            # manual | supervised | autonomous
+armed = false              # nothing live is sent until true, over signed_by and signed_on
+broker = "paper"           # paper | assistant | robinhood_mcp
+signed_by = ""
+signed_on = ""
+max_order_usd = 10000.0
+max_order_pct = 0.25
+max_day_turnover_pct = 0.60
+max_gross = 0.98
+cash_floor = 0.02
+max_equity_usd = 250000.0  # above this the trader refuses: the mandate was written for less
+halt_drawdown = 0.20       # from the account's recorded peak
+halt_day_loss = 0.05       # from the previous day
+min_days_between_tickets = 1
+approval_ttl_min = 240
+window_start = "09:45"     # New York
+window_end = "15:45"
+quiet_days = []
+notes = ""                 # an armed autonomous mandate must say why unattended trading is wanted
+```
+
+## Going autonomous, in order
+
+1. **Paper, autonomous** (the default mandate with `mode = "autonomous"`): run `python -m buildout trader --loop 15`
+   for two weeks. Read `private/trader/journal.jsonl` and the digest. The public paper bot does the same in `paper/`.
+2. **Assistant route, manual**: `broker = "assistant"`, `mode = "manual"`. In Claude Code, `/rebalance` calls
+   `trading_recommendation` with the account and quotes from Robinhood; the ticket is staged; you approve it; the
+   assistant places the orders and records the fills. A week of this.
+3. **Assistant route, supervised**: `mode = "supervised"`; give a standing approval before a session
+   (`--standing 120`) and let `/autotrade` run it without a question inside that window.
+4. **Autonomous, armed**: `mode = "autonomous"`, `armed = true`, your name and the date, and the reason in `notes`. Set
+   Robinhood's own agent permission to act without confirmation. Schedule the pass: a Claude scheduled task running
+   `/autotrade` each weekday at 10:00 New York (assistant route), or `launchd` on your Mac running
+   `python -m buildout trader --once` (direct route; `deploy/com.buildout.trader.plist`). Read the digest daily.
+
+Stop everything at any point with `python -m buildout trade halt` (writes `private/HALT`), the MCP tool
+`trading_halt`, or the environment variable `BUILDOUT_TRADING_HALT=1`. Lift it with `trade resume`.
 
 ## One-time setup
 
@@ -19,17 +91,14 @@ Buildout call (logged in ledger/calls.jsonl)
 2. In Claude Code, from this folder: `.mcp.json` already lists both servers. Run `claude`, type `/mcp`, choose
    `robinhood-trading` and sign in through Robinhood's OAuth page. (Claude Desktop: Settings, Connectors, add the custom
    connector `https://agent.robinhood.com/mcp/trading`.)
-3. Keep `mode = "paper"` until a week of paper tickets look right. Then, in `config.private.toml` (git-ignored):
+3. `python -m buildout trader --init`, then edit and sign `private/mandate.toml` (above). `config.private.toml` keeps
+   the planner's own terms (`[trading]`: variant, VIX share, collar, caps); `mode = "live"` there marks tickets executable.
 
-```toml
-[trading]
-mode = "live"
-```
+## Every rebalance (assistant route)
 
-## Every rebalance
-
-Run `/rebalance` in Claude Code. It reads the Agentic account and quotes from Robinhood, asks Buildout for a ticket,
-shows it to you, and places orders only after you approve that ticket id.
+Run `/rebalance` in Claude Code. It reads the Agentic account and quotes from Robinhood, asks Buildout for the
+trader's pass, shows you the ticket and the mandate's verdict, and places orders only once the mandate allows it
+(your approval of that ticket id in manual mode; a standing approval in supervised mode).
 
 ## What Robinhood's Agentic account allows, and how the call maps to it
 
