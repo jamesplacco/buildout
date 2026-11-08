@@ -43,7 +43,9 @@
     if (U) {
       rows.push(["PSQ (index short)", pctPlain(U.short, 1), pctPlain(Hd.short, 1)], ["VIXY (VIX sleeve)", pctPlain(U.vix, 1), pctPlain(Hd.vix, 1)], ["Cash", pctPlain(1 - U.gross - U.short - U.vix, 1), pctPlain(1 - Hd.gross - Hd.short - Hd.vix, 1)]);
       fillTable($("#ex-tgt"), ["Holding", "Unhedged (default)", "Hedged"], rows, 1);
-      $("#ex-tgt-p").textContent = `From the call on data through ${isoNice(call.asof)}: the unhedged variant holds the book at ${xx(U.gross)}, the smallest size every limit allows. The hedged variant walks the call's menu (more book, more index short) until the book, PSQ and the VIX sleeve fill 98% of the account: ${xx(Hd.gross)} of book with ${pct0(Hd.short)} in PSQ. Whole shares and limit orders, so the account will sit a little under these.`;
+      const TT = typeof T38 === "function" ? T38() : null, PP = TT && TT.pit && TT.pit.policies;
+      const rec = PP && PP.call && PP.call_short ? ` Which variant? The walk-forward record favours the hedge: full size with the call's short earned a Sharpe of ${fx(PP.call_short.net.sharpe, 2)} against ${fx(PP.call.net.sharpe, 2)} for the call as sized. A cash account can hold only part of that hedge, so the hedged variant here is a partial version of it.` : "";
+      $("#ex-tgt-p").textContent = `From the call on data through ${isoNice(call.asof)}: the unhedged variant holds the book at ${xx(U.gross)}, the smallest size every limit allows. The hedged variant walks the call's menu (more book, more index short) until the book, PSQ and the VIX sleeve fill 98% of the account: ${xx(Hd.gross)} of book with ${pct0(Hd.short)} in PSQ. Whole shares and limit orders, so the account will sit a little under these.${rec}`;
     }
     fillTable($("#ex-chk"), ["Check", "Default", "Why"], [
       ["Not halted", "private/HALT or BUILDOUT_TRADING_HALT", "one switch stops every ticket"],

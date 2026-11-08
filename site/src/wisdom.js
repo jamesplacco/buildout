@@ -123,7 +123,7 @@
       case "cycle": return ["off", `Euphoria markers: a CAPE of ${fx(cape, 1)}, earnings padded by marks, special-purpose vehicles at 90% loan to value.`];
       case "lender": return I.funding.v <= 0 ? ["on", "Funding is ample: a selloff today would not start as a funding crisis."] : ["off", "Funding is tight: Bagehot's panic needs a lender of last resort."];
       case "minsky": return [spec.length >= 2 ? "off" : "mid", `${spec.length} of 5 builders (${spec.join(", ")}) are past hedge finance, and CoreWeave sits at the Ponzi edge: the drift Minsky described.`];
-      case "beauty": return ["mid", "Price what others will be forced to do, not what they think: the fourth-order chains on the Decide desk."];
+      case "beauty": return ["mid", "Price what others will be forced to do, not what they think: the fourth-order chains on the Seven decisions desk."];
       case "herd": return ["off", "The AI trade is the index. When everyone owns it, the exit is narrow."];
       case "calibration": return ["mid", "Score forecasts: the Journal's Brier score and calibration chart."];
       case "ooda": return ["mid", "Signals observe, the system map orients, Decide decides, the Journal reviews. The loop is the edge."];

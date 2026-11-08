@@ -144,6 +144,9 @@ def main(argv: list[str] | None = None) -> None:
     hs.add_argument("query")
     rlp = sub.add_parser("rl")
     rlp.add_argument("--out", default="out")
+    drl = sub.add_parser("deeprl", help="v0.41: the deep RL sizer, trained inside a learned market model and walked forward from 1940")
+    drl.add_argument("--out", default="out")
+    drl.add_argument("--quick", action="store_true", help="a tenth of the training, for a smoke test")
     bo = sub.add_parser("board", help="the mind's verdict on every claim it weighs, thought about at once as one matrix")
     bo.add_argument("--json", action="store_true")
     rel = sub.add_parser("related", help="nodes nearest a node in the mind's 64-number spectral map")
@@ -182,6 +185,9 @@ def main(argv: list[str] | None = None) -> None:
     tkp = sub.add_parser("track", help="v0.38: the track record: walk-forward with costs, point-in-time universe, the hedge by regime, the weeks")
     tkp.add_argument("--out", default="out")
     tkp.add_argument("--cache", default=".cache/book")
+    lvp = sub.add_parser("live", help="v0.40: mark the ledger's calls to market and write live.json (the live paper record)")
+    lvp.add_argument("--out", default="site/data")
+    lvp.add_argument("--cache", default=".cache/book")
     trp = sub.add_parser("trade", help="v0.39: the call as an order ticket for a Robinhood Agentic account (never placed here); see docs/TRADING.md")
     trp.add_argument("action", choices=["plan", "status", "halt", "resume", "paper-fill", "fills"])
     trp.add_argument("--account", default=None, help="JSON file: {equity, cash, account_type, positions:[{symbol, quantity}]}")
@@ -565,6 +571,16 @@ def main(argv: list[str] | None = None) -> None:
         o = bk._clean(track.build(bk.download(a.cache), bk.treasury(), None, ledger.read()))
         print("wrote", write(o, a.out, "track.json"))
         return
+    if a.cmd == "live":
+        from . import book as bk, jsonout, ledger, track
+        v = ledger.verify()
+        if not v["ok"]:
+            raise SystemExit(f"the ledger fails verification: {v['problems'][:2]}")
+        L = track.live_record(ledger.read(), bk.download(a.cache), bk.treasury())
+        L["ledger"] = {"ok": True, "entries": v["entries"], "head": v.get("head")}
+        p = jsonout.write(L, a.out, "live.json")
+        print(f"{p}: {L['calls']} calls, {L['marked_days']} days marked" + (f", {L['total']:+.2%} unhedged, {L['total_hedged']:+.2%} hedged" if L.get("marked_days") else ""))
+        return
     if a.cmd == "trade":
         import json as _j
         from pathlib import Path as _P
@@ -743,6 +759,14 @@ def main(argv: list[str] | None = None) -> None:
         from .jsonout import write
         o = rl.build(labs.download())
         print("wrote", write(o, a.out, "rl.json"))
+        for f in o["findings"]:
+            print(" ", f)
+        return
+    if a.cmd == "deeprl":
+        from . import deeprl
+        from .jsonout import write
+        o = deeprl.build(quick=a.quick)
+        print("wrote", write(o, a.out, "deeprl.json"))
         for f in o["findings"]:
             print(" ", f)
         return

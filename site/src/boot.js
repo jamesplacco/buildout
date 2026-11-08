@@ -6,7 +6,7 @@
     evidence: { name: "Evidence", views: ["inventory", "memos", "theses", "reading", "levers", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
     markets: { name: "Markets", views: ["hedgetest", "hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
     engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
-    library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
+    library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "deeprl", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
   };
   const GROUP_ORDER = ["today", "evidence", "markets", "engine", "library"];
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
@@ -55,6 +55,7 @@
     labs: () => guard("The labs", renderLabsDesk, $("#lb-tiles")),
     analysis: () => guard("Technicals and fundamentals", renderAnalysisDesk, $("#an-tiles")),
     ml: () => { guard("The machine-learning lab", renderMlDesk, $("#ml-tiles")); guard("Complexity", renderComplexity, $("#cmx-tiles")); guard("The RL agent", renderRlBlock, $("#rl-tiles")); },
+    deeprl: () => guard("Deep RL", renderDeepRl, $("#dr-tiles")),
     reality: () => guard("The reality check", renderRealityDesk, $("#rt-tiles")),
     edge: () => { guard("The information edge", renderEdgeDesk, $("#ed-tiles")); guard("Distribution", renderDistribution, $("#ed-dist")); },
     cardroom: () => { guard("The labs", renderLabsDesk, $("#lb-tiles")); guard("The card room", drawYale, $("#cr-yale")); },
@@ -324,7 +325,7 @@
   });
   // v0.39.1: the day's call and the ledger, when the published site carries newer ones than this build's snapshot
   const bookOk = (b) => !!(b && typeof b.asof === "string" && fin(b.size) && b.sizes && b.tail && Array.isArray(b.frontier) && b.weights && b.keep_names_hedge);
-  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json")]).then(([bkj, cl]) => {
+  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json")]).then(([bkj, cl, lv]) => {
     let changed = false;
     if (bkj && bookOk(bkj) && typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && bkj.asof > SNAP30.book.asof) { SNAP30.book = bkj; LIVE.book = bkj; changed = true; }
     else if (bkj && !bookOk(bkj)) LIVE.problems.push("book.json did not match the expected shape; the page keeps the call in its snapshot");
@@ -334,6 +335,7 @@
       T.live = { ...(T.live || {}), calls: cl.entries.length, first_effective: cl.entries[0].effective_from };
       changed = true;
     }
+    if (lv && T && Number.isFinite(lv.marked_days) && lv.calls >= ((T.live && T.live.calls) || 0) && (lv.last_mark || "") >= ((T.live && T.live.last_mark) || "")) { T.live = lv; changed = true; }   // v0.40: the daily marks
     if (changed && current && RENDER[current]) guard(TAB_NAME[current], RENDER[current]);
   });
   loadJSON("data/atlas.json").then((at) => {

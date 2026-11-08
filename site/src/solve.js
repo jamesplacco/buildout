@@ -1,5 +1,5 @@
   /* =====================================================================================
-     solve.js (v0.7): the Solve desk. Evidence in, a constrained choice out, with the reasoning shown:
+     solve.js (v0.7): the Allocation desk. Evidence in, a constrained choice out, with the reasoning shown:
      a calculator, the evidence ledger, the posterior, four alternatives, the game against Nature,
      the value of information and the most plausible way to breach the loss limit.
      ===================================================================================== */

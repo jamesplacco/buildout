@@ -15,6 +15,7 @@ checked for serious and critical accessibility violations.
 from __future__ import annotations
 
 import asyncio
+import atexit
 import copy
 import functools
 import http.server
@@ -62,6 +63,7 @@ def serve(folder: Path) -> tuple[http.server.ThreadingHTTPServer, str]:
 
 def site_with(data: dict[str, object] | None, raw: dict[str, str] | None = None) -> Path:
     tmp = Path(tempfile.mkdtemp(prefix="buildout-stress-"))
+    atexit.register(shutil.rmtree, tmp, True)             # each scenario copies the 12 MB page; a run leaves none behind
     src = tmp / "src"
     (src / "data").mkdir(parents=True)
     shutil.copy(ROOT / "site" / "page.html", src / "page.html")
@@ -121,9 +123,10 @@ async def scenario(browser, label: str, folder: Path, expect_errors: int = 0, wi
     await page.goto(url, wait_until="load")
     await page.wait_for_timeout(1200)
     await check_page(page, label)
-    panels = await page.evaluate("document.querySelectorAll('.empty.error').length")
+    shown = await page.evaluate("[...document.querySelectorAll('.empty.error')].map((e) => ((e.closest('.view') || {}).id || '?') + ': ' + e.textContent.trim().slice(0, 200))")
+    panels = len(shown)
     if panels != expect_errors:
-        fail(f"{label}: expected {expect_errors} contained error panels, saw {panels}")
+        fail(f"{label}: expected {expect_errors} contained error panels, saw {panels}: {shown}")
     if extra:
         await extra(page, label)
     if errs:

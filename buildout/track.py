@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import io
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -162,9 +163,54 @@ def _next_vm(vm: pd.Series, t: pd.Timestamp) -> float | None:
     return None if not len(nxt) or pd.isna(nxt.iloc[0]) else float(nxt.iloc[0])
 
 
-def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, turn_names: pd.Series | None = None) -> dict:
+# ---------------------------------------------------------------- v0.40: the live rule, walked forward
+_LR: dict = {}
+
+
+def _lr_init(prices, ust):
+    _LR["prices"], _LR["ust"] = prices, ust
+
+
+def _lr_one(job):
+    t, members = job
+    P, U = _LR["prices"], _LR["ust"]
+    pp = {k: v[v.iloc[:, 0].astype(str) <= t] for k, v in P.items()}
+    book = {m.upper(): 1.0 / len(members) for m in members}
+    try:
+        o = bk.build(pp, U.loc[:t], book)
+        k = o.get("keep_names_hedge") or {}
+        return {"date": t, "size": float(o["size"]), "binding": o["binding"], "short": float(k.get("short_nasdaq_frac") or 0.0),
+                "asof": o["asof"], "ok": True}
+    except Exception as exc:                              # noqa: BLE001 - the month falls back to the simple limits, counted
+        return {"date": t, "ok": False, "error": f"{type(exc).__name__}: {exc}"[:160]}
+
+
+def live_rule_path(prices: dict, ust: pd.DataFrame, members: dict, month_ends: list, workers: int | None = None) -> pd.DataFrame:
+    """The live call's own rule (book.build: factor-model volatility, the three expected-shortfall methods, the drawdown
+    simulation, the gross cap) run at each month-end on the data to that close, for that year's point-in-time names
+    equally weighted. Before v0.40 the walk-forward used a simpler stand-in (realized volatility and one tail model),
+    so the record tested a cousin of the rule that trades; now it tests the rule itself."""
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+    jobs = [(str(t.date()), members[t.year]) for t in month_ends if members.get(t.year)]
+    n = workers or max(1, min(4, os.cpu_count() or 1))
+    if n == 1:
+        _lr_init(prices, ust)
+        out = [_lr_one(j) for j in jobs]
+    else:
+        with ProcessPoolExecutor(n, initializer=_lr_init, initargs=(prices, ust)) as ex:
+            out = list(ex.map(_lr_one, jobs, chunksize=4))
+    D = pd.DataFrame(out)
+    D.index = pd.to_datetime(D["date"])
+    return D
+
+
+def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, turn_names: pd.Series | None = None,
+                 rule: pd.DataFrame | None = None, rl_rule: pd.DataFrame | None = None) -> dict:
     """Monthly decisions frozen at each month-end close; daily returns with and without costs for each policy.
-    r: the book's daily return; qx: QQQ in excess of cash (the futures leg); bond: 20-year par bond total return."""
+    r: the book's daily return; qx: QQQ in excess of cash (the futures leg); bond: 20-year par bond total return.
+    rule: the live rule's size and short at each month-end (live_rule_path); without it, the simple limits stand in.
+    rl_rule: v0.41, the deep RL sizer's exposure at each month-end (deeprl.book_rule); adds the policy call_rl."""
     idx = r.dropna().index
     mes = month_ends(idx)
     rf_ann = (cash.reindex(idx).fillna(0.0) * 252).rolling(21, min_periods=1).mean()
@@ -179,12 +225,21 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
         kelly = max(0.0, (L["mu"] - rf) / max(L["sigma"] ** 2, 1e-6)) * KELLY_FRACTION
         vt = bk.VOL_TARGET / L["sigma"]
         product = min(vt, kelly, bk.MAX_GROSS)
-        dec.append({"date": str(t.date()), "size": L["size"], "binding": L["binding"], "sigma": L["sigma"], "es": L["es"], "short": h,
+        lr = rule.loc[t] if rule is not None and t in rule.index and bool(rule.loc[t].get("ok")) else None
+        dec.append({"date": str(t.date()), "size": float(lr["size"]) if lr is not None else L["size"], "binding": lr["binding"] if lr is not None else L["binding"],
+                    "short": float(lr["short"]) if lr is not None else h, "rule": "live" if lr is not None else "simple",
+                    "size_simple": L["size"], "short_simple": h, "sigma": L["sigma"], "es": L["es"],
                     "vol_target": vt, "kelly": kelly, "product": product, "vm_rule": _next_vm(vm, t),
                     "es_size": L["sizes"]["es"], "dd_size": L["sizes"]["dd"]})
     D = pd.DataFrame(dec).set_index(pd.to_datetime([d["date"] for d in dec]))
+    if rl_rule is not None:
+        Drl = rl_rule.reindex(D.index)
+        okm = Drl["ok"].fillna(False).astype(bool)
+        D["size_rl"] = Drl["size"].where(okm, D["size"])          # a month the sizer could not see falls back to the call, and is counted
+        D["rl_ok"] = okm.to_numpy()
     # hold each decision through the next month
-    held = D.reindex(idx, method="ffill").shift(1).loc[D.index[0]:]
+    held = D.reindex(idx, method="ffill").shift(1)
+    held = held.loc[held.index > D.index[0]]          # v0.40: from the first day a decision is held (the decision day itself held none)
     x = r.reindex(held.index).fillna(0.0)
     q = qx.reindex(held.index).fillna(0.0)
     b = bond.reindex(held.index).fillna(0.0)
@@ -223,6 +278,10 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
     pol["hold"] = run(pd.Series(1.0, index=held.index))
     pol["call"] = run(held["size"])
     pol["call_short"] = run(pd.Series(1.0, index=held.index), short=held["short"])
+    if rule is not None:                                  # the stand-in rule, kept beside the live one so the change is visible
+        pol["call_simple"] = run(held["size_simple"])
+    if rl_rule is not None:
+        pol["call_rl"] = run(held["size_rl"])
     pol["bond30"] = run(pd.Series(1.0, index=held.index), bondw=bk.STATIC_BOND)
     pol["product"] = run(held["product"].clip(upper=bk.MAX_GROSS), stop=True)
     pol["vm_rule"] = run(held["vm_rule"].fillna(1.0).clip(0, sizing_rules.HEADLINE["cap"]))
@@ -466,11 +525,14 @@ def weeks(pol: dict, bench: pd.Series) -> list[dict]:
 
 
 # ---------------------------------------------------------------- build
-POLICY_NAME = {"hold": "The book at 1.00x, unhedged", "call": "The call: sized to the limits", "call_short": "Full size, Nasdaq-100 short to the limits",
+POLICY_NAME = {"hold": "The book at 1.00x, unhedged", "call": "The call: the live rule's size", "call_short": "Full size, the live rule's Nasdaq-100 short",
+               "call_simple": "The simple limits (the stand-in before v0.40)", "call_rl": "The deep RL sizer (v0.41), unhedged",
                "bond30": "Full size, long bond 30% (the old TLT rule)", "product": "Vol target, quarter Kelly, drawdown stop", "vm_rule": "Volatility-managed rule (Moreira and Muir)"}
 
 
-def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | None = None, ledger_rows: list | None = None) -> dict:
+def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | None = None, ledger_rows: list | None = None, rl_nets: dict | None = None) -> dict:
+    """rl_nets (v0.41): deeprl.build()["nets"], the sizer trained through each year; adds the call_rl policy to the
+    point-in-time record and out["deeprl_book"]."""
     P = bk.panel(prices, ust)
     cal = P["R"].index
     cash, bond = P["cash"], P["bond"]
@@ -482,7 +544,19 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
     out = {"members": {str(y): [t.upper().replace("GOOG", "GOOGL") for t in m] for y, m in members.items() if y >= 2018}, "policy_name": POLICY_NAME, "cost": COST}
     recs = {}
     for name, r, tn in (("pit", pit, turn), ("hindsight", hind, None)):
-        W = walk_forward(r, qx, bond, cash, tn)
+        rule = None
+        if name == "pit" and os.environ.get("BUILDOUT_SIMPLE_RULE") != "1":
+            rule = live_rule_path(prices, ust, members, [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)])
+            out["live_rule"] = {"months": int(len(rule)), "fallbacks": int((~rule["ok"].astype(bool)).sum()),
+                                "errors": rule.loc[~rule["ok"].astype(bool), "error"].dropna().head(3).tolist() if "error" in rule else []}
+        rl_rule = None
+        if name == "pit" and rl_nets:
+            from . import deeprl, labs
+            rl_rule = deeprl.book_rule(rl_nets, r, labs.shiller(labs.download()), [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)])
+            out["deeprl_book"] = {"months": int(rl_rule["ok"].astype(bool).sum()), "fallbacks": int((~rl_rule["ok"].astype(bool)).sum()),
+                                  "avg_exposure": float(rl_rule.loc[rl_rule["ok"].astype(bool), "action"].mean()), "time_out": float((rl_rule.loc[rl_rule["ok"].astype(bool), "action"] == 0).mean()),
+                                  "path": [[str(d.date()), float(v)] for d, v in rl_rule.loc[rl_rule["ok"].astype(bool), "size"].items()]}
+        W = walk_forward(r, qx, bond, cash, tn, rule, rl_rule)
         pol = W["policies"]
         recs[name] = W
         out[name] = {"policies": {k: {"gross": stats(g, W["cash"], None, F), "net": stats(n, W["cash"], m["turnover_yr"], F), "meta": m,
@@ -534,21 +608,35 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
 
 
 def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
-    """The ledger's calls marked to market: each call's size held from its effective date to the next call."""
+    """The ledger's calls marked to market, day by day: each call held from its effective date until the next call
+    takes over (two effective the same day: the newer governs). Two variants, as the call offers them: the book at the
+    call's size with the rest in cash, and the book at 1.00x with the call's Nasdaq-100 short. Costs: 5 bp of each
+    change in size; 1 bp of each change in the short. Written daily to site/data/live.json (buildout live)."""
     if not rows:
-        return {"calls": 0, "marked_days": 0, "note": "The ledger starts Nov 3, 2026; no call has a day of marks yet."}
+        return {"calls": 0, "marked_days": 0, "note": "No call logged yet."}
     P = bk.panel(prices, ust)
     rb = bk.book_returns(P["R"], pd.Series(bk.BOOK))
-    eff = [(pd.Timestamp(r["effective_from"]), float(r["call"]["size"])) for r in rows]
-    x = rb[rb.index >= eff[0][0]]
+    first = pd.Timestamp(rows[0]["effective_from"])
+    x = rb[rb.index >= first].dropna()
+    base = {"calls": len(rows), "first_call": rows[0]["ts_utc"], "first_effective": rows[0]["effective_from"]}
     if not len(x):
-        return {"calls": len(rows), "marked_days": 0, "first_call": rows[0]["ts_utc"], "note": "Calls logged; prices after the first call's effective date have not arrived yet."}
-    size = pd.Series([s for _, s in eff], index=[d for d, _ in eff])
-    size = size.groupby(level=0).last().reindex(x.index, method="ffill")        # two calls effective the same day: the newer one governs
-    cash = P["cash"].reindex(x.index).fillna(0)
-    ret = size * x + (1 - size) * cash
-    return {"calls": len(rows), "marked_days": int(len(ret)), "first_call": rows[0]["ts_utc"], "first_effective": rows[0]["effective_from"],
-            "last_mark": str(ret.index[-1].date()), "stats": stats(ret, cash) if len(ret) >= 20 else None, "total": float((1 + ret).prod() - 1)}
+        return {**base, "marked_days": 0, "note": "Calls logged; no price after the first call's effective date yet."}
+    def path(key):
+        s = pd.Series([float(key(r)) for r in rows], index=[pd.Timestamp(r["effective_from"]) for r in rows])
+        return s.groupby(level=0).last().reindex(x.index, method="ffill")
+    size = path(lambda r: r["call"]["size"])
+    short = path(lambda r: (r["call"].get("menu_high") or {}).get("short") or 0.0)
+    cash = P["cash"].reindex(x.index).fillna(0.0)
+    qx = (P["E"]["QQQ"].reindex(x.index) - cash).fillna(0.0)
+    unh = size * x + (1 - size) * cash - size.diff().abs().fillna(size.iloc[0]) * COST["stock_bp"] / 1e4
+    hed = x - short * qx - short.diff().abs().fillna(short.iloc[0]) * COST["fut_bp"] / 1e4 - COST["stock_bp"] / 1e4 * (x.index == x.index[0])
+    nav = lambda r: (1 + r).cumprod()
+    q_tot = float((1 + P["E"]["QQQ"].reindex(x.index).fillna(0.0)).prod() - 1)
+    return {**base, "marked_days": int(len(x)), "last_mark": str(x.index[-1].date()),
+            "total": float(nav(unh).iloc[-1] - 1), "total_hedged": float(nav(hed).iloc[-1] - 1), "book_total": float(nav(x).iloc[-1] - 1), "qqq_total": q_tot,
+            "series": [[str(d.date()), round(float(a), 6), round(float(b), 6), round(float(c), 6), round(float(s_), 4)]
+                       for d, a, b, c, s_ in zip(x.index, nav(unh), nav(hed), nav(x), size)],
+            "stats": stats(unh, cash) if len(unh) >= 20 else None}
 
 
 def synthetic_check(seed: int = 38) -> dict:

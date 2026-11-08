@@ -22,7 +22,7 @@ OUT = ROOT / "site" / "page.html"
 # and the published copy render the same standards-mode document (without it the raw file renders in quirks mode)
 SKELETON = '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>'
 SCRIPTS = ["math.js", "engine7.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js",
-           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "snap19.js", "dx.js", "dxlive.js", "snap20.js", "pf.js", "snap21.js", "mx.js", "snap22.js", "geo.js", "snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "snap29.js", "futures.js", "snap30.js", "book.js", "snappc.js", "credit.js", "sources.js", "reading.js", "snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "execdesk.js", "landing.js", "guide.js", "keys.js", "today7.js",
+           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "snap19.js", "dx.js", "dxlive.js", "snap20.js", "pf.js", "snap21.js", "mx.js", "snap22.js", "geo.js", "snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "snap29.js", "futures.js", "snap30.js", "book.js", "snappc.js", "credit.js", "sources.js", "reading.js", "snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "execdesk.js", "deeprl.js", "landing.js", "guide.js", "keys.js", "today7.js",
            "boot.js"]
 
 
@@ -33,7 +33,10 @@ def assemble(src: Path = SRC) -> str:
     body = (src / "body.html").read_text().strip()
     if (src / "logo.html").exists():                     # the lotus symbols (scripts/make_logo.py)
         body = body.replace("<!--LOGO-->", (src / "logo.html").read_text().strip(), 1)
-    if (src / "favicon.svg").exists():
+    if (src / "favicon.png").exists():                   # v0.40.1: 64 px PNG, a few KB, in place of the 57 KB vector
+        import base64
+        head = head.replace("</title>", '</title>\n<link rel="icon" type="image/png" href="data:image/png;base64,' + base64.b64encode((src / "favicon.png").read_bytes()).decode() + '">', 1)
+    elif (src / "favicon.svg").exists():
         from urllib.parse import quote
         head = head.replace("</title>", '</title>\n<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,' + quote((src / "favicon.svg").read_text().strip(), safe=" =:/,") + '">', 1)
     texts = {name: (src / name).read_text().rstrip() for name in SCRIPTS}

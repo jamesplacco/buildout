@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.39.1</span>
+      Buildout <span class="ver">v0.41</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -1794,7 +1794,7 @@
           <dt>Below zero</dt><dd>Bonds rise when stocks fall: the norm from about 2000 until 2021, when growth scares drove most selloffs.</dd>
           <dt>Above zero</dt><dd>Stocks and bonds fall together: inflation, oil or bond supply is driving rates, as in 2022 and again in 2026.</dd>
           <dt>Engine rule</dt><dd>Hold the long-bond hedge only after the correlation (63-day half-life) falls below −0.10, and drop it once it turns positive.</dd>
-          <dt>Measure in force</dt><dd>The policy's 63-day exponentially weighted correlation needs the daily price feed and is computed by the daily run; it is not computed in this copy. Until it is, the Decide desk reads the 36-month correlation of monthly S&amp;P 500 and 10-year Treasury returns from the Findings desk and says so beside the number. The Fed's one-year figure here and the Geometry desk's real-return figure are context, not inputs.</dd>
+          <dt>Measure in force</dt><dd>The policy's 63-day exponentially weighted correlation needs the daily price feed and is computed by the daily run; it is not computed in this copy. Until it is, the Seven decisions desk reads the 36-month correlation of monthly S&amp;P 500 and 10-year Treasury returns from the Findings desk and says so beside the number. The Fed's one-year figure here and the Geometry desk's real-return figure are context, not inputs.</dd>
         </dl>
         <p class="sentence" id="gauge-live" hidden></p>
       </figure>
@@ -1846,6 +1846,7 @@
     <p class="t7-status" id="ps-status"></p>
   </div>
   <div class="filters" id="ps-filter" role="group" aria-label="Filter positions"></div>
+  <h2 class="sr-only">The holdings</h2>
   <div class="cards2" id="ps-grid"></div>
   <div class="math"><span class="mlabel">How it is computed</span>Enterprise value = market value &minus; cash + debt. Free cash flow margin moves in a straight line from today's (after stock pay) to the steady-state margin (what the business throws off when it stops growing: the lower of after-tax operating earnings and operating cash flow &minus; D&amp;A &minus; stock pay, over revenue, so customer prepayments, deferred taxes and other timing do not flatter it) over ten years; terminal growth 3%; discount rate = 10-year yield + beta &times; 4.5% equity premium, blended with after-tax debt. The implied growth solves PV = EV by bisection. Base rates: Mauboussin, Callahan and Majd, The Base Rate Book (2016), 10-year real sales CAGR by starting size, 1950 to 2015; implied nominal growth less 2.5% inflation is compared with them.</div>
   <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are dated market readings. Assumptions are labelled. Research on a model book, not advice.</p></footer>
@@ -1858,6 +1859,7 @@
     <p class="lede">The engine borrows from statistics, control engineering, meteorology, actuarial science, physics, machine learning and decision theory. Each method is listed once with the formula it computes (shown with today's numbers where it has one) and its out-of-sample evidence.</p></div>
   <div class="at-tiles" id="mt-tiles"></div>
   <div class="pm-filter" id="mt-filter" role="group" aria-label="Filter by field"></div>
+  <h2 class="sr-only">The methods</h2>
   <div class="mt-list" id="mt-list"></div>
 </section>
 
@@ -2324,6 +2326,7 @@
     <h1 id="fi-title">Eight findings most portfolios do not reflect</h1>
     <p class="lede">Each finding states the claim, shows the numbers, explains the method and the caveat, and says what it changes on the desk. All of it is reproducible with one command, <code>python -m buildout research</code>, which is built to rerun daily on public data (the page shows a snapshot until the daily run is live).</p>
   </div>
+  <h2 class="sr-only">The findings</h2>
   <div class="read" id="fi-read"></div>
   <div class="section" id="fi-list"></div>
   <footer class="foot"><p>Monthly data overlap, so counts of months overstate the number of independent observations; small samples (oil shocks, VIX spikes) are direction, not law. Sources: Shiller, BLS, EIA, CBOE, the Treasury.</p></footer>
@@ -2446,6 +2449,7 @@
     <h1 id="lab-title">Seven interactive models behind the desk's rules</h1>
     <p class="lede">Each model is a formula the engine uses, made interactive. The coin game is the recommended starting point: it shows leverage, Kelly sizing and the risk of ruin in a single view.</p>
   </div>
+  <h2 class="sr-only">The models</h2>
   <div id="lab-list" class="section"></div>
 </section>
 
@@ -2454,7 +2458,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 59 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 61 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2559,9 +2563,9 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Ticker</th><th class="r">Weight</th><th>Role</th></tr></thead>
         <tbody>
-          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler; reports Oct 28</td></tr>
-          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler; reports Oct 29</td></tr>
-          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2; reports Oct 28</td></tr>
+          <tr><td>MSFT</td><td class="r">14%</td><td>Hyperscaler; reported Q3 on Oct 28</td></tr>
+          <tr><td>AMZN</td><td class="r">14%</td><td>Hyperscaler; reported Q3 on Oct 29</td></tr>
+          <tr><td>GOOGL</td><td class="r">14%</td><td>Hyperscaler; free cash flow negative in Q2 and Q3 (Oct 28)</td></tr>
           <tr><td>NVDA</td><td class="r">14%</td><td>Compute</td></tr>
           <tr><td>META</td><td class="r">12%</td><td>Hyperscaler; free cash flow negative in Q3 (Oct 21)</td></tr>
           <tr><td>TSLA</td><td class="r">10%</td><td>Autonomy, robotics</td></tr>
@@ -2830,6 +2834,11 @@
   <section class="section" aria-labelledby="tr-weeks-t">
     <div class="section-head"><p class="eyebrow">The weeks</p><h2 id="tr-weeks-t">What each policy would have done, day by day, in the weeks that mattered</h2><p class="prose">Positions as each policy held them that week (decided at the previous month-end), net of costs. 2020's crash, 2022's inflation shocks, the 2024 carry unwind, the 2025 tariff week and October 2026's AI scare.</p></div>
     <div id="tr-weeks"></div>
+  </section>
+  <section class="section" aria-labelledby="tr-live-t">
+    <div class="section-head"><p class="eyebrow">Live paper</p><h2 id="tr-live-t">The logged calls, marked every trading day</h2><p class="prose" id="tr-live-p"></p></div>
+    <div class="chart" id="tr-live-curve"></div>
+    <div class="tablewrap"><table class="rs-table" id="tr-live"></table></div>
   </section>
   <section class="section" aria-labelledby="tr-ledger-t">
     <div class="section-head"><p class="eyebrow">The ledger</p><h2 id="tr-ledger-t">Every call, timestamped before the next bar and hash-chained</h2><p class="prose" id="tr-ledger-p"></p></div>
@@ -3469,6 +3478,49 @@ python -m buildout trade halt        # stop every ticket (private/HALT)</pre>
 </section>
 
 <!-- ======================= v0.15: THE ML LAB ======================= -->
+<section class="view" id="view-deeprl" hidden aria-labelledby="dr-title">
+  <div class="vhead"><p class="eyebrow">Deep reinforcement learning · trained inside a learned model</p><h1 id="dr-title">A sizing agent trained on imagined months, judged on real ones</h1>
+    <p class="lede">The market gives about 1,700 real months since 1881. This agent learns inside a model of the market instead: a mixture density network predicts next month's return from the state, a policy-value network is trained by PPO on millions of simulated months, and at each real month-end a planner tries each action in imagined futures (the lineage runs from World Models and Dreamer to MuZero). Retrained every year on earlier months only and judged from 1940, then set loose on the nine-name AI book, which it never saw. Everything is numpy with the backward passes written by hand and checked against finite differences; the recipe below is Karpathy's, each step run and measured.</p>
+    <p class="sentence" id="dr-sum"></p></div>
+  <div class="at-tiles" id="dr-tiles"></div>
+  <section class="section" aria-labelledby="dr-rec-title">
+    <div class="section-head"><p class="eyebrow">The recipe · run, not recited</p><h2 id="dr-rec-title">Karpathy's recipe for training neural networks, step by step</h2>
+      <p class="prose" id="dr-rec-p"></p></div>
+    <div class="panel"><div class="tablewrap"><table id="dr-rec"></table></div></div>
+  </section>
+  <section class="section" aria-labelledby="dr-wm-title">
+    <div class="section-head"><p class="eyebrow">The world model</p><h2 id="dr-wm-title">Does the learned model beat the baselines it must beat?</h2>
+      <p class="prose" id="dr-wm-p"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Held-out likelihood, averaged over every yearly refit</span><div class="tablewrap"><table id="dr-wm"></table></div><p class="hint">Negative log-likelihood per month on the newest tenth of each training window; lower is better. The volatility-scaled Gaussian is the baseline the mixture is built on, so the gap is what the network added.</p></div>
+      <div class="panel"><span class="panel-title">Do the imagined months look like the record?</span><div class="tablewrap"><table id="dr-tail"></table></div><p class="hint">Twenty thousand months sampled from the final model against the real months before it.</p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="dr-rec2-title">
+    <div class="section-head"><p class="eyebrow">The record · out of sample since 1940</p><h2 id="dr-rec2-title">The deep agent against holding, the trend rule and the tabular agent</h2>
+      <p class="prose" id="dr-rec2-p"></p></div>
+    <div class="panel"><div class="chart" id="dr-curve" role="img" aria-label="Log real wealth since 1940: the deep agent with and without planning, holding, the trend rule and the tabular agent"></div></div>
+    <div class="panel"><div class="tablewrap"><table id="dr-pol"></table></div><p class="hint" id="dr-pol-n"></p></div>
+    <div class="panel"><div class="chart" id="dr-expo" role="img" aria-label="The agent's exposure, quarterly samples since 1940"></div></div>
+  </section>
+  <section class="section" aria-labelledby="dr-map-title">
+    <div class="section-head"><p class="eyebrow">What it learned</p><h2 id="dr-map-title">The policy across the states the record has visited</h2>
+      <p class="prose" id="dr-map-p"></p></div>
+    <div class="grid2">
+      <div class="panel"><span class="panel-title">Mean exposure by trend, volatility and drawdown (from a 1.0x position)</span><div class="tablewrap"><table id="dr-map"></table></div></div>
+      <div class="panel"><span class="panel-title">Today</span><div class="tablewrap"><table id="dr-now"></table></div><p class="hint" id="dr-now-n"></p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="dr-book-title">
+    <div class="section-head"><p class="eyebrow">The book · data it never saw</p><h2 id="dr-book-title">The learned sizer on the nine-name AI book, 2018 to now</h2>
+      <p class="prose" id="dr-book-p"></p></div>
+    <div class="panel"><div class="tablewrap"><table id="dr-book"></table></div><p class="hint" id="dr-book-n"></p></div>
+  </section>
+  <section class="section" aria-labelledby="dr-lim-title">
+    <div class="section-head"><p class="eyebrow">Limits</p><h2 id="dr-lim-title">What this can and cannot claim</h2></div>
+    <div class="panel"><ul class="prose" id="dr-lim"></ul></div>
+  </section>
+</section>
 <section class="view" id="view-ml" hidden aria-labelledby="ml-title">
   <div class="vhead"><p class="eyebrow">Machine-learning lab</p><h1 id="ml-title">Return forecasting: only the simplest model outperforms the historical mean</h1>
     <p class="lede">Seven models, from one-variable CAPE regression to gradient boosting, forecast the S&amp;P 500's next twelve months each month since 1940, refit only on what was known at the time. The flexible ones lose to the plain historical average out of sample. The one that wins is the simplest: an average of eight one-variable forecasts with Campbell and Thompson's sign restrictions, by a small margin that is not yet statistically significant, which is what Rapach, Strauss and Zhou found on other data. A reinforcement-learning sizing agent, judged the same way, does not beat holding either. That is the useful finding: it says which model claims to distrust and why the engine leans on ranges, hedges and sizing rules instead of point forecasts.</p>
@@ -3522,7 +3574,7 @@ python -m buildout trade halt        # stop every ticket (private/HALT)</pre>
       <p class="sentence" id="rl-sum"></p></div>
     <div class="at-tiles" id="rl-tiles"></div>
     <div class="grid2"><div class="panel"><div class="svgbox" id="rlx-curve"></div><div class="legend" id="rlx-curve-l"></div></div>
-      <div class="panel"><div class="tablewrap"><table id="rl-cfg"></table></div><p class="hint">Four configurations were tried (with and without a loss penalty, with a light and a heavy prior); all four are shown, and the deflated chance counts all of them.</p></div></div>
+      <div class="panel"><div class="tablewrap"><table id="rl-cfg"></table></div><p class="hint">Four configurations were tried (with and without a loss penalty, with a light and a heavy prior); all four are shown, and the deflated chance counts all of them. The deep agent trained inside a learned market model (v0.41) is on the <a href="#deeprl">Deep RL desk</a>, with this tabular agent as one of its baselines.</p></div></div>
   </section>
   <section class="section" aria-labelledby="ml-use-title">
     <div class="section-head"><p class="eyebrow">Use</p><h2 id="ml-use-title">Implications for portfolio management</h2></div>
@@ -3729,6 +3781,14 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
         <li>Works on its own (searching, fetching pages, writing a file) and returns one report and one file.</li>
         <li>Cannot see the lead's conversation or other subagents' work, which is the point for a checker: it judges the page, not the claim.</li></ul></div>
     </div>
+  </section>
+  <section class="section" aria-labelledby="ag-v41-t">
+    <div class="section-head"><p class="eyebrow">v0.40 to v0.41</p><h2 id="ag-v41-t">Release metrics, v0.40 to v0.41</h2></div>
+    <div class="at-tiles"><div class="at-kpi"><b>175M</b><span>Simulated months the deep agent trained on</span><small>87 yearly refits in 19 minutes on two CPU cores; the real record holds 1,745</small></div>
+      <div class="at-kpi"><b>4e-8</b><span>Largest gradient error</span><small>hand-written backward passes against finite differences, both networks</small></div>
+      <div class="at-kpi"><b>0.88 against 0.64</b><span>Sharpe, the deep agent against holding</span><small>since 1940, out of sample; 0.49 against 0.78 on the book it never saw</small></div>
+      <div class="at-kpi"><b>0.77, not 0.87</b><span>The call's Sharpe, corrected</span><small>v0.40 sized the record with the live rule itself and the figure fell</small></div></div>
+    <p class="prose">v0.40 made the walk-forward record use the rule that makes the live call, which lowered its headline and was logged as a failure, and started marking the ledger's calls to market every day. v0.41 built the deep reinforcement-learning sizer: a world model, a policy-value network and a planner, trained at a scale the real record cannot offer and judged only on real months it never trained on. Its market result is the best on the desk; its book result is a loss, shown with its cause. Both releases were built by one lead agent with the work checked by a separate run of the tests and the browser stress suite.</p>
   </section>
   <section class="section" aria-labelledby="ag-v39-t">
     <div class="section-head"><p class="eyebrow">v0.37 to v0.39.1</p><h2 id="ag-v39-t">Release metrics, v0.37 to v0.39.1</h2></div>
