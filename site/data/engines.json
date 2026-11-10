@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "version": "0.39.1",
- "run_at": "2026-11-07T17:07:49+00:00",
+ "version": "0.42.0",
+ "run_at": "2026-11-10T19:00:52+00:00",
  "engines": [
   {
    "name": "macro",
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "7e036dc18ca9ee3a"
+    "atlas.json": "fb1e1cfbec27b563"
    }
   },
   {
@@ -107,7 +107,7 @@
    ],
    "status": "external",
    "outputs": {
-    "labs.json": "6bdba27083819093"
+    "labs.json": "28c2ecc006e66044"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "66f0143e38f23924"
+    "connections.json": "d6f4e72cc9737ca4"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "e7278e1ef5273968",
-    "statements.json": "474e90f323666225"
+    "technicals.json": "d5c45cac11bab44b",
+    "statements.json": "9e215db75e5f1ecd"
    }
   },
   {
@@ -246,7 +246,7 @@
    ],
    "status": "external",
    "outputs": {
-    "bonds.json": "2f58e1c34966206f"
+    "bonds.json": "f35c8f8f377d722d"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "ccf508689bbfa6f6"
+    "feeds.json": "0513d5cd15327bed"
    }
   },
   {
@@ -302,7 +302,7 @@
    "outputs": {
     "valuation.json": "4dedef125b628289"
    },
-   "seconds": 0.865,
+   "seconds": 1.208,
    "inputs": {
     "capex.json": "e1a864448f92346e",
     "macro.json": null
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.07,
+   "seconds": 0.108,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -345,7 +345,7 @@
    "outputs": {
     "hedges.json": "4da792fc58c3f6e4"
    },
-   "seconds": 0.774,
+   "seconds": 1.419,
    "attempts": 1
   },
   {
@@ -366,9 +366,9 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "3340b1d808efaf23"
+    "ooda.json": "4dc91efe2d3388b9"
    },
-   "seconds": 1.173,
+   "seconds": 2.027,
    "inputs": {
     "macro.json": null,
     "research.json": "d2c6580ba083f72a",
@@ -449,7 +449,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "eb29070ee4f60dc1"
+    "status.json": "4d0ea1462f73e201"
    }
   }
  ],
@@ -458,9 +458,9 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 1.995,
-  "serial_seconds": 2.882,
-  "speedup": 1.44,
+  "wall_seconds": 3.168,
+  "serial_seconds": 4.762,
+  "speedup": 1.5,
   "levels": [
    [
     "atlas",

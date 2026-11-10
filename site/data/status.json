@@ -1,8 +1,8 @@
 {
  "schema": 2,
- "generated_utc": "2026-11-07T17:08:03+00:00",
- "commit": "770b0ac",
- "run_id": "42393355488",
+ "generated_utc": "2026-11-10T19:01:16+00:00",
+ "commit": "c6c3978",
+ "run_id": "42877659695",
  "python": "3.12.16",
  "files": {
   "macro.json": {
@@ -18,7 +18,7 @@
    "as_of": "2026-09-30",
    "bytes": 35785,
    "weekdays_old": null,
-   "written_utc": "2026-11-07T16:57Z",
+   "written_utc": "2026-11-10T18:48Z",
    "cadence": "quarterly"
   },
   "research.json": {
@@ -27,8 +27,8 @@
    "schema": 2,
    "as_of": "2026-09",
    "bytes": 13072,
-   "weekdays_old": 27,
-   "written_utc": "2026-11-07T16:54Z",
+   "weekdays_old": 29,
+   "written_utc": "2026-11-10T18:44Z",
    "cadence": "monthly"
   },
   "brain.json": {
@@ -38,7 +38,7 @@
    "as_of": null,
    "bytes": 218939,
    "weekdays_old": null,
-   "written_utc": "2026-11-07T16:54Z",
+   "written_utc": "2026-11-10T18:45Z",
    "cadence": "monthly"
   },
   "buyside.json": {
@@ -47,18 +47,18 @@
    "schema": 1,
    "as_of": "2026-09",
    "bytes": 3753,
-   "weekdays_old": 27,
-   "written_utc": "2026-11-07T16:54Z",
+   "weekdays_old": 29,
+   "written_utc": "2026-11-10T18:45Z",
    "cadence": "monthly"
   },
   "feeds.json": {
    "present": true,
    "valid": true,
    "schema": 1,
-   "as_of": "2026-11-07T16:54:46Z",
-   "bytes": 118612,
+   "as_of": "2026-11-10T18:45:17Z",
+   "bytes": 115027,
    "weekdays_old": 0,
-   "written_utc": "2026-11-07T16:55Z"
+   "written_utc": "2026-11-10T18:45Z"
   },
   "reason.json": {
    "present": true,
@@ -67,7 +67,7 @@
    "as_of": null,
    "bytes": 11643,
    "weekdays_old": null,
-   "written_utc": "2026-11-07T17:07Z"
+   "written_utc": "2026-11-10T19:00Z"
   }
  },
  "checks": [
@@ -79,7 +79,7 @@
   {
    "name": "SEC filings include a quarter ended in the last 140 days",
    "ok": true,
-   "detail": "latest quarter ended 2026-09-30, 38 days ago"
+   "detail": "latest quarter ended 2026-09-30, 41 days ago"
   },
   {
    "name": "Capex to cash flow ratios are plausible",
@@ -99,7 +99,7 @@
   {
    "name": "Research data ends within the last 120 days",
    "ok": true,
-   "detail": "ends 2026-09, 67 days ago"
+   "detail": "ends 2026-09, 70 days ago"
   },
   {
    "name": "Brain weights are finite and below 1.5 in size",
@@ -134,7 +134,7 @@
   {
    "name": "Every file comes from the same run day",
    "ok": true,
-   "detail": "2026-11-07 to 2026-11-07"
+   "detail": "2026-11-10 to 2026-11-10"
   }
  ],
  "ok": true

@@ -1,0 +1,38 @@
+{
+ "schema": 1,
+ "opened": "2026-11-10",
+ "start_cash": 100000.0,
+ "equity": 100000.0,
+ "cash": 100000.0,
+ "marks_asof": "",
+ "positions": [],
+ "equity_history": [],
+ "tickets_filled": 0,
+ "fills_chain": {
+  "ok": true,
+  "entries": 0
+ },
+ "passes": 1,
+ "last": {
+  "broker": "paper",
+  "event": "pass",
+  "outcome": "the ticket failed a check",
+  "reasons": [
+   "the call is in force today (on or after its effective date)"
+  ],
+  "ts_utc": "2026-11-10T19:01:14Z"
+ },
+ "recent": [
+  {
+   "broker": "paper",
+   "event": "pass",
+   "outcome": "the ticket failed a check",
+   "reasons": [
+    "the call is in force today (on or after its effective date)"
+   ],
+   "ts_utc": "2026-11-10T19:01:14Z"
+  }
+ ],
+ "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
+ "note": "A model account of $100,000 run by the trader every weekday from the daily workflow, filled at the day's close plus a 5 bp half-spread. Not a personal account."
+}
