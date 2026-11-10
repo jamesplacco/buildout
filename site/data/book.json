@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "asof": "2026-11-09",
- "treasury_to": "2026-11-09",
+ "treasury_to": "2026-11-10",
  "from": "2017-01-04",
  "days": 2476,
  "weights": {
@@ -44,7 +44,7 @@
   "rates": -0.145701,
   "beta_broad_market": 1.552438,
   "beta_broad_market_10y": 1.339937,
-  "rates_dv01_per_100m": -17848.960835
+  "rates_dv01_per_100m": -17701.349442
  },
  "betas": [
   {
@@ -294,47 +294,47 @@
   "vol_target": 0.2,
   "max_drawdown": 0.25,
   "max_gross": 1.5,
-  "drawdown_drift": 0.112597,
-  "cash_rate": 0.0456
+  "drawdown_drift": 0.114297,
+  "cash_rate": 0.0473
  },
  "sizes": {
   "es_budget": 0.627943,
   "vol_target": 0.676349,
-  "drawdown_cap": 0.524902,
+  "drawdown_cap": 0.527115,
   "gross_cap": 1.5
  },
  "binding": "drawdown_cap",
- "size": 0.524902,
+ "size": 0.527115,
  "at_full": {
   "es95": 0.1911,
   "vol": 0.295705,
-  "drawdown95": 0.445611
+  "drawdown95": 0.444849
  },
  "keep_names_hedge": {
-  "short_nasdaq_frac": 0.850596,
-  "best_short": 0.850596,
-  "es95": 0.09721,
-  "vol": 0.15042,
+  "short_nasdaq_frac": 0.841216,
+  "best_short": 0.841216,
+  "es95": 0.097765,
+  "vol": 0.15128,
   "drawdown95": 0.25,
-  "worst": 0.999999,
-  "market_beta_left": 0.301343,
+  "worst": 1.0,
+  "market_beta_left": 0.310723,
   "meets_all": true,
   "binding_after": "drawdown_cap",
-  "notional_usd_per_100m": 85059570.3125
+  "notional_usd_per_100m": 84121582.03125
  },
  "frontier": [
   {
-   "gross": 0.524902,
+   "gross": 0.527115,
    "short": 0.0,
    "meets": true,
-   "es95": 0.100309,
-   "vol": 0.155216,
-   "drawdown95": 0.249988,
-   "cagr": 0.180227,
-   "y2022": -0.235336,
-   "maxdd": 0.26859,
+   "es95": 0.100732,
+   "vol": 0.155871,
+   "drawdown95": 0.249968,
+   "cagr": 0.180993,
+   "y2022": -0.236275,
+   "maxdd": 0.26962,
    "hedge_drag_ann": 0.0,
-   "market_beta_left": 0.604656,
+   "market_beta_left": 0.607204,
    "stock_specific_share": null
   },
   {
@@ -343,7 +343,7 @@
    "meets": true,
    "es95": 0.094763,
    "vol": 0.146635,
-   "drawdown95": 0.236978,
+   "drawdown95": 0.235875,
    "cagr": 0.179571,
    "y2022": -0.216673,
    "maxdd": 0.251813,
@@ -357,7 +357,7 @@
    "meets": true,
    "es95": 0.095265,
    "vol": 0.147411,
-   "drawdown95": 0.239584,
+   "drawdown95": 0.238505,
    "cagr": 0.187429,
    "y2022": -0.208647,
    "maxdd": 0.246742,
@@ -371,7 +371,7 @@
    "meets": true,
    "es95": 0.097036,
    "vol": 0.150152,
-   "drawdown95": 0.244757,
+   "drawdown95": 0.24413,
    "cagr": 0.195177,
    "y2022": -0.200646,
    "maxdd": 0.24173,
@@ -385,7 +385,7 @@
    "meets": true,
    "es95": 0.095674,
    "vol": 0.148044,
-   "drawdown95": 0.243099,
+   "drawdown95": 0.242472,
    "cagr": 0.193296,
    "y2022": -0.175371,
    "maxdd": 0.219174,
@@ -399,7 +399,7 @@
    "meets": true,
    "es95": 0.097244,
    "vol": 0.150474,
-   "drawdown95": 0.250081,
+   "drawdown95": 0.24892,
    "cagr": 0.190916,
    "y2022": -0.149847,
    "maxdd": 0.196428,
@@ -1007,60 +1007,60 @@
    "nasdaq": -0.15,
    "semis_vs_nasdaq": -0.15,
    "dy_bp": -75,
-   "bond20": 0.097612,
-   "book": -0.138879,
-   "with_bond_30": -0.109596,
-   "with_nasdaq_hedge": -0.01129,
+   "bond20": 0.096781,
+   "book": -0.138758,
+   "with_bond_30": -0.109724,
+   "with_nasdaq_hedge": -0.012576,
    "worst_name": "AVGO",
-   "worst_name_move": -0.305275
+   "worst_name_move": -0.305141
   },
   {
    "scenario": "AI financing / term-premium shock",
    "nasdaq": -0.1,
    "semis_vs_nasdaq": -0.1,
    "dy_bp": 75,
-   "bond20": -0.086144,
-   "book": -0.070554,
-   "with_bond_30": -0.096397,
-   "with_nasdaq_hedge": 0.014506,
+   "bond20": -0.085454,
+   "book": -0.070654,
+   "with_bond_30": -0.09629,
+   "with_nasdaq_hedge": 0.013468,
    "worst_name": "AVGO",
-   "worst_name_move": -0.179167
+   "worst_name_move": -0.179278
   },
   {
    "scenario": "Inflation + hikes (2022 replay)",
    "nasdaq": -0.2,
    "semis_vs_nasdaq": -0.1,
    "dy_bp": 125,
-   "bond20": -0.137201,
-   "book": -0.178308,
-   "with_bond_30": -0.219469,
-   "with_nasdaq_hedge": -0.008189,
+   "bond20": -0.136131,
+   "book": -0.178464,
+   "with_bond_30": -0.219304,
+   "with_nasdaq_hedge": -0.010221,
    "worst_name": "AVGO",
-   "worst_name_move": -0.323077
+   "worst_name_move": -0.323249
   },
   {
    "scenario": "AI melt-up, yields up",
    "nasdaq": 0.1,
    "semis_vs_nasdaq": 0.15,
    "dy_bp": 50,
-   "bond20": -0.058703,
-   "book": 0.075613,
-   "with_bond_30": 0.058002,
-   "with_nasdaq_hedge": -0.009446,
+   "bond20": -0.058228,
+   "book": 0.075544,
+   "with_bond_30": 0.058076,
+   "with_nasdaq_hedge": -0.008577,
    "worst_name": "MSFT",
-   "worst_name_move": -0.007995
+   "worst_name_move": -0.008149
   },
   {
    "scenario": "Soft landing, cuts",
    "nasdaq": 0.08,
    "semis_vs_nasdaq": 0.05,
    "dy_bp": -50,
-   "bond20": 0.0638,
-   "book": 0.066815,
-   "with_bond_30": 0.085955,
-   "with_nasdaq_hedge": -0.001233,
+   "bond20": 0.063262,
+   "book": 0.066893,
+   "with_bond_30": 0.085872,
+   "with_nasdaq_hedge": -0.000404,
    "worst_name": "MSFT",
-   "worst_name_move": 0.006772
+   "worst_name_move": 0.006946
   }
  ],
  "worst_days": [
@@ -1639,8 +1639,8 @@
   "method": "buildout/book.py"
  },
  "findings": [
-  "Measured on the nine names' own daily prices from 2017-01-04 to 2026-11-09, the book at 1.00x runs 30% volatility, a one-month 95% expected shortfall of 19.1% (the most cautious of historical 14.9%, filtered 17.6% and Student-t 19.1%) and a one-year 95% drawdown of 45%, against limits of 12%, 20% and 25%.",
-  "The limits allow 0.63x (shortfall), 0.68x (volatility) and 0.52x (drawdown); the drawdown cap binds, so the book's size is 0.52x. Keeping every name at full size instead takes a Nasdaq-100 futures short of 85% of NAV.",
+  "Measured on the nine names' own daily prices from 2017-01-04 to 2026-11-09, the book at 1.00x runs 30% volatility, a one-month 95% expected shortfall of 19.1% (the most cautious of historical 14.9%, filtered 17.6% and Student-t 19.1%) and a one-year 95% drawdown of 44%, against limits of 12%, 20% and 25%.",
+  "The limits allow 0.63x (shortfall), 0.68x (volatility) and 0.53x (drawdown); the drawdown cap binds, so the book's size is 0.53x. Keeping every name at full size instead takes a Nasdaq-100 futures short of 84% of NAV.",
   "Exposures: Nasdaq-100 beta 1.15 (broad market 1.55 now, 1.34 over ten years), semis net of the market -0.32, rates -0.15. 83% of the variance is the market and 16% is stock-specific: effective independent bets 1.6 of nine.",
   "Hedges walked forward from 2017-07-06: a Nasdaq-100 short at the measured beta cut the variance 90% and turned 2022 from -42% to -0.2%; the long bond held only when its correlation said it hedged cut it 3% (2022 -45%), and a standing 30% long bond 0% (2022 -48%).",
   "Stock-bond correlation (63-day, book against the 20-year bond): -0.00, state neutral. On the book's worst 5% of days since 2022 the bond rose 55% of the time.",

@@ -12,7 +12,7 @@
   "ok": true,
   "entries": 0
  },
- "passes": 1,
+ "passes": 2,
  "last": {
   "broker": "paper",
   "event": "pass",
@@ -20,7 +20,7 @@
   "reasons": [
    "the call is in force today (on or after its effective date)"
   ],
-  "ts_utc": "2026-11-10T19:01:14Z"
+  "ts_utc": "2026-11-10T22:37:21Z"
  },
  "recent": [
   {
@@ -31,6 +31,15 @@
     "the call is in force today (on or after its effective date)"
    ],
    "ts_utc": "2026-11-10T19:01:14Z"
+  },
+  {
+   "broker": "paper",
+   "event": "pass",
+   "outcome": "the ticket failed a check",
+   "reasons": [
+    "the call is in force today (on or after its effective date)"
+   ],
+   "ts_utc": "2026-11-10T22:37:21Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
