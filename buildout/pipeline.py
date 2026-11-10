@@ -45,9 +45,25 @@ def load_inputs(cfg: Config) -> Inputs:
     else:
         raise ValueError(f"unknown data.source {d.source!r}")
     yields, rf = None, pd.Series(0.04, index=prices.index)
+    fred = None
     if d.use_fred:
         from .data.fred_source import FredSource
-        fred = FredSource(cache).series(["DGS10", "DGS30", "DGS7", "DGS20", d.risk_free_series], d.start, d.end)
+        fs = FredSource(cache)
+        want = ["DGS10", "DGS30", "DGS7", "DGS20", d.risk_free_series]
+        try:
+            fred = fs.series(want, d.start, d.end)
+        except RuntimeError as exc:        # v0.42.1: FRED and every stand-in down: run on, say so, never crash the Databento pull
+            adj["rates_error"] = str(exc)[:300]
+        if fred is not None:
+            missing = [c for c in want if c not in fred.columns]
+            if fs.fallbacks:
+                adj["rates_fallbacks"] = dict(fs.fallbacks)
+            if missing:
+                adj["rates_missing"] = missing
+            if {"DGS10", "DGS30"} - set(fred.columns) or d.risk_free_series not in fred.columns:
+                adj["rates_error"] = f"needed rate series missing: {missing}"
+                fred = None
+    if fred is not None:
         yields = fred[["DGS10", "DGS30"]]
         if adj["source"] == "public":
             from .data.corporate_actions import PRICE_ONLY_NOTE, add_bond_income
@@ -56,13 +72,19 @@ def load_inputs(cfg: Config) -> Inputs:
         rf = (fred[d.risk_free_series] / 100).reindex(prices.index).ffill()
         infl36 = None
         try:
-            cpi = FredSource(cache).series(["CPIAUCSL"], "2010-01-01", d.end)["CPIAUCSL"].dropna()
+            cs = FredSource(cache)
+            cpi = cs.series(["CPIAUCSL"], "2010-01-01", d.end)["CPIAUCSL"].dropna()
+            if cs.fallbacks:
+                adj.setdefault("rates_fallbacks", {}).update(cs.fallbacks)
             infl36 = published_infl36(cpi)
         except Exception:                  # the inflation gate is then reported unavailable, never assumed
             infl36 = None
         return Inputs(prices, yields, rf, d.source, infl36, adj)
     if adj["source"] == "public":
         adj.update({"note": "public split table; no FRED, so bond-fund income is missing and the hedge leg is price only", "evidence": "Estimated"})
+    if adj.get("rates_error"):
+        adj["note"] = (adj.get("note", "") + "; " if adj.get("note") else "") + "rates unavailable today: cash at a flat 4% and no yield inputs"
+        adj["evidence"] = "Estimated"
     return Inputs(prices, yields, rf, d.source, adjustments=adj)
 
 

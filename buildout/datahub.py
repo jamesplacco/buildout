@@ -35,7 +35,7 @@ SOURCES = {
     "stooq": {"needs": None, "probe": "https://stooq.com/q/d/l/?s=spy.us&i=d", "cost": "free", "what": "Daily OHLCV"},
     "sec": {"needs": "SEC_USER_AGENT", "probe": "https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/Revenues.json", "cost": "free", "what": "XBRL company facts"},
     "treasury": {"needs": None, "probe": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{y}/all?type=daily_treasury_yield_curve&field_tdr_date_value={y}&page&_format=csv",
-                 "cost": "free", "what": "Daily par yield curve"},
+                 "cost": "free", "what": "Daily par yield curve", "timeout": 45},
     "cftc": {"needs": None, "probe": "https://publicreporting.cftc.gov/resource/gpe5-46if.json?$limit=1", "cost": "free", "what": "Traders in financial futures"},
     "fred": {"needs": None, "probe": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10", "cost": "free", "what": "Macro and rates"},
     "github": {"needs": None, "probe": "https://raw.githubusercontent.com/datasets/s-and-p-500/main/data/data.csv", "cost": "free", "what": "Public dataset mirrors"},
@@ -56,7 +56,8 @@ def check(timeout: int = 12) -> list[dict]:
                 row["note"] = f"set the {s['needs']} secret"
         t = time.time()
         try:
-            b = http.get(s["probe"].format(y=y), user_agent=os.environ.get("SEC_USER_AGENT", UA) if name == "sec" else UA, retries=1, timeout=timeout)
+            b = http.get(s["probe"].format(y=y), user_agent=os.environ.get("SEC_USER_AGENT", UA) if name == "sec" else UA, retries=1,
+                         timeout=s.get("timeout", timeout))          # v0.42.1: the Treasury's year CSV takes longer than 12 s
             row["reachable"] = len(b) > 0
             row["ms"] = int((time.time() - t) * 1000)
         except Exception as e:  # noqa: BLE001 - every failure is a recorded status, never fatal

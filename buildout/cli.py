@@ -917,6 +917,9 @@ def main(argv: list[str] | None = None) -> None:
             fred = src.series(FRED_IDS)
             failed = src.failed
         rep = analyze_macro(fred, failed=failed)
+        if not a.csv and src.fallbacks:       # v0.42.1: series FRED refused, taken from their stand-ins
+            rep["fallbacks"] = dict(src.fallbacks)
+            print(f"{len(src.fallbacks)} series from stand-ins: {src.fallbacks}")
         if failed:
             print("FRED series that failed:", failed, file=sys.stderr)
         print(json.dumps(rep["latest"], indent=1))
