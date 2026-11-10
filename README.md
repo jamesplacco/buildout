@@ -3,6 +3,9 @@
 Regime-aware risk, hedge and sizing engine for a concentrated AI-buildout equity book
 (hyperscalers, NVDA/AVGO, TSLA, SPCX) with long Treasuries as the candidate hedge.
 
+Version 0.42.2 cleans the Databento pull: a ticker has a first date (SPCX and META named other funds earlier), Meta's
+FB years are joined on, and the weekend bars that the feed's UTC day boundary creates are dropped.
+
 Version 0.42 adds the trader (`python -m buildout trader`): the model's recommendation turned into orders under a
 mandate you write and sign, in manual, supervised or autonomous mode, through a paper account, through Claude holding
 Robinhood's Trading MCP, or through Buildout's own client on that MCP. A public paper bot runs it every weekday. See

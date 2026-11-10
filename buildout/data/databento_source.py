@@ -1,7 +1,7 @@
 """Databento: split/dividend-adjusted daily closes for US equities and ETFs, and roll-adjusted
 CME Treasury futures returns.
 
-Setup: `pip install databento`, then `export DATABENTO_API_KEY=db-...` (never commit the key).
+Setup: `pip install databento`, then put the key in the DATABENTO_API_KEY environment variable (never commit the key).
 Historical data is pay-as-you-go per GB; run `estimate_cost` before large pulls.
 """
 from __future__ import annotations
@@ -14,6 +14,32 @@ import pandas as pd
 from .store import Cache
 
 MIC_PRIORITY = ["XNGS", "XNYS", "ARCX", "XNCM", "XNMS", "BATS", "XASE"]
+PRICE_BASIS = ("Databento ohlcv-1d: one bar per UTC day from trades on the dataset's venue. The close is the last trade "
+               "before midnight UTC (7 or 8 pm New York, after hours), not the exchange's official 4 pm close")
+
+
+def session_filter(bars: pd.DataFrame, min_rel_volume: float = 0.10) -> tuple[pd.DataFrame, list[str]]:
+    """Drop bars that are not a trading session (v0.42.2). Databento's daily bars are cut at midnight UTC and a bar exists
+    only for symbols that traded, so the last hour of Friday's after-hours session (7 to 8 pm New York in winter) becomes
+    a Saturday bar for the names that happened to trade in it, and the evening before a holiday becomes a holiday bar.
+    Those dates then look like gaps in every name that did not trade. A date is kept when it is a weekday and its
+    volume is not a sliver: the median across symbols of volume over the symbol's own trailing median is at least
+    `min_rel_volume` (a half day runs near 0.5; an after-hours sliver far below 0.01)."""
+    if bars.empty:
+        return bars, []
+    d = pd.to_datetime(bars["date"])
+    dates = pd.Index(sorted(d.unique()))
+    drop = set(dates[dates.dayofweek >= 5])
+    if "volume" in bars.columns and bars["volume"].notna().any() and float(bars["volume"].max()) > 0:
+        vol = bars.assign(date=d).pivot_table(index="date", columns="symbol", values="volume", aggfunc="sum").sort_index()
+        wk = vol.loc[vol.index.dayofweek < 5]
+        med = wk.rolling(41, center=True, min_periods=5).median()
+        rel = (wk / med).median(axis=1, skipna=True)
+        drop |= set(rel.index[rel < min_rel_volume])
+    if not drop:
+        return bars, []
+    keep = ~d.isin(list(drop))
+    return bars.loc[keep].copy(), [t.strftime("%Y-%m-%d") for t in sorted(drop)]
 
 
 def _range_bound(rng: dict, key: str, schema: str | None = None) -> pd.Timestamp:
@@ -145,8 +171,10 @@ class DatabentoSource:
         ds = self.equities_dataset_for(start)
         end = self.resolve_end(ds, end)
         key = f"bars|{ds}|{','.join(sorted(symbols))}|{start}|{end}"
+        self.dataset_used = ds
         if self.cache is not None and (hit := self.cache.get(key)) is not None:
             return hit
+        self.dataset_used = ds
         store = self.hist.timeseries.get_range(dataset=ds, schema="ohlcv-1d", symbols=list(symbols),
                                                start=start, end=end, stype_in="raw_symbol")
         df = store.to_df().reset_index()
@@ -154,6 +182,62 @@ class DatabentoSource:
         out = df[["date", "symbol", "open", "high", "low", "close", "volume"]].copy()
         if self.cache is not None:
             self.cache.put(key, out)
+        return out
+
+    def daily_bars(self, symbols: list[str], start: str, end: str | None = None) -> pd.DataFrame:
+        """The raw bars made fit to use (v0.42.2); what was done is in self.cleaning.
+          1. Ticker identity: rows dated before the ticker became this company are another security's and are dropped
+             (corporate_actions.TICKER_SINCE); the company's earlier ticker is pulled and joined on (FORMER_TICKER).
+          2. Sessions: weekend and sliver-volume dates, which the UTC day boundary creates, are dropped (session_filter)."""
+        from .corporate_actions import FORMER_TICKER, TICKER_SINCE
+        bars = self.raw_daily_bars(symbols, start, end).copy()
+        bars["date"] = pd.to_datetime(bars["date"])
+        info: dict = {"dataset": getattr(self, "dataset_used", None), "price_basis": PRICE_BASIS, "ticker_since": {}, "former_ticker": {}}
+        for sym, since in TICKER_SINCE.items():
+            if sym not in symbols:
+                continue
+            other = (bars["symbol"] == sym) & (bars["date"] < pd.Timestamp(since))
+            info["ticker_since"][sym] = {"since": since, "rows_dropped": int(other.sum()),
+                                         "dropped_from": bars.loc[other, "date"].min().strftime("%Y-%m-%d") if other.any() else None}
+            bars = bars.loc[~other]
+        for sym, (old, until) in FORMER_TICKER.items():
+            if sym not in symbols or pd.Timestamp(start) >= pd.Timestamp(until):
+                continue
+            try:
+                cost = self.estimate_cost([old], start, until) if hasattr(self, "hist") else 0.0
+                if cost > 1.0:
+                    raise RuntimeError(f"estimate ${cost:.2f} is above the $1 allowed for a former ticker")
+                prev = self.raw_daily_bars([old], start, until)
+                prev = prev.loc[(prev["symbol"] == old) & (pd.to_datetime(prev["date"]) < pd.Timestamp(until))].copy()
+                if prev.empty:
+                    raise RuntimeError(f"no {old} bars before {until}")
+                prev["date"] = pd.to_datetime(prev["date"])
+                prev["symbol"] = sym
+                bars = pd.concat([prev, bars], ignore_index=True)
+                info["former_ticker"][sym] = {"from": old, "until": until, "rows": int(len(prev)), "first": prev["date"].min().strftime("%Y-%m-%d")}
+            except Exception as exc:          # the name then starts at its own ticker's first day, and the report says so
+                info["former_ticker"][sym] = {"from": old, "until": until, "rows": 0, "error": f"{type(exc).__name__}: {exc}"[:200]}
+        bars, dropped = session_filter(bars)
+        info["non_session_dates_dropped"] = {"count": len(dropped), "weekend": int(sum(pd.Timestamp(x).dayofweek >= 5 for x in dropped)),
+                                             "first": dropped[:3], "last": dropped[-3:]}
+        self.cleaning = info
+        return bars.sort_values(["date", "symbol"]).reset_index(drop=True)
+
+    def diagnostics(self, symbols: list[str], start: str) -> dict:
+        """Free metadata reads that say what a better price basis would take: how far back the consolidated daily summary
+        goes, and what hourly bars (to rebuild a regular-session close) would cost. Never raises."""
+        out: dict = {}
+        try:
+            rng = self.hist.metadata.get_dataset_range(dataset="EQUS.SUMMARY")
+            out["equs_summary"] = {"start": str(_range_bound(rng, "start", "ohlcv-1d").date()), "end": str(_range_bound(rng, "end", "ohlcv-1d").date())}
+        except Exception as exc:
+            out["equs_summary"] = {"error": f"{type(exc).__name__}: {exc}"[:160]}
+        try:
+            ds = getattr(self, "dataset_used", None) or self.equities_dataset_for(start)
+            out["ohlcv_1h_cost_usd"] = round(self.estimate_cost(symbols, start, None, schema="ohlcv-1h", dataset=ds), 4)
+            out["ohlcv_1d_cost_usd"] = round(self.estimate_cost(symbols, start, None, schema="ohlcv-1d", dataset=ds), 4)
+        except Exception as exc:
+            out["cost_error"] = f"{type(exc).__name__}: {exc}"[:160]
         return out
 
     def adjustment_factors(self, symbols: list[str], start: str, end: str | None = None) -> pd.DataFrame:
@@ -174,7 +258,7 @@ class DatabentoSource:
         from .corporate_actions import PENDING, split_factors
         if adjustments not in ("auto", "databento", "public"):
             raise ValueError(f"data.adjustments must be auto, databento or public, not {adjustments!r}")
-        bars = self.raw_daily_bars(symbols, start, end)
+        bars = self.daily_bars(symbols, start, end)
         closes = bars.pivot_table(index="date", columns="symbol", values="close", aggfunc="last").sort_index()
         self.adjustments_used = "none"
         self.adjustments_error = None

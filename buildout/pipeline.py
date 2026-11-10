@@ -37,7 +37,8 @@ def load_inputs(cfg: Config) -> Inputs:
         src = DatabentoSource(equities_dataset=d.equities_dataset, futures_dataset=d.futures_dataset, cache=cache)
         guard_cost(src, u.equities, d)
         prices = src.adjusted_closes(u.equities, d.start, d.end, adjustments=d.adjustments)
-        adj = {"source": src.adjustments_used, "vendor_error": src.adjustments_error}
+        adj = {"source": src.adjustments_used, "vendor_error": src.adjustments_error, "cleaning": getattr(src, "cleaning", None),
+               "diagnostics": src.diagnostics(u.equities, d.start)}          # v0.42.2: what was dropped or joined, and the price basis
     elif d.source == "csv":
         from .data.csv_source import load_prices
         prices = load_prices(d.csv_path).loc[d.start:d.end]

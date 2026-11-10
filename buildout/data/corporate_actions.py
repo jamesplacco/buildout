@@ -34,6 +34,15 @@ NO_SPLITS = ("MSFT", "META", "ORCL", "QQQ", "TLT", "IEF", "SPCX")
 PENDING = {"META": "2-for-1 through a non-voting Class C share for each Class A share, announced Oct 21, 2026; "
                    "record and distribution dates not yet announced"}
 
+# A ticker is not a company (v0.42.2). Two of the book's tickers named other securities earlier in the data window, and a
+# pull by ticker returns those securities' prices under the book's name.
+#   SPCX  SpaceX listed on Nasdaq on June 12, 2026. Until April 6, 2026 SPCX was Tuttle Capital's SPAC and New Issue ETF
+#         (renamed SPCK on April 7, 2026).
+#   META  Meta Platforms took the ticker on June 9, 2022 (it was FB). Until January 28, 2022 META was the Roundhill Ball
+#         Metaverse ETF (renamed METV on January 31, 2022).
+TICKER_SINCE = {"SPCX": "2026-06-12", "META": "2022-06-09"}       # the first session the ticker is this company
+FORMER_TICKER = {"META": ("FB", "2022-06-09")}                    # the same company's earlier ticker, up to (not including) the date
+
 # fund: (FRED constant-maturity series, expense ratio)
 BOND_INCOME = {"TLT": ("DGS20", 0.0015), "IEF": ("DGS7", 0.0015)}
 

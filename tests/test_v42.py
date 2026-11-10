@@ -39,8 +39,10 @@ def _params():
 
 
 def _call():
-    c = ex.latest_call()
-    c = dict(c)
+    """The latest call's shape, pinned to the ledger's Nov 6 entry (in force from Nov 9, the fixed clock). Pinned
+    because the repo's latest call moves every day: read live, these tests failed the day after they were written."""
+    c = dict(ex.latest_call())
+    c["asof"] = "2026-11-06"
     c["effective_from"] = "2026-11-09"
     return c
 
