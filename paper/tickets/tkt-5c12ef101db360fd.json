@@ -1,0 +1,340 @@
+{
+ "id": "tkt-5c12ef101db360fd",
+ "created": "2026-11-11T19:54:15Z",
+ "expires": "2026-11-11T20:09:15Z",
+ "mode": "paper",
+ "broker": "robinhood_agentic",
+ "call": {
+  "asof": "2026-11-09",
+  "size": 0.5249,
+  "binding": "drawdown_cap",
+  "effective_from": "2026-11-11"
+ },
+ "target": {
+  "book_gross": 0.5249,
+  "short": 0.0,
+  "vix": 0.0,
+  "weights": {
+   "MSFT": 0.07348600000000001,
+   "AMZN": 0.07348600000000001,
+   "GOOGL": 0.07348600000000001,
+   "NVDA": 0.07348600000000001,
+   "META": 0.062988,
+   "TSLA": 0.05249000000000001,
+   "AVGO": 0.041992,
+   "SPCX": 0.041992,
+   "ORCL": 0.031494
+  },
+  "variant": "unhedged",
+  "note": "PSQ is a daily-reset inverse ETF, close to but not the same as a futures short; VIXY carries the VIX futures roll cost."
+ },
+ "orders": [
+  {
+   "symbol": "AMZN",
+   "side": "buy",
+   "quantity": 27.0,
+   "type": "limit",
+   "limit_price": 271.28,
+   "time_in_force": "gfd",
+   "notional": 7324.56,
+   "target_share": 0.0735,
+   "reason": "book name to the call's size",
+   "seq": 1
+  },
+  {
+   "symbol": "NVDA",
+   "side": "buy",
+   "quantity": 43.0,
+   "type": "limit",
+   "limit_price": 169.14,
+   "time_in_force": "gfd",
+   "notional": 7273.02,
+   "target_share": 0.0735,
+   "reason": "book name to the call's size",
+   "seq": 2
+  },
+  {
+   "symbol": "GOOGL",
+   "side": "buy",
+   "quantity": 25.0,
+   "type": "limit",
+   "limit_price": 285.35,
+   "time_in_force": "gfd",
+   "notional": 7133.75,
+   "target_share": 0.0735,
+   "reason": "book name to the call's size",
+   "seq": 3
+  },
+  {
+   "symbol": "MSFT",
+   "side": "buy",
+   "quantity": 13.0,
+   "type": "limit",
+   "limit_price": 533.96,
+   "time_in_force": "gfd",
+   "notional": 6941.48,
+   "target_share": 0.0735,
+   "reason": "book name to the call's size",
+   "seq": 4
+  },
+  {
+   "symbol": "META",
+   "side": "buy",
+   "quantity": 9.0,
+   "type": "limit",
+   "limit_price": 642.35,
+   "time_in_force": "gfd",
+   "notional": 5781.15,
+   "target_share": 0.063,
+   "reason": "book name to the call's size",
+   "seq": 5
+  },
+  {
+   "symbol": "TSLA",
+   "side": "buy",
+   "quantity": 13.0,
+   "type": "limit",
+   "limit_price": 380.35,
+   "time_in_force": "gfd",
+   "notional": 4944.55,
+   "target_share": 0.0525,
+   "reason": "book name to the call's size",
+   "seq": 6
+  },
+  {
+   "symbol": "SPCX",
+   "side": "buy",
+   "quantity": 29.0,
+   "type": "limit",
+   "limit_price": 143.3,
+   "time_in_force": "gfd",
+   "notional": 4155.7,
+   "target_share": 0.042,
+   "reason": "book name to the call's size",
+   "seq": 7
+  },
+  {
+   "symbol": "AVGO",
+   "side": "buy",
+   "quantity": 12.0,
+   "type": "limit",
+   "limit_price": 332.48,
+   "time_in_force": "gfd",
+   "notional": 3989.76,
+   "target_share": 0.042,
+   "reason": "book name to the call's size",
+   "seq": 8
+  },
+  {
+   "symbol": "ORCL",
+   "side": "buy",
+   "quantity": 26.0,
+   "type": "limit",
+   "limit_price": 118.16,
+   "time_in_force": "gfd",
+   "notional": 3072.16,
+   "target_share": 0.0315,
+   "reason": "book name to the call's size",
+   "seq": 9
+  }
+ ],
+ "stage": "single",
+ "account": {
+  "equity": 100000.0,
+  "cash": 100000.0,
+  "positions": {}
+ },
+ "quotes": {
+  "AMZN": {
+   "bid": 270.73456500000003,
+   "ask": 271.005435,
+   "last": 270.87,
+   "asof": "2026-11-10"
+  },
+  "AVGO": {
+   "bid": 331.81401000000005,
+   "ask": 332.14599,
+   "last": 331.98,
+   "asof": "2026-11-10"
+  },
+  "GOOGL": {
+   "bid": 284.77754000000004,
+   "ask": 285.06246,
+   "last": 284.92,
+   "asof": "2026-11-10"
+  },
+  "META": {
+   "bid": 641.069305,
+   "ask": 641.710695,
+   "last": 641.39,
+   "asof": "2026-11-10"
+  },
+  "MSFT": {
+   "bid": 532.89342,
+   "ask": 533.42658,
+   "last": 533.16,
+   "asof": "2026-11-10"
+  },
+  "NVDA": {
+   "bid": 168.805555,
+   "ask": 168.97444499999997,
+   "last": 168.89,
+   "asof": "2026-11-10"
+  },
+  "ORCL": {
+   "bid": 117.92101000000001,
+   "ask": 118.03899,
+   "last": 117.98,
+   "asof": "2026-11-10"
+  },
+  "SPCX": {
+   "bid": 143.01845500000002,
+   "ask": 143.161545,
+   "last": 143.09,
+   "asof": "2026-11-10"
+  },
+  "TSLA": {
+   "bid": 379.59011,
+   "ask": 379.96988999999996,
+   "last": 379.78,
+   "asof": "2026-11-10"
+  }
+ },
+ "checks": [
+  {
+   "check": "not halted",
+   "pass": true,
+   "value": null,
+   "note": "touch private/HALT or set BUILDOUT_TRADING_HALT to stop every ticket"
+  },
+  {
+   "check": "Agentic account",
+   "pass": true,
+   "value": "agentic (paper)",
+   "note": "Robinhood lets agents trade only the Agentic account; any other account is refused here too"
+  },
+  {
+   "check": "equity known",
+   "pass": true,
+   "value": 100000.0,
+   "note": ""
+  },
+  {
+   "check": "call's data at most 3 business days old",
+   "pass": true,
+   "value": {
+    "data": "2026-11-09",
+    "business_days": 2
+   },
+   "note": ""
+  },
+  {
+   "check": "call logged in the verified ledger before trading",
+   "pass": true,
+   "value": {
+    "ledger_ok": true,
+    "logged": true
+   },
+   "note": ""
+  },
+  {
+   "check": "the call is in force today (on or after its effective date)",
+   "pass": true,
+   "value": {
+    "effective_from": "2026-11-11",
+    "today": "2026-11-11"
+   },
+   "note": "a call governs from the trading day after it is logged; trading it sooner would run ahead of the record"
+  },
+  {
+   "check": "equity matches cash plus positions (within 2%)",
+   "pass": true,
+   "value": {
+    "reported": 100000.0,
+    "implied": 100000.0
+   },
+   "note": "a stale or wrong equity figure would size every order wrong"
+  },
+  {
+   "check": "every quote is a positive number with bid at most ask",
+   "pass": true,
+   "value": [],
+   "note": ""
+  },
+  {
+   "check": "every symbol has a quote",
+   "pass": true,
+   "value": [],
+   "note": ""
+  },
+  {
+   "check": "spreads within 1.0%",
+   "pass": true,
+   "value": [],
+   "note": ""
+  },
+  {
+   "check": "every symbol on the allowlist",
+   "pass": true,
+   "value": [],
+   "note": ""
+  },
+  {
+   "check": "no short sale (a sale at most what is held)",
+   "pass": true,
+   "value": null,
+   "note": ""
+  },
+  {
+   "check": "buys funded from cash on hand",
+   "pass": true,
+   "value": {
+    "buys": 50616.13,
+    "cash": 100000.0
+   },
+   "note": ""
+  },
+  {
+   "check": "gross after at most 98% of equity (no borrowing)",
+   "pass": true,
+   "value": 0.5057,
+   "note": ""
+  },
+  {
+   "check": "cash after at least 2% of equity",
+   "pass": true,
+   "value": 49383.87,
+   "note": ""
+  },
+  {
+   "check": "each order at most 25% of equity and $25,000",
+   "pass": true,
+   "value": [],
+   "note": ""
+  },
+  {
+   "check": "turnover at most 100% of equity",
+   "pass": true,
+   "value": 0.5062,
+   "note": "a first build from cash may reach 100%"
+  },
+  {
+   "check": "at most 1 executed ticket a day",
+   "pass": true,
+   "value": 0,
+   "note": ""
+  }
+ ],
+ "all_checks_pass": true,
+ "execute": false,
+ "summary": {
+  "orders": 9,
+  "buys_usd": 50616.13,
+  "sells_usd": 0,
+  "cash_after": 49383.87,
+  "gross_after": 0.5057
+ },
+ "placed_by_buildout": false,
+ "instructions": "Show the person every order and check. Place nothing unless execute is true, every check passes, the ticket has not expired, and the person has approved this ticket id. Place each order through Robinhood's Trading MCP in seq order as a limit order at limit_price, then call record_fills with what Robinhood reports.",
+ "status": "filled"
+}

@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "version": "0.42.2",
- "run_at": "2026-11-11T18:49:05+00:00",
+ "version": "0.42.4",
+ "run_at": "2026-11-11T19:54:00+00:00",
  "engines": [
   {
    "name": "macro",
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "64777909e52c07bd"
+    "atlas.json": "796ef537de4d103a"
    }
   },
   {
@@ -107,7 +107,7 @@
    ],
    "status": "external",
    "outputs": {
-    "labs.json": "28c2ecc006e66044"
+    "labs.json": "6bdba27083819093"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "31ae3fb9859d9bf2"
+    "connections.json": "eacd9ce26360498e"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "940231760ebddc78",
-    "statements.json": "0a1f848e6fa8f957"
+    "technicals.json": "dd48d9303a304a68",
+    "statements.json": "303d9bb0e565a703"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "814bea9bc3663dd9"
+    "feeds.json": "de53a342d8c76620"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "f2bb6f28251b3001"
+    "reason.json": "cc979f7bd67a8fd1"
    }
   },
   {
@@ -302,7 +302,7 @@
    "outputs": {
     "valuation.json": "fd04b9866843e986"
    },
-   "seconds": 1.193,
+   "seconds": 0.697,
    "inputs": {
     "capex.json": "e1a864448f92346e",
     "macro.json": "118c40b1ccea2d9e"
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.113,
+   "seconds": 0.05,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -345,7 +345,7 @@
    "outputs": {
     "hedges.json": "4da792fc58c3f6e4"
    },
-   "seconds": 1.42,
+   "seconds": 0.523,
    "attempts": 1
   },
   {
@@ -368,7 +368,7 @@
    "outputs": {
     "ooda.json": "99b1ecf2879747d6"
    },
-   "seconds": 2.024,
+   "seconds": 0.821,
    "inputs": {
     "macro.json": "118c40b1ccea2d9e",
     "research.json": "d2c6580ba083f72a",
@@ -449,7 +449,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "8cd03eece3a428ae"
+    "status.json": "298c0107da52847b"
    }
   }
  ],
@@ -458,9 +458,9 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 3.139,
-  "serial_seconds": 4.75,
-  "speedup": 1.51,
+  "wall_seconds": 1.483,
+  "serial_seconds": 2.091,
+  "speedup": 1.41,
   "levels": [
    [
     "atlas",

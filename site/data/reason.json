@@ -465,12 +465,12 @@
     ]
    },
    {
-    "id": "oil",
-    "name": "Brent at or above 1.3x its 5-year average",
-    "p_on": 0.200884,
-    "evsi_bp": 6.939e-14,
-    "observed": null,
-    "flip_changes_choice": null,
+    "id": "capex",
+    "name": "Builders' capex above 80% of operating cash flow",
+    "p_on": 0.521628,
+    "evsi_bp": 1.388e-13,
+    "observed": true,
+    "flip_changes_choice": false,
     "choice_if_on": [
      0.45,
      0.0,
@@ -485,12 +485,12 @@
     ]
    },
    {
-    "id": "capex",
-    "name": "Builders' capex above 80% of operating cash flow",
-    "p_on": 0.521628,
+    "id": "oil",
+    "name": "Brent at or above 1.3x its 5-year average",
+    "p_on": 0.200884,
     "evsi_bp": 6.939e-14,
-    "observed": true,
-    "flip_changes_choice": false,
+    "observed": null,
+    "flip_changes_choice": null,
     "choice_if_on": [
      0.45,
      0.0,

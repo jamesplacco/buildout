@@ -2,25 +2,71 @@
  "schema": 1,
  "opened": "2026-11-11",
  "start_cash": 100000.0,
- "equity": 100000.0,
- "cash": 100000.0,
- "marks_asof": "",
- "positions": [],
- "equity_history": [],
- "tickets_filled": 0,
+ "equity": 99924.21,
+ "cash": 49383.87,
+ "marks_asof": "2026-11-10",
+ "positions": [
+  {
+   "symbol": "AMZN",
+   "quantity": 27.0
+  },
+  {
+   "symbol": "AVGO",
+   "quantity": 12.0
+  },
+  {
+   "symbol": "GOOGL",
+   "quantity": 25.0
+  },
+  {
+   "symbol": "META",
+   "quantity": 9.0
+  },
+  {
+   "symbol": "MSFT",
+   "quantity": 13.0
+  },
+  {
+   "symbol": "NVDA",
+   "quantity": 43.0
+  },
+  {
+   "symbol": "ORCL",
+   "quantity": 26.0
+  },
+  {
+   "symbol": "SPCX",
+   "quantity": 29.0
+  },
+  {
+   "symbol": "TSLA",
+   "quantity": 13.0
+  }
+ ],
+ "equity_history": [
+  [
+   "2026-11-10",
+   99924.21
+  ]
+ ],
+ "tickets_filled": 1,
  "fills_chain": {
   "ok": true,
-  "entries": 0
+  "entries": 1
  },
- "passes": 3,
+ "passes": 4,
  "last": {
+  "approval": "autonomous",
   "broker": "paper",
-  "event": "pass",
-  "outcome": "the ticket failed a check",
-  "reasons": [
-   "the call is in force today (on or after its effective date)"
-  ],
-  "ts_utc": "2026-11-11T18:49:31Z"
+  "equity_after": 99924.21,
+  "event": "executed",
+  "failures": 0,
+  "fills": 9,
+  "mandate_hash": "b2d64f2e31dfd9af",
+  "mode": "autonomous",
+  "status": "filled",
+  "ticket": "tkt-5c12ef101db360fd",
+  "ts_utc": "2026-11-11T19:54:16Z"
  },
  "recent": [
   {
@@ -49,6 +95,19 @@
     "the call is in force today (on or after its effective date)"
    ],
    "ts_utc": "2026-11-11T18:49:31Z"
+  },
+  {
+   "approval": "autonomous",
+   "broker": "paper",
+   "equity_after": 99924.21,
+   "event": "executed",
+   "failures": 0,
+   "fills": 9,
+   "mandate_hash": "b2d64f2e31dfd9af",
+   "mode": "autonomous",
+   "status": "filled",
+   "ticket": "tkt-5c12ef101db360fd",
+   "ts_utc": "2026-11-11T19:54:16Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
