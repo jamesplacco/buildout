@@ -206,7 +206,10 @@ def main(argv: list[str] | None = None) -> None:
     tr.add_argument("--out", help="also write <out>/paper.json (the public paper record)")
     tr.add_argument("--cache", default=".cache/book", help="price cache for paper quotes")
     bp = sub.add_parser("broker", help="v0.42: Robinhood's Trading MCP: probe its tools, sign in")
-    bp.add_argument("action", choices=["probe", "login", "init"])
+    bp.add_argument("action", choices=["probe", "login", "init", "orders", "resolve"])
+    bp.add_argument("client_id", nargs="?", help="resolve: the client id of an unknown order")
+    bp.add_argument("--order-id", help="resolve: it was placed; this is Robinhood's order id")
+    bp.add_argument("--not-sent", action="store_true", help="resolve: it never reached Robinhood")
     drl.add_argument("--out", default="out")
     drl.add_argument("--quick", action="store_true", help="a tenth of the training, for a smoke test")
     bo = sub.add_parser("board", help="the mind's verdict on every claim it weighs, thought about at once as one matrix")
@@ -843,6 +846,12 @@ def main(argv: list[str] | None = None) -> None:
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text(br.broker_template())
             print("wrote", p)
+            return
+        if a.action == "orders":
+            print(json.dumps(br.OrderJournal("robinhood_mcp", "agentic").all(), indent=1))
+            return
+        if a.action == "resolve":
+            print(json.dumps(br.resolve(a.client_id, order_id=a.order_id, not_sent=a.not_sent), indent=1))
             return
         b = br.MCPBroker()
         if a.action == "probe":

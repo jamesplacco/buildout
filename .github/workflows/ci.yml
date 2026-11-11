@@ -27,5 +27,7 @@ jobs:
           node-version: "22"
       - name: Page is assembled from site/src
         run: python scripts/assemble_page.py --check
+      - name: Site builds with no packages installed (what the Pages job has)
+        run: python -m venv /tmp/bare && /tmp/bare/bin/python scripts/build_site.py site /tmp/_site && test -s /tmp/_site/data/manifest.json
       - name: Test (engine, page math against the engine, robustness)
         run: pytest -q

@@ -42,7 +42,44 @@ def build(src: str = "site", out: str = "_site") -> Path:
         from buildout import ledger as _ledger
         (dest / "data").mkdir(parents=True, exist_ok=True)
         (dest / "data" / "calls.json").write_text(json.dumps({"verify": _ledger.verify(led), "entries": _ledger.read(led)}))
+    (dest / "data").mkdir(parents=True, exist_ok=True)
+    (dest / "data" / "manifest.json").write_text(json.dumps(manifest(dest), indent=1))
     return dest / "index.html"
+
+
+def manifest(dest: Path) -> dict:
+    """What this deployment serves (v0.42.3): the source commit, when it was built, and how old each data file is.
+    A fresh build is not fresh data; this says which is which. Standard library only."""
+    import hashlib
+    import os
+    import subprocess
+    from datetime import datetime, timezone
+    sha = os.environ.get("GITHUB_SHA")
+    if not sha:
+        try:
+            sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=10).stdout.strip() or None
+        except (OSError, subprocess.SubprocessError):
+            sha = None
+    files = {}
+    for p in sorted((dest / "data").glob("*.json")):
+        if p.name == "manifest.json":
+            continue
+        try:
+            d = json.loads(p.read_text())
+        except ValueError:
+            d = {}
+        asof = None
+        if isinstance(d, dict):
+            for k in ("asof", "as_of", "generated_utc", "last_mark", "marks_asof", "date"):
+                if isinstance(d.get(k), str):
+                    asof = d[k]
+                    break
+            if asof is None and isinstance(d.get("summary"), dict):
+                asof = d["summary"].get("as_of")
+        files[p.name] = {"bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()[:16], "asof": asof}
+    page = dest / "index.html"
+    return {"source_commit": sha, "built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "page_bytes": page.stat().st_size if page.exists() else None, "data": files}
 
 
 if __name__ == "__main__":

@@ -67,9 +67,10 @@ class PaperBroker:
         return {"account_type": "agentic (paper)", "cash": self.start_cash, "positions": {}, "orders": {}, "marks": {}, "opened": datetime.now(timezone.utc).date().isoformat(),
                 "equity_history": [], "start_cash": self.start_cash}
 
-    def save(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(self.state, indent=1, sort_keys=True))
+    def save(self, state: dict | None = None) -> None:
+        """Atomic: write a temporary file beside the account, then rename it over. A crash leaves the old file or
+        the new one, never half of one (v0.42.3)."""
+        _atomic_write_json(self.path, self.state if state is None else state)
 
     def quotes(self, symbols: list[str]) -> dict:
         if self.quote_fn is None:
@@ -101,31 +102,40 @@ class PaperBroker:
                 "positions": [{"symbol": s, "quantity": q} for s, q in sorted(self.state["positions"].items()) if abs(q) > 1e-9], "marks_asof": m["asof"]}
 
     def place(self, symbol: str, side: str, quantity: float, limit: float, client_id: str) -> dict:
-        symbol = symbol.upper()
-        if client_id in self.state["orders"]:
-            return self.state["orders"][client_id]
+        """Validate, compute the account as it would be, check it, write it, and only then adopt it (v0.42.3). A
+        refused order leaves the account in memory and on disk exactly as it was."""
+        symbol, side, quantity, limit = validate_order(symbol, side, quantity, limit, client_id)
+        prior = self.state["orders"].get(client_id)
+        if prior is not None:
+            if (prior["symbol"], prior["side"], float(prior["quantity"]), float(prior["limit"])) != (symbol, side, quantity, limit):
+                raise ValueError(f"client id {client_id} was used for a different order ({prior['side']} {prior['quantity']:g} {prior['symbol']} at {prior['limit']}); refusing")
+            return prior                                              # the same order again: the first result, no second effect
         mk = self.state["marks"].get(symbol)
         if not mk:
             raise RuntimeError(f"no quote for {symbol}; call quotes() first")
         last = float(mk["last"])
         bid, ask = last * (1 - 0.0005), last * (1 + 0.0005)
         fills = (side == "buy" and limit >= ask - 1e-9) or (side == "sell" and limit <= bid + 1e-9)
-        o = {"order_id": f"paper-{client_id}", "client_id": client_id, "symbol": symbol, "side": side, "quantity": float(quantity), "limit": float(limit),
-             "status": "filled" if fills else "open", "filled_qty": float(quantity) if fills else 0.0, "avg_price": float(limit) if fills else None,
-             "placed": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        new = json.loads(json.dumps(self.state))                       # the candidate account
         if fills:
-            signed = quantity if side == "buy" else -quantity
-            held = float(self.state["positions"].get(symbol, 0.0))
+            held = float(new["positions"].get(symbol, 0.0))
             if side == "sell" and quantity > held + 1e-9:
-                raise RuntimeError(f"paper: selling {quantity} {symbol} with {held} held")
-            self.state["positions"][symbol] = held + signed
-            if abs(self.state["positions"][symbol]) < 1e-9:
-                del self.state["positions"][symbol]
-            self.state["cash"] = float(self.state["cash"]) - signed * limit
-            if self.state["cash"] < -1e-6:
-                raise RuntimeError("paper: the buy would take cash below zero; the planner's cash check should have caught this")
-        self.state["orders"][client_id] = o
-        self.save()
+                raise RuntimeError(f"paper: selling {quantity:g} {symbol} with {held:g} held")
+            cash = float(new["cash"]) - (quantity if side == "buy" else -quantity) * limit
+            if cash < -1e-6:
+                raise RuntimeError(f"paper: the buy costs {quantity * limit:,.2f} with {float(new['cash']):,.2f} in cash")
+            pos = held + (quantity if side == "buy" else -quantity)
+            if abs(pos) < 1e-9:
+                new["positions"].pop(symbol, None)
+            else:
+                new["positions"][symbol] = pos
+            new["cash"] = cash
+        o = {"order_id": f"paper-{client_id}", "client_id": client_id, "symbol": symbol, "side": side, "quantity": quantity, "limit": limit,
+             "status": "filled" if fills else "open", "filled_qty": quantity if fills else 0.0, "avg_price": limit if fills else None,
+             "placed": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        new["orders"][client_id] = o
+        self.save(new)                                                 # raises before adoption if the disk refuses
+        self.state = new
         return o
 
     def order(self, order_id: str) -> dict:
@@ -350,6 +360,7 @@ class MCPBroker:
         self.paths = cfg.get("paths", {})
         self.oauth = oauth or OAuth(self.url, PRIVATE / "robinhood_oauth.json")
         self.session_id: str | None = None
+        self.account_key = str(cfg.get("account", "agentic"))       # journal namespace: broker and account
         self.asm: dict | None = None
         self._id = 0
         self._initialized = False
@@ -440,17 +451,64 @@ class MCPBroker:
         return out
 
     def place(self, symbol: str, side: str, quantity: float, limit: float, client_id: str) -> dict:
-        sent = _sent_orders()
-        if client_id in sent:                                        # never twice
-            return sent[client_id]
+        """At most once (v0.42.3). The intent is written to the journal before anything is sent; the journal says
+        what happened after. A send whose outcome is not known (a dropped connection, a crash, a failed write) is
+        'unknown' and is never sent again by this code: it is reconciled against the broker by client id, or
+        resolved by the person (`python -m buildout broker resolve`)."""
+        symbol, side, quantity, limit = validate_order(symbol, side, quantity, limit, client_id)
+        J = OrderJournal(self.name, self.account_key)
+        intent = {"symbol": symbol, "side": side, "quantity": quantity, "limit": round(limit, 2)}
+        rec = J.get(client_id)
+        if rec is not None:
+            if rec["payload_hash"] != _payload_hash(intent):
+                raise ValueError(f"client id {client_id} is already journaled for a different order; refusing")
+            if rec["state"] in ("prepared", "submitting", "unknown"):
+                found = self.reconcile(client_id)
+                if found is None:
+                    J.update(client_id, state="unknown", note="not found at the broker by client id; not re-sent")
+                    raise OrderUnknown(f"{client_id}: an earlier send may have reached Robinhood; not sending again. Check the account, then "
+                                       f"`python -m buildout broker resolve {client_id} --order-id <id>` or `--not-sent`")
+                return J.update(client_id, state="acknowledged", order_id=found.get("order_id"), status=found.get("status"), note="reconciled by client id")
+            return rec                                                         # acknowledged or later: the first result
+        J.prepare(client_id, intent)                                           # durable before the network
         if self.tools.get("review"):
-            self.call("review", symbol=symbol.upper(), side=side, quantity=quantity, limit=round(limit, 2), client_id=client_id)
-        d = self.call("place", symbol=symbol.upper(), side=side, quantity=quantity, limit=round(limit, 2), client_id=client_id)
-        o = {"order_id": str(_dig(d, self.paths.get("order_id", "id")) or ""), "client_id": client_id, "symbol": symbol.upper(), "side": side, "quantity": float(quantity), "limit": float(limit),
-             "status": str(_dig(d, self.paths.get("order_status", "state")) or "submitted"), "placed": datetime.now(timezone.utc).isoformat(timespec="seconds"), "raw": d}
-        sent[client_id] = o
-        _save_sent(sent)
-        return o
+            try:
+                self.call("review", symbol=symbol, side=side, quantity=quantity, limit=round(limit, 2), client_id=client_id)
+            except Exception as exc:                                           # nothing was placed: the intent is closed, not left open
+                J.update(client_id, state="rejected", note=f"review refused: {str(exc)[:160]}")
+                raise
+        J.update(client_id, state="submitting")
+        try:
+            d = self.call("place", symbol=symbol, side=side, quantity=quantity, limit=round(limit, 2), client_id=client_id)
+        except Exception as exc:                                               # it may or may not have reached the broker
+            J.update(client_id, state="unknown", note=f"send failed after it may have arrived: {str(exc)[:160]}")
+            raise OrderUnknown(f"{client_id}: the send failed ({str(exc)[:120]}); it may still have been placed. Not retried.") from exc
+        o = {"order_id": str(_dig(d, self.paths.get("order_id", "id")) or ""), "client_id": client_id, **intent,
+             "status": str(_dig(d, self.paths.get("order_status", "state")) or "submitted"), "placed": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        try:
+            J.update(client_id, state="acknowledged", order_id=o["order_id"], status=o["status"])
+        except Exception:                                                      # placed, but the journal could not say so: never resend
+            o["journal_warning"] = "the order was placed but the journal write failed; it reads 'submitting' and will be reconciled, not re-sent"
+        return {**o, "raw": d}
+
+    def reconcile(self, client_id: str) -> dict | None:
+        """Look for an order with this client id among the broker's orders. Needs a tool that lists orders and a path
+        to the client id in each (paths.client_id); without them nothing can be proven and None is returned."""
+        if not self.tools.get("open_orders") and not self.tools.get("recent_orders"):
+            return None
+        path = self.paths.get("client_id", "client_id")
+        for role in ("recent_orders", "open_orders"):
+            if not self.tools.get(role):
+                continue
+            try:
+                d = self.call(role)
+            except Exception:
+                return None
+            rows = _dig(d, self.paths.get(role, "")) if self.paths.get(role) else d
+            for x in rows if isinstance(rows, list) else []:
+                if str(_dig(x, path)) == client_id:
+                    return {"order_id": str(_dig(x, self.paths.get("order_id", "id")) or ""), "status": str(_dig(x, self.paths.get("order_status", "state")) or "")}
+        return None
 
     def order(self, order_id: str) -> dict:
         d = self.call("order", order_id=order_id)
@@ -509,6 +567,39 @@ def _fill(tmpl, kw: dict):
     return tmpl
 
 
+def validate_order(symbol, side, quantity, limit, client_id) -> tuple[str, str, float, float]:
+    """The checks every broker makes before anything else (v0.42.3): a symbol, buy or sell, a finite positive quantity
+    and limit, a client id."""
+    import math
+    sym = str(symbol or "").strip().upper()
+    if not sym or not sym.replace(".", "").isalnum():
+        raise ValueError(f"bad symbol {symbol!r}")
+    if side not in ("buy", "sell"):
+        raise ValueError(f"side must be buy or sell, not {side!r}")
+    try:
+        q, lim = float(quantity), float(limit)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("quantity and limit must be numbers") from exc
+    if not (math.isfinite(q) and q > 0):
+        raise ValueError(f"quantity must be a finite positive number, not {quantity!r}")
+    if not (math.isfinite(lim) and lim > 0):
+        raise ValueError(f"limit must be a finite positive price, not {limit!r}")
+    if not str(client_id or "").strip():
+        raise ValueError("a client id is required")
+    return sym, side, q, lim
+
+
+def _atomic_write_json(path: Path, obj) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with open(tmp, "w") as fh:
+        fh.write(json.dumps(obj, indent=1, sort_keys=True))
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, path)
+
+
 def _tool_payload(r: dict):
     """A tool result's structured content, else its first text block parsed as JSON, else the text."""
     if r.get("structuredContent") is not None:
@@ -540,18 +631,81 @@ def _dig(d, path: str):
     return cur
 
 
-def _sent_path() -> Path:
-    return PRIVATE / "trader" / "sent_orders.json"
+class OrderUnknown(RuntimeError):
+    """An order whose outcome is not known. The trader records it as a failure and stops; nothing re-sends it."""
 
 
-def _sent_orders() -> dict:
-    p = _sent_path()
-    return json.loads(p.read_text()) if p.exists() else {}
+STATES = ("prepared", "submitting", "acknowledged", "partially_filled", "filled", "cancelled", "rejected", "unknown")
 
 
-def _save_sent(d: dict) -> None:
-    _sent_path().parent.mkdir(parents=True, exist_ok=True)
-    _sent_path().write_text(json.dumps(d, indent=1))
+def _payload_hash(intent: dict) -> str:
+    return hashlib.sha256(json.dumps(intent, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:16]
+
+
+class OrderJournal:
+    """One JSON file of order intents per broker and account, under the trading state root (v0.42.3). Every write is
+    atomic and taken under an exclusive lock, so two passes cannot both prepare the same client id."""
+
+    def __init__(self, broker: str, account: str = "default", root: Path | None = None):
+        from .execution import state_root
+        self.path = (root or state_root()) / "trader" / f"orders_{broker}_{account}.json"
+        self.lock = self.path.with_suffix(".lock")
+
+    def _locked(self, fn):
+        import fcntl
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.lock, "w") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX)
+            try:
+                d = json.loads(self.path.read_text()) if self.path.exists() else {}
+                out = fn(d)
+                _atomic_write_json(self.path, d)
+                return out
+            finally:
+                fcntl.flock(lk, fcntl.LOCK_UN)
+
+    def all(self) -> dict:
+        return json.loads(self.path.read_text()) if self.path.exists() else {}
+
+    def get(self, client_id: str) -> dict | None:
+        return self.all().get(client_id)
+
+    def prepare(self, client_id: str, intent: dict) -> dict:
+        def f(d):
+            if client_id in d:
+                raise ValueError(f"client id {client_id} is already journaled")
+            now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            d[client_id] = {"client_id": client_id, **intent, "payload_hash": _payload_hash(intent), "state": "prepared", "created": now, "history": [["prepared", now]]}
+            return d[client_id]
+        return self._locked(f)
+
+    def update(self, client_id: str, state: str, **fields) -> dict:
+        if state not in STATES:
+            raise ValueError(f"unknown order state {state!r}")
+
+        def f(d):
+            r = d[client_id]
+            now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            r.update({k: v for k, v in fields.items() if v is not None})
+            r["state"] = state
+            r.setdefault("history", []).append([state, now])
+            return dict(r)
+        return self._locked(f)
+
+    def unresolved(self) -> list[dict]:
+        return [r for r in self.all().values() if r["state"] in ("prepared", "submitting", "unknown")]
+
+
+def resolve(client_id: str, order_id: str | None = None, not_sent: bool = False, broker: str = "robinhood_mcp", account: str = "agentic") -> dict:
+    """The person's answer for an unknown order: it was placed (with its order id), or it was not."""
+    J = OrderJournal(broker, account)
+    if J.get(client_id) is None:
+        raise KeyError(client_id)
+    if bool(order_id) == bool(not_sent):
+        raise ValueError("give exactly one of order_id or not_sent")
+    if order_id:
+        return J.update(client_id, state="acknowledged", order_id=order_id, note="resolved by the person: placed")
+    return J.update(client_id, state="rejected", note="resolved by the person: never reached the broker")
 
 
 def load_broker_config(path: str | Path | None = None) -> dict:

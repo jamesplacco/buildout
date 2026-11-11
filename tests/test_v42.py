@@ -199,7 +199,7 @@ def _txt(d):
     return {"content": [{"type": "text", "text": json.dumps(d)}]}
 
 
-def test_the_direct_mcp_client_speaks_json_rpc_and_maps_tools(tmp_path):
+def test_the_direct_mcp_client_speaks_json_rpc_and_maps_tools(tmp_path, monkeypatch):
     srv = HTTPServer(("127.0.0.1", 0), _FakeMCP)
     th = threading.Thread(target=srv.serve_forever, daemon=True)
     th.start()
@@ -210,8 +210,7 @@ def test_the_direct_mcp_client_speaks_json_rpc_and_maps_tools(tmp_path):
         cfg = {"url": url, "tools": {"account": "get_account", "quotes": "get_quotes", "place": "place_equity_order", "order": "get_order"},
                "args": {"place": {"symbol": "{symbol}", "side": "{side}", "quantity": "{quantity}", "type": "limit", "limit_price": "{limit}", "time_in_force": "gfd"}, "order": {"order_id": "{order_id}"}, "quotes": {"symbols": "{symbols}"}},
                "paths": {"account": "account", "account_type": "type", "equity": "equity", "cash": "buying_power", "positions": "positions", "quotes": "results", "q_bid": "bid_price", "q_ask": "ask_price", "q_last": "last_trade_price", "order_id": "id", "order_status": "state"}}
-        import buildout.broker as B
-        B._sent_path = lambda: tmp_path / "sent.json"           # keep the idempotency file in the sandbox
+        monkeypatch.setenv("BUILDOUT_TRADER_STATE", str(tmp_path / "state"))   # the order journal lives under the state root
         b = br.MCPBroker(cfg, oauth=br.OAuth(url, store))
         b.asm = {}
         assert [t["name"] for t in b.list_tools()][:2] == ["get_account", "get_quotes"] and b.session_id == "s1"

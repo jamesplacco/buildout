@@ -16,9 +16,8 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime, timezone
+from datetime import date, timedelta
 from pathlib import Path
-
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / "ledger" / "calls.jsonl"
@@ -76,7 +75,11 @@ def verify(path: Path = PATH) -> dict:
 
 
 def next_trading_day(d: str) -> str:
-    return str((pd.Timestamp(d) + pd.offsets.BDay(1)).date())
+    """The next weekday (pandas' BDay, without pandas: the site build imports this module and installs nothing)."""
+    t = date.fromisoformat(str(d)[:10]) + timedelta(days=1)
+    while t.weekday() >= 5:
+        t += timedelta(days=1)
+    return t.isoformat()
 
 
 def make_entry(book: dict, version: str, prev: dict | None, ts: str | None = None, source: str = "snapshot") -> dict:

@@ -254,12 +254,26 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
         batch = [o for o in ticket["orders"] if o["side"] == side]
         if not batch:
             continue
+        if side == "buy":                     # v0.42.3: the buys must be funded by what the sells actually raised
+            try:
+                cash_now = float(broker.account().get("cash") or 0)
+            except Exception as exc:  # noqa: BLE001
+                failures.append({"symbol": "*", "side": "buy", "error": f"could not re-read cash before the buys: {exc}"})
+                break
+            need = sum(float(o["quantity"]) * float(o["limit_price"]) for o in batch)
+            if need > cash_now + 1e-6:
+                failures.append({"symbol": "*", "side": "buy", "error": f"the buys need {need:,.2f} and the account holds {cash_now:,.2f} after the sells; no buy sent"})
+                break
         placed = []
+        unknown = False
         for o in batch:
             try:
                 placed.append((o, broker.place(o["symbol"], o["side"], o["quantity"], o["limit_price"], f"{ticket['id']}-{o['seq']}")))
             except Exception as exc:  # noqa: BLE001
-                failures.append({"symbol": o["symbol"], "side": side, "error": str(exc)})
+                failures.append({"symbol": o["symbol"], "side": side, "error": str(exc), "unknown": type(exc).__name__ == "OrderUnknown"})
+                if type(exc).__name__ == "OrderUnknown":
+                    unknown = True            # an order that may be live: send nothing more until it is resolved
+                    break
         deadline = min(time.time() + max_wait_seconds, _epoch(ticket["expires"]))
         for o, od in placed:
             st = od
@@ -276,7 +290,7 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
                 fills.append({"symbol": o["symbol"], "side": side, "quantity": fq, "price": float(st.get("avg_price") or o["limit_price"]), "order_id": od["order_id"], "status": st.get("status", "filled")})
             elif st.get("status") in ("rejected", "failed"):
                 failures.append({"symbol": o["symbol"], "side": side, "error": st.get("status")})
-        if side == "sell" and failures:
+        if (side == "sell" and failures) or unknown:
             break                                                         # buys are funded by the sells; a failed sell stops the buys
     rec = ex.record_fills(ticket["id"], fills, now) if fills else {"status": "unfilled", "issues": []}
     if not fills:

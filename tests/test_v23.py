@@ -230,7 +230,7 @@ def test_landing_counts_match_the_engine():
     assert 'id="ag-v23-t"' in agents
     ref = (SRC / "reference.js").read_text()
     assert '["v0.23", "Oct 23, 2026",' in ref and 'g: "v0.23", q: "What is Theta' in ref
-    assert (ROOT / "README.md").read_text().count("Version 0.23") == 1
+    assert (ROOT / "CHANGELOG.md").read_text().count("Version 0.23") == 1          # v0.42.3: the history moved out of the README
     import buildout
     assert buildout.__version__ >= "0.23.0"
 
