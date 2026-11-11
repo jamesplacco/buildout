@@ -35,12 +35,15 @@ def recommendation(P: ex.TradingParams | None = None, M: md.Mandate | None = Non
     from . import book as bk
     P = P or ex.load_params()
     M = M or md.load()
-    call = ex.latest_call()
+    newest = ex.latest_call()
+    call = ex.call_in_force() or newest
     T = ex.target(call, P, dict(bk.BOOK))
     out = {"asof": call.get("asof"), "effective_from": call.get("effective_from") or _effective(call), "size": call.get("size"), "binding": call.get("binding"),
            "menu_high": call.get("keep_names_hedge") or call.get("menu_high"), "variant": P.variant, "target_weights": {k: round(v, 4) for k, v in T["weights"].items()},
            "book_gross": round(T["book_gross"], 4), "index_short_as_psq": round(T["short"], 4), "vix_sleeve": round(T["vix"], 4),
            "mandate": {"mode": M.mode, "armed": M.armed, "broker": M.broker, "hash": M.hash(), "problems": M.problems()},
+           "in_force": call.get("source", "the newest call"), "next_call": {"asof": newest.get("asof"), "size": newest.get("size")} if newest.get("asof") != call.get("asof") else None,
+           "evidence_gate": evidence(),
            "reasons": [f"The live rule sizes the book at {float(call.get('size') or 0):.2f}x of equity; binding limit: {call.get('binding')}.",
                        f"The {P.variant} variant: " + ("the smallest size every limit allows, no index short." if P.variant == "unhedged" else "the largest size the cash account can hold with its index short as PSQ."),
                        f"VIX sleeve {P.vix_share:.0%} of equity in {P.vix_symbol}; the Hedge test desk's study says it pays in crashes and costs carry otherwise."]}
@@ -120,19 +123,62 @@ def approve(ticket_id: str, by: str = "", standing_minutes: int | None = None, n
     return A
 
 
-def _approved(tid: str, M: md.Mandate, now: datetime) -> tuple[bool, str]:
+def _approved(tid: str, M: md.Mandate, now: datetime, mode: str | None = None) -> tuple[bool, str, str | None]:
+    """(approved, why, kind): kind is "ticket" for an approval of this ticket id, "standing" for a standing one."""
+    mode = mode or M.mode
     A = _approvals()
     a = A.get(tid)
     stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     if a:
         given = datetime.strptime(a["given"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         if (now - given) <= timedelta(minutes=M.approval_ttl_min):
-            return True, f"approved by {a.get('by') or 'the person'} at {a['given']}"
-        return False, f"the approval of {a['given']} is older than the mandate's {M.approval_ttl_min} minutes"
+            return True, f"approved by {a.get('by') or 'the person'} at {a['given']}", "ticket"
+        return False, f"the approval of {a['given']} is older than the mandate's {M.approval_ttl_min} minutes", None
     s = A.get("standing")
-    if s and M.mode == "supervised" and s["until"] >= stamp:
-        return True, f"standing approval until {s['until']}"
-    return False, "no approval on file"
+    if s and mode == "supervised" and s["until"] >= stamp:
+        return True, f"standing approval until {s['until']}", "standing"
+    return False, "no approval on file", None
+
+
+# ---------------------------------------------------------------- the evidence gate (v0.42.4)
+PAPER_DAYS_REQUIRED = 60            # trading days the public paper bot has held a position, marked daily
+LIVE_MANUAL_TICKETS_REQUIRED = 5    # live tickets filled after the person approved that ticket's id
+
+
+def evidence(paper_dir: Path | None = None, private_dir: Path | None = None) -> dict:
+    """Has unattended live trading been earned? Two records, both read from files the trader itself writes:
+      1. the paper bot (paper/, committed by the daily run): days marked since its first filled ticket;
+      2. the live route (private/): tickets filled through a live broker after an approval of that ticket's id.
+    Until both are met, a live broker trades in manual mode whatever the mandate says. The thresholds are constants
+    in this file on purpose: changing them is a code change, visible in the repository's history."""
+    paper_dir = Path(paper_dir) if paper_dir else ROOT / "paper"
+    private_dir = Path(private_dir) if private_dir else ex.PRIVATE
+
+    def rows(p: Path) -> list[dict]:
+        if not p.exists():
+            return []
+        out = []
+        for line in p.read_text().splitlines():
+            try:
+                out.append(json.loads(line))
+            except ValueError:
+                continue
+        return out
+
+    pj = rows(paper_dir / "trader" / "journal.jsonl")
+    first = min((r["ts_utc"][:10] for r in pj if r.get("event") == "executed"), default=None)
+    paper_days = len({r["date"] for r in rows(paper_dir / "trader" / "equity.jsonl") if first and r.get("date", "") >= first})
+    lj = rows(private_dir / "trader" / "journal.jsonl")
+    approved = {r["ticket"] for r in lj if r.get("event") in ("executed", "handoff") and r.get("broker") not in (None, "paper") and r.get("approval") == "ticket"}
+    filled = {r["ticket"] for r in rows(private_dir / "fills.jsonl") if r.get("status") in ("filled", "partially_filled")}
+    live = len(approved & filled)
+    missing = []
+    if paper_days < PAPER_DAYS_REQUIRED:
+        missing.append(f"the paper bot has {paper_days} of {PAPER_DAYS_REQUIRED} trading days with a position")
+    if live < LIVE_MANUAL_TICKETS_REQUIRED:
+        missing.append(f"{live} of {LIVE_MANUAL_TICKETS_REQUIRED} live tickets have filled under an approval of their own id")
+    return {"open": not missing, "paper_days": paper_days, "paper_days_required": PAPER_DAYS_REQUIRED, "paper_first_fill": first,
+            "live_manual_tickets": live, "live_manual_tickets_required": LIVE_MANUAL_TICKETS_REQUIRED, "missing": missing}
 
 
 def _equity_history() -> dict:
@@ -195,7 +241,9 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     hist = _equity_history()
     rep["account"] = {"equity": account.get("equity"), "cash": account.get("cash"), "positions": len(account.get("positions") or [])}
     # the recommendation and the quotes
-    call = call or ex.latest_call()
+    call = call or ex.call_in_force(today)
+    if call is None:
+        return stop("no call in force today", reasons=["the ledger holds no call whose effective date has come"])
     T = ex.target(call, P, dict(bk.BOOK))
     symbols = sorted(set(T["weights"]) | {p["symbol"] for p in account.get("positions") or []})
     try:
@@ -228,25 +276,33 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     rep["authorization"] = auth
     if not auth["ok"]:
         return stop("outside the mandate", reasons=auth["reasons"])
+    # live routes: armed, and manual until the evidence is in (v0.42.4)
+    live = getattr(broker, "name", "") != "paper"
+    mode = M.mode
+    if live and not M.armed:
+        return stop("not armed: staged only", reasons=["a live broker needs armed = true in the signed mandate, in every mode"])
+    if live and mode != "manual":
+        ev = evidence()
+        rep["gate"] = ev
+        if not ev["open"]:
+            mode = "manual"
+            rep["steps"].append({"gate": f"the mandate says {M.mode}; live trading is manual until the evidence is in: " + "; ".join(ev["missing"])})
     # the mode gate
-    if M.mode == "manual":
-        okd, why = _approved(ticket["id"], M, now)
+    approval = "autonomous"
+    if mode in ("manual", "supervised"):
+        okd, why, approval = _approved(ticket["id"], M, now, mode)
         if not okd:
-            return stop("staged, awaiting approval", reasons=[why], approve_with=f"python -m buildout trader --approve {ticket['id']}")
-        rep["steps"].append({"approval": why})
-    elif M.mode == "supervised":
-        okd, why = _approved(ticket["id"], M, now)
-        if not okd:
-            return stop("staged, awaiting approval or a standing approval", reasons=[why], approve_with=f"python -m buildout trader --approve {ticket['id']}  (or --standing 120)")
+            gated = [f"gate: {m}" for m in (rep.get("gate") or {}).get("missing", [])] if mode != M.mode else []
+            return stop("staged, awaiting approval" if mode == "manual" else "staged, awaiting approval or a standing approval", reasons=[why] + gated,
+                        approve_with=f"python -m buildout trader --approve {ticket['id']}" + ("" if mode == "manual" else "  (or --standing 120)"))
         rep["steps"].append({"approval": why})
     else:
-        if not M.armed and getattr(broker, "name", "") != "paper":
-            return stop("autonomous but not armed: staged only", reasons=["set armed = true in the signed mandate"])
         rep["steps"].append({"approval": "autonomous under the mandate"})
+    how = {"broker": getattr(broker, "name", "?"), "mode": mode, "approval": approval}
     if getattr(broker, "name", "") == "assistant":
         for o in ticket["orders"]:
             broker.place(o["symbol"], o["side"], o["quantity"], o["limit_price"], f"{ticket['id']}-{o['seq']}")
-        _journal({"event": "handoff", "ticket": ticket["id"], "orders": len(ticket["orders"])})
+        _journal({"event": "handoff", "ticket": ticket["id"], "orders": len(ticket["orders"]), **how})
         return stop("handed to the assistant", handoff=broker.handoff, record_with="record_fills(ticket_id, fills) once Robinhood reports them")
     # execute: sells first, then buys
     fills, failures = [], []
@@ -300,7 +356,7 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     account_after = broker.account()
     _mark_equity(account_after, now)
     rep.update({"fills": fills, "failures": failures, "recorded": rec, "account_after": {"equity": account_after.get("equity"), "cash": account_after.get("cash")}})
-    _journal({"event": "executed" if fills else "unfilled", "ticket": ticket["id"], "fills": len(fills), "failures": len(failures), "status": rec.get("status"), "mandate_hash": M.hash(),
+    _journal({"event": "executed" if fills else "unfilled", "ticket": ticket["id"], "fills": len(fills), "failures": len(failures), "status": rec.get("status"), "mandate_hash": M.hash(), **how,
               "equity_after": account_after.get("equity")})
     _digest(rep, M)
     rep["outcome"] = "executed" if fills else "unfilled"

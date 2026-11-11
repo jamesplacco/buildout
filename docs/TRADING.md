@@ -67,19 +67,39 @@ quiet_days = []
 notes = ""                 # an armed autonomous mandate must say why unattended trading is wanted
 ```
 
+## The evidence gate (in code, not in the mandate)
+
+A live broker trades in **manual** mode, whatever the mandate says, until two records exist:
+
+1. **60 trading days of the paper bot holding a position** (`paper/trader/`, committed by the daily run; days before
+   its first filled ticket do not count).
+2. **5 live tickets filled after you approved that ticket's id** (`private/trader/journal.jsonl` and
+   `private/fills.jsonl`). Standing approvals and paper fills do not count.
+
+Until then a supervised or autonomous mandate on a live broker behaves as manual: each ticket is staged, the pass
+lists what is missing, and a standing approval does not open it. `python -m buildout trader --status` and the MCP tool
+`trader_status` show the count. The thresholds are constants in `buildout/trader.py` (`PAPER_DAYS_REQUIRED`,
+`LIVE_MANUAL_TICKETS_REQUIRED`), so loosening them is a code change with a commit behind it. This is a guard against
+drifting into unattended trading before the record supports it; it is not a security boundary, since the person who
+owns the machine owns the files.
+
+A live broker also needs `armed = true` in every mode, manual included.
+
 ## Going autonomous, in order
 
-1. **Paper, autonomous** (the default mandate with `mode = "autonomous"`): run `python -m buildout trader --loop 15`
-   for two weeks. Read `private/trader/journal.jsonl` and the digest. The public paper bot does the same in `paper/`.
-2. **Assistant route, manual**: `broker = "assistant"`, `mode = "manual"`. In Claude Code, `/rebalance` calls
-   `trading_recommendation` with the account and quotes from Robinhood; the ticket is staged; you approve it; the
-   assistant places the orders and records the fills. A week of this.
-3. **Assistant route, supervised**: `mode = "supervised"`; give a standing approval before a session
-   (`--standing 120`) and let `/autotrade` run it without a question inside that window.
-4. **Autonomous, armed**: `mode = "autonomous"`, `armed = true`, your name and the date, and the reason in `notes`. Set
-   Robinhood's own agent permission to act without confirmation. Schedule the pass: a Claude scheduled task running
-   `/autotrade` each weekday at 10:00 New York (assistant route), or `launchd` on your Mac running
-   `python -m buildout trader --once` (direct route; `deploy/com.buildout.trader.plist`). Read the digest daily.
+1. **Paper**: nothing to do. The public paper bot runs every weekday in `paper/`; a private rehearsal is
+   `python -m buildout trader --once` on the default mandate. The trader acts on the call in force today (the newest
+   ledger entry whose effective date has come), not the call written today, which takes effect tomorrow.
+2. **Live, manual** (this is where the gate keeps you until the evidence is in): `broker = "assistant"`,
+   `armed = true`, your name and the date. In Claude Code, `/rebalance` calls `trading_recommendation` with the
+   account and quotes from Robinhood; the ticket is staged; you approve its id; the assistant places the orders and
+   records the fills. Five filled tickets and sixty paper days open the gate.
+3. **Supervised**: `mode = "supervised"`; give a standing approval before a session (`--standing 120`) and let
+   `/autotrade` run without a question inside that window.
+4. **Autonomous**: `mode = "autonomous"` and the reason in `notes`. Set Robinhood's own agent permission to act
+   without confirmation. Schedule the pass: a Claude scheduled task running `/autotrade` each weekday at 10:00 New
+   York (assistant route), or `launchd` on your Mac running `python -m buildout trader --once` (direct route;
+   `deploy/com.buildout.trader.plist`). Read the digest daily.
 
 Stop everything at any point with `python -m buildout trade halt` (writes `private/HALT`), the MCP tool
 `trading_halt`, or the environment variable `BUILDOUT_TRADING_HALT=1`. Lift it with `trade resume`.

@@ -144,6 +144,23 @@ def latest_call() -> dict:
     return snap
 
 
+def call_in_force(today: str | None = None) -> dict | None:
+    """The call a trade may act on today (v0.42.4): the newest ledger entry whose effective date has come. Each day's
+    call takes effect on the next trading day, so the newest call (latest_call) is never the one in force on the day
+    it is written; trading it was refused every day. Rebuilt from the ledger entry, with its two-point menu as the
+    frontier the hedged variant walks. None when the ledger holds no entry in force."""
+    from . import ledger
+    today = today or datetime.now(timezone.utc).date().isoformat()
+    rows = [e for e in ledger.read() if e.get("effective_from", "9999") <= today]
+    if not rows:
+        return None
+    e = max(rows, key=lambda r: (r["effective_from"], r["seq"]))
+    c = e.get("call", {})
+    frontier = [{"gross": m["gross"], "short": m.get("short", 0.0), "meets": True} for m in (c.get("menu_low"), c.get("menu_high")) if isinstance(m, dict) and m.get("gross") is not None]
+    return {"asof": e.get("data_asof"), "effective_from": e["effective_from"], "size": c.get("size"), "binding": c.get("binding"), "frontier": frontier,
+            "menu_high": c.get("menu_high"), "ledger_seq": e["seq"], "source": f"ledger entry {e['seq']}"}
+
+
 def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams | None = None, weights: dict | None = None,
          today: str | None = None, ledger_check: dict | None = None, now: datetime | None = None) -> dict:
     """The ticket. `account`: {"equity": .., "cash": .., "account_type": "agentic", "positions": [{"symbol", "quantity"}]}.
@@ -151,7 +168,7 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     from . import book as bk
     from . import ledger
     P = P or load_params()
-    call = call or latest_call()
+    call = call or call_in_force(today) or latest_call()
     weights = weights or dict(bk.BOOK)
     now = now or datetime.now(timezone.utc)
     today = today or now.date().isoformat()

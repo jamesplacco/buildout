@@ -127,10 +127,11 @@ def test_the_mandate_refuses_and_the_halt_stops_everything(state):
     assert trader.run_once(pb, md.Mandate(mode="autonomous", max_order_usd=50_000), _params(), now=datetime(2026, 11, 8, 15, 0, tzinfo=timezone.utc), call=_call())["outcome"] == "outside the window"
     unarmed = md.Mandate(mode="autonomous", broker="assistant", max_order_usd=50_000)
     ab = br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
-    assert trader.run_once(ab, unarmed, _params(), now=NOW, call=_call())["outcome"].startswith("autonomous but not armed")
+    assert trader.run_once(ab, unarmed, _params(), now=NOW, call=_call())["outcome"] == "not armed: staged only"
 
 
-def test_the_assistant_route_hands_over_exact_orders(state):
+def test_the_assistant_route_hands_over_exact_orders(state, monkeypatch):
+    monkeypatch.setattr(trader, "evidence", lambda *a, **k: {"open": True, "missing": []})        # the gate has its own tests (test_v42_4)
     ab = br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
     M = md.Mandate(mode="autonomous", armed=True, broker="assistant", signed_by="J", signed_on="2026-11-08", notes="rehearsal", max_order_usd=50_000)
     r = trader.run_once(ab, M, _params(), now=NOW, call=_call())

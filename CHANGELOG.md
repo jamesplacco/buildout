@@ -3,6 +3,12 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.42.4: the trader acts on the call in force today (the newest ledger entry whose effective date has come);
+it had taken the newest call, which takes effect tomorrow, so the paper bot was refused on every pass and never
+traded. A live broker needs `armed = true` in every mode, and trades in manual mode until the evidence gate opens
+(60 paper days with a position, 5 live tickets filled under per-ticket approval; constants in `buildout/trader.py`).
+MIT license. Feature freeze: the daily run, the paper bot and fixes continue.
+
 Version 0.42.3 answers an outside review (Nov 11, 2026). The site builds with no packages installed (the Pages job
 installs none, and the ledger had imported pandas, so the public site stopped updating at v0.39.1), with a manifest of
 what each deployment serves. A refused paper order no longer changes the account. The direct Robinhood route writes

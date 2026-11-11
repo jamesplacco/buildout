@@ -1366,6 +1366,7 @@ def trader_status(ctx: Context, args: dict) -> dict:
     from . import execution as ex, mandate as md, trader
     M = md.load()
     return _clean({"mandate": {"mode": M.mode, "armed": M.armed, "broker": M.broker, "hash": M.hash(), "problems": M.problems(), "window": md.in_window(M)},
+                   "evidence_gate": trader.evidence(),
                    "halted": ex.halted(), "journal": trader.journal(int(args.get("n", 20))), "approvals": trader._approvals(), "fills_chain": ex.verify_fills(),
                    "unresolved_orders": __import__("buildout.broker", fromlist=["OrderJournal"]).OrderJournal("robinhood_mcp", "agentic").unresolved(),
                    "places_orders": False, "note": "Buildout's MCP server places no order. The trader (python -m buildout trader) does, under the mandate, through a broker; on the assistant route the assistant places them through Robinhood's MCP."})

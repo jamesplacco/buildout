@@ -45,8 +45,13 @@ config.toml --out out` runs on real data; see "Local use" below.
 - One book, one decision a day, long only plus index shorts and a VIX sleeve. It does not pick stocks.
 - Backtests start in 2018; the live record starts Nov 4, 2026 and is days old.
 - The Databento daily close is the last trade before midnight UTC, not the official close (stated in every report).
-- The trader can act for a person under a signed mandate (docs/TRADING.md). The direct Robinhood route is built but
-  untested against the live endpoint; paper is the default.
+- The trader can act for a person under a signed mandate (docs/TRADING.md). Paper is the default. A live broker
+  trades only on per-ticket approval until the paper bot has held a position for 60 trading days and 5 live tickets
+  have filled under approval; that gate is in code. The direct Robinhood route is untested against the live endpoint.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Research and tooling, not investment advice.
 
 
 ## Daily run (GitHub Actions)
