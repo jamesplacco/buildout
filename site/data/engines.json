@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "version": "0.42.1",
- "run_at": "2026-11-10T22:37:04+00:00",
+ "version": "0.42.2",
+ "run_at": "2026-11-11T18:49:05+00:00",
  "engines": [
   {
    "name": "macro",
@@ -15,7 +15,7 @@
    ],
    "status": "external",
    "outputs": {
-    "macro.json": "702772953ec58838"
+    "macro.json": "118c40b1ccea2d9e"
    }
   },
   {
@@ -62,7 +62,7 @@
    ],
    "status": "external",
    "outputs": {
-    "report.json": "75afdfb882d37a8e"
+    "report.json": "72ac970d8ef4758e"
    }
   },
   {
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "669f0cb960761ffa"
+    "atlas.json": "64777909e52c07bd"
    }
   },
   {
@@ -107,7 +107,7 @@
    ],
    "status": "external",
    "outputs": {
-    "labs.json": "6bdba27083819093"
+    "labs.json": "28c2ecc006e66044"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "fa8293ebf61ac064"
+    "connections.json": "31ae3fb9859d9bf2"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "96dac44e0e9d65d6",
-    "statements.json": "12b3cecf857334d3"
+    "technicals.json": "940231760ebddc78",
+    "statements.json": "0a1f848e6fa8f957"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "03c65baf377098fb"
+    "feeds.json": "814bea9bc3663dd9"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "47428d6934814d5e"
+    "reason.json": "f2bb6f28251b3001"
    }
   },
   {
@@ -302,10 +302,10 @@
    "outputs": {
     "valuation.json": "fd04b9866843e986"
    },
-   "seconds": 0.893,
+   "seconds": 1.193,
    "inputs": {
     "capex.json": "e1a864448f92346e",
-    "macro.json": "702772953ec58838"
+    "macro.json": "118c40b1ccea2d9e"
    },
    "attempts": 1
   },
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.069,
+   "seconds": 0.113,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -345,7 +345,7 @@
    "outputs": {
     "hedges.json": "4da792fc58c3f6e4"
    },
-   "seconds": 0.763,
+   "seconds": 1.42,
    "attempts": 1
   },
   {
@@ -366,15 +366,15 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "2d5dc52806a21bcb"
+    "ooda.json": "99b1ecf2879747d6"
    },
-   "seconds": 1.179,
+   "seconds": 2.024,
    "inputs": {
-    "macro.json": "702772953ec58838",
+    "macro.json": "118c40b1ccea2d9e",
     "research.json": "d2c6580ba083f72a",
     "brain.json": "e8144ce521a6d89f",
     "capex.json": "e1a864448f92346e",
-    "report.json": "75afdfb882d37a8e"
+    "report.json": "72ac970d8ef4758e"
    },
    "attempts": 1
   },
@@ -449,7 +449,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "99d6f1528e256281"
+    "status.json": "8cd03eece3a428ae"
    }
   }
  ],
@@ -458,9 +458,9 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 2.018,
-  "serial_seconds": 2.904,
-  "speedup": 1.44,
+  "wall_seconds": 3.139,
+  "serial_seconds": 4.75,
+  "speedup": 1.51,
   "levels": [
    [
     "atlas",

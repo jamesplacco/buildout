@@ -1,14 +1,14 @@
 {
  "schema": 2,
- "calls": 6,
+ "calls": 7,
  "first_call": "2026-11-03T15:38:15Z",
  "first_effective": "2026-11-04",
- "marked_days": 4,
- "last_mark": "2026-11-09",
- "total": -0.004298,
- "total_hedged": 0.00106,
- "book_total": -0.006213,
- "qqq_total": -0.008653,
+ "marked_days": 5,
+ "last_mark": "2026-11-10",
+ "total": -0.007395,
+ "total_hedged": 0.000951,
+ "book_total": -0.012134,
+ "qqq_total": -0.015351,
  "series": [
   [
    "2026-11-04",
@@ -37,12 +37,19 @@
    1.00106,
    0.993787,
    0.5319
+  ],
+  [
+   "2026-11-10",
+   0.992605,
+   1.000951,
+   0.987866,
+   0.5319
   ]
  ],
  "stats": null,
  "ledger": {
   "ok": true,
-  "entries": 6,
-  "head": "4f9f2a586b6044237afc1825c703d89c5546ed870c360dabe30c789b4ebfb0a9"
+  "entries": 7,
+  "head": "88c5fcdb33cfd1952605cd4cf261802d13fe563039e0908502e4af1a8bc3c841"
  }
 }

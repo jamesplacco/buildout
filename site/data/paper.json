@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "opened": "2026-11-10",
+ "opened": "2026-11-11",
  "start_cash": 100000.0,
  "equity": 100000.0,
  "cash": 100000.0,
@@ -12,7 +12,7 @@
   "ok": true,
   "entries": 0
  },
- "passes": 2,
+ "passes": 3,
  "last": {
   "broker": "paper",
   "event": "pass",
@@ -20,7 +20,7 @@
   "reasons": [
    "the call is in force today (on or after its effective date)"
   ],
-  "ts_utc": "2026-11-10T22:37:21Z"
+  "ts_utc": "2026-11-11T18:49:31Z"
  },
  "recent": [
   {
@@ -40,6 +40,15 @@
     "the call is in force today (on or after its effective date)"
    ],
    "ts_utc": "2026-11-10T22:37:21Z"
+  },
+  {
+   "broker": "paper",
+   "event": "pass",
+   "outcome": "the ticket failed a check",
+   "reasons": [
+    "the call is in force today (on or after its effective date)"
+   ],
+   "ts_utc": "2026-11-11T18:49:31Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",

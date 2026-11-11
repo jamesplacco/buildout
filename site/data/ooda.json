@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "as_of": "2026-11-10",
+ "as_of": "2026-11-11",
  "observe": {
   "readings": {
    "oil": 1.387919,
@@ -67,7 +67,7 @@
    "brain": "brain.json",
    "fundamentals": "TTM through each company's latest report, collected Oct 21, 2026",
    "prices": "Oct 26, 2026 close (StockTitan rankings, data through Oct 26)",
-   "report": "2026-11-09"
+   "report": "2026-11-10"
   }
  },
  "orient": {
@@ -622,20 +622,20 @@
    }
   },
   "hedges": {
-   "equity": 0.52787,
+   "equity": 0.526662,
    "on": [],
    "current": {
-    "ce": 0.040133,
-    "worst": -0.170823,
+    "ce": 0.040071,
+    "worst": -0.170408,
     "cost_bp": 0.0,
     "rets": [
-     0.051938,
-     0.063287,
-     0.13059,
-     -0.075279,
-     -0.131233,
-     -0.117772,
-     -0.170823
+     0.051843,
+     0.063166,
+     0.130316,
+     -0.075083,
+     -0.130909,
+     -0.117479,
+     -0.170408
     ]
    },
    "advisor": {
@@ -644,32 +644,32 @@
       "on": [
        "collar"
       ],
-      "ce": 0.039588,
-      "worst": -0.14009,
-      "cost_bp": 7.758477,
+      "ce": 0.039526,
+      "worst": -0.139745,
+      "cost_bp": 7.740722,
       "meets": true,
-      "all_in_bp": 12.758477
+      "all_in_bp": 12.740722
      },
      {
       "on": [
        "collar",
        "gold"
       ],
-      "ce": 0.039761,
-      "worst": -0.14211,
-      "cost_bp": 6.330842,
+      "ce": 0.039699,
+      "worst": -0.141765,
+      "cost_bp": 6.313087,
       "meets": true,
-      "all_in_bp": 16.330842
+      "all_in_bp": 16.313087
      },
      {
       "on": [
        "trend"
       ],
-      "ce": 0.039148,
-      "worst": -0.138519,
-      "cost_bp": 12.307182,
+      "ce": 0.039087,
+      "worst": -0.138178,
+      "cost_bp": 12.279017,
       "meets": true,
-      "all_in_bp": 17.307182
+      "all_in_bp": 17.279017
      }
     ],
     "best_growth": [
@@ -677,16 +677,16 @@
       "on": [
        "gold"
       ],
-      "ce": 0.040308,
-      "worst": -0.172843,
+      "ce": 0.040245,
+      "worst": -0.172428,
       "cost_bp": -1.427635,
       "meets": false,
       "all_in_bp": 3.572365
      },
      {
       "on": [],
-      "ce": 0.040133,
-      "worst": -0.170823,
+      "ce": 0.040071,
+      "worst": -0.170408,
       "cost_bp": 0.0,
       "meets": false,
       "all_in_bp": 0.0
@@ -696,29 +696,14 @@
        "collar",
        "gold"
       ],
-      "ce": 0.039761,
-      "worst": -0.14211,
-      "cost_bp": 6.330842,
+      "ce": 0.039699,
+      "worst": -0.141765,
+      "cost_bp": 6.313087,
       "meets": true,
-      "all_in_bp": 16.330842
+      "all_in_bp": 16.313087
      }
     ],
     "best_worst_case": [
-     {
-      "on": [
-       "ai_pair",
-       "beta_short",
-       "degross",
-       "gold",
-       "put_spread",
-       "vix_calls"
-      ],
-      "ce": 0.006596,
-      "worst": -0.014538,
-      "cost_bp": 357.018624,
-      "meets": true,
-      "all_in_bp": 387.018624
-     },
      {
       "on": [
        "ai_pair",
@@ -728,11 +713,11 @@
        "gold",
        "put_spread"
       ],
-      "ce": 0.009134,
-      "worst": -0.015129,
-      "cost_bp": 331.715746,
+      "ce": 0.009093,
+      "worst": -0.014998,
+      "cost_bp": 331.398821,
       "meets": true,
-      "all_in_bp": 361.715746
+      "all_in_bp": 361.398821
      },
      {
       "on": [
@@ -742,11 +727,26 @@
        "gold",
        "put_spread"
       ],
-      "ce": 0.009893,
-      "worst": -0.015302,
-      "cost_bp": 323.957269,
+      "ce": 0.009851,
+      "worst": -0.015084,
+      "cost_bp": 323.658099,
       "meets": true,
-      "all_in_bp": 348.957269
+      "all_in_bp": 348.658099
+     },
+     {
+      "on": [
+       "ai_pair",
+       "beta_short",
+       "degross",
+       "gold",
+       "put_spread",
+       "vix_calls"
+      ],
+      "ce": 0.006507,
+      "worst": -0.015171,
+      "cost_bp": 357.170922,
+      "meets": true,
+      "all_in_bp": 387.170922
      }
     ]
    },
@@ -989,7 +989,7 @@
     "information_nats": 0.049307
    }
   ],
-  "review_by": "2026-11-24",
+  "review_by": "2026-11-25",
   "note": "Proposals for a person to review; the engine places no orders."
  },
  "valuation": {
@@ -3579,7 +3579,7 @@
    ],
    "door": "two-way",
    "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters.",
-   "price": 2.277987
+   "price": 2.133491
   },
   {
    "id": "beta_short",

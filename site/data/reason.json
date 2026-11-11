@@ -17,8 +17,8 @@
   "y30": 0.0485,
   "rf": 0.042,
   "borrow_spread": 0.01,
-  "vix": 19.92,
-  "index_vol": 28.97,
+  "vix": 19.46,
+  "index_vol": 28.57,
   "skew_pts": 3.0,
   "horizon": 0.25,
   "max_loss": 0.15,
@@ -259,26 +259,26 @@
  "alternatives": {
   "keep": {
    "port": [
-    0.52787,
+    0.526662,
     0.0,
     0.0,
     0.0
    ],
    "rets": [
-    0.051938,
-    0.063287,
-    0.13059,
-    -0.075279,
-    -0.131233,
-    -0.117772,
-    -0.170823
+    0.051843,
+    0.063166,
+    0.130316,
+    -0.075083,
+    -0.130909,
+    -0.117479,
+    -0.170408
    ],
-   "elog": 0.036837,
-   "ce": 0.037524,
-   "worst": -0.170823,
-   "mean": 0.040042,
+   "elog": 0.036784,
+   "ce": 0.037468,
+   "worst": -0.170408,
+   "mean": 0.039974,
    "feasible": false,
-   "max_regret": 0.027978
+   "max_regret": 0.029147
   },
   "reduce": {
    "port": [
@@ -301,30 +301,30 @@
    "worst": -0.144075,
    "mean": 0.035684,
    "feasible": true,
-   "max_regret": 0.017715
+   "max_regret": 0.017441
   },
   "hedge": {
    "port": [
     0.55,
     0.0,
     0.0125,
-    0.04
+    0.06
    ],
    "rets": [
-    0.041024,
-    0.053249,
-    0.122574,
-    -0.077524,
-    -0.117821,
-    -0.089794,
-    -0.149069
+    0.041014,
+    0.053439,
+    0.122364,
+    -0.076993,
+    -0.116901,
+    -0.088332,
+    -0.149607
    ],
-   "elog": 0.030725,
-   "ce": 0.031202,
-   "worst": -0.149069,
-   "mean": 0.033243,
+   "elog": 0.030863,
+   "ce": 0.031344,
+   "worst": -0.149607,
+   "mean": 0.033364,
    "feasible": true,
-   "max_regret": 0.016849
+   "max_regret": 0.016318
   },
   "optimal": {
    "port": [
@@ -347,7 +347,7 @@
    "worst": -0.149125,
    "mean": 0.036049,
    "feasible": true,
-   "max_regret": 0.018765
+   "max_regret": 0.018491
   },
   "minimax_regret": "hedge"
  },
@@ -382,13 +382,13 @@
   ]
  },
  "value_of_info": {
-  "evpi_bp": 252.323649,
+  "evpi_bp": 253.052937,
   "signals": [
    {
     "id": "vix",
     "name": "VIX at or above 20",
     "p_on": 0.301593,
-    "evsi_bp": 75.412279,
+    "evsi_bp": 76.081791,
     "observed": false,
     "flip_changes_choice": true,
     "choice_if_on": [
@@ -408,7 +408,7 @@
     "id": "hy",
     "name": "High-yield spread at or above 4.5%",
     "p_on": 0.215115,
-    "evsi_bp": 68.869642,
+    "evsi_bp": 69.364164,
     "observed": false,
     "flip_changes_choice": true,
     "choice_if_on": [
@@ -465,12 +465,12 @@
     ]
    },
    {
-    "id": "capex",
-    "name": "Builders' capex above 80% of operating cash flow",
-    "p_on": 0.521628,
-    "evsi_bp": 1.388e-13,
-    "observed": true,
-    "flip_changes_choice": false,
+    "id": "oil",
+    "name": "Brent at or above 1.3x its 5-year average",
+    "p_on": 0.200884,
+    "evsi_bp": 6.939e-14,
+    "observed": null,
+    "flip_changes_choice": null,
     "choice_if_on": [
      0.45,
      0.0,
@@ -485,12 +485,12 @@
     ]
    },
    {
-    "id": "oil",
-    "name": "Brent at or above 1.3x its 5-year average",
-    "p_on": 0.200884,
+    "id": "capex",
+    "name": "Builders' capex above 80% of operating cash flow",
+    "p_on": 0.521628,
     "evsi_bp": 6.939e-14,
-    "observed": null,
-    "flip_changes_choice": null,
+    "observed": true,
+    "flip_changes_choice": false,
     "choice_if_on": [
      0.45,
      0.0,
@@ -529,27 +529,27 @@
  "reverse_stress": {
   "low_inflation": {
    "shock": [
-    -0.061771,
-    -0.213124,
-    -0.000587,
-    -0.036407,
-    0.005474
+    -0.061913,
+    -0.213613,
+    -0.000588,
+    -0.036491,
+    0.005487
    ],
-   "sigmas": 1.96874,
-   "p_normal": 0.024491,
-   "port_sd": 0.076191
+   "sigmas": 1.973255,
+   "p_normal": 0.024233,
+   "port_sd": 0.076017
   },
   "inflation": {
    "shock": [
-    -0.058491,
-    -0.216897,
-    0.001231,
-    0.028591,
-    -0.009594
+    -0.058625,
+    -0.217394,
+    0.001234,
+    0.028656,
+    -0.009616
    ],
-   "sigmas": 1.986088,
-   "p_normal": 0.023512,
-   "port_sd": 0.075525
+   "sigmas": 1.990644,
+   "p_normal": 0.02326,
+   "port_sd": 0.075353
   }
  },
  "factor_cov": {
