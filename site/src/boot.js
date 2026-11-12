@@ -325,8 +325,20 @@
   });
   // v0.39.1: the day's call and the ledger, when the published site carries newer ones than this build's snapshot
   const bookOk = (b) => !!(b && typeof b.asof === "string" && fin(b.size) && b.sizes && b.tail && Array.isArray(b.frontier) && b.weights && b.keep_names_hedge);
-  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json"), loadJSON("data/paper.json")]).then(([bkj, cl, lv, pp]) => {
+  // v0.42.5: the decision engine's package is loaded too. Before, the Decision desk read only the embedded DX19 while
+  // a revised data/decision.json sat beside it (same month, different inputs: stress next month 20% embedded, 24.5%
+  // published). The published package replaces the embedded one, in place, when its content hash differs and it was
+  // not computed earlier; the comparison is on content, because both carried the same month.
+  const decOk = (d) => !!(d && typeof d.end === "string" && d.now && fin(d.now.exposure) && d.now.gate && fin(d.now.es_1x) && d.gate_hist && Array.isArray(d.gate_hist.dates) && d.curve && Array.isArray(d.curve.dates) && d.forecast_scores && Array.isArray(d.pipeline));
+  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json"), loadJSON("data/paper.json"), loadJSON("data/decision.json")]).then(([bkj, cl, lv, pp, dj]) => {
     let changed = false;
+    const PK = LIVE.pkg = {};
+    if (typeof DX19 !== "undefined" && DX19) {
+      const newer = dj && decOk(dj) && dj.end >= DX19.end && dj.content_sha256 && dj.content_sha256 !== DX19.content_sha256 && String(dj.computed_utc || "") >= String(DX19.computed_utc || "");
+      if (newer) { const keep = DX19.v30_patch; Object.keys(DX19).forEach((k) => { delete DX19[k]; }); Object.assign(DX19, dj); if (keep) DX19.v30_patch = keep; LIVE.decision = dj; changed = true; }
+      else if (dj && !decOk(dj)) LIVE.problems.push("decision.json did not match the expected shape; the page keeps the decision in its snapshot");
+      PK.decision = { showing: newer ? "published" : "embedded", same: !!(dj && dj.content_sha256 === DX19.content_sha256), id: DX19.content_sha256 || null, through: DX19.end, computed: DX19.computed_utc || null, fetch: LIVE.fetch["data/decision.json"] };
+    }
     if (bkj && bookOk(bkj) && typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && bkj.asof > SNAP30.book.asof) { SNAP30.book = bkj; LIVE.book = bkj; changed = true; }
     else if (bkj && !bookOk(bkj)) LIVE.problems.push("book.json did not match the expected shape; the page keeps the call in its snapshot");
     const T = typeof SNAP38 !== "undefined" ? SNAP38 : null;
@@ -337,6 +349,16 @@
     }
     if (lv && T && Number.isFinite(lv.marked_days) && lv.calls >= ((T.live && T.live.calls) || 0) && (lv.last_mark || "") >= ((T.live && T.live.last_mark) || "")) { T.live = lv; changed = true; }   // v0.40: the daily marks
     if (pp && T && Number.isFinite(pp.equity) && Array.isArray(pp.equity_history) && Array.isArray(pp.positions)) { T.paper = pp; changed = true; }   // v0.42: the paper bot's account
+    const B0 = typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book ? SNAP30.book : null;
+    PK.book = { showing: LIVE.book ? "published" : "embedded", through: B0 ? B0.asof : null, fetch: LIVE.fetch["data/book.json"] };
+    const E0 = T && T.ledger ? T.ledger.entries || [] : [], head = (a) => (a.length ? a[a.length - 1].hash : "");
+    PK.calls = { showing: cl && E0 === cl.entries ? "published" : "embedded", same: !!(cl && Array.isArray(cl.entries) && cl.entries.length === E0.length && head(cl.entries) === head(E0)), n: E0.length, fetch: LIVE.fetch["data/calls.json"] };
+    PK.live = { showing: T && T.live === lv ? "published" : "embedded", through: T && T.live ? T.live.last_mark || null : null, fetch: LIVE.fetch["data/live.json"] };
+    PK.paper = { showing: T && T.paper === pp ? "published" : "embedded", through: T && T.paper ? T.paper.marks_asof || null : null, fetch: LIVE.fetch["data/paper.json"] };
+    PK.record = { showing: "embedded", through: T ? T.asof : null, fetch: "built into the page" };
+    guard("Data packages", renderPackages, $("#pkg-body"));
+    if (LIVE.decision) guard("Decision engine", () => { if (typeof dxRebuild === "function") dxRebuild(); });
+    if (changed) guard("Search", reindexDesk);
     if (changed && current && RENDER[current]) guard(TAB_NAME[current], RENDER[current]);
   });
   loadJSON("data/atlas.json").then((at) => {

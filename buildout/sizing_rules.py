@@ -135,30 +135,72 @@ def test_all(r: pd.Series, cash: pd.Series, name: str, gamma: float = GAMMA) -> 
 
 
 # ---------------------------------------------------------------- the frontier
+SOLVER_TOL = 1e-9          # numerical noise only. A limit is a limit: there is no policy tolerance (v0.42.5).
+
+
 def frontier(rb: pd.Series, qx: pd.Series, fm: dict, beta_b: float, beta_q: float, rf: float, limits: dict,
-             es_fn, grosses=(0.5, 0.6, 0.7, 0.8, 0.9, 1.0), equity_premium: float = 0.05) -> list[dict]:
-    """For each gross exposure g (share of NAV in the names), the smallest Nasdaq-100 futures short h (fraction of
-    NAV) that meets every limit, with its record. Volatility comes from the factor model (Var(g b - h q) =
-    g^2 s_b^2 - 2 g h cov(b, q) + h^2 s_q^2); the one-month ES from es_fn(x, sigma), the most cautious of the engine's
-    three methods; the drawdown from the engine's simulation at the drift the betas imply."""
+             es_fn, grosses=(0.5, 0.6, 0.7, 0.8, 0.9, 1.0), equity_premium: float = 0.05, cash: pd.Series | None = None) -> list[dict]:
+    """For each long exposure g (share of NAV in the names), the smallest Nasdaq-100 futures short h (fraction of
+    NAV, in 5% steps) that meets every limit, with its record. Volatility comes from the factor model (Var(g b - h q)
+    = g^2 s_b^2 - 2 g h cov(b, q) + h^2 s_q^2); the one-month ES from es_fn(x, sigma), the most cautious of the
+    engine's three methods; the drawdown from the engine's simulation at the drift the betas imply.
+
+    v0.42.5. A row is marked as meeting the limits only when it is at or inside each one exactly; the 0.5% relative
+    tolerance that let a 25.09% drawdown pass a 25% cap is gone. The first row is the unhedged size, and if the
+    frontier's own check of it lands a hair over a limit, the size is stepped down (0.0005 at a time, at most 1%)
+    until it is inside, and the row says so. The record (CAGR, 2022, worst drawdown) now includes the cash the
+    unused (1 - g) earns when `cash` is given, so a row is comparable with the walk-forward call; the risk measures
+    leave cash out, which is the cautious side. Long, short, total gross and net are each reported."""
     Fc = fm["factor_cov"]
     b = np.array([fm["exposure"][f] for f in fm["factor_cov"].index])
     s_b2, cov_bq, s_q2 = fm["vol"] ** 2, float((Fc.to_numpy() @ b)[0]), float(Fc.iloc[0, 0])
+
+    def measure(g: float, h: float) -> dict:
+        x = (g * rb - h * qx).dropna()
+        sig = math.sqrt(max(g * g * s_b2 - 2 * g * h * cov_bq + h * h * s_q2, 1e-12))
+        e = es_fn(x, sig)
+        dd = sizing.drawdown_quantile(rf + equity_premium * (g * beta_b - h * beta_q), sig, 1.0, cash_rate=rf)
+        ok = e <= limits["es"] + SOLVER_TOL and sig <= limits["vol"] + SOLVER_TOL and dd <= limits["dd"] + SOLVER_TOL
+        return {"x": x, "sig": sig, "es": e, "dd": dd, "ok": ok}
+
+    def record(g: float, h: float, m: dict, extra: dict | None = None) -> dict:
+        x = m["x"]
+        tot = x + (1 - g) * cash.reindex(x.index).fillna(0.0) if cash is not None else x
+        lv = (1 + tot).cumprod()
+        return {"gross": g, "short": float(h), "meets": True, "long": g, "gross_total": float(g + h), "net": float(g - h),
+                "es95": m["es"], "vol": m["sig"], "drawdown95": m["dd"], "cash_in_record": cash is not None,
+                "cagr": float(lv.iloc[-1] ** (252 / len(tot)) - 1), "y2022": float((1 + tot.loc["2022"]).prod() - 1) if tot.index[0].year <= 2022 <= tot.index[-1].year else None,
+                "maxdd": float(1 - (lv / lv.cummax()).min()), "hedge_drag_ann": float(h * qx.reindex(x.index).mean() * 252),
+                "market_beta_left": float(g * fm["exposure"]["market"] - h), "stock_specific_share": None, **(extra or {})}
+
     rows = []
-    for g in grosses:
+    for i, g in enumerate(grosses):
         row = {"gross": g, "short": None, "meets": False}
-        tol = 0.005                                       # the first row is the unhedged size the limits allow, to rounding
-        for h in np.round(np.arange(0.0, 1.21, 0.05), 2):
-            x = (g * rb - h * qx).dropna()
-            sig = math.sqrt(max(g * g * s_b2 - 2 * g * h * cov_bq + h * h * s_q2, 1e-12))
-            e = es_fn(x, sig)
-            dd = sizing.drawdown_quantile(rf + equity_premium * (g * beta_b - h * beta_q), sig, 1.0, cash_rate=rf)
-            if e <= limits["es"] * (1 + tol) and sig <= limits["vol"] * (1 + tol) and dd <= limits["dd"] * (1 + tol):
-                lv = (1 + x).cumprod()
-                row = {"gross": g, "short": float(h), "meets": True, "es95": e, "vol": sig, "drawdown95": dd,
-                       "cagr": float(lv.iloc[-1] ** (252 / len(x)) - 1), "y2022": float((1 + x.loc["2022"]).prod() - 1) if x.index[0].year <= 2022 <= x.index[-1].year else None,
-                       "maxdd": float(1 - (lv / lv.cummax()).min()), "hedge_drag_ann": float(h * qx.reindex(x.index).mean() * 252),
-                       "market_beta_left": float(g * fm["exposure"]["market"] - h), "stock_specific_share": None}
-                break
+        if i == 0:                                        # the unhedged size: inside the limits, or stepped down until it is
+            for step in range(21):
+                gi = round(g - 0.0005 * step, 6)
+                m = measure(gi, 0.0)
+                if m["ok"]:
+                    row = record(gi, 0.0, m, {"stepped_down": float(g - gi)} if step else None)
+                    break
+        if not row["meets"]:
+            for h in np.round(np.arange(0.0, 1.21, 0.05), 2):
+                m = measure(g, float(h))
+                if m["ok"]:
+                    row = record(g, h, m)
+                    break
         rows.append(row)
     return rows
+
+
+def recheck(rows: list[dict], limits: dict) -> list[dict]:
+    """Limits mean limits, at publication too (v0.42.5): a row whose stored figures exceed a limit is not marked as
+    meeting it, whatever tolerance the build that wrote it used."""
+    out = []
+    for r in rows or []:
+        r = dict(r)
+        if r.get("meets") and not (r.get("es95", 0) <= limits["es"] + SOLVER_TOL and r.get("vol", 0) <= limits["vol"] + SOLVER_TOL and r.get("drawdown95", 0) <= limits["dd"] + SOLVER_TOL):
+            r["meets"] = False
+            r["over_limit"] = True
+        out.append(r)
+    return out

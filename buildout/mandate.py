@@ -181,14 +181,18 @@ def authorize(ticket: dict, account: dict, M: Mandate, history: dict | None = No
 
 
 def in_window(M: Mandate, now: datetime | None = None) -> tuple[bool, str]:
-    """Inside the mandate's New York trading window on a weekday? (US market holidays are not known here; a
-    holiday produces no fills, and the trader treats an unfilled day as nothing happened.)"""
+    """Inside the mandate's New York trading window on a day the exchange holds a session? v0.42.5: the exchange's
+    holidays are known (buildout/sessions.py), and on a 1:00 pm close the window ends 15 minutes before it."""
     from zoneinfo import ZoneInfo
+    from . import sessions
     now = now or datetime.now(timezone.utc)
     ny = now.astimezone(ZoneInfo("America/New_York"))
     if ny.weekday() >= 5:
         return False, f"{ny.strftime('%A')} is not a trading day"
+    if not sessions.is_session(ny.date()):
+        return False, f"{ny.date().isoformat()} is an exchange holiday"
     hm = ny.strftime("%H:%M")
-    if not (M.window_start <= hm <= M.window_end):
-        return False, f"{hm} New York is outside {M.window_start} to {M.window_end}"
+    end = min(M.window_end, "12:45") if sessions.early_close(ny.date()) else M.window_end
+    if not (M.window_start <= hm <= end):
+        return False, f"{hm} New York is outside {M.window_start} to {end}" + (" (the exchange closes at 1:00 pm today)" if end != M.window_end else "")
     return True, f"{hm} New York, inside the window"

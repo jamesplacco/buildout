@@ -54,11 +54,11 @@ def test_the_paper_bot_trades_the_day_after_a_call_is_written(state):
     now = datetime(2026, 11, 11, 15, 0, tzinfo=timezone.utc)
     pb = br.PaperBroker(state / "paper_account.json", quote_fn=T._qf)
     r = trader.run_once(pb, md.Mandate(mode="autonomous", broker="paper", max_order_usd=1e9, max_order_pct=1.0), T._params(), now=now, poll_seconds=0.01)
-    assert r["outcome"] == "executed" and len(r["fills"]) == 9
+    assert r["outcome"] == "orders resting until the close" and len(r["resting"]) == 9        # v0.42.5: written Nov 11, filled at that day's close
     t = ex.load_ticket(r["ticket"])
-    assert t["call"]["asof"] == "2026-11-09" and t["call"]["effective_from"] == "2026-11-11"
+    assert t["call"]["asof"] == "2026-11-09" and t["call"]["effective_from"] == "2026-11-11" and t["status"] == "working"
     j = trader.journal()[-1]
-    assert j["event"] == "executed" and j["broker"] == "paper" and j["approval"] == "autonomous"
+    assert j["event"] == "resting" and j["broker"] == "paper" and j["approval"] == "autonomous" and j["fills_in_session"] == "2026-11-11"
 
 
 def test_a_live_broker_needs_armed_in_every_mode(state):

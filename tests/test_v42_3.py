@@ -62,10 +62,11 @@ def test_a_repeated_client_id_has_one_effect_and_a_reused_one_is_refused(tmp_pat
     pb = _pb(tmp_path, cash=1000.0)
     a = pb.place("X", "buy", 2, 101.0, "c1")
     b = pb.place("X", "buy", 2, 101.0, "c1")
-    assert a == b and pb.state["positions"] == {"X": 2.0} and pb.state["cash"] == pytest.approx(798.0)
+    assert a == b and len(pb.state["orders"]) == 1 and a["status"] == "open"          # v0.42.5: one resting order, nothing filled yet
+    assert pb.state["positions"] == {} and pb.state["cash"] == pytest.approx(1000.0)
     with pytest.raises(ValueError, match="different order"):
         pb.place("X", "buy", 3, 101.0, "c1")
-    assert pb.state["positions"] == {"X": 2.0}
+    assert len(pb.state["orders"]) == 1
 
 
 def test_a_failed_disk_write_leaves_the_committed_account(tmp_path, monkeypatch):

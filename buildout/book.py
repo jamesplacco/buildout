@@ -73,7 +73,14 @@ LIMITATIONS = [
     "betas lean on TSLA's until it has two years of its own.",
     "The rates factor is a 20-year par bond rebuilt from the Treasury's daily par yields, a TLT proxy with duration "
     "about 12 against TLT's 16. Cash is proxied by the 2-year yield (older Treasury files here carry 2, 10 and 20 "
-    "years only).",
+    "years only). That overstates what idle cash earned when the curve was steep (2021 and 2022) and understates it "
+    "when the curve was inverted (2023 and 2024); a bill rate is the right series and is not in use yet.",
+    "The drawdown cap is read from a constant-volatility simulation (geometric Brownian motion, 4,000 paths) at an "
+    "assumed drift. It has no volatility clustering, no jumps and no change in correlation, so the 25% is a modelled "
+    "95th percentile under those assumptions and not a stop: a real drawdown at that size can be deeper. The size "
+    "it sets has not been compared with a block bootstrap or a stressed-volatility model.",
+    "The menu's rows are at or inside each limit exactly, in 5% steps of the short. The exact minimum short is "
+    "reported beside the logged row; the logged row is the decision.",
     "Hedge legs are measured as futures: their returns are in excess of cash. No transaction costs, no margin, no borrow.",
     "Ten years of daily data hold one bear market (2022) and two fast crashes (2020, 2025); the tail numbers are "
     "only as wide as that record, which is why the most cautious of three methods governs.",
@@ -496,7 +503,8 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
         "frontier": sizing_rules.frontier(rb, (E["QQQ"] - cash), fm, beta_vti,
                                           float(pd.concat([E["QQQ"] - cash, E["VTI"]], axis=1).dropna().cov().iloc[0, 1] / E["VTI"].var()), rf,
                                           {"es": ES_BUDGET, "vol": VOL_TARGET, "dd": MAX_DD}, lambda x, sig: tail_block(x, sig)["es95"]["governing"],
-                                          grosses=tuple(sorted({float(min(sizes.values()))} | {g for g in (0.6, 0.7, 0.8, 0.9, 1.0) if g > min(sizes.values()) + 0.02}))),
+                                          grosses=tuple(sorted({float(min(sizes.values()))} | {g for g in (0.6, 0.7, 0.8, 0.9, 1.0) if g > min(sizes.values()) + 0.02})),
+                                          cash=cash),
         "vol_rule": {"book": _slim(sizing_rules.test_all(rb, cash.reindex(rb.index).fillna(0.0), "the book, 2017 on")),
                      "nasdaq_2017": _slim(sizing_rules.test_all(E["QQQ"].dropna(), cash.reindex(E["QQQ"].dropna().index).fillna(0.0), "the Nasdaq-100 (QQQ), 2017 on")),
                      "long_record": long_record, "rule": sizing_rules.HEADLINE, "n_rules": sizing_rules.N_RULES, "t_bar": sizing_rules.expected_max_t(sizing_rules.N_RULES),

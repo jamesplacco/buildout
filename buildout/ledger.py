@@ -75,11 +75,12 @@ def verify(path: Path = PATH) -> dict:
 
 
 def next_trading_day(d: str) -> str:
-    """The next weekday (pandas' BDay, without pandas: the site build imports this module and installs nothing)."""
-    t = date.fromisoformat(str(d)[:10]) + timedelta(days=1)
-    while t.weekday() >= 5:
-        t += timedelta(days=1)
-    return t.isoformat()
+    """The next New York Stock Exchange session after d (buildout/sessions.py, standard library: the site build
+    imports this module and installs nothing). v0.42.5: before, this skipped weekends only, so a call written the
+    day before a holiday took effect on a day with no session. Entries already in the ledger keep the effective date
+    they were written with."""
+    from . import sessions
+    return sessions.next_session(d).isoformat()
 
 
 def make_entry(book: dict, version: str, prev: dict | None, ts: str | None = None, source: str = "snapshot") -> dict:

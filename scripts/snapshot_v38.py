@@ -2,6 +2,7 @@
 
     python3 scripts/snapshot_v38.py --mirror-pickle PATH --carver-pickle PATH      # from cached data
     python3 scripts/snapshot_v38.py --track-json PATH                               # from a saved track.json
+    python3 scripts/snapshot_v38.py --track-json NEW --prior-json OLD               # and publish the restatement (v0.42.5)
 
 The PDF is the monthly tear sheet: three records on separate panels (backtest, walk-forward, live paper), never
 mixed, with return, volatility, Sharpe, maximum drawdown, hit rate, turnover and factor exposures.
@@ -47,7 +48,7 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
         y = 0.92
         blocks = [("1. Backtest (in-sample)", f"Size {T['backtest']['size']:.2f}x, chosen with the whole history and applied to it: hindsight on the names and the size. "
                    f"CAGR {pct(T['backtest']['stats'].get('cagr'))}, volatility {pct(T['backtest']['stats'].get('vol'))}, max drawdown {pct(T['backtest']['stats'].get('maxdd'))}."),
-                  ("2. Walk-forward (out-of-sample)", f"Size and hedge recomputed each month-end from data to that close, held the next month, costs charged; universe chosen point in time each January. {W['policies']['call']['net']['from']} to {W['policies']['call']['net']['to']}."),
+                  ("2. Walk-forward (out-of-sample)", f"Size and hedge recomputed each month-end from data to that close, held the next month, costs charged; universe chosen point in time each January from a candidate list set in 2026 (a retrospectively selected universe). {W['policies']['call']['net']['from']} to {W['policies']['call']['net']['to']}."),
                   ("3. Live paper", (f"{T['live']['calls']} call(s) in the hash-chained ledger, the first governing from {str(T['live'].get('first_effective') or T['live'].get('first_call') or '2026-11-04')[:10]}; " + (f"{T['live']['marked_days']} days marked." if T['live'].get('marked_days') else "no day of marks yet.")))]
         import textwrap
         for title, text in blocks:
@@ -86,7 +87,7 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
             if r == 0:
                 cell.set_text_props(weight="bold"); cell.set_height(cell.get_height() * 1.6)
         sv, P = T["survivorship"], W["policies"]["product"]
-        notes = ["Costs: stocks 5 bp per dollar traded; Nasdaq-100 futures 1 bp a trade plus 1 bp a quarter to roll; borrowing above 1.00x at cash plus 50 bp; the long bond 2 bp a trade. Sharpe is in excess of cash; betas from a daily regression on the Nasdaq-100 and the 20-year bond.",
+        notes = ["Restated in v0.42.5: the daily trades that hold the equal weights and the size are counted in turnover and charged, and the hedged policy shorts what the ledger logs (5% steps). Costs: stocks 5 bp per dollar traded; Nasdaq-100 futures 1 bp a trade plus 1 bp a quarter to roll; borrowing above 1.00x at cash plus 50 bp; the long bond 2 bp a trade. Sharpe is in excess of cash; betas from a daily regression on the Nasdaq-100 and the 20-year bond.",
                  f"Survivorship: today's nine held with hindsight grew {pct(sv['hindsight_hold_cagr'])} a year, the point-in-time nine {pct(sv['pit_hold_cagr'])} (gap {abs(sv['gap_cagr']) * 100:.1f} points); hindsight flatters risk more than return (worst drawdown {pct(T['hindsight']['policies']['hold']['net']['maxdd'], 0)} against {pct(W['policies']['hold']['net']['maxdd'], 0)}).",
                  f"The call is sized by the live rule at every month-end (v0.40). It cut the worst drawdown from {pct(W['policies']['hold']['net']['maxdd'], 0)} to {pct(W['policies']['call']['net']['maxdd'], 0)} at a Sharpe of {W['policies']['call']['net']['sharpe']:.2f} against {W['policies']['hold']['net']['sharpe']:.2f} for holding; full size with its short earned {W['policies']['call_short']['net']['sharpe']:.2f}. Vol target with quarter Kelly averaged {P['meta']['avg_gross']:.2f}x gross: the same bet, smaller."]
         yy = 0.105
@@ -140,6 +141,26 @@ def main(argv: list[str]) -> None:
         last = max(R["nets"])
         R["nets"] = {last: R["nets"][last]}
         T["deeprl"] = R
+    if arg("--prior-json"):                     # v0.42.5: a restatement is published beside the record it changed
+        P0 = json.loads(Path(arg("--prior-json")).read_text())
+        pol = {}
+        for k, v in T["pit"]["policies"].items():
+            a = (P0.get("pit", {}).get("policies", {}).get(k) or {})
+            if a:
+                pol[k] = {"sharpe": [a["net"]["sharpe"], v["net"]["sharpe"]], "cagr": [a["net"]["cagr"], v["net"]["cagr"]], "maxdd": [a["net"]["maxdd"], v["net"]["maxdd"]],
+                          "turnover": [a["meta"]["turnover_yr"], v["meta"]["turnover_yr"]], "avg_short": [a["meta"]["avg_short"], v["meta"]["avg_short"]]}
+        put = None
+        if P0.get("alternatives") and T.get("alternatives"):
+            va = [r["h"]["put"]["var_cut"] for r in P0["alternatives"]["rows"]]
+            vb = [r["h"]["put"]["var_cut"] for r in T["alternatives"]["rows"]]
+            put = {"var_cut_min": [min(va), min(vb)], "var_cut_max": [max(va), max(vb)], "by_regime": [[r0["regime"], r0["h"]["put"]["var_cut"], r1["h"]["put"]["var_cut"]] for r0, r1 in zip(P0["alternatives"]["rows"], T["alternatives"]["rows"])]}
+        T["restated"] = {"version": arg("--restated-version") or "v0.42.5", "date": arg("--restated-date") or T["asof"], "asof": T["asof"], "prior_asof": P0.get("asof"), "policies": pol, "put": put}
+    try:                                        # v0.42.5: the paper account as committed, so a copy of the page without the daily files is not blank
+        from buildout import trader
+        if (ROOT / "paper" / "paper_account.json").exists():
+            T["paper"] = bk._clean(trader.paper_summary(ROOT / "paper"))
+    except Exception as exc:                    # noqa: BLE001 - the record does not depend on it
+        print("paper summary skipped:", exc)
     rows = ledger.read()
     T["ledger"] = {"verify": ledger.verify(), "entries": rows}
     if rows and T.get("live"):

@@ -803,7 +803,10 @@ def main(argv: list[str] | None = None) -> None:
             gh = atlas.download(fred=False)["raw"]          # carries the 10-year yield past where Shiller's series stops
         except Exception:  # noqa: BLE001
             gh = None
-        o = decide.build(labs.download(), cape_now=cape, y10_now=5.13, quick=a.quick, gh=gh)
+        from .jsonout import clean
+        o = clean(decide.build(labs.download(), cape_now=cape, y10_now=5.13, quick=a.quick, gh=gh))
+        o["content_sha256"] = decide.content_hash(o)        # v0.42.5: the page prefers the published package when its content differs
+        o["computed_utc"] = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         path = write(o, a.out, "decision.json")
         if a.json:
             print(json.dumps(o["now"], default=float, indent=1))

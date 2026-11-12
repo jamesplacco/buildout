@@ -30,7 +30,15 @@
       [U ? xx(U.gross) : "n/a", "The book, unhedged", call ? `the call's size on data through ${isoNice(call.asof)}` : ""],
       [Hd ? xx(Hd.gross) : "n/a", "The book, hedged", Hd ? `with ${pct0(Hd.short)} in PSQ, the most a cash account allows` : ""],
       [pct0(EX_DEFAULT.vix_share), "VIX sleeve (VIXY)", "of the account, on by default; 0 turns it off"],
-      ["0", "Orders Buildout can place", "Robinhood's MCP places them, after approval"]]);
+      ["None", "Orders this page can place", "the trader can, on its own machine; see who can send an order"]]);
+    // v0.42.5: which system can send what. The old tile said "0 orders Buildout can place" while the repository
+    // held an unattended paper trader and a direct broker route.
+    fillTable($("#ex-who"), ["System", "Can it send an order", "Account", "Approval", "Results on this page"], [
+      ["This page (the public site)", "No. Static files in a browser: no credential, no order code", "none", "n/a", "it displays the records below"],
+      ["Buildout's research server (MCP tools)", "No. It plans and checks tickets and records fills; it has no tool that places an order", "none", "n/a", "none"],
+      ["The paper bot (the daily workflow)", "Yes, simulated orders only, with no person in the loop", "the $100,000 model account in paper/", "none: autonomous by design, under a wide paper mandate", "yes: the paper account below"],
+      ["The trader with an assistant (broker = assistant)", "Buildout hands over exact orders; an assistant holding Robinhood's connector places them", "a Robinhood Agentic account", "the mandate must be signed and armed; each ticket approved by its id", "no: private records"],
+      ["The trader's direct route (broker = robinhood_mcp)", "Yes, from the person's own machine, once a mandate is signed and armed. Untested against the live endpoint", "a Robinhood Agentic account", "each ticket by its id until 60 paper days and 5 approved live tickets are on record, then as the mandate says", "no: private records"]], 1);
     $("#ex-map-p").textContent = "Robinhood's Agentic account (support pages read Nov 5, 2026) allows long stocks and ETFs, single-leg long options, and market, limit and stop orders. It does not allow margin borrowing, short selling, futures or multi-leg options. So the call's Nasdaq-100 futures short becomes a long position in an inverse ETF, and everything long stays under the account's equity.";
     fillTable($("#ex-map"), ["The call says", "In the Agentic account", "The difference"], [
       ["Hold the nine names at the call's size", "The nine names, long, at that share of equity", "None, at sizes up to 0.98x"],
@@ -68,8 +76,8 @@
       ["supervised", "Staged. It executes once approved, or at once under a standing approval the person gave for a window (trader --standing 120).", "The person, in advance"],
       ["autonomous", "Executes without asking, if the mandate is armed. The person reads the digest and the journal; the HALT file stops it.", "The mandate"]], 3);
     fillTable($("#ex-routes"), ["Route", "Who places the orders", "Credential", "Status"], [
-      ["paper", "The paper broker fills at the quote plus the collar in a model account.", "None", "Running: the public paper bot below, and private rehearsals"],
-      ["assistant", "The assistant holding Robinhood's Trading MCP (Claude with the Robinhood connector) places what the trader hands it and reports fills through record_fills.", "Robinhood's OAuth, held by the assistant", "Works today; every order is one the trader wrote"],
+      ["paper", "The paper broker fills each order at the close of the first session that ends after it was written, with a 5 bp half-spread, in a model account.", "None", "Running: the public paper bot below, and private rehearsals"],
+      ["assistant", "The assistant holding Robinhood's Trading MCP (Claude with the Robinhood connector) places what the trader hands it and reports fills through record_fills.", "Robinhood's OAuth, held by the assistant", "Built and tested against a stand-in account; every order is one the trader wrote. No live use is recorded on this page"],
       ["robinhood_mcp", "Buildout's own JSON-RPC client on Robinhood's Trading MCP, with OAuth in the standard library.", "Robinhood's OAuth, tokens in private/", "Built; the tool names Robinhood has not published are filled in from `broker probe`; untested against the live endpoint"]], 4);
     $("#ex-tr-n").textContent = "The evidence gate (v0.42.4, in code): a live broker trades in manual mode, whatever the mandate says, until the paper bot has held a position for 60 trading days and 5 live tickets have filled after an approval of their own id. Robinhood's own terms (support pages read Nov 8, 2026): an external agent trades only in the Agentic account; it can act without confirmation if the person has asked it to; and the person is responsible for the trades it places. The trader's modes sit inside those terms: manual and supervised keep the confirmation on Buildout's side, autonomous removes it under the mandate.";
     fillTable($("#ex-mandate"), ["Term", "Default", "What it does"], [
@@ -80,27 +88,42 @@
       ["min_days_between_tickets", "1", "a rebalance, not a loop"], ["approval_ttl_min", "240", "how long an approval stays good"], ["window", "09:45 to 15:45 New York, weekdays", "when a pass may act"],
       ["quiet_days", "none", "dates to sit out"], ["notes", "", "required for an armed autonomous mandate: why unattended trading is wanted"]], 3);
     const T = typeof T38 === "function" ? T38() : null, Pp = T && T.paper;
-    const has = !!(Pp && Array.isArray(Pp.equity_history) && Pp.equity_history.length);
+    // v0.42.5: an account that holds positions is shown even before its first valid equity point (a mark dated before it opened is not one)
+    const has = !!(Pp && Array.isArray(Pp.equity_history) && (Pp.equity_history.length || (Pp.positions || []).length));
     $("#ex-pb-grid").hidden = !has; $("#ex-pb-jp").hidden = !has;
+    const tp = $("#ex-pb-tp"); if (tp) tp.hidden = !(has && Array.isArray(Pp.timeline) && Pp.timeline.length);
     if (!has) {
-      $("#ex-pb-p").textContent = "The paper bot starts with the first weekday run after v0.42 ships: each morning before the open the daily workflow runs one pass of the trader against a $100,000 model account, unhedged and without the VIX sleeve (PSQ and VIXY are not in the price mirror), filled at the prior close plus a 5 bp half-spread and the 10 bp collar. Its state is committed in paper/ and summarized to data/paper.json, which this section reads.";
-      rsKpi($("#ex-pb-tiles"), [["$100,000", "Opening cash", "the model account"], ["0", "Tickets filled", "none yet"], ["autonomous", "Mode", "paper broker, under a wide mandate"], ["weekdays", "Cadence", "one pass a day, 6:17 New York"]]);
+      $("#ex-pb-p").textContent = "The paper bot starts with the first run after v0.42 ships: the daily workflow runs one pass of the trader against a $100,000 model account, unhedged and without the VIX sleeve (PSQ and VIXY are not in the price mirror). Each order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread, so the price is never older than the order. Its state is committed in paper/ and summarized to data/paper.json, which this section reads.";
+      rsKpi($("#ex-pb-tiles"), [["$100,000", "Opening cash", "the model account"], ["0", "Tickets filled", "none yet"], ["autonomous", "Mode", "paper broker, under a wide mandate"], ["Tuesday to Saturday", "Cadence", "one pass a day, 11:17 UTC, on the prior session's close"]]);
       $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice.";
       return;
     }
-    const eq = Pp.equity_history, first = eq[0][1], last = eq[eq.length - 1][1], ret = last / Pp.start_cash - 1;
+    const eq = Pp.equity_history, last = eq.length ? eq[eq.length - 1][1] : Pp.equity, ret = last / Pp.start_cash - 1;
+    const early = !!(Pp.marks_asof && Pp.opened && Pp.marks_asof < Pp.opened);
     rsKpi($("#ex-pb-tiles"), [[`$${Math.round(last).toLocaleString()}`, "Equity", `${ret >= 0 ? "+" : MINUS}${Math.abs(ret * 100).toFixed(2)}% since ${isoNice(Pp.opened)}`],
       [String(Pp.tickets_filled), "Tickets filled", `${Pp.passes} passes; fills chain ${Pp.fills_chain && Pp.fills_chain.ok ? "verified" : "BROKEN"}`],
       [`${Math.round((1 - Pp.cash / last) * 100)}%`, "Invested", `cash $${Math.round(Pp.cash).toLocaleString()}`],
-      [isoNice(Pp.marks_asof), "Marked at the close of", Pp.last ? `last pass: ${Pp.last.outcome || Pp.last.event}` : ""]]);
+      [isoNice(Pp.marks_asof), "Marked at the close of", early ? "before the account opened: the first equity point comes with the next close" : Pp.last ? `last pass: ${Pp.last.outcome || Pp.last.event}` : ""]]);
     $("#ex-pb-p").textContent = `${Pp.note} ${Pp.mode}.`;
     const lD = (s) => { const d = new Date(s + "T00:00:00Z"); return d.getUTCFullYear() + (d.getUTCMonth() + (d.getUTCDate() - 1) / 31) / 12; };
-    xyChart($("#ex-pb-curve"), { height: 180, label: "Equity, $", series: [{ pts: eq.map(([d, v]) => [lD(d), v]), color: "var(--s1)", name: "Paper account" }],
+    if (!eq.length) $("#ex-pb-curve").replaceChildren(h("p", "empty", "No equity point yet: the account's only mark is dated before it opened. The first point comes with the next session's close."));
+    else xyChart($("#ex-pb-curve"), { height: 180, label: "Equity, $", series: [{ pts: eq.map(([d, v]) => [lD(d), v]), color: "var(--s1)", name: "Paper account" }],
       xticks: eq.length > 1 ? [[lD(eq[0][0]), isoNice(eq[0][0]).replace(/, \d{4}$/, "")], [lD(eq[eq.length - 1][0]), isoNice(eq[eq.length - 1][0]).replace(/, \d{4}$/, "")]] : [[lD(eq[0][0]), isoNice(eq[0][0])]],
       yfmt: (v) => `$${Math.round(v / 1000)}k` });
     fillTable($("#ex-pb-pos"), ["Symbol", "Shares"], (Pp.positions || []).map((p) => [p.symbol, String(p.quantity)]), 1);
     fillTable($("#ex-pb-j"), ["When (UTC)", "Event", "Outcome", "Ticket", "Fills"], (Pp.recent || []).map((r) => [r.ts_utc, r.event, r.outcome || r.status || "", r.ticket || "", r.fills != null ? String(r.fills) : ""]), 4);
-    $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice. The account is marked at the last close in the price mirror.";
+    // v0.42.5: the four times of each filled ticket, in the order they must come, and the convention it filled under
+    const TL = Array.isArray(Pp.timeline) ? Pp.timeline : [];
+    if (TL.length) {
+      const tU = (s) => (s ? String(s).replace("T", " ").replace(/(\+00:00|Z)$/, "").slice(0, 16) : "not recorded");
+      fillTable($("#ex-pb-tl"), ["Ticket", "Decision", "Decided (UTC)", "Order written (UTC)", "Priced at the close of", "Filled (UTC)", "Convention", "Order before price"],
+        TL.map((r) => [r.ticket, r.decision_id || "not recorded", tU(r.decision_ts), tU(r.ordered), r.fill_session ? isoNice(r.fill_session) : "the previous close", tU(r.filled_at || r.recorded), r.convention, r.causal ? "yes" : "no"]), 2);
+      const bad = TL.filter((r) => !r.causal).length;
+      $("#ex-pb-tn").textContent = (bad ? `${bad} ticket${bad === 1 ? " was" : "s were"} filled before v0.42.5 at the limit against the previous day's close, a price older than the order; ${bad === 1 ? "it is" : "they are"} kept as recorded and marked. ` : "")
+        + "From v0.42.5 an order fills at the close of the first session that ends after it was written. The ticket's limit is recorded but the paper fill does not depend on it. A simulation convention, not evidence of an achievable execution.";
+    }
+    if (Array.isArray(Pp.resting) && Pp.resting.length) $("#ex-pb-p").textContent += ` ${Pp.resting.length} order${Pp.resting.length === 1 ? " rests" : "s rest"} until the close of ${isoNice(Pp.resting[0].fills_in_session)}.`;
+    $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice. The account is marked at the last close in the price mirror; no point is shown for a date before it opened.";
   }
 
   function renderVix() {

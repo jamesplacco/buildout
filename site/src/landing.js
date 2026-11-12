@@ -5,8 +5,8 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 51;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 66;      // tests/test_*.py, pinned by tests/test_v39_1.py
-  const TESTS_PASSING = 838;     // the shipped test count (the chip and the hood tile read it)
+  const TEST_FILES = 67;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TESTS_PASSING = 877;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -97,8 +97,8 @@
     const cut = ov.trend_on && fin(ov.factor) && ov.factor < 1 && fin(ov.exposure_if_off) ? (N.exposure - ov.exposure_if_off) * nav : 0;
     const contracts = fin(ndx) && cut > 0 ? Math.round(cut * 1e6 / (20 * ndx)) : null;
     el.append(h("strong", null, "Per $100m of NAV. "), document.createTextNode(BC
-      ? `The worst month in twenty at ${xx(BC.size)} costs about $${fx(es, 1)}m (the book's expected shortfall on its own prices; the budget is $${fx(O.es_limit * nav, 0)}m). Getting there from 1.00x means selling $${fx((1 - BC.size) * nav, 0)}m of the names pro rata${BC.keep != null && fin(ndx) ? `, or keeping them and selling about ${Math.round(BC.keep * nav * 1e6 / (20 * ndx)).toLocaleString()} Nasdaq-100 futures ($${fx(BC.keep * nav, 0)}m at ${lv.value})` : ""}. `
-      : `The worst month in twenty at ${xx(N.exposure)} costs about $${fx(es, 1)}m (expected shortfall, the engine's budget is $${fx(O.es_limit * nav, 0)}m). `), evTag("est"));
+      ? `The average loss in the worst 5% of months at ${xx(BC.size)} is about $${fx(es, 1)}m (the book's expected shortfall on its own prices; the budget is $${fx(O.es_limit * nav, 0)}m). Getting there from 1.00x means selling $${fx((1 - BC.size) * nav, 0)}m of the names pro rata${BC.keep != null && fin(ndx) ? `, or keeping them and selling about ${Math.round(BC.keep * nav * 1e6 / (20 * ndx)).toLocaleString()} Nasdaq-100 futures ($${fx(BC.keep * nav, 0)}m at ${lv.value})` : ""}. `
+      : `The average loss in the worst 5% of months at ${xx(N.exposure)} is about $${fx(es, 1)}m (expected shortfall, the engine's budget is $${fx(O.es_limit * nav, 0)}m). `), evTag("est"));
     if (cut > 0) el.append(document.createTextNode(` If the 10-month trend breaks, the overlay cuts $${fx(cut, 0)}m of equity exposure: about ${contracts ? contracts.toLocaleString() : "n/a"} Nasdaq-100 futures at ${lv ? lv.value : "n/a"}${lv && lv.note ? ` (${lv.note.split(";")[0].replace(/\.$/, "")})` : ""}, or the same notional in the holdings, at the engine's assumed 2 bp a side plus impact. `), evTag("asm"));
     el.append(document.createTextNode(" Scale to the fund's NAV; nothing here is an order."));
   }

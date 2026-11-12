@@ -39,7 +39,7 @@ LAG = 2                       # months between the last data used and the month 
 REFIT_HMM = 60
 REFIT_ML = 24
 GRID = np.round(np.arange(0.0, 1.51, 0.05), 2)
-ES_LIMIT = 0.12               # expected loss in the worst month in twenty, at most 12% of capital
+ES_LIMIT = 0.12               # the average loss across the worst 5% of months, at most 12% of capital
 COST, BORROW = rl.COST, rl.BORROW
 N0 = 120                      # regime means are shrunk toward the long-run mean with 120 pseudo-months of prior
 FORGET = 0.98                 # model averaging: a month's predictive score loses 2% of its weight each month
@@ -132,7 +132,18 @@ def choose(w, mu, sd, gamma, es_limit=ES_LIMIT, z=None, wq=None, borrow=BORROW) 
     i = int(np.argmax(u2))
     info["capped"] = bool(i != int(np.argmax(u)))
     info["u"] = u
+    info["feasible_max"] = float(GRID[allowed].max())           # the largest exposure inside the risk budget (v0.42.5)
     return float(GRID[i]), info
+
+
+def gate_blend(optimum: float, gate: float, feasible_max: float | None = None) -> float:
+    """The final exposure: from holding (1x) toward the engine's optimum by the evidence gate, then held inside the
+    risk budget (v0.42.5). The budget is a limit on the decision, not on the engine alone: before this, a shut gate
+    returned 1x even when 1x broke the budget, so tightening the budget could leave the final risk unchanged."""
+    x = round((1 + gate * (optimum - 1)) / 0.05) * 0.05
+    if feasible_max is not None:
+        x = min(x, feasible_max)
+    return float(round(x, 2))
 
 
 # ---------------------------------------------------------------- regimes, walked forward
@@ -474,6 +485,7 @@ def run_engine(D: pd.DataFrame, pred: dict, tilt: np.ndarray, gamma: float, star
     x = np.full(T, np.nan)
     ret = np.full(T, np.nan)
     capped = np.zeros(T, bool)
+    fmax = np.full(T, np.nan)
     prev = 1.0
     for t in range(start_i, T):
         wm = averaging_weights({k: M[k]["ll"] for k in models}, t, models)
@@ -485,10 +497,11 @@ def run_engine(D: pd.DataFrame, pred: dict, tilt: np.ndarray, gamma: float, star
         a, info = choose(np.concatenate(W), np.concatenate(MU), np.concatenate(SD), gamma, es)
         x[t] = a
         capped[t] = info["capped"]
+        fmax[t] = info["feasible_max"]
         ret[t] = a * r[t] - COST * abs(a - prev) - max(0.0, a - 1) * BORROW
         prev = a
     m = np.isfinite(ret)
-    return {"x": x, "ret": ret, "m": m, "capped": capped}
+    return {"x": x, "ret": ret, "m": m, "capped": capped, "feasible_max": fmax}
 
 
 NW_LAGS = 12
@@ -555,7 +568,7 @@ def gated(D: pd.DataFrame, R: dict, start_i: int, gamma: float) -> dict:
         lo = t - LAG + 1
         _, tt, _ = utility_gain(R["ret"][start_i:lo], r[start_i:lo], gamma)
         g[t] = gate_from_t(tt)
-        a = round((1 + g[t] * (R["x"][t] - 1)) / 0.05) * 0.05
+        a = gate_blend(R["x"][t], g[t], R["feasible_max"][t] if "feasible_max" in R and np.isfinite(R["feasible_max"][t]) else None)
         x[t] = a
         ret[t] = a * r[t] - COST * abs(a - prev) - max(0.0, a - 1) * BORROW
         prev = a
@@ -773,7 +786,7 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
     hp = hedge["posterior"](hedge["ctx_now"])
     hi = int(np.argmax(hp["mean_annual"]))
     return {
-        "date": D.index[-1].strftime("%Y-%m"), "exposure": x, "capped": info["capped"], "es_1x": info.get("es_1x"), "var5": var5, "es5": es5,
+        "date": D.index[-1].strftime("%Y-%m"), "exposure": x, "capped": info["capped"], "es_1x": info.get("es_1x"), "feasible_max": info.get("feasible_max"), "var5": var5, "es5": es5,
         "ce_gain_vs_hold_annual": 12 * (certainty_equivalent(u_star, gamma) - certainty_equivalent(u_hold, gamma)),
         "distribution": {"p_below_1": float(np.mean(dx < 1 - 1e-9)), "p_above_1": float(np.mean(dx > 1 + 1e-9)), "p_at_1": float(np.mean(np.abs(dx - 1) < 1e-9)),
                          "q10": float(np.quantile(dx, 0.1)), "median": float(np.median(dx)), "q90": float(np.quantile(dx, 0.9)),
@@ -798,6 +811,16 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
 
 # ---------------------------------------------------------------- build
 @cache.memo("decide.build", deps=("buildout.infer", "buildout.nn", "buildout.ml", "buildout.rl", "buildout.labs", "buildout.geometry", "buildout.portfolio"), require=("dl",))
+def content_hash(dec: dict) -> str:
+    """A name for one decision package's content (v0.42.5): the first 16 hex digits of the SHA-256 of its canonical
+    JSON, without the hash itself, the time it was computed or the page's patch note. Two packages for the same month with different inputs
+    get different names, so the page can tell a revision from a repeat; comparing dates could not."""
+    import hashlib
+    import json as _json
+    body = {k: v for k, v in dec.items() if k not in ("content_sha256", "computed_utc", "v30_patch")}
+    return hashlib.sha256(_json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode()).hexdigest()[:16]
+
+
 def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float | None = None, quick: bool = False, gh: dict | None = None) -> dict:
     dl = dl or labs.download()
     S = labs.shiller(dl)
@@ -884,10 +907,11 @@ def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float 
     now["engine_exposure"] = now["exposure"]
     now["gate"] = {"value": g_now, "t": t_all, "t0": float(_st.norm.ppf(1 - 1 / N_TRIED)), "n_tried": N_TRIED, "utility_gain_month": ug,
                    "alpha_annual": a_all * 12, "alpha_t": ta_all, "months": n_all}
-    now["exposure"] = float(round((1 + g_now * (now["engine_exposure"] - 1)) / 0.05) * 0.05)
+    now["exposure"] = gate_blend(now["engine_exposure"], g_now, now.get("feasible_max"))
+    now["budget_binds_decision"] = bool(now.get("feasible_max") is not None and round((1 + g_now * (now["engine_exposure"] - 1)) / 0.05) * 0.05 > now["feasible_max"] + 1e-9)
     # the trend overlay, if the study adopted one: the gated size times the factor when the trend is off
     now["overlay"] = {"factor": overlay["adopted"], "trend_on": overlay["trend_on_now"], "reason": overlay["adopted_reason"],
-                      "exposure_if_off": float(round(now["exposure"] * overlay["adopted"] / 0.05) * 0.05)}
+                      "exposure_if_off": float(min(round(now["exposure"] * overlay["adopted"] / 0.05) * 0.05, now["exposure"]))}
     if not overlay["trend_on_now"]:
         now["exposure"] = now["overlay"]["exposure_if_off"]
     now["rl"] = {"v16": float(rl.ACTIONS[rl.act(rl.fit(rl.encode(Ds, len(Ds)), Ds["r"].to_numpy(), **{k: rl.CONFIGS["risk_averse_cautious_prior"][k] for k in ("gamma", "penalty", "prior")}),
@@ -1044,5 +1068,8 @@ def what_if(n: dict, p_stress: float | None = None, r12: float | None = None, ga
     gh = n.get("gh") or {}
     x, info = choose(np.array(W), np.array(MU), np.array(SD), g_, es_, np.array(gh["z"]) if gh else None, np.array(gh["w"]) if gh else None, n.get("borrow", BORROW))
     gate = n["gate"]["value"] if t is None else gate_from_t(t, n["gate"]["n_tried"])
-    return {"optimum": x, "capped": info["capped"], "es_1x": info.get("es_1x"), "gate": gate, "decision": round(float(round((1 + gate * (x - 1)) / 0.05) * 0.05), 2),
+    dec = gate_blend(x, gate, info.get("feasible_max") if es_ is not None else None)
+    es1 = info.get("es_1x")
+    return {"optimum": x, "capped": info["capped"], "es_1x": es1, "gate": gate, "decision": dec, "feasible_max": info.get("feasible_max"),
+            "decision_es": (dec * es1 if es1 is not None else None), "budget_binds_decision": bool(es_ is not None and dec < round((1 + gate * (x - 1)) / 0.05) * 0.05 - 1e-9),
             "tilt": tilt, "gamma": g_, "ce": [certainty_equivalent(float(u), g_) for u in info["u"]]}

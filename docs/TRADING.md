@@ -30,7 +30,7 @@ Buildout call (logged in ledger/calls.jsonl)
 
 | `broker` | Who places the orders | Credential | Status |
 |---|---|---|---|
-| `paper` | the paper broker, in a model account filled at the quote plus the collar | none | running: the public paper bot (`paper/`, every weekday from the daily workflow) and private rehearsals |
+| `paper` | the paper broker, in a model account. An order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread (v0.42.5; before, at the limit against the last stored close, a price that could be older than the order) | none | running: the public paper bot (`paper/`, from the daily workflow, Tuesday to Saturday at 11:17 UTC on the prior session's close) and private rehearsals |
 | `assistant` | the assistant that holds Robinhood's Trading MCP (Claude with the Robinhood connector) places exactly what the trader hands it and reports the fills through `record_fills` | Robinhood's OAuth, held by the assistant | works today |
 | `robinhood_mcp` | Buildout's own JSON-RPC client on `https://agent.robinhood.com/mcp/trading`, OAuth 2.1 with PKCE in the standard library | Robinhood's OAuth, tokens in `private/` (mode 600) | built; Robinhood has not published its tool names, so `python -m buildout broker probe` lists them and you fill `private/broker.toml`; untested against the live endpoint from this build |
 
@@ -87,7 +87,7 @@ A live broker also needs `armed = true` in every mode, manual included.
 
 ## Going autonomous, in order
 
-1. **Paper**: nothing to do. The public paper bot runs every weekday in `paper/`; a private rehearsal is
+1. **Paper**: nothing to do. The public paper bot runs from the daily workflow in `paper/`; a private rehearsal is
    `python -m buildout trader --once` on the default mandate. The trader acts on the call in force today (the newest
    ledger entry whose effective date has come), not the call written today, which takes effect tomorrow.
 2. **Live, manual** (this is where the gate keeps you until the evidence is in): `broker = "assistant"`,

@@ -182,7 +182,9 @@ def test_shipped_decision_carries_the_overlay_and_the_headline_matches():
     else:
         tail = f"cut to {now['overlay']['exposure_if_off']:.2f}x if the 10-month trend breaks" if now["overlay"]["trend_on"] else f"scaled by {ov['adopted']:.2f} while the trend is off"
     # v0.31: the headline is the book's call (test_page checks its numbers); the decision engine's baseline sentence is the fallback in landing.js
-    assert f"; {hedge}." in body and "Hold equity at ${xx(N.exposure)}" in (SRC / "landing.js").read_text() and tail
+    # v0.42.5: the static headline carries no figure or hedge; landing.js writes the sentence, hedge words included
+    land = (SRC / "landing.js").read_text()
+    assert hedge in land and "Hold equity at ${xx(N.exposure)}" in land and tail and "desk-title" in body
 
 
 # ---------------------------------------------------------------- the page

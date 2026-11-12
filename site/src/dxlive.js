@@ -44,11 +44,13 @@
     for (let i = 1; i < u.length; i++) if (u[i] > u[bestAll]) bestAll = i;
     if (esLimit == null) return { x: grid[bestAll], i: bestAll, u, capped: false, es1 };
     es1 = dxlCvar(w, mu, sd, 0.05)[1];
+    let fmax = grid[0];
     for (let i = 0; i < u.length; i++) {
       const ok = i === 0 || grid[i] * Math.max(es1, 1e-9) <= esLimit + 1e-12;
       if (ok && (best < 0 || u[i] > u[best])) best = i;
+      if (ok && grid[i] > fmax) fmax = grid[i];
     }
-    return { x: grid[best], i: best, u, capped: best !== bestAll, es1 };
+    return { x: grid[best], i: best, u, capped: best !== bestAll, es1, fmax };
   }
   const dxlCE = (u, gamma) => (Math.abs(gamma - 1) < 1e-9 ? Math.exp(u) - 1 : Math.pow(1 + (1 - gamma) * u, 1 / (1 - gamma)) - 1);
   function dxlGate(t, nTried) {                               // 2 Phi(t - t0) - 1, floored at 0; t0 the best of n useless strategies
@@ -94,8 +96,9 @@
     const gamma = opt.gamma == null ? N.gamma : opt.gamma, es = opt.es === undefined ? N.es_limit : opt.es;
     const r = dxlChoose(W, MU, SD, gamma, es, N.grid, N.borrow, N.gh.z, N.gh.w);
     const g = opt.t == null ? N.gate.value : dxlGate(opt.t, N.gate.n_tried);
-    const fin = Math.round((1 + g * (r.x - 1)) / 0.05) * 0.05;
-    return { ...r, gate: g, decision: fin, tilt, gamma, ce: Array.from(r.u, (u) => dxlCE(u, gamma)) };
+    const blend = Math.round((1 + g * (r.x - 1)) / 0.05) * 0.05;
+    const fin = es == null || r.fmax == null ? blend : Math.min(blend, r.fmax);      // v0.42.5: the risk budget binds the final size, not the optimum alone (decide.gate_blend)
+    return { ...r, gate: g, decision: Math.round(fin * 100) / 100, budgetBinds: fin < blend - 1e-9, decisionEs: r.es1 == null ? null : fin * r.es1, tilt, gamma, ce: Array.from(r.u, (u) => dxlCE(u, gamma)) };
   }
 
   /* ---------- the desk: what if ---------- */
@@ -107,11 +110,7 @@
     if (!box.dataset.wired) {
       box.dataset.wired = "1";
       const set = (id, v) => { const e = $(id); if (e) e.value = String(v); };
-      const reset = () => {
-        DXL.p = N.regime.next[N.regime.worst]; DXL.r12 = N.forecasts.stacked; DXL.gamma = N.gamma; DXL.es = N.es_limit; DXL.t = N.gate.t;
-        set("#dxw-p", DXL.p); set("#dxw-r", DXL.r12); set("#dxw-g", DXL.gamma); set("#dxw-es", DXL.es); set("#dxw-t", DXL.t);
-        dxlUpdate();
-      };
+      const reset = () => dxlReset();
       [["#dxw-p", "p"], ["#dxw-r", "r12"], ["#dxw-g", "gamma"], ["#dxw-es", "es"], ["#dxw-t", "t"]].forEach(([id, k]) => {
         const e = $(id);
         if (e) e.addEventListener("input", () => { DXL[k] = Number(e.value); dxlUpdate(); });
@@ -123,6 +122,15 @@
     }
     dxlUpdate();
   }
+  // the controls back to today's reading. Reads DX19 afresh: the published decision package can replace the
+  // embedded one after the desk is wired (v0.42.5), and the sliders must follow it.
+  function dxlReset() {
+    if (!dxOk() || !DX19.now.mixture || !$("#dxw-out")) return;
+    const N = DX19.now, set = (id, v) => { const e = $(id); if (e) e.value = String(v); };
+    DXL.p = N.regime.next[N.regime.worst]; DXL.r12 = N.forecasts.stacked; DXL.gamma = N.gamma; DXL.es = N.es_limit; DXL.t = N.gate.t;
+    set("#dxw-p", DXL.p); set("#dxw-r", DXL.r12); set("#dxw-g", DXL.gamma); set("#dxw-es", DXL.es); set("#dxw-t", DXL.t);
+    dxlUpdate();
+  }
   function dxlUpdate() {
     const N = DX19.now;
     const esv = DXL.es >= 0.299 ? null : DXL.es;
@@ -132,6 +140,7 @@
     txt("#dxw-es-v", esv == null ? "off" : pct(esv, 0, false)); txt("#dxw-t-v", fx(DXL.t, 1));
     txt("#dxw-x", dxX(r.decision)); txt("#dxw-opt", dxX(r.x)); txt("#dxw-gate", pct(r.gate, 0, false));
     txt("#dxw-why", `The engine's optimum is ${dxX(r.x)}${r.capped ? ", held down by the risk budget" : ""}; a 1x month's expected shortfall is ${r.es1 == null ? "not limited" : pct(r.es1, 1, false)}. `
+      + (r.budgetBinds ? `The gate alone would leave ${dxX(Math.round((1 + r.gate * (r.x - 1)) / 0.05) * 0.05)}, which breaks the risk budget, so the final size is held to ${dxX(r.decision)} (average loss in the worst 5% of months ${pct(r.decisionEs, 1, false)}). ` : "")
       + (r.gate > 0 ? `With evidence t ${fx(DXL.t, 1)}, the gate passes ${pct(r.gate, 0, false)} of the move away from 1x.` : `With evidence t ${fx(DXL.t, 1)}, under the ${fx(dxlNormInv(1 - 1 / N.gate.n_tried), 1)} that luck alone would give the best of ${N.gate.n_tried} strategies, the gate stays shut.`));
     const pts = N.grid.map((x, i) => [x, r.ce[i] * 12]);
     xyChart($("#dxw-chart"), { series: [{ name: "Certainty-equivalent return, a year", pts, color: "var(--s1)", width: 2.2 }], height: 220, zero: true,

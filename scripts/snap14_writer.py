@@ -22,7 +22,8 @@ def write(snap14: dict, out: Path = OUT, header: str = "") -> Path:
     light["stats"] = {**light.get("stats", {}), "code_files": len(code), "code_lines": sum(int(f.get("lines") or 0) for f in code)}
     def enc(o):   # JSON text inside String.raw: no doubled escapes; the three sequences a template would read are JSON escapes
         t = json.dumps(o, separators=(",", ":"), ensure_ascii=False)
-        t = t.replace("`", "\\u0060").replace("${", "$\\u007b").replace("</", "<\\/")
+        t = t.replace("`", "\\u0060").replace("${", "$\\u007b").replace("</", "<\\/").replace("<!", "<\\u0021")
+        t = re.sub(r"<(?=(?:html|head|body)\b)", r"\\u003c", t, flags=re.I)   # v0.42.5: source that holds "<!doctype" or "<html" is data; a scan of the page should not read it as a second document
         assert not t.endswith("\\")
         return "String.raw`" + t + "`"
     body = json.dumps(light, separators=(",", ":"), ensure_ascii=False).replace("</", "<\\/")

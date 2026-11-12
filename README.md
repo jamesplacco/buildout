@@ -8,7 +8,8 @@ personal positions.
 
 ## The decision
 
-Each weekday before the open, the daily run answers three questions on data through the prior close:
+After each exchange session (the run is at 11:17 UTC, Tuesday to Saturday), the daily run answers three questions on
+data through that session's close; the answer takes effect on the first session after the day it is written:
 
 1. **How big?** Volatility targeting and a drawdown-constrained leverage cap set the size; fractional Kelly reports
    the excess return you would need to believe to justify it.
@@ -22,10 +23,12 @@ day, and marked to market every day after (`site/data/live.json`).
 ## What the record says (and where it disappoints)
 
 - Walked forward from 2018 with the live rule itself, after costs: the call earns a Sharpe of 0.77 with a 23% worst
-  drawdown; holding the nine names earns 0.88 with 51%; full size with the call's Nasdaq-100 short earns 0.95 with
-  25%. Sizing down protects; the short keeps the return.
+  drawdown; holding the nine names earns 0.88 with 52%; full size with the call's Nasdaq-100 short earns 0.93 with
+  24%. Sizing down protects; the short keeps the return. (Restated in v0.42.5 after an outside audit: the daily
+  trades that hold the weights are now charged. Before and after are on the Track record desk. The names come from
+  a candidate list chosen in 2026, so this is a walk-forward rule on a retrospectively selected universe.)
 - A deep RL sizer trained inside a learned market model beats holding, the trend rule and a tabular agent on the
-  S&P 500 since 1940 (Sharpe 0.88 against 0.64), and loses on this book (0.49 against 0.78). Both are published.
+  S&P 500 since 1940 (Sharpe 0.88 against 0.64), and loses on this book (0.49 against 0.77). Both are published.
 - Every number that turned out wrong is in the failure log on the Memos desk, with its cost and fix.
 
 ## Run it

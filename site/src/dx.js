@@ -9,6 +9,12 @@
   function dxKpis(box, rows) {
     rows.forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); box.append(d); });
   }
+  // v0.42.5: when the published decision package replaces the embedded one, the parts this desk builds once are
+  // emptied so the next render rebuilds them from the package now in DX19.
+  function dxRebuild() {
+    ["#dx-card", "#dx-pipe", "#dx-tiles", "#dx-find", "#dx-gate-note"].forEach((id) => { const e = $(id); if (e) e.replaceChildren(); });
+    if (typeof dxlReset === "function" && $("#dxw-out") && $("#dxw-out").dataset.wired) dxlReset();
+  }
   function renderDecision() {
     const card = $("#dx-card");
     if (!card || !dxOk()) { if (card && !card.children.length) card.append(h("p", "hint", "The decision engine is missing from this build.")); return; }
@@ -25,7 +31,8 @@
         ["Hedge", N.hedge.name, `${N.hedge.context}; best with ${pct(Math.max(...N.hedge.p_best), 0, false)} odds (bond data to ${N.hedge.as_of})`],
         ["RL checks", `${dxX(N.rl.v16)} and ${dxX(N.rl.conservative.action)}`, `the fitted-Q agent and the conservative ensemble (${pct(N.rl.conservative.agreement, 0, false)} of its agents agree)`]]
         .forEach(([k, v, s]) => { const r = h("div", "dx-row"); r.append(h("span", "dx-rk", k), h("b", null, v), h("small", null, s)); why.append(r); });
-      card.append(big, why, h("p", "dx-note", "The MODEL book, not personal positions. Research only: the engine never places orders."));
+      card.append(big, why, h("p", "dx-note", "The MODEL book, not personal positions. Research only: the engine never places orders."),
+        h("p", "dx-note", `Decision package ${O.content_sha256 || "unnamed"}: monthly data through ${O.end}${O.computed_utc ? `, computed ${isoNice(O.computed_utc.slice(0, 10))}` : ""}. A monthly model; it sizes the S&P 500 and supplies the book's baseline, and the book's own daily limits set the call.`));
       // the pipeline
       const pipe = $("#dx-pipe");
       O.pipeline.forEach((p, i) => { const s = h("li", "dx-stage"); s.append(h("span", "dx-n", String(i + 1).padStart(2, "0")), h("b", null, p.stage), h("span", null, p.what)); pipe.append(s); });

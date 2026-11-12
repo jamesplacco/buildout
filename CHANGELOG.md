@@ -3,6 +3,40 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.42.5 answers an outside buyside audit (Nov 11, 2026): thirteen findings, each reproduced before anything
+was changed. Fixed, with a test for each:
+
+- **The gate could undo the risk budget.** The engine found the largest exposure inside the budget, then the evidence
+  gate blended the answer back toward 1.00x without checking 1.00x against the budget (budget 3%, gate shut: optimum
+  0.45x, final 1.00x, shortfall 6.6%). The final size is now capped at the largest exposure inside the budget, in the
+  engine, the walk-forward path and the page. The live call was not affected.
+- **The track record now pays for its rebalancing.** The equal-weight book is restored to its weights daily; only
+  each January's change of names was charged. Turnover for holding goes from 0.19x to 3.58x a year. Restated on the
+  same prices (through Nov 5, 2026): the call's Sharpe 0.775 to 0.767, holding 0.883 to 0.878, full size with the
+  call's short 0.950 to 0.926 (this one also now shorts what the ledger logs, in 5% steps). Before and after are on
+  the Track record desk.
+- **The modelled put is bought before the month it protects.** It was priced at the month's first close and paid on
+  the whole month. Bought at the prior month-end close, its variance cut by regime moves from 26% to 38% to 28% to
+  39%; the conclusion stands.
+- **Paper orders fill after they are written.** The first nine fills used the previous day's close. An order now
+  rests until the close of the first exchange session that ends after it was written and fills there; decision,
+  order, pricing close and fill each carry a time. The nine fills are kept and marked.
+- **One decision on every surface.** Home showed an 84% short, the ledger 85%, search 86%. Every surface now quotes
+  the ledger's entry by its id; the exact minimum is a detail beside it.
+- **Limits mean limits.** The frontier's 0.5% tolerance is gone (a 25.09% drawdown had passed a 25% cap).
+- **An exchange calendar** (`buildout/sessions.py`, standard library, checked against the NYSE's published dates for
+  2026 to 2028) for the ledger's effective date, the staleness check and the trader's window.
+- **The page loads the published decision** (`data/decision.json`) and prefers it when its content hash differs; the
+  Status desk lists which copy of each package is on screen and how its fetch ended.
+- **Words.** Expected shortfall is the average loss across the worst 5% of months, not "the worst month in twenty".
+  The Execution desk says which system can send an order, to which account, on whose approval.
+- **One document.** The published page had two nested document skeletons; it now has one.
+
+Not changed, and open: the candidate universe is still chosen with hindsight (now labelled as such everywhere); the
+drawdown cap still comes from a constant-volatility simulation; cash is still proxied by the two-year yield; the
+PSQ and VIXY version of the call has no record of its own; prices are still last trade before midnight UTC, not the
+official close. The audit's redesign items (five destinations, a smaller payload, typography) are not started.
+
 Version 0.42.4: the trader acts on the call in force today (the newest ledger entry whose effective date has come);
 it had taken the newest call, which takes effect tomorrow, so the paper bot was refused on every pass and never
 traded. A live broker needs `armed = true` in every mode, and trades in manual mode until the evidence gate opens

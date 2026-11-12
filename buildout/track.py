@@ -80,30 +80,46 @@ def pit_members(prices: dict[str, pd.DataFrame], years: list[int]) -> dict[int, 
     return out
 
 
+def rebalance_turnover(R: pd.DataFrame, W: pd.DataFrame) -> pd.Series:
+    """The trading a target-weight book needs, as a share of the book, booked on the day the trade is made (v0.42.5).
+    W[t] is the weight held through day t. By the close of t the weights have drifted to W[t] (1 + R[t]) / (1 + r[t]);
+    restoring W[t+1] trades the sum of the absolute differences, counting buys and sells. A change of membership
+    is in the same number. The first day is zero: the opening build is charged where the size is set."""
+    R, W = R.fillna(0.0), W.fillna(0.0)
+    rp = (R * W).sum(axis=1)
+    drift = (W * (1 + R)).div((1 + rp).replace(0, np.nan), axis=0)
+    return (W - drift.shift(1)).abs().sum(axis=1).where(np.arange(len(W)) > 0, 0.0).rename("turnover")
+
+
 def pit_book(prices: dict[str, pd.DataFrame], cal: pd.DatetimeIndex) -> tuple[pd.Series, dict, pd.Series]:
-    """Equal-weight daily returns of the point-in-time members, rebalanced each January; the turnover each January."""
+    """Equal-weight daily returns of the point-in-time members: the membership is reset each January and the weights
+    are restored to equal every day. Returns the book's return, the members, and the turnover that policy needs each
+    day (the daily trades back to equal weight and each January's change of names), so the record pays for the
+    rebalancing it earns from (v0.42.5; before, only the January change was counted)."""
     R = pd.DataFrame({t: bk.total_returns(prices[t]) for t in CANDIDATES if t in prices}).reindex(cal)
     years = sorted({d.year for d in cal})
     mem = pit_members(prices, years)
     w = pd.DataFrame(0.0, index=cal, columns=R.columns)
-    turn = pd.Series(0.0, index=cal)
-    prev = None
     for y in years:
         m = [t for t in mem[y] if t in R.columns]
         rows = w.index.year == y
         if not m:
             continue
         w.loc[rows, m] = 1.0 / len(m)
-        cur = pd.Series(0.0, index=R.columns); cur[m] = 1.0 / len(m)
-        if prev is not None:
-            first = w.index[rows][0]
-            turn[first] = float((cur - prev).abs().sum())
-        prev = cur
     have = R.notna()
     wt = (w * have)
     wt = wt.div(wt.sum(axis=1).replace(0, np.nan), axis=0)
     r = (R.fillna(0.0) * wt).sum(axis=1, min_count=1)
-    return r.rename("pit"), mem, turn
+    return r.rename("pit"), mem, rebalance_turnover(R, wt)
+
+
+def book_turnover(R: pd.DataFrame, w: pd.Series) -> pd.Series:
+    """The same count for book.book_returns: fixed target weights, restored daily (v0.42.5)."""
+    w = w.reindex(R.columns).fillna(0.0)
+    have = R.notna()
+    wt = have.mul(w, axis=1)
+    wt = wt.mul(w.sum() / wt.sum(axis=1).replace(0, np.nan), axis=0)
+    return rebalance_turnover(R, wt)
 
 
 # ---------------------------------------------------------------- walk-forward sizing
@@ -179,7 +195,12 @@ def _lr_one(job):
     try:
         o = bk.build(pp, U.loc[:t], book)
         k = o.get("keep_names_hedge") or {}
-        return {"date": t, "size": float(o["size"]), "binding": o["binding"], "short": float(k.get("short_nasdaq_frac") or 0.0),
+        # v0.42.5: the short the ledger would have logged that day (the menu's full-size row, the smallest 5% step
+        # inside every limit), so the record tests the decision that is recorded; the exact minimum rides along
+        fr = [r for r in (o.get("frontier") or []) if r.get("meets")]
+        exact = float(k.get("short_nasdaq_frac") or 0.0)
+        short = float(fr[-1]["short"]) if fr and abs(fr[-1]["gross"] - 1) < 1e-9 else exact
+        return {"date": t, "size": float(o["size"]), "binding": o["binding"], "short": short, "short_exact": exact,
                 "asof": o["asof"], "ok": True}
     except Exception as exc:                              # noqa: BLE001 - the month falls back to the simple limits, counted
         return {"date": t, "ok": False, "error": f"{type(exc).__name__}: {exc}"[:160]}
@@ -263,9 +284,12 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
         fin = (1 - g - bondw) * c - (g + bondw - 1).clip(lower=0) * COST["borrow_spread"] / 252
         gross_ret = g * x + fin + bondw * b - short * q
         # costs
-        dg = g.diff().abs().fillna(g.iloc[0])
+        # v0.42.5: holding the names at g of NAV is itself a trade each day, because the names and the rest of the
+        # account do not move together; the size held into today is yesterday's g carried by yesterday's returns
+        nav1 = (1 + gross_ret).shift(1)
+        dg = (g - g.shift(1) * (1 + x.shift(1)) / nav1).abs().fillna(g.iloc[0])
         stock_cost = (dg + g * tn) * COST["stock_bp"] / 1e4
-        ds = short.diff().abs().fillna(short.iloc[0])
+        ds = (short - short.shift(1) * (1 + q.shift(1) + c.shift(1)) / nav1).abs().fillna(short.iloc[0])
         q_end = pd.Series(held.index.month.isin([3, 6, 9, 12]) & (pd.Series(held.index.day, index=held.index) >= 15) & (pd.Series(held.index.to_period("M"), index=held.index) != pd.Series(held.index.to_period("M"), index=held.index).shift(-1)), index=held.index)
         fut_cost = ds * COST["fut_bp"] / 1e4 + short * q_end.astype(float) * COST["roll_bp_q"] / 1e4
         db = bondw.diff().abs().fillna(bondw.iloc[0])
@@ -406,18 +430,22 @@ def regime_table(H: pd.DataFrame, pol: pd.Series | None, start: str = "1962-01-0
 
 
 def put_returns(q_excess: pd.Series, vol_index: pd.Series, k: float = 0.90, scale: float = 1.25) -> pd.Series:
-    """A one-month 90%-strike put on the Nasdaq-100, bought at each month's first close and held to the month's end,
-    as a return per $1 of index hedged. Priced by Black-Scholes at implied vol = VIX x 1.25 (an assumption for the
-    Nasdaq-100's premium over the S&P 500); paid at expiry from the index's monthly move. Modelled, not traded."""
+    """A one-month 90%-strike put on the Nasdaq-100, bought at each month-end close and held to the next month-end,
+    as a return per $1 of index hedged. Strike and premium are set at the purchase close: the strike is 90% of that
+    close and the implied vol is that day's VIX x 1.25 (an assumption for the Nasdaq-100's premium over the S&P
+    500), priced by Black-Scholes. The payoff comes from the index's move over the month that follows, so nothing
+    that happened before the purchase can pay the put (v0.42.5: before, the premium used the month's first close
+    and the payoff the whole month, which paid the put for a fall into its own purchase). Modelled, not traded: no
+    skew, no bid-ask, no listed expiry."""
     from scipy.stats import norm
     m = (1 + q_excess.dropna()).resample("ME").prod() - 1
-    v = (vol_index.resample("ME").first() / 100 * scale).reindex(m.index).ffill()
+    v = (vol_index.resample("ME").last().shift(1) / 100 * scale).reindex(m.index)
     T = 1 / 12
     d1 = (np.log(1 / k) + 0.5 * v ** 2 * T) / (v * np.sqrt(T))
     d2 = d1 - v * np.sqrt(T)
     prem = k * norm.cdf(-d2) - norm.cdf(-d1)
     payoff = (k - (1 + m)).clip(lower=0)
-    return (payoff - prem).rename("put")
+    return (payoff - prem).dropna().rename("put")
 
 
 def alternatives(frames: dict, H: pd.DataFrame, vix: pd.Series, pol: pd.Series) -> dict:
@@ -543,7 +571,7 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
     F = pd.DataFrame({"market": P["F"]["market"], "semis": P["F"]["semis"], "rates": P["F"]["rates"]})
     out = {"members": {str(y): [t.upper().replace("GOOG", "GOOGL") for t in m] for y, m in members.items() if y >= 2018}, "policy_name": POLICY_NAME, "cost": COST}
     recs = {}
-    for name, r, tn in (("pit", pit, turn), ("hindsight", hind, None)):
+    for name, r, tn in (("pit", pit, turn), ("hindsight", hind, book_turnover(P["R"], w))):
         rule = None
         if name == "pit" and os.environ.get("BUILDOUT_SIMPLE_RULE") != "1":
             rule = live_rule_path(prices, ust, members, [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)])
@@ -610,8 +638,9 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
 def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
     """The ledger's calls marked to market, day by day: each call held from its effective date until the next call
     takes over (two effective the same day: the newer governs). Two variants, as the call offers them: the book at the
-    call's size with the rest in cash, and the book at 1.00x with the call's Nasdaq-100 short. Costs: 5 bp of each
-    change in size; 1 bp of each change in the short. Written daily to site/data/live.json (buildout live)."""
+    call's size with the rest in cash, and the book at 1.00x with the call's Nasdaq-100 short. Costs: 5 bp of every
+    trade in the names (each change in size, and from v0.42.5 the daily trades that hold the target weights and the
+    target size); 1 bp of each change in the short. Written daily to site/data/live.json (buildout live)."""
     if not rows:
         return {"calls": 0, "marked_days": 0, "note": "No call logged yet."}
     P = bk.panel(prices, ust)
@@ -628,8 +657,15 @@ def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
     short = path(lambda r: (r["call"].get("menu_high") or {}).get("short") or 0.0)
     cash = P["cash"].reindex(x.index).fillna(0.0)
     qx = (P["E"]["QQQ"].reindex(x.index) - cash).fillna(0.0)
-    unh = size * x + (1 - size) * cash - size.diff().abs().fillna(size.iloc[0]) * COST["stock_bp"] / 1e4
-    hed = x - short * qx - short.diff().abs().fillna(short.iloc[0]) * COST["fut_bp"] / 1e4 - COST["stock_bp"] / 1e4 * (x.index == x.index[0])
+    tn = book_turnover(P["R"], pd.Series(bk.BOOK)).reindex(x.index).fillna(0.0)      # v0.42.5: the daily trades back to the target weights
+    g_unh = size * x + (1 - size) * cash
+    d_size = (size - size.shift(1) * (1 + x.shift(1)) / (1 + g_unh).shift(1)).abs().fillna(size.iloc[0])
+    unh = g_unh - (d_size + size * tn) * COST["stock_bp"] / 1e4
+    g_hed = x - short * qx
+    nav1 = (1 + g_hed).shift(1)
+    d_one = (1 - (1 + x.shift(1)) / nav1).abs().fillna(1.0)
+    d_short = (short - short.shift(1) * (1 + qx.shift(1) + cash.shift(1)) / nav1).abs().fillna(short.iloc[0])
+    hed = g_hed - d_short * COST["fut_bp"] / 1e4 - (d_one + tn) * COST["stock_bp"] / 1e4
     nav = lambda r: (1 + r).cumprod()
     q_tot = float((1 + P["E"]["QQQ"].reindex(x.index).fillna(0.0)).prod() - 1)
     return {**base, "marked_days": int(len(x)), "last_mark": str(x.index[-1].date()),

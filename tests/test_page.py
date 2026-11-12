@@ -115,8 +115,12 @@ def test_headline_and_snapshots_agree():
     F, R = _json_const(res, "FINDINGS"), _json_const(res, "ROC_SNAP")
     s30 = (SRC / "snap30.js").read_text()                 # v0.31: the headline is the book's call, shipped as the same sentence
     B = json.loads(s30[s30.index("const SNAP30 = ") + 15:s30.index(";\n", s30.index("const SNAP30 = "))].replace("<\\/", "</"))["book"]
-    k = B["keep_names_hedge"]
-    assert f"Run the book at {B['size']:.2f}x, or keep every name and short {round(k['short_nasdaq_frac'] * 100)}% of NAV in Nasdaq-100 futures; no bond hedge." in body
+    # v0.42.5: the page ships no figure in its static headline. The sentence used to be copied into the page with
+    # that build's numbers, the search index read it before the live call rendered, and it went stale (an 86% short,
+    # two calls old). The headline is written at load from the ledger's entry for the call's date (book.js bookCall).
+    h1 = re.search(r'<h1 id="desk-title">(.*?)</h1>', body).group(1)
+    assert not re.search(r"\d(%|x\b)", h1), h1
+    assert B["size"] > 0 and "decisionFor(B.asof)" in (SRC / "book.js").read_text() and "pct0(M.hi.short)" in (SRC / "landing.js").read_text()
     assert abs(F["hedge"]["latest"]["infl_avg"] * 100 - R["cpi"]["avg36"]) < 0.005
     assert abs(F["spells"]["latest"] * 100 - R["cpi"]["value"]) < 0.005
     assert F["hedge"]["latest"]["month"] == R["cpi"]["date"][:7] == F["spells"]["month"]

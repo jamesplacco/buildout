@@ -40,7 +40,7 @@ LAYERS = [
 # Constants chosen by judgment rather than fit. Each carries its reason, so a reviewer can see what is a choice.
 SET_BY_HAND = [
     {"id": "lag", "symbol": "L", "value": decide.LAG, "unit": "months", "where": "decide", "reason": "A decision at month t uses data through t minus 2, so a figure is never used before it could be known."},
-    {"id": "es_limit", "symbol": "ES limit", "value": decide.ES_LIMIT, "unit": "share of capital", "where": "decide, portfolio", "reason": "Expected loss in the worst month in twenty, at most 12% of capital. A risk budget, not a forecast."},
+    {"id": "es_limit", "symbol": "ES limit", "value": decide.ES_LIMIT, "unit": "share of capital", "where": "decide, portfolio", "reason": "The average loss across the worst 5% of months, at most 12% of capital. A risk budget, not a forecast."},
     {"id": "forget", "symbol": "lambda", "value": decide.FORGET, "unit": "per month", "where": "decide", "reason": "Model averaging forgets 2% of a month's evidence each month, so a model that stopped working loses weight within a few years."},
     {"id": "refit_hmm", "symbol": "", "value": decide.REFIT_HMM, "unit": "months", "where": "decide, portfolio", "reason": "Regime models refit every five years: often enough to follow drift, rarely enough that the fit history stays auditable (18 fits since 1940)."},
     {"id": "refit_ml", "symbol": "", "value": decide.REFIT_ML, "unit": "months", "where": "decide", "reason": "Forecasters refit every two years."},

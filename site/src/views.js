@@ -160,16 +160,19 @@
   /* ---------- live readout (data/macro.json and data/report.json) ---------- */
   const LIVE = { macro: null, report: null, btSeries: null, capex: null, capexPick: null, status: null, problems: [] };
   // fetch with a timeout; a missing, slow or malformed file yields null and a note, never an exception
+  // v0.42.5: every fetch leaves a record of how it ended (LIVE.fetch), so a file that failed to load is visible on
+  // the Status desk as "this build's snapshot" and not silently indistinguishable from a fresh one.
   async function loadJSON(path, ms = 10000) {
-    if (typeof location !== "undefined" && location.protocol === "file:") return null;   // v0.39.1: a page opened from disk keeps its snapshots, quietly
+    LIVE.fetch = LIVE.fetch || {};
+    if (typeof location !== "undefined" && location.protocol === "file:") { LIVE.fetch[path] = "opened from disk"; return null; }   // v0.39.1: a page opened from disk keeps its snapshots, quietly
     const ctl = typeof AbortController === "function" ? new AbortController() : null;
     const timer = ctl ? setTimeout(() => ctl.abort(), ms) : 0;
     try {
       const res = await fetch(path, { cache: "no-store", signal: ctl ? ctl.signal : undefined });
-      if (!res.ok) return null;
+      if (!res.ok) { LIVE.fetch[path] = `not published (HTTP ${res.status})`; return null; }
       const text = await res.text();
-      try { return JSON.parse(text); } catch (e) { LIVE.problems.push(`${path} is not valid JSON`); return null; }
-    } catch (e) { return null; } finally { clearTimeout(timer); }
+      try { const j = JSON.parse(text); LIVE.fetch[path] = "loaded"; return j; } catch (e) { LIVE.fetch[path] = "not valid JSON"; LIVE.problems.push(`${path} is not valid JSON`); return null; }
+    } catch (e) { LIVE.fetch[path] = "not reachable"; return null; } finally { clearTimeout(timer); }
   }
   const SCHEMA_MAX = 2;
   const getPath = (o, path) => path.split(".").reduce((x, k) => (x == null ? undefined : x[k]), o);
@@ -1865,6 +1868,33 @@
     chip.lastElementChild.textContent = st.ok ? `Daily run ${st.checks.length} of ${st.checks.length} checks` : `Daily run ${passed} of ${st.checks.length} checks`;
   }
 
+  // v0.42.5: which copy of each data package the page is showing, and how the fetch of the published copy ended.
+  // A package whose fetch failed is named as this build's snapshot, with its date, so an old snapshot cannot pass
+  // for today's recommendation.
+  function renderPackages() {
+    const box = $("#pkg-body");
+    if (!box) return;
+    const P = LIVE.pkg || {}, nd = (d) => (d ? isoNice(String(d).slice(0, 10)) : "n/a");
+    const D = typeof decisionInForce === "function" ? decisionInForce() : null;
+    const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null, BC = N && typeof bookCall === "function" ? bookCall(N) : null, next = BC && BC.decision;
+    const how = (k) => { const p = P[k]; if (!p) return "not in this build"; return p.showing === "published" ? "the published copy" : (p.same ? "the same content as the published copy" : "this build's snapshot"); };
+    const st = (k) => { const p = P[k]; return p ? (p.fetch || "not requested") : ""; };
+    const rows = [
+      ["The call (book risk and limits)", "daily", how("book"), nd(P.book && P.book.through), st("book"), next ? `decision ${next.id}, in force from ${nd(next.effective_from)}` : "not yet in the ledger"],
+      ["The ledger of calls", "daily", how("calls"), P.calls ? `${P.calls.n} entries` : "n/a", st("calls"), D ? `in force today: decision ${D.id} (since ${nd(D.effective_from)})` : "no call in force yet"],
+      ["The calls marked to market", "daily", how("live"), nd(P.live && P.live.through), st("live"), ""],
+      ["The paper account", "daily", how("paper"), nd(P.paper && P.paper.through), st("paper"), ""],
+      ["The decision engine (S&P 500 sizing)", "monthly", how("decision"), P.decision ? `${P.decision.through}` : "n/a", st("decision"), P.decision && P.decision.id ? `package ${P.decision.id}` : ""],
+      ["The walk-forward record", "per release", "this build's snapshot", nd(P.record && P.record.through), "built into the page", ""]];
+    const wrap = h("div");
+    wrap.append(h("p", "prose", "Each package has its own cadence, so one date cannot describe the page. What the page is showing for each, where it came from, and the decision it carries:"));
+    const tb = h("div", "tablewrap"), t = h("table", "rs-table");
+    tb.append(t); wrap.append(tb);
+    box.replaceChildren(wrap);
+    fillTable(t, ["Package", "Cadence", "Showing", "Data through", "Fetch of the published copy", "Decision"], rows, 1);
+    if (LIVE.problems.length) { const ul = h("ul", "checks"); LIVE.problems.forEach((x) => ul.append(h("li", "fail", x))); wrap.append(ul); }
+  }
+
   /* =====================================================================================
      NAVIGATION: contents, glossary links, search, shortcuts, print
      ===================================================================================== */
@@ -1931,8 +1961,17 @@
   }
 
   const INDEX = [];
+  // v0.42.5: when the published call replaces the embedded one, the Desk's search entry follows it
+  function reindexDesk() {
+    try { if (typeof renderHeadline === "function" && typeof DX19 !== "undefined" && DX19 && DX19.now) renderHeadline(DX19.now); } catch (e) { return; }
+    const h1 = $("#desk-title"), e = INDEX.find((x) => x.kind === "Desk" && x.target === "desk");
+    if (h1 && e) { e.sub = h1.textContent; e.hay = `${e.title} ${e.sub}`.toLowerCase(); }
+  }
   function buildIndex() {
     const add = (title, sub, kind, target, keys = "") => INDEX.push({ title, sub, kind, target, t: title.toLowerCase(), hay: `${title} ${sub} ${keys}`.toLowerCase() });
+    // v0.42.5: the Desk's headline is written from the current call before it is indexed; search used to carry the
+    // sentence the page shipped with (an 86% short, two calls old)
+    try { if (typeof renderHeadline === "function" && typeof DX19 !== "undefined" && DX19 && DX19.now) renderHeadline(DX19.now); } catch (e) { /* the static sentence carries no figure */ }
     VIEWS.forEach((v) => { const h1 = $("#view-" + v).querySelector("h1"); add(TAB_NAME[v], h1 ? h1.textContent : "", "Desk", v); });
     document.querySelectorAll(".view .section-head h2[id]").forEach((h2) => {
       const view = h2.closest(".view").id.slice(5), head = h2.parentElement, eb = head.querySelector(".eyebrow");

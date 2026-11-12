@@ -1,8 +1,9 @@
 """Brokers (v0.42): one interface, three ways to reach a market.
 
     Broker              what the trader needs: the account, quotes, a limit order, its status, a cancel
-    PaperBroker         a model account filled at the quote plus the collar; its state is a JSON file. Runs in public
-                        every day from the daily workflow (paper/account.json) and privately for rehearsal.
+    PaperBroker         a model account whose orders rest and fill at the close of the first session that ends after
+                        they were written (v0.42.5; before, at the limit against the last stored close). Its state
+                        is a JSON file. Runs in public from the daily workflow (paper/) and privately for rehearsal.
     AssistantBroker     places nothing. It writes each order into the ticket's hand-off for an assistant that holds
                         Robinhood's Trading MCP (Claude with the Robinhood connector), which places the orders and
                         reports the fills back through record_fills. Buildout holds no credential on this route.
@@ -50,50 +51,77 @@ class Broker(Protocol):
 
 # ---------------------------------------------------------------- paper
 class PaperBroker:
-    """A cash account marked at the last quote. Fills happen at the limit when the limit is through the quote (a buy
-    at or above the ask, a sell at or below the bid), else the order rests and is cancelled at the ticket's expiry."""
+    """A cash account marked at daily closes, with orders that fill in the order time demands (v0.42.5).
+
+    An order rests from the moment it is written until the close of the first exchange session that ends after
+    that moment, and fills there: at that close plus a 5 bp half-spread to buy, less it to sell (market on close).
+    So decision <= order <= price <= fill, each with its own timestamp on the order. Before v0.42.5 an order filled
+    the instant it was written, at its limit against the last stored close, which could be the day before: a price
+    older than the order. The limit the planner wrote is kept on the order and `inside_limit` says whether a live
+    limit order at that price would have filled at that close; the paper fill does not depend on it, because a
+    10 bp collar on yesterday's close rarely survives a day's move and a daily-close record has nothing finer.
+    An order with no eligible close within MAX_REST_DAYS is cancelled. No equity point is written for a date
+    before the account opened."""
 
     name = "paper"
+    fills_at_close = True
+    HALF_SPREAD = 0.0005
+    MAX_REST_DAYS = 6
 
-    def __init__(self, path: str | Path | None = None, quote_fn=None, start_cash: float = 100_000.0):
+    def __init__(self, path: str | Path | None = None, quote_fn=None, start_cash: float = 100_000.0, clock=None):
         self.path = Path(path) if path else PRIVATE / "paper_account.json"
         self.quote_fn = quote_fn
         self.start_cash = start_cash
+        self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.state = self._load()
 
     def _load(self) -> dict:
         if self.path.exists():
             return json.loads(self.path.read_text())
-        return {"account_type": "agentic (paper)", "cash": self.start_cash, "positions": {}, "orders": {}, "marks": {}, "opened": datetime.now(timezone.utc).date().isoformat(),
-                "equity_history": [], "start_cash": self.start_cash}
+        return {"account_type": "agentic (paper)", "cash": self.start_cash, "positions": {}, "orders": {}, "marks": {}, "opened": self.clock().date().isoformat(),
+                "equity_history": [], "start_cash": self.start_cash, "fill_convention": "close of the order's session, 5 bp half-spread (v0.42.5)"}
 
     def save(self, state: dict | None = None) -> None:
         """Atomic: write a temporary file beside the account, then rename it over. A crash leaves the old file or
         the new one, never half of one (v0.42.3)."""
         _atomic_write_json(self.path, self.state if state is None else state)
 
+    @staticmethod
+    def _mark_of(v: dict) -> dict:
+        m = {"last": float(v["last"]), "asof": v.get("asof", "")}
+        if isinstance(v.get("closes"), dict):
+            m["closes"] = {str(d)[:10]: float(c) for d, c in v["closes"].items()}
+        return m
+
     def quotes(self, symbols: list[str]) -> dict:
         if self.quote_fn is None:
             raise RuntimeError("the paper broker needs a quote source")
         q = self.quote_fn([s.upper() for s in symbols])
         for s, v in q.items():
-            self.state["marks"][s] = {"last": float(v["last"]), "asof": v.get("asof", "")}
+            self.state["marks"][s] = self._mark_of(v)
         return q
 
     def mark(self, quotes: dict | None = None) -> dict:
-        """Equity at the latest marks; appends a daily point to the equity history (one per date)."""
+        """Equity at the latest marks; appends a daily point to the equity history (one per date), never one dated
+        before the account opened (v0.42.5: such a point, written by earlier builds, is moved aside, not deleted)."""
         if quotes:
             for s, v in quotes.items():
-                self.state["marks"][s.upper()] = {"last": float(v["last"]), "asof": v.get("asof", "")}
+                self.state["marks"][s.upper()] = self._mark_of(v)
         pos = self.state["positions"]
         value = sum(float(q) * float(self.state["marks"].get(s, {}).get("last") or 0) for s, q in pos.items())
         eq = round(float(self.state["cash"]) + value, 2)
         asof = max((m.get("asof", "") for m in self.state["marks"].values()), default="")
+        opened = str(self.state.get("opened") or "")
         hist = self.state["equity_history"]
-        if asof and (not hist or hist[-1][0] != asof):
-            hist.append([asof, eq])
-        elif hist and asof:
-            hist[-1][1] = eq
+        early = [h for h in hist if opened and h[0] < opened]
+        if early:
+            self.state.setdefault("pre_inception_marks", []).extend(early)
+            hist[:] = [h for h in hist if not (opened and h[0] < opened)]
+        if asof and (not opened or asof >= opened):
+            if not hist or hist[-1][0] != asof:
+                hist.append([asof, eq])
+            else:
+                hist[-1][1] = eq
         return {"equity": eq, "positions_value": round(value, 2), "asof": asof}
 
     def account(self) -> dict:
@@ -102,8 +130,9 @@ class PaperBroker:
                 "positions": [{"symbol": s, "quantity": q} for s, q in sorted(self.state["positions"].items()) if abs(q) > 1e-9], "marks_asof": m["asof"]}
 
     def place(self, symbol: str, side: str, quantity: float, limit: float, client_id: str) -> dict:
-        """Validate, compute the account as it would be, check it, write it, and only then adopt it (v0.42.3). A
-        refused order leaves the account in memory and on disk exactly as it was."""
+        """Write a resting order. Nothing fills here: the account changes only in settle(), at a close that comes
+        after this moment. A refused order leaves the account in memory and on disk exactly as it was."""
+        from . import sessions
         symbol, side, quantity, limit = validate_order(symbol, side, quantity, limit, client_id)
         prior = self.state["orders"].get(client_id)
         if prior is not None:
@@ -113,30 +142,72 @@ class PaperBroker:
         mk = self.state["marks"].get(symbol)
         if not mk:
             raise RuntimeError(f"no quote for {symbol}; call quotes() first")
-        last = float(mk["last"])
-        bid, ask = last * (1 - 0.0005), last * (1 + 0.0005)
-        fills = (side == "buy" and limit >= ask - 1e-9) or (side == "sell" and limit <= bid + 1e-9)
+        if side == "sell":
+            held = float(self.state["positions"].get(symbol, 0.0))
+            resting = sum(float(o["quantity"]) for o in self.state["orders"].values() if o["status"] == "open" and o["symbol"] == symbol and o["side"] == "sell")
+            if quantity > held - resting + 1e-9:
+                raise RuntimeError(f"paper: selling {quantity:g} {symbol} with {held:g} held" + (f" and {resting:g} already resting to sell" if resting else ""))
+        else:                                                          # a buy must be funded now, at its limit, beside the buys already resting
+            reserved = sum(float(o["quantity"]) * float(o["limit"]) for o in self.state["orders"].values() if o["status"] == "open" and o["side"] == "buy")
+            if quantity * limit + reserved > float(self.state["cash"]) + 1e-6:
+                raise RuntimeError(f"paper: the buy costs {quantity * limit:,.2f} with {float(self.state['cash']):,.2f} in cash" + (f" and {reserved:,.2f} reserved for resting buys" if reserved else ""))
+        now = self.clock()
         new = json.loads(json.dumps(self.state))                       # the candidate account
-        if fills:
-            held = float(new["positions"].get(symbol, 0.0))
-            if side == "sell" and quantity > held + 1e-9:
-                raise RuntimeError(f"paper: selling {quantity:g} {symbol} with {held:g} held")
-            cash = float(new["cash"]) - (quantity if side == "buy" else -quantity) * limit
-            if cash < -1e-6:
-                raise RuntimeError(f"paper: the buy costs {quantity * limit:,.2f} with {float(new['cash']):,.2f} in cash")
-            pos = held + (quantity if side == "buy" else -quantity)
-            if abs(pos) < 1e-9:
-                new["positions"].pop(symbol, None)
-            else:
-                new["positions"][symbol] = pos
-            new["cash"] = cash
         o = {"order_id": f"paper-{client_id}", "client_id": client_id, "symbol": symbol, "side": side, "quantity": quantity, "limit": limit,
-             "status": "filled" if fills else "open", "filled_qty": quantity if fills else 0.0, "avg_price": limit if fills else None,
-             "placed": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+             "type": "market_on_close", "status": "open", "filled_qty": 0.0, "avg_price": None,
+             "placed": now.isoformat(timespec="seconds"), "fills_in_session": sessions.session_of_close_after(now).isoformat(),
+             "planning_quote": {"last": float(mk["last"]), "asof": mk.get("asof", "")}}
         new["orders"][client_id] = o
         self.save(new)                                                 # raises before adoption if the disk refuses
         self.state = new
         return o
+
+    def settle(self, now: datetime | None = None) -> list[dict]:
+        """Fill every resting order whose session has closed, at that session's close (sells first, so the buys are
+        funded by what the sells raised). The close must be in the marks: call quotes() for the open orders' symbols
+        first. Returns the orders that changed. All or nothing on disk."""
+        from . import sessions
+        now = now or self.clock()
+        new = json.loads(json.dumps(self.state))
+        changed = []
+        todo = sorted((o for o in new["orders"].values() if o["status"] == "open"), key=lambda o: (o["side"] != "sell", o["placed"], o["client_id"]))
+        for o in todo:
+            s, side, qty = o["symbol"], o["side"], float(o["quantity"])
+            mk = new["marks"].get(s) or {}
+            closes = dict(mk.get("closes") or ({mk["asof"]: mk["last"]} if mk.get("asof") else {}))
+            first = o.get("fills_in_session") or sessions.session_of_close_after(datetime.fromisoformat(o["placed"])).isoformat()
+            ok = sorted(d for d in closes if d >= first and sessions.close_utc(d) <= now)
+            if not ok:
+                if (now - datetime.fromisoformat(o["placed"])).days >= self.MAX_REST_DAYS:
+                    o.update({"status": "cancelled", "reason": f"no close on or after {first} within {self.MAX_REST_DAYS} days"})
+                    changed.append(o)
+                continue
+            d = ok[0]
+            px = round(float(closes[d]) * (1 + self.HALF_SPREAD if side == "buy" else 1 - self.HALF_SPREAD), 6)
+            held = float(new["positions"].get(s, 0.0))
+            if side == "sell" and qty > held + 1e-9:
+                o.update({"status": "rejected", "reason": f"selling {qty:g} with {held:g} held at the close of {d}"})
+                changed.append(o)
+                continue
+            cash = float(new["cash"]) - (qty if side == "buy" else -qty) * px
+            if cash < -1e-6:
+                o.update({"status": "rejected", "reason": f"the buy costs {qty * px:,.2f} at the close of {d} with {float(new['cash']):,.2f} in cash"})
+                changed.append(o)
+                continue
+            pos = held + (qty if side == "buy" else -qty)
+            if abs(pos) < 1e-9:
+                new["positions"].pop(s, None)
+            else:
+                new["positions"][s] = pos
+            new["cash"] = cash
+            o.update({"status": "filled", "filled_qty": qty, "avg_price": px, "fill_session": d, "close": float(closes[d]),
+                      "filled": sessions.close_utc(d).isoformat(timespec="seconds"),
+                      "inside_limit": bool(px <= float(o["limit"]) + 1e-9 if side == "buy" else px >= float(o["limit"]) - 1e-9)})
+            changed.append(o)
+        if changed:
+            self.save(new)
+            self.state = new
+        return changed
 
     def order(self, order_id: str) -> dict:
         for o in self.state["orders"].values():

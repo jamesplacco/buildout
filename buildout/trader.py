@@ -195,11 +195,64 @@ def _mark_equity(account: dict, now: datetime) -> None:
     p = _tdir() / "equity.jsonl"
     day = now.date().isoformat()
     rows = [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.exists() else []
+    row = {"date": day, "equity": float(account["equity"]), **({"marks_asof": account["marks_asof"]} if account.get("marks_asof") else {})}
     if rows and rows[-1]["date"] == day:
-        rows[-1]["equity"] = float(account["equity"])
+        rows[-1] = row
     else:
-        rows.append({"date": day, "equity": float(account["equity"])})
+        rows.append(row)
     p.write_text("".join(json.dumps(r) + "\n" for r in rows))
+
+
+def _settle_resting(broker, now: datetime, M: md.Mandate, cancel: bool = False) -> dict | None:
+    """Resting paper orders meet the close of their session (v0.42.5). Reads the closes for the symbols with open
+    orders, fills what is due, records the fills against their tickets and journals each ticket with the four
+    times in order: the decision, the order, the close that priced it, and this pass, which only observed it. A
+    halt cancels what is resting instead."""
+    open_ = broker.open_orders()
+    if not open_:
+        return None
+    if cancel:
+        for o in open_:
+            broker.cancel(o["order_id"])
+        for tid in sorted({o["client_id"].rsplit("-", 1)[0] for o in open_}):
+            try:
+                t = ex.load_ticket(tid); t["status"] = "cancelled"; ex._save_ticket(t)
+            except Exception:  # noqa: BLE001
+                pass
+            _journal({"event": "cancelled", "ticket": tid, "why": "halted while orders were resting"})
+        return {"cancelled": len(open_)}
+    broker.quotes(sorted({o["symbol"] for o in open_}))
+    changed = broker.settle(now)
+    if not changed:
+        return {"filled": 0, "still_resting": len(broker.open_orders())}
+    by: dict[str, list] = {}
+    for o in changed:
+        by.setdefault(o["client_id"].rsplit("-", 1)[0], []).append(o)
+    out = {"filled": 0, "tickets": [], "still_resting": len(broker.open_orders())}
+    for tid, orders in sorted(by.items()):
+        done = [o for o in orders if o["status"] == "filled"]
+        fills = [{"symbol": o["symbol"], "side": o["side"], "quantity": o["filled_qty"], "price": o["avg_price"], "order_id": o["order_id"], "status": "filled",
+                  "session": o["fill_session"], "filled": o["filled"], "ordered": o["placed"], "inside_limit": o.get("inside_limit")} for o in done]
+        t = ex.load_ticket(tid)
+        still = any(x["client_id"].rsplit("-", 1)[0] == tid for x in broker.open_orders())
+        if fills:
+            rec = ex.record_fills(tid, fills, now, at_close=True)
+        else:
+            rec = {"status": "unfilled", "issues": [o.get("reason", o["status"]) for o in orders]}
+            if not still:
+                t["status"] = "unfilled"; ex._save_ticket(t)
+        account = broker.account()
+        _mark_equity(account, now)
+        c = t.get("call") or {}
+        _journal({"event": "executed" if fills else "unfilled", "ticket": tid, "fills": len(fills), "failures": len(orders) - len(done), "status": rec.get("status"), "mandate_hash": M.hash(),
+                  "broker": getattr(broker, "name", "?"), "mode": M.mode, "approval": "autonomous" if M.mode == "autonomous" else "approved",
+                  "equity_after": account.get("equity"), "decision_id": c.get("decision_id"), "decision_ts": c.get("decision_ts"),
+                  "ordered": min((o["placed"] for o in orders), default=None), "fill_session": min((o["fill_session"] for o in done), default=None),
+                  "filled_at": min((o["filled"] for o in done), default=None), "marks_asof": account.get("marks_asof"),
+                  "outside_limit": sum(1 for o in done if o.get("inside_limit") is False)})
+        out["filled"] += len(fills)
+        out["tickets"].append({"ticket": tid, "fills": len(fills), "status": rec.get("status"), "fill_session": min((o["fill_session"] for o in done), default=None)})
+    return out
 
 
 # ---------------------------------------------------------------- one pass
@@ -212,7 +265,18 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     P = P or ex.load_params()
     rep: dict = {"ts_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "broker": getattr(broker, "name", "?"), "mode": M.mode, "armed": M.armed, "mandate_hash": M.hash(), "steps": []}
 
+    def keep() -> None:
+        """A paper account's marks and equity point are saved on every pass (v0.42.5). Before, they were written
+        only when an order was placed, so on a day with nothing to trade the public equity path did not advance."""
+        if getattr(broker, "fills_at_close", False) and hasattr(broker, "save"):
+            try:
+                broker.mark()
+                broker.save()
+            except Exception:  # noqa: BLE001 - the pass's own outcome is what matters
+                pass
+
     def stop(why: str, **kw) -> dict:
+        keep()
         rep.update({"outcome": why, **kw})
         _journal({"event": "pass", "outcome": why, "broker": rep["broker"], **{k: v for k, v in kw.items() if k in ("ticket", "reasons")}})
         return rep
@@ -220,8 +284,20 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     if M.problems():
         return stop("mandate unusable", reasons=M.problems())
     h = ex.halted()
+    if hasattr(broker, "clock"):
+        broker.clock = lambda: now                      # one clock for the pass: the broker stamps orders with the trader's time
+    if getattr(broker, "fills_at_close", False):        # v0.42.5: yesterday's resting orders meet their close first
+        try:
+            st = _settle_resting(broker, now, M, cancel=bool(h))
+        except Exception as exc:  # noqa: BLE001
+            return stop("broker error settling resting orders", reasons=[str(exc)])
+        if st:
+            rep["settled"] = st
     if h:
         return stop("halted", reasons=[h])
+    if getattr(broker, "fills_at_close", False) and broker.open_orders():
+        o = broker.open_orders()
+        return stop("orders resting until the close", reasons=[f"{len(o)} order(s) fill at the close of {min(x.get('fills_in_session', '?') for x in o)}"])
     ok, why = md.in_window(M, now)
     rep["steps"].append({"window": why})
     if not ok and not force_window:
@@ -305,7 +381,7 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
         _journal({"event": "handoff", "ticket": ticket["id"], "orders": len(ticket["orders"]), **how})
         return stop("handed to the assistant", handoff=broker.handoff, record_with="record_fills(ticket_id, fills) once Robinhood reports them")
     # execute: sells first, then buys
-    fills, failures = [], []
+    fills, failures, resting = [], [], []
     for side in ("sell", "buy"):
         batch = [o for o in ticket["orders"] if o["side"] == side]
         if not batch:
@@ -330,6 +406,9 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
                 if type(exc).__name__ == "OrderUnknown":
                     unknown = True            # an order that may be live: send nothing more until it is resolved
                     break
+        if getattr(broker, "fills_at_close", False):
+            resting += [(o, od) for o, od in placed if od.get("status") == "open"]
+            continue
         deadline = min(time.time() + max_wait_seconds, _epoch(ticket["expires"]))
         for o, od in placed:
             st = od
@@ -348,6 +427,18 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
                 failures.append({"symbol": o["symbol"], "side": side, "error": st.get("status")})
         if (side == "sell" and failures) or unknown:
             break                                                         # buys are funded by the sells; a failed sell stops the buys
+    if resting and not fills:                           # v0.42.5: nothing has filled, and nothing is claimed to have
+        t = ex.load_ticket(ticket["id"])
+        t["status"] = "working"
+        ex._save_ticket(t)
+        session = min(od.get("fills_in_session", "?") for _, od in resting)
+        _journal({"event": "resting", "ticket": ticket["id"], "orders": len(resting), "failures": len(failures), "fills_in_session": session, "mandate_hash": M.hash(), **how,
+                  "decision_id": (ticket.get("call") or {}).get("decision_id"), "decision_ts": (ticket.get("call") or {}).get("decision_ts"), "ordered": rep["ts_utc"]})
+        rep.update({"resting": [{"symbol": o["symbol"], "side": o["side"], "quantity": o["quantity"], "fills_in_session": od.get("fills_in_session")} for o, od in resting],
+                    "failures": failures, "outcome": "orders resting until the close", "fills_in_session": session})
+        _digest(rep, M)
+        keep()
+        return rep
     rec = ex.record_fills(ticket["id"], fills, now) if fills else {"status": "unfilled", "issues": []}
     if not fills:
         t = ex.load_ticket(ticket["id"])
@@ -359,6 +450,7 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     _journal({"event": "executed" if fills else "unfilled", "ticket": ticket["id"], "fills": len(fills), "failures": len(failures), "status": rec.get("status"), "mandate_hash": M.hash(), **how,
               "equity_after": account_after.get("equity")})
     _digest(rep, M)
+    keep()
     rep["outcome"] = "executed" if fills else "unfilled"
     return rep
 
@@ -375,10 +467,12 @@ def _digest(rep: dict, M: md.Mandate) -> None:
     lines = [f"## {rep['ts_utc']}  ticket {rep.get('ticket')}  ({rep['mode']}, {rep['broker']})", ""]
     for f in rep.get("fills", []):
         lines.append(f"- {f['side']} {f['quantity']:g} {f['symbol']} at {f['price']:.2f} (order {f['order_id']})")
+    for f in rep.get("resting", []):
+        lines.append(f"- RESTING {f['side']} {f['quantity']:g} {f['symbol']}: fills at the close of {f.get('fills_in_session')}")
     for f in rep.get("failures", []):
         lines.append(f"- FAILED {f['side']} {f['symbol']}: {f['error']}")
     a = rep.get("account_after") or {}
-    lines += ["", f"Equity after: {a.get('equity')}; cash {a.get('cash')}. Mandate {rep['mandate_hash']}.", ""]
+    lines += ["", (f"Equity after: {a.get('equity')}; cash {a.get('cash')}. " if a else "Nothing has filled yet. ") + f"Mandate {rep['mandate_hash']}.", ""]
     with p.open("a") as fh:
         fh.write("\n".join(lines) + "\n")
 
@@ -403,7 +497,8 @@ def loop(broker, every_minutes: int = 15, M: md.Mandate | None = None, P: ex.Tra
 
 # ---------------------------------------------------------------- the paper bot (public)
 def paper_quote_fn(cache: str | Path | None = None):
-    """Quotes for the paper broker from the validated price mirror: last close, with a 5 bp half-spread."""
+    """Quotes for the paper broker from the validated price mirror: the last close with a 5 bp half-spread, and the
+    last twelve closes by date so a resting order fills at the close of its own session."""
     from . import book as bk
 
     def fn(symbols: list[str]) -> dict:
@@ -415,13 +510,16 @@ def paper_quote_fn(cache: str | Path | None = None):
             if df is None or not len(df):
                 continue
             last = float(df["close"].iloc[-1])
-            out[s] = {"bid": last * (1 - 0.0005), "ask": last * (1 + 0.0005), "last": last, "asof": str(df["date"].iloc[-1])[:10]}
+            tail = df.tail(12)
+            out[s] = {"bid": last * (1 - 0.0005), "ask": last * (1 + 0.0005), "last": last, "asof": str(df["date"].iloc[-1])[:10],
+                      "closes": {str(d)[:10]: float(c) for d, c in zip(tail["date"], tail["close"])}}      # v0.42.5: a resting order needs its own session's close
         return out
     return fn
 
 
 def paper_summary(state_dir: str | Path) -> dict:
-    """The public paper record for the page: equity path, holdings, the journal, today's outcome."""
+    """The public paper record for the page: equity path, holdings, the journal, today's outcome, and (v0.42.5) each
+    filled ticket's four times in order with the convention it was filled under."""
     from .broker import PaperBroker
     sd = Path(state_dir)
     prev = os.environ.get("BUILDOUT_TRADER_STATE")
@@ -429,7 +527,7 @@ def paper_summary(state_dir: str | Path) -> dict:
     try:
         pb = PaperBroker(sd / "paper_account.json")
         acct = pb.account()
-        j = [r for r in journal(2000) if r.get("event") in ("executed", "unfilled", "pass", "handoff")]
+        j = [r for r in journal(2000) if r.get("event") in ("executed", "unfilled", "pass", "handoff", "resting", "cancelled")]
         fills = ex._fills()
         chain = ex.verify_fills()
     finally:
@@ -437,8 +535,32 @@ def paper_summary(state_dir: str | Path) -> dict:
             os.environ.pop("BUILDOUT_TRADER_STATE", None)
         else:
             os.environ["BUILDOUT_TRADER_STATE"] = prev
-    return {"schema": 1, "opened": pb.state.get("opened"), "start_cash": pb.state.get("start_cash"), "equity": acct["equity"], "cash": acct["cash"], "marks_asof": acct.get("marks_asof"),
-            "positions": acct["positions"], "equity_history": pb.state.get("equity_history", []), "tickets_filled": sum(1 for e in fills if e.get("status") in ("filled", "partially_filled")),
+    opened = str(pb.state.get("opened") or "")
+    orders = list(pb.state.get("orders", {}).values())
+    old = [o for o in orders if o.get("status") == "filled" and o.get("type") != "market_on_close"]
+    timeline = []
+    for e in fills:
+        if e.get("status") not in ("filled", "partially_filled"):
+            continue
+        ex_ev = next((r for r in reversed(j) if r.get("event") == "executed" and r.get("ticket") == e.get("ticket")), {})
+        at_close = bool(e.get("convention"))
+        timeline.append({"ticket": e.get("ticket"), "fills": len(e.get("fills", [])), "status": e.get("status"),
+                         "decision_id": ex_ev.get("decision_id"), "decision_ts": ex_ev.get("decision_ts"), "ordered": ex_ev.get("ordered"),
+                         "fill_session": ex_ev.get("fill_session"), "filled_at": ex_ev.get("filled_at"), "recorded": e.get("ts_utc"),
+                         "outside_limit": ex_ev.get("outside_limit"),
+                         "convention": "close of the order's session" if at_close else "limit against the previous close (before v0.42.5)", "causal": at_close})
+    return {"schema": 2, "opened": opened, "start_cash": pb.state.get("start_cash"), "equity": acct["equity"], "cash": acct["cash"], "marks_asof": acct.get("marks_asof"),
+            "positions": acct["positions"], "equity_history": [h for h in pb.state.get("equity_history", []) if not opened or h[0] >= opened],
+            "pre_inception_marks": pb.state.get("pre_inception_marks", []),
+            "tickets_filled": sum(1 for e in fills if e.get("status") in ("filled", "partially_filled")),
+            "resting": [{"symbol": o["symbol"], "side": o["side"], "quantity": o["quantity"], "ordered": o["placed"], "fills_in_session": o.get("fills_in_session")} for o in orders if o.get("status") == "open"],
+            "timeline": timeline, "non_causal_fills": len(old),
             "fills_chain": chain, "passes": len(j), "last": j[-1] if j else None, "recent": j[-12:],
             "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
-            "note": "A model account of $100,000 run by the trader every weekday from the daily workflow, filled at the day's close plus a 5 bp half-spread. Not a personal account."}
+            "convention": {"order": "written by the daily pass, before the open on most days", "fill": "the close of the first exchange session that ends after the order was written",
+                           "cost": "5 bp half-spread on every fill; no commission", "limit": "the ticket's limit is recorded; the paper fill does not depend on it",
+                           "since": "v0.42.5"},
+            "note": ("A model account of $100,000 run by the trader from the daily workflow. Each order rests until the close of the first exchange session that ends after it was "
+                     "written and fills at that close with a 5 bp half-spread, so the price is never older than the order. "
+                     + (f"The first {len(old)} fills (written Nov 11, 2026) were made under the earlier convention, at the limit against the previous day's close: a price older than the order. They are kept as recorded and marked. " if old else "")
+                     + "A simulation convention, not evidence of an achievable execution. Not a personal account.")}

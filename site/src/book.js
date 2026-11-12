@@ -14,17 +14,53 @@
     bond_when_it_hedges: "Long 20-year bond, only when its correlation says it hedges", bond_static_30: "Long 20-year bond, 30% always (the TLT 0.3x rule)" };
 
   // the one call: the decision engine's size (its baseline while the gate is shut), cut to the tightest book limit
+  // v0.42.5: one decision on every surface. The decision is the ledger's entry for this data date: the unhedged
+  // size, and full size with the smallest Nasdaq-100 short in 5% steps inside every limit. Home, the Desk, search,
+  // the ticket and the live record all quote that entry, by its id. The frontier supplies each row's risk figures
+  // and, until the day's entry is written, the menu itself. The exact minimum short (keep_names_hedge) is a detail
+  // beside the logged row, never in its place: v0.39.1 put the exact figure in the menu, and Home then said 84%
+  // while the ledger had logged 85%. If the engine, rerun on the same date, now computes a different row (a
+  // revised input, or the tolerance removed in v0.42.5), the logged row stands and the difference is stated.
   function bookCall(N) {
     const B = B30();
     if (!B || !N || !fin(N.exposure)) return null;
     const size = Math.min(N.exposure, B.size);
     const k = B.keep_names_hedge || {};
     const FR = (B.frontier || []).filter((r) => r.meets);                   // v0.32: the menu, from the smallest gross to full size
+    const dec = decisionFor(B.asof), c = dec && dec.call && dec.call.menu_low && dec.call.menu_high ? dec.call : null;
+    const near = (r, m) => r && Math.abs(r.gross - m.gross) < 5e-3 && Math.abs((r.short || 0) - (m.short || 0)) < 1e-9;
+    const row = (m, r) => (near(r, m) ? { ...r, gross: m.gross, short: m.short } : { gross: m.gross, short: m.short, meets: true, logged_only: true });
+    const lo = c ? row(c.menu_low, FR[0]) : FR[0] || null, hi = c ? row(c.menu_high, FR[FR.length - 1]) : FR[FR.length - 1] || null;
+    const full = hi && Math.abs(hi.gross - 1) < 1e-9, eng = FR.length ? FR[FR.length - 1] : null;
+    const exact = k.meets_all && fin(k.short_nasdaq_frac) ? k.short_nasdaq_frac : null;
     return { B, size, engine: N.exposure, cut: size < N.exposure - 1e-9, binding: B.binding, bindingName: B30_LIMIT_LC[B.binding] || B.binding,
       breaches: ["es_budget", "vol_target", "drawdown_cap"].filter((x) => B.sizes[x] < 1 - 1e-9).length,
-      keep: k.meets_all && fin(k.short_nasdaq_frac) ? k.short_nasdaq_frac : null,
-      // v0.39.1: the menu's full-size row carries the exact keep-every-name short, so every desk quotes one figure
-      menu: FR.length ? { lo: FR[0], hi: (k.meets_all && fin(k.short_nasdaq_frac) && Math.abs(FR[FR.length - 1].gross - 1) < 1e-9) ? { ...FR[FR.length - 1], short: k.short_nasdaq_frac } : FR[FR.length - 1], n: FR.length } : null };
+      keep: full ? hi.short : exact, keepExact: exact,
+      recomputed: c && eng && Math.abs(eng.gross - 1) < 1e-9 && Math.abs(eng.short - c.menu_high.short) > 1e-9 ? eng.short : null,
+      decision: dec,
+      menu: lo && hi ? { lo, hi, n: FR.length } : null };
+  }
+  // the ledger entry that recorded the call made on this data date: its number and the head of its hash name the decision
+  function decisionFor(asof) {
+    const L = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.ledger && Array.isArray(SNAP38.ledger.entries) ? SNAP38.ledger.entries : [];
+    const e = L.filter((x) => x.data_asof === asof).pop();
+    return e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null;
+  }
+  // the call that governs a given day: the newest entry whose effective date has come
+  function decisionInForce(today) {
+    const L = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.ledger && Array.isArray(SNAP38.ledger.entries) ? SNAP38.ledger.entries : [];
+    const t = today || new Date().toISOString().slice(0, 10);
+    const ok = L.filter((x) => x.effective_from <= t).sort((a, b) => (a.effective_from === b.effective_from ? a.seq - b.seq : a.effective_from < b.effective_from ? -1 : 1));
+    const e = ok.pop();
+    return e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null;
+  }
+  // what stands beside the logged short: the exact minimum, and the engine's own row if it now differs from the log
+  function b30Exact(BC) {
+    if (!BC || BC.keep == null) return "";
+    const out = [];
+    if (BC.recomputed != null) out.push(`The ledger logged ${pctPlain(BC.keep, 0)} for this date; held to every limit exactly, with no tolerance, the engine now computes ${pctPlain(BC.recomputed, 0)}. The logged call stands as written.`);
+    if (BC.keepExact != null && Math.abs(BC.keepExact - BC.keep) > 5e-4) out.push(`The short is logged in 5% steps; the exact minimum is ${pctPlain(BC.keepExact, 1)}.`);
+    return out.join(" ");
   }
 
   function renderBookRisk() {
@@ -32,9 +68,11 @@
     if (!tiles) return;
     if (!B) { tiles.replaceChildren(h("p", "empty", "The book engine is not in this build.")); return; }
     const t = B.tail, e95 = t.es95, e975 = t["es97.5"], S = B.sizes, L = B.limits, K = B.keep_names_hedge || {}, R = B.risk, X = B.exposure;
+    const BCd = typeof DX19 !== "undefined" && DX19 && DX19.now ? bookCall(DX19.now) : null;
+    const HI = BCd && BCd.menu ? BCd.menu.hi : (B.frontier || []).filter((r) => r.meets).pop() || null;      // v0.42.5: the logged full-size row
     rsKpi(tiles, [
-      [xx(B.size), "The size the limits allow", `${B30_LIMIT_LC[B.binding]} binds; ${K.meets_all ? `or keep every name and short ${b30P(K.short_nasdaq_frac, 0)} of NAV in Nasdaq-100 futures` : "no index hedge alone fits every limit"}`],
-      [b30P(e95.governing, 1), "Worst month in twenty at 1.00x", `one-month 95% expected shortfall, most cautious of three methods; the budget is ${b30P(L.es_budget, 0)}`],
+      [xx(B.size), "The size the limits allow", `${B30_LIMIT_LC[B.binding]} binds; ${K.meets_all ? `or keep every name and short ${b30P(HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac, 0)} of NAV in Nasdaq-100 futures` : "no index hedge alone fits every limit"}`],
+      [b30P(e95.governing, 1), "Average loss in the worst 5% of months, at 1.00x", `one-month 95% expected shortfall, a model estimate, most cautious of three methods; the budget is ${b30P(L.es_budget, 0)}`],
       [b30P(R.vol, 0), "Volatility at 1.00x", `factor model; the names' own covariance says ${b30P(R.vol_names_cov, 0)}; the target is ${b30P(L.vol_target, 0)}`],
       [fx(R.effective_bets, 1), "Independent bets, of nine", `${b30P(R.variance_share.market, 0)} of the variance is one factor, the Nasdaq-100`]]);
     const F = (B.findings || []).map((x) => x.replace(/(^|[\s(])-(\d)/g, "$1\u2212$2"));
@@ -48,18 +86,18 @@
       ["One-year drawdown cap", `95th percentile, constant-volatility simulation, drift ${b30P(L.drawdown_drift, 1)}`, b30P(B.at_full.drawdown95, 0), b30P(L.max_drawdown, 0), xx(S.drawdown_cap), "at the cap", S.drawdown_cap < 1 ? "breached" : "within"],
       ["Gross cap", "gross exposure", "1.00x", xx(L.max_gross), xx(S.gross_cap), xx(B.size), "within"]], 2);
     $("#bk-keep-p").textContent = K.meets_all
-      ? `Keeping every name at full size takes a Nasdaq-100 futures short of ${b30P(K.short_nasdaq_frac, 0)} of NAV ($${fx(K.notional_usd_per_100m / 1e6, 0)}m per $100m), which leaves a Nasdaq-100 beta of ${fx(K.market_beta_left, 2)}, ${b30P(K.vol, 0)} volatility, a ${b30P(K.es95, 1)} worst month in twenty and a ${b30P(K.drawdown95, 0)} one-year drawdown; ${B30_LIMIT_LC[K.binding_after]} still binds. The choice between cutting gross and shorting the index is the PM's: the short keeps the stock-specific bets and the semis tilt, cutting gross keeps the market bet smaller and simpler. Both carry the same limits.`
+      ? `Keeping every name at full size takes a Nasdaq-100 futures short of at least ${b30P(K.short_nasdaq_frac, 1)} of NAV ($${fx(K.notional_usd_per_100m / 1e6, 1)}m per $100m), the exact minimum; the call is logged in 5% steps${HI && Math.abs(HI.gross - 1) < 1e-9 ? `, ${b30P(HI.short, 0)} for this date${BCd && BCd.decision ? ` (decision ${BCd.decision.id})` : ""}` : ""}, and that is the figure every desk and the ledger quote.${BCd && BCd.recomputed != null ? ` Held to every limit exactly, the engine now computes ${b30P(BCd.recomputed, 0)} for the same date; the logged call stands as written, and the next call is computed without the tolerance.` : ""} Total gross is then about ${fx(1 + (HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac), 2)}x (1.00x long plus the short) and net about ${fx(1 - (HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac), 2)}x. At the exact minimum the short leaves a Nasdaq-100 beta of ${fx(K.market_beta_left, 2)}, ${b30P(K.vol, 0)} volatility, a ${b30P(K.es95, 1)} average loss in the worst 5% of months and a ${b30P(K.drawdown95, 0)} one-year drawdown; ${B30_LIMIT_LC[K.binding_after]} still binds. The choice between cutting gross and shorting the index is the PM's: the short keeps the stock-specific bets and the semis tilt, cutting gross keeps the market bet smaller and simpler. Both carry the same limits.`
       : `No Nasdaq-100 short alone brings the full-size book inside every limit (the best, ${b30P(K.best_short, 0)} of NAV, leaves ${b30P(K.drawdown95, 0)} of one-year drawdown): cut gross to ${xx(B.size)}.`;
     $("#bk-math").innerHTML = `<span class="mlabel">The method</span>daily total returns <var>r</var><sub>i,t</sub> = (<var>P</var><sub>t</sub> + <var>D</var><sub>t</sub>) / <var>P</var><sub>t&minus;1</sub> &minus; 1 (prices split-adjusted, dividends on their ex-dates); the book <var>r</var><sub>B,t</sub> = &Sigma; <var>w</var><sub>i</sub><var>r</var><sub>i,t</sub> at today's weights, a name without a price that day handing its weight to the others pro rata; factors: <var>m</var> = QQQ, <var>s</var> = SOXX &minus; &beta;<sub>t&minus;1</sub>QQQ (semis net of the market, the beta through the day before), <var>y</var> = a 20-year par bond repriced daily from the Treasury's par yields; betas by exponentially weighted least squares (half-life ${126} days; SPCX shrunk toward TSLA, weight <var>n</var>/(<var>n</var> + 126) on its own); &Sigma; = <var>B</var>&Phi;<var>B</var>&prime; + <var>D</var> with &Phi; the factors' 63-day exponentially weighted covariance; ES<sub>&alpha;</sub> one month by historical simulation of 21-day compounded returns, filtered historical simulation (standardized by RiskMetrics &lambda; 0.94 volatility, rescaled to today's) and a Student-t (&nu; 5) at the factor-model volatility; the governing ES is the largest of the three; sizes: ${b30P(L.es_budget, 0)} &divide; ES<sub>5%</sub>, ${b30P(L.vol_target, 0)} &divide; &sigma;, the largest leverage whose 95th-percentile one-year drawdown stays within ${b30P(L.max_drawdown, 0)}; the call is the smallest.`;
     // v0.32: the menu of size-and-hedge choices that meet every limit
     const FR = (B.frontier || []).filter((r) => r.meets);
     if (FR.length) {
       const lo = FR[0], hi = FR[FR.length - 1];
-      $("#bk-front-p").textContent = `For each share of NAV held in the nine names, the smallest Nasdaq-100 futures short that brings the book inside all three limits, with what that mix did on the names' own days since ${B.from.slice(0, 4)}. Every row meets the limits; they differ in what the book is a bet on. At the top the bet is mostly the market (beta ${fx(lo.market_beta_left, 2)} left); at the bottom it is mostly these nine names against the index (beta ${fx(hi.market_beta_left, 2)} left), and the short gives up the index's return to get there (${pctPlain(hi.hedge_drag_ann, 1)} a year since ${B.from.slice(0, 4)}, which the index may or may not keep paying).`;
-      fillTable($("#bk-front"), ["Names, share of NAV", "Nasdaq-100 short", "Volatility", "Worst month in twenty", "One-year drawdown, 95th pct", "Market beta left", "Average year since " + B.from.slice(0, 4), "2022", "Worst fall", "Cost of the short, a year"],
-        (B.frontier || []).map((r) => r.meets ? [xx(r.gross), r.short ? pctPlain(r.short, 0) + " of NAV" : "none", pctPlain(r.vol, 0), pctPlain(r.es95, 1), pctPlain(r.drawdown95, 0), fx(r.market_beta_left, 2), b30S(r.cagr, 0), b30S(r.y2022, 0), pctPlain(r.maxdd, 0), pctPlain(r.hedge_drag_ann, 1)]
-          : [xx(r.gross), "no short meets every limit", "", "", "", "", "", "", "", ""]), 2);
-      $("#bk-front-read").textContent = `How to read it: the history columns are what these nine names did, and they are in the book because they did well, so read the differences between rows rather than the levels. The rows run from ${pctPlain(lo.gross, 0)} of NAV with ${lo.short ? "a small short" : "no short"} to full size with a ${pctPlain(hi.short, 0)} short at about the same volatility. If you believe these nine names will keep beating the index, the lower rows keep that bet and shed the market; if you do not, the upper rows are simpler and cheaper. That belief is the PM's, not the engine's.`;
+      $("#bk-front-p").textContent = `For each share of NAV held in the nine names, the smallest Nasdaq-100 futures short that brings the book inside all three limits, with what that mix did on the names' own days since ${B.from.slice(0, 4)}. Every row shown with figures is at or inside each limit exactly (no tolerance; a row that is not says so), and they differ in what the book is a bet on. "Names" is the long exposure; total gross is the long plus the short. At the top the bet is mostly the market (beta ${fx(lo.market_beta_left, 2)} left); at the bottom it is mostly these nine names against the index (beta ${fx(hi.market_beta_left, 2)} left), and the short gives up the index's return to get there (${pctPlain(hi.hedge_drag_ann, 1)} a year since ${B.from.slice(0, 4)}, which the index may or may not keep paying).`;
+      fillTable($("#bk-front"), ["Names (long), share of NAV", "Nasdaq-100 short", "Total gross", "Volatility", "Avg loss, worst 5% of months", "One-year drawdown, 95th pct", "Market beta left", "Average year since " + B.from.slice(0, 4), "2022", "Worst fall", "Cost of the short, a year"],
+        (B.frontier || []).map((r) => r.meets ? [xx(r.gross), r.short ? pctPlain(r.short, 0) + " of NAV" : "none", xx(r.gross + (r.short || 0)), pctPlain(r.vol, 0), pctPlain(r.es95, 1), pctPlain(r.drawdown95, 0), fx(r.market_beta_left, 2), b30S(r.cagr, 0), b30S(r.y2022, 0), pctPlain(r.maxdd, 0), pctPlain(r.hedge_drag_ann, 1)]
+          : [xx(r.gross), r.over_limit ? "over a limit at this step; recomputed on the next daily run" : "no short meets every limit", "", "", "", "", "", "", "", "", ""]), 2);
+      $("#bk-front-read").textContent = `How to read it: the history columns are what these nine names did, and they are in the book because they did well, so read the differences between rows rather than the levels. The rows run from ${pctPlain(lo.gross, 0)} of NAV with ${lo.short ? "a small short" : "no short"} to full size with a short of ${pctPlain(hi.short, 0)} at about the same volatility. If you believe these nine names will keep beating the index, the lower rows keep that bet and shed the market; if you do not, the upper rows are simpler and cheaper. That belief is the PM's, not the engine's.${lo.cash_in_record ? " The history columns include what the unused share of NAV earned in cash, so a row is comparable with the walk-forward call (the two-year Treasury yield stands in for a cash rate: it overstates cash when the curve is steep and understates it when the curve is inverted)." : ""}`;
     }
     // v0.32: the volatility-managed rule, tested on three records
     const VRl = B.vol_rule || {}, recs = [VRl.long_record, VRl.nasdaq_2017, VRl.book].filter(Boolean);

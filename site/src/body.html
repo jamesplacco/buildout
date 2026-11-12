@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.42.4</span>
+      Buildout <span class="ver">v0.42.5</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -34,7 +34,7 @@
   <div class="t7" id="today7">
     <div class="t7-head">
       <p class="eyebrow" id="t7-eyebrow">The engine's call · model book · data to Nov 5, 2026</p>
-      <h1 id="desk-title">Run the book at 0.53x, or keep every name and short 86% of NAV in Nasdaq-100 futures; no bond hedge.</h1>
+      <h1 id="desk-title">The call: the size the book's limits allow, or every name with a Nasdaq-100 short.</h1>
       <div class="t7-answer" id="t7-answer"></div>
       <p class="t7-status" id="t7-status"></p>
     </div>
@@ -96,7 +96,7 @@
     <div class="section-head">
       <p class="eyebrow">Under the hood</p>
       <h2 id="hood-title">A rigorous, tested, inspectable codebase</h2>
-      <p class="prose">Pure functions of dated files, run daily on GitHub Actions, isolated so one failure never stops the rest, and shipped with the page so every module can be read. Nothing executes an order.</p>
+      <p class="prose">Pure functions of dated files, run daily on GitHub Actions, isolated so one failure never stops the rest, and shipped with the page so every module can be read. None of these engines sends an order; the trader that can is a separate program (Execution).</p>
     </div>
     <div class="hood" id="hood" role="list"></div>
     <div class="chips" id="chips" aria-label="System status">
@@ -121,7 +121,7 @@
         <ul class="m-learn-l">
           <li>Public data: FRED, SEC XBRL filings, Treasury par yields, Shiller's long history; Databento for the tape under a secret key.</li>
           <li>The fund's own book and limits, kept in a private, git-ignored file the page never sees. Here the book is a model, not personal positions.</li>
-          <li>Stated rules: the loss budget (expected shortfall, worst month in twenty), the lag, the refit schedule, the risk aversion. All listed, with reasons, on the Parameters desk.</li>
+          <li>Stated rules: the loss budget (expected shortfall: the average loss in the worst 5% of months), the lag, the refit schedule, the risk aversion. All listed, with reasons, on the Parameters desk.</li>
         </ul>
       </div>
       <div class="panel fund-cell">
@@ -188,7 +188,7 @@
   </section>
   <section class="section" aria-labelledby="dx-dec-title">
     <div class="section-head"><p class="eyebrow">Decision</p><h2 id="dx-dec-title">Exposure drivers and flip points</h2>
-      <p class="prose">The engine picks the exposure from 0 to 1.5x that maximizes expected utility of next month's wealth under the averaged mixture, with constant relative risk aversion set once, on 1871 to 1939 data, so that holding 1x is optimal in an average month. A risk budget caps the expected loss in the worst month in twenty at 12% of capital. Then the evidence gate scales the move away from 1x by how much the engine's own past departures helped.</p></div>
+      <p class="prose">The engine picks the exposure from 0 to 1.5x that maximizes expected utility of next month's wealth under the averaged mixture, with constant relative risk aversion set once, on 1871 to 1939 data, so that holding 1x is optimal in an average month. A risk budget caps the average loss across the worst 5% of months at 12% of capital (the 95% one-month expected shortfall, a model estimate and not a worst case). Then the evidence gate scales the move away from 1x by how much the engine's own past departures helped.</p></div>
     <div class="grid2 dx-g2">
       <div class="panel"><span class="panel-title">What drives the engine's optimum (leave one out)</span><div class="tablewrap"><table id="dx-drv"></table></div><p class="prose" id="dx-flip"></p>
         <span class="panel-title">Its optimum across draws of regime, model and forecast</span><div class="svgbox" id="dx-dist"></div></div>
@@ -204,7 +204,7 @@
         <label class="bd-sl"><span>Stressed regime, next month <b id="dxw-p-v"></b></span><input type="range" id="dxw-p" min="0" max="1" step="0.01"></label>
         <label class="bd-sl"><span>Stacked 12-month real return forecast <b id="dxw-r-v"></b></span><input type="range" id="dxw-r" min="-0.2" max="0.2" step="0.005"></label>
         <label class="bd-sl"><span>Risk aversion <b id="dxw-g-v"></b></span><input type="range" id="dxw-g" min="1" max="10" step="0.05"></label>
-        <label class="bd-sl"><span>Risk budget, worst month in twenty <b id="dxw-es-v"></b></span><input type="range" id="dxw-es" min="0.04" max="0.3" step="0.01"></label>
+        <label class="bd-sl"><span>Risk budget, average loss in the worst 5% of months <b id="dxw-es-v"></b></span><input type="range" id="dxw-es" min="0.04" max="0.3" step="0.01"></label>
         <label class="bd-sl"><span>Evidence behind the gate (t) <b id="dxw-t-v"></b></span><input type="range" id="dxw-t" min="-2" max="5" step="0.05"></label>
         <button type="button" class="btn" id="dxw-reset">Back to today</button>
       </div>
@@ -2458,7 +2458,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 66 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 67 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2484,6 +2484,7 @@
   <section class="section" id="status" aria-labelledby="st-title">
     <div class="section-head"><p class="eyebrow">Operations</p><h2 id="st-title">System status</h2><p class="prose">Written by the last step of every daily run: what ran, how fresh each output is, and the checks it passed. A stale or failed check shows here and on the Desk.</p></div>
     <div class="panel" id="status-body"><div class="empty"><strong>Live panel: no run status in this copy.</strong> <span>The daily run writes data/status.json at the end of every run. Until the first one, the page shows the dated snapshot.</span></div></div>
+    <div class="panel" id="pkg-body" aria-live="polite"><div class="empty"><strong>Data packages.</strong> <span>Opened from disk, the page shows this build's snapshots only; on the published site this lists which copy of each package is on screen.</span></div></div>
   </section>
   <div class="grid2">
     <div class="panel">
@@ -2617,7 +2618,7 @@
     <div class="section-head"><p class="eyebrow">In one paragraph</p><h2 id="hw-para-title">The same thing, with the moving parts named</h2></div>
     <div class="hw-para">
       <p class="prose">The engine is a set of numbers learned from history, with the rules that update them written down in advance. It starts from monthly US stock returns since 1871 and a handful of things known at the time: how expensive stocks are, where bond yields and inflation stand, how the market has been trending, how volatile it has been and how far it sits below its last high. From these it keeps two kinds of belief up to date. One is about the <b>state</b> of the market: a few regimes (calm, turbulent, stressed), each with its own typical return and risk, and the odds of being in each this month. The other is about the <b>next year</b>: four simple forecasters, combined by how well each has actually done.</p>
-      <p class="prose">It then asks one question. For an investor who dislikes losses about as much as the average long-run investor must have (the dislike is set so that holding exactly one times capital is the neutral answer), what exposure to stocks makes the next month's expected outcome best, provided the worst month in twenty costs no more than <span id="hw-es">12%</span> of capital? That number is the engine's <b>optimum</b>, <span id="hw-opt">1.50x</span> today.</p>
+      <p class="prose">It then asks one question. For an investor who dislikes losses about as much as the average long-run investor must have (the dislike is set so that holding exactly one times capital is the neutral answer), what exposure to stocks makes the next month's expected outcome best, provided the average loss across the worst 5% of months is no more than <span id="hw-es">12%</span> of capital? That number is the engine's <b>optimum</b>, <span id="hw-opt">1.50x</span> today.</p>
       <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the engine holds the index at <span id="hw-x">1.00x</span>; the book's own risk limits, measured on its nine names, then cut it (the Desk shows the size). Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
     </div>
   </section>
@@ -2628,7 +2629,7 @@
       <div class="panel hw-stage"><span class="hw-n">1</span><span class="panel-title">Data: the instruments</span><p class="hw-what">156 years of monthly readings, each dated. A value for month t uses data through t minus two, so nothing is used before it could have been known.</p><p class="hw-why">What can go wrong: a stale feed. The engine says which date each number carries and marks anything older than its schedule.</p><div class="math"><span class="mlabel">The rule</span>a value used in month <var>t</var> is fit on data through <var>t</var> &minus; 2 (LAG = 2); refits: regimes every 60 months, forecasters every 24, the learner every 12.</div><a href="#engines">Engine room →</a></div>
       <div class="panel hw-stage"><span class="hw-n">2</span><span class="panel-title">Regimes: the season</span><p class="hw-what">Not "will it rain tomorrow" but "is this a stormy season": the odds of calm, turbulent and stressed markets this month, from a model refit every five years, plus a check for whether a new season has just begun.</p><p class="hw-why">What can go wrong: regimes are labels fitted after the fact. The engine averages four different views of the next month by how well each has recently predicted it, so no single label decides.</p><div class="math"><span class="mlabel">The model</span><var>s</var><sub>t</sub> ~ Markov(<var>A</var>), <var>r</var><sub>t</sub> | <var>s</var><sub>t</sub> = <var>k</var> ~ N(&mu;<sub>k</sub>, &sigma;<sub>k</sub><sup>2</sup>); filter &alpha;<sub>t</sub> &prop; (&alpha;<sub>t&minus;1</sub><var>A</var>) &odot; <var>p</var>(<var>r</var><sub>t</sub> | <var>s</var>); state means shrunk: &mu;&#771;<sub>k</sub> = <var>r</var>&#772; + <var>n</var><sub>k</sub>/(<var>n</var><sub>k</sub> + <var>n</var><sub>0</sub>)(&mu;<sub>k</sub> &minus; <var>r</var>&#772;).</div><a href="#dx-states">The states today →</a></div>
       <div class="panel hw-stage"><span class="hw-n">3</span><span class="panel-title">Forecasts: the outlook</span><p class="hw-what">Four forecasters of the next year's return, each refit every two years and combined by their record. The outlook carries its own uncertainty, which is wide.</p><p class="hw-why">What can go wrong: forecasting returns is barely possible. Out of sample, the best forecaster only edges the long-run average; the engine's edge is in the budget and the discipline, not the forecast.</p><div class="math"><span class="mlabel">The combination</span><var>f</var> = &Sigma;<sub>j</sub> <var>v</var><sub>j</sub> <var>f</var><sub>j</sub>, <var>v</var> = argmin &Sigma;<sub>&tau; &lt; t&minus;12</sub> (<var>y</var><sub>&tau;</sub> &minus; &Sigma;<sub>j</sub> <var>v</var><sub>j</sub><var>f</var><sub>j,&tau;</sub>)<sup>2</sup>, <var>v</var> &ge; 0, &Sigma;<var>v</var> = 1 (stacking on forecasts whose outcomes were known).</div><a href="#ml">The forecasters' record →</a></div>
-      <div class="panel hw-stage"><span class="hw-n">4</span><span class="panel-title">Allocation: the umbrella</span><p class="hw-what">How much stock to carry: the exposure with the best expected outcome for a cautious investor, inside a budget of 12% of capital for the worst month in twenty.</p><p class="hw-why">What can go wrong: the budget binds in a storm and the engine cuts exposure late. That is accepted; the budget is a mandate's limit, not a forecast.</p><div class="math"><span class="mlabel">The choice</span><var>x</var>* = argmax<sub>0 &le; <var>x</var> &le; 1.5</sub> E[(<var>v</var><sup>1&minus;&gamma;</sup> &minus; 1)/(1 &minus; &gamma;)], <var>v</var> = 1 + <var>xR</var> &minus; <var>b</var> max(<var>x</var> &minus; 1, 0), subject to <var>x</var>&middot;ES<sub>5%</sub>(<var>R</var>) &le; 12%.</div><a href="#solve">The sizing math →</a></div>
+      <div class="panel hw-stage"><span class="hw-n">4</span><span class="panel-title">Allocation: the umbrella</span><p class="hw-what">How much stock to carry: the exposure with the best expected outcome for a cautious investor, inside a budget of 12% of capital for the average loss in the worst 5% of months.</p><p class="hw-why">What can go wrong: the budget binds in a storm and the engine cuts exposure late. That is accepted; the budget is a mandate's limit, not a forecast.</p><div class="math"><span class="mlabel">The choice</span><var>x</var>* = argmax<sub>0 &le; <var>x</var> &le; 1.5</sub> E[(<var>v</var><sup>1&minus;&gamma;</sup> &minus; 1)/(1 &minus; &gamma;)], <var>v</var> = 1 + <var>xR</var> &minus; <var>b</var> max(<var>x</var> &minus; 1, 0), subject to <var>x</var>&middot;ES<sub>5%</sub>(<var>R</var>) &le; 12%.</div><a href="#solve">The sizing math →</a></div>
       <div class="panel hw-stage"><span class="hw-n">5</span><span class="panel-title">Gate: how far to trust the forecaster</span><p class="hw-what">A forecaster who has not beaten "assume tomorrow looks like today" gets little say. The gate scales the move from holding toward the optimum by the strength of the engine's own record, discounted for every version tried.</p><p class="hw-why">What can go wrong: a gate that someone can tune. This one cannot: it is a fixed function of the record's t statistic and the count of strategies tried.</p><div class="math"><span class="mlabel">The gate</span><var>g</var> = max(0, 2&Phi;(<var>t</var> &minus; <var>t</var><sub>0</sub>) &minus; 1), <var>t</var><sub>0</sub> = &Phi;<sup>&minus;1</sup>(1 &minus; 1/<var>n</var>), <var>x</var> = 1 + <var>g</var>(<var>x</var>* &minus; 1).</div><a href="#dx-gate">The gate today →</a></div>
       <div class="panel hw-stage"><span class="hw-n">6</span><span class="panel-title">Hedge and overlay: the standing guards</span><p class="hw-what">What to hold beside the stocks (all stocks, a Treasury sleeve or cash, chosen by recent record in the current regime), and the rule that scales exposure when the trend breaks.</p><p class="hw-why">What can go wrong: bonds stop hedging when inflation is high, which is the case now, and a rule that looks free on the full record can fail when re-chosen year by year, which is what happened to the trend overlay. The selector holds no bond sleeve and the overlay is not applied.</p><div class="math"><span class="mlabel">The selector</span>P(<var>h</var> best | context) estimated by Thompson draws from discounted outcome means (forgetting 0.995); the overlay factor <var>f</var> is kept only if, re-chosen each year on the record to date, E[<var>u</var>] is at least holding&rsquo;s.</div><a href="#dx-overlay">The overlay study →</a></div>
     </div>
@@ -2654,7 +2655,7 @@
       <div><dt>Regime</dt><dd>A stretch of months that share a typical return and risk. The engine fits a few and keeps the odds of being in each.</dd></div>
       <div><dt>Forecast</dt><dd>A guess at the next year's real return, with its uncertainty. Four of them, combined by record.</dd></div>
       <div><dt>Risk aversion</dt><dd>How much more a loss hurts than a gain helps. Set so that holding one times capital is the neutral answer; not tuned.</dd></div>
-      <div><dt>Expected shortfall</dt><dd>The average loss in the worst month in twenty. The engine keeps it under 12% of capital.</dd></div>
+      <div><dt>Expected shortfall</dt><dd>The average loss across the worst 5% of months the model expects, over one month. It is an average of the tail, so single months inside it are worse; it is not a worst case and not a one-month-in-twenty event (that cutoff is the value at risk). The engine keeps it under 12% of capital.</dd></div>
       <div><dt>Optimum</dt><dd>The exposure with the best expected outcome for that risk aversion inside that budget. Today 1.50x.</dd></div>
       <div><dt>Gate</dt><dd>The share of the move from holding toward the optimum that reaches the book, from the strength of the record. Today 0%.</dd></div>
       <div><dt>Overlay</dt><dd>A scaling of exposure when the market is below its 10-month average. Adopted only if it keeps a cautious investor's expected utility walked forward; today none is.</dd></div>
@@ -2666,7 +2667,7 @@
     <div class="section-head"><p class="eyebrow">Limits</p><h2 id="hw-not-title">What the engine is not</h2></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Not a price predictor</span><p class="prose">Its forecasters barely beat the long-run average out of sample, and it says so. The value is in the risk budget, the regime odds, the gate and the written-down rules, not in calling the market.</p></div>
-      <div class="panel"><span class="panel-title">Not an order system</span><p class="prose">Nothing on this site or in the code places, routes or cancels a trade. It writes proposals a person approves; the MCP server has no order tool.</p></div>
+      <div class="panel"><span class="panel-title">What can and cannot send an order</span><p class="prose">Nothing on this site places, routes or cancels a trade, and the MCP server has no order tool: both write proposals a person approves. The trader is a separate program in the same repository. It trades a public paper account on its own, and on a person's machine it can reach a broker under a signed, armed mandate (Execution).</p></div>
       <div class="panel"><span class="panel-title">Not tuned</span><p class="prose">Eleven constants are set by hand and listed with reasons; the gate is a fixed function of the record once the count of strategies tried is fixed; the overlay factor was chosen by a rule stated before the result and then rejected by that rule's own walk-forward. No parameter was tuned to the backtest's result, though the design was chosen knowing the history.</p></div>
       <div class="panel"><span class="panel-title">Not a black box</span><p class="prose">Twenty-two learned objects, 2,850 numbers in the decision core, each with its shape and its optimiser on the <a href="#parameters">Parameters desk</a>; the source is on the <a href="#code">source desk</a>; the daily record is the Engine room.</p></div>
     </div>
@@ -2715,7 +2716,7 @@
     <div class="tablewrap"><table class="rs-table" id="bk-exp"></table></div>
   </section>
   <section class="section" aria-labelledby="bk-tail-t">
-    <div class="section-head"><p class="eyebrow">Tail</p><h2 id="bk-tail-t">The worst month in twenty, three ways, and a VaR backtest on the book</h2><p class="prose" id="bk-tail-p"></p></div>
+    <div class="section-head"><p class="eyebrow">Tail</p><h2 id="bk-tail-t">The average loss in the worst 5% of months, three ways, and a VaR backtest on the book</h2><p class="prose" id="bk-tail-p"></p></div>
     <div class="tablewrap"><table class="rs-table" id="bk-tail"></table></div>
     <div class="tablewrap"><table class="rs-table" id="bk-var"></table></div>
   </section>
@@ -2800,13 +2801,13 @@
       <div><dt>Monday risk note</dt><dd>Holdings in as a CSV; out come the size each limit allows, the one that binds, and the hedge that keeps every name.</dd></div>
       <div><dt>Hedge selector</dt><dd>Index short, puts, bonds or a short basket, chosen by regime and tested on your book's days, not a 60/40 habit.</dd></div>
       <div><dt>Early-warning list</dt><dd>Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</dd></div>
-      <div><dt>Audit trail</dt><dd>Every call timestamped and reproducible with one command. Proposals only: nothing executes without a person.</dd></div>
+      <div><dt>Audit trail</dt><dd>Every call timestamped and reproducible with one command. This page and the research tools only propose. The public paper bot trades a model account on its own; a live order needs a signed, armed mandate and, until the evidence gate opens, a person's approval of each ticket.</dd></div>
     </dl>
   </section>
 
   <footer class="hm-sign" aria-labelledby="hm-contact-t">
     <div><h2 class="hm-name" id="hm-contact-t">James Placco</h2><p id="hm-contact"></p></div>
-    <p class="hm-fine">A research tool for a model book: not personal positions, not investment advice, and it places no orders. The engine, the code and how it was built: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p>
+    <p class="hm-fine">A research tool for a model book: not personal positions, not investment advice, and this page places no orders. The engine, the code and how it was built: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p>
   </footer>
 </section>
 <section class="view" id="view-track" hidden aria-labelledby="tr-title">
@@ -2822,6 +2823,8 @@
     <div class="section-head"><p class="eyebrow">Walk-forward</p><h2 id="tr-wf-t">Every decision from data it had, costs charged</h2><p class="prose" id="tr-pol-p"></p></div>
     <figure class="panel chart" style="margin:0"><div class="svgbox" id="tr-curve"></div></figure>
     <div class="tablewrap"><table class="rs-table" id="tr-pol"></table></div>
+    <p class="prose" id="tr-restate-p" hidden></p>
+    <div class="tablewrap" id="tr-restate-w" hidden><table class="rs-table" id="tr-restate"></table></div>
   </section>
   <section class="section" aria-labelledby="tr-surv-t">
     <div class="section-head"><p class="eyebrow">Survivorship</p><h2 id="tr-surv-t">The names were not obvious in advance: a point-in-time universe</h2><p class="prose" id="tr-surv-p"></p></div>
@@ -2875,11 +2878,16 @@
   </section>
 </section>
 <section class="view" id="view-execution" hidden aria-labelledby="exd-title">
-  <div class="vhead"><p class="eyebrow">Today · from the call to orders</p><h1 id="exd-title">The call becomes a ticket; Robinhood places it after a person approves</h1>
-    <p class="lede">Buildout decides what to trade and whether it is allowed. Robinhood's own Trading MCP places the orders, in a separate Agentic account, only after the ticket is approved. Buildout holds no brokerage credential and has no tool that places an order.</p></div>
+  <div class="vhead"><p class="eyebrow">Today · from the call to orders</p><h1 id="exd-title">The call becomes a ticket; which system may send it, and on whose approval</h1>
+    <p class="lede">Buildout decides what to trade and whether it is allowed. This page and Buildout's research server place no orders and hold no brokerage credential. The trader, a separate program, can: it runs a public paper account on its own from the daily run, and on a person's own machine it can reach a Robinhood Agentic account under a signed mandate. The table says which system can send what.</p></div>
   <div class="at-tiles" id="ex-tiles"></div>
+  <section class="section" aria-labelledby="ex-who-t">
+    <div class="section-head"><p class="eyebrow">Capabilities</p><h2 id="ex-who-t">Who can send an order, to which account, on whose approval</h2>
+      <p class="prose">Four systems share this code. Only the last two can reach a real account, and neither is set up by the public repository: the mandate and any credential live in a private folder that is never committed, so this page cannot read their state and does not claim one.</p></div>
+    <div class="tablewrap"><table class="rs-table" id="ex-who"></table></div>
+  </section>
   <section class="section" aria-labelledby="ex-flow-t">
-    <div class="section-head"><p class="eyebrow">The flow</p><h2 id="ex-flow-t">Five steps, two servers, one approval</h2></div>
+    <div class="section-head"><p class="eyebrow">The flow</p><h2 id="ex-flow-t">The assistant route: five steps, two servers, one approval</h2></div>
     <ol class="ex-flow">
       <li><b>The call is logged.</b> The day's size and hedge are written to the hash-chained ledger before the next trading day (<code>ledger/calls.jsonl</code>).</li>
       <li><b>Robinhood is read.</b> The assistant reads the Agentic account (equity, cash, positions) and quotes through Robinhood's Trading MCP.</li>
@@ -2915,13 +2923,14 @@
     <div class="tablewrap"><table class="rs-table" id="ex-mandate"></table></div>
   </section>
   <section class="section" aria-labelledby="ex-pb-t">
-    <div class="section-head"><p class="eyebrow">The paper bot · public</p><h2 id="ex-pb-t">A model account the trader runs every weekday</h2>
+    <div class="section-head"><p class="eyebrow">The paper bot · public</p><h2 id="ex-pb-t">A model account the trader runs on its own</h2>
       <p class="prose" id="ex-pb-p"></p></div>
     <div class="at-tiles" id="ex-pb-tiles"></div>
     <div class="grid2" id="ex-pb-grid" hidden>
       <div class="panel"><div class="chart" id="ex-pb-curve" role="img" aria-label="The paper account's equity by day"></div></div>
       <div class="panel"><span class="panel-title">Holdings</span><div class="tablewrap"><table class="rs-table" id="ex-pb-pos"></table></div></div>
     </div>
+    <div class="panel" id="ex-pb-tp" hidden><span class="panel-title">Each filled ticket's times, in order</span><div class="tablewrap"><table class="rs-table" id="ex-pb-tl"></table></div><p class="note" id="ex-pb-tn"></p></div>
     <div class="panel" id="ex-pb-jp" hidden><span class="panel-title">The journal, newest last</span><div class="tablewrap"><table class="rs-table" id="ex-pb-j"></table></div></div>
     <p class="note" id="ex-pb-n"></p>
   </section>
@@ -3804,7 +3813,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <div class="section-head"><p class="eyebrow">The pattern</p><h2 id="ag-how-t">Roles: lead, researchers and checkers</h2></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">The lead agent</span><ul class="m-learn-l">
-        <li>Holds the plan, the code, the tests and the house rules (no em dashes, no fabricated numbers, real positions never on the page, nothing executes).</li>
+        <li>Holds the plan, the code, the tests and the house rules (no em dashes, no fabricated numbers, real positions never on the page, the page and the research tools place no orders).</li>
         <li>Writes every module, the page and the parity tests, and runs them; it integrates what subagents return only after validation.</li>
         <li>Treats a subagent's report as data, not instructions: it can be wrong, and it carries no authority.</li></ul></div>
       <div class="panel"><span class="panel-title">A subagent</span><ul class="m-learn-l">

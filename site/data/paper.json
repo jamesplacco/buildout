@@ -1,5 +1,5 @@
 {
- "schema": 1,
+ "schema": 2,
  "opened": "2026-11-11",
  "start_cash": 100000.0,
  "equity": 99924.21,
@@ -43,13 +43,32 @@
    "quantity": 13.0
   }
  ],
- "equity_history": [
+ "equity_history": [],
+ "pre_inception_marks": [
   [
    "2026-11-10",
-   99924.21
+   100000.0
   ]
  ],
  "tickets_filled": 1,
+ "resting": [],
+ "timeline": [
+  {
+   "ticket": "tkt-5c12ef101db360fd",
+   "fills": 9,
+   "status": "filled",
+   "decision_id": null,
+   "decision_ts": null,
+   "ordered": null,
+   "fill_session": null,
+   "filled_at": null,
+   "recorded": "2026-11-11T19:54:15Z",
+   "outside_limit": null,
+   "convention": "limit against the previous close (before v0.42.5)",
+   "causal": false
+  }
+ ],
+ "non_causal_fills": 9,
  "fills_chain": {
   "ok": true,
   "entries": 1
@@ -111,5 +130,12 @@
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
- "note": "A model account of $100,000 run by the trader every weekday from the daily workflow, filled at the day's close plus a 5 bp half-spread. Not a personal account."
+ "convention": {
+  "order": "written by the daily pass, before the open on most days",
+  "fill": "the close of the first exchange session that ends after the order was written",
+  "cost": "5 bp half-spread on every fill; no commission",
+  "limit": "the ticket's limit is recorded; the paper fill does not depend on it",
+  "since": "v0.42.5"
+ },
+ "note": "A model account of $100,000 run by the trader from the daily workflow. Each order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread, so the price is never older than the order. The first 9 fills (written Nov 11, 2026) were made under the earlier convention, at the limit against the previous day's close: a price older than the order. They are kept as recorded and marked. A simulation convention, not evidence of an achievable execution. Not a personal account."
 }

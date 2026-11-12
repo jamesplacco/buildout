@@ -8,7 +8,9 @@ not be left to judgment in the moment: what to trade, and whether it is allowed.
 
     plan(account, quotes)        target holdings, the orders to reach them, every check, a ticket id; nothing placed
     record_fills(ticket, fills)  fills checked against the ticket and appended to a hash-chained private log
-    paper_fill(ticket)           in paper mode, fills the ticket at its limit prices in a private paper account
+    paper_fill(ticket)           in paper mode, fills the ticket at its limit prices in a private paper account (a
+                                 rehearsal of the ticket's arithmetic, not a market simulation: the public paper bot
+                                 uses broker.PaperBroker, whose orders fill at the next close)
 
 What Robinhood's Agentic account allows (support pages read Nov 5, 2026): long stocks and ETFs; single-leg long
 options; market, limit and stop orders; no margin borrowing, no short selling, no futures, no multi-leg options. So:
@@ -87,8 +89,9 @@ def halted() -> str | None:
 
 
 def _bdays_between(a: str, b: str) -> int:
-    import numpy as np
-    return int(np.busday_count(a, b))
+    """Exchange sessions after a, up to and including b (v0.42.5: holidays count as closed, not as stale days)."""
+    from . import sessions
+    return sessions.sessions_between(a, b)
 
 
 def _canon(o) -> str:
@@ -158,7 +161,13 @@ def call_in_force(today: str | None = None) -> dict | None:
     c = e.get("call", {})
     frontier = [{"gross": m["gross"], "short": m.get("short", 0.0), "meets": True} for m in (c.get("menu_low"), c.get("menu_high")) if isinstance(m, dict) and m.get("gross") is not None]
     return {"asof": e.get("data_asof"), "effective_from": e["effective_from"], "size": c.get("size"), "binding": c.get("binding"), "frontier": frontier,
-            "menu_high": c.get("menu_high"), "ledger_seq": e["seq"], "source": f"ledger entry {e['seq']}"}
+            "menu_high": c.get("menu_high"), "ledger_seq": e["seq"], "source": f"ledger entry {e['seq']}",
+            "decision_id": decision_id(e), "decision_ts": e.get("ts_utc")}
+
+
+def decision_id(entry: dict) -> str:
+    """One name for one decision on every surface (v0.42.5): the ledger entry's number and the head of its hash."""
+    return f"{entry['seq']}-{str(entry.get('hash', ''))[:8]}"
 
 
 def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams | None = None, weights: dict | None = None,
@@ -284,7 +293,8 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     chk(f"at most {P.max_tickets_per_day} executed ticket a day", n_today < P.max_tickets_per_day, n_today)
     ok = all(c["pass"] for c in checks)
     body = {"created": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "expires": (now + timedelta(minutes=P.ticket_ttl_min)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "mode": P.mode, "broker": P.broker, "call": {"asof": call.get("asof"), "size": call.get("size"), "binding": call.get("binding"), "effective_from": eff},
+            "mode": P.mode, "broker": P.broker, "call": {"asof": call.get("asof"), "size": call.get("size"), "binding": call.get("binding"), "effective_from": eff,
+                                                                **({"decision_id": call["decision_id"], "decision_ts": call.get("decision_ts")} if call.get("decision_id") else {})},
             "target": T, "orders": orders, "stage": stage, "account": {"equity": eq, "cash": cash, "positions": held}, "quotes": Q}
     ticket = {**body, "checks": checks, "all_checks_pass": ok, "execute": bool(ok and P.mode == "live" and orders),
               "summary": {"orders": len(orders), "buys_usd": round(buys, 2), "sells_usd": round(sells, 2), "cash_after": round(cash_after, 2), "gross_after": round(gross_after, 4)},
@@ -357,10 +367,12 @@ def verify_fills() -> dict:
     return {"ok": True, "entries": n}
 
 
-def record_fills(tid: str, fills: list[dict], now: datetime | None = None) -> dict:
+def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_close: bool = False) -> dict:
     """Fills as Robinhood reports them ({symbol, side, quantity, price, order_id, status}) checked against the
     ticket's orders and appended, one hash-chained entry per ticket. A fill for an order not on the ticket, on the
-    other side, for more shares, or far from the limit price is flagged."""
+    other side, for more shares, or far from the limit price is flagged. at_close (v0.42.5) is for the paper
+    broker alone: its orders fill at the session's close, so the limit is not the test; the entry says so and
+    carries each fill's session and close time."""
     t = load_ticket(tid)
     v = verify_fills()
     if not v["ok"]:
@@ -389,14 +401,19 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None) -> di
             total[(s, side)] = total.get((s, side), 0.0) + q
             if total[(s, side)] > o["quantity"] + 1e-9:
                 issues.append(f"{s}: filled {total[(s, side)]:g} in all against {o['quantity']:g} ordered")
-            if (side == "buy" and p > o["limit_price"] + 1e-6) or (side == "sell" and p < o["limit_price"] - 1e-6):
+            if not at_close and ((side == "buy" and p > o["limit_price"] + 1e-6) or (side == "sell" and p < o["limit_price"] - 1e-6)):
                 issues.append(f"{s}: price {p} through the limit {o['limit_price']}")
-        clean.append({"symbol": s, "side": side, "quantity": q, "price": p, "order_id": oid, "status": str(f.get("status", "filled"))[:20]})
+        row = {"symbol": s, "side": side, "quantity": q, "price": p, "order_id": oid, "status": str(f.get("status", "filled"))[:20]}
+        if at_close:
+            row.update({k: f[k] for k in ("session", "filled", "ordered", "inside_limit") if f.get(k) is not None})
+        clean.append(row)
     complete = all(abs(total.get(k, 0.0) - o["quantity"]) < 1e-9 for k, o in by.items())
     status = "filled" if complete and not issues else ("partially_filled" if any(v > 0 for v in total.values()) else "unfilled")
     prev = _fills()[-1]["hash"] if _fills() else "0" * 64
     e = {"seq": len(_fills()) + 1, "ticket": tid, "mode": t["mode"], "ts_utc": (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"),
          "fills": clean, "issues": issues, "status": status, "prev": prev}
+    if at_close:
+        e["convention"] = "market on close: each order filled at the close of the first session ending after it was written, 5 bp half-spread"
     e["hash"] = _sha(e)
     _fills_path().parent.mkdir(parents=True, exist_ok=True)
     with _fills_path().open("a") as fh:

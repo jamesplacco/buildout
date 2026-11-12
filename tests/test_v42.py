@@ -75,16 +75,18 @@ def test_window_is_new_york_weekdays():
 
 
 def test_autonomous_paper_pass_executes_once_a_day_and_idles_in_the_band(state):
+    """v0.42.5: a paper order rests until the close of its session; the next pass finds it filled there."""
     pb = br.PaperBroker(state / "paper_account.json", quote_fn=_qf)
     M = md.Mandate(mode="autonomous", broker="paper", max_order_usd=50_000)
     r = trader.run_once(pb, M, _params(), now=NOW, call=_call(), poll_seconds=0.01)
-    assert r["outcome"] == "executed" and len(r["fills"]) == 9 and r["recorded"]["status"] == "filled" and r["recorded"]["issues"] == []
-    assert 99_800 < r["account_after"]["equity"] < 100_000                   # the collar and the half-spread are the only cost
-    assert trader.run_once(pb, M, _params(), now=NOW + timedelta(hours=1), call=_call())["outcome"] == "already traded today"
+    assert r["outcome"] == "orders resting until the close" and len(r["resting"]) == 9 and r["fills_in_session"] == "2026-11-09"
+    assert pb.account()["positions"] == [] and pb.account()["equity"] == 100_000          # nothing has filled, and nothing says it has
+    assert trader.run_once(pb, M, _params(), now=NOW + timedelta(hours=1), call=_call())["outcome"] == "orders resting until the close"
     r3 = trader.run_once(pb, M, _params(), now=NOW + timedelta(days=1), call=_call())
-    assert r3["outcome"].startswith("nothing to trade")
+    assert r3["settled"]["filled"] == 9 and r3["settled"]["tickets"][0]["status"] == "filled" and r3["outcome"].startswith("nothing to trade")
+    assert 99_900 < pb.account()["equity"] < 100_000                         # the half-spread is the only cost
     j = trader.journal()
-    assert [e["event"] for e in j][-3:] == ["executed", "pass", "pass"]
+    assert [e["event"] for e in j][-4:] == ["resting", "pass", "executed", "pass"]
     assert ex.verify_fills()["ok"] and ex.verify_fills()["entries"] == 1
     assert (state / "trader" / "digest.md").exists()
 
@@ -98,7 +100,7 @@ def test_manual_stages_then_executes_after_approval(state):
         trader.approve("tkt-0000000000000000")
     trader.approve(r["ticket"], by="test", now=NOW)
     r2 = trader.run_once(pb, M, _params(), now=NOW + timedelta(minutes=5), call=_call(), poll_seconds=0.01)
-    assert r2["outcome"] == "executed" and r2["ticket"] == r["ticket"]
+    assert r2["outcome"] == "orders resting until the close" and r2["ticket"] == r["ticket"]
     # an approval older than the mandate's life is refused
     pb2 = br.PaperBroker(state / "paper2.json", quote_fn=_qf)
     os.environ["BUILDOUT_TRADER_STATE"] = str(state / "late")
@@ -113,7 +115,7 @@ def test_supervised_takes_a_standing_approval(state):
     M = md.Mandate(mode="supervised", broker="paper", max_order_usd=50_000)
     assert trader.run_once(pb, M, _params(), now=NOW, call=_call())["outcome"].startswith("staged")
     trader.approve("standing", by="test", standing_minutes=120, now=NOW)
-    assert trader.run_once(pb, M, _params(), now=NOW + timedelta(minutes=1), call=_call(), poll_seconds=0.01)["outcome"] == "executed"
+    assert trader.run_once(pb, M, _params(), now=NOW + timedelta(minutes=1), call=_call(), poll_seconds=0.01)["outcome"] == "orders resting until the close"
 
 
 def test_the_mandate_refuses_and_the_halt_stops_everything(state):
@@ -142,11 +144,16 @@ def test_the_assistant_route_hands_over_exact_orders(state, monkeypatch):
 
 
 def test_paper_broker_is_idempotent_and_refuses_overselling(tmp_path):
-    pb = br.PaperBroker(tmp_path / "a.json", quote_fn=_qf)
+    t0 = NOW
+    pb = br.PaperBroker(tmp_path / "a.json", quote_fn=_qf, clock=lambda: t0)
     pb.quotes(["NVDA"])
     o1 = pb.place("NVDA", "buy", 10, PX["NVDA"] * 1.001, "c1")
     o2 = pb.place("NVDA", "buy", 10, PX["NVDA"] * 1.001, "c1")
-    assert o1 == o2 and o1["status"] == "filled" and pb.account()["positions"] == [{"symbol": "NVDA", "quantity": 10.0}]
+    assert o1 == o2 and o1["status"] == "open" and o1["fills_in_session"] == "2026-11-09" and pb.account()["positions"] == []
+    assert pb.settle(NOW + timedelta(hours=2)) == []                          # the close has not come
+    done = pb.settle(NOW + timedelta(hours=7))
+    assert [o["status"] for o in done] == ["filled"] and done[0]["avg_price"] == pytest.approx(PX["NVDA"] * 1.0005) and done[0]["filled"] >= done[0]["placed"]
+    assert pb.account()["positions"] == [{"symbol": "NVDA", "quantity": 10.0}]
     rest = pb.place("NVDA", "buy", 1, PX["NVDA"] * 0.99, "c2")
     assert rest["status"] == "open" and pb.open_orders() and pb.cancel(rest["order_id"])["status"] == "cancelled"
     with pytest.raises(RuntimeError):
