@@ -306,7 +306,7 @@ def test_every_surface_quotes_the_ledgers_entry():
     v = (SRC / "views.js").read_text()
     assert "reindexDesk" in v and "renderHeadline(DX19.now)" in v and "guard(\"Search\", reindexDesk)" in (SRC / "boot.js").read_text()
     td = (SRC / "trackdesk.js").read_text()
-    assert "decisionInForce" in td and "takes effect" in td and "In force today" in td
+    assert "decisionInForce" in td and "takes effect" in td and "Superseded: decision" in td
 
 
 def test_the_published_call_is_the_logged_call():

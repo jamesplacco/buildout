@@ -201,6 +201,9 @@
   };
   function guard(name, fn, box) {
     try { const out = fn(); scheduleRoles(); return out; } catch (e) {
+      // v0.43: on the core page a step that builds a desk the page does not carry has nothing to build into; that is
+      // not a failure. A step whose panel is on the page still reports as before.
+      if (typeof BUILD_CORE !== "undefined" && BUILD_CORE === true && !(box && box.isConnected)) { (LIVE.skipped = LIVE.skipped || []).push(name); return null; }
       console.error("[buildout] " + name, e);
       LIVE.problems.push(`${name}: ${e && e.message ? e.message : e}`);
       errorState(box, `${name} could not render.`, "The rest of the page is unaffected. Details are in the browser console.");
@@ -285,7 +288,7 @@
     const two2 = h("div", "grid2");
     two2.append(eraFig, polFig);
     body.append(tiles, two, two2, h("p", "hint", m.source + ". Correlations use simple daily returns; hedge ratios are long-only and applied the next day."));
-    const gl = $("#gauge-live");
+    const gl = $("#gauge-live") || h("p");            // v0.43: the sentence lives on a library desk; the core page has no such element
     gl.hidden = false;
     gl.className = "sentence" + (L.regime === "hedging" ? " ok" : L.regime === "amplifying" ? " warn" : "");
     gl.textContent = `Engine, ${niceDate(L.as_of)}: Nasdaq-100 against the 20-year Treasury, correlation ${sgn2(L.corr63)} (63-day half-life) and ${sgn2(L.corr252)} over one year. Regime: ${L.regime}${L.regime === "hedging" ? ", so the rule holds the bond hedge." : ", so the rule holds no bond hedge."}`;
@@ -903,7 +906,7 @@
       yfmt: (v) => pctPlain(v, 0), xfmt: (x) => xx(x) + " gross", xticks: [0, 0.5, 1, 1.5, 2].map((x) => [x, x.toFixed(1) + "x"]), yDomain: [0, Math.max(...ys, st.dd) * 1.05], label: "Drawdown by gross exposure", height: 250 });
   }
   function scheduleSize() { clearTimeout(sizeTimer); labelsSize(sizeState()); sizeTimer = setTimeout(updateSize, 90); }
-  Object.values(SZ).forEach((inp) => inp.addEventListener(inp.tagName === "SELECT" ? "change" : "input", scheduleSize));
+  Object.values(SZ).forEach((inp) => { if (inp) inp.addEventListener(inp.tagName === "SELECT" ? "change" : "input", scheduleSize); });   // v0.43: absent on the core page
 
   /* =====================================================================================
      SECURITIES, THESES, LENSES
@@ -1864,6 +1867,7 @@
     st.checks.forEach((c) => { const li = h("li", c.ok ? null : "fail"); li.append(document.createTextNode(c.name)); if (c.detail) li.append(h("span", null, String(c.detail))); ul.append(li); });
     box.append(tiles, ul);
     const chip = $("#chip-run");
+    if (!chip) return;                                   // v0.43: the chip sits in the part of the Desk the core page leaves out
     chip.querySelector(".dot").className = "dot " + (st.ok ? "good" : "warn");
     chip.lastElementChild.textContent = st.ok ? `Daily run ${st.checks.length} of ${st.checks.length} checks` : `Daily run ${passed} of ${st.checks.length} checks`;
   }

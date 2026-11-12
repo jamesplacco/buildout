@@ -215,21 +215,21 @@
     $("#hm-why").textContent = BC ? `${(BC.bindingName || "the binding limit").replace(/^the /, "The ")} sets the size, measured on the nine names' own risk; the forecast has not earned the right to move it. Long bonds stay off while stocks and bonds fall together.` : "";
     const wh = $("#hm-when"), B = typeof B30 === "function" ? B30() : null;
     if (wh && B) {
-      // v0.42.5: the decision by its ledger id, with what is in force today and what takes effect next kept apart
-      const today = new Date().toISOString().slice(0, 10), next = BC && BC.decision, now = typeof decisionInForce === "function" ? decisionInForce(today) : null;
+      // v0.43: one quiet line under the call (which decision, on which prices, in force from when), and one red line
+      // only when this copy is behind the ledger or the calendar. v0.42.5 put five sentences here in red; the detail
+      // (the exact minimum short, what the engine now computes) is on the Book risk desk, where it is read.
+      const today = new Date().toISOString().slice(0, 10), shown = BC && BC.decision, now = typeof decisionInForce === "function" ? decisionInForce(today) : null;
       const bd = (a, b) => { let n = 0; const d = new Date(a + "T12:00:00Z"), e = new Date(b + "T12:00:00Z"); while (d < e) { d.setUTCDate(d.getUTCDate() + 1); if (d.getUTCDay() % 6) n++; } return n; };
-      const age = bd(B.asof, today);
-      const menu = (c) => (c && c.menu_low ? `${xx(c.menu_low.gross)}, or ${xx(c.menu_high.gross)} with ${pct0(c.menu_high.short)} short` : c ? xx(c.size) : "");
-      const parts = [`On prices through ${isoNice(B.asof)}`];
-      if (next) parts.push(next.effective_from > today ? `decision ${next.id}, takes effect ${isoNice(next.effective_from)}` : `decision ${next.id}, in force since ${isoNice(next.effective_from)}`);
-      else parts.push("not yet in the ledger");
-      let txt = parts.join("; ") + ".";
-      if (now && (!next || now.id !== next.id)) txt += ` In force today: decision ${now.id} (${menu(now.call)}), since ${isoNice(now.effective_from)}.`;
-      const ex = typeof b30Exact === "function" ? b30Exact(BC) : "";
-      if (ex) txt += " " + ex;
-      if (age > 3) txt += ` This build's call is ${age} business days old: the Track record and the published site carry newer ones.`;
-      wh.textContent = txt;
-      wh.classList.toggle("hm-stale", age > 3);
+      const age = bd(B.asof, today), day = (d) => isoNice(d).replace(/, \d{4}$/, "");
+      const bits = [shown ? `Decision ${shown.id}` : "Not yet in the ledger", `prices through ${day(B.asof)}`];
+      if (shown) bits.push(shown.effective_from > today ? `takes effect ${day(shown.effective_from)}` : `in force since ${day(shown.effective_from)}`);
+      wh.textContent = bits.join(" · ");
+      wh.classList.remove("hm-stale");
+      const behind = now && shown && now.seq > shown.seq ? `Superseded: decision ${now.id} has been in force since ${day(now.effective_from)}. The published site shows it.`
+        : age > 3 ? `This copy's call is ${age} business days old. The published site carries the current one.` : "";
+      let bh = $("#hm-behind");
+      if (!bh) { bh = h("p", "hm-behind"); bh.id = "hm-behind"; wh.after(bh); }
+      bh.textContent = behind; bh.hidden = !behind;
     }
     const ct = $("#hm-contact");
     ct.replaceChildren();

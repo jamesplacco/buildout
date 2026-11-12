@@ -1,0 +1,551 @@
+{
+ "note": "written by scripts/prune_core.py; do not edit",
+ "stubs": {
+  "snap14.js": {
+   "raw": {
+    "SNAP14_MIND_JSON": "{}",
+    "SNAP14_CODE_JSON": "[]"
+   }
+  },
+  "snap25.js": {
+   "consts": [
+    "SNAP25"
+   ],
+   "funcs": []
+  },
+  "snap12.js": {
+   "consts": [
+    "ROBUST_SNAP",
+    "VOICES_CFG",
+    "VOICES_LIB"
+   ],
+   "funcs": []
+  },
+  "snap15.js": {
+   "consts": [
+    "SNAP15",
+    "ML_SNAP",
+    "REAL_SNAP",
+    "EDGE_SNAP",
+    "DAM_SNAP"
+   ],
+   "funcs": []
+  },
+  "snap27.js": {
+   "consts": [
+    "SNAP27"
+   ],
+   "funcs": []
+  },
+  "snap29.js": {
+   "consts": [
+    "SNAP29"
+   ],
+   "funcs": []
+  },
+  "snap26.js": {
+   "consts": [
+    "SNAP26"
+   ],
+   "funcs": []
+  },
+  "snap17.js": {
+   "consts": [
+    "SNAP17",
+    "BONDS17",
+    "TAPE17",
+    "CX17",
+    "CHRON17"
+   ],
+   "funcs": []
+  },
+  "snap13.js": {
+   "consts": [
+    "ATLAS_SNAP"
+   ],
+   "funcs": []
+  },
+  "snap16.js": {
+   "consts": [
+    "SNAP16",
+    "TA_SNAP",
+    "FA_SNAP",
+    "RL_SNAP",
+    "CONN_SNAP",
+    "DIST_SNAP"
+   ],
+   "funcs": []
+  },
+  "atlas.js": {
+   "consts": [
+    "AT_H",
+    "AT_COLS",
+    "AT_JUDGED",
+    "AT_BOOK",
+    "AT_M",
+    "AT_M_SRC",
+    "atCum",
+    "AT_STAGES",
+    "AT_STEP",
+    "AT_HOLD",
+    "AT_FLY",
+    "atXY",
+    "atRad",
+    "atEl",
+    "AH",
+    "AT_VOICE",
+    "AT_VOICE_ID"
+   ],
+   "funcs": [
+    "atlasOk",
+    "atlasData",
+    "atMatrices",
+    "atSolve",
+    "atRespond",
+    "atMCStart",
+    "atMCStep",
+    "atMCFinish",
+    "atMC",
+    "atMCAsync",
+    "atNodeColor",
+    "atStage",
+    "atLayout",
+    "atScenario",
+    "atStart",
+    "atJump",
+    "atOnScreen",
+    "atTick",
+    "atSpawn",
+    "atFrame",
+    "atDraw",
+    "atHit",
+    "atWire",
+    "atPlayToggle",
+    "atScenarioName",
+    "atFan",
+    "heroAtlasStep",
+    "heroAtlasStatic",
+    "renderHeroAtlas",
+    "setHeroBrain",
+    "wireHeroWhich",
+    "renderAtlasDesk",
+    "atExplain",
+    "atVoiceTopic",
+    "atVoices",
+    "atCharts"
+   ]
+  },
+  "snap22.js": {
+   "consts": [
+    "SNAP22",
+    "GEO22"
+   ],
+   "funcs": []
+  },
+  "snappc.js": {
+   "consts": [
+    "SNAPPC"
+   ],
+   "funcs": []
+  },
+  "snap9.js": {
+   "consts": [
+    "BRAIN_SERIES"
+   ],
+   "funcs": []
+  },
+  "edges.js": {
+   "consts": [
+    "E26",
+    "e26N",
+    "e26S",
+    "e26T",
+    "e26Pct",
+    "e26Share",
+    "e26Luck",
+    "e26Tested",
+    "e26Partial"
+   ],
+   "funcs": [
+    "renderEdges",
+    "renderEdgesToday"
+   ]
+  },
+  "buyside6.js": {
+   "consts": [
+    "depreciationTable",
+    "ddbFirstYear",
+    "cashEps",
+    "RED_TESTS",
+    "CS_PRESETS"
+   ],
+   "funcs": [
+    "dcfValue",
+    "reverseDcf",
+    "creditStress",
+    "gradeFlag",
+    "grossScaler",
+    "regimeLabel",
+    "buyData",
+    "renderBsRegime",
+    "signalNow",
+    "renderBsSelector",
+    "drawBsSelector",
+    "renderBsTails",
+    "renderBsReplays",
+    "updateDeprCalc",
+    "updateCashEps",
+    "updateRevDcf",
+    "updateCredit",
+    "renderRedFlags",
+    "updateMoonbag",
+    "renderManualBoard",
+    "buildBuyside",
+    "drawBuyside"
+   ]
+  },
+  "geo.js": {
+   "consts": [
+    "GEO_ERAS",
+    "geoEra",
+    "geoYr",
+    "geoSgn",
+    "geoName"
+   ],
+   "funcs": [
+    "geoOk",
+    "renderGeometry",
+    "geoMap",
+    "geoAnalogs",
+    "geoPlacebo",
+    "geoSpectrum",
+    "geoBarcode",
+    "geoLevy",
+    "geoHurst",
+    "geoComp",
+    "geoTests",
+    "geoSeries"
+   ]
+  },
+  "voices.js": {
+   "consts": [
+    "VC",
+    "VQ",
+    "VSTANCES",
+    "VSET",
+    "V_STOP",
+    "V_NEG",
+    "V_BULL",
+    "V_BEAR",
+    "V_DIR",
+    "V_FLIP",
+    "V_PHRASE",
+    "V_WORD",
+    "VKEYS",
+    "vQuoteDoc",
+    "vTopicDoc",
+    "V_IDX",
+    "vIdx",
+    "r9",
+    "VS",
+    "V_EXAMPLES",
+    "vName",
+    "vDate",
+    "vUrl"
+   ],
+   "funcs": [
+    "vStem",
+    "vRaw",
+    "vWord",
+    "vTokens",
+    "vIndex",
+    "vPolarity",
+    "vSearch",
+    "vRun",
+    "vCurrentIds",
+    "vSetStance",
+    "vMove",
+    "vNext",
+    "renderVoices",
+    "vAskClaude",
+    "wireVoices"
+   ]
+  },
+  "nowcast.js": {
+   "consts": [
+    "N27",
+    "n27Pct",
+    "n27Pts",
+    "n27Log",
+    "n27S",
+    "n27P",
+    "N27_GROUP",
+    "N27_SIG",
+    "N27_WIN",
+    "n27Date",
+    "N27_ANNOUNCED"
+   ],
+   "funcs": [
+    "renderNowcast",
+    "renderNowcastToday"
+   ]
+  },
+  "bonds.js": {
+   "consts": [
+    "BD_ORDER",
+    "BD",
+    "bdP",
+    "bdUsd",
+    "bdBp"
+   ],
+   "funcs": [
+    "bdOk",
+    "bdFunds",
+    "renderBonds",
+    "bdLink",
+    "bdSet",
+    "bdUpdate",
+    "bdPxChart",
+    "bdCurveChart",
+    "bdHeat",
+    "bdHeatMark",
+    "bdTape",
+    "bdEquity",
+    "bdFour"
+   ]
+  },
+  "snap21.js": {
+   "consts": [
+    "SNAP21",
+    "MX21"
+   ],
+   "funcs": []
+  },
+  "levers_data.js": {
+   "consts": [
+    "LEVERS_DATA"
+   ],
+   "funcs": []
+  },
+  "games.js": {
+   "consts": [
+    "GM",
+    "CAPEX_SEATS",
+    "GAME_PRESETS",
+    "LADDER_DEFAULT",
+    "FQ"
+   ],
+   "funcs": [
+    "capexInputs",
+    "renderCapexGame",
+    "renderExit",
+    "renderKyle",
+    "gameNow",
+    "renderGameMatrix",
+    "renderMatrixResult",
+    "renderLadder",
+    "renderLadderResult",
+    "renderFill",
+    "buildGames",
+    "drawGames"
+   ]
+  },
+  "analysis.js": {
+   "consts": [
+    "AN",
+    "anPct",
+    "anP",
+    "anX",
+    "AN_SIG"
+   ],
+   "funcs": [
+    "anOk",
+    "renderAnalysisDesk",
+    "anAssetSeg",
+    "anAsset",
+    "anCompanySeg",
+    "anCompany",
+    "anConnections",
+    "brokerCsv",
+    "brokerWeights",
+    "anBrokerWire",
+    "renderRlBlock",
+    "renderDistribution"
+   ]
+  },
+  "deeprl.js": {
+   "consts": [
+    "PPO_ENVS"
+   ],
+   "funcs": [
+    "renderDeepRl"
+   ]
+  },
+  "futures.js": {
+   "consts": [
+    "F29",
+    "f29S",
+    "f29P",
+    "f29Pct",
+    "F29_VCLASS",
+    "F29_DES",
+    "f29Date",
+    "F29_HEAD",
+    "SIGNALS29"
+   ],
+   "funcs": [
+    "f29Rows",
+    "renderFutures"
+   ]
+  },
+  "wisdom.js": {
+   "consts": [
+    "tailWired",
+    "lgGroup",
+    "STANCE_WORD"
+   ],
+   "funcs": [
+    "tailRows",
+    "renderTailsDesk",
+    "buildSwans",
+    "renderSwansStatic",
+    "tailState",
+    "tailNumbers",
+    "updateTailLab",
+    "drawTailLab",
+    "trendRead",
+    "lensRead",
+    "buildLegends",
+    "renderLegends"
+   ]
+  },
+  "snap28.js": {
+   "consts": [
+    "SNAP28"
+   ],
+   "funcs": []
+  },
+  "filings.js": {
+   "consts": [
+    "F28",
+    "f28S",
+    "f28P",
+    "f28Pct",
+    "F28_FAM",
+    "F28_VCLASS"
+   ],
+   "funcs": [
+    "renderFilings"
+   ]
+  },
+  "pf.js": {
+   "consts": [
+    "PF_COL",
+    "PF_POL"
+   ],
+   "funcs": [
+    "pfOk",
+    "pfMixText",
+    "pfMixBar",
+    "renderPortfolio",
+    "pfCharts"
+   ]
+  },
+  "levers.js": {
+   "consts": [
+    "LV_DEFAULTS",
+    "LV_SLIDERS",
+    "LV_STATE",
+    "lvM"
+   ],
+   "funcs": [
+    "lvSens",
+    "leverModel",
+    "renderLevers"
+   ]
+  },
+  "mx.js": {
+   "consts": [
+    "mxSame",
+    "mxMs"
+   ],
+   "funcs": [
+    "mxOk",
+    "renderMatrix",
+    "mxBoardTable",
+    "mxLive",
+    "mxBrainMatrix",
+    "mxScanFig",
+    "mxPearl"
+   ]
+  },
+  "pulse.js": {
+   "consts": [
+    "CHECK_ITEMS",
+    "todayIso6"
+   ],
+   "funcs": [
+    "prevWeekday",
+    "pulseNow",
+    "renderRings",
+    "renderSince",
+    "renderCheckin",
+    "buildPulse"
+   ]
+  },
+  "hedgebook.js": {
+   "consts": [
+    "HB_HEDGES",
+    "HB_IDS",
+    "HB_RUNNING_BP",
+    "HB_A",
+    "hbP",
+    "hbVixEnd"
+   ],
+   "funcs": [
+    "hbCosts",
+    "hbPnl",
+    "hbBook",
+    "hbEvaluate",
+    "hbAdvisor"
+   ]
+  },
+  "ml.js": {
+   "consts": [
+    "mlPct",
+    "mlX",
+    "mlP"
+   ],
+   "funcs": [
+    "mlOk",
+    "renderMlDesk",
+    "mlTables",
+    "mlCharts"
+   ]
+  },
+  "complexity.js": {
+   "consts": [
+    "CX"
+   ],
+   "funcs": [
+    "cxOk",
+    "renderComplexity",
+    "cxChart"
+   ]
+  },
+  "snap6.js": {
+   "consts": [
+    "BRAIN_SNAP",
+    "BUY_SNAP",
+    "SOURCES_SNAP"
+   ],
+   "funcs": []
+  },
+  "snap7.js": {
+   "consts": [
+    "REASON_SNAP"
+   ],
+   "funcs": []
+  }
+ }
+}

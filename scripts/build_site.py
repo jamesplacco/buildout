@@ -1,4 +1,4 @@
-"""Wrap site/page.html (the artifact body) into a standalone page for GitHub Pages.
+"""Wrap site/core.html (the core page) and site/page.html (every desk: the library) into standalone pages for GitHub Pages.
 
 The Claude artifact host supplies the document skeleton and a small reset; GitHub Pages does not,
 so this adds both and copies the daily JSON next to the page.
@@ -20,12 +20,24 @@ HEAD = """<!doctype html>
 
 
 def build(src: str = "site", out: str = "_site") -> Path:
-    html = document(Path(src, "page.html").read_text())
+    # v0.43: two pages from the same sources. index.html is the core page (the desks the call depends on); library.html
+    # is the full page with every desk. A build without site/core.html (older checkouts) publishes the full page alone.
+    full = document(Path(src, "page.html").read_text())
+    core_src = Path(src, "core.html")
     dest = Path(out)
     if dest.exists():
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
-    (dest / "index.html").write_text(html)
+    if core_src.exists():
+        core = core_src.read_text()
+        a, b = "  const BUILD_CORE = true;", '<a href="page.html" class="lib-link"'
+        if core.count(a) != 1 or core.count(b) != 1:
+            raise SystemExit("site/core.html is not a core page this script knows how to link to the library")
+        core = core.replace(a, a + '\n  const BUILD_LIBRARY_HREF = "library.html";', 1).replace(b, '<a href="library.html" class="lib-link"', 1)
+        (dest / "index.html").write_text(document(core))
+        (dest / "library.html").write_text(full)
+    else:
+        (dest / "index.html").write_text(full)
     (dest / ".nojekyll").write_text("")
     pdf = Path(src, "tearsheet.pdf")
     if pdf.exists():                      # v0.38: the tear sheet the Home and Track record pages link to
@@ -142,7 +154,8 @@ def manifest(dest: Path) -> dict:
         files[p.name] = {"bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()[:16], "asof": asof}
     page = dest / "index.html"
     return {"source_commit": sha, "built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "page_bytes": page.stat().st_size if page.exists() else None, "data": files}
+            "page_bytes": page.stat().st_size if page.exists() else None,
+            "library_bytes": (dest / "library.html").stat().st_size if (dest / "library.html").exists() else None, "data": files}
 
 
 if __name__ == "__main__":

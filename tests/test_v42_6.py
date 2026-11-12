@@ -139,7 +139,7 @@ def test_what_a_short_leaves_is_the_regression_residual():
 
 def test_house_style_and_version():
     import buildout
-    assert buildout.__version__ == "0.42.6"
+    assert buildout.__version__ >= "0.42.6"
     for p in ("tests/test_v42_6.py", "site/src/trackdesk.js", "buildout/track.py"):
         low = (ROOT / p).read_text().lower()
         for b in (chr(0x2014), "inter" "section", "load" "-bearing"):

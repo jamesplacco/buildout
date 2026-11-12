@@ -5,8 +5,8 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 51;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 68;      // tests/test_*.py, pinned by tests/test_v39_1.py
-  const TESTS_PASSING = 884;     // the shipped test count (the chip and the hood tile read it)
+  const TEST_FILES = 69;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TESTS_PASSING = 895;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -56,7 +56,9 @@
     const todayIso = new Date().toISOString().slice(0, 10);
     document.querySelectorAll(".cal li[data-date]").forEach((li) => { if (li.dataset.date < todayIso) { const b = li.querySelector("b"); if (b && !/passed/.test(b.textContent)) b.textContent += " (passed)"; li.classList.add("cal-past"); } });
     const eb = $("#t7-eyebrow");
-    if (eb) eb.textContent = `The engine's call · model book · data to ${isoNice(latestDataDate())}`;
+    // v0.43: the date that governs the call is the date of the prices it was sized on, not the newest market file
+    const Bk = typeof B30 === "function" ? B30() : null;
+    if (eb) eb.textContent = `The engine's call · model book · ${Bk && Bk.asof ? `prices through ${isoNice(Bk.asof)}` : `data to ${isoNice(latestDataDate())}`}`;
   }
 
   function renderCallBoard(N, O) {

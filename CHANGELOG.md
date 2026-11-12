@@ -3,6 +3,20 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.43: the core page. "Reduce what is unnecessary." The site's front page now carries fifteen desks in four
+groups (Call, Record, Evidence, Method) and the library carries all sixty-six; both are built from the same sources.
+
+- **What a reader meets.** Four groups and fifteen desks in place of five groups and sixty-six. The Desk on the core
+  page ends at what would reverse the call; how the call is derived lives under Method.
+- **What the browser loads.** The core page leaves out the other desks' markup, the mind's graph (4.3 MB), the
+  embedded source (2.4 MB) and every snapshot and module only the library uses.
+- **How the cut is decided.** `scripts/prune_core.py` replaces a file with inert stand-ins, opens the page in a
+  browser, visits and uses every core desk, and leaves the file out only if no text, table or chart mark changes and
+  nothing errors. A module of code is tried only if no core module names anything it declares.
+- **How the cut is held.** `tests/test_v43.py` compares every core desk on the two pages in a browser; the stress
+  suite serves the site as published and follows a link from the core page into the library and back.
+- **Nothing was deleted.** `site/page.html` is unchanged in content and is published as `library.html`.
+
 Version 0.42.6 adds the universe checks (`track.universe_checks`, the Track record desk): how much of the record is
 owed to a candidate list written in 2026. The same sizing rule, costs and dates are run on the candidates frozen at
 the end of 2017 (14 names; Palantir and SpaceX listed later and never enter), on that list without the name whose

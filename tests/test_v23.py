@@ -190,7 +190,8 @@ def test_shipped_decision_carries_the_overlay_and_the_headline_matches():
 # ---------------------------------------------------------------- the page
 def test_six_groups_cover_every_desk_once():
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
-    groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
+    full = boot.split("const CORE_GROUPS = ")[0]                  # v0.43: the full page's groups; the core page's are tested in test_v43
+    groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', full))
     assert list(groups) == ["today", "evidence", "markets", "engine", "library"]            # v0.31: five groups
     views = [v.strip('" ') for g in groups.values() for v in g.split(",")]
     assert len(views) == len(set(views))

@@ -2269,4 +2269,20 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
 .memo-since { font: 500 var(--t-xs)/1 var(--f-mono); color: var(--muted); }
 .memo-row h4 { margin: 0 0 2px; font: 600 var(--t-xs)/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
 .memo-row p { margin: 0; font-size: var(--t-sm); line-height: 1.45; color: var(--ink); }
+/* v0.43: on a phone the header is the brand row and two rows that scroll sideways, never rows that wrap. With four
+   groups it had been taking about 250 px of an 844 px screen. */
+@media (max-width: 640px) {
+  .tabs { display: flex; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; border-radius: 14px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs a { flex: 0 0 auto; padding: 8px 12px; min-height: 34px; font-size: 0.94rem; }
+  .subtabs { display: flex; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; padding-block: 0 8px; gap: 6px; }
+  .subtabs::-webkit-scrollbar { display: none; }
+  .subtabs a { flex: 0 0 auto; min-height: 32px; padding: 6px 12px; font-size: 0.9rem; }
+  .topbar-inner { padding-block: 8px 6px; gap: 6px 12px; }
+}
+/* the call card's dateline: one quiet line, and one red line only when this copy is behind */
+.hm-when { font: 500 var(--t-xs)/1.45 var(--f-body); color: var(--muted); letter-spacing: 0.01em; }
+.hm-when b { font-weight: 600; color: var(--ink-2); }
+.hm-behind { font: 500 var(--t-xs)/1.45 var(--f-body); color: var(--bad, #b3261e); margin-top: 4px; }
+.tabs a.lib-link, .tabs a.core-link { opacity: 0.8; }
 </style>

@@ -100,8 +100,21 @@ by `github-actions[bot]`. Only derived analytics are committed; raw market data 
 
 ## The page
 
-`site/page.html` is one self-contained page with twenty-three desks in seven sections (Today, Decide, Markets,
-Trading, Research, Wisdom, Reference). Market figures carry a source and a date;
+Two pages are built from the same sources in `site/src/` (v0.43):
+
+- **`site/core.html`, the site's front page.** Fifteen desks in four groups, and nothing the call does not depend
+  on: **Call** (Home, Desk, Book risk, Decision engine, Hedge test), **Record** (Track record, Execution),
+  **Evidence** (Inventory, Memos and the failure log, Fundamentals), **Method** (How it works, Parameters, Data
+  lineage, Architecture and status, Appendix). About a third of the full page's size.
+- **`site/page.html`, the library.** All sixty-six desks: the core fifteen and every research desk built along the
+  way. Published as `library.html`; a link on the core page to a desk it does not carry opens the library there.
+
+What the core page leaves out is decided by rendering, not by hand. `scripts/prune_core.py` replaces a file with
+inert stand-ins, opens the page in a browser, uses every core desk, and leaves the file out only if nothing a reader
+sees or does changes; `tests/test_v43.py` holds every core desk to the same text, tables and charts on both pages.
+The list is `scripts/core_stubs.json`.
+
+The table below describes the library's older desks. Market figures carry a source and a date;
 tiles marked Live are replaced by the daily run's numbers, and a Stale badge appears when a file is more
 than three weekdays old. The bond, curve, option, hedge and sizing tools run in the browser with the same
 formulas as the engine (`analytics/bonds.py`, `curve.py`, `options.py`), checked against it to 1e-9.
@@ -152,7 +165,8 @@ The page is assembled from `site/src/` (`head.html`, `body.html`, and `math.js`,
 `snap6.js`, `brain.js`, `noteworthy.js`, `trading.js`, `buyside6.js`, `pulse.js`, `boot.js` inside one strict-mode script). Edit the parts, then:
 
 ```bash
-python scripts/assemble_page.py           # writes site/page.html; --check fails CI if it is stale
+python scripts/assemble_page.py           # writes site/page.html and site/core.html; --check fails CI if either is stale
+python scripts/prune_core.py --code       # only when a core desk starts using something new: re-decides what the core page leaves out
 python site/tests/stress.py               # browser suite (needs: pip install playwright; playwright install chromium)
 python scripts/snapshot_fundamentals.py   # regenerate the Fundamentals snapshot from the SEC facts in tests/fixtures
 python scripts/snapshot_v06.py <dir>      # regenerate snap6.js from brain, buyside and sources output in <dir>

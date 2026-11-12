@@ -54,15 +54,6 @@
     const e = ok.pop();
     return e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null;
   }
-  // what stands beside the logged short: the exact minimum, and the engine's own row if it now differs from the log
-  function b30Exact(BC) {
-    if (!BC || BC.keep == null) return "";
-    const out = [];
-    if (BC.recomputed != null) out.push(`The ledger logged ${pctPlain(BC.keep, 0)} for this date; held to every limit exactly, with no tolerance, the engine now computes ${pctPlain(BC.recomputed, 0)}. The logged call stands as written.`);
-    if (BC.keepExact != null && Math.abs(BC.keepExact - BC.keep) > 5e-4) out.push(`The short is logged in 5% steps; the exact minimum is ${pctPlain(BC.keepExact, 1)}.`);
-    return out.join(" ");
-  }
-
   function renderBookRisk() {
     const B = B30(), tiles = $("#bk-tiles");
     if (!tiles) return;

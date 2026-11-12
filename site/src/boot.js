@@ -9,7 +9,39 @@
     library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "deeprl", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
   };
   const GROUP_ORDER = ["today", "evidence", "markets", "engine", "library"];
+  // v0.43: the core page. The same sources build two pages: the full one (every desk, the library) and a core one
+  // that carries only the desks the call depends on: the call and its risk, the record, the evidence, the method.
+  // The assembler sets BUILD_CORE, leaves the other desks' markup and snapshots out, and this swaps the groups.
+  // A link to a desk the core page does not carry opens the library at that desk.
+  const CORE = typeof BUILD_CORE !== "undefined" && BUILD_CORE === true;
+  const LIBRARY_HREF = typeof BUILD_LIBRARY_HREF === "string" ? BUILD_LIBRARY_HREF : "page.html";
+  const ALL_VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
+  const CORE_GROUPS = {
+    today: { views: ["home", "desk", "book", "decision", "hedgetest"], name: "Call" },
+    record: { views: ["track", "execution"], name: "Record" },
+    evidence: { views: ["inventory", "memos", "fundamentals"], name: "Evidence" },
+    engine: { views: ["explained", "parameters", "engines", "engine", "appendix"], name: "Method" },
+  };
+  if (CORE) {
+    Object.keys(GROUPS).forEach((k) => { delete GROUPS[k]; });
+    Object.assign(GROUPS, CORE_GROUPS);
+    GROUP_ORDER.splice(0, GROUP_ORDER.length, ...Object.keys(CORE_GROUPS));
+    if (typeof GUIDE_GROUPS === "object") Object.assign(GUIDE_GROUPS, { today: "The call: the size the book's limits allow, the hedge beside it, and the engine's baseline.", record: "What was decided and what happened: the walk-forward record, the ledger of calls, the paper account.",
+      evidence: "What has been tested, what failed, and whether the buildout pays for itself.", engine: "How the call is made, which values were chosen by hand, where each number comes from." });
+  }
+  // the full page links back to the core page: beside it on disk, at the site's root once published
+  if (!CORE && typeof document !== "undefined") {
+    const tabs = document.querySelector(".tabs");
+    if (tabs && !tabs.querySelector(".core-link")) {
+      const a = document.createElement("a");
+      a.className = "core-link"; a.textContent = "Core page"; a.title = "The fifteen desks the call depends on";
+      a.href = typeof location !== "undefined" && location.protocol === "file:" ? "core.html" : "./";
+      tabs.append(a);
+    }
+  }
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
+  const inLibrary = (v) => CORE && ALL_VIEWS.includes(v) && !VIEWS.includes(v);
+  const toLibrary = (v) => { location.href = LIBRARY_HREF + "#" + v; };
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
   function goGroup(g) {
@@ -115,6 +147,7 @@
   function resolve(token) {
     if (!token) return { view: "home", el: null };          // v0.38: the front door; the Desk is one click away
     if (VIEWS.includes(token)) return { view: token, el: null };
+    if (inLibrary(token)) { toLibrary(token); return { view: current || "home", el: null }; }      // v0.43: a desk the core page does not carry
     if (GROUPS[token]) return { view: lastInGroup[token] || GROUPS[token].views[0], el: null };
     let el = document.getElementById(token);
     if (!el && /^sec-/.test(token) && secFilter !== "All") { secFilter = "All"; renderSecurities(); el = document.getElementById(token); }
@@ -274,16 +307,18 @@
     LAZY.pending++;
   });
 
-  ["#bc-cpn", "#bc-yld", "#bc-mat", "#bc-face", "#bc-shock"].forEach((id) => $(id).addEventListener("input", () => guard("Bond calculator", updateBond)));
-  ["#ct-dv01", "#ct-d2", "#ct-d10"].forEach((id) => $(id).addEventListener("input", () => guard("Curve trade", updateCurveTrade)));
-  ["#bs-S", "#bs-K", "#bs-T", "#bs-v", "#bs-r", "#bs-q", "#bs-mkt"].forEach((id) => $(id).addEventListener("input", () => guard("Option pricer", updateBS)));
-  $("#bs-type").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+  // v0.43: wiring for inputs that only some builds carry (the core page has no bond or option calculators)
+  const onInput = (ids, name, fn) => ids.forEach((id) => { const e = $(id); if (e) e.addEventListener("input", () => guard(name, fn)); });
+  onInput(["#bc-cpn", "#bc-yld", "#bc-mat", "#bc-face", "#bc-shock"], "Bond calculator", updateBond);
+  onInput(["#ct-dv01", "#ct-d2", "#ct-d10"], "Curve trade", updateCurveTrade);
+  onInput(["#bs-S", "#bs-K", "#bs-T", "#bs-v", "#bs-r", "#bs-q", "#bs-mkt"], "Option pricer", updateBS);
+  if ($("#bs-type")) $("#bs-type").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
     bsType = b.dataset.v;
     $("#bs-type").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
     guard("Option pricer", updateBS);
   }));
-  ["#po-v", "#po-T"].forEach((id) => $(id).addEventListener("input", () => guard("Payoff builder", updatePayoff)));
-  ["#tb-k", "#tb-T", "#tb-v", "#tb-n"].forEach((id) => $(id).addEventListener("input", () => guard("Tail budget", updateTail)));
+  onInput(["#po-v", "#po-T"], "Payoff builder", updatePayoff);
+  onInput(["#tb-k", "#tb-T", "#tb-v", "#tb-n"], "Tail budget", updateTail);
   document.querySelectorAll("form").forEach((f) => f.addEventListener("submit", (e) => e.preventDefault()));
   [["Bond calculator", updateBond], ["Curve trade", updateCurveTrade], ["Option pricer", updateBS], ["Hedge lab", updateHedge], ["Sizing lab", () => labelsSize(sizeState())], ["Futures hedge", updateFutures], ["Payoff builder", updatePayoff]]
     .forEach(([name, fn]) => guard(name, fn));

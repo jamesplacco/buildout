@@ -4,7 +4,7 @@ keyboard-only use, deep links and print. Needs Playwright with Chromium:
     pip install playwright && playwright install chromium
     python site/tests/stress.py            # exits 1 on any failure
 
-It serves site/page.html (wrapped the way GitHub Pages serves it) from temporary folders, one per
+It serves site/page.html, and from v0.43 the core page in front of it (wrapped the way GitHub Pages serves them), from temporary folders, one per
 data scenario, and fails on any script error, any NaN/undefined/Infinity/null on screen, any horizontal
 page scroll, any duplicate id, or any panel that should have rendered but did not. The print scenario
 prints every desk to PDF and, when poppler's pdftotext is installed, fails on text printed over text.
@@ -61,12 +61,17 @@ def serve(folder: Path) -> tuple[http.server.ThreadingHTTPServer, str]:
     return httpd, f"http://127.0.0.1:{httpd.server_address[1]}/"
 
 
-def site_with(data: dict[str, object] | None, raw: dict[str, str] | None = None) -> Path:
+CORE_VIEWS = ["home", "desk", "book", "decision", "hedgetest", "track", "execution", "inventory", "memos", "fundamentals", "explained", "parameters", "engines", "engine", "appendix"]
+
+
+def site_with(data: dict[str, object] | None, raw: dict[str, str] | None = None, core: bool = False) -> Path:
     tmp = Path(tempfile.mkdtemp(prefix="buildout-stress-"))
     atexit.register(shutil.rmtree, tmp, True)             # each scenario copies the 12 MB page; a run leaves none behind
     src = tmp / "src"
     (src / "data").mkdir(parents=True)
     shutil.copy(ROOT / "site" / "page.html", src / "page.html")
+    if core:                                              # v0.43: the site as published, core page in front and the library behind it
+        shutil.copy(ROOT / "site" / "core.html", src / "core.html")
     for name, obj in (data or {}).items():
         (src / "data" / name).write_text(json.dumps(obj))
     for name, text in (raw or {}).items():
@@ -110,7 +115,7 @@ async def check_page(page, label: str, views=VIEWS) -> None:
             fail(f"{label} #{v}: opened {res['view']}")
 
 
-async def scenario(browser, label: str, folder: Path, expect_errors: int = 0, width: int = 1280, extra=None, init: str | None = None) -> None:
+async def scenario(browser, label: str, folder: Path, expect_errors: int = 0, width: int = 1280, extra=None, init: str | None = None, views=VIEWS) -> None:
     httpd, url = serve(folder)
     ctx = await browser.new_context(viewport={"width": width, "height": 900})
     if init:
@@ -122,7 +127,7 @@ async def scenario(browser, label: str, folder: Path, expect_errors: int = 0, wi
     await page.route("https://fonts.googleapis.com/**", lambda r: r.abort())
     await page.goto(url, wait_until="load")
     await page.wait_for_timeout(1200)
-    await check_page(page, label)
+    await check_page(page, label, views)
     shown = await page.evaluate("[...document.querySelectorAll('.empty.error')].map((e) => ((e.closest('.view') || {}).id || '?') + ': ' + e.textContent.trim().slice(0, 200))")
     panels = len(shown)
     if panels != expect_errors:
@@ -495,6 +500,12 @@ async def main() -> int:
         await scenario(browser, "incomplete market file", site_with({"macro.json": {"latest": {"as_of": "2026-10-16"}}}), expect_errors=1)
         for w in (320, 768, 1920):
             await scenario(browser, f"good data at {w}px", site_with(good), width=w)
+        # v0.43: the site as published. The front page is the core page; a desk it does not carry opens the library.
+        await scenario(browser, "core page, good data", site_with(good, core=True), views=CORE_VIEWS, extra=core_and_library)
+        await scenario(browser, "core page, no data at all", site_with(None, core=True), views=CORE_VIEWS)
+        await scenario(browser, "core page, truncated files", site_with(None, raw={n: '{"latest": {"as_of": "2026-10' for n in good}, core=True), views=CORE_VIEWS)
+        for w in (320, 768):
+            await scenario(browser, f"core page at {w}px", site_with(good, core=True), width=w, views=CORE_VIEWS)
         await browser.close()
     print(f"\n{len(FAILURES)} failures")
     return 1 if FAILURES else 0
@@ -527,6 +538,31 @@ window.claude = { use: async (name) => {
   return sample;
 } };
 """
+
+
+async def core_and_library(page, label: str) -> None:
+    """The core page carries fifteen desks and no library desk; the Library link and a link to a library desk both
+    land on library.html, which carries all sixty-six and links back."""
+    n = await page.evaluate("document.querySelectorAll('section.view').length")
+    if n != len(CORE_VIEWS):
+        fail(f"{label}: the front page carries {n} desks, not {len(CORE_VIEWS)}")
+    href = await page.evaluate("(document.querySelector('.tabs a.lib-link') || {}).getAttribute ? document.querySelector('.tabs a.lib-link').getAttribute('href') : null")
+    if href != "library.html":
+        fail(f"{label}: the Library link points to {href}")
+    await page.evaluate("location.hash = 'games'")
+    try:
+        await page.wait_for_url("**/library.html#games", timeout=20000)
+        await page.wait_for_timeout(1500)
+    except Exception:
+        fail(f"{label}: a link to a library desk stayed on {page.url}")
+        return
+    res = await page.evaluate("({ n: document.querySelectorAll('section.view').length, v: (document.querySelector('.view:not([hidden])') || {}).id, back: (document.querySelector('.tabs a.core-link') || {}).href || null })")
+    if res["n"] != 66 or res["v"] != "view-games":
+        fail(f"{label}: the library opened {res}")
+    if not res["back"] or not res["back"].endswith("/"):
+        fail(f"{label}: the library's link back to the core page is {res['back']}")
+    await page.go_back()
+    await page.wait_for_timeout(800)
 
 
 async def ask_flow(page, label: str) -> None:
