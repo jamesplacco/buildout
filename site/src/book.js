@@ -54,6 +54,63 @@
     const e = ok.pop();
     return e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null;
   }
+  // v0.44: how sure is the size. The drawdown cap binds and comes from one model; this shows the same number under
+  // other defensible models (sensitivity.py), what the walk-forward did against the cap (track.window_drawdowns),
+  // and the size with one setting changed at a time. It never changes the call.
+  function renderSensitivity(B) {
+    const sec = $("#bk-sens-s"), S = B && B.sensitivity && !B.sensitivity.failed && B.sensitivity.models && Array.isArray(B.sensitivity.models.rows) && Array.isArray(B.sensitivity.settings) ? B.sensitivity : null;
+    if (!sec) return;
+    sec.hidden = !S;
+    if (!S) return;
+    const M = S.models, by = Object.fromEntries(M.rows.map((r) => [r.key, r])), cap = M.cap, eng = by.gbm;
+    const sg = (v) => (Math.abs(v) < 0.005 ? "within 0.01x" : (v > 0 ? "+" : MINUS) + fx(Math.abs(v), 2) + "x");
+    const U = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.universe && Array.isArray(SNAP38.universe.rows) ? SNAP38.universe.rows.filter((r) => r.cap_check && r.cap_check.call && r.cap_check.call.windows) : [];
+    const pit = U.find((r) => r.key === "pit"), cc = pit ? pit.cap_check.call : null;
+    const shape = M.rows.filter((r) => r.kind === "shape" && r.key !== "gbm"), low = shape.reduce((a, r) => (r.size < a.size ? r : a), shape[0]);
+    const same = S.asof === B.asof;
+    $("#bk-sens-p").textContent = `The size is ${xx(B.size)} because the drawdown cap binds, and that number comes from one model: constant volatility, normal shocks, an assumed drift. It is solved to four decimals, which is precision about the arithmetic. Below: the same number under other models, ${same ? `on the same book and date (${isoNice(S.asof)})` : `as last computed, on the book of ${isoNice(S.asof)}, when the size was ${xx(S.size)}`}; what the cap did when the rule was walked forward; and the size with one setting changed at a time. None of it changes the call.${S.mismatch ? ` Note: ${S.mismatch}.` : ""}`;
+    rsKpi($("#bk-sens-tiles"), [
+      [xx(eng.size), same ? "The engine's size" : `The engine's size on ${isoNice(S.asof)}`, `a bad year at this size: ${pctPlain(eng.dd_at_size, 0)} down, the cap`],
+      [`${xx(M.shape_range[0])} to ${xx(M.shape_range[1])}`, "Across models of the shocks", `lowest: ${low.label.toLowerCase()}`],
+      [`${xx(M.seeds.min)} to ${xx(M.seeds.max)}`, "From the random draws alone", `${M.seeds.n} seeds of the engine's own model; one standard deviation ${fx(M.seeds.sd, 3)}x`],
+      cc ? [`${cc.breaches} of ${cc.windows}`, "One-year windows past the cap", `the call on the nine names, walked forward from ${cc.first.slice(0, 4)}; worst year ${pctPlain(cc.worst, 1)} down`] : [xx(M.all_range[0]), "At the worst year's volatility", "the lowest size in the table"]]);
+    fillTable($("#bk-sens-m"), ["Model and what changes", "A bad year at 1.00x", `At ${xx(S.size)}`, `Size inside ${pctPlain(cap, 0)}`, "Against the engine"],
+      M.rows.map((r) => [r.label, pctPlain(r.dd_full, 0), pctPlain(r.dd_at_size, 1), xx(r.size), r.key === "gbm" ? "" : sg(r.d_size)]), 1);
+    document.querySelectorAll("#bk-sens-m tbody tr").forEach((tr, i) => { const sm = document.createElement("small"); sm.textContent = M.rows[i].what; tr.firstElementChild.append(sm); });
+    const cl = by.clustered, st = by.student_t, bl = by.blocks, np = by.no_premium, vn = by.vol_now, vw = by.vol_worst;
+    const small = (r) => Math.abs(r.d_size) < 0.015;
+    $("#bk-sens-mn").textContent = `A bad year is the 95th percentile of the worst peak-to-trough fall over one year, ${M.paths.toLocaleString()} simulated years each. `
+      + (st && bl && small(st) && small(bl) ? `The shape of the tail hardly matters over a year: fat-tailed shocks, and the book's own days redrawn in runs, each leave the size within ${fx(Math.max(Math.abs(st.d_size), Math.abs(bl.d_size), 0.01), 2)}x of the engine's. ` : `Fat-tailed shocks give ${xx(st.size)} and the book's own days in runs ${xx(bl.size)}, against ${xx(eng.size)}. `)
+      + (cl ? `What matters is volatility that moves. When each day's variance follows the last day's move, a bad year at the call's size is ${pctPlain(cl.dd_at_size, 0)} down, not ${pctPlain(cap, 0)}, and the cap allows ${xx(cl.size)}. ` : "")
+      + (np ? `The assumed equity premium is worth ${fx(Math.abs(np.d_size), 2)}x of size. ` : "")
+      + (vn ? `At the last weeks' volatility the cap allows ${xx(vn.size)}` : "") + (vw ? `${vn ? "; at" : "At"} the book's worst year's, ${xx(vw.size)}. ` : vn ? ". " : "")
+      + `The random draws alone move the engine's own answer between ${xx(M.seeds.min)} and ${xx(M.seeds.max)}, so the third and fourth decimals of the size carry no information.`;
+    const cp = $("#bk-sens-cp");
+    if (cp) cp.hidden = !U.length;
+    if (U.length) {
+      const short = (l) => l.replace(/ \(.*$/, "").replace(/^The /, "the ").replace(/^Candidates /, "candidates ").replace(/^Semiconductors$/, "semiconductors").replace(/^Robotics and AI$/, "robotics and AI");
+      const sh = (c) => (c && c.windows ? pctPlain(c.share, 0) : "n/a");
+      fillTable($("#bk-sens-c"), ["Universe", "One-year windows", "The call: fell more than " + pctPlain(cap, 0), "Share", "Separate stretches", "Worst window", "Holding at full size: share", "Full size with the short: share"],
+        U.map((r) => { const c = r.cap_check.call; return [r.label, String(c.windows), String(c.breaches), pctPlain(c.share, 0), String(c.episodes), pctPlain(c.worst, 1), sh(r.cap_check.hold), sh(r.cap_check.call_short)]; }), 1);
+      const over = U.filter((r) => r.cap_check.call.share > 0.05 + 1e-9), any = U.filter((r) => r.cap_check.call.breaches > 0), yrs = cc ? cc.years : U[0].cap_check.call.years;
+      const far = U.reduce((a, r) => (r.cap_check.call.worst > a.cap_check.call.worst ? r : a), U[0]);
+      const hs = U.map((r) => r.cap_check.hold).filter((c) => c && c.windows).map((c) => c.share), ss = U.filter((r) => r.cap_check.call_short && r.cap_check.call_short.share > 0.05 + 1e-9);
+      $("#bk-sens-cn").textContent = `Each window is the year after a month-end, with the rule re-sizing every month inside it. If the model were right, about one window in twenty would fall further than the cap. The windows overlap: this is about ${fx(yrs, 0)} years of history, so one bad stretch fills many windows and the count of stretches is the honest sample. `
+        + (cc ? `On the nine names the call's worst year was ${pctPlain(cc.worst, 1)} down, ${cc.breaches ? "past" : "inside"} the cap${cc.breaches ? "" : ` by ${fx((cap - cc.worst) * 100, 1)} points`}. ` : "")
+        + (any.length ? `It went past the cap on ${any.length} of ${U.length} universes (${any.map((r) => `${short(r.label)}: ${r.cap_check.call.breaches} windows in ${r.cap_check.call.episodes} stretch${r.cap_check.call.episodes === 1 ? "" : "es"}, worst ${pctPlain(r.cap_check.call.worst, 1)}`).join("; ")})${over.length ? `, and more often than one window in twenty on ${over.length}` : ", on none more often than one window in twenty"}. ` : `It went past the cap on none of the ${U.length} universes. `)
+        + `The furthest it fell in any year was ${pctPlain(far.cap_check.call.worst, 1)} (${short(far.label)}). `
+        + (hs.length ? `Holding at full size went past the cap in ${pctPlain(Math.min(...hs), 0)} to ${pctPlain(Math.max(...hs), 0)} of windows. ` : "")
+        + (ss.length ? `Full size with the Nasdaq-100 short went past the cap in more than one window in twenty on ${ss.map((r) => `${short(r.label)} (${pctPlain(r.cap_check.call_short.share, 0)})`).join(" and ")}, so the short stood in for cutting size only on the names and on the index itself. ` : "")
+        + `This is not the test the table above runs: there the size is held for the whole year, here the rule changes it every month. About ${fx(yrs, 0)} years with a few bad stretches cannot confirm a 1-in-20 number; they can only fail to contradict it. The cap is a modelled percentile, not a stop.`;
+    }
+    const rows = [], others = ["es_budget", "vol_target", "drawdown_cap"].filter((k) => k !== S.binding).map((k) => S.sizes[k]).filter((v) => isFinite(v));
+    const nextLimit = others.length ? Math.min(...others) : S.size;
+    let g = "";
+    S.settings.forEach((r) => { rows.push([r.group === g ? "" : r.group, r.label + (r.now ? " (now)" : ""), xx(r.size), B30_LIMIT_LC[r.binding] || r.binding]); g = r.group; });
+    fillTable($("#bk-sens-set"), ["Setting", "Value", "Size", "What binds"], rows, 2);
+    $("#bk-sens-setn").textContent = `One setting changes in each row and the rest stay as they are. Across every row the size runs from ${xx(S.settings_range[0])} to ${xx(S.settings_range[1])}. Alone, the loss budget would allow ${xx(S.sizes.es_budget)}, the volatility target ${xx(S.sizes.vol_target)} and the drawdown cap ${xx(S.sizes.drawdown_cap)}, so loosening the limit that binds gains at most ${fx(Math.max(0, nextLimit - S.size), 2)}x before the next one takes over.`;
+  }
+
   function renderBookRisk() {
     const B = B30(), tiles = $("#bk-tiles");
     if (!tiles) return;
@@ -88,6 +145,7 @@
       fillTable($("#bk-front"), ["Names (long), share of NAV", "Nasdaq-100 short", "Total gross", "Volatility", "Avg loss, worst 5% of months", "One-year drawdown, 95th pct", "Market beta left", "Average year since " + B.from.slice(0, 4), "2022", "Worst fall", "Cost of the short, a year"],
         (B.frontier || []).map((r) => r.meets ? [xx(r.gross), r.short ? pctPlain(r.short, 0) + " of NAV" : "none", xx(r.gross + (r.short || 0)), pctPlain(r.vol, 0), pctPlain(r.es95, 1), pctPlain(r.drawdown95, 0), fx(r.market_beta_left, 2), b30S(r.cagr, 0), b30S(r.y2022, 0), pctPlain(r.maxdd, 0), pctPlain(r.hedge_drag_ann, 1)]
           : [xx(r.gross), r.over_limit ? "over a limit at this step; recomputed on the next daily run" : "no short meets every limit", "", "", "", "", "", "", "", "", ""]), 2);
+      guard("How sure is the size", () => renderSensitivity(B), $("#bk-sens-tiles"));
       $("#bk-front-read").textContent = `How to read it: the history columns are what these nine names did, and they are in the book because they did well, so read the differences between rows rather than the levels. The rows run from ${pctPlain(lo.gross, 0)} of NAV with ${lo.short ? "a small short" : "no short"} to full size with a short of ${pctPlain(hi.short, 0)} at about the same volatility. If you believe these nine names will keep beating the index, the lower rows keep that bet and shed the market; if you do not, the upper rows are simpler and cheaper. That belief is the PM's, not the engine's.${lo.cash_in_record ? " The history columns include what the unused share of NAV earned in cash, so a row is comparable with the walk-forward call (the two-year Treasury yield stands in for a cash rate: it overstates cash when the curve is steep and understates it when the curve is inverted)." : ""}`;
     }
     // v0.32: the volatility-managed rule, tested on three records

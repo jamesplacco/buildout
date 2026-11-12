@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.43</span>
+      Buildout <span class="ver">v0.44</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#desk" data-group="today">Today</a>
@@ -2458,7 +2458,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 69 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 70 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2705,6 +2705,13 @@
     <div class="section-head"><p class="eyebrow">The menu</p><h2 id="bk-front-t">Every size-and-hedge choice that meets the limits</h2><p class="prose" id="bk-front-p"></p></div>
     <div class="tablewrap"><table class="rs-table" id="bk-front"></table></div>
     <p class="prose" id="bk-front-read"></p>
+  </section>
+  <section class="section" aria-labelledby="bk-sens-t" id="bk-sens-s" hidden>
+    <div class="section-head"><p class="eyebrow">How sure is the size</p><h2 id="bk-sens-t">The size under other models, and whether the cap held</h2><p class="prose" id="bk-sens-p"></p></div>
+    <div class="at-tiles" id="bk-sens-tiles"></div>
+    <div class="panel"><span class="panel-title">The number that binds, computed seven ways</span><div class="tablewrap"><table class="rs-table" id="bk-sens-m"></table></div><p class="note" id="bk-sens-mn"></p></div>
+    <div class="panel" id="bk-sens-cp" hidden><span class="panel-title">Did the cap hold: one-year windows of the walk-forward</span><div class="tablewrap"><table class="rs-table" id="bk-sens-c"></table></div><p class="note" id="bk-sens-cn"></p></div>
+    <details class="more"><summary>One setting changed at a time</summary><div class="tablewrap"><table class="rs-table" id="bk-sens-set"></table></div><p class="note" id="bk-sens-setn"></p></details>
   </section>
   <section class="section" aria-labelledby="bk-rule-t">
     <div class="section-head"><p class="eyebrow">A rule tried</p><h2 id="bk-rule-t">Sizing by volatility: supported over two crashes, a reading beside the limits</h2><p class="prose" id="bk-rule-p"></p></div>

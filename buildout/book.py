@@ -77,8 +77,10 @@ LIMITATIONS = [
     "when the curve was inverted (2023 and 2024); a bill rate is the right series and is not in use yet.",
     "The drawdown cap is read from a constant-volatility simulation (geometric Brownian motion, 4,000 paths) at an "
     "assumed drift. It has no volatility clustering, no jumps and no change in correlation, so the 25% is a modelled "
-    "95th percentile under those assumptions and not a stop: a real drawdown at that size can be deeper. The size "
-    "it sets has not been compared with a block bootstrap or a stressed-volatility model.",
+    "95th percentile under those assumptions and not a stop: a real drawdown at that size can be deeper. From "
+    "v0.44 the page shows the size under fat tails, the book's own days in runs, volatility that moves, no equity "
+    "premium and higher volatility (sensitivity.py), and whether the cap held in the walk-forward. The call still "
+    "uses the constant-volatility number.",
     "The menu's rows are at or inside each limit exactly, in 5% steps of the short. The exact minimum short is "
     "reported beside the logged row; the logged row is the decision.",
     "Hedge legs are measured as futures: their returns are in excess of cash. No transaction costs, no margin, no borrow.",
@@ -254,9 +256,10 @@ def kupiec(r: pd.Series, q: float = 0.01, model: str = "normal") -> dict:
 
 
 # ---------------------------------------------------------------- factor model
-def factor_model(R: pd.DataFrame, F: pd.DataFrame, w: pd.Series) -> dict:
-    B = exposures.latest_betas(R, F[FACTORS], list(R.columns), halflife=BETA_HL, priors=PRIORS)
-    Fc = risk.ewma_cov(F[FACTORS].dropna(), halflife=COV_HL) * 252
+def factor_model(R: pd.DataFrame, F: pd.DataFrame, w: pd.Series, beta_hl: int = BETA_HL, cov_hl: int = COV_HL) -> dict:
+    """beta_hl and cov_hl (v0.44) are the two half-lives; the defaults are the engine's, and sensitivity.py varies them."""
+    B = exposures.latest_betas(R, F[FACTORS], list(R.columns), halflife=beta_hl, priors=PRIORS)
+    Fc = risk.ewma_cov(F[FACTORS].dropna(), halflife=cov_hl) * 252
     Bm = B[FACTORS].astype(float)
     D = np.diag(B["resid_vol_ann"].astype(float) ** 2)
     S = pd.DataFrame(Bm.to_numpy() @ Fc.to_numpy() @ Bm.to_numpy().T + D, index=R.columns, columns=R.columns)
@@ -266,7 +269,7 @@ def factor_model(R: pd.DataFrame, F: pd.DataFrame, w: pd.Series) -> dict:
     var_tot = float(x @ S.to_numpy() @ x)
     parts = {f: float(b[i] * fv[i]) for i, f in enumerate(FACTORS)}
     parts["specific"] = float(x @ D @ x)
-    sample = risk.ewma_cov(R.drop(columns=[c for c in R if R[c].count() < 2 * COV_HL]).dropna(), halflife=COV_HL) * 252
+    sample = risk.ewma_cov(R.drop(columns=[c for c in R if R[c].count() < 2 * cov_hl]).dropna(), halflife=cov_hl) * 252
     xs = w.reindex(sample.index).to_numpy()
     xs = xs / xs.sum() * w.sum()
     rc = risk.risk_contributions(w.reindex(R.columns), S / 252)

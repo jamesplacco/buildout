@@ -620,8 +620,11 @@ def main(argv: list[str] | None = None) -> None:
     if a.cmd == "book":
         from . import book as bk
         from .jsonout import write
-        o = bk.build(bk.download(a.cache), meta={"source": "mirror download"})
+        from . import sensitivity
+        prices = bk.download(a.cache)
+        o = bk.build(prices, meta={"source": "mirror download"})
         o["findings"] = bk.summary(o)
+        sensitivity.attach(o, prices)                    # v0.44: the size under other models and settings; never blocks the call
         path = write(o, a.out, "book.json")
         for f in o["findings"]:
             print(" ", f)

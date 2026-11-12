@@ -41,7 +41,11 @@
   }
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const inLibrary = (v) => CORE && ALL_VIEWS.includes(v) && !VIEWS.includes(v);
-  const toLibrary = (v) => { location.href = LIBRARY_HREF + "#" + v; };
+  // v0.44: one navigation per link. A link is resolved twice on its way to the screen (once to pick the view, once to
+  // show it), and a second assignment to location.href cancels the first request and starts the library again.
+  let leavingFor = null;
+  const toLibrary = (v) => { if (leavingFor === v) return; leavingFor = v; location.href = LIBRARY_HREF + "#" + v; };
+  window.addEventListener("pageshow", () => { leavingFor = null; });          // back from the library: its links work again
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
   function goGroup(g) {
@@ -52,7 +56,7 @@
   // v0.37: a desk opens with its first screen; the rest of its sections fold under one line, each still reachable by link.
   // FOLD lists the sections (by aria-labelledby) that stay visible; everything after the first kept section folds.
   const FOLD = {
-    book: ["bk-size-t", "bk-front-t", "bk-hedge-t"],
+    book: ["bk-size-t", "bk-front-t", "bk-sens-t", "bk-hedge-t"],
     track: ["tr-three-t", "tr-wf-t", "tr-surv-t", "tr-lev-t"],
     decision: ["dx-inf-title", "dx-dec-title", "dx-ov-title"],
     ooda: ["oo-obs-title", "oo-ori-title", "oo-dec-title", "oo-act-title"],
@@ -374,7 +378,12 @@
       else if (dj && !decOk(dj)) LIVE.problems.push("decision.json did not match the expected shape; the page keeps the decision in its snapshot");
       PK.decision = { showing: newer ? "published" : "embedded", same: !!(dj && dj.content_sha256 === DX19.content_sha256), id: DX19.content_sha256 || null, through: DX19.end, computed: DX19.computed_utc || null, fetch: LIVE.fetch["data/decision.json"] };
     }
-    if (bkj && bookOk(bkj) && typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && bkj.asof > SNAP30.book.asof) { SNAP30.book = bkj; LIVE.book = bkj; changed = true; }
+    if (bkj && bookOk(bkj) && typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && bkj.asof > SNAP30.book.asof) {
+      // v0.44: a published book from a run that predates the sensitivity block keeps the embedded one, which says
+      // which book and date it was computed on; the next daily run writes its own.
+      if (!(bkj.sensitivity && bkj.sensitivity.models) && SNAP30.book.sensitivity) bkj.sensitivity = SNAP30.book.sensitivity;
+      SNAP30.book = bkj; LIVE.book = bkj; changed = true;
+    }
     else if (bkj && !bookOk(bkj)) LIVE.problems.push("book.json did not match the expected shape; the page keeps the call in its snapshot");
     const T = typeof SNAP38 !== "undefined" ? SNAP38 : null;
     if (cl && T && cl.verify && cl.verify.ok && Array.isArray(cl.entries) && cl.entries.length > ((T.ledger && T.ledger.entries) || []).length) {

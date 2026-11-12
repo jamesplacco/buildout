@@ -30,6 +30,13 @@ day, and marked to market every day after (`site/data/live.json`).
   the Track record desk, v0.42.6). (Restated in v0.42.5 after an outside audit: the daily
   trades that hold the weights are now charged. Before and after are on the Track record desk. The names come from
   a candidate list chosen in 2026, so this is a walk-forward rule on a retrospectively selected universe.)
+- How sure is the size (v0.44, the Book risk desk). The size is 0.53x because a modelled one-year drawdown cap of
+  25% binds, and that number came from one model. With fat-tailed shocks, or the book's own days redrawn in runs,
+  the cap allows the same 0.53x. With volatility that moves, a bad year at 0.53x is 29% down and the cap allows
+  0.45x; with no assumed equity premium, 0.50x; at the worst year's volatility, 0.36x. The random draws alone move
+  the answer by about 0.01x. Walked forward, the call's worst one-year window on the nine names was 23.3%, inside
+  the cap in all 93 windows; on the Nasdaq-100 it was 25.3% (11 windows, one stretch) and on the first AI theme fund
+  27.1% (4 windows, one stretch). Nine years cannot confirm a 1-in-20 number. The call is unchanged.
 - A deep RL sizer trained inside a learned market model beats holding, the trend rule and a tabular agent on the
   S&P 500 since 1940 (Sharpe 0.88 against 0.64), and loses on this book (0.49 against 0.77). Both are published.
 - Every number that turned out wrong is in the failure log on the Memos desk, with its cost and fix.
@@ -50,6 +57,8 @@ config.toml --out out` runs on real data; see "Local use" below.
 
 - One book, one decision a day, long only plus index shorts and a VIX sleeve. It does not pick stocks.
 - Backtests start in 2018; the live record starts Nov 4, 2026 and is days old.
+- The drawdown cap is a modelled 95th percentile, not a stop. Under a model where volatility moves, the same size
+  has a bad year of 29%, not 25% (`buildout/sensitivity.py`).
 - The Databento daily close is the last trade before midnight UTC, not the official close (stated in every report).
 - The trader can act for a person under a signed mandate (docs/TRADING.md). Paper is the default. A live broker
   trades only on per-ticket approval until the paper bot has held a position for 60 trading days and 5 live tickets
@@ -366,6 +375,7 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `nn.py` | Multi-layer perceptrons and deep ensembles in numpy: gradient-checked backpropagation, dropout, weight decay, Adam, early stopping on the newest data, mse, pinball and logistic losses, purged walk-forward |
 | | `infer.py` | Hidden Markov models (one asset or several, full covariance) fit by EM with the forward-backward pass as a scan of matrix products and every start batched; Bayesian online changepoints; Kalman regression; stacking; mixture risk; exponential weights |
 | | `decide.py` | The decision engine: walked-forward regimes, changepoints and geometric analogs, forecasts, dynamic model averaging, utility-optimal exposure in a risk budget, the evidence gate, the hedge selector, conservative RL, drivers, flip points and the value of information |
+| | `sensitivity.py` | How sure is the size (v0.44): the one-year drawdown quantile and the size inside the cap under fat tails, a stationary bootstrap of the book's own days, moving volatility, no premium and other volatility levels; the size with one setting changed at a time; the spread from the random draws. `track.window_drawdowns` counts what the walk-forward did against the cap. Never changes the call |
 | | `geometry.py` | The shape of the market: covariance matrices on a curved space (affine-invariant analogs, an MDS era map, Frechet means), random matrix theory, persistent homology, optimal transport, the Levy area, DFA and volatility drag, every claim walked forward with a placebo and a false-discovery correction |
 | | `parameters.py` | Theta: the inventory of every matrix, vector and scalar the engine learns, read from the engines' outputs (shape, count, optimiser, objective, data, refit schedule, desks fed); the constants set by hand with their reasons |
 | | `portfolio.py` | The portfolio engine: three-asset regimes, utility-optimal mixes in a risk budget, eight policies walked forward, the Hedge learner, a regime-switching bootstrap and stress replays |
@@ -416,6 +426,10 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 
 ## What the tests prove
 
+- v0.44: the sensitivity block sizes the same book as the call (the engine's row is the engine's own function);
+  this module's simulator with normal shocks agrees with the engine to sampling error; a looser limit never shrinks
+  the book; a failure in the block is recorded and never touches the call; one fall fills a year of overlapping
+  windows and is counted as one stretch; the page's readings are asserted against the published numbers.
 - Betas planted in the synthetic market are recovered; a 90-day IPO is shrunk toward its prior.
 - The regime detector tracks the planted regimes; the gated hedge beats a static hedge; bonds rally on
   worst days only in the hedging regime. The FRED monitor reads the same planted regimes.

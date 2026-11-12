@@ -3,6 +3,29 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.44: how sure is the size. Two outside audits asked the same thing: the size is the leverage at which one
+model's 95th-percentile drawdown reaches 25%, solved to four decimals; what does it become under other
+specifications, and did the cap hold where it was used? The call is unchanged. This is how far to trust it.
+
+- **Other models** (`buildout/sensitivity.py`, the Book risk desk). Same book, same date, 4,000 simulated years
+  each. Fat-tailed shocks: 0.53x. The book's own days redrawn in runs of about a month: 0.53x. Volatility that
+  moves (each day's variance follows the last day's move): a bad year at the call's size is 29% down, and the cap
+  allows 0.45x. No assumed equity premium: 0.50x. The last weeks' volatility: 0.44x. The worst year's: 0.36x.
+- **The draws.** Twenty seeds of the engine's own model give 0.52x to 0.54x. The third and fourth decimals of the
+  published size carry no information.
+- **One setting at a time.** Each limit, the premium, the tail method and the factor model's two half-lives: the
+  size runs from 0.42x to 0.64x. The tail method does not move it, because the drawdown cap binds.
+- **What happened** (`track.window_drawdowns`, on the six universes of v0.42.6). In 93 one-year windows of the
+  walk-forward the call never fell further than the cap on the nine names (worst 23.3%). It did on the Nasdaq-100
+  (11 windows in one stretch, worst 25.3%) and on the first AI theme fund (4 windows in one stretch, worst 27.1%).
+  Holding at full size went past the cap in 24% to 52% of windows. Full size with the index short went past it in
+  48% of windows on semiconductors. About nine years cannot confirm a 1-in-20 number.
+- **Not decided.** Whether to size to the most cautious model of the shocks (0.45x) is the owner's decision. The
+  engine's rule is unchanged.
+- **Fix.** A link from the core page to a library desk started the library twice, the second request cancelling
+  the first (the stress run caught it). It now navigates once.
+- `tests/test_v44.py`; the daily `book` command now writes the block into `site/data/book.json`.
+
 Version 0.43: the core page. "Reduce what is unnecessary." The site's front page now carries fifteen desks in four
 groups (Call, Record, Evidence, Method) and the library carries all sixty-six; both are built from the same sources.
 

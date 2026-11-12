@@ -691,6 +691,29 @@ def frozen_candidates(prices: dict[str, pd.DataFrame], freeze: str = FREEZE, nee
     return [t for t in CANDIDATES if t in prices and int((bk._frame(prices[t]).index <= cut).sum()) >= need]
 
 
+def window_drawdowns(net: pd.Series, cap: float = bk.MAX_DD, days: int = 252) -> dict:
+    """Did the cap hold? The size is set so that the modelled 95th percentile of the worst fall over a year is `cap`.
+    If the model is right, about one year in twenty falls further. This counts what happened: for a window of `days`
+    trading days starting at each month-end, the worst peak-to-trough fall inside the window (the peak is the
+    window's own), and the share of windows that fell further than the cap. The windows overlap, so the count of
+    independent years is the span in years, not the number of windows; one bad stretch can fill many windows."""
+    n = net.dropna()
+    starts = [t for t in month_ends(n.index) if (n.index > t).sum() >= days]
+    dd = []
+    for t in starts:
+        w = n[n.index > t].iloc[:days]
+        lv = (1 + w).cumprod()
+        dd.append(float(1 - (lv / lv.cummax().clip(lower=1.0)).min()))       # a fall from the starting value counts too
+    if not dd:
+        return {"windows": 0}
+    a = np.array(dd)
+    over = a > cap + 1e-12
+    runs = int(((over[1:] & ~over[:-1]).sum()) + (1 if over[0] else 0))     # separate stretches of breaching windows
+    return {"windows": int(len(a)), "breaches": int(over.sum()), "share": float(over.mean()), "episodes": runs, "worst": float(a.max()),
+            "p95": float(np.quantile(a, 0.95)), "median": float(np.median(a)), "years": float(len(n) / 252), "cap": cap,
+            "first": str(starts[0].date()), "last": str(starts[-1].date())}
+
+
 def vs_index(r: pd.Series, qx: pd.Series, cash: pd.Series) -> dict:
     """What a Nasdaq-100 short leaves: the universe's excess return regressed on the index's, over the record's own
     span. beta is the short that removes the index; alpha is the yearly return left after it. A short of the index
@@ -750,6 +773,7 @@ def _universe_row(key: str, label: str, what: str, r: pd.Series, tn, members: di
            "fallbacks": int((~lr["ok"].astype(bool)).sum()) if lr is not None else None, "months": int(len(lr)) if lr is not None else None,
            "policies": {k: {**{f: v for f, v in stats(W["policies"][k][1], W["cash"], W["policies"][k][2]["turnover_yr"]).items() if f in ("from", "to", "cagr", "vol", "sharpe", "maxdd", "y2022", "turnover_yr")},
                             "avg_gross": W["policies"][k][2]["avg_gross"], "avg_short": W["policies"][k][2]["avg_short"]} for k in ("hold", "call", "call_short")}}
+    row["cap_check"] = {k: window_drawdowns(W["policies"][k][1]) for k in ("hold", "call", "call_short")}      # v0.44: did the 25% hold
     h, c = row["policies"]["hold"], row["policies"]["call"]
     row["rule_effect"] = {"sharpe": c["sharpe"] - h["sharpe"], "maxdd": c["maxdd"] - h["maxdd"], "cagr": c["cagr"] - h["cagr"],
                           "sharpe_short": row["policies"]["call_short"]["sharpe"] - h["sharpe"], "maxdd_short": row["policies"]["call_short"]["maxdd"] - h["maxdd"]}

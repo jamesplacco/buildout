@@ -46,10 +46,12 @@ def book_run(argv: list[str]) -> dict:
     if arg("--book-json"):
         return json.loads(arg("--book-json").read_text())
     lr = long_record(argv)
+    from buildout import sensitivity                   # v0.44: the size under other models and settings, beside the book it describes
     if arg("--mirror-pickle"):
         prices = pickle.load(open(arg("--mirror-pickle"), "rb"))["prices"]
-        return book.build(prices, meta={"source": "mirror download (pickled)"}, long_record=lr)
-    return book.build(book.download(arg("--book-cache") or ROOT / ".cache" / "book"), meta={"source": "mirror download"}, long_record=lr)
+        return sensitivity.attach(book.build(prices, meta={"source": "mirror download (pickled)"}, long_record=lr), prices)
+    prices = book.download(arg("--book-cache") or ROOT / ".cache" / "book")
+    return sensitivity.attach(book.build(prices, meta={"source": "mirror download"}, long_record=lr), prices)
 
 
 # ---------------------------------------------------------------- the inventory: every edge tested, one ledger
