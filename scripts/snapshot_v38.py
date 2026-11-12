@@ -141,6 +141,8 @@ def main(argv: list[str]) -> None:
         last = max(R["nets"])
         R["nets"] = {last: R["nets"][last]}
         T["deeprl"] = R
+    if arg("--universe-json"):                  # v0.42.6: the same rule on stricter lists and on baskets chosen without hindsight (track.universe_checks)
+        T["universe"] = json.loads(Path(arg("--universe-json")).read_text())
     if arg("--prior-json"):                     # v0.42.5: a restatement is published beside the record it changed
         P0 = json.loads(Path(arg("--prior-json")).read_text())
         pol = {}

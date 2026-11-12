@@ -57,19 +57,20 @@ GH = "https://raw.githubusercontent.com/datasets/{}"
 
 
 # ---------------------------------------------------------------- the universe
-def dollar_volume(prices: dict[str, pd.DataFrame]) -> pd.DataFrame:
+def dollar_volume(prices: dict[str, pd.DataFrame], candidates: list[str] | None = None) -> pd.DataFrame:
     out = {}
-    for t in CANDIDATES:
+    for t in (candidates or CANDIDATES):
         if t in prices:
             f = bk._frame(prices[t])
             out[t] = f["close"] * f["volume"]
     return pd.DataFrame(out)
 
 
-def pit_members(prices: dict[str, pd.DataFrame], years: list[int]) -> dict[int, list[str]]:
+def pit_members(prices: dict[str, pd.DataFrame], years: list[int], candidates: list[str] | None = None) -> dict[int, list[str]]:
     """Each January, the N_NAMES candidates with the largest average dollar volume over the trailing 252 trading days,
-    among those with that much history at the decision date. Uses only data before the year starts."""
-    dv = dollar_volume(prices)
+    among those with that much history at the decision date. Uses only data before the year starts. `candidates`
+    (v0.42.6) swaps the list ranked, for the universe checks; the default is CANDIDATES."""
+    dv = dollar_volume(prices, candidates)
     out = {}
     for y in years:
         hist = dv.loc[: pd.Timestamp(f"{y}-01-01") - pd.Timedelta(days=1)]
@@ -91,14 +92,15 @@ def rebalance_turnover(R: pd.DataFrame, W: pd.DataFrame) -> pd.Series:
     return (W - drift.shift(1)).abs().sum(axis=1).where(np.arange(len(W)) > 0, 0.0).rename("turnover")
 
 
-def pit_book(prices: dict[str, pd.DataFrame], cal: pd.DatetimeIndex) -> tuple[pd.Series, dict, pd.Series]:
+def pit_book(prices: dict[str, pd.DataFrame], cal: pd.DatetimeIndex, candidates: list[str] | None = None) -> tuple[pd.Series, dict, pd.Series]:
     """Equal-weight daily returns of the point-in-time members: the membership is reset each January and the weights
     are restored to equal every day. Returns the book's return, the members, and the turnover that policy needs each
     day (the daily trades back to equal weight and each January's change of names), so the record pays for the
     rebalancing it earns from (v0.42.5; before, only the January change was counted)."""
-    R = pd.DataFrame({t: bk.total_returns(prices[t]) for t in CANDIDATES if t in prices}).reindex(cal)
+    cands = candidates or CANDIDATES
+    R = pd.DataFrame({t: bk.total_returns(prices[t]) for t in cands if t in prices}).reindex(cal)
     years = sorted({d.year for d in cal})
-    mem = pit_members(prices, years)
+    mem = pit_members(prices, years, cands)
     w = pd.DataFrame(0.0, index=cal, columns=R.columns)
     for y in years:
         m = [t for t in mem[y] if t in R.columns]
@@ -673,6 +675,126 @@ def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
             "series": [[str(d.date()), round(float(a), 6), round(float(b), 6), round(float(c), 6), round(float(s_), 4)]
                        for d, a, b, c, s_ in zip(x.index, nav(unh), nav(hed), nav(x), size)],
             "stats": stats(unh, cash) if len(unh) >= 20 else None}
+
+
+# ---------------------------------------------------------------- the universe checks (v0.42.6)
+FREEZE = "2017-12-29"            # the last session before the record's first decision year
+BASKETS = {"qqq": ("The Nasdaq-100 (QQQ)", "the index the book is hedged with: every large Nasdaq name, winners and losers, at index weights"),
+           "soxx": ("Semiconductors (SOXX)", "a semiconductor index fund listed in 2001: the hardware side of the buildout as an index committee defined it"),
+           "robo": ("Robotics and AI (ROBO)", "the first robotics and AI theme fund, listed in 2013: what an AI theme could be bought as in 2017")}
+
+
+def frozen_candidates(prices: dict[str, pd.DataFrame], freeze: str = FREEZE, need: int = 250) -> list[str]:
+    """The candidates that already had `need` trading days of prices at `freeze`: the list as it could have been
+    written then. Names listed later (Palantir in 2020, SpaceX in 2026) can never enter."""
+    cut = pd.Timestamp(freeze)
+    return [t for t in CANDIDATES if t in prices and int((bk._frame(prices[t]).index <= cut).sum()) >= need]
+
+
+def vs_index(r: pd.Series, qx: pd.Series, cash: pd.Series) -> dict:
+    """What a Nasdaq-100 short leaves: the universe's excess return regressed on the index's, over the record's own
+    span. beta is the short that removes the index; alpha is the yearly return left after it. A short of the index
+    keeps a return only where alpha is positive. The t statistic treats days as independent."""
+    x = (r - cash.reindex(r.index).fillna(0.0)).dropna()
+    x = x[x.index > month_ends(x.index)[0]]
+    q = qx.reindex(x.index).fillna(0.0)
+    beta = float(np.cov(x, q)[0, 1] / q.var())
+    res = x - beta * q
+    sd = float(res.std())
+    return {"beta": beta, "alpha_ann": float(res.mean() * 252), "alpha_t": float(res.mean() / (sd / math.sqrt(len(res)))) if sd > 1e-9 else None,
+            "resid_vol": sd * math.sqrt(252), "r2": float(1 - res.var() / x.var()) if x.var() > 0 else None}
+
+
+def universe_returns(prices: dict[str, pd.DataFrame], ust: pd.DataFrame) -> dict:
+    """Each universe's daily return, its turnover and its members: the inputs universe_checks sizes and charges."""
+    P = bk.panel(prices, ust)
+    cal = P["R"].index
+    fz = frozen_candidates(prices)
+    c = P["cash"]
+    first = None
+    out = {"P": P, "frozen": fz, "rows": {}}
+    r, m, tn = pit_book(prices, cal)
+    out["rows"]["pit"] = (r, tn, m)
+    rf, mf, tf = pit_book(prices, cal, fz)
+    out["rows"]["frozen"] = (rf, tf, mf)
+    first = month_ends(rf.dropna().index)[0]                    # the walk-forward's own span: from the day after its first decision
+    hold = lambda r_, tn_: stats((r_ - tn_.reindex(r_.index).fillna(0.0) * COST["stock_bp"] / 1e4).loc[lambda x: x.index > first], c, None)
+    hb = hold(rf, tf)
+    loo = []
+    for t in fz:
+        r1, _, t1 = pit_book(prices, cal, [x for x in fz if x != t])
+        h1 = hold(r1, t1)
+        loo.append({"without": t.upper().replace("GOOG", "GOOGL"), "cagr": h1["cagr"], "sharpe": h1["sharpe"], "maxdd": h1["maxdd"],
+                    "d_cagr": h1["cagr"] - hb["cagr"], "d_sharpe": h1["sharpe"] - hb["sharpe"]})
+    loo.sort(key=lambda x: x["d_cagr"])
+    out["leave_one_out"], out["hold_frozen"] = loo, {k: hb[k] for k in ("cagr", "sharpe", "maxdd", "from", "to")}
+    top = loo[0]["without"].lower().replace("googl", "goog")
+    out["top"] = top
+    out["rows"]["ex_top"] = pit_book(prices, cal, [x for x in fz if x != top])
+    out["rows"]["ex_top"] = (out["rows"]["ex_top"][0], out["rows"]["ex_top"][2], out["rows"]["ex_top"][1])
+    years = sorted({d.year for d in cal})
+    for f in BASKETS:
+        if f in prices:
+            out["rows"][f] = (bk.total_returns(prices[f]).reindex(cal), pd.Series(0.0, index=cal), {y: [f] for y in years})
+    return out
+
+
+def _universe_row(key: str, label: str, what: str, r: pd.Series, tn, members: dict, prices: dict, ust: pd.DataFrame, P: dict, rule: bool, workers: int | None) -> dict:
+    cash, bond = P["cash"], P["bond"]
+    qx = P["E"]["QQQ"] - cash
+    lr = None
+    if rule:
+        lr = live_rule_path(prices, ust, members, [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)], workers)
+    W = walk_forward(r, qx, bond, cash, tn, lr)
+    row = {"key": key, "label": label, "what": what, "rule": "live" if rule else "simple",
+           "fallbacks": int((~lr["ok"].astype(bool)).sum()) if lr is not None else None, "months": int(len(lr)) if lr is not None else None,
+           "policies": {k: {**{f: v for f, v in stats(W["policies"][k][1], W["cash"], W["policies"][k][2]["turnover_yr"]).items() if f in ("from", "to", "cagr", "vol", "sharpe", "maxdd", "y2022", "turnover_yr")},
+                            "avg_gross": W["policies"][k][2]["avg_gross"], "avg_short": W["policies"][k][2]["avg_short"]} for k in ("hold", "call", "call_short")}}
+    h, c = row["policies"]["hold"], row["policies"]["call"]
+    row["rule_effect"] = {"sharpe": c["sharpe"] - h["sharpe"], "maxdd": c["maxdd"] - h["maxdd"], "cagr": c["cagr"] - h["cagr"],
+                          "sharpe_short": row["policies"]["call_short"]["sharpe"] - h["sharpe"], "maxdd_short": row["policies"]["call_short"]["maxdd"] - h["maxdd"]}
+    return row
+
+
+def universe_checks(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, rule: bool = True, workers: int | None = None, only: list[str] | None = None) -> dict:
+    """How much of the record is owed to knowing, in 2026, which names to put on the candidate list (v0.42.6).
+
+    The walk-forward record ranks sixteen candidates each January on data to that date, but the sixteen were chosen
+    in 2026. Nothing here can add a company that failed and left the data: no source this build can reach carries
+    delisted names, so a broad historical universe is still not tested. What can be tested, with the same sizing
+    rule, the same costs and the same dates:
+
+      pit        the record as published: sixteen candidates, the nine most traded each January
+      frozen     the candidates that already had a year of prices at the end of 2017; later listings never enter
+      ex_top     the frozen list without the one name whose removal costs holding the most (found from the data)
+      baskets    funds that existed before 2018 and whose members someone else chose: the Nasdaq-100, a semiconductor
+                 index fund, the first robotics and AI theme fund. Their returns carry their own losers, so there is
+                 no selection by this engine at all; the sizing rule is the only thing under test.
+
+    And, for holding only (no rule to run): the frozen list with each name left out in turn, which shows how much
+    of the level rests on any one pick. Each row carries what the rule changed against holding the same universe."""
+    X = universe_returns(prices, ust)
+    P, fz = X["P"], X["frozen"]
+    cal = P["R"].index
+    qx = P["E"]["QQQ"] - P["cash"]
+    nm = lambda t: t.upper().replace("GOOG", "GOOGL")
+    out = {"freeze": FREEZE, "candidates": [nm(t) for t in CANDIDATES], "frozen": [nm(t) for t in fz],
+           "listed_later": [t.upper() for t in CANDIDATES if t in prices and t not in fz], "rows": [], "leave_one_out": X["leave_one_out"],
+           "hold_frozen": X["hold_frozen"], "top_name": nm(X["top"]), "cost": COST}
+    up = lambda m: {str(y): [nm(t) for t in v] for y, v in m.items() if y >= 2018}
+    text = {"pit": ("The record as published", f"{len(CANDIDATES)} candidates chosen in 2026; the nine most traded each January"),
+            "frozen": (f"Candidates frozen at the end of 2017 ({len(fz)} names)", "only names with a year of prices then; nothing listed later can enter"),
+            "ex_top": (f"The frozen list without {out['top_name']}", "the one name whose removal costs holding the most, taken out for every year"),
+            **BASKETS}
+    for key, (r, tn, m) in X["rows"].items():
+        if only is not None and key not in only:
+            continue
+        row = _universe_row(key, text[key][0], text[key][1], r, tn, m, prices, ust, P, rule, workers)
+        row["vs_index"] = vs_index(r, qx, P["cash"])
+        row.update({"basket": True} if key in BASKETS else {"members": up(m)})
+        out["rows"].append(row)
+    out["asof"] = str(cal[-1].date())
+    return out
 
 
 def synthetic_check(seed: int = 38) -> dict:

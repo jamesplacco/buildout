@@ -24,7 +24,10 @@ day, and marked to market every day after (`site/data/live.json`).
 
 - Walked forward from 2018 with the live rule itself, after costs: the call earns a Sharpe of 0.77 with a 23% worst
   drawdown; holding the nine names earns 0.88 with 52%; full size with the call's Nasdaq-100 short earns 0.93 with
-  24%. Sizing down protects; the short keeps the return. (Restated in v0.42.5 after an outside audit: the daily
+  24%. Sizing down protects, at a cost in Sharpe ratio, and that held on index baskets other people chose before
+  2018 (the Nasdaq-100, a semiconductor fund, the first AI theme fund). The 0.93 did not carry over: it is the nine
+  names beating the index by about 8% a year, which a candidate list written in 2026 knew (the universe checks on
+  the Track record desk, v0.42.6). (Restated in v0.42.5 after an outside audit: the daily
   trades that hold the weights are now charged. Before and after are on the Track record desk. The names come from
   a candidate list chosen in 2026, so this is a walk-forward rule on a retrospectively selected universe.)
 - A deep RL sizer trained inside a learned market model beats holding, the trend rule and a tabular agent on the

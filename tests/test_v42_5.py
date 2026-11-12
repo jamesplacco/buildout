@@ -466,8 +466,11 @@ def test_a_decision_package_is_named_by_its_content():
 def test_the_page_carries_the_published_decision():
     pub = json.loads((ROOT / "site" / "data" / "decision.json").read_text())
     D = _dec()
-    assert pub["content_sha256"] == D["content_sha256"] == decide.content_hash(pub), "the embedded decision is the published one"
-    assert pub["computed_utc"] and D["computed_utc"] == pub["computed_utc"] and pub["end"] == D["end"]
+    # Each copy names its own content. They are not required to be the same copy: the daily run rewrites the published
+    # one (a new computed time every day, new content when a month's data arrives), which is what the page's overlay
+    # is for. v0.42.5 asserted that the two were equal, and the first daily run after it failed the suite (v0.42.6).
+    assert pub["content_sha256"] == decide.content_hash(pub) and D["content_sha256"] == decide.content_hash(D)
+    assert pub["computed_utc"] and D["computed_utc"] and pub["computed_utc"] >= D["computed_utc"] and pub["end"] >= D["end"]
     assert pub["now"]["feasible_max"] >= pub["now"]["exposure"]
     boot = (SRC / "boot.js").read_text()
     assert 'loadJSON("data/decision.json")' in boot and "content_sha256 !== DX19.content_sha256" in boot and "dxRebuild" in boot
@@ -553,7 +556,7 @@ def test_the_published_page_is_one_document(tmp_path):
 # ---------------------------------------------------------------- house rules
 def test_house_style_and_version():
     import buildout
-    assert buildout.__version__ == "0.42.5"
+    assert buildout.__version__ >= "0.42.5"
     for p in ("buildout/sessions.py", "buildout/broker.py", "buildout/trader.py", "buildout/track.py", "buildout/sizing_rules.py", "buildout/decide.py", "scripts/build_site.py",
               "scripts/snapshot_v19_refresh.py", "tests/test_v42_5.py", "paper/README.md", "site/src/memos.js", "site/src/execdesk.js", "site/src/book.js"):
         low = (ROOT / p).read_text().lower()

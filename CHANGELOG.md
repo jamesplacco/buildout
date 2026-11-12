@@ -3,6 +3,27 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.42.6 adds the universe checks (`track.universe_checks`, the Track record desk): how much of the record is
+owed to a candidate list written in 2026. The same sizing rule, costs and dates are run on the candidates frozen at
+the end of 2017 (14 names; Palantir and SpaceX listed later and never enter), on that list without the name whose
+removal costs most (AMD), and on three funds that existed before 2018 and whose members someone else chose (QQQ, SOXX,
+ROBO). Findings, through Nov 5, 2026:
+
+- **The level is the list.** Holding the nine grew 29.7% a year; the baskets 17.3%, 24.9% and 5.2%. That gap, 5 to 24
+  points a year, is selection.
+- **The rule's claim holds off the list.** The call cut the worst fall on all six universes (QQQ 35% to 25%, SOXX 46%
+  to 20%, ROBO 44% to 31%) and gave up Sharpe ratio on all six.
+- **The short's claim does not.** Full size with the Nasdaq-100 short earned 0.93 on the nine because they beat the
+  index by 8.1% a year (t 2.2). SOXX beat it by 4.6% (t 0.8) and ROBO lagged it by 9.1%. The page said the hedge was
+  the better way to take the limits; it now says the edge was the names (failure log).
+- **No single pick carries it.** Leaving any one name out of the frozen list moves holding's growth by -0.1 to +4.1
+  points a year.
+
+Still not done: a universe with the companies that failed. No source this build can reach carries delisted names.
+
+Also fixed: a v0.42.5 test required the embedded and the published decision to carry the same computed time, which
+the first daily run changed; the suite fails against that run's commit (failure log).
+
 Version 0.42.5 answers an outside buyside audit (Nov 11, 2026): thirteen findings, each reproduced before anything
 was changed. Fixed, with a test for each:
 
@@ -32,7 +53,8 @@ was changed. Fixed, with a test for each:
   The Execution desk says which system can send an order, to which account, on whose approval.
 - **One document.** The published page had two nested document skeletons; it now has one.
 
-Not changed, and open: the candidate universe is still chosen with hindsight (now labelled as such everywhere); the
+Not changed, and open: the candidate universe is still chosen with hindsight (now labelled as such everywhere, and
+measured in v0.42.6); the
 drawdown cap still comes from a constant-volatility simulation; cash is still proxied by the two-year yield; the
 PSQ and VIXY version of the call has no record of its own; prices are still last trade before midnight UTC, not the
 official close. The audit's redesign items (five destinations, a smaller payload, typography) are not started.

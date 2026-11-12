@@ -62,6 +62,52 @@
       S.slice(-10).reverse().map((r) => [isoNice(r[0]), xx(r[4]), tS(r[1] - 1, 2), tS(r[2] - 1, 2), tS(r[3] - 1, 2)]), 1);
   }
 
+  // v0.42.6: the universe checks' verdict on the two claims the record makes. The baskets (funds whose members
+  // someone else chose before 2018) carry no selection by this engine, so they say whether a claim is about the
+  // rule or about the nine names.
+  function universeVerdict(T) {
+    const U = T && T.universe;
+    if (!U || !Array.isArray(U.rows)) return null;
+    const by = Object.fromEntries(U.rows.map((r) => [r.key, r])), B = U.rows.filter((r) => r.basket), pit = by.pit;
+    if (!pit || !B.length || !pit.vs_index) return null;
+    const cutsDD = U.rows.every((r) => r.policies.call.maxdd < r.policies.hold.maxdd - 1e-9);
+    const callBeatsHold = U.rows.filter((r) => r.policies.call.sharpe > r.policies.hold.sharpe).length;
+    const a0 = pit.vs_index.alpha_ann;
+    // the hedged row's edge is the names when the names beat the index by more than any basket did, and the short beat the cut on them
+    const edgeIsNames = a0 > 0 && B.every((r) => r.vs_index.alpha_ann < a0) && pit.policies.call_short.sharpe > pit.policies.call.sharpe;
+    const short = (r) => { const t = r.label.replace(/ \(.*$/, ""); return /^The /.test(t) ? "the " + t.slice(4) : t.charAt(0).toLowerCase() + t.slice(1); };
+    const alpha = (r) => `${r.vs_index.alpha_ann >= 0 ? "+" : MINUS}${fx(Math.abs(r.vs_index.alpha_ann) * 100, 1)}% a year${fin(r.vs_index.alpha_t) ? ` (t ${r.vs_index.alpha_t >= 0 ? "" : MINUS}${fx(Math.abs(r.vs_index.alpha_t), 1)})` : ""}`;
+    return { U, by, B, pit, cutsDD, callBeatsHold, edgeIsNames, short, alpha, others: B.filter((r) => fin(r.vs_index.alpha_t)) };
+  }
+
+  function renderUniverse(T) {
+    const sec = $("#tr-univ-s"), V = universeVerdict(T);
+    if (!sec) return;
+    sec.hidden = !V;
+    if (!V) return;
+    const U = V.U, P = (r, k) => r.policies[k], sg = (v, d = 2) => (v >= 0 ? "+" : MINUS) + fx(Math.abs(v), d);
+    $("#tr-univ-p").textContent = `The walk-forward record ranks ${U.candidates.length} candidates each January on data to that date, but the ${U.candidates.length} were chosen in 2026, so the record cannot say how much of its level is the list. These rows run the same sizing rule, the same costs and the same dates on other universes. Two are stricter lists: the candidates that already had a year of prices at the end of 2017 (${U.frozen.length} names; ${U.listed_later.join(" and ")} listed later and can never enter), and that list without ${U.top_name}, the name whose removal costs holding the most. Three are funds that existed before 2018 and whose members someone else chose; their returns carry their own losers, so this engine selected nothing in them and the rule is the only thing under test. What none of this can do: add a company that failed and left the data. No source this build can reach carries delisted names, so a broad historical universe is still untested.`;
+    fillTable($("#tr-univ"), ["Universe", "Holding: a year", "Sharpe", "Worst fall", "The call: Sharpe", "Worst fall", "Average size", "Full size with the short: Sharpe", "Worst fall", "Average short", "Beta to the Nasdaq-100", "Return the index does not explain, a year", "t"],
+      U.rows.map((r) => [r.label, tS(P(r, "hold").cagr), fx(P(r, "hold").sharpe, 2), tP(P(r, "hold").maxdd, 0), fx(P(r, "call").sharpe, 2), tP(P(r, "call").maxdd, 0), xx(P(r, "call").avg_gross),
+        fx(P(r, "call_short").sharpe, 2), tP(P(r, "call_short").maxdd, 0), tP(P(r, "call_short").avg_short, 0), fx(r.vs_index.beta, 2), tS(r.vs_index.alpha_ann), fin(r.vs_index.alpha_t) ? sg(r.vs_index.alpha_t, 1) : "n/a"]), 1);
+    const pit = V.pit, lvl = V.B.map((r) => `${V.short(r)} ${tS(P(r, "hold").cagr, 0)}`).join(", ");
+    const gaps = V.B.map((r) => P(pit, "hold").cagr - P(r, "hold").cagr), gmin = Math.min(...gaps), gmax = Math.max(...gaps);
+    const fz = V.by.frozen, ex = V.by.ex_top, parts = [];
+    parts.push(`The level is mostly the list. Holding the point-in-time nine grew ${tS(P(pit, "hold").cagr, 0)} a year; the baskets grew less (${lvl}). A candidate list written in 2026 was worth ${fx(gmin * 100, 0)} to ${fx(gmax * 100, 0)} points a year over a basket someone else chose before 2018, and that part of the record is selection, not evidence of anything the engine does.`);
+    if (fz) parts.push(`Inside the list, the choice of names matters little: frozen at the end of 2017, holding earned a Sharpe of ${fx(P(fz, "hold").sharpe, 2)} against ${fx(P(pit, "hold").sharpe, 2)}${ex ? `, and ${fx(P(ex, "hold").sharpe, 2)} without ${U.top_name}` : ""}, because the rule picks by trading volume and the next name steps in.`);
+    parts.push(V.cutsDD ? `The rule's claim holds on every universe: the call cut the worst fall in all ${U.rows.length} (${V.B.map((r) => `${V.short(r)} from ${tP(P(r, "hold").maxdd, 0)} to ${tP(P(r, "call").maxdd, 0)}`).join(", ")}), and it ${V.callBeatsHold === 0 ? "gave up Sharpe ratio in every one" : `raised the Sharpe ratio in ${V.callBeatsHold} of ${U.rows.length}`}. Sizing to the limits is risk control with a cost, off the list as on it.${(() => { const over = U.rows.filter((r) => P(r, "call").maxdd > 0.25); return over.length ? ` The cap is not a stop: on ${over.length} of ${U.rows.length} the call's worst realized fall was deeper than the 25% it is sized to (${over.map((r) => `${V.short(r)} ${tP(P(r, "call").maxdd, 1)}`).join(", ")}), because the 25% is a modelled 95th percentile from a constant-volatility simulation.` : ""; })()}`
+      : `The call did not cut the worst fall on every universe: the rule's protection is not general.`);
+    const thin = V.B.filter((r) => P(r, "call_short").maxdd > 0.30);
+    parts.push((V.edgeIsNames ? `The hedged row's edge is the names, not the hedge. A short of the index leaves the return the index does not explain. By regression on the Nasdaq-100 that was ${V.alpha(pit)} for the nine names${V.others.length ? `, ${V.others.map((r) => `${V.alpha(r)} for ${V.short(r)}`).join(" and ")}` : ""}. Full size with the short earned ${fx(P(pit, "call_short").sharpe, 2)} on the nine because they beat the index by that much, and that they would is what a list written in 2026 knew.`
+      : `By regression on the Nasdaq-100, the return the index does not explain was ${V.alpha(pit)} for the nine names${V.others.length ? `, ${V.others.map((r) => `${V.alpha(r)} for ${V.short(r)}`).join(" and ")}` : ""}.`)
+      + (thin.length ? ` Nor is the hedged row always on offer: for ${thin.map((r) => V.short(r)).join(" and ")} the rule found no index short inside the limits in most months (average short ${thin.map((r) => tP(P(r, "call_short").avg_short, 0)).join(" and ")} of NAV), so full size with the short fell ${thin.map((r) => tP(P(r, "call_short").maxdd, 0)).join(" and ")}, close to holding. A basket the index explains less well can be brought inside the limits only by cutting; on the index itself a short is a cut.` : ""));
+    $("#tr-univ-read").textContent = parts.join(" ");
+    const L = U.leave_one_out || [];
+    fillTable($("#tr-loo"), ["Left out", "Holding: a year", "Sharpe", "Worst fall", "Change in a year's growth"], L.map((r) => [r.without, tS(r.cagr), fx(r.sharpe, 2), tP(r.maxdd, 0), sg(r.d_cagr * 100, 1) + " pts"]), 1);
+    const worst = L[0], best = L[L.length - 1];
+    $("#tr-loo-n").textContent = worst && best ? `Holding the frozen list grew ${tS(U.hold_frozen.cagr)} a year (Sharpe ${fx(U.hold_frozen.sharpe, 2)}). Leaving one name out changes that by ${sg(worst.d_cagr * 100, 1)} (${worst.without}) to ${sg(best.d_cagr * 100, 1)} points (${best.without}): each January the nine most traded names are held, so a name left out is replaced by the tenth, and several replacements did better than the name they replaced. No single pick carries the record. Holding only, costs charged, no sizing rule.` : "";
+  }
+
   function renderTrack() {
     const T = T38(), tiles = $("#tr-tiles");
     if (!tiles) return;
@@ -84,7 +130,7 @@
     trackCurve($("#tr-curve"), W, ["call", "call_short", "hold", "qqq"], `Walk-forward growth of $1, net of costs, point-in-time universe: the call ends at ${ev("call")}, full size with the short at ${ev("call_short")}, the book at 1.00x at ${ev("hold")}, the Nasdaq-100 at ${ev("qqq")}`);
     policyTable($("#tr-pol"), W, "net");
     const LR = T.live_rule, CSm = W.policies.call_simple;
-    $("#tr-pol-p").textContent = `${LR ? `Since v0.40 the call is sized by the live rule itself (book.build: factor-model volatility, three tail models, the drawdown simulation), run at each of ${LR.months} month-ends on that year's point-in-time names${LR.fallbacks ? `; ${LR.fallbacks} early month${LR.fallbacks === 1 ? "" : "s"} with too little history used the simple limits` : ""}. The simpler stand-in it replaced is kept as a row: the live rule earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(CSm ? CSm.net.sharpe : NaN, 2)} for the stand-in, so the record now reads lower and is the honest one. Read with the short, the same rule earned ${fx(CS.net.sharpe, 2)}: sizing down protects, the short keeps the return. ` : ""}Each policy is decided at a month-end close from data to that close, frozen, and held through the next month. ${W.policies.call.meta ? `The call averaged ${xx(W.policies.call.meta.avg_gross)}; the hedged variant shorted ${tP(W.policies.call_short.meta.avg_short, 0)} of NAV on average.` : ""} The book is held at equal weights, restored every day, and the size is held at its share of NAV every day; the trades that takes are counted in the turnover column and charged (v0.42.5: before, only each January's change of names and each change of size were). Costs: stocks ${SNAP38.cost.stock_bp} bp per dollar traded, futures ${SNAP38.cost.fut_bp} bp a trade plus ${SNAP38.cost.roll_bp_q} bp a quarter to roll, borrowing above 1.00x at cash plus ${fx(SNAP38.cost.borrow_spread * 1e4, 0)} bp. The "before costs" column shows what they take.`;
+    $("#tr-pol-p").textContent = `${LR ? `Since v0.40 the call is sized by the live rule itself (book.build: factor-model volatility, three tail models, the drawdown simulation), run at each of ${LR.months} month-ends on that year's point-in-time names${LR.fallbacks ? `; ${LR.fallbacks} early month${LR.fallbacks === 1 ? "" : "s"} with too little history used the simple limits` : ""}. The simpler stand-in it replaced is kept as a row: the live rule earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(CSm ? CSm.net.sharpe : NaN, 2)} for the stand-in, so the record now reads lower and is the honest one. Read with the short, the same rule earned ${fx(CS.net.sharpe, 2)}${(() => { const V = universeVerdict(T); return V && V.edgeIsNames ? `: sizing down protects, and on these names the short kept the return. That last part is the names beating the index (${V.alpha(V.pit)} by regression), not the hedge; the universe checks below test it off the list` : ": sizing down protects, the short keeps the return"; })()}. ` : ""}Each policy is decided at a month-end close from data to that close, frozen, and held through the next month. ${W.policies.call.meta ? `The call averaged ${xx(W.policies.call.meta.avg_gross)}; the hedged variant shorted ${tP(W.policies.call_short.meta.avg_short, 0)} of NAV on average.` : ""} The book is held at equal weights, restored every day, and the size is held at its share of NAV every day; the trades that takes are counted in the turnover column and charged (v0.42.5: before, only each January's change of names and each change of size were). Costs: stocks ${SNAP38.cost.stock_bp} bp per dollar traded, futures ${SNAP38.cost.fut_bp} bp a trade plus ${SNAP38.cost.roll_bp_q} bp a quarter to roll, borrowing above 1.00x at cash plus ${fx(SNAP38.cost.borrow_spread * 1e4, 0)} bp. The "before costs" column shows what they take.`;
     // v0.42.5: the restatement, published beside the record it changed
     const RS = T.restated, rp = $("#tr-restate-p"), rw = $("#tr-restate-w");
     if (rp && rw) { rp.hidden = !RS; rw.hidden = !RS; }
@@ -94,6 +140,7 @@
       fillTable($("#tr-restate"), ["Policy", "Sharpe, before", "after", "CAGR, before", "after", "Worst drawdown, before", "after", "Turnover a year, before", "after"],
         rk.map((k) => { const r = RS.policies[k]; return [SNAP38.policy_name[k], fx(r.sharpe[0], 3), fx(r.sharpe[1], 3), tS(r.cagr[0]), tS(r.cagr[1]), tP(r.maxdd[0], 1), tP(r.maxdd[1], 1), fx(r.turnover[0], 1) + "x", fx(r.turnover[1], 1) + "x"]; }), 1);
     }
+    renderUniverse(T);
     // survivorship
     const sv = T.survivorship, mem = T.members, yrs = Object.keys(mem).sort();
     const gapPts = sv.gap_cagr * 100, Hh = T.hindsight.policies.hold.net, Hp = W.policies.hold.net;
@@ -206,9 +253,12 @@
     if (cv && !cv.childElementCount) trackCurve(cv, W, ["call", "hold", "qqq"], `Walk-forward growth of $1, net of costs, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: the call ends at ${endv("call")}, the book held at 1.00x at ${endv("hold")}, the Nasdaq-100 at ${endv("qqq")}`, 230);
     const R = (T.regimes && T.regimes.rows) || [], r21 = R.find((r) => /^2021 to/.test(r.regime)) || {}, hi = R.find((r) => r.regime === "Inflation above 3%") || {};
     const A = T.alternatives, puts = A ? A.rows.map((r) => r.h.put && r.h.put.var_cut).filter(fin) : [];
+    const UV = universeVerdict(T);
     const items = [
       [sgn2(r21.corr), "Long Treasuries have stopped hedging", `Since 2021 stocks and bonds have moved together; a 30% bond position ${fin(r21.var_cut_30) && r21.var_cut_30 < 0 ? `added ${tP(-r21.var_cut_30, 0)} to` : "barely changed"} stock variance. Since 1962 bonds hedged below 3% inflation and failed above it (correlation ${sgn2(hi.corr)}).`, "#hedgetest", "Hedge test"],
-      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Sizing down protects; the short keeps the return", `Walked forward with the live rule, the call cut the worst drawdown from ${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)} but earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)} for holding. Full size with the call's Nasdaq-100 short earned ${fx(W.policies.call_short.net.sharpe, 2)} with a ${tP(W.policies.call_short.net.maxdd, 0)} worst drawdown: the hedge, not the cash, is the better way to take the limits.`, "#track", "Track record"],
+      [`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, UV && UV.edgeIsNames ? "Sizing down protects, at a cost; the short's edge is the names beating the index" : "Sizing down protects; the short keeps the return",
+        `Walked forward with the live rule, the call cut the worst drawdown from ${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)} but earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)} for holding. Full size with the call's Nasdaq-100 short earned ${fx(W.policies.call_short.net.sharpe, 2)} with a ${tP(W.policies.call_short.net.maxdd, 0)} worst drawdown`
+        + (UV && UV.edgeIsNames ? `. Run on index baskets someone else chose before 2018, the same rule cut the worst fall every time${UV.callBeatsHold === 0 ? " and gave up Sharpe ratio every time" : ""}: that part is the rule. The ${fx(W.policies.call_short.net.sharpe, 2)} is the nine names beating the index by ${UV.alpha(UV.pit).replace(/^\+/, "")}, which a list written in 2026 knew${UV.others.length ? `; ${UV.others.map((r) => `${UV.short(r)} ${r.vs_index.alpha_ann >= 0 ? "beat" : "lagged"} it by ${fx(Math.abs(r.vs_index.alpha_ann) * 100, 1)}%`).join(" and ")}` : ""}.` : `: the hedge, not the cash, is the better way to take the limits.`), "#track", "Track record"],
       [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modelled one-month, 90% put on the Nasdaq-100, bought at each month-end close and priced from that close's VIX, removed that share of its variance in every inflation and policy regime since 2000, and, of the overlays that add to the book (bonds, 2-year notes, gold, puts), was the only one that paid in 2022; the call's own hedge, a Nasdaq-100 short, did more. It costs a premium; the bond's failure costs more. A model scenario (Black-Scholes at VIX x 1.25, no skew or bid-ask), not a traded result.`, "#hedgetest", "Hedge test"]];
     const ol = $("#hm-find"); ol.replaceChildren();
     items.forEach(([big, t, p, href, lab]) => { const li = h("li"), a = h("a", null, lab); a.href = href; li.append(h("span", "hm-big", big), h("h3", null, t), h("p", null, p), a); ol.append(li); });
