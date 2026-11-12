@@ -1,8 +1,8 @@
 {
  "schema": 2,
- "generated_utc": "2026-11-12T00:33:51+00:00",
- "commit": "59e1569",
- "run_id": "43126648914",
+ "generated_utc": "2026-11-12T19:08:54+00:00",
+ "commit": "a5ca78f",
+ "run_id": "43285166401",
  "python": "3.12.16",
  "files": {
   "macro.json": {
@@ -10,9 +10,9 @@
    "valid": true,
    "schema": 2,
    "as_of": "2026-11-09",
-   "bytes": 707066,
+   "bytes": 707036,
    "weekdays_old": 3,
-   "written_utc": "2026-11-12T00:22Z"
+   "written_utc": "2026-11-12T18:58Z"
   },
   "report.json": {
    "present": true,
@@ -21,16 +21,16 @@
    "as_of": "2026-11-11",
    "bytes": 127110,
    "weekdays_old": 1,
-   "written_utc": "2026-11-12T00:24Z"
+   "written_utc": "2026-11-12T18:59Z"
   },
   "capex.json": {
    "present": true,
    "valid": true,
    "schema": 2,
    "as_of": "2026-09-30",
-   "bytes": 35785,
+   "bytes": 35937,
    "weekdays_old": null,
-   "written_utc": "2026-11-12T00:24Z",
+   "written_utc": "2026-11-12T18:59Z",
    "cadence": "quarterly"
   },
   "research.json": {
@@ -40,7 +40,7 @@
    "as_of": "2026-09",
    "bytes": 13072,
    "weekdays_old": 31,
-   "written_utc": "2026-11-12T00:22Z",
+   "written_utc": "2026-11-12T18:58Z",
    "cadence": "monthly"
   },
   "brain.json": {
@@ -50,7 +50,7 @@
    "as_of": null,
    "bytes": 218939,
    "weekdays_old": null,
-   "written_utc": "2026-11-12T00:22Z",
+   "written_utc": "2026-11-12T18:58Z",
    "cadence": "monthly"
   },
   "buyside.json": {
@@ -60,17 +60,17 @@
    "as_of": "2026-09",
    "bytes": 3753,
    "weekdays_old": 31,
-   "written_utc": "2026-11-12T00:22Z",
+   "written_utc": "2026-11-12T18:58Z",
    "cadence": "monthly"
   },
   "feeds.json": {
    "present": true,
    "valid": true,
    "schema": 1,
-   "as_of": "2026-11-12T00:22:40Z",
-   "bytes": 111474,
+   "as_of": "2026-11-12T18:58:45Z",
+   "bytes": 115109,
    "weekdays_old": 0,
-   "written_utc": "2026-11-12T00:23Z"
+   "written_utc": "2026-11-12T18:59Z"
   },
   "reason.json": {
    "present": true,
@@ -79,7 +79,7 @@
    "as_of": null,
    "bytes": 12100,
    "weekdays_old": null,
-   "written_utc": "2026-11-12T00:33Z"
+   "written_utc": "2026-11-12T19:08Z"
   }
  },
  "checks": [
@@ -121,7 +121,7 @@
   {
    "name": "Nasdaq-100 implied volatility is plausible (1 to 150 points)",
    "ok": true,
-   "detail": "28.57"
+   "detail": "26.74"
   },
   {
    "name": "Net liquidity is plausible ($1T to $15T)",
@@ -131,7 +131,7 @@
   {
    "name": "SOFR minus IORB is within 100bp",
    "ok": true,
-   "detail": "-2.0"
+   "detail": "-1.0"
   },
   {
    "name": "Book run used market data, not the synthetic test market",

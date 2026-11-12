@@ -723,21 +723,6 @@
       "on": [
        "ai_pair",
        "beta_short",
-       "degross",
-       "gold",
-       "put_spread",
-       "vix_calls"
-      ],
-      "ce": 0.006964,
-      "worst": -0.016564,
-      "cost_bp": 360.395421,
-      "meets": true,
-      "all_in_bp": 390.395421
-     },
-     {
-      "on": [
-       "ai_pair",
-       "beta_short",
        "collar",
        "degross",
        "put_spread"
@@ -747,10 +732,24 @@
       "cost_bp": 336.24232,
       "meets": true,
       "all_in_bp": 361.24232
+     },
+     {
+      "on": [
+       "ai_pair",
+       "beta_short",
+       "degross",
+       "gold",
+       "put_spread"
+      ],
+      "ce": 0.010304,
+      "worst": -0.017432,
+      "cost_bp": 326.882598,
+      "meets": true,
+      "all_in_bp": 351.882598
      }
     ]
    },
-   "meets_limit": 502,
+   "meets_limit": 504,
    "combinations": 512,
    "loss_limit": 0.15
   },
@@ -3579,7 +3578,7 @@
    ],
    "door": "two-way",
    "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters.",
-   "price": 2.133491
+   "price": 1.555466
   },
   {
    "id": "beta_short",
