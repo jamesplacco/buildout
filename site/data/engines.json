@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "version": "0.43.0",
- "run_at": "2026-11-12T19:08:37+00:00",
+ "version": "0.44.0",
+ "run_at": "2026-11-13T17:20:40+00:00",
  "engines": [
   {
    "name": "macro",
@@ -15,7 +15,7 @@
    ],
    "status": "external",
    "outputs": {
-    "macro.json": "3c572ed4941d549a"
+    "macro.json": "d64c7341f6e80ec7"
    }
   },
   {
@@ -62,7 +62,7 @@
    ],
    "status": "external",
    "outputs": {
-    "report.json": "2910aa68e67bae7f"
+    "report.json": "5f34508d3d85e008"
    }
   },
   {
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "42d8f4f7f9b5092a"
+    "atlas.json": "fb049991f382c34f"
    }
   },
   {
@@ -107,7 +107,7 @@
    ],
    "status": "external",
    "outputs": {
-    "labs.json": "6bdba27083819093"
+    "labs.json": "54d825819a279bec"
    }
   },
   {
@@ -139,7 +139,7 @@
    ],
    "status": "external",
    "outputs": {
-    "reality.json": "cb54efb759ff0b64"
+    "reality.json": "38144b920ec79ce6"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "4e2bd68509987052"
+    "connections.json": "2b2a91caca501d59"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "653546ca4c442c88",
-    "statements.json": "a28c6a791b45a1b9"
+    "technicals.json": "6f8218a716dc75a7",
+    "statements.json": "7184d6eee7c9ddd6"
    }
   },
   {
@@ -231,7 +231,7 @@
    ],
    "status": "external",
    "outputs": {
-    "decision.json": "5b4a4b392c515e34"
+    "decision.json": "dd45f3ad0a470196"
    }
   },
   {
@@ -246,7 +246,7 @@
    ],
    "status": "external",
    "outputs": {
-    "bonds.json": "67c3553a178ae4f5"
+    "bonds.json": "265bf0a20b4cd3c6"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "2309336a1f279ddb"
+    "feeds.json": "1f92b603130883e6"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "beb3627301870b62"
+    "reason.json": "0e834591a8eb7c2a"
    }
   },
   {
@@ -300,12 +300,12 @@
    ],
    "status": "ok",
    "outputs": {
-    "valuation.json": "fd04b9866843e986"
+    "valuation.json": "5aedc061bd5a0935"
    },
-   "seconds": 0.725,
+   "seconds": 0.752,
    "inputs": {
     "capex.json": "dda86b796c47184d",
-    "macro.json": "3c572ed4941d549a"
+    "macro.json": "d64c7341f6e80ec7"
    },
    "attempts": 1
   },
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.05,
+   "seconds": 0.052,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -366,15 +366,15 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "125646440bb620f0"
+    "ooda.json": "94ab8a795160af72"
    },
-   "seconds": 0.84,
+   "seconds": 0.852,
    "inputs": {
-    "macro.json": "3c572ed4941d549a",
+    "macro.json": "d64c7341f6e80ec7",
     "research.json": "d2c6580ba083f72a",
     "brain.json": "e8144ce521a6d89f",
     "capex.json": "dda86b796c47184d",
-    "report.json": "2910aa68e67bae7f"
+    "report.json": "5f34508d3d85e008"
    },
    "attempts": 1
   },
@@ -449,7 +449,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "acf2f33c07bbcbf7"
+    "status.json": "269aaeb91c7981a4"
    }
   }
  ],
@@ -458,9 +458,9 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 1.53,
-  "serial_seconds": 2.137,
-  "speedup": 1.4,
+  "wall_seconds": 1.568,
+  "serial_seconds": 2.178,
+  "speedup": 1.39,
   "levels": [
    [
     "atlas",

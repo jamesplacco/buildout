@@ -1,27 +1,27 @@
 {
  "schema": 2,
- "generated_utc": "2026-11-12T19:08:54+00:00",
- "commit": "a5ca78f",
- "run_id": "43285166401",
+ "generated_utc": "2026-11-13T17:21:09+00:00",
+ "commit": "2212fb3",
+ "run_id": "43469969043",
  "python": "3.12.16",
  "files": {
   "macro.json": {
    "present": true,
    "valid": true,
    "schema": 2,
-   "as_of": "2026-11-09",
-   "bytes": 707036,
+   "as_of": "2026-11-10",
+   "bytes": 707088,
    "weekdays_old": 3,
-   "written_utc": "2026-11-12T18:58Z"
+   "written_utc": "2026-11-13T17:10Z"
   },
   "report.json": {
    "present": true,
    "valid": true,
    "schema": 2,
-   "as_of": "2026-11-11",
-   "bytes": 127110,
+   "as_of": "2026-11-12",
+   "bytes": 127109,
    "weekdays_old": 1,
-   "written_utc": "2026-11-12T18:59Z"
+   "written_utc": "2026-11-13T17:12Z"
   },
   "capex.json": {
    "present": true,
@@ -30,7 +30,7 @@
    "as_of": "2026-09-30",
    "bytes": 35937,
    "weekdays_old": null,
-   "written_utc": "2026-11-12T18:59Z",
+   "written_utc": "2026-11-13T17:12Z",
    "cadence": "quarterly"
   },
   "research.json": {
@@ -39,8 +39,8 @@
    "schema": 2,
    "as_of": "2026-09",
    "bytes": 13072,
-   "weekdays_old": 31,
-   "written_utc": "2026-11-12T18:58Z",
+   "weekdays_old": 32,
+   "written_utc": "2026-11-13T17:10Z",
    "cadence": "monthly"
   },
   "brain.json": {
@@ -50,7 +50,7 @@
    "as_of": null,
    "bytes": 218939,
    "weekdays_old": null,
-   "written_utc": "2026-11-12T18:58Z",
+   "written_utc": "2026-11-13T17:10Z",
    "cadence": "monthly"
   },
   "buyside.json": {
@@ -59,34 +59,34 @@
    "schema": 1,
    "as_of": "2026-09",
    "bytes": 3753,
-   "weekdays_old": 31,
-   "written_utc": "2026-11-12T18:58Z",
+   "weekdays_old": 32,
+   "written_utc": "2026-11-13T17:10Z",
    "cadence": "monthly"
   },
   "feeds.json": {
    "present": true,
    "valid": true,
    "schema": 1,
-   "as_of": "2026-11-12T18:58:45Z",
-   "bytes": 115109,
+   "as_of": "2026-11-13T17:11:00Z",
+   "bytes": 106648,
    "weekdays_old": 0,
-   "written_utc": "2026-11-12T18:59Z"
+   "written_utc": "2026-11-13T17:11Z"
   },
   "reason.json": {
    "present": true,
    "valid": true,
    "schema": 1,
    "as_of": null,
-   "bytes": 12100,
+   "bytes": 12096,
    "weekdays_old": null,
-   "written_utc": "2026-11-12T19:08Z"
+   "written_utc": "2026-11-13T17:20Z"
   }
  },
  "checks": [
   {
    "name": "Correlations are within -1 and 1",
    "ok": true,
-   "detail": "0.035662, 0.182338"
+   "detail": "0.044024, 0.189194"
   },
   {
    "name": "Hedge ratios are within 0 and 1",
@@ -106,7 +106,7 @@
   {
    "name": "FRED data is at most 3 weekdays old",
    "ok": true,
-   "detail": "as of 2026-11-09, 3 weekdays"
+   "detail": "as of 2026-11-10, 3 weekdays"
   },
   {
    "name": "Every FRED series downloaded",
@@ -121,17 +121,17 @@
   {
    "name": "Nasdaq-100 implied volatility is plausible (1 to 150 points)",
    "ok": true,
-   "detail": "26.74"
+   "detail": "28.55"
   },
   {
    "name": "Net liquidity is plausible ($1T to $15T)",
    "ok": true,
-   "detail": "5.790745"
+   "detail": "5.844345"
   },
   {
    "name": "SOFR minus IORB is within 100bp",
    "ok": true,
-   "detail": "-1.0"
+   "detail": "0.0"
   },
   {
    "name": "Book run used market data, not the synthetic test market",
@@ -141,12 +141,12 @@
   {
    "name": "Recommended gross is within the gross limit",
    "ok": true,
-   "detail": "0.539682 vs 1.5"
+   "detail": "0.541291 vs 1.5"
   },
   {
    "name": "One-day VaR is positive and below 50%",
    "ok": true,
-   "detail": "0.068902"
+   "detail": "0.067655"
   },
   {
    "name": "No bad prints, frozen prices or gaps in the book's prices",
@@ -156,7 +156,7 @@
   {
    "name": "Book data is at most 3 weekdays old",
    "ok": true,
-   "detail": "as of 2026-11-11, 1 weekdays"
+   "detail": "as of 2026-11-12, 1 weekdays"
   },
   {
    "name": "SEC fundamentals cover at least one company",
@@ -166,7 +166,7 @@
   {
    "name": "SEC filings include a quarter ended in the last 140 days",
    "ok": true,
-   "detail": "latest quarter ended 2026-09-30, 43 days ago"
+   "detail": "latest quarter ended 2026-09-30, 44 days ago"
   },
   {
    "name": "Capex to cash flow ratios are plausible",
@@ -186,7 +186,7 @@
   {
    "name": "Research data ends within the last 120 days",
    "ok": true,
-   "detail": "ends 2026-09, 72 days ago"
+   "detail": "ends 2026-09, 73 days ago"
   },
   {
    "name": "Brain weights are finite and below 1.5 in size",
@@ -221,7 +221,7 @@
   {
    "name": "Every file comes from the same run day",
    "ok": true,
-   "detail": "2026-11-12 to 2026-11-12"
+   "detail": "2026-11-13 to 2026-11-13"
   }
  ],
  "ok": true

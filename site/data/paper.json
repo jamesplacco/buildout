@@ -2,9 +2,9 @@
  "schema": 2,
  "opened": "2026-11-11",
  "start_cash": 100000.0,
- "equity": 100354.41,
+ "equity": 100448.45,
  "cash": 49383.87,
- "marks_asof": "2026-11-11",
+ "marks_asof": "2026-11-12",
  "positions": [
   {
    "symbol": "AMZN",
@@ -47,6 +47,10 @@
   [
    "2026-11-11",
    100354.41
+  ],
+  [
+   "2026-11-12",
+   100448.45
   ]
  ],
  "pre_inception_marks": [
@@ -78,12 +82,12 @@
   "ok": true,
   "entries": 1
  },
- "passes": 6,
+ "passes": 7,
  "last": {
   "broker": "paper",
   "event": "pass",
   "outcome": "nothing to trade: holdings are within the drift band",
-  "ts_utc": "2026-11-12T19:08:54Z"
+  "ts_utc": "2026-11-13T17:21:08Z"
  },
  "recent": [
   {
@@ -137,6 +141,12 @@
    "event": "pass",
    "outcome": "nothing to trade: holdings are within the drift band",
    "ts_utc": "2026-11-12T19:08:54Z"
+  },
+  {
+   "broker": "paper",
+   "event": "pass",
+   "outcome": "nothing to trade: holdings are within the drift band",
+   "ts_utc": "2026-11-13T17:21:08Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",

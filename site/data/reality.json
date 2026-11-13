@@ -18,17 +18,17 @@
   },
   "tails_day": {
    "series": "Brent, daily since 1987",
-   "n": 9121,
-   "kurtosis": 55.965549,
+   "n": 9127,
+   "kurtosis": 55.563037,
    "jb_p": 0.0,
-   "hill_alpha": 2.642893,
+   "hill_alpha": 2.619241,
    "threshold_sd": 5.0,
    "observed_beyond": 24,
-   "gaussian_expects": 0.005229,
-   "ratio": 4589.701726,
-   "var99_empirical": -0.071199,
-   "var99_normal": -0.062714,
-   "var_understatement": 0.1353,
+   "gaussian_expects": 0.005233,
+   "ratio": 4586.684502,
+   "var99_empirical": -0.071338,
+   "var99_normal": -0.062867,
+   "var_understatement": 0.134756,
    "status": "broken"
   },
   "dependence": {
@@ -114,7 +114,7 @@
    "holm": 8
   },
   "garch": {
-   "persistence": 0.99662,
+   "persistence": 0.996928,
    "status": "strained"
   },
   "kappa": {
@@ -125,14 +125,14 @@
      "n_equivalent_30": 38.588814
     },
     "Brent, daily": {
-     "kappa": 0.16553,
+     "kappa": 0.165138,
      "n": 30,
-     "n_equivalent_30": 42.036509
+     "n_equivalent_30": 41.996227
     },
     "Henry Hub gas, daily": {
-     "kappa": 0.367659,
+     "kappa": 0.394493,
      "n": 30,
-     "n_equivalent_30": 80.637779
+     "n_equivalent_30": 90.844543
     },
     "VIX, daily change": {
      "kappa": 0.130801,

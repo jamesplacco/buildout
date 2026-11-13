@@ -17,8 +17,8 @@
   "y30": 0.0485,
   "rf": 0.042,
   "borrow_spread": 0.01,
-  "vix": 17.49,
-  "index_vol": 26.74,
+  "vix": 18.7,
+  "index_vol": 28.55,
   "skew_pts": 3.0,
   "horizon": 0.25,
   "max_loss": 0.15,
@@ -259,26 +259,26 @@
  "alternatives": {
   "keep": {
    "port": [
-    0.539682,
+    0.541291,
     0.0,
     0.0,
     0.0
    ],
    "rets": [
-    0.052865,
-    0.064468,
-    0.133278,
-    -0.077198,
-    -0.134405,
-    -0.120643,
-    -0.174881
+    0.052991,
+    0.064629,
+    0.133644,
+    -0.07746,
+    -0.134837,
+    -0.121034,
+    -0.175433
    ],
-   "elog": 0.037363,
-   "ce": 0.03807,
-   "worst": -0.174881,
-   "mean": 0.040703,
+   "elog": 0.037434,
+   "ce": 0.038144,
+   "worst": -0.175433,
+   "mean": 0.040793,
    "feasible": false,
-   "max_regret": 0.036696
+   "max_regret": 0.032726
   },
   "reduce": {
    "port": [
@@ -301,30 +301,30 @@
    "worst": -0.144075,
    "mean": 0.035684,
    "feasible": true,
-   "max_regret": 0.020403
+   "max_regret": 0.020769
   },
   "hedge": {
    "port": [
     0.55,
     0.0,
     0.0125,
-    0.1
+    0.06
    ],
    "rets": [
-    0.040994,
-    0.053819,
-    0.121944,
-    -0.075491,
-    -0.114037,
-    -0.083946,
-    -0.149221
+    0.041014,
+    0.053439,
+    0.122364,
+    -0.076985,
+    -0.116884,
+    -0.088308,
+    -0.149583
    ],
-   "elog": 0.031301,
-   "ce": 0.031796,
-   "worst": -0.149221,
-   "mean": 0.033753,
+   "elog": 0.030865,
+   "ce": 0.031347,
+   "worst": -0.149583,
+   "mean": 0.033366,
    "feasible": true,
-   "max_regret": 0.014816
+   "max_regret": 0.01631
   },
   "optimal": {
    "port": [
@@ -347,7 +347,7 @@
    "worst": -0.149125,
    "mean": 0.036049,
    "feasible": true,
-   "max_regret": 0.021453
+   "max_regret": 0.021819
   },
   "minimax_regret": "hedge"
  },
@@ -382,13 +382,13 @@
   ]
  },
  "value_of_info": {
-  "evpi_bp": 263.989296,
+  "evpi_bp": 253.09011,
   "signals": [
    {
     "id": "vix",
     "name": "VIX at or above 20",
     "p_on": 0.301593,
-    "evsi_bp": 79.48918,
+    "evsi_bp": 76.115917,
     "observed": false,
     "flip_changes_choice": true,
     "choice_if_on": [
@@ -408,7 +408,7 @@
     "id": "hy",
     "name": "High-yield spread at or above 4.5%",
     "p_on": 0.215115,
-    "evsi_bp": 71.880976,
+    "evsi_bp": 69.38937,
     "observed": false,
     "flip_changes_choice": true,
     "choice_if_on": [
@@ -465,16 +465,16 @@
     ]
    },
    {
-    "id": "oil",
-    "name": "Brent at or above 1.3x its 5-year average",
-    "p_on": 0.200884,
-    "evsi_bp": 0.259267,
-    "observed": null,
-    "flip_changes_choice": null,
+    "id": "capex",
+    "name": "Builders' capex above 80% of operating cash flow",
+    "p_on": 0.521628,
+    "evsi_bp": 1.388e-13,
+    "observed": true,
+    "flip_changes_choice": false,
     "choice_if_on": [
-     0.55,
+     0.45,
      0.0,
-     0.0125,
+     0.0,
      0.1
     ],
     "choice_if_off": [
@@ -485,12 +485,12 @@
     ]
    },
    {
-    "id": "capex",
-    "name": "Builders' capex above 80% of operating cash flow",
-    "p_on": 0.521628,
-    "evsi_bp": 1.388e-13,
-    "observed": true,
-    "flip_changes_choice": false,
+    "id": "oil",
+    "name": "Brent at or above 1.3x its 5-year average",
+    "p_on": 0.200884,
+    "evsi_bp": 6.939e-14,
+    "observed": null,
+    "flip_changes_choice": null,
     "choice_if_on": [
      0.45,
      0.0,
@@ -529,27 +529,27 @@
  "reverse_stress": {
   "low_inflation": {
    "shock": [
-    -0.060419,
-    -0.208459,
-    -0.000574,
-    -0.03561,
-    0.005355
+    -0.06024,
+    -0.20784,
+    -0.000572,
+    -0.035504,
+    0.005339
    ],
-   "sigmas": 1.92565,
-   "p_normal": 0.027074,
-   "port_sd": 0.077896
+   "sigmas": 1.919926,
+   "p_normal": 0.027434,
+   "port_sd": 0.078128
   },
   "inflation": {
    "shock": [
-    -0.05721,
-    -0.212149,
-    0.001204,
-    0.027965,
-    -0.009384
+    -0.05704,
+    -0.211519,
+    0.001201,
+    0.027882,
+    -0.009356
    ],
-   "sigmas": 1.942619,
-   "p_normal": 0.026031,
-   "port_sd": 0.077215
+   "sigmas": 1.936844,
+   "p_normal": 0.026382,
+   "port_sd": 0.077446
   }
  },
  "factor_cov": {
