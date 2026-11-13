@@ -44,7 +44,9 @@
   // v0.44: one navigation per link. A link is resolved twice on its way to the screen (once to pick the view, once to
   // show it), and a second assignment to location.href cancels the first request and starts the library again.
   let leavingFor = null;
-  const toLibrary = (v) => { if (leavingFor === v) return; leavingFor = v; location.href = LIBRARY_HREF + "#" + v; };
+  // v0.44.1: replace, not assign. The link that brought the reader here has already put this page at #<desk> in the
+  // history; assigning left that entry behind, so Back from the library landed on it and was sent forward again.
+  const toLibrary = (v) => { if (leavingFor === v) return; leavingFor = v; location.replace(LIBRARY_HREF + "#" + v); };
   window.addEventListener("pageshow", () => { leavingFor = null; });          // back from the library: its links work again
   const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
   const lastInGroup = {};
@@ -158,6 +160,9 @@
     if (!el && /^ep-/.test(token) && epKind !== "All") { epKind = "All"; buildEpisodes(); el = document.getElementById(token); }
     if (!el && /^lg-/.test(token) && lgGroup !== "All") { lgGroup = "All"; renderLegends(); el = document.getElementById(token); }
     if (!el && LAZY.pending) { lazyFlushAll(); el = document.getElementById(token); }      // a deep link into a desk not built yet
+    // v0.44.1: a link to a security, an episode or a legend is a link into the library when this page does not carry
+    // that desk. In v0.43 it threw (the filter it resets was a constant stand-in) and the core page stayed blank.
+    if (!el && CORE && /^(sec|ep|lg)-/.test(token)) { toLibrary(token); return { view: current || "home", el: null }; }
     const v = el && el.closest(".view");
     return v ? { view: v.id.slice(5), el } : { view: "home", el: null };      // v0.38: an unknown link opens Home
   }

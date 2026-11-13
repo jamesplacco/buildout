@@ -426,6 +426,10 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 
 ## What the tests prove
 
+- v0.44.1: the mandate's gross cap, the one-day loss halt and the halt file each stop a run; a ticket handed to the
+  assistant is handed once and still takes its fills; fills the paper account holds and the log does not are
+  recorded by the next pass, once; the inflation reading is the one published by the decision; a crash on the
+  decision day shrinks that evening's size; December's decision is sized on January's names.
 - v0.44: the sensitivity block sizes the same book as the call (the engine's row is the engine's own function);
   this module's simulator with normal shocks agrees with the engine to sampling error; a looser limit never shrinks
   the book; a failure in the block is recorded and never touches the call; one fall fills a year of overlapping

@@ -7,6 +7,7 @@ from __future__ import annotations
 import io
 import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -16,6 +17,7 @@ from buildout import execution as ex
 from buildout import mandate as md
 from buildout import trader
 
+ROOT = Path(__file__).resolve().parents[1]
 NOW = datetime(2026, 11, 9, 15, 0, tzinfo=timezone.utc)
 PX = {"MSFT": 505.1, "AMZN": 236.2, "GOOGL": 280.4, "META": 610.0, "NVDA": 198.6, "AVGO": 349.0, "TSLA": 430.2, "SPCX": 48.3, "ORCL": 230.5, "VIXY": 38.0, "PSQ": 30.0}
 
@@ -180,3 +182,147 @@ def test_a_malformed_mcp_request_is_an_error_not_a_crash():
     mcp_server.serve(ctx, io.StringIO('{"jsonrpc":"2.0","id":1,"method":"tools/call","params":[1]}\n{"jsonrpc":"2.0","id":2,"method":"ping"}\n'), out)
     lines = [json.loads(x) for x in out.getvalue().splitlines()]
     assert lines[0]["id"] == 1 and "error" in lines[0] and lines[1] == {"jsonrpc": "2.0", "id": 2, "result": {}}
+
+
+# ---------------------------------------------------------------- the review's additions
+def test_a_handed_off_ticket_still_takes_its_fills(state, monkeypatch):
+    """The hand-off marks the ticket so it is not handed over twice; the mark must not stop the fills coming back."""
+    monkeypatch.setattr(trader, "evidence", lambda *a, **k: {"open": True, "missing": []})
+    M = md.Mandate(mode="autonomous", armed=True, broker="assistant", signed_by="J", signed_on="2026-11-08", notes="rehearsal", max_order_usd=50_000)
+
+    def ab():
+        return br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
+    r1 = trader.run_once(ab(), M, _params(), now=NOW, call=_call())
+    t = ex.load_ticket(r1["ticket"])
+    assert t["status"] == "handed_off"
+    fills = [{"symbol": o["symbol"], "side": o["side"], "quantity": o["quantity"], "price": o["limit_price"], "order_id": f"rh-{o['seq']}", "status": "filled"} for o in t["orders"]]
+    rec = ex.record_fills(r1["ticket"], fills, NOW + timedelta(minutes=10))
+    assert rec["status"] == "filled" and rec["chain_ok"] and ex.load_ticket(r1["ticket"])["status"] == "filled"
+    r3 = trader.run_once(ab(), M, _params(), now=NOW + timedelta(minutes=20), call=_call())
+    assert r3["outcome"] == "already traded today"
+
+
+def test_fills_the_account_holds_and_the_log_does_not_are_recorded_by_the_next_pass(state):
+    """settle() saves the account before the fills reach the log. A pass that dies between the two is repaired by the
+    next one, once."""
+    pb = br.PaperBroker(state / "paper_account.json", quote_fn=_qf)
+    M = md.Mandate(mode="autonomous", broker="paper", max_order_usd=50_000)
+    r1 = trader.run_once(pb, M, _params(), now=NOW, call=_call(), poll_seconds=0.01)
+    assert r1["outcome"] == "orders resting until the close"
+    later = NOW + timedelta(days=1)
+    pb.clock = lambda: later
+    pb.quotes(sorted({o["symbol"] for o in pb.open_orders()}))
+    changed = pb.settle(later)                                      # the account trades; the pass "dies" before the log
+    filled = [o for o in changed if o["status"] == "filled"]
+    assert filled and not ex._fills() and not pb.open_orders()
+    r2 = trader.run_once(pb, M, _params(), now=later, call=_call())
+    assert r2["reconciled"]["recorded"] == len(filled)
+    log = ex._fills()
+    assert len(log) == 1 and {f["order_id"] for f in log[0]["fills"]} == {o["order_id"] for o in filled} and ex.verify_fills()["ok"]
+    j = [e for e in trader.journal(50) if e.get("event") == "executed"]
+    assert len(j) == 1 and j[0]["reconciled"] is True and j[0]["fill_session"] == "2026-11-09"
+    r3 = trader.run_once(pb, M, _params(), now=later + timedelta(hours=1), call=_call())
+    assert "reconciled" not in r3 and len(ex._fills()) == 1, "once"
+
+
+def test_the_inflation_reading_is_the_one_published_by_the_decision():
+    """A month's CPI comes out in the middle of the next month. The regime a month-end decision reads is the one the
+    last published CPI gives: inflation that turns up in June's index changes the August book, not July's."""
+    import numpy as np
+    from buildout import track
+    assert track.CPI_LAG_MONTHS == 1
+    months = pd.date_range("2010-01-01", "2020-12-01", freq="MS")
+    rng = np.random.default_rng(0)
+    H = pd.DataFrame({"stock": rng.normal(0.007, 0.04, len(months)), "bond": rng.normal(0.003, 0.02, len(months)),
+                      "infl": np.where(months >= "2019-06-01", 0.03, 0.02), "y10": 0.03}, index=months)
+    days = pd.bdate_range("2018-01-02", "2020-06-30")
+    r = pd.Series(rng.normal(0.0005, 0.01, len(days)), index=days)
+    flat = pd.Series(0.0, index=days)
+    pol = pd.Series("on hold", index=pd.date_range("2009-12-31", "2020-12-31", freq="ME"))
+    rows = {x["month"]: x["regime"] for x in track.regime_hedge_walk(r, flat, H, pol, flat)["rows"]}
+    assert rows["2019-06"].startswith("inflation falling")
+    assert rows["2019-07"].startswith("inflation falling"), "June's CPI is not out at the end of June"
+    assert rows["2019-08"].startswith("inflation rising")
+
+
+def test_the_forecast_made_at_a_close_sees_the_close():
+    import math
+    import numpy as np
+    from buildout import book as bk, track
+    r = pd.Series(np.random.default_rng(0).normal(0, 0.01, 400), index=pd.bdate_range("2024-01-02", periods=400))
+    calm = bk.ewma_next(r)
+    r.iloc[-1] = -0.12
+    s = bk.ewma_vol(r)
+    assert float(s.iloc[-1]) == pytest.approx(float(bk.ewma_vol(r.iloc[:-1].reindex(r.index).fillna(0.0)).iloc[-1])), "the last value of the series does not see the last day"
+    assert bk.ewma_next(r) == pytest.approx(math.sqrt(bk.EWMA_LAMBDA * float(s.iloc[-1]) ** 2 + (1 - bk.EWMA_LAMBDA) * 0.12 ** 2)) and bk.ewma_next(r) > 2.5 * calm
+    q = pd.Series(0.0, index=r.index)
+    crash, quiet = track.limits_at(r, q, r.index[-1], 0.04), track.limits_at(r.iloc[:-1], q, r.index[-2], 0.04)
+    assert crash["sigma"] > 1.5 * quiet["sigma"] and crash["size"] < quiet["size"], "a crash on the decision day shrinks that evening's size"
+    assert "bk.ewma_next(x)" in (ROOT / "buildout" / "track.py").read_text() and "s_next = ewma_next(r)" in (ROOT / "buildout" / "book.py").read_text()
+
+
+def test_decembers_decision_is_sized_on_the_names_it_will_hold(monkeypatch):
+    from buildout import track
+    seen = []
+    monkeypatch.setattr(track, "_lr_one", lambda job: seen.append(job) or {"date": job[0], "ok": False})
+    mes = [pd.Timestamp(d) for d in ("2019-11-29", "2019-12-31", "2020-01-31", "2020-12-31")]
+    track.live_rule_path({}, pd.DataFrame(), {2019: ["a"], 2020: ["b"]}, mes, workers=1)
+    assert seen == [("2019-11-29", ["a"]), ("2019-12-31", ["b"]), ("2020-01-31", ["b"]), ("2020-12-31", ["b"])], "the last list stands when the next is not known"
+
+
+def test_the_backtest_arithmetic():
+    import numpy as np
+    from buildout import track
+    src = (ROOT / "buildout" / "track.py").read_text()
+    # modified duration of a 10-year par bond with semiannual coupons, against repricing the bond
+    y = 0.05
+    price = lambda yy: sum((y / 2) / (1 + yy / 2) ** k for k in range(1, 21)) + 1 / (1 + yy / 2) ** 20
+    numeric = -(price(y + 1e-6) - price(y - 1e-6)) / 2e-6
+    assert (1 - (1 + y / 2) ** -20) / y == pytest.approx(numeric, rel=1e-6) and "dur = (1 - (1 + y / 2) ** -20) / y " in src
+    assert (1 - (1 + y / 2) ** -20) / (y / 2) / 2 / (1 + y / 2) < 0.98 * numeric, "the old line was short by 1 + y/2"
+    # a hedge ratio is a regression slope: covariance and variance on the same divisor
+    assert all("ddof=1" in line for line in src.splitlines() if "np.var(" in line), "every np.var beside an np.cov carries ddof=1"
+    rng = np.random.default_rng(2)
+    b = rng.normal(0, 1, 30); a = 0.7 * b + rng.normal(0, 0.3, 30)
+    assert np.cov(a, b)[0, 1] / np.var(b, ddof=1) == pytest.approx(np.polyfit(b, a, 1)[0])
+    # the weak-name short pays to trade
+    idx = pd.bdate_range("2017-01-02", "2019-06-28")
+    prices = {t: pd.DataFrame({"date": idx.strftime("%Y-%m-%d"), "close": 100 * np.cumprod(1 + rng.normal(0.0003 * (i + 1), 0.015, len(idx)))}) for i, t in enumerate(track.CANDIDATES[:6])}
+    monkey = dict(track.COST)
+    try:
+        track.COST["short_trade_bp"] = 0.0
+        free = track.weak_basket(prices, idx)
+    finally:
+        track.COST.update(monkey)
+    paid = track.weak_basket(prices, idx)
+    drag = float((free - paid).sum())
+    assert (free - paid).min() >= -1e-15 and 0.0005 < drag < 0.05, drag
+
+
+def test_a_library_link_on_the_core_page_goes_to_the_library():
+    """v0.43 shipped a core page that stayed blank on a link to a legend: the filter the link resets was a constant
+    stand-in, and assigning to it threw. The stand-ins are variables now, and the link opens the library."""
+    import sys
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import assemble_page as A
+    assert "let X = __stub;" in A.stand_in("x.js", {"consts": ["X"]}) and "const X" not in A.stand_in("x.js", {"consts": ["X"]})
+    boot = (ROOT / "site" / "src" / "boot.js").read_text()
+    assert "if (!el && CORE && /^(sec|ep|lg)-/.test(token)) { toLibrary(token);" in boot
+    assert boot.index("lazyFlushAll(); el = document.getElementById(token);") < boot.index("/^(sec|ep|lg)-/.test(token)) { toLibrary")
+    # Back from the library returns to where the reader was: the hand-off replaces the #<desk> entry, it does not add to it
+    assert 'location.replace(LIBRARY_HREF + "#" + v)' in boot and "location.href = LIBRARY_HREF" not in boot
+    stress = (ROOT / "site" / "tests" / "stress.py").read_text()
+    assert "going back from the library did not return to the core page" in stress and "lg-buffett" in stress
+
+
+def test_version_and_notes():
+    import buildout
+    assert buildout.__version__ >= "0.44.1"
+    src = ROOT / "site" / "src"
+    assert '["v0.44.1", "Nov 13, 2026"' in (src / "reference.js").read_text() and "Version 0.44.1" in (ROOT / "CHANGELOG.md").read_text()
+    log = [line for line in (src / "memos.js").read_text().splitlines() if '"v0.44.1"' in line]
+    assert len(log) >= 3 and any("max_gross" in x for x in log) and any("blank" in x for x in log) and any("consumer price" in x.lower() or "CPI" in x for x in log)
+    for p in ("tests/test_v44_1.py", "buildout/trader.py", "buildout/track.py", "buildout/execution.py", "buildout/datahub.py"):
+        low = (ROOT / p).read_text().lower()
+        for b in (chr(0x2014), "inter" "section", "load" "-bearing"):
+            assert b not in low, (p, b)

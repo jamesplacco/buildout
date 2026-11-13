@@ -253,7 +253,7 @@ def test_a_link_to_the_library_navigates_once():
     """The stress run caught the core page starting the library twice for one link: the second request cancels the
     first. The reader still arrived; the browser fetched 12 MB twice."""
     boot = (SRC / "boot.js").read_text()
-    assert "if (leavingFor === v) return; leavingFor = v; location.href = LIBRARY_HREF" in boot
+    assert "if (leavingFor === v) return; leavingFor = v; location.replace(LIBRARY_HREF" in boot
     assert 'window.addEventListener("pageshow", () => { leavingFor = null; })' in boot, "coming back from the library re-arms its links"
 
 

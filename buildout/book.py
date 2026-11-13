@@ -204,7 +204,8 @@ def t_es(sigma: float, alpha: float, nu: float = T_NU) -> float:
 
 
 def ewma_vol(r: pd.Series, lam: float = EWMA_LAMBDA) -> pd.Series:
-    """sigma_t from returns through t (RiskMetrics), seeded with the first 20 days' variance."""
+    """The RiskMetrics forecast for each day, made at the close before it (s[t] uses returns through t-1), seeded with
+    the first 20 days' variance. For the forecast made at the last close, which includes that day's move, use ewma_next."""
     x = r.dropna()
     v = np.empty(len(x))
     v[0] = float(np.var(x.iloc[:20])) if len(x) >= 20 else float(x.iloc[0] ** 2)
@@ -214,12 +215,20 @@ def ewma_vol(r: pd.Series, lam: float = EWMA_LAMBDA) -> pd.Series:
     return s
 
 
+def ewma_next(r: pd.Series, lam: float = EWMA_LAMBDA) -> float:
+    """The daily volatility forecast made at the last close in r, for the day after it (v0.44.1). ewma_vol's last
+    value is the forecast for the last day itself and leaves that day's return out; a sizing decision made at a
+    close should see the close."""
+    x = r.dropna()
+    return float(math.sqrt(lam * float(ewma_vol(x, lam).iloc[-1]) ** 2 + (1 - lam) * float(x.iloc[-1]) ** 2))
+
+
 def tail_block(r: pd.Series, sigma_ann: float) -> dict:
     """One-month ES at 95% and 97.5% by three methods, one-day VaR and ES at 99%."""
     m = horizon_returns(r)
     s = ewma_vol(r)
     z = (r.dropna() / s).dropna()
-    s_next = float(math.sqrt(EWMA_LAMBDA * s.iloc[-1] ** 2 + (1 - EWMA_LAMBDA) * r.dropna().iloc[-1] ** 2))
+    s_next = ewma_next(r)
     fhs_m = horizon_returns(z * s_next)
     sig_m = sigma_ann / math.sqrt(12)
     out = {"months": int(len(m)), "daily_vol_now_ann": s_next * math.sqrt(252)}

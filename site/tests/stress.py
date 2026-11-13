@@ -563,6 +563,21 @@ async def core_and_library(page, label: str) -> None:
         fail(f"{label}: the library's link back to the core page is {res['back']}")
     await page.go_back()
     await page.wait_for_timeout(800)
+    # v0.44.1: a link to an element inside a library desk (a legend) goes there too; in v0.43 it left the core page blank
+    if await page.evaluate("document.querySelectorAll('section.view').length") == len(CORE_VIEWS):
+        await page.evaluate("location.hash = 'lg-buffett'")
+        try:
+            await page.wait_for_url("**/library.html#lg-buffett", timeout=20000)
+            await page.wait_for_timeout(1500)
+            v = await page.evaluate("(document.querySelector('.view:not([hidden])') || {}).id")
+            if v != "view-legends":
+                fail(f"{label}: a link to a legend opened {v}")
+        except Exception:
+            fail(f"{label}: a link to a legend stayed on {page.url}")
+        await page.go_back()
+        await page.wait_for_timeout(800)
+    else:
+        fail(f"{label}: going back from the library did not return to the core page")
 
 
 async def ask_flow(page, label: str) -> None:

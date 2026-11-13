@@ -3,6 +3,41 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.44.1: a bug hunt, reviewed. A second pass over the whole codebase found 28 defects; this release fixes
+them, adds three the pass had left open, and reruns the record on the result. The call is unchanged.
+
+- **Trading, the limits that were not limits.** The mandate's `max_gross` was never enforced (the target carried no
+  total to compare). The one-day loss halt always read 0% (the pass wrote today's equity, then read it back as
+  yesterday's). `trade halt` wrote `private/HALT`, which the paper bot and any run under another state root did not
+  read. All three now work. No live order has ever been placed; the paper account was never near either limit.
+- **Trading, the rest.** The account is valued at the quotes of the same pass. The one-ticket-a-day spacing counts
+  from the session traded. A ticket handed to the assistant is marked and never handed over twice, and still takes
+  its fills. A live order that times out keeps what filled. Tickets, approvals, the equity record and the paper
+  account are written through a temporary file. A failed sell stops the buys on the paper route.
+- **Paper fills, reconciled (added in review).** The paper account was saved before its fills reached the log. A
+  pass that died between the two left an account that had traded and a log that said it had not. Every pass now
+  checks first and records what is missing, once.
+- **The record, rerun.** December's decision is sized on the names held from January. Hedge ratios divide by the
+  same count as their covariance. The 10-year bond's duration was divided by 1 + y/2 twice. The weak-name short
+  pays its trading cost. The simple limits' volatility forecast now includes the decision day's move (added in
+  review). Holding, the call and the call with the short are unchanged to three decimals (0.878, 0.767, 0.926);
+  five of 95 monthly decisions changed size. The simple-limits comparison moved from 0.866 to 0.855.
+- **CPI timing (added in review).** The regime-switching bond hedge labelled each month with its own CPI, which
+  is published two weeks into the next month. The label is now the one known at the decision. Nine of 95 months
+  changed regime; the hedged book's return went from 31.8% to 32.7% a year. The look-ahead was not helping.
+- **Data.** The market-data step asked Databento for dates before its dataset begins, was refused for every name
+  and used Yahoo; it now starts at the dataset's first day, applies the book run's ticker-history and session
+  rules, and refuses a pull estimated above $5. Yahoo's bar for a session still trading is dropped. The FRED
+  stand-in from Yahoo works. A company the SEC refuses keeps its last good table, marked as carried.
+- **Site.** The core page stayed blank on a link to a legend, a security or an episode (v0.43); those links now
+  open the library there, and Back from the library returns to where the reader was (it had returned to the link
+  that sent them, which sent them again). The buyside calculators are wired once. The paper tiles no longer show "Infinity%".
+- **Engine.** The decision engine's cache had been off since v0.42.5 (the decorator sat on the wrong function).
+  The MCP server answers a malformed request with an error. Weekly workflows install from `requirements.lock`.
+- **Left open, by decision.** The walk-forward starts in February 2018; the regime simulation starts from today's
+  state; the local cache never expires; five feeds refuse the run's requests.
+- `tests/test_v44_1.py` (19 tests).
+
 Version 0.44: how sure is the size. Two outside audits asked the same thing: the size is the leverage at which one
 model's 95th-percentile drawdown reaches 25%, solved to four decimals; what does it become under other
 specifications, and did the cap hold where it was used? The call is unchanged. This is how far to trust it.

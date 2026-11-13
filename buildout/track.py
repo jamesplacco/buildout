@@ -44,6 +44,7 @@ CACHE = ROOT / ".cache" / "track"
 CANDIDATES = ["msft", "amzn", "goog", "meta", "nvda", "avgo", "tsla", "orcl", "amd", "intc", "mu", "tsm", "mrvl", "wdc", "pltr", "spcx"]
 N_NAMES = 9
 START = "2018-01-01"            # one year of warm-up after the bond series starts (2017)
+CPI_LAG_MONTHS = 1          # the consumer price index for a month is released about two weeks into the next
 COST = {"stock_bp": 5.0, "fut_bp": 1.0, "roll_bp_q": 1.0, "borrow_spread": 0.005, "short_borrow": 0.003, "short_trade_bp": 5.0}
 KELLY_FRACTION = 0.25
 DD_STOP = 0.15                  # hard stop: from a 15% drawdown, exposure is halved until the drawdown is back inside 10%
@@ -140,7 +141,7 @@ def limits_at(r: pd.Series, q: pd.Series, t: pd.Timestamp, rf: float) -> dict:
     x = r.loc[:t].dropna()
     qq = q.reindex(x.index)
     vol = float(x.tail(63).std() * math.sqrt(252))
-    lam = bk.ewma_vol(x).iloc[-1] * math.sqrt(252) if len(x) > 30 else vol
+    lam = bk.ewma_next(x) * math.sqrt(252) if len(x) > 30 else vol          # v0.44.1: the forecast made at this close, the day's own move included
     sig = max(vol, float(lam))
     h21 = bk.horizon_returns(x)
     sig_m = sig / math.sqrt(12)                                    # the Student-t tail is scaled to the one-month sigma
@@ -510,8 +511,13 @@ def regime_hedge_walk(r: pd.Series, bond: pd.Series, H: pd.DataFrame, pol: pd.Se
     long record in that same regime only (the stock-bond relation of the S&P since 1962, a monthly record that ends
     before the decision). Negative weights are floored at zero. Applied to the book's next month."""
     X = H.copy()
-    X["infl_dir"] = np.where(X["infl"] > X["infl"].shift(12), "rising", "falling")
+    # v0.44.1: a month's CPI is published in the middle of the next month, so the inflation reading known at a
+    # month-end is the month before's. Before, each month was labelled with its own CPI, which the decision at its
+    # close could not have seen. The label is lagged for every month, the history's and the current one's alike.
+    known = X["infl"].shift(CPI_LAG_MONTHS)
+    X["infl_dir"] = np.where(known > known.shift(12), "rising", "falling")
     X["policy"] = pol.reindex(X.index, method="ffill")
+    X = X[known.notna() & known.shift(12).notna()]
     rm = (1 + r.dropna()).resample("ME").prod() - 1
     bm = (1 + bond.reindex(r.dropna().index).fillna(0)).resample("ME").prod() - 1
     cm = (1 + cash.reindex(r.dropna().index).fillna(0)).resample("ME").prod() - 1

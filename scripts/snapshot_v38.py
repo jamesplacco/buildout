@@ -157,6 +157,17 @@ def main(argv: list[str]) -> None:
             vb = [r["h"]["put"]["var_cut"] for r in T["alternatives"]["rows"]]
             put = {"var_cut_min": [min(va), min(vb)], "var_cut_max": [max(va), max(vb)], "by_regime": [[r0["regime"], r0["h"]["put"]["var_cut"], r1["h"]["put"]["var_cut"]] for r0, r1 in zip(P0["alternatives"]["rows"], T["alternatives"]["rows"])]}
         T["restated"] = {"version": arg("--restated-version") or "v0.42.5", "date": arg("--restated-date") or T["asof"], "asof": T["asof"], "prior_asof": P0.get("asof"), "policies": pol, "put": put}
+    if arg("--revised-from-json") and T.get("restated"):     # v0.44.1: a later fix that moves the restated numbers is stated beside them, with its size
+        P1 = json.loads(Path(arg("--revised-from-json")).read_text())
+        mv = {}
+        for k, v in T["pit"]["policies"].items():
+            a = (P1.get("pit", {}).get("policies", {}).get(k) or {})
+            if a:
+                mv[k] = {m: [a["net"][m], v["net"][m]] for m in ("sharpe", "cagr", "maxdd")}
+        T["restated"]["revised"] = {"version": arg("--revised-version") or "v0.44.1", "date": arg("--revised-date") or T["asof"], "policies": mv,
+                                    "head_sharpe_move": max((abs(mv[k]["sharpe"][1] - mv[k]["sharpe"][0]) for k in ("hold", "call", "call_short") if k in mv), default=0.0),
+                                    "max_sharpe_move": max((abs(x["sharpe"][1] - x["sharpe"][0]) for x in mv.values()), default=0.0),
+                                    "max_maxdd_move": max((abs(x["maxdd"][1] - x["maxdd"][0]) for x in mv.values()), default=0.0)}
     try:                                        # v0.42.5: the paper account as committed, so a copy of the page without the daily files is not blank
         from buildout import trader
         if (ROOT / "paper" / "paper_account.json").exists():

@@ -182,9 +182,11 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
     # v0.44.1: in CI every file carries the checkout's time, so the dates above always agree. A file this run did not
     # rewrite still has that time; the checkout's time is read from a file no step writes.
     if os.environ.get("GITHUB_ACTIONS"):
-        ref = Path(__file__).resolve().parents[1] / "pyproject.toml"
-        if ref.exists():
-            t0 = ref.stat().st_mtime + 1.0
+        root = Path(__file__).resolve().parents[1]
+        refs = [root / n for n in ("pyproject.toml", "README.md", "site/page.html", "site/core.html", "site/src/body.html")]
+        refs = [r for r in refs if r.exists()]          # a checkout takes seconds: the latest of several files no step writes
+        if refs:
+            t0 = max(r.stat().st_mtime for r in refs) + 1.0
             stale = sorted(n for n, v in files.items() if v.get("present") and (out / n).exists() and (out / n).stat().st_mtime <= t0)
             check("Every file was rewritten by this run", not stale, ", ".join(stale) + " kept from an earlier run" if stale else "")
 

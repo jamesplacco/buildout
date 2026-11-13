@@ -87,7 +87,7 @@ def test_cutting_a_desk_needs_balanced_markup():
 
 def test_a_link_to_a_library_desk_opens_the_library():
     boot = (SRC / "boot.js").read_text()
-    assert "if (inLibrary(token)) { toLibrary(token);" in boot and 'location.href = LIBRARY_HREF + "#" + v' in boot
+    assert "if (inLibrary(token)) { toLibrary(token);" in boot and 'location.replace(LIBRARY_HREF + "#" + v)' in boot
     assert "const ALL_VIEWS = GROUP_ORDER.flatMap" in boot.split("if (CORE) {")[0], "the full list is taken before the groups are swapped"
     v = (SRC / "views.js").read_text()
     assert "BUILD_CORE === true && !(box && box.isConnected)" in v, "a step with no panel on the core page is skipped, not reported as failed"

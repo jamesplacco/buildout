@@ -222,6 +222,39 @@ def _mark_equity(account: dict, now: datetime) -> None:
     ex._atomic_write_text(p, "".join(json.dumps(r) + "\n" for r in rows))
 
 
+def _paper_fill_rows(done: list[dict]) -> list[dict]:
+    return [{"symbol": o["symbol"], "side": o["side"], "quantity": o["filled_qty"], "price": o["avg_price"], "order_id": o["order_id"], "status": "filled",
+             "session": o["fill_session"], "filled": o["filled"], "ordered": o["placed"], "inside_limit": o.get("inside_limit")} for o in done]
+
+
+def _reconcile_paper(broker, now: datetime, M: md.Mandate) -> dict | None:
+    """Fills the paper account holds that the fills log does not (v0.44.1). settle() changes the account and saves
+    it; the fills are written to the log after that. A pass that died between the two left an account that had
+    traded and a log that said it had not, and no later pass looked. Every pass now looks first: a filled order
+    with no entry in the log is recorded against its ticket and journalled as reconciled."""
+    st = getattr(broker, "state", None)
+    if not isinstance(st, dict):
+        return None
+    logged = {f.get("order_id") for e in ex._fills() for f in e.get("fills", [])}
+    by: dict[str, list] = {}
+    for o in (st.get("orders") or {}).values():
+        if o.get("status") == "filled" and o.get("order_id") not in logged:
+            by.setdefault(str(o["client_id"]).rsplit("-", 1)[0], []).append(o)
+    if not by:
+        return None
+    out = {"recorded": 0, "tickets": []}
+    for tid, done in sorted(by.items()):
+        rec = ex.record_fills(tid, _paper_fill_rows(done), now, at_close=True)
+        _journal({"event": "executed", "ticket": tid, "fills": len(done), "failures": 0, "status": rec.get("status"), "mandate_hash": M.hash(),
+                  "broker": getattr(broker, "name", "?"), "mode": M.mode, "reconciled": True,
+                  "why": "the account held these fills and the fills log did not; an earlier pass stopped between the two",
+                  "ordered": min((o["placed"] for o in done), default=None), "fill_session": min((o["fill_session"] for o in done), default=None),
+                  "filled_at": min((o["filled"] for o in done), default=None)})
+        out["recorded"] += len(done)
+        out["tickets"].append({"ticket": tid, "fills": len(done), "status": rec.get("status")})
+    return out
+
+
 def _settle_resting(broker, now: datetime, M: md.Mandate, cancel: bool = False) -> dict | None:
     """Resting paper orders meet the close of their session (v0.42.5). Reads the closes for the symbols with open
     orders, fills what is due, records the fills against their tickets and journals each ticket with the four
@@ -250,8 +283,7 @@ def _settle_resting(broker, now: datetime, M: md.Mandate, cancel: bool = False) 
     out = {"filled": 0, "tickets": [], "still_resting": len(broker.open_orders())}
     for tid, orders in sorted(by.items()):
         done = [o for o in orders if o["status"] == "filled"]
-        fills = [{"symbol": o["symbol"], "side": o["side"], "quantity": o["filled_qty"], "price": o["avg_price"], "order_id": o["order_id"], "status": "filled",
-                  "session": o["fill_session"], "filled": o["filled"], "ordered": o["placed"], "inside_limit": o.get("inside_limit")} for o in done]
+        fills = _paper_fill_rows(done)
         t = ex.load_ticket(tid)
         still = any(x["client_id"].rsplit("-", 1)[0] == tid for x in broker.open_orders())
         if fills:
@@ -307,6 +339,9 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
         broker.clock = lambda: now                      # one clock for the pass: the broker stamps orders with the trader's time
     if getattr(broker, "fills_at_close", False):        # v0.42.5: yesterday's resting orders meet their close first
         try:
+            rc = _reconcile_paper(broker, now, M)       # v0.44.1: and before that, anything a dead pass left unrecorded
+            if rc:
+                rep["reconciled"] = rc
             st = _settle_resting(broker, now, M, cancel=bool(h))
         except Exception as exc:  # noqa: BLE001
             return stop("broker error settling resting orders", reasons=[str(exc)])
