@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       FRED_API_KEY: ${{ secrets.FRED_API_KEY }}   # v0.33: optional; FRED's official API when set, its graph CSV otherwise
     timeout-minutes: 120      # v0.33: every data step has its own limit; this is the backstop
