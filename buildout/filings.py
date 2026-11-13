@@ -242,7 +242,7 @@ def month_cutoffs(months: pd.DatetimeIndex, days: pd.DatetimeIndex | None = None
     if days is None or len(days) == 0:
         return pd.DatetimeIndex(months)
     days = pd.DatetimeIndex(days)
-    d = pd.Series(days[days.dayofweek < 5].sort_values().unique())
+    d = pd.Series(days[days.day_of_week < 5].sort_values().unique())
     last = d.groupby(d.dt.to_period("M")).max()
     return pd.DatetimeIndex([last.get(m.to_period("M"), m) for m in months])
 
@@ -259,7 +259,7 @@ def trading_calendar(px: dict, share: float = 0.5) -> pd.DatetimeIndex:
     if cnt is None:
         return pd.DatetimeIndex([])
     cnt = cnt.sort_index()
-    cnt = cnt[cnt.index.dayofweek < 5]
+    cnt = cnt[cnt.index.day_of_week < 5]
     ref = cnt.groupby(cnt.index.year).transform("max")
     return pd.DatetimeIndex(cnt.index[cnt >= share * ref])
 
@@ -509,7 +509,7 @@ def monthly_returns(px: dict, cal: pd.DatetimeIndex | None = None) -> tuple[pd.D
     P = _month_end_prices(px, "adj_close", cal)
     if len(P):
         last = max(df.index.max() for df in px.values() if df is not None and not df.empty)
-        keep = [m for m in P.index if last > m or last >= (m + pd.offsets.BMonthEnd(0) if m.dayofweek < 5 else m - pd.offsets.BMonthEnd(1))]
+        keep = [m for m in P.index if last > m or last >= (m + pd.offsets.BMonthEnd(0) if m.day_of_week < 5 else m - pd.offsets.BMonthEnd(1))]
         P = P.loc[keep]
     return P.pct_change(fill_method=None), P
 

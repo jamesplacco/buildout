@@ -2553,7 +2553,7 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 70 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 71 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -6380,7 +6380,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
     );
     const labels = Object.keys(r.backtest.curves), colors = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
     const fig = figureBlock("Growth of $1 under four hedge and sizing policies", labels.map((l, i) => [colors[i], l, true]), "bt-chart");
-    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), s.dsr.toFixed(2)]; });
+    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), fx(s.dsr, 2)]; });
     const statFig = h("figure", "chart");
     statFig.append(tableBlock(["Policy", "CAGR", "Volatility", "Sharpe", "Max drawdown", "Deflated Sharpe"], stats),
       h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of every variant, policy and hedge tried would show by luck. Above 0.95 is the bar."));
@@ -9814,9 +9814,9 @@ python -m buildout trade halt             # the kill switch, every route</pre>
   }
 
   /* wisdom.js: not on the core page (scripts/prune_core.py) */
-  const tailWired = __stub;
-  const lgGroup = __stub;
-  const STANCE_WORD = __stub;
+  let tailWired = __stub;
+  let lgGroup = __stub;
+  let STANCE_WORD = __stub;
   function tailRows() { return __stub; }
   function renderTailsDesk() { return __stub; }
   function buildSwans() { return __stub; }
@@ -10014,15 +10014,15 @@ python -m buildout trade halt             # the kill switch, every route</pre>
     "&sigma;<sub>p</sub> / &sigma; = &radic;((1 + (<var>n</var> &minus; 1)<var>&rho;</var>) / <var>n</var>) &rarr; &radic;<var>&rho;</var> as <var>n</var> grows. Independent bets <var>n</var><sub>eff</sub> = <var>n</var> / (1 + (<var>n</var> &minus; 1)<var>&rho;</var>).");
 
   /* snap6.js: not on the core page (scripts/prune_core.py) */
-  const BRAIN_SNAP = __stub;
-  const BUY_SNAP = __stub;
-  const SOURCES_SNAP = __stub;
+  let BRAIN_SNAP = __stub;
+  let BUY_SNAP = __stub;
+  let SOURCES_SNAP = __stub;
 
   /* snap7.js: not on the core page (scripts/prune_core.py) */
-  const REASON_SNAP = __stub;
+  let REASON_SNAP = __stub;
 
   /* snap9.js: not on the core page (scripts/prune_core.py) */
-  const BRAIN_SERIES = __stub;
+  let BRAIN_SERIES = __stub;
 
   /* =====================================================================================
      brain.js (v0.6, v0.8): the system as a signed, weighted graph, and (v0.8) a reasoner over it. Shocks propagate order by order
@@ -12007,11 +12007,11 @@ The reader's question: ${q}`;
   }
 
   /* buyside6.js: not on the core page (scripts/prune_core.py) */
-  const depreciationTable = __stub;
-  const ddbFirstYear = __stub;
-  const cashEps = __stub;
-  const RED_TESTS = __stub;
-  const CS_PRESETS = __stub;
+  let depreciationTable = __stub;
+  let ddbFirstYear = __stub;
+  let cashEps = __stub;
+  let RED_TESTS = __stub;
+  let CS_PRESETS = __stub;
   function dcfValue() { return __stub; }
   function reverseDcf() { return __stub; }
   function creditStress() { return __stub; }
@@ -12036,8 +12036,8 @@ The reader's question: ${q}`;
   function drawBuyside() { return __stub; }
 
   /* pulse.js: not on the core page (scripts/prune_core.py) */
-  const CHECK_ITEMS = __stub;
-  const todayIso6 = __stub;
+  let CHECK_ITEMS = __stub;
+  let todayIso6 = __stub;
   function prevWeekday() { return __stub; }
   function pulseNow() { return __stub; }
   function renderRings() { return __stub; }
@@ -12391,11 +12391,11 @@ The reader's question: ${q}`;
   }
 
   /* games.js: not on the core page (scripts/prune_core.py) */
-  const GM = __stub;
-  const CAPEX_SEATS = __stub;
-  const GAME_PRESETS = __stub;
-  const LADDER_DEFAULT = __stub;
-  const FQ = __stub;
+  let GM = __stub;
+  let CAPEX_SEATS = __stub;
+  let GAME_PRESETS = __stub;
+  let LADDER_DEFAULT = __stub;
+  let FQ = __stub;
   function capexInputs() { return __stub; }
   function renderCapexGame() { return __stub; }
   function renderExit() { return __stub; }
@@ -12589,12 +12589,12 @@ The reader's question: ${q}`;
   const ENGINES_SNAP = [{"name":"macro","title":"Market regime","reads":[],"writes":["macro.json"],"module":"macro.py","offline":false,"does":"FRED: curve, spreads, levels, stock-bond correlation and regime"},{"name":"research","title":"Long-history research","reads":[],"writes":["research.json"],"module":"research.py","offline":false,"does":"156 years: the hedge line out of sample, fat tails, base rates"},{"name":"brain","title":"Brain links","reads":[],"writes":["brain.json"],"module":"brain.py","offline":false,"does":"Measured links by regime, the series, structure learning, robust links, self-checks (conformal, stacking, robustness values)"},{"name":"book","title":"Book run","reads":["research.json"],"writes":["report.json"],"module":"pipeline.py","offline":false,"does":"Databento: exposures, regime, hedge, sizing, VaR, stress, backtest, robustness"},{"name":"capex","title":"Fundamentals","reads":[],"writes":["capex.json"],"module":"fundamentals.py","offline":false,"does":"SEC XBRL: TTM cash flows, capex, debt, depreciation paths"},{"name":"atlas","title":"The atlas","reads":[],"writes":["atlas.json"],"module":"atlas.py","offline":false,"does":"Every monthly series: graphical lasso with stability selection, LiNGAM orientation, structural VAR, connectedness"},{"name":"labs","title":"The labs","reads":[],"writes":["labs.json"],"module":"labs.py","offline":false,"does":"Trading claims on 156 years: trend rules with a bootstrap, max test and deflated Sharpe; oscillators; valuation out of sample; Markov regimes; GARCH; cointegration; multiple testing"},{"name":"ml","title":"Machine-learning lab","reads":[],"writes":["ml.json"],"module":"ml.py","offline":false,"does":"Seven models and two ensembles forecast 12-month returns and 15% falls since 1940: purged walk-forward, Diebold-Mariano, CPCV and overfitting odds, conformal intervals, analogs, novelty"},{"name":"reality","title":"Reality check","reads":["labs.json"],"writes":["reality.json"],"module":"assumptions.py","offline":false,"does":"Every model's assumptions tested: tails, dependence, stability, correlation regimes, breakpoints, kappa, fragility, 400 stressed worlds"},{"name":"connect","title":"Data connections","reads":[],"writes":["connections.json"],"module":"datahub.py","offline":false,"does":"Credential and reachability check for every data source"},{"name":"market","title":"Technicals and fundamentals","reads":[],"writes":["technicals.json","statements.json"],"module":"technicals.py","offline":false,"does":"Daily OHLCV from the best available source: every indicator, signals, levels and an event study per ticker; SEC statements, ratios and scores"},{"name":"rl","title":"Reinforcement-learning sizing","reads":[],"writes":["rl.json"],"module":"rl.py","offline":false,"does":"Fitted Q iteration over trend, volatility, valuation and drawdown states, walk-forward from 1940"},{"name":"portfolio","title":"Portfolio engine","reads":[],"writes":["portfolio.json"],"module":"portfolio.py","offline":false,"does":"Stocks, Treasuries, gold and cash from a three-asset regime model, utility-optimal mixes in a risk budget, eight policies walked forward, a learner over policies, a regime-switching bootstrap of ten years and eight replayed drawdowns"},{"name":"geometry","title":"The shape of the market","reads":[],"writes":["geometry.json"],"module":"geometry.py","offline":false,"does":"Covariance matrices as points on a curved space (affine-invariant analogs, an era map, Frechet means), random matrix theory, persistent homology, optimal transport, the Levy area, long memory and volatility drag, every claim walked forward and corrected for testing many"},{"name":"decide","title":"Decision engine","reads":[],"writes":["decision.json"],"module":"decide.py","offline":false,"does":"Data to decision: stacked forecasts with a neural-network ensemble, hidden Markov regimes, changepoints, a Kalman stock-bond beta, dynamic model averaging, utility-optimal exposure inside a risk budget, an evidence gate, a hedge selector and a conservative RL check, walked forward from 1940"},{"name":"bonds","title":"Bonds, simply","reads":[],"writes":["bonds.json"],"module":"bondlab.py","offline":false,"does":"Every Treasury ETF repriced bond by bond on today's curve at any 10-year and 30-year yield; convexity, income, roll, break-evens; stocks per point of yield by inflation band"},{"name":"feeds","title":"Noteworthy","reads":[],"writes":["feeds.json"],"module":"feeds.py","offline":false,"does":"Feeds, heat, niche skew, lead time"},{"name":"reason","title":"Solver and games","reads":["macro.json","research.json","brain.json","capex.json","report.json"],"writes":["reason.json"],"module":"reasoner.py","offline":true,"does":"Tempered Bayes, the constrained choice, the game against Nature, value of information, games"},{"name":"valuation","title":"Valuation and accounting","reads":["capex.json","macro.json"],"writes":["valuation.json"],"module":"valuation.py","offline":true,"does":"Accounting quality, reverse DCF, base rates, irrationality and why, per position"},{"name":"causal","title":"Causal statistics","reads":["brain.json"],"writes":["causal.json"],"module":"causal_stats.py","offline":true,"does":"Granger, partial correlations, crisis behaviour, tail dependence, lead-lag"},{"name":"hedges","title":"Hedge book","reads":[],"writes":["hedges.json"],"module":"hedgebook.py","offline":true,"does":"Prebuilt hedges, priced and run through the scenarios; the advisor"},{"name":"ooda","title":"Decision loop","reads":["macro.json","research.json","brain.json","capex.json","report.json"],"writes":["ooda.json"],"module":"ooda.py","offline":true,"does":"Observe, orient, decide, act: one decision record per position and hedge"},{"name":"mind","title":"The mind","reads":["atlas.json","labs.json","research.json","ml.json","reality.json"],"writes":["mind.json"],"module":"mind.py","offline":true,"does":"One graph of the brain and the engine: concepts, markets, checked evidence, voices, engine modules, economies and signals"},{"name":"voices","title":"Investor voices","reads":[],"writes":["voices.json"],"module":"voices.py","offline":true,"does":"Verified quotes, extreme bear to extreme bull; integrity checked on every run"},{"name":"parameters","title":"The parameters","reads":["decision.json","portfolio.json","rl.json","ml.json","geometry.json","atlas.json","mind.json"],"writes":["parameters.json"],"module":"parameters.py","offline":true,"does":"Theta: every matrix the engine learns, its shape, the algorithm and objective that shaped it, its data, refit schedule and the desks it feeds"},{"name":"status","title":"Run status","reads":["*"],"writes":["status.json"],"module":"status.py","offline":true,"does":"Freshness and sanity checks on every output"}];
 
   /* hedgebook.js: not on the core page (scripts/prune_core.py) */
-  const HB_HEDGES = __stub;
-  const HB_IDS = __stub;
-  const HB_RUNNING_BP = __stub;
-  const HB_A = __stub;
-  const hbP = __stub;
-  const hbVixEnd = __stub;
+  let HB_HEDGES = __stub;
+  let HB_IDS = __stub;
+  let HB_RUNNING_BP = __stub;
+  let HB_A = __stub;
+  let hbP = __stub;
+  let hbVixEnd = __stub;
   function hbCosts() { return __stub; }
   function hbPnl() { return __stub; }
   function hbBook() { return __stub; }
@@ -12926,9 +12926,9 @@ The reader's question: ${q}`;
   }
 
   /* snap12.js: not on the core page (scripts/prune_core.py) */
-  const ROBUST_SNAP = __stub;
-  const VOICES_CFG = __stub;
-  const VOICES_LIB = __stub;
+  let ROBUST_SNAP = __stub;
+  let VOICES_CFG = __stub;
+  let VOICES_LIB = __stub;
 
   /* =====================================================================================
      robustb.js (v0.12): how far to trust the brain (renders buildout/brain_robust.py: brain.json or ROBUST_SNAP).
@@ -13493,29 +13493,29 @@ The reader's question: ${q}`;
   }
 
   /* voices.js: not on the core page (scripts/prune_core.py) */
-  const VC = __stub;
-  const VQ = __stub;
-  const VSTANCES = __stub;
-  const VSET = __stub;
-  const V_STOP = __stub;
-  const V_NEG = __stub;
-  const V_BULL = __stub;
-  const V_BEAR = __stub;
-  const V_DIR = __stub;
-  const V_FLIP = __stub;
-  const V_PHRASE = __stub;
-  const V_WORD = __stub;
-  const VKEYS = __stub;
-  const vQuoteDoc = __stub;
-  const vTopicDoc = __stub;
-  const V_IDX = __stub;
-  const vIdx = __stub;
-  const r9 = __stub;
-  const VS = __stub;
-  const V_EXAMPLES = __stub;
-  const vName = __stub;
-  const vDate = __stub;
-  const vUrl = __stub;
+  let VC = __stub;
+  let VQ = __stub;
+  let VSTANCES = __stub;
+  let VSET = __stub;
+  let V_STOP = __stub;
+  let V_NEG = __stub;
+  let V_BULL = __stub;
+  let V_BEAR = __stub;
+  let V_DIR = __stub;
+  let V_FLIP = __stub;
+  let V_PHRASE = __stub;
+  let V_WORD = __stub;
+  let VKEYS = __stub;
+  let vQuoteDoc = __stub;
+  let vTopicDoc = __stub;
+  let V_IDX = __stub;
+  let vIdx = __stub;
+  let r9 = __stub;
+  let VS = __stub;
+  let V_EXAMPLES = __stub;
+  let vName = __stub;
+  let vDate = __stub;
+  let vUrl = __stub;
   function vStem() { return __stub; }
   function vRaw() { return __stub; }
   function vWord() { return __stub; }
@@ -13533,26 +13533,26 @@ The reader's question: ${q}`;
   function wireVoices() { return __stub; }
 
   /* snap13.js: not on the core page (scripts/prune_core.py) */
-  const ATLAS_SNAP = __stub;
+  let ATLAS_SNAP = __stub;
 
   /* atlas.js: not on the core page (scripts/prune_core.py) */
-  const AT_H = __stub;
-  const AT_COLS = __stub;
-  const AT_JUDGED = __stub;
-  const AT_BOOK = __stub;
-  const AT_M = __stub;
-  const AT_M_SRC = __stub;
-  const atCum = __stub;
-  const AT_STAGES = __stub;
-  const AT_STEP = __stub;
-  const AT_HOLD = __stub;
-  const AT_FLY = __stub;
-  const atXY = __stub;
-  const atRad = __stub;
-  const atEl = __stub;
-  const AH = __stub;
-  const AT_VOICE = __stub;
-  const AT_VOICE_ID = __stub;
+  let AT_H = __stub;
+  let AT_COLS = __stub;
+  let AT_JUDGED = __stub;
+  let AT_BOOK = __stub;
+  let AT_M = __stub;
+  let AT_M_SRC = __stub;
+  let atCum = __stub;
+  let AT_STAGES = __stub;
+  let AT_STEP = __stub;
+  let AT_HOLD = __stub;
+  let AT_FLY = __stub;
+  let atXY = __stub;
+  let atRad = __stub;
+  let atEl = __stub;
+  let AH = __stub;
+  let AT_VOICE = __stub;
+  let AT_VOICE_ID = __stub;
   function atlasOk() { return __stub; }
   function atlasData() { return __stub; }
   function atMatrices() { return __stub; }
@@ -15022,16 +15022,16 @@ The reader's question: ${q}`;
   }
 
   /* snap15.js: not on the core page (scripts/prune_core.py) */
-  const SNAP15 = __stub;
-  const ML_SNAP = __stub;
-  const REAL_SNAP = __stub;
-  const EDGE_SNAP = __stub;
-  const DAM_SNAP = __stub;
+  let SNAP15 = __stub;
+  let ML_SNAP = __stub;
+  let REAL_SNAP = __stub;
+  let EDGE_SNAP = __stub;
+  let DAM_SNAP = __stub;
 
   /* ml.js: not on the core page (scripts/prune_core.py) */
-  const mlPct = __stub;
-  const mlX = __stub;
-  const mlP = __stub;
+  let mlPct = __stub;
+  let mlX = __stub;
+  let mlP = __stub;
   function mlOk() { return __stub; }
   function renderMlDesk() { return __stub; }
   function mlTables() { return __stub; }
@@ -15326,19 +15326,19 @@ The reader's question: ${q}`;
   }
 
   /* snap16.js: not on the core page (scripts/prune_core.py) */
-  const SNAP16 = __stub;
-  const TA_SNAP = __stub;
-  const FA_SNAP = __stub;
-  const RL_SNAP = __stub;
-  const CONN_SNAP = __stub;
-  const DIST_SNAP = __stub;
+  let SNAP16 = __stub;
+  let TA_SNAP = __stub;
+  let FA_SNAP = __stub;
+  let RL_SNAP = __stub;
+  let CONN_SNAP = __stub;
+  let DIST_SNAP = __stub;
 
   /* analysis.js: not on the core page (scripts/prune_core.py) */
-  const AN = __stub;
-  const anPct = __stub;
-  const anP = __stub;
-  const anX = __stub;
-  const AN_SIG = __stub;
+  let AN = __stub;
+  let anPct = __stub;
+  let anP = __stub;
+  let anX = __stub;
+  let AN_SIG = __stub;
   function anOk() { return __stub; }
   function renderAnalysisDesk() { return __stub; }
   function anAssetSeg() { return __stub; }
@@ -15353,11 +15353,11 @@ The reader's question: ${q}`;
   function renderDistribution() { return __stub; }
 
   /* snap17.js: not on the core page (scripts/prune_core.py) */
-  const SNAP17 = __stub;
-  const BONDS17 = __stub;
-  const TAPE17 = __stub;
-  const CX17 = __stub;
-  const CHRON17 = __stub;
+  let SNAP17 = __stub;
+  let BONDS17 = __stub;
+  let TAPE17 = __stub;
+  let CX17 = __stub;
+  let CHRON17 = __stub;
 
   /* =====================================================================================
      bondlab.js (v0.17): bonds broken down to what they are. Set the 10-year and 30-year yields; every Treasury ETF is
@@ -15486,11 +15486,11 @@ The reader's question: ${q}`;
   }
 
   /* bonds.js: not on the core page (scripts/prune_core.py) */
-  const BD_ORDER = __stub;
-  const BD = __stub;
-  const bdP = __stub;
-  const bdUsd = __stub;
-  const bdBp = __stub;
+  let BD_ORDER = __stub;
+  let BD = __stub;
+  let bdP = __stub;
+  let bdUsd = __stub;
+  let bdBp = __stub;
   function bdOk() { return __stub; }
   function bdFunds() { return __stub; }
   function renderBonds() { return __stub; }
@@ -15506,7 +15506,7 @@ The reader's question: ${q}`;
   function bdFour() { return __stub; }
 
   /* complexity.js: not on the core page (scripts/prune_core.py) */
-  const CX = __stub;
+  let CX = __stub;
   function cxOk() { return __stub; }
   function renderComplexity() { return __stub; }
   function cxChart() { return __stub; }
@@ -15816,8 +15816,8 @@ The reader's question: ${q}`;
   const PF20 = SNAP20.portfolio;
 
   /* pf.js: not on the core page (scripts/prune_core.py) */
-  const PF_COL = __stub;
-  const PF_POL = __stub;
+  let PF_COL = __stub;
+  let PF_POL = __stub;
   function pfOk() { return __stub; }
   function pfMixText() { return __stub; }
   function pfMixBar() { return __stub; }
@@ -15825,12 +15825,12 @@ The reader's question: ${q}`;
   function pfCharts() { return __stub; }
 
   /* snap21.js: not on the core page (scripts/prune_core.py) */
-  const SNAP21 = __stub;
-  const MX21 = __stub;
+  let SNAP21 = __stub;
+  let MX21 = __stub;
 
   /* mx.js: not on the core page (scripts/prune_core.py) */
-  const mxSame = __stub;
-  const mxMs = __stub;
+  let mxSame = __stub;
+  let mxMs = __stub;
   function mxOk() { return __stub; }
   function renderMatrix() { return __stub; }
   function mxBoardTable() { return __stub; }
@@ -15840,15 +15840,15 @@ The reader's question: ${q}`;
   function mxPearl() { return __stub; }
 
   /* snap22.js: not on the core page (scripts/prune_core.py) */
-  const SNAP22 = __stub;
-  const GEO22 = __stub;
+  let SNAP22 = __stub;
+  let GEO22 = __stub;
 
   /* geo.js: not on the core page (scripts/prune_core.py) */
-  const GEO_ERAS = __stub;
-  const geoEra = __stub;
-  const geoYr = __stub;
-  const geoSgn = __stub;
-  const geoName = __stub;
+  let GEO_ERAS = __stub;
+  let geoEra = __stub;
+  let geoYr = __stub;
+  let geoSgn = __stub;
+  let geoName = __stub;
   function geoOk() { return __stub; }
   function renderGeometry() { return __stub; }
   function geoMap() { return __stub; }
@@ -15876,7 +15876,7 @@ The reader's question: ${q}`;
   const pmNum = (v) => (typeof v === "number" ? (Number.isInteger(v) ? v.toLocaleString() : fx(v, Math.abs(v) < 0.01 ? 4 : 3)) : String(v));
   function pmValue(v) {
     if (v == null) return "n/a";
-    if (Array.isArray(v)) return v.map((x) => (Array.isArray(x) ? "[" + x.map(pmNum).join(", ") + "]" : pmNum(x))).join(", ");
+    if (Array.isArray(v)) return v.map((x) => (Array.isArray(x) ? "[" + x.map(pmNum).join(", ") + "]" : x && typeof x === "object" ? "(" + pmValue(x) + ")" : pmNum(x))).join(", ");      // v0.44.1: objects were "[object Object]"
     if (typeof v === "object") return Object.entries(v).map(([k, x]) => `${k} ${pmValue(x)}`).join("; ");
     if (typeof v === "boolean") return v ? "yes" : "no";
     return pmNum(v);
@@ -16201,7 +16201,7 @@ The reader's question: ${q}`;
   }
 
   /* snap25.js: not on the core page (scripts/prune_core.py) */
-  const SNAP25 = __stub;
+  let SNAP25 = __stub;
 
   /* =====================================================================================
      v0.25: REASONING (deduction, induction, abduction, invention), BORROWED MT_METHODS, THE MT_METHODS REGISTRY
@@ -16483,64 +16483,64 @@ The reader's question: ${q}`;
   }
 
   /* snap26.js: not on the core page (scripts/prune_core.py) */
-  const SNAP26 = __stub;
+  let SNAP26 = __stub;
 
   /* edges.js: not on the core page (scripts/prune_core.py) */
-  const E26 = __stub;
-  const e26N = __stub;
-  const e26S = __stub;
-  const e26T = __stub;
-  const e26Pct = __stub;
-  const e26Share = __stub;
-  const e26Luck = __stub;
-  const e26Tested = __stub;
-  const e26Partial = __stub;
+  let E26 = __stub;
+  let e26N = __stub;
+  let e26S = __stub;
+  let e26T = __stub;
+  let e26Pct = __stub;
+  let e26Share = __stub;
+  let e26Luck = __stub;
+  let e26Tested = __stub;
+  let e26Partial = __stub;
   function renderEdges() { return __stub; }
   function renderEdgesToday() { return __stub; }
 
   /* snap27.js: not on the core page (scripts/prune_core.py) */
-  const SNAP27 = __stub;
+  let SNAP27 = __stub;
 
   /* nowcast.js: not on the core page (scripts/prune_core.py) */
-  const N27 = __stub;
-  const n27Pct = __stub;
-  const n27Pts = __stub;
-  const n27Log = __stub;
-  const n27S = __stub;
-  const n27P = __stub;
-  const N27_GROUP = __stub;
-  const N27_SIG = __stub;
-  const N27_WIN = __stub;
-  const n27Date = __stub;
-  const N27_ANNOUNCED = __stub;
+  let N27 = __stub;
+  let n27Pct = __stub;
+  let n27Pts = __stub;
+  let n27Log = __stub;
+  let n27S = __stub;
+  let n27P = __stub;
+  let N27_GROUP = __stub;
+  let N27_SIG = __stub;
+  let N27_WIN = __stub;
+  let n27Date = __stub;
+  let N27_ANNOUNCED = __stub;
   function renderNowcast() { return __stub; }
   function renderNowcastToday() { return __stub; }
 
   /* snap28.js: not on the core page (scripts/prune_core.py) */
-  const SNAP28 = __stub;
+  let SNAP28 = __stub;
 
   /* filings.js: not on the core page (scripts/prune_core.py) */
-  const F28 = __stub;
-  const f28S = __stub;
-  const f28P = __stub;
-  const f28Pct = __stub;
-  const F28_FAM = __stub;
-  const F28_VCLASS = __stub;
+  let F28 = __stub;
+  let f28S = __stub;
+  let f28P = __stub;
+  let f28Pct = __stub;
+  let F28_FAM = __stub;
+  let F28_VCLASS = __stub;
   function renderFilings() { return __stub; }
 
   /* snap29.js: not on the core page (scripts/prune_core.py) */
-  const SNAP29 = __stub;
+  let SNAP29 = __stub;
 
   /* futures.js: not on the core page (scripts/prune_core.py) */
-  const F29 = __stub;
-  const f29S = __stub;
-  const f29P = __stub;
-  const f29Pct = __stub;
-  const F29_VCLASS = __stub;
-  const F29_DES = __stub;
-  const f29Date = __stub;
-  const F29_HEAD = __stub;
-  const SIGNALS29 = __stub;
+  let F29 = __stub;
+  let f29S = __stub;
+  let f29P = __stub;
+  let f29Pct = __stub;
+  let F29_VCLASS = __stub;
+  let F29_DES = __stub;
+  let f29Date = __stub;
+  let F29_HEAD = __stub;
+  let SIGNALS29 = __stub;
   function f29Rows() { return __stub; }
   function renderFutures() { return __stub; }
 
@@ -16823,7 +16823,7 @@ The reader's question: ${q}`;
   }
 
   /* snappc.js: not on the core page (scripts/prune_core.py) */
-  const SNAPPC = __stub;
+  let SNAPPC = __stub;
 
   /* =====================================================================================
      v0.34: THE PRIVATE CREDIT LENS, Blue Owl at the centre (buildout/private_credit.py, snapshot in snappc.js).
@@ -17471,13 +17471,13 @@ The reader's question: ${q}`;
   }
 
   /* levers_data.js: not on the core page (scripts/prune_core.py) */
-  const LEVERS_DATA = __stub;
+  let LEVERS_DATA = __stub;
 
   /* levers.js: not on the core page (scripts/prune_core.py) */
-  const LV_DEFAULTS = __stub;
-  const LV_SLIDERS = __stub;
-  const LV_STATE = __stub;
-  const lvM = __stub;
+  let LV_DEFAULTS = __stub;
+  let LV_SLIDERS = __stub;
+  let LV_STATE = __stub;
+  let lvM = __stub;
   function lvSens() { return __stub; }
   function leverModel() { return __stub; }
   function renderLevers() { return __stub; }
@@ -17582,7 +17582,8 @@ The reader's question: ${q}`;
       $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice.";
       return;
     }
-    const eq = Pp.equity_history, last = eq.length ? eq[eq.length - 1][1] : Pp.equity, ret = last / Pp.start_cash - 1;
+    const eq = Pp.equity_history || [], lp = eq.length ? eq[eq.length - 1][1] : null;
+    const last = fin(lp) && lp > 0 ? lp : fin(Pp.equity) && Pp.equity > 0 ? Pp.equity : Pp.start_cash, ret = last / Pp.start_cash - 1;      // v0.44.1: a null mark is not $0
     const early = !!(Pp.marks_asof && Pp.opened && Pp.marks_asof < Pp.opened);
     rsKpi($("#ex-pb-tiles"), [[`$${Math.round(last).toLocaleString()}`, "Equity", `${ret >= 0 ? "+" : MINUS}${Math.abs(ret * 100).toFixed(2)}% since ${isoNice(Pp.opened)}`],
       [String(Pp.tickets_filled), "Tickets filled", `${Pp.passes} passes; fills chain ${Pp.fills_chain && Pp.fills_chain.ok ? "verified" : "BROKEN"}`],
@@ -17634,7 +17635,7 @@ The reader's question: ${q}`;
   }
 
   /* deeprl.js: not on the core page (scripts/prune_core.py) */
-  const PPO_ENVS = __stub;
+  let PPO_ENVS = __stub;
   function renderDeepRl() { return __stub; }
 
   /* =====================================================================================
@@ -17644,7 +17645,7 @@ The reader's question: ${q}`;
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 51;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 70;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TEST_FILES = 71;      // tests/test_*.py, pinned by tests/test_v39_1.py
   const TESTS_PASSING = 910;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);

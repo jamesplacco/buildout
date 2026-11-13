@@ -27,7 +27,6 @@ basket of the weakest AI names. Then a hedge ratio that changes with the regime,
 """
 from __future__ import annotations
 
-import io
 import math
 import os
 from pathlib import Path
@@ -147,7 +146,7 @@ def limits_at(r: pd.Series, q: pd.Series, t: pd.Timestamp, rf: float) -> dict:
     sig_m = sig / math.sqrt(12)                                    # the Student-t tail is scaled to the one-month sigma
     es_hist = bk.es(h21, 0.05) if len(h21) > 100 else bk.t_es(sig_m, 0.05)
     es_now = max(es_hist * sig / max(float(x.std() * math.sqrt(252)), 1e-6), bk.t_es(sig_m, 0.05))
-    beta = float(np.cov(x.tail(252), qq.tail(252))[0, 1] / max(np.var(qq.tail(252)), 1e-12))
+    beta = float(np.cov(x.tail(252), qq.tail(252))[0, 1] / max(np.var(qq.tail(252), ddof=1), 1e-12))      # v0.44.1: ddof matches np.cov
     mu = rf + bk.EQUITY_PREMIUM * beta
     s = {"es": bk.ES_BUDGET / es_now if es_now > 0 else bk.MAX_GROSS, "vol": bk.VOL_TARGET / sig, "dd": dd_size(mu, sig, rf), "gross": bk.MAX_GROSS}
     k = min(s, key=s.get)
@@ -215,7 +214,10 @@ def live_rule_path(prices: dict, ust: pd.DataFrame, members: dict, month_ends: l
     so the record tested a cousin of the rule that trades; now it tests the rule itself."""
     import os
     from concurrent.futures import ProcessPoolExecutor
-    jobs = [(str(t.date()), members[t.year]) for t in month_ends if members.get(t.year)]
+    # v0.44.1: a decision is sized on the names it will hold: December's on the coming year's list (known at that close,
+    # since pit_members uses only data before the year starts), not on the year that is ending
+    held = {t: members.get((t + pd.offsets.MonthBegin(1)).year) or members.get(t.year) for t in month_ends}
+    jobs = [(str(t.date()), held[t]) for t in month_ends if held[t]]
     n = workers or max(1, min(4, os.cpu_count() or 1))
     if n == 1:
         _lr_init(prices, ust)
@@ -237,9 +239,7 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
     idx = r.dropna().index
     mes = month_ends(idx)
     rf_ann = (cash.reindex(idx).fillna(0.0) * 252).rolling(21, min_periods=1).mean()
-    rows, dec = [], []
-    stop_on = False
-    peak, level = 1.0, 1.0
+    dec = []
     vm = sizing_rules.exposure_path(r.dropna(), sizing_rules.HEADLINE)
     for i, t in enumerate(mes[:-1]):
         rf = float(rf_ann.loc[t])
@@ -379,7 +379,7 @@ def monthly_history() -> pd.DataFrame:
     dv = d["Dividend"].fillna(dy * p)
     y = d["Long Interest Rate"] / 100
     stock = (p + dv / 12) / p.shift(1) - 1
-    dur = (1 - (1 + y / 2) ** -20) / (y / 2) / 2 / (1 + y / 2)          # modified duration of a 10-year par bond
+    dur = (1 - (1 + y / 2) ** -20) / y          # modified duration of a 10-year par bond (v0.44.1: was divided by 1 + y/2 twice)
     bond = y.shift(1) / 12 - dur.shift(1) * y.diff()
     cpi = d["Consumer Price Index"]
     infl = cpi / cpi.shift(12) - 1
@@ -409,7 +409,7 @@ def regime_table(H: pd.DataFrame, pol: pd.Series | None, start: str = "1962-01-0
         if len(g) < 24:
             return
         c = float(g["stock"].corr(g["bond"]))
-        h = -float(np.cov(g["stock"], g["bond"])[0, 1] / np.var(g["bond"]))      # min-variance bond weight per $1 of stock
+        h = -float(np.cov(g["stock"], g["bond"])[0, 1] / np.var(g["bond"], ddof=1))      # min-variance bond weight per $1 of stock
         v0 = float(g["stock"].var())
         cut_min = 1 - float((g["stock"] + max(h, 0) * g["bond"]).var()) / v0
         cut_30 = 1 - float((g["stock"] + 0.3 * g["bond"]).var()) / v0
@@ -477,7 +477,7 @@ def alternatives(frames: dict, H: pd.DataFrame, vix: pd.Series, pol: pd.Series) 
                 continue
             s = g[k].dropna()
             nq = g["NQ"].reindex(s.index)
-            v = float(np.var(s)) if len(s) > 2 else 0.0
+            v = float(np.var(s, ddof=1)) if len(s) > 2 else 0.0
             w = -float(np.cov(nq, s)[0, 1] / v) if v > 0 else 0.0
             w = max(w, 0.0)
             cut = 1 - float((nq + w * s).var()) / float(nq.var()) if w > 0 else 0.0
@@ -500,7 +500,8 @@ def weak_basket(prices: dict[str, pd.DataFrame], cal: pd.DatetimeIndex) -> pd.Se
         pick = list(m.index[:3])
         w.loc[(w.index > a) & (w.index <= b), pick] = 1 / 3
     basket = (R.fillna(0) * w).sum(axis=1)
-    return (-basket - COST["short_borrow"] / 252).loc[me[0]:].rename("short_weak")
+    turn = rebalance_turnover(R, w)                       # v0.44.1: the rotation and the daily re-equalising pay short_trade_bp
+    return (-basket - COST["short_borrow"] / 252 - turn * COST["short_trade_bp"] / 1e4).loc[me[0]:].rename("short_weak")
 
 
 def regime_hedge_walk(r: pd.Series, bond: pd.Series, H: pd.DataFrame, pol: pd.Series, cash: pd.Series) -> dict:
@@ -522,7 +523,7 @@ def regime_hedge_walk(r: pd.Series, bond: pd.Series, H: pd.DataFrame, pol: pd.Se
         last = past.iloc[-1]
         same = past[(past["infl_dir"] == last["infl_dir"]) & (past["policy"] == last["policy"])]
         if len(same) >= 24:
-            w = max(0.0, -float(np.cov(same["stock"], same["bond"])[0, 1] / np.var(same["bond"])))
+            w = max(0.0, -float(np.cov(same["stock"], same["bond"])[0, 1] / np.var(same["bond"], ddof=1)))
         else:
             w = 0.0
         w = min(w, 1.0)

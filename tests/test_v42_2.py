@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from buildout.data import corporate_actions as CA
 from buildout.data.databento_source import DatabentoSource, session_filter
@@ -35,7 +34,7 @@ def _feed() -> pd.DataFrame:
     add("SPCX", days[days <= "2026-04-06"], 25.0, 20_000, 0.002)                             # Tuttle's SPAC ETF
     add("SPCX", days[days >= "2026-06-12"], 95.0, 60_000_000, 0.03)                          # SpaceX
     # winter Fridays: the 7 to 8 pm New York hour lands on Saturday UTC, for the names that traded in it
-    for fri in days[(days.dayofweek == 4) & (days.month.isin([11, 12, 1, 2]))]:
+    for fri in days[(days.day_of_week == 4) & (days.month.isin([11, 12, 1, 2]))]:
         for sym, p in (("QQQ", 400.0), ("MSFT", 300.0)):
             rows.append({"date": fri + pd.Timedelta(days=1), "symbol": sym, "open": p, "high": p, "low": p, "close": p, "volume": 900})
     # the evening before Thanksgiving 2024 lands on the holiday (a Thursday)
@@ -70,7 +69,7 @@ def test_the_fake_feed_reproduces_what_the_report_showed():
 def test_cleaned_closes_have_one_company_per_ticker_and_no_gaps():
     src = _source(_feed())
     c = src.adjusted_closes(SYMS, "2021-01-04", adjustments="auto")
-    assert (c.index.dayofweek < 5).all() and pd.Timestamp("2024-11-28") not in c.index
+    assert (c.index.day_of_week < 5).all() and pd.Timestamp("2024-11-28") not in c.index
     assert c["SPCX"].first_valid_index() == pd.Timestamp("2026-06-12")                 # SpaceX's own history only
     assert c["META"].first_valid_index() == pd.Timestamp("2021-01-04")                 # FB joined on
     assert c["META"].loc["2021-07-01":"2022-01-28"].min() > 100                        # the $15 ETF is gone

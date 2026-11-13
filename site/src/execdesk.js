@@ -98,7 +98,8 @@
       $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice.";
       return;
     }
-    const eq = Pp.equity_history, last = eq.length ? eq[eq.length - 1][1] : Pp.equity, ret = last / Pp.start_cash - 1;
+    const eq = Pp.equity_history || [], lp = eq.length ? eq[eq.length - 1][1] : null;
+    const last = fin(lp) && lp > 0 ? lp : fin(Pp.equity) && Pp.equity > 0 ? Pp.equity : Pp.start_cash, ret = last / Pp.start_cash - 1;      // v0.44.1: a null mark is not $0
     const early = !!(Pp.marks_asof && Pp.opened && Pp.marks_asof < Pp.opened);
     rsKpi($("#ex-pb-tiles"), [[`$${Math.round(last).toLocaleString()}`, "Equity", `${ret >= 0 ? "+" : MINUS}${Math.abs(ret * 100).toFixed(2)}% since ${isoNice(Pp.opened)}`],
       [String(Pp.tickets_filled), "Tickets filled", `${Pp.passes} passes; fills chain ${Pp.fills_chain && Pp.fills_chain.ok ? "verified" : "BROKEN"}`],

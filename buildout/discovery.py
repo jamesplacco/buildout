@@ -1988,12 +1988,11 @@ def summary(o: dict) -> list[str]:
                    f"{f['test_t2']['real']} had a t of 2 or more.")
     else:
         part = [e for e in o["edges"] if (e["test"]["net"].get("n") or 0) >= 12 and not e["test"].get("tested")]
-        out.append(f"No edge in the main calendar can be tested after 2017: every survivor trades commodities whose IMF series end in June 2017. "
+        out.append("No edge in the main calendar can be tested after 2017: every survivor trades commodities whose IMF series end in June 2017. "
                    + (f"{len(part)} can be followed on the few markets still trading (Brent, WTI, Henry Hub gas, gold), which is partial evidence and "
                       "is not counted." if part else ""))
     good = [x["family"] for x in o["families"] if x.get("beats_placebo")]
     out.append(("Families of idea that beat their own null: " + ", ".join(good) + ".") if good else "No family of idea beat its own null.")
-    dead = [e for e in o["edges"] if not (e["test"]["net"].get("n") or 0) >= 12]
     bk = o["book"]
     if bk.get("test", {}).get("sharpe") is not None:
         t = bk["test"]

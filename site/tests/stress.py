@@ -668,7 +668,8 @@ async def think_and_field(page, label: str) -> None:
     if await page.evaluate("document.querySelectorAll('#fd-notes tbody tr').length") != 1:
         fail(f"{label}: field notes did not survive a reload cleanly")
     if await page.evaluate("document.querySelectorAll('#fd-ms li').length") != 8:
-        fail(f"{label}: milestones after hostile storage: {await page.evaluate('document.querySelectorAll(\"#fd-ms li\").length')}")
+        n_ms = await page.evaluate('document.querySelectorAll("#fd-ms li").length')
+        fail(f"{label}: milestones after hostile storage: {n_ms}")
     txt = await page.evaluate("document.querySelector('#view-field').innerText")
     if bad_text(txt):
         fail(f"{label}: field desk shows {bad_text(txt)}")

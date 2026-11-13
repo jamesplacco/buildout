@@ -169,7 +169,6 @@ def test_execution_desk_targets_match_the_planner():
 
 # ---------------------------------------------------------------- the record
 def test_two_calls_effective_the_same_day_do_not_break_the_live_record():
-    from buildout import track
     s = pd.Series([0.58, 0.60], index=[pd.Timestamp("2026-11-09")] * 2).groupby(level=0).last()
     assert s.iloc[0] == 0.60
     src = (ROOT / "buildout" / "track.py").read_text()

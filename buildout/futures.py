@@ -156,7 +156,7 @@ def parse_carver(text: str) -> pd.DataFrame:
         out[a] = x[col].astype(float)
         out[b] = x[con].map(_yyyymm)
     f = pd.DataFrame(out).sort_index()
-    f = f[f["price"].notna() & (f.index.dayofweek < 5)]                  # Sunday-evening rows are the next session's open, not a close
+    f = f[f["price"].notna() & (f.index.day_of_week < 5)]                  # Sunday-evening rows are the next session's open, not a close
     return f[["price", "m_price", "carry", "m_carry", "forward", "m_forward"]]
 
 
@@ -726,7 +726,7 @@ def databento_frames(start: str = "2010-06-06", end: str | None = None, markets:
                       "m": [_yyyymm(int(y) * 100 + int(mo)) if pd.notna(y) and pd.notna(mo) else np.nan for y, mo in zip(defs["maturity_year"], defs["maturity_month"])]})
     D = D.dropna(subset=["m"]).sort_values("dday", kind="mergesort")
     bars["date"] = _day(bars["ts_event"])
-    bars = bars[bars["date"].dt.dayofweek < 5].copy()
+    bars = bars[bars["date"].dt.day_of_week < 5].copy()
     bars["instrument_id"] = bars["instrument_id"].astype("int64")
     bars = bars.sort_values("date", kind="mergesort")
     back = pd.merge_asof(bars, D, left_on="date", right_on="dday", by="instrument_id", direction="backward")["m"].to_numpy()

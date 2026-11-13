@@ -29,10 +29,10 @@ def session_filter(bars: pd.DataFrame, min_rel_volume: float = 0.10) -> tuple[pd
         return bars, []
     d = pd.to_datetime(bars["date"])
     dates = pd.Index(sorted(d.unique()))
-    drop = set(dates[dates.dayofweek >= 5])
+    drop = set(dates[dates.day_of_week >= 5])
     if "volume" in bars.columns and bars["volume"].notna().any() and float(bars["volume"].max()) > 0:
         vol = bars.assign(date=d).pivot_table(index="date", columns="symbol", values="volume", aggfunc="sum").sort_index()
-        wk = vol.loc[vol.index.dayofweek < 5]
+        wk = vol.loc[vol.index.day_of_week < 5]
         med = wk.rolling(41, center=True, min_periods=5).median()
         rel = (wk / med).median(axis=1, skipna=True)
         drop |= set(rel.index[rel < min_rel_volume])
@@ -218,7 +218,7 @@ class DatabentoSource:
             except Exception as exc:          # the name then starts at its own ticker's first day, and the report says so
                 info["former_ticker"][sym] = {"from": old, "until": until, "rows": 0, "error": f"{type(exc).__name__}: {exc}"[:200]}
         bars, dropped = session_filter(bars)
-        info["non_session_dates_dropped"] = {"count": len(dropped), "weekend": int(sum(pd.Timestamp(x).dayofweek >= 5 for x in dropped)),
+        info["non_session_dates_dropped"] = {"count": len(dropped), "weekend": int(sum(pd.Timestamp(x).day_of_week >= 5 for x in dropped)),
                                              "first": dropped[:3], "last": dropped[-3:]}
         self.cleaning = info
         return bars.sort_values(["date", "symbol"]).reset_index(drop=True)

@@ -107,7 +107,7 @@ def core_body(body: str, keep: list[str] = CORE_VIEWS) -> str:
 def stand_in(name: str, d: dict) -> str:
     """A file the core page leaves out, as inert stand-ins for the names it declares."""
     lines = [f"  /* {name}: not on the core page (scripts/prune_core.py) */"]
-    lines += [f"  const {c} = __stub;" for c in d.get("consts", [])]
+    lines += [f"  let {c} = __stub;" for c in d.get("consts", [])]      # v0.44.1: let, so shared code that resets one (boot.js) does not throw
     lines += [f"  function {f}() {{ return __stub; }}" for f in d.get("funcs", [])]
     return "\n".join(lines)
 

@@ -414,7 +414,7 @@ def correlation_block(rb: pd.Series, F: pd.DataFrame) -> dict:
     yearly = c_book.groupby(c_book.index.year).mean()
     return {"definition": "63-day exponentially weighted correlation of daily returns, book vs the 20-year par bond",
             "book_63d": float(c_book.iloc[-1]), "nasdaq_63d": float(c_q.iloc[-1]), "book_36m_monthly": m36,
-            "state": lab.iloc[-1], "state_since": str(lab[lab != lab.iloc[-1]].index[-1].date()) if (lab != lab.iloc[-1]).any() else None,
+            "state": lab.iloc[-1], "state_since": str(lab.index[(lab != lab.shift()).to_numpy()][-1].date()) if (lab != lab.iloc[-1]).any() else None,      # v0.44.1: the first day of the state, not the last day before it
             "share_days_hedging": float((lab == regime.HEDGING).mean()),
             "by_year": {int(k): float(v) for k, v in yearly.items()},
             "shock": [{"group": g, **{k: float(v) for k, v in r.items()}} for g, r in shock.iterrows()]}

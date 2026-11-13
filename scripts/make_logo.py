@@ -109,7 +109,8 @@ def favicon_png(svg: str, size: int = 64) -> bytes | None:
     with sync_playwright() as pw:
         b = pw.chromium.launch()
         p = b.new_page(viewport={"width": size, "height": size})
-        p.set_content(f'<body style="margin:0;background:transparent">{svg.replace("<svg ", f"<svg width=\"{size}\" height=\"{size}\" ", 1)}</body>')
+        sized = svg.replace("<svg ", f'<svg width="{size}" height="{size}" ', 1)      # v0.44.1: no backslash inside an f-string (3.11)
+        p.set_content(f'<body style="margin:0;background:transparent">{sized}</body>')
         out = p.screenshot(omit_background=True, clip={"x": 0, "y": 0, "width": size, "height": size})
         b.close()
     return out

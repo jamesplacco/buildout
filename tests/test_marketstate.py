@@ -65,7 +65,7 @@ def test_vol_block_premium_and_term():
 
 def test_liquidity_block_units_and_alignment():
     days = pd.date_range("2025-01-01", "2026-10-16", freq="D")
-    wed = days[days.dayofweek == 2]
+    wed = days[days.day_of_week == 2]
     fred = pd.DataFrame(index=days)
     fred.loc[wed, "WALCL"] = 6_755_639.0                  # millions
     fred.loc[wed, "WTREGEN"] = 883_373.0                  # millions

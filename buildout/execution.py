@@ -81,11 +81,25 @@ def load_params(path: str | Path | None = None) -> TradingParams:
 
 
 def halted() -> str | None:
+    """v0.44.1: private/HALT (what `trade halt` writes) stops every run, the paper bot and any --state run included."""
     if os.environ.get("BUILDOUT_TRADING_HALT"):
         return "BUILDOUT_TRADING_HALT is set"
-    if (state_root() / "HALT").exists():
-        return f"{state_root().name}/HALT exists"
+    for d in dict.fromkeys([state_root(), PRIVATE]):
+        if (d / "HALT").exists():
+            return f"{d.name}/HALT exists"
     return None
+
+
+def _atomic_write_text(path: Path, text: str) -> None:
+    """Write through a temporary file and rename it into place (v0.44.1), so a crash never leaves half a file."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with open(tmp, "w") as fh:
+        fh.write(text)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, path)
 
 
 def _bdays_between(a: str, b: str) -> int:
@@ -128,7 +142,7 @@ def target(call: dict, P: TradingParams, weights: dict[str, float]) -> dict:
         tw[P.short_symbol] = h
     if vix > 1e-6:
         tw[P.vix_symbol] = vix
-    return {"book_gross": g, "short": h, "vix": vix, "weights": tw, "variant": P.variant,
+    return {"book_gross": g, "short": h, "vix": vix, "gross_total": g + h + vix, "weights": tw, "variant": P.variant,
             "note": "PSQ is a daily-reset inverse ETF, close to but not the same as a futures short; VIXY carries the VIX futures roll cost."}
 
 
@@ -315,7 +329,7 @@ def _tickets_dir() -> Path:
 
 
 def _save_ticket(t: dict) -> None:
-    (_tickets_dir() / f"{t['id']}.json").write_text(json.dumps(t, indent=1))
+    _atomic_write_text(_tickets_dir() / f"{t['id']}.json", json.dumps(t, indent=1))
 
 
 TICKET_ID = re.compile(r"^tkt-[0-9a-f]{16}$")
@@ -419,7 +433,7 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_cl
     with _fills_path().open("a") as fh:
         fh.write(_canon(e) + "\n")
     t["status"] = status
-    (_tickets_dir() / f"{tid}.json").write_text(json.dumps(t, indent=1))
+    _atomic_write_text(_tickets_dir() / f"{tid}.json", json.dumps(t, indent=1))
     return {"ticket": tid, "status": status, "issues": issues, "entry": e["seq"], "chain_ok": verify_fills()["ok"]}
 
 
@@ -454,7 +468,7 @@ def paper_fill(tid: str) -> dict:
     marks = {s: (t["quotes"].get(s) or {}).get("last") or 0 for s in pos}
     A["equity"] = round(A["cash"] + sum(q * float(marks.get(s) or 0) for s, q in pos.items()), 2)
     state_root().mkdir(parents=True, exist_ok=True)
-    _paper_path().write_text(json.dumps(A, indent=1))
+    _atomic_write_text(_paper_path(), json.dumps(A, indent=1))
     return {"account": A, **record_fills(tid, fills)}
 
 

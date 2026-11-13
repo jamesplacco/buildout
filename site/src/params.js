@@ -8,7 +8,7 @@
   const pmNum = (v) => (typeof v === "number" ? (Number.isInteger(v) ? v.toLocaleString() : fx(v, Math.abs(v) < 0.01 ? 4 : 3)) : String(v));
   function pmValue(v) {
     if (v == null) return "n/a";
-    if (Array.isArray(v)) return v.map((x) => (Array.isArray(x) ? "[" + x.map(pmNum).join(", ") + "]" : pmNum(x))).join(", ");
+    if (Array.isArray(v)) return v.map((x) => (Array.isArray(x) ? "[" + x.map(pmNum).join(", ") + "]" : x && typeof x === "object" ? "(" + pmValue(x) + ")" : pmNum(x))).join(", ");      // v0.44.1: objects were "[object Object]"
     if (typeof v === "object") return Object.entries(v).map(([k, x]) => `${k} ${pmValue(x)}`).join("; ");
     if (typeof v === "boolean") return v ? "yes" : "no";
     return pmNum(v);

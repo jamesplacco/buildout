@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from buildout import book as B
 from buildout import sizing_rules as SR
 
 ROOT = Path(__file__).resolve().parents[1]

@@ -659,6 +659,9 @@ def main(argv: list[str] | None = None) -> None:
             ex.PRIVATE.mkdir(parents=True, exist_ok=True); (ex.PRIVATE / "HALT").write_text("halted from the command line\n"); print("halted: private/HALT"); return
         if a.action == "resume":
             (ex.PRIVATE / "HALT").unlink(missing_ok=True); print("resumed"); return
+        need = {"plan": ("quotes",), "paper-fill": ("ticket",), "fills": ("ticket", "fills")}.get(a.action, ())
+        if [n for n in need if not getattr(a, n)]:
+            raise SystemExit(f"trade {a.action} needs " + " and ".join(f"--{n}" for n in need))
         if a.action == "paper-fill":
             print(_j.dumps(ex.paper_fill(a.ticket), indent=1, default=str)); return
         if a.action == "fills":
@@ -746,7 +749,6 @@ def main(argv: list[str] | None = None) -> None:
         print("wrote", path)
         return
     if a.cmd == "edges":
-        import pandas as _pd
         from . import atlas, discovery, labs, unusual
         from .jsonout import write
         adl = atlas.download(fred=False)
@@ -857,6 +859,8 @@ def main(argv: list[str] | None = None) -> None:
             print(json.dumps(br.OrderJournal("robinhood_mcp", "agentic").all(), indent=1))
             return
         if a.action == "resolve":
+            if not a.client_id:
+                raise SystemExit("broker resolve needs the client id of the unknown order")
             print(json.dumps(br.resolve(a.client_id, order_id=a.order_id, not_sent=a.not_sent), indent=1))
             return
         b = br.MCPBroker()
@@ -976,8 +980,20 @@ def main(argv: list[str] | None = None) -> None:
         if a.json:
             from pathlib import Path
             from .jsonout import write
-            print("wrote", write({"units": "USD billions", "companies": out, "ttm": ttm, "skipped": failed},
-                                 Path(a.json).parent, Path(a.json).name))
+            carried = {}
+            if Path(a.json).exists():               # v0.44.1: a company the SEC refused today keeps its last good table, marked as carried
+                try:
+                    prev = json.loads(Path(a.json).read_text())
+                except (OSError, ValueError):
+                    prev = {}
+                for t in a.tickers:
+                    if t not in out and t in (prev.get("companies") or {}):
+                        out[t] = prev["companies"][t]
+                        if t in (prev.get("ttm") or {}) and t not in ttm:
+                            ttm[t] = prev["ttm"][t]
+                        carried[t] = (prev.get("carried") or {}).get(t) or prev.get("as_of") or "an earlier run"
+            print("wrote", write({"units": "USD billions", "as_of": __import__("datetime").date.today().isoformat(), "companies": out, "ttm": ttm,
+                                  "skipped": failed, "carried": carried}, Path(a.json).parent, Path(a.json).name))
     elif a.cmd == "status":
         from .status import build_status
         from .jsonout import write

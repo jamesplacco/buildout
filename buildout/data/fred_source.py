@@ -91,7 +91,9 @@ def from_treasury(sid: str, start: str | None = None) -> pd.Series:
 def from_index(sid: str) -> pd.Series:
     from ..datahub import yahoo
     df = yahoo(INDEX_TICKERS[sid], years=45)
-    s = df.set_index(pd.to_datetime(df["date"]))["close"].astype(float).dropna()
+    df = df.set_index("date") if "date" in df.columns else df      # v0.44.1: yahoo() returns the date as the index
+    s = df["close"].astype(float).dropna()
+    s.index = pd.to_datetime(s.index)
     s.name = sid
     return s
 

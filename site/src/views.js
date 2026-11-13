@@ -320,7 +320,7 @@
     );
     const labels = Object.keys(r.backtest.curves), colors = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
     const fig = figureBlock("Growth of $1 under four hedge and sizing policies", labels.map((l, i) => [colors[i], l, true]), "bt-chart");
-    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), s.dsr.toFixed(2)]; });
+    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), fx(s.dsr, 2)]; });
     const statFig = h("figure", "chart");
     statFig.append(tableBlock(["Policy", "CAGR", "Volatility", "Sharpe", "Max drawdown", "Deflated Sharpe"], stats),
       h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of every variant, policy and hedge tried would show by luck. Above 0.95 is the bar."));

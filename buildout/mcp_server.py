@@ -1160,7 +1160,6 @@ def filings_engine(ctx: Context, args: dict) -> dict:
     """v0.28: the filings engine from the shipped snapshot: insider and fundamental signals from SEC filings across
     every stock ever in the S&P 500, their monthly rank ICs, p-values from the IC series, portfolios and the book's readings.
     Before the first real run it returns the engine's design and its synthetic validation. Research only."""
-    from . import filings as fl
     S = _snap("snap28.js", "SNAP28", "filings")
     if not S:
         raise ToolError("no v0.28 snapshot: run python scripts/snapshot_v28.py")
@@ -1336,7 +1335,7 @@ def trading_status(ctx: Context, args: dict) -> dict:
 def trading_recommendation(ctx: Context, args: dict) -> dict:
     """The model's recommendation today, and, given the account and quotes from Robinhood's MCP, the trader's pass:
     the ticket, the mandate's verdict, and on the assistant route the orders to place."""
-    from . import broker as br, execution as ex, mandate as md, trader
+    from . import broker as br, mandate as md, trader
     rec = trader.recommendation()
     acct, quotes = args.get("account"), args.get("quotes")
     if not isinstance(acct, dict) or not isinstance(quotes, dict):
@@ -1649,6 +1648,8 @@ def handle(ctx: Context, msg: dict) -> dict | None:
     mid, method, params = msg.get("id"), msg["method"], msg.get("params") or {}
     if "id" not in msg:
         return None                                        # notifications (initialized, cancelled) need no reply
+    if not isinstance(params, dict):                       # v0.44.1: a malformed request is an error reply, never a crash
+        return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32602, "message": "params must be an object"}}
 
     def ok(result):
         return {"jsonrpc": "2.0", "id": mid, "result": result}
@@ -1668,7 +1669,7 @@ def handle(ctx: Context, msg: dict) -> dict | None:
         return ok({"tools": tool_list()})
     if method == "tools/call":
         name, args = params.get("name"), params.get("arguments") or {}
-        if name not in TOOLS:
+        if not isinstance(name, str) or name not in TOOLS:
             return err(-32602, f"unknown tool {name!r}")
         if not isinstance(args, dict):
             return err(-32602, "arguments must be an object")
@@ -1703,10 +1704,14 @@ def serve(ctx: Context, stdin=None, stdout=None) -> None:
         except ValueError:
             resp = {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}}
         else:
-            if isinstance(msg, list):                       # batches: answer each request
-                resp = [r for r in (handle(ctx, m) for m in msg) if r is not None] or None
-            else:
-                resp = handle(ctx, msg)
+            try:
+                if isinstance(msg, list):                   # batches: answer each request
+                    resp = [r for r in (handle(ctx, m) for m in msg) if r is not None] or None
+                else:
+                    resp = handle(ctx, msg)
+            except Exception as e:  # noqa: BLE001 - v0.44.1: no request can stop the server
+                print(f"buildout mcp: request failed: {e!r}", file=sys.stderr)
+                resp = {"jsonrpc": "2.0", "id": msg.get("id") if isinstance(msg, dict) else None, "error": {"code": -32603, "message": "internal error"}}
         if resp is not None:
             stdout.write(json.dumps(resp, separators=(",", ":")) + "\n")
             stdout.flush()

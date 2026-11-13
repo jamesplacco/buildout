@@ -4753,7 +4753,7 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 70 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 71 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -9628,7 +9628,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     );
     const labels = Object.keys(r.backtest.curves), colors = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
     const fig = figureBlock("Growth of $1 under four hedge and sizing policies", labels.map((l, i) => [colors[i], l, true]), "bt-chart");
-    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), s.dsr.toFixed(2)]; });
+    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), fx(s.dsr, 2)]; });
     const statFig = h("figure", "chart");
     statFig.append(tableBlock(["Policy", "CAGR", "Volatility", "Sharpe", "Max drawdown", "Deflated Sharpe"], stats),
       h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of every variant, policy and hedge tried would show by luck. Above 0.95 is the bar."));
@@ -15634,7 +15634,14 @@ The reader's question: ${q}`;
       box.append(c);
     });
   }
+  let bsWired = false;
   function buildBuyside() {
+    if (!bsWired) { bsWired = true; wireBuyside(); }      // v0.44.1: boot calls this up to three times; the inputs and presets are wired once
+    guard("Regime and gross", renderBsRegime, $("#bs-reg-tiles"));
+    guard("Hedge selector", renderBsSelector, $("#bs-sel"));
+    buildBuysideRest();
+  }
+  function wireBuyside() {
     ["#bd-c", "#bd-l"].forEach((id) => $(id) && $(id).addEventListener("input", () => guard("Depreciation calculator", updateDeprCalc, $("#bd-chart"))));
     ["#ce-ni", "#ce-de", "#ce-db", "#ce-sbc", "#ce-sw", "#ce-dr", "#ce-sh"].forEach((id) => $(id) && $(id).addEventListener("input", () => guard("Cash earnings bridge", updateCashEps)));
     ["#rd-mv", "#rd-f", "#rd-rf", "#rd-erp", "#rd-g3"].forEach((id) => $(id) && $(id).addEventListener("input", () => guard("Reverse DCF", updateRevDcf)));
@@ -15647,8 +15654,8 @@ The reader's question: ${q}`;
       b.addEventListener("click", () => { $("#cs-d").value = d * 100; $("#cs-r").value = r * 100; guard("Credit stress", updateCredit); });
       pre.append(b);
     });
-    guard("Regime and gross", renderBsRegime, $("#bs-reg-tiles"));
-    guard("Hedge selector", renderBsSelector, $("#bs-sel"));
+  }
+  function buildBuysideRest() {
     guard("Manual board", renderManualBoard, $("#bs-board"));
     guard("Red flags", renderRedFlags, $("#bs-flags"));
     guard("Replays", renderBsReplays, $("#bs-replay"));
@@ -21535,7 +21542,7 @@ Quotes: ${JSON.stringify(cands)}`;
   const pmNum = (v) => (typeof v === "number" ? (Number.isInteger(v) ? v.toLocaleString() : fx(v, Math.abs(v) < 0.01 ? 4 : 3)) : String(v));
   function pmValue(v) {
     if (v == null) return "n/a";
-    if (Array.isArray(v)) return v.map((x) => (Array.isArray(x) ? "[" + x.map(pmNum).join(", ") + "]" : pmNum(x))).join(", ");
+    if (Array.isArray(v)) return v.map((x) => (Array.isArray(x) ? "[" + x.map(pmNum).join(", ") + "]" : x && typeof x === "object" ? "(" + pmValue(x) + ")" : pmNum(x))).join(", ");      // v0.44.1: objects were "[object Object]"
     if (typeof v === "object") return Object.entries(v).map(([k, x]) => `${k} ${pmValue(x)}`).join("; ");
     if (typeof v === "boolean") return v ? "yes" : "no";
     return pmNum(v);
@@ -23715,7 +23722,8 @@ Quotes: ${JSON.stringify(cands)}`;
       $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice.";
       return;
     }
-    const eq = Pp.equity_history, last = eq.length ? eq[eq.length - 1][1] : Pp.equity, ret = last / Pp.start_cash - 1;
+    const eq = Pp.equity_history || [], lp = eq.length ? eq[eq.length - 1][1] : null;
+    const last = fin(lp) && lp > 0 ? lp : fin(Pp.equity) && Pp.equity > 0 ? Pp.equity : Pp.start_cash, ret = last / Pp.start_cash - 1;      // v0.44.1: a null mark is not $0
     const early = !!(Pp.marks_asof && Pp.opened && Pp.marks_asof < Pp.opened);
     rsKpi($("#ex-pb-tiles"), [[`$${Math.round(last).toLocaleString()}`, "Equity", `${ret >= 0 ? "+" : MINUS}${Math.abs(ret * 100).toFixed(2)}% since ${isoNice(Pp.opened)}`],
       [String(Pp.tickets_filled), "Tickets filled", `${Pp.passes} passes; fills chain ${Pp.fills_chain && Pp.fills_chain.ok ? "verified" : "BROKEN"}`],
@@ -23850,7 +23858,7 @@ Quotes: ${JSON.stringify(cands)}`;
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 51;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 70;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TEST_FILES = 71;      // tests/test_*.py, pinned by tests/test_v39_1.py
   const TESTS_PASSING = 910;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);

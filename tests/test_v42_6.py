@@ -4,7 +4,6 @@ baskets whose members someone else chose before 2018. The page's claims about th
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 import numpy as np

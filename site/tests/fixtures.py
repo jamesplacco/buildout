@@ -47,7 +47,7 @@ def fake_fred(seed: int = 3) -> pd.DataFrame:
     df["VXVCLS"] = df["VIXCLS"] * 1.05 + 1
     df["SP500"] = w.prices["QQQ"] * 20
     df["DEXJPUS"], df["CBBTCUSD"] = np.abs(walk(150, 0.4)) + 50, np.abs(walk(60000, 900)) + 5000
-    wed = idx[idx.dayofweek == 2]
+    wed = idx[idx.day_of_week == 2]
     df.loc[wed, "WALCL"] = np.abs(walk(6.8e6, 2e3))[: len(wed)]
     df.loc[wed, "WTREGEN"] = np.abs(walk(8.0e5, 5e3))[: len(wed)]
     df.loc[wed, "WRESBAL"] = np.abs(walk(3.1e3, 8))[: len(wed)]
@@ -60,7 +60,7 @@ def fake_fred(seed: int = 3) -> pd.DataFrame:
     df.loc[month_starts, "SAHMREALTIME"] = np.clip(walk(0.1, 0.03)[: len(month_starts)], -0.2, 1.2)
     df.loc[month_starts, "UNRATE"] = np.clip(walk(4.2, 0.05)[: len(month_starts)], 3, 9)
     df["T10Y3M"] = df["DGS10"] - df["DGS3MO"]
-    fri = idx[idx.dayofweek == 4]
+    fri = idx[idx.day_of_week == 4]
     df.loc[fri, "NFCI"] = walk(-0.5, 0.01)[: len(fri)]
     df.loc[fri, "ICSA"] = np.abs(walk(220000, 2000)[: len(fri)]) + 150000
     return df

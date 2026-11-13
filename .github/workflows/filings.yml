@@ -25,9 +25,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: requirements.lock
 
       - name: Install
-        run: pip install -e ".[dev]"
+        # v0.44.1: the same exact pins as CI and the daily run, so a new pandas cannot break the weekly job alone
+        run: pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
 
       - name: Restore the SEC and price cache
         uses: actions/cache@v5

@@ -19,8 +19,6 @@ On Robinhood: VIX futures are not open to agents; VIX ETFs (VIXY) trade as share
 """
 from __future__ import annotations
 
-import io
-import math
 import time
 from pathlib import Path
 

@@ -810,7 +810,6 @@ def today(D, pred, F, P, row, gamma, hedge, draws: int = 2000, seed: int = SEED)
 
 
 # ---------------------------------------------------------------- build
-@cache.memo("decide.build", deps=("buildout.infer", "buildout.nn", "buildout.ml", "buildout.rl", "buildout.labs", "buildout.geometry", "buildout.portfolio"), require=("dl",))
 def content_hash(dec: dict) -> str:
     """A name for one decision package's content (v0.42.5): the first 16 hex digits of the SHA-256 of its canonical
     JSON, without the hash itself, the time it was computed or the page's patch note. Two packages for the same month with different inputs
@@ -821,6 +820,7 @@ def content_hash(dec: dict) -> str:
     return hashlib.sha256(_json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode()).hexdigest()[:16]
 
 
+@cache.memo("decide.build", deps=("buildout.infer", "buildout.nn", "buildout.ml", "buildout.rl", "buildout.labs", "buildout.geometry", "buildout.portfolio"), require=("dl",))
 def build(dl: dict | None = None, cape_now: float | None = None, y10_now: float | None = None, quick: bool = False, gh: dict | None = None) -> dict:
     dl = dl or labs.download()
     S = labs.shiller(dl)

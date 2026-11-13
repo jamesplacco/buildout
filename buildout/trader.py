@@ -96,8 +96,20 @@ def journal(n: int = 50) -> list[dict]:
     p = _tdir() / "journal.jsonl"
     if not p.exists():
         return []
-    rows = [json.loads(x) for x in p.read_text().splitlines() if x.strip()]
-    return rows[-n:]
+    return _jsonl(p)[-n:]
+
+
+def _jsonl(p: Path) -> list[dict]:
+    """The rows of a .jsonl file; a line cut short by a crash mid-write is skipped, not fatal (v0.44.1)."""
+    out = []
+    for x in p.read_text().splitlines():
+        if not x.strip():
+            continue
+        try:
+            out.append(json.loads(x))
+        except json.JSONDecodeError:
+            continue
+    return out
 
 
 def _approvals() -> dict:
@@ -118,7 +130,7 @@ def approve(ticket_id: str, by: str = "", standing_minutes: int | None = None, n
         if t.get("status"):
             raise ValueError(f"ticket {ticket_id} is already {t['status']}")
         A[ticket_id] = {"by": by, "given": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "expires": t["expires"]}
-    (_tdir() / "approvals.json").write_text(json.dumps(A, indent=1))
+    ex._atomic_write_text(_tdir() / "approvals.json", json.dumps(A, indent=1))
     _journal({"event": "approved", "ticket": ticket_id, "by": by})
     return A
 
@@ -181,26 +193,33 @@ def evidence(paper_dir: Path | None = None, private_dir: Path | None = None) -> 
             "live_manual_tickets": live, "live_manual_tickets_required": LIVE_MANUAL_TICKETS_REQUIRED, "missing": missing}
 
 
-def _equity_history() -> dict:
+def _equity_history(before: str | None = None) -> dict:
+    """The equity record the mandate's halts read. before (v0.44.1): only points dated before this day, so
+    "yesterday" is never today's own point (which the pass writes first, and which made the day-loss halt read 0%)."""
     p = _tdir() / "equity.jsonl"
-    rows = [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.exists() else []
+    rows = _jsonl(p) if p.exists() else []
+    if before:
+        rows = [r for r in rows if str(r.get("date", "")) < before]
     out = {"peak_equity": max((r["equity"] for r in rows), default=None), "prev_equity": rows[-1]["equity"] if rows else None, "n": len(rows)}
     done = [r for r in journal(1000) if r.get("event") == "executed"]
     out["tickets_executed"] = len(done)
-    out["last_ticket_date"] = done[-1]["ts_utc"][:10] if done else None
+    # v0.44.1: a close-filled ticket is journalled the day after its session; the spacing rule counts from the
+    # session it traded in (else the bot could only trade every other day)
+    last = done[-1] if done else None
+    out["last_ticket_date"] = str(last.get("fill_session") or last.get("ordered") or last["ts_utc"])[:10] if last else None
     return out
 
 
 def _mark_equity(account: dict, now: datetime) -> None:
     p = _tdir() / "equity.jsonl"
     day = now.date().isoformat()
-    rows = [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.exists() else []
+    rows = _jsonl(p) if p.exists() else []
     row = {"date": day, "equity": float(account["equity"]), **({"marks_asof": account["marks_asof"]} if account.get("marks_asof") else {})}
     if rows and rows[-1]["date"] == day:
         rows[-1] = row
     else:
         rows.append(row)
-    p.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    ex._atomic_write_text(p, "".join(json.dumps(r) + "\n" for r in rows))
 
 
 def _settle_resting(broker, now: datetime, M: md.Mandate, cancel: bool = False) -> dict | None:
@@ -308,13 +327,17 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     done = [t for t in todays if t.get("status") in ("filled", "partially_filled")]
     if done:
         return stop("already traded today", ticket=done[-1]["id"])
+    handed = [t for t in todays if t.get("status") == "handed_off" and t.get("expires", "") > now.strftime("%Y-%m-%dT%H:%M:%SZ")]
+    if handed:                                          # v0.44.1: the same orders are never handed over twice
+        return stop("already handed to the assistant", ticket=handed[-1]["id"],
+                    reasons=["record its fills with record_fills, or wait for the ticket to expire"])
     # the account
     try:
         account = broker.account()
     except Exception as exc:  # noqa: BLE001
         return stop("broker error reading the account", reasons=[str(exc)])
+    hist = _equity_history(before=today)
     _mark_equity(account, now)
-    hist = _equity_history()
     rep["account"] = {"equity": account.get("equity"), "cash": account.get("cash"), "positions": len(account.get("positions") or [])}
     # the recommendation and the quotes
     call = call or ex.call_in_force(today)
@@ -329,6 +352,14 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     missing = [s for s in symbols if s not in quotes]
     if missing:
         return stop("no quote for a symbol the ticket needs", reasons=missing)
+    # v0.44.1: the account again at the quotes just read; before, equity (and the plan's check against cash plus
+    # positions, the targets and the halts) used the previous pass's marks
+    try:
+        account = broker.account()
+    except Exception as exc:  # noqa: BLE001
+        return stop("broker error reading the account", reasons=[str(exc)])
+    _mark_equity(account, now)
+    rep["account"] = {"equity": account.get("equity"), "cash": account.get("cash"), "positions": len(account.get("positions") or [])}
     # a staged ticket from an earlier pass today, still valid? else plan a new one
     staged = [t for t in todays if not t.get("status") and t.get("all_checks_pass")]
     ticket = None
@@ -378,6 +409,9 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     if getattr(broker, "name", "") == "assistant":
         for o in ticket["orders"]:
             broker.place(o["symbol"], o["side"], o["quantity"], o["limit_price"], f"{ticket['id']}-{o['seq']}")
+        t = ex.load_ticket(ticket["id"])
+        t["status"] = "handed_off"
+        ex._save_ticket(t)
         _journal({"event": "handoff", "ticket": ticket["id"], "orders": len(ticket["orders"]), **how})
         return stop("handed to the assistant", handoff=broker.handoff, record_with="record_fills(ticket_id, fills) once Robinhood reports them")
     # execute: sells first, then buys
@@ -408,6 +442,8 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
                     break
         if getattr(broker, "fills_at_close", False):
             resting += [(o, od) for o, od in placed if od.get("status") == "open"]
+            if (side == "sell" and failures) or unknown:
+                break
             continue
         deadline = min(time.time() + max_wait_seconds, _epoch(ticket["expires"]))
         for o, od in placed:
@@ -417,9 +453,13 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
                 st = broker.order(od["order_id"])
             if st.get("status") not in ("filled", "cancelled", "rejected", "failed") and st.get("status") != "filled":
                 try:
-                    st = broker.cancel(od["order_id"])
+                    st = {**st, **broker.cancel(od["order_id"])}
                 except Exception as exc:  # noqa: BLE001
                     failures.append({"symbol": o["symbol"], "side": side, "error": f"cancel: {exc}"})
+                try:                                    # v0.44.1: what filled before (or during) the cancel is still a fill
+                    st = {**st, **broker.order(od["order_id"])}
+                except Exception as exc:  # noqa: BLE001
+                    failures.append({"symbol": o["symbol"], "side": side, "error": f"order state after cancel unknown: {exc}", "unknown": True})
             fq = float(st.get("filled_qty") or (o["quantity"] if st.get("status") == "filled" else 0))
             if fq > 0:
                 fills.append({"symbol": o["symbol"], "side": side, "quantity": fq, "price": float(st.get("avg_price") or o["limit_price"]), "order_id": od["order_id"], "status": st.get("status", "filled")})

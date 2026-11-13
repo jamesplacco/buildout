@@ -22,7 +22,6 @@ import pytest
 from buildout import book as bk
 from buildout import sensitivity as sens
 from buildout import track
-from buildout.analytics import sizing
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "site" / "src"

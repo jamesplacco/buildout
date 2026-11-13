@@ -197,8 +197,7 @@ def test_the_journal_refuses_a_second_prepare_and_unknown_states(state):
 
 def test_the_trader_stops_after_an_unknown_order(state):
     """One unknown order, and nothing after it is sent."""
-    from datetime import datetime, timezone
-    from buildout import execution as ex, mandate as md, trader
+    from buildout import mandate as md, trader
     sys.path.insert(0, str(ROOT / "tests"))
     import test_v42 as T
 

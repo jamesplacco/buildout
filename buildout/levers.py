@@ -69,7 +69,6 @@ def model(p: dict | None = None) -> dict:
     eqN = evN - rows[-1]["debt"]
     moic = eqN / eq0 if eq0 > 0 else float("nan")
     irr = moic ** (1 / p["years"]) - 1 if moic > 0 else float("nan")
-    e_ref = e0 + (p["bolt_on_ebitda"] if p["years"] >= p["bolt_on_year"] else 0.0)
     debt_in = p["leverage"] * ev0 + (p["bolt_on_ebitda"] * p["bolt_on_multiple"] * p["leverage"] if p["years"] >= p["bolt_on_year"] else 0.0)
     # equity out less equity in = m0 (E_N - E0) + (m_exit - m0) E_N + (debt borrowed - debt left) - bolt-on price
     bridge = {"ebitda_growth": (eN - e0) * p["entry_multiple"], "multiple": (m_exit - p["entry_multiple"]) * eN, "paydown": debt_in - rows[-1]["debt"],

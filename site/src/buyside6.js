@@ -215,7 +215,14 @@
       box.append(c);
     });
   }
+  let bsWired = false;
   function buildBuyside() {
+    if (!bsWired) { bsWired = true; wireBuyside(); }      // v0.44.1: boot calls this up to three times; the inputs and presets are wired once
+    guard("Regime and gross", renderBsRegime, $("#bs-reg-tiles"));
+    guard("Hedge selector", renderBsSelector, $("#bs-sel"));
+    buildBuysideRest();
+  }
+  function wireBuyside() {
     ["#bd-c", "#bd-l"].forEach((id) => $(id) && $(id).addEventListener("input", () => guard("Depreciation calculator", updateDeprCalc, $("#bd-chart"))));
     ["#ce-ni", "#ce-de", "#ce-db", "#ce-sbc", "#ce-sw", "#ce-dr", "#ce-sh"].forEach((id) => $(id) && $(id).addEventListener("input", () => guard("Cash earnings bridge", updateCashEps)));
     ["#rd-mv", "#rd-f", "#rd-rf", "#rd-erp", "#rd-g3"].forEach((id) => $(id) && $(id).addEventListener("input", () => guard("Reverse DCF", updateRevDcf)));
@@ -228,8 +235,8 @@
       b.addEventListener("click", () => { $("#cs-d").value = d * 100; $("#cs-r").value = r * 100; guard("Credit stress", updateCredit); });
       pre.append(b);
     });
-    guard("Regime and gross", renderBsRegime, $("#bs-reg-tiles"));
-    guard("Hedge selector", renderBsSelector, $("#bs-sel"));
+  }
+  function buildBuysideRest() {
     guard("Manual board", renderManualBoard, $("#bs-board"));
     guard("Red flags", renderRedFlags, $("#bs-flags"));
     guard("Replays", renderBsReplays, $("#bs-replay"));

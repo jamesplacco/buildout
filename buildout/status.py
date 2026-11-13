@@ -179,6 +179,14 @@ def build_status(out_dir: str | Path, now: datetime | None = None) -> dict:
     stamps = sorted(v["written_utc"][:10] for v in files.values() if v.get("written_utc"))
     if stamps:
         check("Every file comes from the same run day", stamps[0] == stamps[-1], f"{stamps[0]} to {stamps[-1]}")
+    # v0.44.1: in CI every file carries the checkout's time, so the dates above always agree. A file this run did not
+    # rewrite still has that time; the checkout's time is read from a file no step writes.
+    if os.environ.get("GITHUB_ACTIONS"):
+        ref = Path(__file__).resolve().parents[1] / "pyproject.toml"
+        if ref.exists():
+            t0 = ref.stat().st_mtime + 1.0
+            stale = sorted(n for n, v in files.items() if v.get("present") and (out / n).exists() and (out / n).stat().st_mtime <= t0)
+            check("Every file was rewritten by this run", not stale, ", ".join(stale) + " kept from an earlier run" if stale else "")
 
     return {
         "generated_utc": now.isoformat(timespec="seconds"),

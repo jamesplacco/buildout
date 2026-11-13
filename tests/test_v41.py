@@ -8,7 +8,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from buildout import deeprl
 from buildout.rl import ACTIONS

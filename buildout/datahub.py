@@ -78,15 +78,20 @@ def _frame(rows: list[dict]) -> pd.DataFrame:
     return df[[c for c in ("open", "high", "low", "close", "volume") if c in df]].astype(float).dropna(subset=["close"])
 
 
-def parse_yahoo(js: dict) -> pd.DataFrame:
-    """Yahoo's chart JSON to OHLCV, scaled by adjclose/close so splits and dividends are adjusted on every column."""
+def parse_yahoo(js: dict, now: float | None = None) -> pd.DataFrame:
+    """Yahoo's chart JSON to OHLCV, scaled by adjclose/close so splits and dividends are adjusted on every column.
+    v0.44.1: a session still trading is dropped; its bar is the latest trade, not a close (the daily run starts mid-session)."""
     r = js["chart"]["result"][0]
     q = r["indicators"]["quote"][0]
     adj = (r["indicators"].get("adjclose") or [{}])[0].get("adjclose")
+    reg = (((r.get("meta") or {}).get("currentTradingPeriod") or {}).get("regular") or {})
+    open_from = reg.get("start") if reg.get("start") and reg.get("end") and (time.time() if now is None else now) < reg["end"] else None
     rows = []
     for i, ts in enumerate(r["timestamp"]):
         c = q["close"][i]
         if c is None:
+            continue
+        if open_from is not None and ts >= open_from:
             continue
         f = (adj[i] / c) if adj and adj[i] else 1.0
         rows.append({"date": dt.datetime.fromtimestamp(ts, dt.timezone.utc).date(), "open": (q["open"][i] or c) * f, "high": (q["high"][i] or c) * f,
@@ -117,12 +122,26 @@ def stooq(ticker: str) -> pd.DataFrame:
     return parse_stooq(http.get(f"https://stooq.com/q/d/l/?s={sym}&i=d", retries=2).decode("utf-8", "replace"))
 
 
-def databento(tickers: list[str], start: str, cfg_data=None) -> dict[str, pd.DataFrame]:
-    """Split-adjusted OHLCV from Databento with the engine's own factor logic (public split table fallback)."""
+def databento(tickers: list[str], start: str, cfg_data=None, max_cost_usd: float | None = None) -> dict[str, pd.DataFrame]:
+    """Split-adjusted OHLCV from Databento with the engine's own factor logic (public split table fallback).
+    v0.44.1: the start is moved to the dataset's first day (XNAS.ITCH begins 2018-05-01; asking for earlier was a
+    422 on every name, so every name fell to Yahoo); the bars go through daily_bars (the ticker-history rules and the
+    session filter the book's run uses); and a pull estimated above max_cost_usd is refused."""
     from .data.corporate_actions import split_factors
-    from .data.databento_source import DatabentoSource, apply_factors
+    from .data.databento_source import DatabentoSource, _range_bound, apply_factors
     src = DatabentoSource(equities_dataset=getattr(cfg_data, "equities_dataset", "auto") if cfg_data else "auto")
-    bars = src.raw_daily_bars(tickers, start)
+    ds = src.equities_dataset_for(start)
+    try:
+        first = _range_bound(src.hist.metadata.get_dataset_range(dataset=ds), "start", "ohlcv-1d")
+    except Exception:  # noqa: BLE001
+        first = pd.Timestamp("2018-05-01") if ds == "XNAS.ITCH" else None
+    if first is not None and pd.Timestamp(start) < first:
+        start = first.strftime("%Y-%m-%d")
+    cap = max_cost_usd if max_cost_usd is not None else float(getattr(cfg_data, "max_cost_usd", 5.0) if cfg_data else 5.0)
+    cost = float(src.estimate_cost(tickers, start, None, dataset=ds))
+    if cost > cap:
+        raise RuntimeError(f"Databento estimates ${cost:.2f} for this pull, above the ${cap:.2f} limit")
+    bars = src.daily_bars(tickers, start)
     out = {}
     for t, g in bars.groupby("symbol"):
         g = g.set_index("date").sort_index()
@@ -144,6 +163,9 @@ def ohlcv(ticker: str, years: int = 10, order: list[str] | None = None, prefetch
             if name == "databento":
                 if prefetched and ticker in prefetched:
                     df = prefetched[ticker]
+                elif prefetched:                       # v0.44.1: the batch pull ran (or failed); one more call per name only repeats it
+                    errs[name] = prefetched.get("_error") or "not in the batch pull"
+                    continue
                 else:
                     if not os.environ.get("DATABENTO_API_KEY"):
                         errs[name] = "no key"
