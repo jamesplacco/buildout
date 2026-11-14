@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "summary": {
-  "as_of": "2026-11-12",
+  "as_of": "2026-11-13",
   "data": "databento",
   "adjustments": {
    "source": "public",
@@ -47,9 +47,9 @@
    "diagnostics": {
     "equs_summary": {
      "start": "2024-07-01",
-     "end": "2026-11-13"
+     "end": "2026-11-14"
     },
-    "ohlcv_1h_cost_usd": 0.5412,
+    "ohlcv_1h_cost_usd": 0.5415,
     "ohlcv_1d_cost_usd": 0.0399
    },
    "note": "public split table; stock dividends excluded (price return); bond-fund income estimated from Treasury yields",
@@ -57,39 +57,39 @@
     "TLT": {
      "series": "DGS20",
      "expense_ratio": 0.0015,
-     "avg_income_ann": 0.032465
+     "avg_income_ann": 0.032475
     },
     "IEF": {
      "series": "DGS7",
      "expense_ratio": 0.0015,
-     "avg_income_ann": 0.02777
+     "avg_income_ann": 0.02778
     }
    },
    "evidence": "Estimated"
   },
   "regime_now": "amplifying",
-  "stock_bond_corr_now": 0.002923,
+  "stock_bond_corr_now": 0.005583,
   "hedge_ratio_now": 0.0,
-  "book_vol_ewma": 0.369487,
-  "book_vol_garch_next": 0.405207,
-  "vol_target_scale": 0.541291,
-  "kelly_leverage": 0.399577,
-  "drawdown_leverage_cap": 0.543137,
-  "recommended_gross": 0.541291,
-  "excess_return_needed_for_gross": 0.206246,
-  "var99_hist": 0.052086,
+  "book_vol_ewma": 0.369266,
+  "book_vol_garch_next": 0.400642,
+  "vol_target_scale": 0.541615,
+  "kelly_leverage": 0.395855,
+  "drawdown_leverage_cap": 0.542603,
+  "recommended_gross": 0.541615,
+  "excess_return_needed_for_gross": 0.206423,
+  "var99_hist": 0.052078,
   "cvar99_hist": 0.065165,
-  "var99_fhs": 0.067655,
-  "cvar99_fhs": 0.086944,
-  "effective_risk_contributors": 8.570981,
-  "effective_independent_bets": 1.426246,
-  "diversification_ratio": 1.508524,
+  "var99_fhs": 0.066879,
+  "cvar99_fhs": 0.086507,
+  "effective_risk_contributors": 8.560618,
+  "effective_independent_bets": 1.41598,
+  "diversification_ratio": 1.504311,
   "exposure": {
    "policy": "limits.portfolio.v1",
-   "equity": 0.541291,
+   "equity": 0.541615,
    "bond": 0.0,
-   "total_gross": 0.541291,
-   "net_long": 0.541291,
+   "total_gross": 0.541615,
+   "net_long": 0.541615,
    "premium": 0.0,
    "scaled_by": 1.0,
    "binding": []
@@ -104,8 +104,8 @@
    "sharpe": "excess over the accrued cash rate",
    "window": "every variant on the same dates after warm-up"
   },
-  "mu_shrunk": 0.195249,
-  "rf": 0.043,
+  "mu_shrunk": 0.194071,
+  "rf": 0.0432,
   "limits": {
    "max_gross": 1.5,
    "target_vol": 0.2,
@@ -986,7 +986,7 @@
     0.069005,
     0.052852,
     0.032992,
-    0.002923
+    0.005583
    ]
   },
   "label_episodes": [
@@ -1071,8 +1071,8 @@
     "index": 16,
     "regime": "amplifying",
     "start": "2026-06-04",
-    "end": "2026-11-12",
-    "days": 113
+    "end": "2026-11-13",
+    "days": 114
    }
   ],
   "shock_table": [
@@ -1106,7 +1106,7 @@
   "policies": [
    {
     "index": "none",
-    "ann_vol": 0.311635,
+    "ann_vol": 0.311675,
     "variance_reduction": 0.0,
     "worst_days_avg": -0.0447,
     "worst_days_saved": 0.0,
@@ -1115,38 +1115,38 @@
    },
    {
     "index": "static",
-    "ann_vol": 0.312933,
-    "variance_reduction": -0.008346,
+    "ann_vol": 0.312976,
+    "variance_reduction": -0.008368,
     "worst_days_avg": -0.043952,
     "worst_days_saved": 0.000748,
-    "ann_return_drag": -0.001618,
+    "ann_return_drag": -0.001673,
     "avg_ratio": 0.3
    },
    {
     "index": "min_var_long_only",
-    "ann_vol": 0.308457,
-    "variance_reduction": 0.020289,
+    "ann_vol": 0.3085,
+    "variance_reduction": 0.02027,
     "worst_days_avg": -0.042626,
     "worst_days_saved": 0.002074,
-    "ann_return_drag": 0.01769,
-    "avg_ratio": 0.23383
+    "ann_return_drag": 0.017681,
+    "avg_ratio": 0.233718
    },
    {
     "index": "regime_gated",
-    "ann_vol": 0.30854,
-    "variance_reduction": 0.019764,
+    "ann_vol": 0.308583,
+    "variance_reduction": 0.019745,
     "worst_days_avg": -0.042675,
     "worst_days_saved": 0.002025,
-    "ann_return_drag": 0.017893,
-    "avg_ratio": 0.22194
+    "ann_return_drag": 0.017884,
+    "avg_ratio": 0.221833
    }
   ],
   "by_regime": [
    {
     "index": "amplifying",
-    "days": 867.0,
-    "corr": 0.130583,
-    "hindsight_ratio": -0.235483,
+    "days": 868.0,
+    "corr": 0.130744,
+    "hindsight_ratio": -0.236085,
     "variance_reduction_at_ratio": 0.0,
     "tail_days": 22.0,
     "tail_hedge_avg": -0.001224,
@@ -1175,20 +1175,20 @@
   ],
   "candidates": {
    "TLT": {
-    "ann_vol": 0.308457,
-    "variance_reduction": 0.020289,
+    "ann_vol": 0.3085,
+    "variance_reduction": 0.02027,
     "worst_days_avg": -0.042626,
     "worst_days_saved": 0.002074,
-    "ann_return_drag": 0.01769,
-    "avg_ratio": 0.23383
+    "ann_return_drag": 0.017681,
+    "avg_ratio": 0.233718
    },
    "IEF": {
-    "ann_vol": 0.307919,
-    "variance_reduction": 0.023703,
+    "ann_vol": 0.307973,
+    "variance_reduction": 0.023616,
     "worst_days_avg": -0.043471,
     "worst_days_saved": 0.00123,
-    "ann_return_drag": 0.015051,
-    "avg_ratio": 0.451968
+    "ann_return_drag": 0.014915,
+    "avg_ratio": 0.451925
    }
   },
   "ratio_history": {
@@ -2067,152 +2067,152 @@
  "exposures": [
   {
    "index": "MSFT",
-   "market": 0.456904,
-   "ai": 0.414187,
-   "rates": -0.094947,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.262229
+   "market": 0.449281,
+   "ai": 0.41647,
+   "rates": -0.094681,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.261798
   },
   {
    "index": "AMZN",
-   "market": 0.912208,
-   "ai": 0.338888,
-   "rates": -0.186968,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.310476
+   "market": 0.906588,
+   "ai": 0.340709,
+   "rates": -0.186773,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.30976
   },
   {
    "index": "GOOGL",
-   "market": 0.758657,
-   "ai": 0.223095,
-   "rates": -0.020372,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.286167
+   "market": 0.761399,
+   "ai": 0.221948,
+   "rates": -0.020532,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.285414
   },
   {
    "index": "META",
-   "market": 0.954255,
-   "ai": 0.21461,
-   "rates": 0.075817,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.36026
+   "market": 0.926571,
+   "ai": 0.21391,
+   "rates": 0.075295,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.362658
   },
   {
    "index": "NVDA",
-   "market": 1.335363,
-   "ai": 0.078871,
-   "rates": -0.373471,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.311283
+   "market": 1.341725,
+   "ai": 0.075904,
+   "rates": -0.37377,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.310598
   },
   {
    "index": "AVGO",
-   "market": 1.66652,
-   "ai": -0.10839,
-   "rates": -0.278317,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.341918
+   "market": 1.686018,
+   "ai": -0.120628,
+   "rates": -0.279906,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.342405
   },
   {
    "index": "TSLA",
-   "market": 1.557204,
-   "ai": -0.021051,
-   "rates": -0.071674,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.386107
+   "market": 1.551521,
+   "ai": -0.019239,
+   "rates": -0.071428,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.385164
   },
   {
    "index": "SPCX",
-   "market": 1.554075,
-   "ai": 0.273623,
-   "rates": -0.26626,
-   "n_obs": 106.0,
-   "resid_vol_ann": 0.624899
+   "market": 1.549346,
+   "ai": 0.276497,
+   "rates": -0.267243,
+   "n_obs": 107.0,
+   "resid_vol_ann": 0.620941
   },
   {
    "index": "ORCL",
-   "market": 1.437195,
-   "ai": 0.686312,
-   "rates": 0.161716,
-   "n_obs": 2146.0,
-   "resid_vol_ann": 0.489435
+   "market": 1.434912,
+   "ai": 0.687304,
+   "rates": 0.161875,
+   "n_obs": 2147.0,
+   "resid_vol_ann": 0.488105
   }
  ],
  "risk_contributions": [
   {
    "index": "MSFT",
    "weight": 0.14,
-   "marginal": 0.154114,
-   "contribution": 0.021576,
-   "share": 0.072159
+   "marginal": 0.153091,
+   "contribution": 0.021433,
+   "share": 0.071363
   },
   {
    "index": "AMZN",
    "weight": 0.14,
-   "marginal": 0.261994,
-   "contribution": 0.036679,
-   "share": 0.12267
+   "marginal": 0.262371,
+   "contribution": 0.036732,
+   "share": 0.122303
   },
   {
    "index": "GOOGL",
    "weight": 0.14,
-   "marginal": 0.215715,
-   "contribution": 0.0302,
-   "share": 0.101001
+   "marginal": 0.217567,
+   "contribution": 0.030459,
+   "share": 0.101418
   },
   {
    "index": "META",
    "weight": 0.12,
-   "marginal": 0.271757,
-   "contribution": 0.032611,
-   "share": 0.109064
+   "marginal": 0.268273,
+   "contribution": 0.032193,
+   "share": 0.107189
   },
   {
    "index": "NVDA",
    "weight": 0.14,
-   "marginal": 0.339972,
-   "contribution": 0.047596,
-   "share": 0.159181
+   "marginal": 0.343913,
+   "contribution": 0.048148,
+   "share": 0.160314
   },
   {
    "index": "AVGO",
    "weight": 0.08,
-   "marginal": 0.387982,
-   "contribution": 0.031039,
-   "share": 0.103806
+   "marginal": 0.395641,
+   "contribution": 0.031651,
+   "share": 0.105387
   },
   {
    "index": "TSLA",
    "weight": 0.1,
-   "marginal": 0.387823,
-   "contribution": 0.038782,
-   "share": 0.129704
+   "marginal": 0.390003,
+   "contribution": 0.039,
+   "share": 0.129856
   },
   {
    "index": "SPCX",
    "weight": 0.08,
-   "marginal": 0.457489,
-   "contribution": 0.036599,
-   "share": 0.122403
+   "marginal": 0.458342,
+   "contribution": 0.036667,
+   "share": 0.122088
   },
   {
    "index": "ORCL",
    "weight": 0.06,
-   "marginal": 0.398739,
-   "contribution": 0.023924,
-   "share": 0.080013
+   "marginal": 0.400858,
+   "contribution": 0.024051,
+   "share": 0.080082
   }
  ],
  "erc_weights": {
-  "MSFT": 0.192218,
-  "AMZN": 0.125012,
-  "GOOGL": 0.147566,
-  "META": 0.118518,
-  "NVDA": 0.098898,
-  "AVGO": 0.083144,
-  "TSLA": 0.084946,
-  "SPCX": 0.071918,
-  "ORCL": 0.07778
+  "MSFT": 0.193615,
+  "AMZN": 0.125137,
+  "GOOGL": 0.146889,
+  "META": 0.120049,
+  "NVDA": 0.098079,
+  "AVGO": 0.081899,
+  "TSLA": 0.084725,
+  "SPCX": 0.071951,
+  "ORCL": 0.077657
  },
  "stress": {
   "episodes": [
@@ -2262,122 +2262,122 @@
   "scenarios": [
    {
     "scenario": "AI capex digestion (growth scare)",
-    "book": -0.214672,
+    "book": -0.214099,
     "hedge": 0.0,
-    "net": -0.214672,
-    "long_bond": 0.126184,
+    "net": -0.214099,
+    "long_bond": 0.126189,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "AI capex digestion (growth scare)",
-    "book": -0.214672,
-    "hedge": 0.037855,
-    "net": -0.176817,
-    "long_bond": 0.126184,
+    "book": -0.214099,
+    "hedge": 0.037857,
+    "net": -0.176243,
+    "long_bond": 0.126189,
     "hedge_ratio": 0.3
    },
    {
     "scenario": "AI capex digestion (growth scare)",
-    "book": -0.214672,
+    "book": -0.214099,
     "hedge": 0.0,
-    "net": -0.214672,
-    "long_bond": 0.126184,
+    "net": -0.214099,
+    "long_bond": 0.126189,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "AI financing / term-premium shock",
-    "book": -0.118875,
+    "book": -0.118448,
     "hedge": -0.0,
-    "net": -0.118875,
-    "long_bond": -0.107438,
+    "net": -0.118448,
+    "long_bond": -0.107434,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "AI financing / term-premium shock",
-    "book": -0.118875,
-    "hedge": -0.032231,
-    "net": -0.151106,
-    "long_bond": -0.107438,
+    "book": -0.118448,
+    "hedge": -0.03223,
+    "net": -0.150679,
+    "long_bond": -0.107434,
     "hedge_ratio": 0.3
    },
    {
     "scenario": "AI financing / term-premium shock",
-    "book": -0.118875,
+    "book": -0.118448,
     "hedge": -0.0,
-    "net": -0.118875,
-    "long_bond": -0.107438,
+    "net": -0.118448,
+    "long_bond": -0.107434,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "Inflation + hikes (2022 replay)",
-    "book": -0.22083,
+    "book": -0.220047,
     "hedge": -0.0,
-    "net": -0.22083,
-    "long_bond": -0.170187,
+    "net": -0.220047,
+    "long_bond": -0.170177,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "Inflation + hikes (2022 replay)",
-    "book": -0.22083,
-    "hedge": -0.051056,
-    "net": -0.271886,
-    "long_bond": -0.170187,
+    "book": -0.220047,
+    "hedge": -0.051053,
+    "net": -0.2711,
+    "long_bond": -0.170177,
     "hedge_ratio": 0.3
    },
    {
     "scenario": "Inflation + hikes (2022 replay)",
-    "book": -0.22083,
+    "book": -0.220047,
     "hedge": -0.0,
-    "net": -0.22083,
-    "long_bond": -0.170187,
+    "net": -0.220047,
+    "long_bond": -0.170177,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "AI melt-up, yields up",
-    "book": 0.153059,
+    "book": 0.152644,
     "hedge": -0.0,
-    "net": 0.153059,
-    "long_bond": -0.073507,
+    "net": 0.152644,
+    "long_bond": -0.073505,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "AI melt-up, yields up",
-    "book": 0.153059,
-    "hedge": -0.022052,
-    "net": 0.131007,
-    "long_bond": -0.073507,
+    "book": 0.152644,
+    "hedge": -0.022051,
+    "net": 0.130593,
+    "long_bond": -0.073505,
     "hedge_ratio": 0.3
    },
    {
     "scenario": "AI melt-up, yields up",
-    "book": 0.153059,
+    "book": 0.152644,
     "hedge": -0.0,
-    "net": 0.153059,
-    "long_bond": -0.073507,
+    "net": 0.152644,
+    "long_bond": -0.073505,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "Soft landing, cuts",
-    "book": 0.088849,
+    "book": 0.088526,
     "hedge": 0.0,
-    "net": 0.088849,
-    "long_bond": 0.081825,
+    "net": 0.088526,
+    "long_bond": 0.081827,
     "hedge_ratio": 0.0
    },
    {
     "scenario": "Soft landing, cuts",
-    "book": 0.088849,
+    "book": 0.088526,
     "hedge": 0.024548,
-    "net": 0.113397,
-    "long_bond": 0.081825,
+    "net": 0.113074,
+    "long_bond": 0.081827,
     "hedge_ratio": 0.3
    },
    {
     "scenario": "Soft landing, cuts",
-    "book": 0.088849,
+    "book": 0.088526,
     "hedge": 0.0,
-    "net": 0.088849,
-    "long_bond": 0.081825,
+    "net": 0.088526,
+    "long_bond": 0.081827,
     "hedge_ratio": 0.0
    }
   ]
@@ -2385,129 +2385,129 @@
  "backtest": {
   "stats": {
    "Book, unhedged": {
-    "cagr": 0.315511,
-    "vol": 0.311411,
-    "sharpe": 0.945497,
-    "sortino": 1.377392,
+    "cagr": 0.311539,
+    "vol": 0.311457,
+    "sharpe": 0.93566,
+    "sortino": 1.362569,
     "max_drawdown": -0.470637,
-    "calmar": 0.670391,
-    "skew": 0.050185,
-    "kurtosis": 7.922776,
-    "hit_rate": 0.56025,
+    "calmar": 0.661951,
+    "skew": 0.050984,
+    "kurtosis": 7.915687,
+    "hit_rate": 0.559981,
     "worst_day": -0.129209,
     "best_day": 0.164227,
-    "psr": 0.99667,
-    "sr_per_period": 0.059561,
-    "n": 2083,
-    "years": 8.265873,
-    "final_equity": 9.647608,
-    "cash_cagr": 0.028787,
-    "avg_turnover_ann": 1.546143,
+    "psr": 0.996385,
+    "sr_per_period": 0.058941,
+    "n": 2084,
+    "years": 8.269841,
+    "final_equity": 9.419592,
+    "cash_cagr": 0.028794,
+    "avg_turnover_ann": 1.545401,
     "cost_drag_ann": 0.000309,
-    "financing_ann": 9.505e-06,
-    "nav_final": 9.647608,
+    "financing_ann": 9.5e-06,
+    "nav_final": 9.419592,
     "start": "2018-07-31",
-    "dsr": 0.993877
+    "dsr": 0.993322
    },
    "Book + 30% TLT always": {
-    "cagr": 0.296441,
-    "vol": 0.312557,
-    "sharpe": 0.896266,
-    "sortino": 1.310112,
+    "cagr": 0.292436,
+    "vol": 0.312607,
+    "sharpe": 0.88624,
+    "sortino": 1.294958,
     "max_drawdown": -0.53389,
-    "calmar": 0.555247,
-    "skew": 0.121479,
-    "kurtosis": 7.912232,
-    "hit_rate": 0.555449,
+    "calmar": 0.547746,
+    "skew": 0.122185,
+    "kurtosis": 7.904963,
+    "hit_rate": 0.555182,
     "worst_day": -0.127336,
     "best_day": 0.168198,
-    "psr": 0.99503,
-    "sr_per_period": 0.056459,
-    "n": 2083,
-    "years": 8.265873,
-    "final_equity": 8.550665,
-    "cash_cagr": 0.028787,
-    "avg_turnover_ann": 2.118415,
-    "cost_drag_ann": 0.000424,
-    "financing_ann": -0.011481,
-    "nav_final": 8.550665,
+    "psr": 0.994611,
+    "sr_per_period": 0.055828,
+    "n": 2084,
+    "years": 8.269841,
+    "final_equity": 8.343264,
+    "cash_cagr": 0.028794,
+    "avg_turnover_ann": 2.117399,
+    "cost_drag_ann": 0.000423,
+    "financing_ann": -0.011483,
+    "nav_final": 8.343264,
     "start": "2018-07-31",
-    "dsr": 0.991082
+    "dsr": 0.990292
    },
    "Book + regime-gated TLT": {
-    "cagr": 0.331269,
-    "vol": 0.308876,
-    "sharpe": 0.989191,
-    "sortino": 1.450554,
+    "cagr": 0.327242,
+    "vol": 0.308924,
+    "sharpe": 0.979243,
+    "sortino": 1.435426,
     "max_drawdown": -0.501982,
-    "calmar": 0.659922,
-    "skew": 0.10668,
-    "kurtosis": 8.150671,
-    "hit_rate": 0.555929,
+    "calmar": 0.651899,
+    "skew": 0.107413,
+    "kurtosis": 8.143278,
+    "hit_rate": 0.555662,
     "worst_day": -0.123606,
     "best_day": 0.172228,
-    "psr": 0.997765,
-    "sr_per_period": 0.062313,
-    "n": 2083,
-    "years": 8.265873,
-    "final_equity": 10.645482,
-    "cash_cagr": 0.028787,
-    "avg_turnover_ann": 2.870351,
+    "psr": 0.997562,
+    "sr_per_period": 0.061687,
+    "n": 2084,
+    "years": 8.269841,
+    "final_equity": 10.393882,
+    "cash_cagr": 0.028794,
+    "avg_turnover_ann": 2.868974,
     "cost_drag_ann": 0.000574,
-    "financing_ann": -0.005527,
-    "nav_final": 10.645482,
+    "financing_ann": -0.005524,
+    "nav_final": 10.393882,
     "start": "2018-07-31",
-    "dsr": 0.995782
+    "dsr": 0.995379
    },
    "Vol-targeted + regime-gated TLT": {
-    "cagr": 0.243148,
-    "vol": 0.214246,
-    "sharpe": 0.991155,
-    "sortino": 1.420514,
+    "cagr": 0.241195,
+    "vol": 0.214243,
+    "sharpe": 0.983786,
+    "sortino": 1.4097,
     "max_drawdown": -0.332151,
-    "calmar": 0.732041,
-    "skew": -0.258595,
-    "kurtosis": 5.368966,
-    "hit_rate": 0.557369,
+    "calmar": 0.726161,
+    "skew": -0.257526,
+    "kurtosis": 5.366683,
+    "hit_rate": 0.557102,
     "worst_day": -0.07691,
     "best_day": 0.072564,
-    "psr": 0.997601,
-    "sr_per_period": 0.062437,
-    "n": 2083,
-    "years": 8.265873,
-    "final_equity": 6.043854,
-    "cash_cagr": 0.028787,
-    "avg_turnover_ann": 4.915532,
+    "psr": 0.997448,
+    "sr_per_period": 0.061973,
+    "n": 2084,
+    "years": 8.269841,
+    "final_equity": 5.970933,
+    "cash_cagr": 0.028794,
+    "avg_turnover_ann": 4.913175,
     "cost_drag_ann": 0.000983,
-    "financing_ann": 0.003082,
-    "nav_final": 6.043854,
+    "financing_ann": 0.003091,
+    "nav_final": 5.970933,
     "start": "2018-07-31",
-    "dsr": 0.99552
+    "dsr": 0.995205
    },
    "Cash only": {
-    "cagr": 0.028787,
-    "vol": 0.001248,
-    "sharpe": 0.308536,
-    "sortino": 0.447065,
+    "cagr": 0.028794,
+    "vol": 0.001247,
+    "sharpe": 0.309797,
+    "sortino": 0.449041,
     "max_drawdown": 0.0,
     "calmar": null,
-    "skew": -0.182948,
-    "kurtosis": 1.575571,
+    "skew": -0.183799,
+    "kurtosis": 1.575884,
     "hit_rate": 0.99904,
     "worst_day": 0.0,
     "best_day": 0.000223,
-    "psr": 0.811987,
-    "sr_per_period": 0.019436,
-    "n": 2083,
-    "years": 8.265873,
-    "final_equity": 1.264389,
-    "cash_cagr": 0.028787,
+    "psr": 0.813015,
+    "sr_per_period": 0.019515,
+    "n": 2084,
+    "years": 8.269841,
+    "final_equity": 1.264606,
+    "cash_cagr": 0.028794,
     "avg_turnover_ann": 0.0,
     "cost_drag_ann": 0.0,
-    "financing_ann": 0.028369,
-    "nav_final": 1.264389,
+    "financing_ann": 0.028376,
+    "nav_final": 1.264606,
     "start": "2018-07-31",
-    "dsr": 0.750743
+    "dsr": 0.750872
    }
   },
   "curves": {
@@ -3380,7 +3380,7 @@
      9.770476,
      9.514297,
      9.297751,
-     9.647608
+     9.419592
     ]
    },
    "Book + 30% TLT always": {
@@ -4252,7 +4252,7 @@
      8.714627,
      8.496429,
      8.309427,
-     8.550665
+     8.343264
     ]
    },
    "Book + regime-gated TLT": {
@@ -5124,7 +5124,7 @@
      10.781059,
      10.498383,
      10.259439,
-     10.645482
+     10.393882
     ]
    },
    "Vol-targeted + regime-gated TLT": {
@@ -5996,7 +5996,7 @@
      6.109597,
      5.994306,
      5.894807,
-     6.043854
+     5.970933
     ]
    },
    "Cash only": {
@@ -6868,30 +6868,30 @@
      1.261428,
      1.262477,
      1.263529,
-     1.264389
+     1.264606
     ]
    }
   }
  },
  "signal": {
-  "n": 1600,
-  "hit_rate": 0.63875,
-  "base_rate": 0.655625,
-  "brier": 0.242946,
-  "brier_skill": -0.076026,
-  "log_loss": 0.685628,
-  "auc": 0.491004,
+  "n": 1601,
+  "hit_rate": 0.638351,
+  "base_rate": 0.655215,
+  "brier": 0.243035,
+  "brier_skill": -0.075813,
+  "log_loss": 0.685804,
+  "auc": 0.49147,
   "calibration": [
    {
     "index": 0,
-    "predicted": 0.456904,
-    "realized": 0.66875,
-    "n": 320
+    "predicted": 0.45735,
+    "realized": 0.669782,
+    "n": 321
    },
    {
     "index": 1,
-    "predicted": 0.64518,
-    "realized": 0.715625,
+    "predicted": 0.645243,
+    "realized": 0.7125,
     "n": 320
    },
    {
@@ -6919,63 +6919,63 @@
   "rows": [
    {
     "index": "MSFT",
-    "current": 0.135016,
+    "current": 0.13803,
     "target": 0.14,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "AMZN",
-    "current": 0.137013,
+    "current": 0.138208,
     "target": 0.14,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "GOOGL",
-    "current": 0.144327,
+    "current": 0.144418,
     "target": 0.14,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "META",
-    "current": 0.115268,
+    "current": 0.119999,
     "target": 0.12,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "NVDA",
-    "current": 0.136794,
+    "current": 0.134144,
     "target": 0.14,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "AVGO",
-    "current": 0.086524,
+    "current": 0.082563,
     "target": 0.08,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "TSLA",
-    "current": 0.103647,
+    "current": 0.102888,
     "target": 0.1,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "SPCX",
-    "current": 0.078004,
+    "current": 0.077055,
     "target": 0.08,
     "action": "hold",
     "trade": 0.0
    },
    {
     "index": "ORCL",
-    "current": 0.06342,
+    "current": 0.062709,
     "target": 0.06,
     "action": "hold",
     "trade": 0.0
@@ -6984,7 +6984,7 @@
  },
  "decision": {
   "schema": 1,
-  "as_of": "2026-11-12",
+  "as_of": "2026-11-13",
   "policies": {
    "hedge.tlt.v2": "Hold TLT at the minimum-variance ratio (capped at 1.0x) only while the stock-bond state is 'hedging' and, when the research has a reliable inflation line, 36-month inflation is below it. The state enters 'hedging' when the correlation is at or below -0.10 and leaves only when it rises above 0.",
    "size.equity.v2": "Equity scale = the smallest of: volatility target / forecast volatility, the drawdown cap, and max gross. Quarter Kelly is reported beside it as an edge check: the excess return that would justify this size.",
@@ -6992,8 +6992,8 @@
   },
   "inputs": {
    "corr63": {
-    "value": 0.002923,
-    "date": "2026-11-12"
+    "value": 0.005583,
+    "date": "2026-11-13"
    },
    "infl36": {
     "value": 0.031273,
@@ -7027,26 +7027,26 @@
   "size": {
    "policy": "size.equity.v2",
    "status": "ok",
-   "scale": 0.541291,
+   "scale": 0.541615,
    "binding": "vol_target",
    "candidates": {
-    "vol_target": 0.541291,
-    "drawdown_cap": 0.543137,
+    "vol_target": 0.541615,
+    "drawdown_cap": 0.542603,
     "max_gross": 1.5
    },
    "kelly_check": {
-    "kelly_leverage": 0.399577,
-    "excess_return_needed": 0.206246,
+    "kelly_leverage": 0.395855,
+    "excess_return_needed": 0.206423,
     "kelly_supports_size": false
    },
    "blocked": []
   },
   "limits": {
    "policy": "limits.portfolio.v1",
-   "equity": 0.541291,
+   "equity": 0.541615,
    "bond": 0.0,
-   "total_gross": 0.541291,
-   "net_long": 0.541291,
+   "total_gross": 0.541615,
+   "net_long": 0.541615,
    "premium": 0.0,
    "scaled_by": 1.0,
    "binding": []
@@ -7055,14 +7055,14 @@
   "blocked": []
  },
  "tail": {
-  "months": 2146,
+  "months": 2147,
   "alpha": 0.975,
-  "normal": 0.044323,
-  "student_t": 0.054255,
+  "normal": 0.04434,
+  "student_t": 0.054234,
   "historical": 0.054614,
-  "nu": 4.037572,
-  "var_normal": 0.03698,
-  "var_t": 0.037301
+  "nu": 4.047761,
+  "var_normal": 0.036997,
+  "var_t": 0.037315
  },
  "hedge_selector": {
   "hedging": {
@@ -7114,38 +7114,38 @@
    ]
   },
   "amplifying": {
-   "periods": 867,
+   "periods": 868,
    "book_es": 0.034152,
    "rows": [
     {
      "hedge": "IEF",
      "on_worst": -0.000333,
      "es_removed": -0.000263,
-     "carry": 0.035376,
+     "carry": 0.03459,
      "per_carry": null,
      "hit": 0.454545,
-     "periods": 867
+     "periods": 868
     },
     {
      "hedge": "TLT",
      "on_worst": -0.002108,
      "es_removed": -0.00102,
-     "carry": 0.055459,
+     "carry": 0.054947,
      "per_carry": null,
      "hit": 0.386364,
-     "periods": 867
+     "periods": 868
     }
    ]
   }
  },
  "roll_spread_bps": {
   "MSFT": null,
-  "AMZN": 126.707914,
+  "AMZN": 128.941551,
   "GOOGL": null,
   "META": null,
-  "NVDA": 130.033048,
-  "AVGO": 123.212255,
-  "TSLA": 116.355802,
+  "NVDA": 134.739508,
+  "AVGO": 135.421468,
+  "TSLA": 120.507903,
   "SPCX": null,
   "ORCL": null
  },
@@ -7154,80 +7154,80 @@
    "variants": {
     "Book, unhedged": {
      "sharpe": [
-      0.385732,
-      0.932306,
-      1.49853
+      0.412793,
+      0.924973,
+      1.463702
      ],
      "cagr": [
-      0.106719,
-      0.310425,
-      0.53675
+      0.11529,
+      0.306191,
+      0.519968
      ],
      "max_drawdown": [
-      -0.590752,
-      -0.397057,
-      -0.29436
+      -0.578075,
+      -0.388572,
+      -0.285716
      ],
      "p_beats_base": null
     },
     "Book + 30% TLT always": {
      "sharpe": [
-      0.336203,
-      0.885143,
-      1.425509
+      0.339911,
+      0.876719,
+      1.450118
      ],
      "cagr": [
-      0.08539,
-      0.289288,
-      0.513666
+      0.088063,
+      0.288279,
+      0.509751
      ],
      "max_drawdown": [
-      -0.628089,
-      -0.416976,
+      -0.603755,
+      -0.406566,
       -0.301252
      ],
-     "p_beats_base": 0.152
+     "p_beats_base": 0.15
     },
     "Book + regime-gated TLT": {
      "sharpe": [
-      0.443877,
-      0.983008,
-      1.545601
+      0.471888,
+      0.969616,
+      1.532707
      ],
      "cagr": [
-      0.128413,
-      0.328338,
-      0.547433
+      0.136036,
+      0.322422,
+      0.541809
      ],
      "max_drawdown": [
-      -0.584445,
-      -0.393304,
-      -0.287207
+      -0.564363,
+      -0.389987,
+      -0.288057
      ],
-     "p_beats_base": 0.726
+     "p_beats_base": 0.706
     },
     "Vol-targeted + regime-gated TLT": {
      "sharpe": [
-      0.422214,
-      0.993849,
-      1.568049
+      0.43591,
+      0.972574,
+      1.509092
      ],
      "cagr": [
-      0.101004,
-      0.243506,
-      0.395498
+      0.104198,
+      0.238313,
+      0.389335
      ],
      "max_drawdown": [
-      -0.44442,
-      -0.287616,
-      -0.200281
+      -0.417929,
+      -0.278243,
+      -0.196721
      ],
      "p_beats_base": 0.636
     }
    },
    "draws": 500,
    "mean_block_days": 21.0,
-   "days": 2084,
+   "days": 2085,
    "base": "Book, unhedged"
   },
   "pbo": {
@@ -7244,44 +7244,44 @@
   },
   "plateau": {
    "chosen": "enter -0.10 exit +0.00 x1",
-   "chosen_sharpe": 1.105568,
+   "chosen_sharpe": 1.095854,
    "rank": 10,
    "of": 30,
-   "neighbour_median": 1.096213,
-   "neighbour_min": 1.081353,
-   "neighbour_max": 1.133303,
-   "spread": 0.051949,
+   "neighbour_median": 1.086497,
+   "neighbour_min": 1.071645,
+   "neighbour_max": 1.123564,
+   "spread": 0.051919,
    "grid": {
-    "enter -0.05 exit +0.00 x0.5": 1.08216,
-    "enter -0.05 exit +0.00 x1": 1.104433,
-    "enter -0.05 exit +0.05 x0.5": 1.081353,
-    "enter -0.05 exit +0.05 x1": 1.102817,
-    "enter -0.05 exit +0.10 x0.5": 1.082664,
-    "enter -0.05 exit +0.10 x1": 1.105458,
-    "enter -0.10 exit +0.00 x0.5": 1.08272,
-    "enter -0.10 exit +0.00 x1": 1.105568,
-    "enter -0.10 exit +0.05 x0.5": 1.082664,
-    "enter -0.10 exit +0.05 x1": 1.105458,
-    "enter -0.10 exit +0.10 x0.5": 1.082664,
-    "enter -0.10 exit +0.10 x1": 1.105458,
-    "enter -0.15 exit +0.00 x0.5": 1.088782,
-    "enter -0.15 exit +0.00 x1": 1.117827,
-    "enter -0.15 exit +0.05 x0.5": 1.085637,
-    "enter -0.15 exit +0.05 x1": 1.111468,
-    "enter -0.15 exit +0.10 x0.5": 1.085637,
-    "enter -0.15 exit +0.10 x1": 1.111468,
-    "enter -0.20 exit +0.00 x0.5": 1.094545,
-    "enter -0.20 exit +0.00 x1": 1.129607,
-    "enter -0.20 exit +0.05 x0.5": 1.094545,
-    "enter -0.20 exit +0.05 x1": 1.129607,
-    "enter -0.20 exit +0.10 x0.5": 1.094545,
-    "enter -0.20 exit +0.10 x1": 1.129607,
-    "enter -0.30 exit +0.00 x0.5": 1.096213,
-    "enter -0.30 exit +0.00 x1": 1.133303,
-    "enter -0.30 exit +0.05 x0.5": 1.096213,
-    "enter -0.30 exit +0.05 x1": 1.133303,
-    "enter -0.30 exit +0.10 x0.5": 1.096213,
-    "enter -0.30 exit +0.10 x1": 1.133303
+    "enter -0.05 exit +0.00 x0.5": 1.072451,
+    "enter -0.05 exit +0.00 x1": 1.094715,
+    "enter -0.05 exit +0.05 x0.5": 1.071645,
+    "enter -0.05 exit +0.05 x1": 1.093101,
+    "enter -0.05 exit +0.10 x0.5": 1.072956,
+    "enter -0.05 exit +0.10 x1": 1.095741,
+    "enter -0.10 exit +0.00 x0.5": 1.073013,
+    "enter -0.10 exit +0.00 x1": 1.095854,
+    "enter -0.10 exit +0.05 x0.5": 1.072956,
+    "enter -0.10 exit +0.05 x1": 1.095741,
+    "enter -0.10 exit +0.10 x0.5": 1.072956,
+    "enter -0.10 exit +0.10 x1": 1.095741,
+    "enter -0.15 exit +0.00 x0.5": 1.079071,
+    "enter -0.15 exit +0.00 x1": 1.108103,
+    "enter -0.15 exit +0.05 x0.5": 1.07593,
+    "enter -0.15 exit +0.05 x1": 1.101752,
+    "enter -0.15 exit +0.10 x0.5": 1.07593,
+    "enter -0.15 exit +0.10 x1": 1.101752,
+    "enter -0.20 exit +0.00 x0.5": 1.084833,
+    "enter -0.20 exit +0.00 x1": 1.119879,
+    "enter -0.20 exit +0.05 x0.5": 1.084833,
+    "enter -0.20 exit +0.05 x1": 1.119879,
+    "enter -0.20 exit +0.10 x0.5": 1.084833,
+    "enter -0.20 exit +0.10 x1": 1.119879,
+    "enter -0.30 exit +0.00 x0.5": 1.086497,
+    "enter -0.30 exit +0.00 x1": 1.123564,
+    "enter -0.30 exit +0.05 x0.5": 1.086497,
+    "enter -0.30 exit +0.05 x1": 1.123564,
+    "enter -0.30 exit +0.10 x0.5": 1.086497,
+    "enter -0.30 exit +0.10 x1": 1.123564
    }
   },
   "family_rules": 30
@@ -7293,84 +7293,84 @@
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.017037
+    "robust_sd": 0.017044
    },
    "AVGO": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.019903
+    "robust_sd": 0.019932
    },
    "GOOGL": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.015242
+    "robust_sd": 0.015238
    },
    "IEF": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.0038
+    "robust_sd": 0.003807
    },
    "META": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.01854
+    "robust_sd": 0.018547
    },
    "MSFT": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.013879
+    "robust_sd": 0.013872
    },
    "NVDA": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.027024
+    "robust_sd": 0.02703
    },
    "ORCL": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.01552
+    "robust_sd": 0.015543
    },
    "QQQ": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.011424
+    "robust_sd": 0.011432
    },
    "SPCX": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.037588
+    "robust_sd": 0.037977
    },
    "TLT": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.008183
+    "robust_sd": 0.008184
    },
    "TSLA": {
     "spikes": [],
     "stale_runs": [],
     "gaps": 0,
     "ok": true,
-    "robust_sd": 0.032042
+    "robust_sd": 0.032067
    }
   },
   "flagged": 0,
