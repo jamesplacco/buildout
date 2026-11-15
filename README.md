@@ -112,11 +112,15 @@ by `github-actions[bot]`. Only derived analytics are committed; raw market data 
 Two pages are built from the same sources in `site/src/` (v0.43):
 
 - **`site/core.html`, the site's front page.** Fifteen desks in four groups, and nothing the call does not depend
-  on: **Call** (Home, Desk, Book risk, Decision engine, Hedge test), **Record** (Track record, Execution),
+  on: **Call** (Home, Today's call, Book risk, Decision engine, Hedge test), **Record** (Track record, Execution),
   **Evidence** (Inventory, Memos and the failure log, Fundamentals), **Method** (How it works, Parameters, Data
   lineage, Architecture and status, Appendix). About a third of the full page's size.
 - **`site/page.html`, the library.** All sixty-six desks: the core fifteen and every research desk built along the
   way. Published as `library.html`; a link on the core page to a desk it does not carry opens the library there.
+
+Both pages carry one menu (v0.45): the four groups above and **Library**, whose fifty desks sit on seven shelves
+(markets and hedges, live research, studies and tests, decision tools, models and maps, engine internals,
+workshop). The groups and shelves are defined once, in `site/src/boot.js`.
 
 What the core page leaves out is decided by rendering, not by hand. `scripts/prune_core.py` replaces a file with
 inert stand-ins, opens the page in a browser, uses every core desk, and leaves the file out only if nothing a reader
@@ -426,6 +430,8 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 
 ## What the tests prove
 
+- v0.45: both pages carry the same five groups; every desk is filed once; the library's index, sub-tabs and map
+  read one list of shelves; the five tabs fit a phone.
 - v0.44.1: the mandate's gross cap, the one-day loss halt and the halt file each stop a run; a ticket handed to the
   assistant is handed once and still takes its fills; fills the paper account holds and the log does not are
   recorded by the next pass, once; the inflation reading is the one published by the decision; a crash on the

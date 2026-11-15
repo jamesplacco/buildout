@@ -84,7 +84,7 @@ def test_the_page_snapshot_is_the_engines_own_and_the_tool_is_read_only():
     page = (ROOT / "site" / "src" / "body.html").read_text()
     assert 'id="view-credit"' in page and 'id="pc-score"' in page
     boot = (ROOT / "site" / "src" / "boot.js").read_text()
-    assert '"positions", "credit", "swans"' in boot
+    assert '"credit", "swans", "positions"' in boot         # v0.45: on the Markets and hedges shelf
 
 
 def test_house_style():

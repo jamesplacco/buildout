@@ -189,21 +189,23 @@ def test_shipped_decision_carries_the_overlay_and_the_headline_matches():
 
 # ---------------------------------------------------------------- the page
 def test_six_groups_cover_every_desk_once():
+    # v0.45: five groups on both pages. Four carry the call; the fifth is the library, its desks on seven shelves.
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
-    full = boot.split("const CORE_GROUPS = ")[0]                  # v0.43: the full page's groups; the core page's are tested in test_v43
-    groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', full))
-    assert list(groups) == ["today", "evidence", "markets", "engine", "library"]            # v0.31: five groups
-    views = [v.strip('" ') for g in groups.values() for v in g.split(",")]
+    core = boot.split("const CORE_GROUPS = ")[1].split("\n  };")[0]
+    groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', core))
+    assert list(groups) == ["today", "record", "evidence", "engine"]
+    shelves = re.findall(r'\["\w+", "[^"]+", "[^"]+", \[([^\]]+)\]\]', boot.split("const SHELVES = [")[1].split("\n  ];")[0])
+    views = [v.strip('" ') for g in list(groups.values()) + shelves for v in g.split(",")] + ["library"]
     assert len(views) == len(set(views))
     assert set(views) == set(re.findall(r'<section class="view" id="view-([\w-]+)"', body))
-    assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and '"code"' in groups["engine"] and '"agents"' in groups["engine"]
+    assert groups["engine"].startswith('"explained"') and '"parameters"' in groups["engine"] and '"code", "agents"' in boot
     assert groups["today"].startswith('"home", "desk"')                                     # v0.38: the home page first
     nav = re.findall(r'<a href="#(\w+)" data-group="(\w+)">', body)
-    assert [g for _, g in nav] == list(groups) and all(v in views for v, _ in nav)
+    assert [g for _, g in nav] == list(groups) + ["library"] and all(v in views for v, _ in nav)
     assert "parameters:" in (SRC / "views.js").read_text().split("const TAB_NAME = ")[1][:200]
     guide = (SRC / "guide.js").read_text()
-    assert '"parameters": {"q":' in guide and all(f'"{g}":' in guide.split("GUIDE_GROUPS = ")[1].split("\n")[0] for g in groups)
-    assert "1 to 6 open a group" in guide and "/^[1-6]$/" in (SRC / "views.js").read_text()
+    assert '"parameters": {"q":' in guide and all(f'"{g}":' in guide.split("GUIDE_GROUPS = ")[1].split("\n")[0] for g in list(groups) + ["library"])
+    assert "1 to 5 open a group" in guide and "/^[1-5]$/" in (SRC / "views.js").read_text()
 
 
 def test_landing_page_is_the_call_and_the_engine():

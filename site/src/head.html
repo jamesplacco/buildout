@@ -1407,7 +1407,11 @@ svg.lotus { color: var(--accent); overflow: visible; }
 .at-voice .vo-badge { margin-right: 6px; }
 .hero-which { margin-top: 6px; }
 .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 28px 32px; margin-block: 24px; }
-.lib-sec { min-width: 0; }
+.lib-sec { min-width: 0; scroll-margin-top: 140px; }
+.lib-jump { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 8px 4px; }
+.lib-jump a { font: 500 var(--t-sm)/1 var(--f-body); padding: 8px 12px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-2); text-decoration: none; background: var(--surface); }
+.lib-jump a:hover { border-color: var(--accent); color: var(--ink); }
+.lib-jump .lib-n { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: 2px; }
 .lib-sec h2 { font-size: 1.15rem; margin: 0 0 2px; }
 .lib-sub { color: var(--muted); margin: 0 0 10px; font-size: .92rem; }
 .lib-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -1696,7 +1700,15 @@ em, i { font-style: italic; }
 .sitemap-start li a { font-weight: 600; }
 .sitemap-start li span { color: var(--ink-2); }
 .sitemap-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 18px; }
-.sitemap-col h3 { font: 600 1.2rem/1.2 var(--f-display); }
+.sitemap-col h3, .sitemap-lib h3 { font: 600 1.2rem/1.2 var(--f-display); }
+.sitemap-lib { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rule); }
+.sitemap-lib h3 a { text-decoration: none; }
+.sitemap-lib .hint { margin: 2px 0 10px; }
+.sitemap-shelves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 12px 24px; }
+.sitemap-shelf h4 { font: 600 var(--t-sm)/1.3 var(--f-body); margin: 0 0 2px; color: var(--ink); }
+.sitemap-shelf p { margin: 0; font-size: var(--t-sm); line-height: 1.6; color: var(--muted); }
+.sitemap-shelf a { text-decoration: none; }
+.sitemap-shelf a:hover, .sitemap-shelf a[aria-current] { text-decoration: underline; }
 .sitemap-col .hint { margin: 2px 0 8px; }
 .sitemap-col ul { list-style: none; padding: 0; display: grid; gap: 8px; }
 .sitemap-col li { display: grid; gap: 1px; padding-left: 10px; border-left: 2px solid var(--rule); }
@@ -1734,6 +1746,7 @@ html.map-open { overflow: hidden; }
 .search-btn:hover, .tool-btn:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(0, 0, 0, .07); transform: translateY(-1px); }
 .subtabs { justify-content: center; gap: 8px; padding-block: 2px 12px; }
 .subtabs .sub-label { display: none; }
+.subtabs .sub-label.sub-shelf { display: inline-flex; align-items: center; font: 600 0.7rem/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
 .subtabs a { font: 500 1rem/1 var(--f-body); padding: 10px 17px; min-height: 40px; display: inline-flex; align-items: center; border: 1.5px solid var(--rule); border-radius: 999px; background: var(--surface); color: var(--ink); transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease); }
 .subtabs a:hover { border-color: var(--accent); background: var(--accent-wash); transform: translateY(-1px); }
 .subtabs a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
@@ -1968,6 +1981,27 @@ svg:has(.hit:focus-visible) { outline: 2px solid var(--accent); outline-offset: 
 .dguide-grid dd { font-size: var(--t-sm); line-height: 1.4; }
 .dguide-grid > div:first-child dd { font-size: 1rem; }
 .dguide-map { min-height: 34px; padding: 0 14px; font-size: var(--t-sm); }
+/* v0.45: the desk guide is one line; the rest folds under it */
+.dguide { display: block; padding: 0; max-width: 1000px; }
+.dguide-d > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 10px 16px; }
+.dguide-d > summary::-webkit-details-marker { display: none; }
+.dguide-grp { font: 500 0.82rem/1.3 var(--f-body); font-variant-caps: all-small-caps; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap; }
+.dguide-q { flex: 1 1 320px; min-width: 0; font-size: 1rem; font-weight: 500; color: var(--ink); line-height: 1.4; }
+.dguide-more { font-size: var(--t-sm); color: var(--accent); white-space: nowrap; }
+.dguide-more::after { content: " +"; }
+.dguide-d[open] .dguide-more::after { content: " \2212"; }
+.dguide-d > summary:hover .dguide-more { text-decoration: underline; }
+.dguide-d > .dguide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 2px 16px 12px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.dguide-grid > div:first-child dd { font-size: var(--t-sm); font-weight: 400; }
+@media (max-width: 860px) { .dguide-d > .dguide-grid { grid-template-columns: 1fr; } }
+/* v0.45: a desk's contents are a numbered list in columns, not a wall of pills */
+.toc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; min-width: 0; align-items: start; max-width: 1000px; counter-reset: toc; }
+.toc .flabel { grid-column: 1 / -1; margin: 0 0 6px; }
+.toc a { counter-increment: toc; display: flex; align-items: baseline; gap: 10px; min-height: 0; padding: 7px 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: none; font-size: var(--t-sm); line-height: 1.35; color: var(--ink-2); }
+.toc a::before { content: counter(toc); flex: none; width: 1.4em; color: var(--muted); font-variant-numeric: tabular-nums lining-nums; }
+.toc a:hover { background: none; transform: none; color: var(--accent); text-decoration: underline; }
+@media (pointer: coarse) { .toc a { padding: 11px 0; } }
+@media (max-width: 900px) { .toc { grid-template-columns: minmax(0, 1fr); } }
 .empty { display: block; padding: 10px 14px; border-radius: 8px; border: 1px dashed var(--rule); background: transparent; color: var(--muted); font-size: var(--t-xs); line-height: 1.5; }
 .empty strong { color: var(--ink-2); font-weight: 600; margin-right: 6px; }
 .empty .vmark { display: none; }
@@ -2243,6 +2277,10 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
 .hm-n { font: 500 var(--t-sm)/1 var(--f-display); letter-spacing: 0.12em; color: var(--accent); font-variant-numeric: lining-nums; }
 .hm-steps h3 { margin: 0; font: 600 var(--t-xl)/1.1 var(--f-display); color: var(--ink); }
 .hm-steps p { margin: 0; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
+.hm-layout { grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); }
+.hm-steps .hm-links { line-height: 1.7; color: var(--muted); }
+.hm-steps .hm-links a { font-weight: 600; color: var(--accent); text-decoration: none; }
+.hm-steps .hm-links a:hover { text-decoration: underline; }
 .hm-plug { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); border-top: 2px solid var(--hm-rule); }
 .hm-plug > div { padding: 14px 20px 4px 0; min-width: 0; }
 .hm-plug > div + div { padding-left: 20px; border-left: 1px solid var(--rule); }
@@ -2275,7 +2313,8 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
 @media (max-width: 640px) {
   .tabs { display: flex; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; border-radius: 14px; }
   .tabs::-webkit-scrollbar { display: none; }
-  .tabs a { flex: 0 0 auto; padding: 8px 12px; min-height: 34px; font-size: 0.94rem; }
+  .tabs a { flex: 1 0 auto; justify-content: center; padding: 8px 6px; min-height: 34px; font-size: 0.86rem; letter-spacing: 0.03em; }      /* v0.45: the five groups fit one row at 360 px */
+  .subtabs .sub-label.sub-shelf { display: none; }
   .subtabs { display: flex; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; padding-block: 0 8px; gap: 6px; }
   .subtabs::-webkit-scrollbar { display: none; }
   .subtabs a { flex: 0 0 auto; min-height: 32px; padding: 6px 12px; font-size: 0.9rem; }
@@ -2285,5 +2324,5 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
 .hm-when { font: 500 var(--t-xs)/1.45 var(--f-body); color: var(--muted); letter-spacing: 0.01em; }
 .hm-when b { font-weight: 600; color: var(--ink-2); }
 .hm-behind { font: 500 var(--t-xs)/1.45 var(--f-body); color: var(--bad, #b3261e); margin-top: 4px; }
-.tabs a.lib-link, .tabs a.core-link { opacity: 0.8; }
+/* v0.45: the Library is the fifth group on both pages and reads like the other four */
 </style>

@@ -5,13 +5,13 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.44.1</span>
+      Buildout <span class="ver">v0.45</span>
     </a>
     <nav class="tabs" aria-label="Sections">
-      <a href="#desk" data-group="today">Today</a>
+      <a href="#home" data-group="today">Call</a>
+      <a href="#track" data-group="record">Record</a>
       <a href="#inventory" data-group="evidence">Evidence</a>
-      <a href="#hedges" data-group="markets">Markets</a>
-      <a href="#explained" data-group="engine">Engine</a>
+      <a href="#explained" data-group="engine">Method</a>
       <a href="#library" data-group="library">Library</a>
     </nav>
     <div class="tools">
@@ -2458,7 +2458,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 71 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 33,000 lines of engine code and 72 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
@@ -2619,7 +2619,7 @@
     <div class="hw-para">
       <p class="prose">The engine is a set of numbers learned from history, with the rules that update them written down in advance. It starts from monthly US stock returns since 1871 and a handful of things known at the time: how expensive stocks are, where bond yields and inflation stand, how the market has been trending, how volatile it has been and how far it sits below its last high. From these it keeps two kinds of belief up to date. One is about the <b>state</b> of the market: a few regimes (calm, turbulent, stressed), each with its own typical return and risk, and the odds of being in each this month. The other is about the <b>next year</b>: four simple forecasters, combined by how well each has actually done.</p>
       <p class="prose">It then asks one question. For an investor who dislikes losses about as much as the average long-run investor must have (the dislike is set so that holding exactly one times capital is the neutral answer), what exposure to stocks makes the next month's expected outcome best, provided the average loss across the worst 5% of months is no more than <span id="hw-es">12%</span> of capital? That number is the engine's <b>optimum</b>, <span id="hw-opt">1.50x</span> today.</p>
-      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the engine holds the index at <span id="hw-x">1.00x</span>; the book's own risk limits, measured on its nine names, then cut it (the Desk shows the size). Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
+      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the engine holds the index at <span id="hw-x">1.00x</span>; the book's own risk limits, measured on its nine names, then cut it (Today's call shows the size). Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
     </div>
   </section>
 
@@ -2675,9 +2675,10 @@
 </section>
 
 <!-- ======================= EDGE LAB (v0.26) ======================= -->
-<section class="view" id="view-library" hidden aria-labelledby="lib-title">
-  <div class="vhead"><p class="eyebrow">Library</p><h1 id="lib-title">The library: every other desk, one index away</h1>
-    <p class="lede">The main path is four groups: Today, Evidence, Markets and Engine. Everything else lives here, grouped by what it is for. Nothing was deleted; each desk still works as before.</p></div>
+<section class="view" id="view-library" data-guide="off" hidden aria-labelledby="lib-title">
+  <div class="vhead"><p class="eyebrow">Library</p><h1 id="lib-title">The library: fifty more desks, on seven shelves</h1>
+    <p class="lede">The call is made in four groups: Call, Record, Evidence and Method. Every other desk is here, filed once, on the shelf that says what it is for. Each line is a desk and the question it answers.</p></div>
+  <nav class="lib-jump" id="lib-jump" aria-label="Shelves"></nav>
   <div class="lib-grid" id="lib-grid"></div>
 </section>
 <section class="view" id="view-inventory" hidden aria-labelledby="inv-title">
@@ -2793,12 +2794,13 @@
   </section>
 
   <section class="hm-sect" aria-labelledby="hm-how-t">
-    <h2 class="hm-label" id="hm-how-t">Method</h2>
-    <ol class="hm-steps">
-      <li><span class="hm-n">01</span><h3>Measure</h3><p>Risk on the nine names' own daily prices: factor exposures, the one-month tail, the drawdown path.</p><a href="#book">Book risk</a></li>
-      <li><span class="hm-n">02</span><h3>Size</h3><p>The smallest size any limit allows. A forecast may move it only as far as its out-of-sample record has earned.</p><a href="#decision">Decision engine</a></li>
-      <li><span class="hm-n">03</span><h3>Hedge</h3><p>Chosen by regime and tested on the book's own days: an index short, puts, bonds only when bonds hedge.</p><a href="#hedgetest">Hedge test</a></li>
-      <li><span class="hm-n">04</span><h3>Log</h3><p>Each call goes to an append-only, hash-chained ledger before its first trading day. Misses go in the failure log.</p><a href="#memos">Memos and misses</a></li>
+    <h2 class="hm-label" id="hm-how-t">How this site is laid out</h2>
+    <ol class="hm-steps hm-layout">
+      <li><span class="hm-n">01</span><h3>Call</h3><p>What to hold today and why: the size the limits allow, the risk behind it, the hedge beside it.</p><p class="hm-links"><a href="#desk">Today's call</a> · <a href="#book">Book risk</a> · <a href="#decision">Decision engine</a> · <a href="#hedgetest">Hedge test</a></p></li>
+      <li><span class="hm-n">02</span><h3>Record</h3><p>What was decided in advance and what happened next: the walk-forward record, the ledger, the paper account.</p><p class="hm-links"><a href="#track">Track record</a> · <a href="#execution">Execution</a></p></li>
+      <li><span class="hm-n">03</span><h3>Evidence</h3><p>What was tested, what failed, and whether the buildout pays for itself.</p><p class="hm-links"><a href="#inventory">Inventory</a> · <a href="#memos">Memos and misses</a> · <a href="#fundamentals">Fundamentals</a></p></li>
+      <li><span class="hm-n">04</span><h3>Method</h3><p>How the call is made, which values were set by hand, and where each number comes from.</p><p class="hm-links"><a href="#explained">How it works</a> · <a href="#parameters">Parameters</a> · <a href="#engines">Data lineage</a> · <a href="#engine">Architecture</a> · <a href="#appendix">Appendix</a></p></li>
+      <li><span class="hm-n">05</span><h3>Library</h3><p>Fifty more desks on seven shelves: markets and hedges, live research, studies, tools, models, the engine's internals, the workshop.</p><p class="hm-links"><a href="#library">Open the library</a></p></li>
     </ol>
   </section>
 
@@ -4136,7 +4138,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
     <h2 id="keys-title">Keyboard shortcuts</h2>
     <dl class="dlist">
       <dt>/ or Ctrl K</dt><dd>Search everything: tools, terms, securities, theses, episodes, questions</dd>
-      <dt>1 to 6</dt><dd>Jump to a section: Today, Engine, Markets, Research, Workshop, Methods</dd><dt>=</dt><dd>In search, type arithmetic (= 2bn / 3m, bsput(100, 95, 0.25, 22%)) for an exact answer</dd><dt>M</dt><dd>Show or hide the math</dd>
+      <dt>1 to 5</dt><dd>Jump to a group: Call, Record, Evidence, Method, Library</dd><dt>=</dt><dd>In search, type arithmetic (= 2bn / 3m, bsput(100, 95, 0.25, 22%)) for an exact answer</dd><dt>M</dt><dd>Show or hide the math</dd>
       <dt>← →</dt><dd>Step through a focused chart</dd>
       <dt>?</dt><dd>This list</dd>
       <dt>:</dt><dd>Command line: think &lt;question&gt;, whatif &lt;condition&gt;, go &lt;desk&gt;, triage 1.2 8 40, erp 3.5 6, set keys=vim, math, help (Tab completes, ↑ recalls)</dd>

@@ -3,6 +3,22 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.45: one menu, and a library on shelves. The site had two menus that filed the same desks differently;
+it now has one. No desk was removed, no number changed, and the call is unchanged.
+
+- **One menu on both pages.** Call, Record, Evidence, Method, Library: the same five groups, names and order on the
+  core page and on the full one. Before, the full page kept the v0.31 groups (Today, Evidence, Markets, Engine,
+  Library), so the fifteen core desks were filed two ways.
+- **The library on seven shelves.** All fifty desks outside the four groups, each filed once: markets and hedges,
+  live research, studies and tests, decision tools, models and maps, engine internals, workshop. The old index
+  listed 27 of the 50. The index, a library desk's sub-tabs and the map read one list (`SHELVES` in `boot.js`).
+- **Names.** The desk called Desk is Today's call. The line over each headline is written from the menu.
+- **Less above each desk.** The guide card is one line (the question the desk answers; when to open it and how to
+  read it fold under it). A desk's contents are a numbered list, not rows of pills.
+- **Home** ends with how the site is laid out, in place of the four method steps that How it works carries.
+- **Phone.** The five groups fit one row at 360 px.
+- `tests/test_v45.py` (6 tests); ten older tests that pinned the v0.31 groups now pin these.
+
 Version 0.44.1: a bug hunt, reviewed. A second pass over the whole codebase found 28 defects; this release fixes
 them, adds three the pass had left open, and reruns the record on the result. The call is unchanged.
 

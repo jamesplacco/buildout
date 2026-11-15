@@ -131,7 +131,7 @@ def test_home_is_the_default_view_and_new_views_are_wired():
     views = (SRC / "views.js").read_text()
     for v in ("home", "track", "hedgetest", "memos", "levers"):
         assert f'id="view-{v}"' in body and re.search(rf"\b{v}: ", views), v
-    assert 'today: { name: "Today", views: ["home",' in boot
+    assert 'today: { name: "Call", views: ["home",' in boot         # v0.45: the group is Call on both pages
     scripts = (ROOT / "scripts" / "assemble_page.py").read_text()
     assert '"snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "execdesk.js"' in scripts
 

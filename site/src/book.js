@@ -191,7 +191,7 @@
       (B.worst_days || []).map((x) => [isoNice(x.date), b30S(x.book, 1), b30S(x.nasdaq, 1), b30S(x.semis_etf, 1), b30S(x.bond20, 1)]), 1);
     // correlation
     const C = B.correlation || {};
-    $("#bk-corr-p").textContent = `One definition: ${C.definition}, with the engine's hysteresis (enter a state at 0.10, leave it at 0). Today ${sgn2(C.book_63d)}, ${C.state}${C.state_since ? ` since ${isoNice(C.state_since)}` : ""}; the Nasdaq-100 on the same definition ${sgn2(C.nasdaq_63d)}; the book's 36-month correlation of monthly returns ${sgn2(C.book_36m_monthly)}. Other desks quote other definitions (the Desk's 36-month S&P 500 against the 10-year, the Futures desk's S&P 500 future against Treasury futures); they are labelled where they appear and are not interchangeable.`;
+    $("#bk-corr-p").textContent = `One definition: ${C.definition}, with the engine's hysteresis (enter a state at 0.10, leave it at 0). Today ${sgn2(C.book_63d)}, ${C.state}${C.state_since ? ` since ${isoNice(C.state_since)}` : ""}; the Nasdaq-100 on the same definition ${sgn2(C.nasdaq_63d)}; the book's 36-month correlation of monthly returns ${sgn2(C.book_36m_monthly)}. Other desks quote other definitions (Today's call quotes the 36-month S&P 500 against the 10-year, the Futures desk's S&P 500 future against Treasury futures); they are labelled where they appear and are not interchangeable.`;
     fillTable($("#bk-corr"), ["On the book's worst 5% of days", "Days", "Book, average", "Bond, average", "Bond up on", "Bond offset per dollar"],
       (C.shock || []).map((g) => [g.group, String(g.days), b30S(g.avg_equity, 1), b30S(g.avg_bond, 2), b30P(g.bond_up_share, 0), b30P(g.offset, 0)]), 1);
     // growth chart
@@ -246,23 +246,20 @@
     const ul = $("#inv-key"); if (ul) { ul.replaceChildren(); INV_ORDER.forEach((v) => ul.append(h("li", null, `${v}: ${(I.verdicts || {})[v] || ""}`))); }
   }
 
-  /* v0.31: THE LIBRARY. The desks moved off the main path, one index away, grouped by what they are for. */
-  const LIBRARY = [
-    ["Decision tools", "Other ways to reach and stress the call", ["portfolio", "decide", "solve", "noteworthy"]],
-    ["Models and maps", "How the parts of the system connect, and whether the models' assumptions hold", ["mind", "brain", "atlas", "geometry", "matrix", "reality"]],
-    ["Research", "Signals, data and tests behind the desk's views", ["analysis", "labs", "ml", "edge", "physics", "buyside", "field"]],
-    ["Markets reference", "What each security carries, and who funds the long end", ["securities", "insurers"]],
-    ["Workshop", "Games, market making, prop economics, the math lab, and the investors whose rules the engine borrows", ["games", "cardroom", "making", "prop", "lab", "legends", "lenses"]],
-    ["Methods and reference", "How it runs each day, borrowed methods, definitions", ["crossfield", "engine", "engines", "appendix"]],
-  ];
+  /* v0.31: THE LIBRARY. v0.45: every desk outside the four groups, on the seven shelves boot.js defines (SHELVES);
+     the index and the menu read the same list, so a desk cannot be on a shelf and missing from the index. */
   function renderLibrary() {
     const box = $("#lib-grid");
     if (!box || box.childElementCount) return;
-    LIBRARY.forEach(([name, sub, views]) => {
+    const jump = $("#lib-jump");
+    SHELVES.forEach(([key, name, sub, views]) => {
+      const here = views.filter((v) => document.getElementById("view-" + v));
+      if (!here.length) return;
       const sec = h("section", "lib-sec");
+      sec.id = "shelf-" + key;
       sec.append(h("h2", null, name), h("p", "lib-sub", sub));
       const ul = h("ul", "lib-list");
-      views.filter((v) => document.getElementById("view-" + v)).forEach((v) => {
+      here.forEach((v) => {
         const li = h("li"), a = h("a", null, TAB_NAME[v] || v);
         a.href = "#" + v;
         li.append(a, h("span", null, (typeof DESK_GUIDE === "object" && DESK_GUIDE[v] && DESK_GUIDE[v].q) || ""));
@@ -270,5 +267,6 @@
       });
       sec.append(ul);
       box.append(sec);
+      if (jump) { const j = h("a", null, `${name} `); j.append(h("span", "lib-n", String(here.length))); j.href = "#shelf-" + key; jump.append(j); }
     });
   }

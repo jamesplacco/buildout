@@ -102,7 +102,7 @@ def test_unusual_data_are_lagged_and_documented():
 def test_the_edge_lab_is_on_the_page_and_in_the_mind():
     boot, body = (SRC / "boot.js").read_text(), (SRC / "body.html").read_text()
     groups = dict(re.findall(r'(\w+): \{ name: "[^"]+", views: \[([^\]]+)\] \}', boot))
-    assert groups["engine"].startswith('"explained", "edges"')
+    assert groups["engine"].startswith('"explained"') and '"edges", "reasoning"' in boot         # v0.45: the Edge lab opens the Engine internals shelf
     assert 'id="view-edges"' in body and 'id="t7-edges"' in body and "renderEdgesToday" in boot
     assert any(d[0] == "edges" for d in mind.DESKS)
     assert '"snap26.js", "edges.js"' in (ROOT / "scripts" / "assemble_page.py").read_text()

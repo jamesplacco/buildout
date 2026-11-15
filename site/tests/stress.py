@@ -39,7 +39,7 @@ import printcheck  # noqa: E402
 
 VIEWS = ["desk", "noteworthy", "decide", "brain", "journal", "swans", "credit", "reading", "prop", "making", "buyside", "bonds", "rates", "options", "hedges", "securities", "insurers", "fundamentals", "physics", "findings", "theses",
          "legends", "lenses", "lab", "engine", "appendix", "solve", "games", "field", "ooda", "positions", "engines", "atlas", "mind", "analysis", "labs", "ml", "reality", "edge", "cardroom", "code", "agents",
-         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory", "home", "track", "hedgetest", "memos", "levers", "execution"]
+         "parameters", "decision", "portfolio", "matrix", "geometry", "explained", "digest", "reasoning", "methods", "crossfield", "edges", "nowcast", "filings", "futures", "book", "inventory", "home", "track", "hedgetest", "memos", "levers", "execution", "library", "deeprl"]
 BAD_TEXT = ["NaN", "undefined", "Infinity", "[object"]
 FAILURES: list[str] = []
 
@@ -228,25 +228,52 @@ async def keyboard_and_links(page, label: str) -> None:
     if await page.evaluate("document.getElementById('keys').hidden"):
         fail(f"{label}: '?' did not open shortcuts")
     await page.keyboard.press("Escape")
-    await page.evaluate("location.hash = 'positions'")
-    await settle(page, "view-positions")
+    # v0.45: five groups on both pages (1 Call, 2 Record, 3 Evidence, 4 Method, 5 Library). A group reopens the desk
+    # last read in it; the Library always opens its index, and a library desk's sub-tabs are its shelf.
+    await page.evaluate("location.hash = 'memos'")
+    await settle(page, "view-memos")
     await page.evaluate("location.hash = 'desk'")
     await settle(page, "view-desk")
     await page.keyboard.press("3")
     await page.wait_for_timeout(300)
-    if await page.evaluate("location.hash") != "#positions":           # the last Markets desk the reader opened
-        fail(f"{label}: key 3 did not reopen the Markets group where the reader left it: {await page.evaluate('location.hash')}")
-    await page.evaluate("location.hash = 'options'")
+    if await page.evaluate("location.hash") != "#memos":               # the last Evidence desk the reader opened
+        fail(f"{label}: key 3 did not reopen the Evidence group where the reader left it: {await page.evaluate('location.hash')}")
+    await page.evaluate("location.hash = 'fundamentals'")
     await page.wait_for_timeout(200)
     await page.keyboard.press("1")
     await page.wait_for_timeout(200)
     await page.keyboard.press("3")
     await page.wait_for_timeout(1000)                                   # v0.31: a group switch renders its desk, allow it a second
-    if await page.evaluate("location.hash") != "#options":
-        fail(f"{label}: the Markets group did not reopen the last desk read in it")
+    if await page.evaluate("location.hash") != "#fundamentals":
+        fail(f"{label}: the Evidence group did not reopen the last desk read in it")
     sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
-    if ["Options", "page"] not in sub or len(sub) != 8:                # eight Markets desks since v0.38 (the hedge test) (the rest in the Library)
-        fail(f"{label}: Markets subtabs wrong: {sub}")
+    if ["Fundamentals", "page"] not in sub or len(sub) != 3:
+        fail(f"{label}: Evidence subtabs wrong: {sub}")
+    tabs = await page.evaluate("[...document.querySelectorAll('.tabs a')].map((a) => a.textContent)")
+    if tabs != ["Call", "Record", "Evidence", "Method", "Library"]:
+        fail(f"{label}: the menu reads {tabs}")
+    await page.evaluate("location.hash = 'options'")
+    await settle(page, "view-options")
+    sub = await page.evaluate("[...document.querySelectorAll('#subtabs a')].map((a) => [a.textContent, a.getAttribute('aria-current')])")
+    shelf = await page.evaluate("(document.querySelector('#subtabs .sub-shelf') || {}).textContent || null")
+    if ["Options", "page"] not in sub or len(sub) != 10 or sub[0][0] != "Index" or shelf != "Markets and hedges":      # the index and the nine desks on the shelf
+        fail(f"{label}: a library desk's subtabs are not its shelf: {shelf} {sub}")
+    crumb = await page.evaluate("document.querySelector('#view-options > .vhead > .eyebrow').textContent.trim()")
+    if crumb != "Library · Markets and hedges":
+        fail(f"{label}: the line over a library desk's headline reads {crumb!r}")
+    await page.keyboard.press("1")
+    await page.wait_for_timeout(300)
+    await page.keyboard.press("5")
+    await page.wait_for_timeout(600)
+    if await page.evaluate("location.hash") != "#library":
+        fail(f"{label}: key 5 did not open the library's index: {await page.evaluate('location.hash')}")
+    shelves = await page.evaluate("({ secs: document.querySelectorAll('#lib-grid .lib-sec').length, desks: document.querySelectorAll('#lib-grid .lib-list li').length, blank: [...document.querySelectorAll('#lib-grid .lib-list li span')].filter((x) => !x.textContent.trim()).length, jump: document.querySelectorAll('#lib-jump a').length })")
+    if shelves != {"secs": 7, "desks": 50, "blank": 0, "jump": 7}:
+        fail(f"{label}: the library index shows {shelves}")
+    await page.evaluate("location.hash = 'shelf-workshop'")
+    await page.wait_for_timeout(400)
+    if await page.evaluate("document.querySelector('.view:not([hidden])').id") != "view-library":
+        fail(f"{label}: a shelf link left the index")
     pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")
     flipped = await page.evaluate("document.documentElement.classList.contains('math-on') === !%s && document.getElementById('math-toggle').getAttribute('aria-pressed') === '%s'" % ("true" if pre else "false", "false" if pre else "true"))
@@ -255,7 +282,7 @@ async def keyboard_and_links(page, label: str) -> None:
     if not (flipped and back):
         fail(f"{label}: M did not toggle the math")
     for token, view in [("t3", "theses"), ("sec-tips", "securities"), ("ep-covid-2020", "appendix"), ("pb-credit", "hedges"),
-                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "home"), ("%E0%A4%A", "home"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("explained", "explained"), ("hw-replay-title", "explained"), ("digest", "digest"), ("dg-how-t", "digest"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
+                        ("sig-vix", "decide"), ("g-convexity", "appendix"), ("nope-not-here", "library"), ("%E0%A4%A", "library"), ("size", "hedges"), ("parameters", "parameters"), ("pm-inv-title", "parameters"), ("explained", "explained"), ("hw-replay-title", "explained"), ("digest", "digest"), ("dg-how-t", "digest"), ("call-board", "desk"), ("flow-title", "desk"), ("fund-title", "desk"), ("dx-overlay", "decision"), ("pulse", "journal"), ("sysmap", "brain"), ("moves", "rates"), ("regime-title", "ooda"), ("live", "engines"), ("miss", "theses"),
                         ("faq-is-this-investment-advice", "appendix"), ("d-duration", "decide"), ("as-a-line-row", "decide"), ("ch-oil", "decide"), ("sw-credit", "swans"), ("lg-griffin", "legends"),
                         ("fi-hedge", "findings"), ("lab-coin", "lab"), ("g-hedge-line", "appendix"), ("tl-title", "swans"),
                         ("calc", "solve"), ("rzv-title", "solve"), ("gtc-title", "games"), ("gtx-title", "games"), ("fq-title", "making"), ("pol-title", "engine"), ("g-nash", "appendix"),
@@ -542,7 +569,7 @@ window.claude = { use: async (name) => {
 
 async def core_and_library(page, label: str) -> None:
     """The core page carries fifteen desks and no library desk; the Library link and a link to a library desk both
-    land on library.html, which carries all sixty-six and links back."""
+    land on library.html, which carries all sixty-six under the same menu."""
     n = await page.evaluate("document.querySelectorAll('section.view').length")
     if n != len(CORE_VIEWS):
         fail(f"{label}: the front page carries {n} desks, not {len(CORE_VIEWS)}")
@@ -556,11 +583,11 @@ async def core_and_library(page, label: str) -> None:
     except Exception:
         fail(f"{label}: a link to a library desk stayed on {page.url}")
         return
-    res = await page.evaluate("({ n: document.querySelectorAll('section.view').length, v: (document.querySelector('.view:not([hidden])') || {}).id, back: (document.querySelector('.tabs a.core-link') || {}).href || null })")
+    res = await page.evaluate("({ n: document.querySelectorAll('section.view').length, v: (document.querySelector('.view:not([hidden])') || {}).id, tabs: [...document.querySelectorAll('.tabs a')].map((a) => a.textContent) })")
     if res["n"] != 66 or res["v"] != "view-games":
         fail(f"{label}: the library opened {res}")
-    if not res["back"] or not res["back"].endswith("/"):
-        fail(f"{label}: the library's link back to the core page is {res['back']}")
+    if res["tabs"] != ["Call", "Record", "Evidence", "Method", "Library"]:       # v0.45: the library carries the core page's menu
+        fail(f"{label}: the library's menu reads {res['tabs']}")
     await page.go_back()
     await page.wait_for_timeout(800)
     # v0.44.1: a link to an element inside a library desk (a legend) goes there too; in v0.43 it left the core page blank

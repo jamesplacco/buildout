@@ -1,44 +1,44 @@
   /* =====================================================================================
-     boot.js (v0.6, regrouped in v0.18 and v0.23): six groups, their desks, the math toggle, deep links, live data, boot
+     boot.js (v0.6, regrouped in v0.18, v0.23, v0.31 and v0.45): five groups, their desks, the math toggle, deep links, live data, boot
      ===================================================================================== */
-  const GROUPS = {   // v0.31: five groups for a reader with ten minutes. Today is the decision; Evidence is what has been proven; Library holds everything else, one index away
-    today: { name: "Today", views: ["home", "desk", "track", "book", "decision", "execution", "ooda", "journal"] },
-    evidence: { name: "Evidence", views: ["inventory", "memos", "theses", "reading", "levers", "digest", "futures", "nowcast", "filings", "findings", "fundamentals"] },
-    markets: { name: "Markets", views: ["hedgetest", "hedges", "options", "rates", "bonds", "positions", "credit", "swans"] },
-    engine: { name: "Engine", views: ["explained", "edges", "reasoning", "parameters", "methods", "code", "agents"] },
-    library: { name: "Library", views: ["library", "portfolio", "decide", "solve", "noteworthy", "mind", "brain", "atlas", "geometry", "matrix", "securities", "insurers", "analysis", "edge", "physics", "buyside", "labs", "ml", "deeprl", "reality", "field", "games", "cardroom", "making", "prop", "lab", "legends", "lenses", "crossfield", "engine", "engines", "appendix"] },
+  // v0.45: one menu on both pages. Four groups carry the call (the same fifteen desks, under the same names, on the
+  // core page and on the full one); the fifth, the Library, holds every other desk on seven shelves by what it is for.
+  // Before this the full page kept the v0.31 groups (Today, Evidence, Markets, Engine, Library), so a reader who
+  // followed the Library link met a second menu with the same desks filed differently.
+  const CORE_GROUPS = {
+    today: { name: "Call", views: ["home", "desk", "book", "decision", "hedgetest"] },
+    record: { name: "Record", views: ["track", "execution"] },
+    evidence: { name: "Evidence", views: ["inventory", "memos", "fundamentals"] },
+    engine: { name: "Method", views: ["explained", "parameters", "engines", "engine", "appendix"] },
   };
-  const GROUP_ORDER = ["today", "evidence", "markets", "engine", "library"];
+  // the shelves: [key, name, what it is for, desks]. Every desk outside the four groups is on exactly one.
+  const SHELVES = [
+    ["markets", "Markets and hedges", "The instruments: what each pays, what it costs and what it protects against", ["hedges", "options", "rates", "bonds", "credit", "swans", "positions", "securities", "insurers"]],
+    ["live", "Live research", "Read and scored as new data arrives", ["digest", "theses", "reading", "noteworthy", "nowcast", "filings", "futures", "physics"]],
+    ["studies", "Studies and tests", "Rules and signals people repeat, put to an honest test", ["findings", "labs", "analysis", "ml", "deeprl", "edge", "field", "buyside", "levers"]],
+    ["tools", "Decision tools", "Other ways to reach and stress the call", ["ooda", "decide", "portfolio", "solve", "journal"]],
+    ["models", "Models and maps", "How the parts of the system connect, and whether the models' assumptions hold", ["mind", "brain", "atlas", "geometry", "matrix", "reality"]],
+    ["internals", "Engine internals", "How the engine finds, tests and runs its methods, and how it was built", ["edges", "reasoning", "methods", "crossfield", "code", "agents"]],
+    ["workshop", "Workshop", "The mathematics behind the rules, and the people they were borrowed from", ["lab", "games", "cardroom", "making", "prop", "legends", "lenses"]],
+  ];
+  const shelfOf = (v) => SHELVES.find((s) => s[3].includes(v)) || null;
+  const GROUPS = Object.assign({}, CORE_GROUPS, { library: { name: "Library", views: ["library"].concat(SHELVES.flatMap((s) => s[3])) } });
+  const GROUP_ORDER = ["today", "record", "evidence", "engine", "library"];
   // v0.43: the core page. The same sources build two pages: the full one (every desk, the library) and a core one
   // that carries only the desks the call depends on: the call and its risk, the record, the evidence, the method.
-  // The assembler sets BUILD_CORE, leaves the other desks' markup and snapshots out, and this swaps the groups.
+  // The assembler sets BUILD_CORE, leaves the other desks' markup and snapshots out, and this drops the fifth group.
   // A link to a desk the core page does not carry opens the library at that desk.
   const CORE = typeof BUILD_CORE !== "undefined" && BUILD_CORE === true;
   const LIBRARY_HREF = typeof BUILD_LIBRARY_HREF === "string" ? BUILD_LIBRARY_HREF : "page.html";
   const ALL_VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
-  const CORE_GROUPS = {
-    today: { views: ["home", "desk", "book", "decision", "hedgetest"], name: "Call" },
-    record: { views: ["track", "execution"], name: "Record" },
-    evidence: { views: ["inventory", "memos", "fundamentals"], name: "Evidence" },
-    engine: { views: ["explained", "parameters", "engines", "engine", "appendix"], name: "Method" },
-  };
   if (CORE) {
-    Object.keys(GROUPS).forEach((k) => { delete GROUPS[k]; });
-    Object.assign(GROUPS, CORE_GROUPS);
-    GROUP_ORDER.splice(0, GROUP_ORDER.length, ...Object.keys(CORE_GROUPS));
-    if (typeof GUIDE_GROUPS === "object") Object.assign(GUIDE_GROUPS, { today: "The call: the size the book's limits allow, the hedge beside it, and the engine's baseline.", record: "What was decided and what happened: the walk-forward record, the ledger of calls, the paper account.",
-      evidence: "What has been tested, what failed, and whether the buildout pays for itself.", engine: "How the call is made, which values were chosen by hand, where each number comes from." });
+    delete GROUPS.library;
+    GROUP_ORDER.splice(GROUP_ORDER.indexOf("library"), 1);
   }
-  // the full page links back to the core page: beside it on disk, at the site's root once published
-  if (!CORE && typeof document !== "undefined") {
-    const tabs = document.querySelector(".tabs");
-    if (tabs && !tabs.querySelector(".core-link")) {
-      const a = document.createElement("a");
-      a.className = "core-link"; a.textContent = "Core page"; a.title = "The fifteen desks the call depends on";
-      a.href = typeof location !== "undefined" && location.protocol === "file:" ? "core.html" : "./";
-      tabs.append(a);
-    }
-  }
+  // the page a reader lands on with no link: Home on the core page, the index on the library
+  const FRONT = CORE ? "home" : "library";
+  // links written for the menu before v0.45 still land somewhere sensible
+  const OLD_GROUPS = { markets: "hedges", research: "digest", reference: "appendix" };
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const inLibrary = (v) => CORE && ALL_VIEWS.includes(v) && !VIEWS.includes(v);
   // v0.44: one navigation per link. A link is resolved twice on its way to the screen (once to pick the view, once to
@@ -52,7 +52,7 @@
   const lastInGroup = {};
   function goGroup(g) {
     if (!GROUPS[g]) return;
-    const v = lastInGroup[g] || GROUPS[g].views[0];
+    const v = g === "library" ? "library" : lastInGroup[g] || GROUPS[g].views[0];
     if (location.hash === "#" + v) show(v, true); else location.hash = v;
   }
   // v0.37: a desk opens with its first screen; the rest of its sections fold under one line, each still reachable by link.
@@ -151,10 +151,11 @@
   let current = null;
   // any element id is a deep link: the view that contains it opens and the element scrolls into view
   function resolve(token) {
-    if (!token) return { view: "home", el: null };          // v0.38: the front door; the Desk is one click away
+    if (!token) return { view: FRONT, el: null };          // v0.38: the front door; v0.45: the library opens at its index
     if (VIEWS.includes(token)) return { view: token, el: null };
     if (inLibrary(token)) { toLibrary(token); return { view: current || "home", el: null }; }      // v0.43: a desk the core page does not carry
     if (GROUPS[token]) return { view: lastInGroup[token] || GROUPS[token].views[0], el: null };
+    if (OLD_GROUPS[token]) return resolve(OLD_GROUPS[token]);
     let el = document.getElementById(token);
     if (!el && /^sec-/.test(token) && secFilter !== "All") { secFilter = "All"; renderSecurities(); el = document.getElementById(token); }
     if (!el && /^ep-/.test(token) && epKind !== "All") { epKind = "All"; buildEpisodes(); el = document.getElementById(token); }
@@ -164,22 +165,24 @@
     // that desk. In v0.43 it threw (the filter it resets was a constant stand-in) and the core page stayed blank.
     if (!el && CORE && /^(sec|ep|lg)-/.test(token)) { toLibrary(token); return { view: current || "home", el: null }; }
     const v = el && el.closest(".view");
-    return v ? { view: v.id.slice(5), el } : { view: "home", el: null };      // v0.38: an unknown link opens Home
+    return v ? { view: v.id.slice(5), el } : { view: FRONT, el: null };      // v0.38: an unknown link opens the front page (v0.45: the library's is its index)
   }
   function renderSubtabs(view) {
     const g = groupOf(view), nav = $("#subtabs");
     document.querySelectorAll(".tabs a[data-group]").forEach((a) => {
       if (a.dataset.group === g) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
-      const v = lastInGroup[a.dataset.group] || GROUPS[a.dataset.group].views[0];
+      // v0.45: the Library tab always opens the index; the other groups reopen the desk last read there
+      const v = a.dataset.group === "library" ? "library" : lastInGroup[a.dataset.group] || GROUPS[a.dataset.group].views[0];
       a.href = "#" + v;
     });
     if (!nav) return;
     nav.replaceChildren();
     if (GROUPS[g].views.length < 2) return;
-    nav.append(h("span", "sub-label", GROUPS[g].name));
-    // v0.31: the Library is reached through its index; its row shows the index and the desk being read, never all of them
-    const row = g === "library" ? ["library"].concat(view !== "library" ? [view] : []) : GROUPS[g].views;
-    row.forEach((v) => {
+    // v0.45: a library desk shows its shelf: the index, then the desks filed beside it
+    const shelf = g === "library" ? shelfOf(view) : null;
+    if (g !== "library" || shelf) nav.append(h("span", shelf ? "sub-label sub-shelf" : "sub-label", shelf ? shelf[1] : GROUPS[g].name));
+    const row = g === "library" ? ["library"].concat(shelf ? shelf[3].filter((v) => document.getElementById("view-" + v)) : []) : GROUPS[g].views;
+    if (row.length > 1) row.forEach((v) => {
       const a = h("a", null, g === "library" && v === "library" ? "Index" : TAB_NAME[v]);
       a.href = "#" + v;
       if (v === view) a.setAttribute("aria-current", "page");

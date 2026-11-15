@@ -1165,7 +1165,7 @@
     el.title = ok ? "" : `Enter a number from ${lo.toLocaleString("en-US")} to ${hi.toLocaleString("en-US")}`;
     return ok ? v : raw !== "" && fin(v) ? clamp(v, lo, hi) : fallback;
   }
-  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", credit: "Private credit", reading: "Reading room", home: "Home", track: "Track record", hedgetest: "Hedge test", execution: "Execution", memos: "Memos", levers: "Value creation", library: "Library", digest: "Digest", desk: "Desk", rates: "Rates", options: "Options", hedges: "Hedge menu", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Architecture", appendix: "Appendix",
+  const TAB_NAME = { futures: "Futures", filings: "Filings", nowcast: "Nowcast", edges: "Edge lab", reasoning: "Reasoning", methods: "Every method", crossfield: "Borrowed methods", explained: "How it works", parameters: "Parameters", inventory: "Inventory", book: "Book risk", credit: "Private credit", reading: "Reading room", home: "Home", track: "Track record", hedgetest: "Hedge test", execution: "Execution", memos: "Memos", levers: "Value creation", library: "Library", digest: "Digest", desk: "Today's call", rates: "Rates", options: "Options", hedges: "Hedge menu", securities: "Securities", insurers: "Insurers", theses: "Theses", lenses: "Lenses", engine: "Architecture", appendix: "Appendix",
     decide: "Seven decisions", journal: "Journal", swans: "Swans", fundamentals: "Fundamentals", physics: "Physics", findings: "Findings", legends: "Legends", lab: "Math lab",
     noteworthy: "Noteworthy", brain: "The brain", prop: "Prop", making: "Market making", buyside: "Buyside 2026", solve: "Allocation", games: "Games", field: "Field", ooda: "OODA loop", decision: "Decision engine", portfolio: "Portfolio", matrix: "The shortcut", geometry: "Geometry", positions: "Positions", engines: "Data lineage", atlas: "Atlas", mind: "The mind", labs: "Rule tests", analysis: "Analysis", bonds: "Bonds", ml: "ML lab", deeprl: "Deep RL", reality: "Reality check", edge: "Primary sources", cardroom: "Card room", code: "Under the hood", agents: "Agents" };
   const LINK_NAME = { "fw-title": "Carry and roll-down", "tb-title": "Tail-hedge budget", "hedge": "Hedge lab", "size": "Sizing lab", "iv-title": "Insurance price", "liq-title": "Liquidity",
@@ -2076,7 +2076,7 @@
       if (typing || e.metaKey || e.ctrlKey || e.altKey || !$("#palette").hidden) return;
       if (e.key === "/") { e.preventDefault(); openPalette(); }
       else if (e.key === "?") { e.preventDefault(); palReturn = document.activeElement; $("#keys").hidden = false; $("#keys-close").focus(); }
-      else if (/^[1-6]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
+      else if (/^[1-5]$/.test(e.key) && $("#keys").hidden) goGroup(GROUP_ORDER[Number(e.key) - 1]);
       else if ((e.key === "m" || e.key === "M") && $("#keys").hidden) toggleMath();
     });
     $("#keys").addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); $("#keys-close").focus(); } });
