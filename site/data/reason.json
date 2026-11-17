@@ -4,7 +4,7 @@
   "infl": true,
   "corr": true,
   "oil": null,
-  "vix": false,
+  "vix": true,
   "hy": false,
   "capex": true,
   "curve": null
@@ -17,8 +17,8 @@
   "y30": 0.0485,
   "rf": 0.042,
   "borrow_spread": 0.01,
-  "vix": 18.7,
-  "index_vol": 28.55,
+  "vix": 22.91,
+  "index_vol": 32.9,
   "skew_pts": 3.0,
   "horizon": 0.25,
   "max_loss": 0.15,
@@ -209,13 +209,13 @@
    0.04
   ],
   "posterior": [
-   0.56804,
-   0.084954,
-   0.170592,
-   0.098384,
-   0.021557,
-   0.052163,
-   0.004311
+   0.328857,
+   0.049182,
+   0.131682,
+   0.22783,
+   0.074881,
+   0.147639,
+   0.039928
   ],
   "log_contrib": {
    "inflation": [
@@ -228,13 +228,13 @@
     -0.804719
    ],
    "stress": [
-    -0.223144,
-    -0.223144,
-    -0.287682,
+    -1.609438,
+    -1.609438,
+    -1.386294,
     -0.693147,
-    -0.916291,
-    -0.798508,
-    -1.609438
+    -0.510826,
+    -0.597837,
+    -0.223144
    ],
    "credit": [
     -0.162519,
@@ -259,26 +259,26 @@
  "alternatives": {
   "keep": {
    "port": [
-    0.541615,
+    0.541992,
     0.0,
     0.0,
     0.0
    ],
    "rets": [
-    0.053017,
-    0.064661,
-    0.133717,
-    -0.077512,
-    -0.134924,
-    -0.121112,
-    -0.175545
+    0.053046,
+    0.064699,
+    0.133803,
+    -0.077574,
+    -0.135025,
+    -0.121204,
+    -0.175674
    ],
-   "elog": 0.037449,
-   "ce": 0.038159,
-   "worst": -0.175545,
-   "mean": 0.040811,
+   "elog": -0.01943,
+   "ce": -0.019243,
+   "worst": -0.175674,
+   "mean": -0.014447,
    "feasible": false,
-   "max_regret": 0.032804
+   "max_regret": 0.181124
   },
   "reduce": {
    "port": [
@@ -296,60 +296,60 @@
     -0.09885,
     -0.144075
    ],
-   "elog": 0.033302,
-   "ce": 0.033863,
+   "elog": -0.013592,
+   "ce": -0.0135,
    "worst": -0.144075,
-   "mean": 0.035684,
+   "mean": -0.010213,
    "feasible": true,
-   "max_regret": 0.020842
+   "max_regret": 0.149525
   },
   "hedge": {
    "port": [
     0.55,
     0.0,
-    0.0125,
-    0.06
+    0.02,
+    0.1
    ],
    "rets": [
-    0.041014,
-    0.053439,
-    0.122364,
-    -0.076985,
-    -0.116884,
-    -0.088308,
-    -0.149583
+    0.033415,
+    0.04624,
+    0.114365,
+    -0.077861,
+    -0.109462,
+    -0.074162,
+    -0.139437
    ],
-   "elog": 0.030865,
-   "ce": 0.031347,
-   "worst": -0.149583,
-   "mean": 0.033366,
+   "elog": -0.01723,
+   "ce": -0.017082,
+   "worst": -0.139437,
+   "mean": -0.01413,
    "feasible": true,
-   "max_regret": 0.01631
+   "max_regret": 0.144887
   },
   "optimal": {
    "port": [
-    0.45,
+    0.0,
     0.0,
     0.0,
     0.1
    ],
    "rets": [
-    0.045775,
-    0.05645,
-    0.111825,
-    -0.060675,
-    -0.107375,
-    -0.0939,
-    -0.149125
+    0.01045,
+    0.01145,
+    0.00945,
+    0.01245,
+    0.01345,
+    0.01545,
+    0.00545
    ],
-   "elog": 0.033726,
-   "ce": 0.034301,
-   "worst": -0.149125,
-   "mean": 0.036049,
+   "elog": 0.011517,
+   "ce": 0.011584,
+   "worst": 0.00545,
+   "mean": 0.011586,
    "feasible": true,
-   "max_regret": 0.021892
+   "max_regret": 0.124353
   },
-  "minimax_regret": "hedge"
+  "minimax_regret": "optimal"
  },
  "robust": {
   "names": [
@@ -360,9 +360,9 @@
   ],
   "mix": [
    0.0,
-   1.0,
    0.0,
-   0.0
+   0.0,
+   1.0
   ],
   "nature": [
    0.0,
@@ -373,106 +373,26 @@
    0.0,
    1.0
   ],
-  "value": -0.144075,
+  "value": 0.00545,
   "mixed_port": [
-   0.45,
    0.0,
    0.0,
-   0.0
+   0.0,
+   0.1
   ]
  },
  "value_of_info": {
-  "evpi_bp": 253.09011,
+  "evpi_bp": 387.146342,
   "signals": [
    {
     "id": "vix",
     "name": "VIX at or above 20",
     "p_on": 0.301593,
-    "evsi_bp": 76.115917,
-    "observed": false,
+    "evsi_bp": 72.114537,
+    "observed": true,
     "flip_changes_choice": true,
     "choice_if_on": [
      0.0,
-     0.0,
-     0.02,
-     0.1
-    ],
-    "choice_if_off": [
-     0.45,
-     0.0,
-     0.0,
-     0.1
-    ]
-   },
-   {
-    "id": "hy",
-    "name": "High-yield spread at or above 4.5%",
-    "p_on": 0.215115,
-    "evsi_bp": 69.38937,
-    "observed": false,
-    "flip_changes_choice": true,
-    "choice_if_on": [
-     0.0,
-     0.0,
-     0.02,
-     0.1
-    ],
-    "choice_if_off": [
-     0.45,
-     0.0,
-     0.0,
-     0.1
-    ]
-   },
-   {
-    "id": "corr",
-    "name": "Stocks and bonds moving together (correlation above 0)",
-    "p_on": 0.470079,
-    "evsi_bp": 32.537619,
-    "observed": true,
-    "flip_changes_choice": false,
-    "choice_if_on": [
-     0.45,
-     0.0,
-     0.0,
-     0.1
-    ],
-    "choice_if_off": [
-     0.45,
-     0.0,
-     0.0,
-     0.1
-    ]
-   },
-   {
-    "id": "infl",
-    "name": "36-month inflation at or above 2.75%",
-    "p_on": 0.452293,
-    "evsi_bp": 29.552597,
-    "observed": true,
-    "flip_changes_choice": false,
-    "choice_if_on": [
-     0.45,
-     0.0,
-     0.0,
-     0.1
-    ],
-    "choice_if_off": [
-     0.45,
-     0.0,
-     0.0,
-     0.1
-    ]
-   },
-   {
-    "id": "capex",
-    "name": "Builders' capex above 80% of operating cash flow",
-    "p_on": 0.521628,
-    "evsi_bp": 1.388e-13,
-    "observed": true,
-    "flip_changes_choice": false,
-    "choice_if_on": [
-     0.45,
      0.0,
      0.0,
      0.1
@@ -487,18 +407,18 @@
    {
     "id": "oil",
     "name": "Brent at or above 1.3x its 5-year average",
-    "p_on": 0.200884,
-    "evsi_bp": 6.939e-14,
+    "p_on": 0.257758,
+    "evsi_bp": 31.475238,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
-     0.45,
      0.0,
      0.0,
+     0.02,
      0.1
     ],
     "choice_if_off": [
-     0.45,
+     0.0,
      0.0,
      0.0,
      0.1
@@ -507,18 +427,98 @@
    {
     "id": "curve",
     "name": "2s10s curve inverted",
-    "p_on": 0.263024,
-    "evsi_bp": -6.939e-14,
+    "p_on": 0.298917,
+    "evsi_bp": 20.873389,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
-     0.45,
+     0.0,
+     0.0,
+     0.02,
+     0.1
+    ],
+    "choice_if_off": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "hy",
+    "name": "High-yield spread at or above 4.5%",
+    "p_on": 0.343002,
+    "evsi_bp": 4.753011,
+    "observed": false,
+    "flip_changes_choice": true,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.02,
+     0.1
+    ],
+    "choice_if_off": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "capex",
+    "name": "Builders' capex above 80% of operating cash flow",
+    "p_on": 0.553183,
+    "evsi_bp": 1.735e-14,
+    "observed": true,
+    "flip_changes_choice": false,
+    "choice_if_on": [
+     0.0,
      0.0,
      0.0,
      0.1
     ],
     "choice_if_off": [
-     0.45,
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "infl",
+    "name": "36-month inflation at or above 2.75%",
+    "p_on": 0.519904,
+    "evsi_bp": -1.74471,
+    "observed": true,
+    "flip_changes_choice": false,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ],
+    "choice_if_off": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ]
+   },
+   {
+    "id": "corr",
+    "name": "Stocks and bonds moving together (correlation above 0)",
+    "p_on": 0.542235,
+    "evsi_bp": -2.211555,
+    "observed": true,
+    "flip_changes_choice": false,
+    "choice_if_on": [
+     0.0,
+     0.0,
+     0.0,
+     0.1
+    ],
+    "choice_if_off": [
+     0.0,
      0.0,
      0.0,
      0.1
@@ -529,27 +529,27 @@
  "reverse_stress": {
   "low_inflation": {
    "shock": [
-    -0.060204,
-    -0.207715,
+    -0.060162,
+    -0.207571,
     -0.000572,
-    -0.035483,
-    0.005335
+    -0.035458,
+    0.005332
    ],
-   "sigmas": 1.918777,
-   "p_normal": 0.027506,
-   "port_sd": 0.078175
+   "sigmas": 1.917443,
+   "p_normal": 0.027591,
+   "port_sd": 0.078229
   },
   "inflation": {
    "shock": [
-    -0.057006,
-    -0.211392,
-    0.0012,
-    0.027865,
-    -0.009351
+    -0.056967,
+    -0.211245,
+    0.001199,
+    0.027846,
+    -0.009344
    ],
-   "sigmas": 1.935686,
-   "p_normal": 0.026453,
-   "port_sd": 0.077492
+   "sigmas": 1.934339,
+   "p_normal": 0.026536,
+   "port_sd": 0.077546
   }
  },
  "factor_cov": {

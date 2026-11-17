@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "checked": "2026-11-14T17:17:34Z",
+ "checked": "2026-11-17T19:27:34Z",
  "sources": [
   {
    "source": "databento",
@@ -8,7 +8,7 @@
    "cost": "paid",
    "credential": true,
    "reachable": true,
-   "ms": 66,
+   "ms": 665,
    "note": "",
    "ok": true
   },
@@ -18,7 +18,7 @@
    "cost": "free",
    "credential": null,
    "reachable": true,
-   "ms": 85,
+   "ms": 104,
    "note": "",
    "ok": true
   },
@@ -27,10 +27,10 @@
    "what": "Daily OHLCV",
    "cost": "free",
    "credential": null,
-   "reachable": true,
-   "ms": 481,
-   "note": "",
-   "ok": true
+   "reachable": false,
+   "ms": null,
+   "note": "RuntimeError",
+   "ok": false
   },
   {
    "source": "sec",
@@ -38,7 +38,7 @@
    "cost": "free",
    "credential": true,
    "reachable": true,
-   "ms": 146,
+   "ms": 110,
    "note": "",
    "ok": true
   },
@@ -48,7 +48,7 @@
    "cost": "free",
    "credential": null,
    "reachable": true,
-   "ms": 16151,
+   "ms": 19223,
    "note": "",
    "ok": true
   },
@@ -58,7 +58,7 @@
    "cost": "free",
    "credential": null,
    "reachable": true,
-   "ms": 853,
+   "ms": 2913,
    "note": "",
    "ok": true
   },
@@ -68,7 +68,7 @@
    "cost": "free",
    "credential": null,
    "reachable": true,
-   "ms": 146,
+   "ms": 79,
    "note": "",
    "ok": true
   },
@@ -78,7 +78,7 @@
    "cost": "free",
    "credential": null,
    "reachable": true,
-   "ms": 22,
+   "ms": 30,
    "note": "",
    "ok": true
   }
