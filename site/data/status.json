@@ -1,8 +1,8 @@
 {
  "schema": 2,
- "generated_utc": "2026-11-17T19:34:30+00:00",
- "commit": "6e5d767",
- "run_id": "44157461626",
+ "generated_utc": "2026-11-17T20:06:27+00:00",
+ "commit": "113cda4",
+ "run_id": "44163285007",
  "python": "3.12.16",
  "files": {
   "macro.json": {
@@ -12,7 +12,7 @@
    "as_of": "2026-11-13",
    "bytes": 681611,
    "weekdays_old": 2,
-   "written_utc": "2026-11-17T19:21Z"
+   "written_utc": "2026-11-17T19:53Z"
   },
   "report.json": {
    "present": true,
@@ -21,7 +21,7 @@
    "as_of": "2026-11-16",
    "bytes": 127344,
    "weekdays_old": 1,
-   "written_utc": "2026-11-17T19:23Z"
+   "written_utc": "2026-11-17T19:56Z"
   },
   "capex.json": {
    "present": true,
@@ -30,7 +30,7 @@
    "as_of": "2026-09-30",
    "bytes": 35977,
    "weekdays_old": null,
-   "written_utc": "2026-11-17T19:23Z",
+   "written_utc": "2026-11-17T19:56Z",
    "cadence": "quarterly"
   },
   "research.json": {
@@ -40,7 +40,7 @@
    "as_of": "2026-09",
    "bytes": 13072,
    "weekdays_old": 34,
-   "written_utc": "2026-11-17T19:21Z",
+   "written_utc": "2026-11-17T19:54Z",
    "cadence": "monthly"
   },
   "brain.json": {
@@ -50,7 +50,7 @@
    "as_of": null,
    "bytes": 218939,
    "weekdays_old": null,
-   "written_utc": "2026-11-17T19:21Z",
+   "written_utc": "2026-11-17T19:54Z",
    "cadence": "monthly"
   },
   "buyside.json": {
@@ -60,17 +60,17 @@
    "as_of": "2026-09",
    "bytes": 3753,
    "weekdays_old": 34,
-   "written_utc": "2026-11-17T19:21Z",
+   "written_utc": "2026-11-17T19:54Z",
    "cadence": "monthly"
   },
   "feeds.json": {
    "present": true,
    "valid": true,
    "schema": 1,
-   "as_of": "2026-11-17T19:21:47Z",
-   "bytes": 106204,
+   "as_of": "2026-11-17T19:54:11Z",
+   "bytes": 108756,
    "weekdays_old": 0,
-   "written_utc": "2026-11-17T19:22Z"
+   "written_utc": "2026-11-17T19:54Z"
   },
   "reason.json": {
    "present": true,
@@ -79,7 +79,7 @@
    "as_of": null,
    "bytes": 12076,
    "weekdays_old": null,
-   "written_utc": "2026-11-17T19:33Z"
+   "written_utc": "2026-11-17T20:05Z"
   }
  },
  "checks": [
@@ -201,7 +201,7 @@
   {
    "name": "Feed scraper read at least half its sources",
    "ok": true,
-   "detail": "20 read, 4 failed or skipped"
+   "detail": "17 read, 7 failed or skipped"
   },
   {
    "name": "Feed items are links, not markup",
