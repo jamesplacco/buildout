@@ -3,6 +3,22 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.46: a layout to find your way around. Where things sit changed; what they say did not. No desk was
+removed, no number changed, and the call is unchanged.
+
+- **A rail of sections beside each desk** (wide screens, 1,200 px and up): numbered as on the page, the section
+  being read marked, folded sections listed under one line, in view for the whole desk. `railFor` and `railMark` in
+  `site/src/guide.js`; one `<aside id="rail">` filled from the page's own headings.
+- **Narrow screens:** the list under the headline is one line that opens.
+- **Desk heads:** smaller headlines, less air, and the question line without its box, so the first figure is on the
+  first screen.
+- **Today's call:** the six readings behind the call sit beside the three steps on a wide screen.
+- **Shell:** 1,320 px of content (was 1,160) for the band and the page.
+- **Two node graphs** (the Brain desk's map, the Mind desk's graph) stack by their own width; beside a rail two
+  columns left them narrow enough for two labels to collide, which the print run caught.
+- `tests/test_v46.py` (6 tests); the stress run checks the rail against the page's headings, a folded section
+  opened from the rail, and the fold at 900 px.
+
 Version 0.45: one menu, and a library on shelves. The site had two menus that filed the same desks differently;
 it now has one. No desk was removed, no number changed, and the call is unchanged.
 

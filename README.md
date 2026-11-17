@@ -430,6 +430,8 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 
 ## What the tests prove
 
+- v0.46: on a wide screen every desk with two or more sections has a rail whose lines match its headings and mark
+  the one being read; on a narrow one the list folds to a line that opens.
 - v0.45: both pages carry the same five groups; every desk is filed once; the library's index, sub-tabs and map
   read one list of shelves; the five tabs fit a phone.
 - v0.44.1: the mandate's gross cap, the one-day loss halt and the halt file each stop a run; a ticket handed to the

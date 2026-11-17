@@ -217,6 +217,7 @@
     document.title = (view === "desk" ? "" : TAB_NAME[view] + " · ") + "Buildout Risk Engine";
     guard(TAB_NAME[view], RENDER[view]);
     guard("Fold", () => foldDesk(view));
+    guard("Rail", () => { railFor(view); guideHere(); });          // v0.46: the desk's sections, beside it
     hideTip();
     if (el && el.id && !el.isConnected) el = document.getElementById(el.id) || el;     // v0.31: the desk re-rendered after the link resolved
     if (el) {

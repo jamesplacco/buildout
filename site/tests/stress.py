@@ -274,6 +274,36 @@ async def keyboard_and_links(page, label: str) -> None:
     await page.wait_for_timeout(400)
     if await page.evaluate("document.querySelector('.view:not([hidden])').id") != "view-library":
         fail(f"{label}: a shelf link left the index")
+    # v0.46: the rail. At this width a desk's sections sit beside it (the list under the headline is hidden), a
+    # folded section is listed and opens from there, and the line for the section being read is marked.
+    await page.evaluate("location.hash = 'book'")
+    await settle(page, "view-book")
+    rail = await page.evaluate("(() => { const r = document.getElementById('rail'), t = document.querySelector('#view-book > .toc'); return { shown: !r.hidden && getComputedStyle(r).display === 'block', sticky: getComputedStyle(r).position, n: r.querySelectorAll('a[data-for]').length, sub: r.querySelectorAll('.rail-sub a').length, heads: document.querySelectorAll('#view-book .section-head h2[id]').length, toc: t ? getComputedStyle(t).display : null, has: document.getElementById('main').classList.contains('has-rail') }; })()")
+    if not rail["shown"] or rail["sticky"] != "sticky" or not rail["has"] or rail["n"] != rail["heads"] or rail["n"] < 8 or rail["sub"] < 1 or rail["toc"] != "none":
+        fail(f"{label}: the rail on Book risk: {rail}")
+    await page.click("#rail .rail-sub a >> nth=1")
+    await page.wait_for_timeout(700)
+    spy = await page.evaluate("(() => { const a = document.querySelector('#rail a[aria-current]'), d = document.querySelector('#view-book details.desk-more'); return { cur: a ? a.dataset.for : null, n: document.querySelectorAll('#rail a[aria-current]').length, hash: location.hash.slice(1), open: d ? d.open : null, moved: scrollY > 400 }; })()")
+    if spy["cur"] != spy["hash"] or spy["n"] != 1 or spy["open"] is not True or not spy["moved"]:
+        fail(f"{label}: a folded section opened from the rail: {spy}")
+    await page.evaluate("location.hash = 'home'")
+    await settle(page, "view-home")
+    if await page.evaluate("!document.getElementById('rail').hidden || document.getElementById('main').classList.contains('has-rail')"):
+        fail(f"{label}: Home has no sections and should have no rail")
+    # too narrow for the rail: the list under the headline is one line that opens
+    await page.set_viewport_size({"width": 900, "height": 900})
+    await page.evaluate("location.hash = 'track'")
+    await settle(page, "view-track")
+    narrow = await page.evaluate("(() => { const r = document.getElementById('rail'), t = document.querySelector('#view-track > .toc'), b = t.querySelector('.toc-toggle'); return { rail: getComputedStyle(r).display, links: [...t.querySelectorAll(':scope > a')].filter((a) => a.offsetParent !== null).length, exp: b.getAttribute('aria-expanded') }; })()")
+    if narrow != {"rail": "none", "links": 0, "exp": "false"}:
+        fail(f"{label}: at 900 px the contents should be folded and the rail gone: {narrow}")
+    await page.click("#view-track > .toc .toc-toggle")
+    await page.wait_for_timeout(200)
+    opened = await page.evaluate("(() => { const t = document.querySelector('#view-track > .toc'); return { links: [...t.querySelectorAll(':scope > a')].filter((a) => a.offsetParent !== null).length, exp: t.querySelector('.toc-toggle').getAttribute('aria-expanded'), over: document.documentElement.scrollWidth > innerWidth }; })()")
+    if opened["links"] < 6 or opened["exp"] != "true" or opened["over"]:
+        fail(f"{label}: the folded contents did not open: {opened}")
+    await page.set_viewport_size({"width": 1280, "height": 900})
+    await page.wait_for_timeout(200)
     pre = await page.evaluate("document.documentElement.classList.contains('math-on')")      # v0.25: the math shows by default
     await page.keyboard.press("m")
     flipped = await page.evaluate("document.documentElement.classList.contains('math-on') === !%s && document.getElementById('math-toggle').getAttribute('aria-pressed') === '%s'" % ("true" if pre else "false", "false" if pre else "true"))

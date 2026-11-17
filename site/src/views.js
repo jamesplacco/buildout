@@ -1913,6 +1913,18 @@
       const after = view.querySelector(":scope > .start") || view.querySelector(":scope > .vhead, :scope > .hero");
       if (after) after.after(nav);
     });
+    // v0.46: on a screen with room, the rail carries this list and it is hidden; on a narrower one it is one line
+    // that opens, so the desk's first figure is on the first screen either way
+    document.querySelectorAll(".view > .toc").forEach((nav) => {
+      const lab = nav.querySelector(":scope > .flabel");
+      if (!lab || lab.tagName === "BUTTON") return;
+      const b = h("button", "flabel toc-toggle");
+      b.type = "button";
+      b.setAttribute("aria-expanded", "false");
+      b.append(h("span", null, "On this desk"), h("span", "toc-n", `${nav.querySelectorAll(":scope > a").length} sections`));
+      b.addEventListener("click", () => b.setAttribute("aria-expanded", String(nav.classList.toggle("open"))));
+      lab.replaceWith(b);
+    });
   }
   const NO_LINK = "#view-home, a, button, label, h1, h2, h3, h4, h5, h6, summary, svg, script, style, input, select, textarea, code, kbd, var, table, dt, .src, .eyebrow, .badge, .tip, .gloss, .methods, .term, .signals, #levels, .chart-title, .panel-title, .flabel, .tagline, .kind, .sig-state, .toc, .chips, .tchips, .sec, .readouts, .sentence";
   const LINKED = new Set();

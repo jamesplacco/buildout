@@ -130,18 +130,92 @@
   const GPOS = { heads: [], raf: 0 };
   function guideOnShow(v) {
     const view = $("#view-" + v), here = $("#sub-here");
-    GPOS.heads = view ? [...view.querySelectorAll(":scope > .section > .section-head h2, :scope > section > .section-head h2")] : [];
+    GPOS.heads = view ? [...view.querySelectorAll(":scope > .section > .section-head h2, :scope > section > .section-head h2, :scope > details.desk-more > .section > .section-head h2")] : [];
     if (here) here.textContent = "";
     guideProgress();
     deskbarFor(v);
   }
   function guideHere() {
     const here = $("#sub-here");
-    if (!here) return;
     let cur = null;
-    for (const x of GPOS.heads) if (x.getBoundingClientRect().top < 140) cur = x;
+    for (const x of GPOS.heads) if (x.offsetParent !== null && x.getBoundingClientRect().top < 140) cur = x;      // v0.46: a heading inside a closed fold has no place on the page
+    railMark(cur);
+    if (!here) return;
     here.textContent = cur ? cur.textContent : "";
     here.hidden = !cur;
+  }
+  /* v0.46: THE RAIL. On a wide screen a desk's sections sit beside it for the whole read, numbered as they are on the
+     page, and the one being read is marked. Before this the list of sections was a block under the headline: it
+     pushed the first figure off the first screen and was out of sight for the rest of a desk that can run to
+     seventy screens. Each line is the section's own short label (the small line over its heading); the full
+     heading is the tooltip. A label that says nothing alone ("Tool", "A") or repeats falls back to the heading. */
+  const RAIL = { cur: null };
+  function railFor(v) {
+    const rail = $("#rail"), page = $("#main"), view = $("#view-" + v);
+    // read again in the page's order: the desk may have folded its later sections since guideOnShow listed them
+    if (view) GPOS.heads = [...view.querySelectorAll(":scope > .section > .section-head h2, :scope > section > .section-head h2, :scope > details.desk-more > .section > .section-head h2")];
+    if (!rail || !page) return;
+    const rows = [];
+    let n = 0;
+    const add = (sec, more) => {
+      if (sec.hidden) return;
+      if (!more) n += 1;                                   // the number the page prints over the section
+      const h2 = sec.querySelector(":scope > .section-head h2[id]"), eb = sec.querySelector(":scope > .section-head > .eyebrow");
+      if (h2) rows.push({ n: more ? null : n, h2, more, short: eb ? eb.textContent.replace(/^\s*\d+\s*·\s*/, "").trim() : "" });
+    };
+    // in the order of the page: its sections, and where it folds the rest (boot.js foldDesk), those under one line
+    (view ? [...view.children] : []).forEach((el) => {
+      if (el.matches("section.section")) add(el, null);
+      else if (el.matches("details.desk-more")) [...el.querySelectorAll(":scope > section.section")].forEach((s) => add(s, el));
+    });
+    const seen = {};
+    rows.forEach((r) => { seen[r.short.toLowerCase()] = (seen[r.short.toLowerCase()] || 0) + 1; });
+    rows.forEach((r) => { r.label = r.short.length > 2 && !/^tool\b/i.test(r.short) && seen[r.short.toLowerCase()] === 1 ? r.short : r.h2.textContent.trim(); });
+    const on = rows.length >= 2;
+    page.classList.toggle("has-rail", on);
+    rail.hidden = !on;
+    rail.replaceChildren();
+    RAIL.cur = null;
+    if (!on) return;
+    const ol = h("ol", "rail-list");
+    let folded = null;
+    rows.forEach((r) => {
+      if (r.more && r.more !== folded) {
+        folded = r.more;
+        const li = h("li", "rail-more"), bt = h("button", null, "More on this desk");
+        bt.type = "button";
+        bt.addEventListener("click", () => { r.more.open = true; r.more.scrollIntoView({ block: "start" }); });
+        li.append(bt);
+        ol.append(li);
+      }
+      const li = h("li", r.more ? "rail-sub" : null), a = h("a");
+      a.href = "#" + r.h2.id;
+      a.dataset.for = r.h2.id;
+      if (r.label !== r.h2.textContent.trim()) a.title = r.h2.textContent.trim();
+      a.append(h("span", "rail-n", r.n == null ? "" : String(r.n)), h("span", "rail-l", r.label));
+      li.append(a);
+      ol.append(li);
+    });
+    const top = h("button", "rail-top", "Back to top");
+    top.type = "button";
+    top.addEventListener("click", () => window.scrollTo({ top: 0, behavior: calm() ? "auto" : "smooth" }));
+    rail.append(h("p", "rail-t", "On this desk"), ol, top);        // the band already names the desk
+  }
+  function railMark(cur) {
+    const rail = $("#rail");
+    if (!rail || rail.hidden) return;
+    const id = cur ? cur.id : null;
+    if (id === RAIL.cur) return;
+    RAIL.cur = id;
+    rail.querySelectorAll("a[data-for]").forEach((a) => {
+      if (a.dataset.for === id) {
+        a.setAttribute("aria-current", "location");
+        // keep the marked line in sight when the list is taller than the screen, without moving the page
+        const top = a.offsetTop - rail.offsetTop, bot = top + a.offsetHeight;
+        if (top < rail.scrollTop) rail.scrollTop = Math.max(0, top - 40);
+        else if (bot > rail.scrollTop + rail.clientHeight) rail.scrollTop = bot - rail.clientHeight + 40;
+      } else a.removeAttribute("aria-current");
+    });
   }
   function guideProgress() {
     cancelAnimationFrame(GPOS.raf);
