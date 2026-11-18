@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "version": "0.46.0",
- "run_at": "2026-11-17T20:05:55+00:00",
+ "run_at": "2026-11-18T19:35:02+00:00",
  "engines": [
   {
    "name": "macro",
@@ -15,7 +15,7 @@
    ],
    "status": "external",
    "outputs": {
-    "macro.json": "63d20c3ac88a7746"
+    "macro.json": "1bdc9e364fbb5806"
    }
   },
   {
@@ -62,7 +62,7 @@
    ],
    "status": "external",
    "outputs": {
-    "report.json": "b5a6681580734df7"
+    "report.json": "48d2862035cf54e2"
    }
   },
   {
@@ -77,7 +77,7 @@
    ],
    "status": "external",
    "outputs": {
-    "capex.json": "a7c2941e6794b477"
+    "capex.json": "43cf3b52b337b26c"
    }
   },
   {
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "685eadbc35814bce"
+    "atlas.json": "fd68c74f6017467d"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "7545cc0e04eeedb3"
+    "connections.json": "8c29908882a2a55a"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "a3019eeaa4471447",
-    "statements.json": "6a60d6589a3e574b"
+    "technicals.json": "43fcda83d69676ad",
+    "statements.json": "86799e7c494e74b0"
    }
   },
   {
@@ -231,7 +231,7 @@
    ],
    "status": "external",
    "outputs": {
-    "decision.json": "bdd8f0d2b0f44c6b"
+    "decision.json": "6a20de5b74a607b0"
    }
   },
   {
@@ -246,7 +246,7 @@
    ],
    "status": "external",
    "outputs": {
-    "bonds.json": "53882f1340a103da"
+    "bonds.json": "60a1113da17064b8"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "ced4395c00eb2a99"
+    "feeds.json": "81291c833a1df5d4"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "79fc8e1130ed0774"
+    "reason.json": "c36e0809470d7600"
    }
   },
   {
@@ -300,12 +300,12 @@
    ],
    "status": "ok",
    "outputs": {
-    "valuation.json": "029fb8e84d585ca2"
+    "valuation.json": "9fd85ef5c336652c"
    },
-   "seconds": 0.753,
+   "seconds": 0.696,
    "inputs": {
-    "capex.json": "a7c2941e6794b477",
-    "macro.json": "63d20c3ac88a7746"
+    "capex.json": "43cf3b52b337b26c",
+    "macro.json": "1bdc9e364fbb5806"
    },
    "attempts": 1
   },
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.05,
+   "seconds": 0.048,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -345,7 +345,7 @@
    "outputs": {
     "hedges.json": "4da792fc58c3f6e4"
    },
-   "seconds": 0.534,
+   "seconds": 0.503,
    "attempts": 1
   },
   {
@@ -366,15 +366,15 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "63838e4c488ad751"
+    "ooda.json": "5ecc0cc7bd17ec67"
    },
-   "seconds": 0.838,
+   "seconds": 0.805,
    "inputs": {
-    "macro.json": "63d20c3ac88a7746",
+    "macro.json": "1bdc9e364fbb5806",
     "research.json": "d2c6580ba083f72a",
     "brain.json": "e8144ce521a6d89f",
-    "capex.json": "a7c2941e6794b477",
-    "report.json": "b5a6681580734df7"
+    "capex.json": "43cf3b52b337b26c",
+    "report.json": "48d2862035cf54e2"
    },
    "attempts": 1
   },
@@ -449,7 +449,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "a9216f47c3d4ec7a"
+    "status.json": "e8b2f3a9ad12c77d"
    }
   }
  ],
@@ -458,8 +458,8 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 1.549,
-  "serial_seconds": 2.175,
+  "wall_seconds": 1.467,
+  "serial_seconds": 2.052,
   "speedup": 1.4,
   "levels": [
    [

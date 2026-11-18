@@ -48,7 +48,7 @@
     "quality_grade": "low"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.87,
     "erp": 0.045,
     "inflation": 0.025,
@@ -58,7 +58,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 5190.897,
-   "discount_rate": 0.135119,
+   "discount_rate": 0.134819,
    "m0": 0.395303,
    "m_star": 0.407407,
    "pe": 27.063459,
@@ -66,12 +66,12 @@
    "ev_ebit": 26.272514,
    "fcf_yield": 0.024331,
    "owner_fcf_yield": 0.022943,
-   "implied_growth": 0.246217,
-   "implied_real_pct": 22.121673,
-   "terminal_share": 0.592737,
+   "implied_growth": 0.245639,
+   "implied_real_pct": 22.063926,
+   "terminal_share": 0.593247,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.002778,
-   "p_at_or_below": 0.997222,
+   "p_achieve": 0.002784,
+   "p_at_or_below": 0.997216,
    "own_growth": 0.8338,
    "verdict": {
     "code": "extreme",
@@ -80,12 +80,12 @@
    "why": [
     {
      "driver": "base_rate",
-     "points": 20.92789,
+     "points": 20.870143,
      "text": "Outside view: only 0.3% of companies with sales above $50 billion grew at least 22% a year in real terms for a decade."
     },
     {
      "driver": "margin",
-     "points": 5.088318,
+     "points": 5.086046,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (27% instead of 41%), the growth required rises 5.1 points."
     },
     {
@@ -102,22 +102,22 @@
    "why_right": [
     {
      "driver": "momentum",
-     "points": 58.758327,
+     "points": 58.816074,
      "text": "Momentum: revenue grew 83% last year; the price only needs it to average 25%. It already assumes a slowdown."
     },
     {
      "driver": "margin_expansion",
-     "points": 4.80865,
+     "points": 4.806329,
      "text": "Margins: if the steady-state free cash flow margin rose to 60% from 41% (mix shift, operating leverage), the growth required falls 4.8 points."
     },
     {
      "driver": "discount_rate",
-     "points": 1.967878,
+     "points": 1.970489,
      "text": "Rates: 59% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.0 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 2047.370964,
-   "price_to_p90_value": 2.549611
+   "value_at_p90_growth": 2054.108914,
+   "price_to_p90_value": 2.541248
   },
   "MSFT": {
    "ticker": "MSFT",
@@ -161,7 +161,7 @@
     "quality_grade": "mixed"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.0,
     "erp": 0.045,
     "inflation": 0.025,
@@ -171,7 +171,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 3908.638,
-   "discount_rate": 0.096104,
+   "discount_rate": 0.095805,
    "m0": 0.136821,
    "m_star": 0.386256,
    "pe": 27.693839,
@@ -179,53 +179,53 @@
    "ev_ebit": 23.951309,
    "fcf_yield": 0.015179,
    "owner_fcf_yield": 0.012,
-   "implied_growth": 0.127731,
-   "implied_real_pct": 10.273128,
-   "terminal_share": 0.70897,
+   "implied_growth": 0.127018,
+   "implied_real_pct": 10.201844,
+   "terminal_share": 0.709645,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.04022,
-   "p_at_or_below": 0.95978,
+   "p_achieve": 0.040647,
+   "p_at_or_below": 0.959353,
    "own_growth": 0.1779,
    "verdict": {
     "code": "exuberant",
-    "text": "The price needs about 13% a year for ten years (10% real), achieved by about 4.0% of companies this size."
+    "text": "The price needs about 13% a year for ten years (10% real), achieved by about 4.1% of companies this size."
    },
    "why": [
     {
      "driver": "depreciation",
-     "points": 11.059532,
+     "points": 11.051929,
      "text": "Depreciation catch-up: if D&A rose to today's capex the growth required would be 11.1 points higher. The price may be capitalizing earnings the build will absorb."
     },
     {
      "driver": "base_rate",
-     "points": 9.079345,
-     "text": "Outside view: only 4.0% of companies with sales above $50 billion grew at least 10% a year in real terms for a decade."
+     "points": 9.008061,
+     "text": "Outside view: only 4.1% of companies with sales above $50 billion grew at least 10% a year in real terms for a decade."
     },
     {
      "driver": "margin",
-     "points": 4.844915,
+     "points": 4.841486,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (26% instead of 39%), the growth required rises 4.8 points."
     }
    ],
    "why_right": [
     {
      "driver": "momentum",
-     "points": 5.016872,
+     "points": 5.088156,
      "text": "Momentum: revenue grew 18% last year; the price only needs it to average 13%. It already assumes a slowdown."
     },
     {
      "driver": "margin_expansion",
-     "points": 4.731887,
+     "points": 4.728402,
      "text": "Margins: if the steady-state free cash flow margin rose to 58% from 39% (mix shift, operating leverage), the growth required falls 4.7 points."
     },
     {
      "driver": "discount_rate",
-     "points": 2.487251,
+     "points": 2.494273,
      "text": "Rates: 71% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.5 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 3381.094611,
-   "price_to_p90_value": 1.168261
+   "value_at_p90_growth": 3399.81887,
+   "price_to_p90_value": 1.161827
   },
   "GOOGL": {
    "ticker": "GOOGL",
@@ -279,7 +279,7 @@
     "quality_grade": "low"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.21,
     "erp": 0.045,
     "inflation": 0.025,
@@ -289,7 +289,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 3752.628,
-   "discount_rate": 0.104263,
+   "discount_rate": 0.103965,
    "m0": -0.022632,
    "m_star": 0.257159,
    "pe": 16.419595,
@@ -297,12 +297,12 @@
    "ev_ebit": 23.905744,
    "fcf_yield": 0.005103,
    "owner_fcf_yield": -0.002755,
-   "implied_growth": 0.16381,
-   "implied_real_pct": 13.881029,
-   "terminal_share": 0.757078,
+   "implied_growth": 0.163119,
+   "implied_real_pct": 13.811855,
+   "terminal_share": 0.757669,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.018649,
-   "p_at_or_below": 0.981351,
+   "p_achieve": 0.019062,
+   "p_at_or_below": 0.980938,
    "own_growth": 0.2005,
    "verdict": {
     "code": "exuberant",
@@ -311,17 +311,17 @@
    "why": [
     {
      "driver": "depreciation",
-     "points": 24.087681,
+     "points": 24.070273,
      "text": "Depreciation catch-up: if D&A rose to today's capex the growth required would be 24.1 points higher. The price may be capitalizing earnings the build will absorb."
     },
     {
      "driver": "base_rate",
-     "points": 12.687246,
+     "points": 12.618072,
      "text": "Outside view: only 1.9% of companies with sales above $50 billion grew at least 14% a year in real terms for a decade."
     },
     {
      "driver": "margin",
-     "points": 5.18483,
+     "points": 5.181062,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (17% instead of 26%), the growth required rises 5.2 points."
     },
     {
@@ -338,22 +338,22 @@
    "why_right": [
     {
      "driver": "margin_expansion",
-     "points": 5.021214,
+     "points": 5.017527,
      "text": "Margins: if the steady-state free cash flow margin rose to 39% from 26% (mix shift, operating leverage), the growth required falls 5.0 points."
     },
     {
      "driver": "momentum",
-     "points": 3.668971,
+     "points": 3.738145,
      "text": "Momentum: revenue grew 20% last year; the price only needs it to average 16%. It already assumes a slowdown."
     },
     {
      "driver": "discount_rate",
-     "points": 2.405328,
+     "points": 2.410923,
      "text": "Rates: 76% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.4 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 2489.82931,
-   "price_to_p90_value": 1.554323
+   "value_at_p90_growth": 2502.811426,
+   "price_to_p90_value": 1.546261
   },
   "AMZN": {
    "ticker": "AMZN",
@@ -402,7 +402,7 @@
     "quality_grade": "low"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.4,
     "erp": 0.045,
     "inflation": 0.025,
@@ -412,7 +412,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 2747.899,
-   "discount_rate": 0.110566,
+   "discount_rate": 0.11027,
    "m0": -0.083723,
    "m_star": 0.086618,
    "pe": 19.958599,
@@ -420,12 +420,12 @@
    "ev_ebit": 26.329446,
    "fcf_yield": -0.017432,
    "owner_fcf_yield": -0.02482,
-   "implied_growth": 0.227582,
-   "implied_real_pct": 20.258161,
-   "terminal_share": 0.875095,
+   "implied_growth": 0.226867,
+   "implied_real_pct": 20.186693,
+   "terminal_share": 0.875564,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.002964,
-   "p_at_or_below": 0.997036,
+   "p_achieve": 0.002971,
+   "p_at_or_below": 0.997029,
    "own_growth": 0.1577,
    "verdict": {
     "code": "extreme",
@@ -439,17 +439,17 @@
     },
     {
      "driver": "base_rate",
-     "points": 19.064378,
+     "points": 18.99291,
      "text": "Outside view: only 0.3% of companies with sales above $50 billion grew at least 20% a year in real terms for a decade."
     },
     {
      "driver": "expectations",
-     "points": 6.988161,
+     "points": 6.916693,
      "text": "Expectations: the price needs 23% a year for a decade, faster than the 16% the company grew last year."
     },
     {
      "driver": "margin",
-     "points": 5.793227,
+     "points": 5.788571,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (6% instead of 9%), the growth required rises 5.8 points."
     },
     {
@@ -461,17 +461,17 @@
    "why_right": [
     {
      "driver": "margin_expansion",
-     "points": 5.518169,
+     "points": 5.513868,
      "text": "Margins: if the steady-state free cash flow margin rose to 13% from 9% (mix shift, operating leverage), the growth required falls 5.5 points."
     },
     {
      "driver": "discount_rate",
-     "points": 2.487467,
+     "points": 2.492454,
      "text": "Rates: 88% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.5 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 881.227314,
-   "price_to_p90_value": 3.052561
+   "value_at_p90_growth": 887.141272,
+   "price_to_p90_value": 3.032212
   },
   "META": {
    "ticker": "META",
@@ -525,7 +525,7 @@
     "quality_grade": "low"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.45,
     "erp": 0.045,
     "inflation": 0.025,
@@ -535,7 +535,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 1608.473,
-   "discount_rate": 0.113655,
+   "discount_rate": 0.113357,
    "m0": -0.007521,
    "m_star": 0.269409,
    "pe": 21.395633,
@@ -543,16 +543,16 @@
    "ev_ebit": 20.263206,
    "fcf_yield": 0.015606,
    "owner_fcf_yield": -0.001129,
-   "implied_growth": 0.155003,
-   "implied_real_pct": 13.000287,
-   "terminal_share": 0.717428,
+   "implied_growth": 0.154375,
+   "implied_real_pct": 12.937476,
+   "terminal_share": 0.717997,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.023915,
-   "p_at_or_below": 0.976085,
+   "p_achieve": 0.02429,
+   "p_at_or_below": 0.97571,
    "own_growth": 0.2752,
    "verdict": {
     "code": "exuberant",
-    "text": "The price needs about 16% a year for ten years (13% real), achieved by about 2.4% of companies this size."
+    "text": "The price needs about 15% a year for ten years (13% real), achieved by about 2.4% of companies this size."
    },
    "why": [
     {
@@ -562,12 +562,12 @@
     },
     {
      "driver": "base_rate",
-     "points": 11.806504,
+     "points": 11.743693,
      "text": "Outside view: only 2.4% of companies with sales above $50 billion grew at least 13% a year in real terms for a decade."
     },
     {
      "driver": "margin",
-     "points": 5.180015,
+     "points": 5.176562,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (18% instead of 27%), the growth required rises 5.2 points."
     },
     {
@@ -579,22 +579,22 @@
    "why_right": [
     {
      "driver": "momentum",
-     "points": 12.019713,
-     "text": "Momentum: revenue grew 28% last year; the price only needs it to average 16%. It already assumes a slowdown."
+     "points": 12.082524,
+     "text": "Momentum: revenue grew 28% last year; the price only needs it to average 15%. It already assumes a slowdown."
     },
     {
      "driver": "margin_expansion",
-     "points": 5.030973,
+     "points": 5.027569,
      "text": "Margins: if the steady-state free cash flow margin rose to 40% from 27% (mix shift, operating leverage), the growth required falls 5.0 points."
     },
     {
      "driver": "discount_rate",
-     "points": 2.177135,
+     "points": 2.181319,
      "text": "Rates: 72% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.2 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 1100.992638,
-   "price_to_p90_value": 1.462317
+   "value_at_p90_growth": 1106.392358,
+   "price_to_p90_value": 1.45518
   },
   "AVGO": {
    "ticker": "AVGO",
@@ -638,7 +638,7 @@
     "quality_grade": "mixed"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.98,
     "erp": 0.045,
     "inflation": 0.025,
@@ -648,7 +648,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 1605.444,
-   "discount_rate": 0.137372,
+   "discount_rate": 0.137074,
    "m0": 0.347021,
    "m_star": 0.262693,
    "pe": 41.029662,
@@ -656,12 +656,12 @@
    "ev_ebit": 36.910153,
    "fcf_yield": 0.025097,
    "owner_fcf_yield": 0.019695,
-   "implied_growth": 0.316919,
-   "implied_real_pct": 29.191909,
-   "terminal_share": 0.605711,
+   "implied_growth": 0.316316,
+   "implied_real_pct": 29.131624,
+   "terminal_share": 0.606209,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.002074,
-   "p_at_or_below": 0.997926,
+   "p_achieve": 0.00208,
+   "p_at_or_below": 0.99792,
    "own_growth": 0.4869,
    "verdict": {
     "code": "extreme",
@@ -670,12 +670,12 @@
    "why": [
     {
      "driver": "base_rate",
-     "points": 27.998126,
+     "points": 27.937841,
      "text": "Outside view: only 0.2% of companies with sales above $50 billion grew at least 29% a year in real terms for a decade."
     },
     {
      "driver": "margin",
-     "points": 5.255922,
+     "points": 5.253761,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (18% instead of 26%), the growth required rises 5.3 points."
     },
     {
@@ -687,22 +687,22 @@
    "why_right": [
     {
      "driver": "momentum",
-     "points": 16.998091,
+     "points": 17.058376,
      "text": "Momentum: revenue grew 49% last year; the price only needs it to average 32%. It already assumes a slowdown."
     },
     {
      "driver": "margin_expansion",
-     "points": 5.205517,
+     "points": 5.203168,
      "text": "Margins: if the steady-state free cash flow margin rose to 39% from 26% (mix shift, operating leverage), the growth required falls 5.2 points."
     },
     {
      "driver": "discount_rate",
-     "points": 2.064053,
+     "points": 2.06668,
      "text": "Rates: 61% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.1 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 371.546929,
-   "price_to_p90_value": 4.225577
+   "value_at_p90_growth": 372.793602,
+   "price_to_p90_value": 4.211446
   },
   "TSLA": {
    "ticker": "TSLA",
@@ -746,7 +746,7 @@
     "quality_grade": "mixed"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 2.26,
     "erp": 0.045,
     "inflation": 0.025,
@@ -756,7 +756,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 1514.076,
-   "discount_rate": 0.152582,
+   "discount_rate": 0.152283,
    "m0": -0.009626,
    "m_star": 0.026697,
    "pe": 481.665631,
@@ -764,9 +764,9 @@
    "ev_ebit": 449.014235,
    "fcf_yield": 0.002131,
    "owner_fcf_yield": -0.000643,
-   "implied_growth": 0.709213,
-   "implied_real_pct": 68.421342,
-   "terminal_share": 0.789233,
+   "implied_growth": 0.708431,
+   "implied_real_pct": 68.34312,
+   "terminal_share": 0.789605,
    "base_rate_bucket": "over_50b",
    "p_achieve": 0.0,
    "p_at_or_below": 1.0,
@@ -778,12 +778,12 @@
    "why": [
     {
      "driver": "base_rate",
-     "points": 67.227559,
+     "points": 67.149337,
      "text": "Outside view: fewer than 1 in 1,000 of companies with sales above $50 billion grew at least 68% a year in real terms for a decade."
     },
     {
      "driver": "expectations",
-     "points": 62.621342,
+     "points": 62.54312,
      "text": "Expectations: the price needs 71% a year for a decade, faster than the 8% the company grew last year."
     },
     {
@@ -793,24 +793,24 @@
     },
     {
      "driver": "margin",
-     "points": 7.381173,
+     "points": 7.37737,
      "text": "Margins: if the steady-state free cash flow margin settled a third lower (2% instead of 3%), the growth required rises 7.4 points."
     }
    ],
    "why_right": [
     {
      "driver": "margin_expansion",
-     "points": 7.081172,
+     "points": 7.077544,
      "text": "Margins: if the steady-state free cash flow margin rose to 4% from 3% (mix shift, operating leverage), the growth required falls 7.1 points."
     },
     {
      "driver": "discount_rate",
-     "points": 2.652089,
+     "points": 2.654752,
      "text": "Rates: 79% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.7 points. A buyer here is partly betting on rates or the risk premium falling."
     }
    ],
-   "value_at_p90_growth": 59.287731,
-   "price_to_p90_value": 26.143689
+   "value_at_p90_growth": 59.383876,
+   "price_to_p90_value": 26.101361
   },
   "ORCL": {
    "ticker": "ORCL",
@@ -874,7 +874,7 @@
     "quality_grade": "low"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 1.99,
     "erp": 0.045,
     "inflation": 0.025,
@@ -884,7 +884,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 470.41,
-   "discount_rate": 0.119074,
+   "discount_rate": 0.118787,
    "m0": -0.467204,
    "m_star": 0.28103,
    "pe": 20.198203,
@@ -892,12 +892,12 @@
    "ev_ebit": 19.123135,
    "fcf_yield": -0.075154,
    "owner_fcf_yield": -0.087751,
-   "implied_growth": 0.203483,
-   "implied_real_pct": 17.84829,
-   "terminal_share": 1.02601,
+   "implied_growth": 0.202829,
+   "implied_real_pct": 17.782857,
+   "terminal_share": 1.026366,
    "base_rate_bucket": "over_50b",
-   "p_achieve": 0.006849,
-   "p_at_or_below": 0.993151,
+   "p_achieve": 0.006966,
+   "p_at_or_below": 0.993034,
    "own_growth": 0.2162,
    "verdict": {
     "code": "extreme",
@@ -911,13 +911,13 @@
     },
     {
      "driver": "base_rate",
-     "points": 16.654507,
+     "points": 16.589074,
      "text": "Outside view: only 0.7% of companies with sales above $50 billion grew at least 18% a year in real terms for a decade."
     },
     {
      "driver": "margin",
-     "points": 6.252815,
-     "text": "Margins: if the steady-state free cash flow margin settled a third lower (19% instead of 28%), the growth required rises 6.3 points."
+     "points": 6.24747,
+     "text": "Margins: if the steady-state free cash flow margin settled a third lower (19% instead of 28%), the growth required rises 6.2 points."
     },
     {
      "driver": "quality_sbc",
@@ -938,22 +938,22 @@
    "why_right": [
     {
      "driver": "margin_expansion",
-     "points": 5.866656,
+     "points": 5.861921,
      "text": "Margins: if the steady-state free cash flow margin rose to 42% from 28% (mix shift, operating leverage), the growth required falls 5.9 points."
     },
     {
      "driver": "discount_rate",
-     "points": 2.345128,
+     "points": 2.348976,
      "text": "Rates: 103% of value lies beyond year ten; a 1-point lower discount rate cuts the growth required by 2.3 points. A buyer here is partly betting on rates or the risk premium falling."
     },
     {
      "driver": "momentum",
-     "points": 1.27171,
+     "points": 1.337143,
      "text": "Momentum: revenue grew 22% last year; the price only needs it to average 20%. It already assumes a slowdown."
     }
    ],
-   "value_at_p90_growth": 80.963053,
-   "price_to_p90_value": 4.720054
+   "value_at_p90_growth": 82.23795,
+   "price_to_p90_value": 4.646881
   },
   "SPCX": {
    "ticker": "SPCX",
@@ -1007,7 +1007,7 @@
     "quality_grade": "low"
    },
    "inputs": {
-    "rf": 0.0515,
+    "rf": 0.0512,
     "beta": 2.73,
     "erp": 0.045,
     "inflation": 0.025,
@@ -1017,7 +1017,7 @@
     "cost_of_debt_spread": 0.012
    },
    "ev": 1948.989,
-   "discount_rate": 0.17202,
+   "discount_rate": 0.171721,
    "m0": -1.376369,
    "m_star": null,
    "pe": -724.637681,
@@ -1305,7 +1305,7 @@
   "years": 10,
   "cost_of_debt_spread": 0.012
  },
- "rf": 0.0515,
+ "rf": 0.0512,
  "labels": {
   "inputs": "Observed (filings, prices)",
   "discount_rate": "Assumed (CAPM with a stated ERP)",
