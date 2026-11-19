@@ -22,14 +22,14 @@
     "source": "research (multpl, secondary)"
    },
    "y10": {
-    "value": 5.13,
+    "value": 5.1,
     "source": "research (Treasury)"
    }
   },
   "features": {
    "log_cape": 3.710152,
-   "ecy": 0.005623,
-   "y10": 0.0513,
+   "ecy": 0.005923,
+   "y10": 0.051,
    "infl12": 0.033401,
    "mom12_1": 0.154716,
    "trend_gap": 0.084434,
@@ -179,14 +179,14 @@
   },
   "now": {
    "cape_ols": -0.01885,
-   "ridge": 0.01151,
+   "ridge": 0.011729,
    "forest": 0.013747,
    "boost": 0.002601,
-   "analogs": 0.066093,
-   "combo": 0.04319,
-   "ensemble_v24": 0.027428,
+   "analogs": 0.064829,
+   "combo": 0.043226,
+   "ensemble_v24": 0.027226,
    "ensemble": 0.064245,
-   "dmspe": 0.02611,
+   "dmspe": 0.025975,
    "benchmark": 0.064245
   },
   "n_oos": 1006,
@@ -2295,13 +2295,13 @@
    }
   },
   "now": {
-   "logit": 0.249783,
+   "logit": 0.24915,
    "forest": 0.272027,
-   "boost": 0.332351,
+   "boost": 0.337709,
    "analogs": 0.25,
-   "ensemble_v24": 0.27604,
+   "ensemble_v24": 0.277222,
    "ensemble": 0.212281,
-   "dmspe": 0.275138,
+   "dmspe": 0.276181,
    "benchmark": 0.212281
   },
   "n_oos": 1006,
@@ -4544,64 +4544,64 @@
  "analogs": [
   {
    "date": "1998-08",
-   "distance": 0.530335,
+   "distance": 0.534515,
    "next12": 0.224141,
    "crash": false,
    "cape": 38.598123
   },
   {
-   "date": "2000-05",
-   "distance": 0.829687,
-   "next12": -0.125207,
+   "date": "2000-09",
+   "distance": 0.837875,
+   "next12": -0.297852,
    "crash": true,
-   "cape": 44.216034
+   "cape": 43.617044
   },
   {
    "date": "1996-12",
-   "distance": 1.030922,
+   "distance": 1.035881,
    "next12": 0.295658,
    "crash": false,
    "cape": 27.980316
   },
   {
    "date": "2018-10",
-   "distance": 1.151422,
+   "distance": 1.140404,
    "next12": 0.071251,
    "crash": false,
    "cape": 33.260864
   },
   {
    "date": "2007-06",
-   "distance": 1.208721,
+   "distance": 1.205984,
    "next12": -0.139963,
    "crash": true,
    "cape": 27.957899
   },
   {
    "date": "1966-02",
-   "distance": 1.49356,
+   "distance": 1.491066,
    "next12": -0.051595,
    "crash": true,
    "cape": 24.201503
   },
   {
    "date": "1967-09",
-   "distance": 1.498611,
+   "distance": 1.498847,
    "next12": 0.043835,
    "crash": false,
    "cape": 22.198286
   },
   {
    "date": "1929-06",
-   "distance": 1.526199,
+   "distance": 1.521013,
    "next12": -0.128898,
    "crash": true,
    "cape": 28.02297
   }
  ],
  "shift": {
-  "novelty": 1.134745,
-  "novelty_pct": 0.252632,
+  "novelty": 1.139369,
+  "novelty_pct": 0.25731,
   "k": 24,
   "features": {
    "log_cape": {
@@ -4611,15 +4611,15 @@
     "outside": false
    },
    "ecy": {
-    "value": 0.005623,
-    "pct": 0.139181,
-    "z": -0.918466,
+    "value": 0.005923,
+    "pct": 0.14152,
+    "z": -0.911597,
     "outside": false
    },
    "y10": {
-    "value": 0.0513,
-    "pct": 0.761988,
-    "z": 0.278656,
+    "value": 0.051,
+    "pct": 0.759649,
+    "z": 0.266007,
     "outside": false
    },
    "infl12": {
@@ -4660,6 +4660,6 @@
   "Since v0.25 the ensemble truncates each member's forecast at zero and shrinks the average toward the historical mean with a weight learned only from forecasts whose outcome was known (today 0.00, average 0.46); the equal-weight v0.24 ensemble scored -6.0%. The crash ensemble is shrunk toward the base rate the same way (Brier skill -2.8% against -11.6%). Each was chosen from the variants tried (11 for returns, 7 for crashes), so the margins are smaller than their t statistics suggest.",
   "Today the ensemble expects +6.6% real over the next year against a historical +6.6%, with an 80% conformal interval of plus or minus 20% in log terms (past intervals covered 82%).",
   "A fall of 15% or more within a year: the ensemble puts it at 21% against a base rate of 21%; its Brier skill out of sample is -2.8% and AUC 0.52.",
-  "Is today familiar? Its 24 nearest historical months are further away than they are for 25% of months in the record."
+  "Is today familiar? Its 24 nearest historical months are further away than they are for 26% of months in the record."
  ]
 }

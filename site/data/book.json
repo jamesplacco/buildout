@@ -1,9 +1,12 @@
 {
  "schema": 1,
- "asof": "2026-11-17",
- "treasury_to": "2026-11-17",
+ "asof": "2026-11-18",
+ "treasury_to": "2026-11-18",
+ "treasury_lag_bdays": 0,
+ "treasury_rows_after_asof": 0,
+ "warnings": [],
  "from": "2017-01-04",
- "days": 2482,
+ "days": 2483,
  "weights": {
   "MSFT": 0.14,
   "AMZN": 0.14,
@@ -28,150 +31,150 @@
   "ORCL": "2017-01-04"
  },
  "last_date": {
-  "MSFT": "2026-11-17",
-  "AMZN": "2026-11-17",
-  "GOOGL": "2026-11-17",
-  "NVDA": "2026-11-17",
-  "META": "2026-11-17",
-  "TSLA": "2026-11-17",
-  "AVGO": "2026-11-17",
-  "SPCX": "2026-11-17",
-  "ORCL": "2026-11-17"
+  "MSFT": "2026-11-18",
+  "AMZN": "2026-11-18",
+  "GOOGL": "2026-11-18",
+  "NVDA": "2026-11-18",
+  "META": "2026-11-18",
+  "TSLA": "2026-11-18",
+  "AVGO": "2026-11-18",
+  "SPCX": "2026-11-18",
+  "ORCL": "2026-11-18"
  },
  "exposure": {
-  "market": 1.140276,
-  "semis": -0.318757,
-  "rates": -0.161179,
-  "beta_broad_market": 1.534339,
-  "beta_broad_market_10y": 1.339541,
-  "rates_dv01_per_100m": -19404.386778
+  "market": 1.140427,
+  "semis": -0.318917,
+  "rates": -0.15928,
+  "beta_broad_market": 1.532973,
+  "beta_broad_market_10y": 1.339476,
+  "rates_dv01_per_100m": -19271.132656
  },
  "betas": [
   {
    "name": "MSFT",
-   "market": 0.760976,
-   "semis": -0.713954,
-   "rates": -0.302455,
-   "broad_market": 1.009059,
-   "days": 2419,
-   "specific_vol": 0.247743,
+   "market": 0.760873,
+   "semis": -0.713796,
+   "rates": -0.303919,
+   "broad_market": 1.008277,
+   "days": 2420,
+   "specific_vol": 0.247067,
    "prior": null
   },
   {
    "name": "AMZN",
-   "market": 0.918047,
-   "semis": -0.543023,
-   "rates": -0.271339,
-   "broad_market": 1.281948,
-   "days": 2419,
-   "specific_vol": 0.277328,
+   "market": 0.920854,
+   "semis": -0.547357,
+   "rates": -0.231192,
+   "broad_market": 1.276281,
+   "days": 2420,
+   "specific_vol": 0.279318,
    "prior": null
   },
   {
    "name": "GOOGL",
-   "market": 0.846642,
-   "semis": -0.510894,
-   "rates": -0.169408,
-   "broad_market": 1.126291,
-   "days": 2419,
-   "specific_vol": 0.271913,
+   "market": 0.846737,
+   "semis": -0.511041,
+   "rates": -0.168048,
+   "broad_market": 1.125119,
+   "days": 2420,
+   "specific_vol": 0.271169,
    "prior": null
   },
   {
    "name": "NVDA",
-   "market": 1.277832,
-   "semis": 0.100582,
-   "rates": -0.091111,
-   "broad_market": 1.762084,
-   "days": 2419,
-   "specific_vol": 0.306974,
+   "market": 1.275137,
+   "semis": 0.104742,
+   "rates": -0.129651,
+   "broad_market": 1.765497,
+   "days": 2420,
+   "specific_vol": 0.308424,
    "prior": null
   },
   {
    "name": "META",
-   "market": 0.944241,
-   "semis": -0.514586,
-   "rates": -0.05242,
-   "broad_market": 1.329124,
-   "days": 2419,
-   "specific_vol": 0.358504,
+   "market": 0.943377,
+   "semis": -0.513252,
+   "rates": -0.064774,
+   "broad_market": 1.329296,
+   "days": 2420,
+   "specific_vol": 0.357721,
    "prior": null
   },
   {
    "name": "TSLA",
-   "market": 1.582876,
-   "semis": -0.266816,
-   "rates": -0.037181,
-   "broad_market": 2.164506,
-   "days": 2419,
-   "specific_vol": 0.381351,
+   "market": 1.583031,
+   "semis": -0.267056,
+   "rates": -0.03496,
+   "broad_market": 2.162572,
+   "days": 2420,
+   "specific_vol": 0.380309,
    "prior": null
   },
   {
    "name": "AVGO",
-   "market": 1.504113,
-   "semis": 0.447214,
-   "rates": -0.306228,
-   "broad_market": 2.040818,
-   "days": 2419,
-   "specific_vol": 0.332047,
+   "market": 1.507072,
+   "semis": 0.442646,
+   "rates": -0.263917,
+   "broad_market": 2.035164,
+   "days": 2420,
+   "specific_vol": 0.33369,
    "prior": null
   },
   {
    "name": "SPCX",
-   "market": 1.58884,
-   "semis": -0.30068,
-   "rates": -0.18247,
-   "broad_market": 2.270888,
-   "days": 109,
-   "specific_vol": 0.680831,
+   "market": 1.589667,
+   "semis": -0.301028,
+   "rates": -0.174032,
+   "broad_market": 2.268485,
+   "days": 110,
+   "specific_vol": 0.676676,
    "prior": "TSLA"
   },
   {
    "name": "ORCL",
-   "market": 1.479226,
-   "semis": -0.143795,
-   "rates": 0.078828,
-   "broad_market": 2.029555,
-   "days": 2419,
-   "specific_vol": 0.511445,
+   "market": 1.47793,
+   "semis": -0.141794,
+   "rates": 0.060295,
+   "broad_market": 2.030093,
+   "days": 2420,
+   "specific_vol": 0.510359,
    "prior": null
   }
  ],
  "factors": {
   "market": {
    "name": "Nasdaq-100 (QQQ)",
-   "vol": 0.240937
+   "vol": 0.239718
   },
   "semis": {
    "name": "Semiconductors net of the Nasdaq-100 (SOXX less its walked-forward beta times QQQ)",
-   "vol": 0.234004
+   "vol": 0.232883
   },
   "rates": {
    "name": "20-year Treasury par bond (daily par yields)",
-   "vol": 0.089732
+   "vol": 0.090128
   }
  },
  "factor_corr": {
   "market": {
    "market": 1.0,
-   "semis": 0.209589,
-   "rates": 0.044561
+   "semis": 0.208258,
+   "rates": 0.048206
   },
   "semis": {
-   "market": 0.209589,
+   "market": 0.208258,
    "semis": 1.0,
-   "rates": -0.13282
+   "rates": -0.136655
   },
   "rates": {
-   "market": 0.044561,
-   "semis": -0.13282,
+   "market": 0.048206,
+   "semis": -0.136655,
    "rates": 1.0
   }
  },
  "risk": {
-  "vol": 0.293167,
-  "vol_names_cov": 0.269781,
+  "vol": 0.291948,
+  "vol_names_cov": 0.268507,
   "vol_names_cov_over": [
    "MSFT",
    "AMZN",
@@ -182,95 +185,95 @@
    "AVGO",
    "ORCL"
   ],
-  "vol_ewma_now": 0.317923,
+  "vol_ewma_now": 0.309268,
   "variance_share": {
-   "market": 0.826175,
-   "semis": 0.013094,
-   "rates": -0.001294,
-   "specific": 0.162025
+   "market": 0.82502,
+   "semis": 0.013397,
+   "rates": -0.001511,
+   "specific": 0.163094
   },
-  "effective_bets": 1.592979,
-  "effective_names": 8.675107,
-  "diversification_ratio": 1.541529,
+  "effective_bets": 1.593192,
+  "effective_names": 8.67643,
+  "diversification_ratio": 1.544211,
   "weight_hhi": 0.1192,
   "contributions": [
    {
     "name": "MSFT",
     "weight": 0.14,
-    "share": 0.094953
+    "share": 0.094893
    },
    {
     "name": "AMZN",
     "weight": 0.14,
-    "share": 0.11348
+    "share": 0.114117
    },
    {
     "name": "GOOGL",
     "weight": 0.14,
-    "share": 0.105489
+    "share": 0.105449
    },
    {
     "name": "NVDA",
     "weight": 0.14,
-    "share": 0.150426
+    "share": 0.150233
    },
    {
     "name": "META",
     "weight": 0.12,
-    "share": 0.106117
+    "share": 0.106029
    },
    {
     "name": "TSLA",
     "weight": 0.1,
-    "share": 0.132673
+    "share": 0.132579
    },
    {
     "name": "AVGO",
     "weight": 0.08,
-    "share": 0.093727
+    "share": 0.093894
    },
    {
     "name": "SPCX",
     "weight": 0.08,
-    "share": 0.127482
+    "share": 0.127262
    },
    {
     "name": "ORCL",
     "weight": 0.06,
-    "share": 0.075654
+    "share": 0.075544
    }
   ]
  },
  "tail": {
-  "months": 2462,
-  "daily_vol_now_ann": 0.317923,
+  "months": 2463,
+  "daily_vol_now_ann": 0.309268,
   "es95": {
    "historical": 0.148178,
-   "filtered": 0.159729,
-   "student_t": 0.18946,
-   "governing": 0.18946,
+   "filtered": 0.155578,
+   "student_t": 0.188672,
+   "governing": 0.188672,
    "method": "student_t"
   },
   "es97.5": {
    "historical": 0.174542,
-   "filtered": 0.185164,
-   "student_t": 0.230854,
-   "governing": 0.230854,
+   "filtered": 0.180425,
+   "student_t": 0.229894,
+   "governing": 0.229894,
    "method": "student_t"
   },
   "day": {
-   "var99_hist": 0.050234,
+   "var99_hist": 0.050233,
    "es99_hist": 0.062747,
-   "var99_now": 0.046583,
-   "es97_5_now": 0.05463
+   "var99_now": 0.045315,
+   "es97_5_now": 0.053143
   }
  },
  "var_backtest": {
   "normal": {
-   "days": 2422,
+   "days": 2423,
    "breaches": 55,
-   "expected": 24.22,
-   "rate": 0.022709,
+   "expected": 24.23,
+   "rate": 0.022699,
    "p": 0.0,
    "avg_loss_given_breach": 0.045371,
    "avg_var_on_breach": 0.035458,
@@ -278,11 +281,11 @@
    "model": "normal quantile at the RiskMetrics volatility (lambda 0.94)"
   },
   "filtered": {
-   "days": 2172,
+   "days": 2173,
    "breaches": 15,
-   "expected": 21.72,
-   "rate": 0.006906,
-   "p": 0.124843,
+   "expected": 21.73,
+   "rate": 0.006903,
+   "p": 0.124345,
    "avg_loss_given_breach": 0.049832,
    "avg_var_on_breach": 0.044043,
    "from": "2018-03-29",
@@ -294,51 +297,52 @@
   "vol_target": 0.2,
   "max_drawdown": 0.25,
   "max_gross": 1.5,
-  "drawdown_drift": 0.114977,
-  "cash_rate": 0.048
+  "drawdown_drift": 0.114974,
+  "cash_rate": 0.048,
+  "cash_rate_date": "2026-11-18"
  },
  "sizes": {
-  "es_budget": 0.633379,
-  "vol_target": 0.682205,
-  "drawdown_cap": 0.533066,
+  "es_budget": 0.636023,
+  "vol_target": 0.685052,
+  "drawdown_cap": 0.535431,
   "gross_cap": 1.5
  },
  "binding": "drawdown_cap",
- "size": 0.533066,
+ "size": 0.535431,
  "at_full": {
-  "es95": 0.18946,
-  "vol": 0.293167,
-  "drawdown95": 0.44112
+  "es95": 0.188672,
+  "vol": 0.291948,
+  "drawdown95": 0.439471
  },
  "keep_names_hedge": {
-  "short_nasdaq_frac": 0.812314,
-  "best_short": 0.812314,
-  "es95": 0.098186,
-  "vol": 0.151932,
+  "short_nasdaq_frac": 0.808257,
+  "best_short": 0.808257,
+  "es95": 0.09822,
+  "vol": 0.151983,
   "drawdown95": 0.25,
   "worst": 0.999998,
-  "market_beta_left": 0.327961,
+  "market_beta_left": 0.332171,
   "meets_all": true,
   "binding_after": "drawdown_cap",
-  "notional_usd_per_100m": 81231445.3125
+  "notional_usd_per_100m": 80825683.59375
  },
  "frontier": [
   {
-   "gross": 0.533066,
+   "gross": 0.535431,
    "short": 0.0,
    "meets": true,
-   "long": 0.533066,
-   "gross_total": 0.533066,
-   "net": 0.533066,
-   "es95": 0.100995,
-   "vol": 0.156277,
-   "drawdown95": 0.249995,
+   "long": 0.535431,
+   "gross_total": 0.535431,
+   "net": 0.535431,
+   "es95": 0.101021,
+   "vol": 0.156318,
+   "drawdown95": 0.249966,
    "cash_in_record": true,
-   "cagr": 0.194702,
-   "y2022": -0.22819,
-   "maxdd": 0.264346,
+   "cagr": 0.195784,
+   "y2022": -0.22926,
+   "maxdd": 0.265496,
    "hedge_drag_ann": 0.0,
-   "market_beta_left": 0.607842,
+   "market_beta_left": 0.61062,
    "stock_specific_share": null
   },
   {
@@ -348,15 +352,15 @@
    "long": 0.6,
    "gross_total": 0.7,
    "net": 0.5,
-   "es95": 0.100219,
-   "vol": 0.155077,
-   "drawdown95": 0.248668,
+   "es95": 0.099824,
+   "vol": 0.154465,
+   "drawdown95": 0.247584,
    "cash_in_record": true,
-   "cagr": 0.198231,
+   "cagr": 0.198577,
    "y2022": -0.224459,
    "maxdd": 0.262206,
-   "hedge_drag_ann": 0.01791,
-   "market_beta_left": 0.584165,
+   "hedge_drag_ann": 0.017941,
+   "market_beta_left": 0.584256,
    "stock_specific_share": null
   },
   {
@@ -366,15 +370,15 @@
    "long": 0.7,
    "gross_total": 0.95,
    "net": 0.45,
-   "es95": 0.100006,
-   "vol": 0.154748,
-   "drawdown95": 0.249306,
+   "es95": 0.099646,
+   "vol": 0.154191,
+   "drawdown95": 0.248319,
    "cash_in_record": true,
-   "cagr": 0.203282,
+   "cagr": 0.203636,
    "y2022": -0.218732,
    "maxdd": 0.258862,
-   "hedge_drag_ann": 0.044774,
-   "market_beta_left": 0.548193,
+   "hedge_drag_ann": 0.044852,
+   "market_beta_left": 0.548299,
    "stock_specific_share": null
   },
   {
@@ -384,15 +388,15 @@
    "long": 0.8,
    "gross_total": 1.25,
    "net": 0.35,
-   "es95": 0.095692,
-   "vol": 0.148073,
-   "drawdown95": 0.240487,
+   "es95": 0.095397,
+   "vol": 0.147616,
+   "drawdown95": 0.239671,
    "cash_in_record": true,
-   "cagr": 0.199111,
+   "cagr": 0.199451,
    "y2022": -0.195893,
    "maxdd": 0.238153,
-   "hedge_drag_ann": 0.080594,
-   "market_beta_left": 0.462221,
+   "hedge_drag_ann": 0.080733,
+   "market_beta_left": 0.462342,
    "stock_specific_share": null
   },
   {
@@ -402,15 +406,15 @@
    "long": 0.9,
    "gross_total": 1.5,
    "net": 0.3,
-   "es95": 0.098565,
-   "vol": 0.152518,
-   "drawdown95": 0.248414,
+   "es95": 0.098292,
+   "vol": 0.152096,
+   "drawdown95": 0.247735,
    "cash_in_record": true,
-   "cagr": 0.203743,
+   "cagr": 0.204091,
    "y2022": -0.190276,
    "maxdd": 0.234979,
-   "hedge_drag_ann": 0.107458,
-   "market_beta_left": 0.426248,
+   "hedge_drag_ann": 0.107644,
+   "market_beta_left": 0.426385,
    "stock_specific_share": null
   },
   {
@@ -420,15 +424,15 @@
    "long": 1.0,
    "gross_total": 1.85,
    "net": 0.15,
-   "es95": 0.095912,
-   "vol": 0.148413,
-   "drawdown95": 0.24517,
+   "es95": 0.0957,
+   "vol": 0.148084,
+   "drawdown95": 0.244606,
    "cash_in_record": true,
-   "cagr": 0.189299,
+   "cagr": 0.189613,
    "y2022": -0.149847,
    "maxdd": 0.196428,
-   "hedge_drag_ann": 0.152232,
-   "market_beta_left": 0.290276,
+   "hedge_drag_ann": 0.152496,
+   "market_beta_left": 0.290427,
    "stock_specific_share": null
   }
  ],
@@ -445,29 +449,29 @@
     },
     "months": 117,
     "from": "2017-03-01",
-    "to": "2026-11-17",
-    "utility_gain_month": -0.003645,
-    "t": -0.657026,
-    "p": 0.527607,
+    "to": "2026-11-18",
+    "utility_gain_month": -0.003676,
+    "t": -0.662436,
+    "p": 0.524291,
     "df": 9,
-    "sharpe_rule": 1.070345,
-    "sharpe_hold": 1.127608,
+    "sharpe_rule": 1.071982,
+    "sharpe_hold": 1.130604,
     "halves": {
      "first": {
       "t": -0.879403,
       "gain": -0.005856
      },
      "second": {
-      "t": -0.179429,
-      "gain": -0.001472
+      "t": -0.186598,
+      "gain": -0.001534
      }
     },
     "maxdd_rule": 0.268138,
     "maxdd_hold": 0.468869,
-    "avg_exposure": 0.791179,
-    "time_below_1": 0.65671,
-    "cagr_rule": 0.255754,
-    "cagr_hold": 0.332807,
+    "avg_exposure": 0.791041,
+    "time_below_1": 0.656851,
+    "cagr_rule": 0.256025,
+    "cagr_hold": 0.333539,
     "thirds": [
      {
       "from": "2017-03-01",
@@ -478,20 +482,20 @@
      },
      {
       "from": "2020-06-01",
-      "to": "2023-08-01",
-      "t": -0.014294,
-      "sharpe_rule": 1.408906,
-      "sharpe_hold": 1.043542
+      "to": "2023-08-02",
+      "t": -0.005395,
+      "sharpe_rule": 1.353806,
+      "sharpe_hold": 1.010608
      },
      {
       "from": "2023-09-01",
-      "to": "2026-11-17",
-      "t": -3.414085,
-      "sharpe_rule": 0.681486,
-      "sharpe_hold": 1.019553
+      "to": "2026-11-18",
+      "t": -3.380765,
+      "sharpe_rule": 0.686197,
+      "sharpe_hold": 1.028969
      }
     ],
-    "t_at_5x_cost": -0.701458,
+    "t_at_5x_cost": -0.706821,
     "exposure_now": 0.452606
    },
    "best": {
@@ -501,7 +505,7 @@
      "cap": 1.5,
      "form": "vol"
     },
-    "t": -0.538646
+    "t": -0.543678
    },
    "t_bar": 1.664811,
    "n_rules": 12,
@@ -514,8 +518,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -1.382238,
-     "sharpe_rule": 1.045505,
+     "t": -1.391879,
+     "sharpe_rule": 1.047034,
      "maxdd_rule": 0.184277
     },
     {
@@ -525,8 +529,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -1.3493,
-     "sharpe_rule": 0.957322,
+     "t": -1.358813,
+     "sharpe_rule": 0.95861,
      "maxdd_rule": 0.261446
     },
     {
@@ -536,8 +540,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -0.975038,
-     "sharpe_rule": 1.158368,
+     "t": -0.981892,
+     "sharpe_rule": 1.16056,
      "maxdd_rule": 0.195101
     },
     {
@@ -547,8 +551,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -0.657026,
-     "sharpe_rule": 1.070345,
+     "t": -0.662436,
+     "sharpe_rule": 1.071982,
      "maxdd_rule": 0.268138
     },
     {
@@ -558,8 +562,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -1.424387,
-     "sharpe_rule": 0.994816,
+     "t": -1.432734,
+     "sharpe_rule": 0.997803,
      "maxdd_rule": 0.210779
     },
     {
@@ -569,8 +573,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -1.369522,
-     "sharpe_rule": 0.986189,
+     "t": -1.377583,
+     "sharpe_rule": 0.989005,
      "maxdd_rule": 0.241594
     },
     {
@@ -580,8 +584,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -1.161575,
-     "sharpe_rule": 1.037952,
+     "t": -1.165314,
+     "sharpe_rule": 1.041834,
      "maxdd_rule": 0.262457
     },
     {
@@ -591,8 +595,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -0.890395,
-     "sharpe_rule": 0.988014,
+     "t": -0.893607,
+     "sharpe_rule": 0.991036,
      "maxdd_rule": 0.320201
     },
     {
@@ -602,8 +606,8 @@
       "cap": 1.5,
       "form": "vol"
      },
-     "t": -0.538646,
-     "sharpe_rule": 1.140255,
+     "t": -0.543678,
+     "sharpe_rule": 1.14267,
      "maxdd_rule": 0.293355
     },
     {
@@ -613,8 +617,8 @@
       "cap": 1.5,
       "form": "vol"
      },
-     "t": -0.779331,
-     "sharpe_rule": 1.086183,
+     "t": -0.781766,
+     "sharpe_rule": 1.089582,
      "maxdd_rule": 0.346235
     },
     {
@@ -624,8 +628,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -1.299675,
-     "sharpe_rule": 0.85092,
+     "t": -1.306237,
+     "sharpe_rule": 0.85355,
      "maxdd_rule": 0.312214
     },
     {
@@ -635,8 +639,8 @@
       "cap": 1.5,
       "form": "vol"
      },
-     "t": -1.194732,
-     "sharpe_rule": 0.991323,
+     "t": -1.200279,
+     "sharpe_rule": 0.994481,
      "maxdd_rule": 0.320166
     }
    ]
@@ -653,29 +657,29 @@
     },
     "months": 117,
     "from": "2017-03-01",
-    "to": "2026-11-17",
-    "utility_gain_month": 0.000909,
-    "t": 0.28654,
-    "p": 0.780952,
+    "to": "2026-11-18",
+    "utility_gain_month": 0.000901,
+    "t": 0.28419,
+    "p": 0.782695,
     "df": 9,
-    "sharpe_rule": 0.928994,
-    "sharpe_hold": 0.854455,
+    "sharpe_rule": 0.93096,
+    "sharpe_hold": 0.856885,
     "halves": {
      "first": {
       "t": -0.554335,
       "gain": -0.002521
      },
      "second": {
-      "t": 1.147042,
-      "gain": 0.004281
+      "t": 1.141701,
+      "gain": 0.004265
      }
     },
     "maxdd_rule": 0.262249,
     "maxdd_hold": 0.351225,
-    "avg_exposure": 1.077847,
-    "time_below_1": 0.416121,
-    "cagr_rule": 0.201323,
-    "cagr_hold": 0.189701,
+    "avg_exposure": 1.077726,
+    "time_below_1": 0.41636,
+    "cagr_rule": 0.201614,
+    "cagr_hold": 0.190094,
     "thirds": [
      {
       "from": "2017-03-01",
@@ -686,20 +690,20 @@
      },
      {
       "from": "2020-06-01",
-      "to": "2023-08-01",
-      "t": 0.586944,
-      "sharpe_rule": 1.100375,
-      "sharpe_hold": 0.729784
+      "to": "2023-08-02",
+      "t": 0.541054,
+      "sharpe_rule": 1.028136,
+      "sharpe_hold": 0.697433
      },
      {
       "from": "2023-09-01",
-      "to": "2026-11-17",
-      "t": -0.0626,
-      "sharpe_rule": 0.774078,
-      "sharpe_hold": 0.835728
+      "to": "2026-11-18",
+      "t": -0.073182,
+      "sharpe_rule": 0.779167,
+      "sharpe_hold": 0.843709
      }
     ],
-    "t_at_5x_cost": 0.212958,
+    "t_at_5x_cost": 0.210605,
     "exposure_now": 0.782708
    },
    "best": {
@@ -709,7 +713,7 @@
      "cap": 1.5,
      "form": "vol"
     },
-    "t": 0.429116
+    "t": 0.427279
    },
    "t_bar": 1.664811,
    "n_rules": 12,
@@ -722,8 +726,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -0.637137,
-     "sharpe_rule": 0.937224,
+     "t": -0.64324,
+     "sharpe_rule": 0.939047,
      "maxdd_rule": 0.173327
     },
     {
@@ -733,8 +737,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -0.452244,
-     "sharpe_rule": 0.893108,
+     "t": -0.457991,
+     "sharpe_rule": 0.894568,
      "maxdd_rule": 0.18556
     },
     {
@@ -744,8 +748,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -0.23833,
-     "sharpe_rule": 0.961238,
+     "t": -0.241341,
+     "sharpe_rule": 0.963934,
      "maxdd_rule": 0.206463
     },
     {
@@ -755,8 +759,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": 0.28654,
-     "sharpe_rule": 0.928994,
+     "t": 0.28419,
+     "sharpe_rule": 0.93096,
      "maxdd_rule": 0.262249
     },
     {
@@ -766,8 +770,8 @@
       "cap": 1.0,
       "form": "var"
      },
-     "t": -1.022054,
-     "sharpe_rule": 0.736934,
+     "t": -1.026361,
+     "sharpe_rule": 0.739558,
      "maxdd_rule": 0.22514
     },
     {
@@ -777,8 +781,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -0.919354,
-     "sharpe_rule": 0.673802,
+     "t": -0.923208,
+     "sharpe_rule": 0.675849,
      "maxdd_rule": 0.279613
     },
     {
@@ -789,7 +793,7 @@
       "form": "var"
      },
      "t": -0.940192,
-     "sharpe_rule": 0.730411,
+     "sharpe_rule": 0.733619,
      "maxdd_rule": 0.285594
     },
     {
@@ -799,8 +803,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -0.546449,
-     "sharpe_rule": 0.720936,
+     "t": -0.544956,
+     "sharpe_rule": 0.723683,
      "maxdd_rule": 0.349138
     },
     {
@@ -810,8 +814,8 @@
       "cap": 1.5,
       "form": "vol"
      },
-     "t": 0.429116,
-     "sharpe_rule": 0.924785,
+     "t": 0.427279,
+     "sharpe_rule": 0.927016,
      "maxdd_rule": 0.275285
     },
     {
@@ -821,8 +825,8 @@
       "cap": 1.5,
       "form": "vol"
      },
-     "t": -0.458195,
-     "sharpe_rule": 0.772028,
+     "t": -0.457201,
+     "sharpe_rule": 0.774631,
      "maxdd_rule": 0.34233
     },
     {
@@ -832,8 +836,8 @@
       "cap": 1.5,
       "form": "var"
      },
-     "t": -1.2501,
-     "sharpe_rule": 0.546408,
+     "t": -1.253265,
+     "sharpe_rule": 0.548247,
      "maxdd_rule": 0.408936
     },
     {
@@ -843,8 +847,8 @@
       "cap": 1.5,
       "form": "vol"
      },
-     "t": -1.017709,
-     "sharpe_rule": 0.68864,
+     "t": -1.019985,
+     "sharpe_rule": 0.690856,
      "maxdd_rule": 0.348633
     }
    ]
@@ -862,75 +866,75 @@
  },
  "hedges": {
   "from": "2017-07-06",
-  "to": "2026-11-17",
-  "days": 2356,
+  "to": "2026-11-18",
+  "days": 2357,
   "policies": {
    "none": {
-    "vol": 0.296639,
+    "vol": 0.296581,
     "variance_cut": 0.0,
-    "mean_ann": 0.323946,
+    "mean_ann": 0.324502,
     "leg_mean_ann": 0.0,
     "worst_5pct_days": -0.043475,
     "worst_10pct_months": -0.11129,
     "es95_month": 0.150532,
     "max_drawdown": 0.468869,
     "y2022": -0.42391,
-    "sharpe": 1.00099
+    "sharpe": 1.003053
    },
    "nasdaq_beta": {
-    "vol": 0.093454,
-    "variance_cut": 0.900748,
-    "mean_ann": 0.112017,
-    "leg_mean_ann": -0.211929,
+    "vol": 0.093437,
+    "variance_cut": 0.900745,
+    "mean_ann": 0.112263,
+    "leg_mean_ann": -0.212239,
     "worst_5pct_days": -0.00249,
     "worst_10pct_months": -0.016686,
     "es95_month": 0.052158,
     "max_drawdown": 0.237295,
     "y2022": -0.002386,
-    "sharpe": 0.90958
+    "sharpe": 0.912351
    },
    "nasdaq_and_semis": {
-    "vol": 0.089476,
-    "variance_cut": 0.909017,
-    "mean_ann": 0.111726,
-    "leg_mean_ann": -0.21222,
+    "vol": 0.089457,
+    "variance_cut": 0.90902,
+    "mean_ann": 0.111795,
+    "leg_mean_ann": -0.212707,
     "worst_5pct_days": -0.002264,
     "worst_10pct_months": -0.010809,
     "es95_month": 0.045078,
     "max_drawdown": 0.157314,
     "y2022": -0.00529,
-    "sharpe": 0.94676
+    "sharpe": 0.947701
    },
    "bond_when_it_hedges": {
-    "vol": 0.292684,
-    "variance_cut": 0.026484,
-    "mean_ann": 0.329302,
-    "leg_mean_ann": 0.005357,
+    "vol": 0.292627,
+    "variance_cut": 0.026483,
+    "mean_ann": 0.329862,
+    "leg_mean_ann": 0.00536,
     "worst_5pct_days": -0.041873,
     "worst_10pct_months": -0.10985,
     "es95_month": 0.147184,
     "max_drawdown": 0.497193,
     "y2022": -0.453122,
-    "sharpe": 1.032817
+    "sharpe": 1.034922
    },
    "bond_static_30": {
-    "vol": 0.29619,
-    "variance_cut": 0.003024,
-    "mean_ann": 0.31458,
-    "leg_mean_ann": -0.009366,
+    "vol": 0.296137,
+    "variance_cut": 0.00299,
+    "mean_ann": 0.315374,
+    "leg_mean_ann": -0.009128,
     "worst_5pct_days": -0.042882,
     "worst_10pct_months": -0.113985,
     "es95_month": 0.152986,
     "max_drawdown": 0.522584,
     "y2022": -0.477763,
-    "sharpe": 0.970887
+    "sharpe": 0.973732
    }
   },
   "now": {
-   "nasdaq_beta": 0.993358,
-   "nasdaq": 1.658789,
-   "semis": -0.322599,
-   "bond_ratio": 0.007286
+   "nasdaq_beta": 0.993883,
+   "nasdaq": 1.659421,
+   "semis": -0.322829,
+   "bond_ratio": 0.0
   }
  },
  "episodes": [
@@ -1029,64 +1033,158 @@
   {
    "scenario": "AI capex digestion (growth scare)",
    "nasdaq": -0.15,
+   "ai_vs_nasdaq": -0.15,
    "semis_vs_nasdaq": -0.15,
    "dy_bp": -75,
-   "bond20": 0.09588,
-   "book": -0.138682,
-   "with_bond_30": -0.109918,
-   "with_nasdaq_hedge": -0.016834,
-   "worst_name": "AVGO",
-   "worst_name_move": -0.32206
+   "bond20": 0.09637,
+   "book": -0.300457,
+   "legs": {
+    "nasdaq": -0.152917,
+    "ai": -0.148456,
+    "rates": 0.000915
+   },
+   "with_bond_30": -0.271546,
+   "with_nasdaq_hedge": -0.179219,
+   "worst_name": "SPCX",
+   "worst_name_move": -0.408069
   },
   {
    "scenario": "AI financing / term-premium shock",
    "nasdaq": -0.1,
+   "ai_vs_nasdaq": -0.1,
    "semis_vs_nasdaq": -0.1,
    "dy_bp": 75,
-   "bond20": -0.084706,
-   "book": -0.068499,
-   "with_bond_30": -0.093911,
-   "with_nasdaq_hedge": 0.012732,
-   "worst_name": "AVGO",
-   "worst_name_move": -0.169193
+   "bond20": -0.085113,
+   "book": -0.201723,
+   "legs": {
+    "nasdaq": -0.101944,
+    "ai": -0.09897,
+    "rates": -0.000808
+   },
+   "with_bond_30": -0.227257,
+   "with_nasdaq_hedge": -0.120897,
+   "worst_name": "ORCL",
+   "worst_name_move": -0.299476
   },
   {
    "scenario": "Inflation + hikes (2022 replay)",
    "nasdaq": -0.2,
+   "ai_vs_nasdaq": -0.1,
    "semis_vs_nasdaq": -0.1,
    "dy_bp": 125,
-   "bond20": -0.134969,
-   "book": -0.174425,
-   "with_bond_30": -0.214916,
-   "with_nasdaq_hedge": -0.011962,
-   "worst_name": "AVGO",
-   "worst_name_move": -0.304213
+   "bond20": -0.135601,
+   "book": -0.304147,
+   "legs": {
+    "nasdaq": -0.203889,
+    "ai": -0.09897,
+    "rates": -0.001287
+   },
+   "with_bond_30": -0.344827,
+   "with_nasdaq_hedge": -0.142496,
+   "worst_name": "ORCL",
+   "worst_name_move": -0.446623
   },
   {
    "scenario": "AI melt-up, yields up",
    "nasdaq": 0.1,
+   "ai_vs_nasdaq": 0.15,
    "semis_vs_nasdaq": 0.15,
    "dy_bp": 50,
-   "bond20": -0.057712,
-   "book": 0.075516,
-   "with_bond_30": 0.058202,
-   "with_nasdaq_hedge": -0.005716,
+   "bond20": -0.057993,
+   "book": 0.24985,
+   "legs": {
+    "nasdaq": 0.101944,
+    "ai": 0.148456,
+    "rates": -0.000551
+   },
+   "with_bond_30": 0.232452,
+   "with_nasdaq_hedge": 0.169024,
    "worst_name": "MSFT",
-   "worst_name_move": -0.01354
+   "worst_name_move": 0.210893
   },
   {
    "scenario": "Soft landing, cuts",
    "nasdaq": 0.08,
+   "ai_vs_nasdaq": 0.05,
    "semis_vs_nasdaq": 0.05,
    "dy_bp": -50,
-   "bond20": 0.062678,
-   "book": 0.065182,
-   "with_bond_30": 0.083985,
-   "with_nasdaq_hedge": 0.000197,
+   "bond20": 0.062996,
+   "book": 0.131639,
+   "legs": {
+    "nasdaq": 0.081556,
+    "ai": 0.049485,
+    "rates": 0.000598
+   },
+   "with_bond_30": 0.150538,
+   "with_nasdaq_hedge": 0.066978,
    "worst_name": "MSFT",
-   "worst_name_move": 0.006223
+   "worst_name_move": 0.092847
   }
  ],
+ "scenarios_method": "Each scenario states three moves: the Nasdaq-100, the AI names beyond the Nasdaq-100, and the long yield. Nasdaq leg: each name's loading on QQQ times the Nasdaq-100 move. AI leg: each name's loading on the book's own daily return less QQQ's (today's weights), times the scenario's AI move; the scenario's AI basket is these nine names, so the whole book's loading on this leg is about 1 by construction and a name's is its share of that. Rates leg: each name's loading on the 20-year par bond's return, given the other two, times the bond's repriced return for the yield move (duration and convexity at today's 20-year yield). Loadings are exponentially weighted least squares, half-life 126 days, on all three at once; a name with under two years of history leans on its prior. Before v0.47 the AI move was put on semiconductors net of the Nasdaq-100, a factor this book loads on negatively, so an AI sell-off raised the book and an AI rally lowered it.",
+ "scenario_loadings": {
+  "book": {
+   "market": 1.019445,
+   "ai": 0.989705,
+   "rates": 0.009494
+  },
+  "names": [
+   {
+    "name": "MSFT",
+    "market": 0.548486,
+    "ai": 1.02599,
+    "rates": -0.037012
+   },
+   {
+    "name": "AMZN",
+    "market": 0.726693,
+    "ai": 1.305678,
+    "rates": 0.017718
+   },
+   {
+    "name": "GOOGL",
+    "market": 0.677496,
+    "ai": 1.01946,
+    "rates": 0.047332
+   },
+   {
+    "name": "NVDA",
+    "market": 1.26316,
+    "ai": 0.564775,
+    "rates": -0.107834
+   },
+   {
+    "name": "META",
+    "market": 0.758532,
+    "ai": 1.270448,
+    "rates": 0.172559
+   },
+   {
+    "name": "TSLA",
+    "market": 1.478677,
+    "ai": 0.796595,
+    "rates": 0.100086
+   },
+   {
+    "name": "AVGO",
+    "market": 1.582367,
+    "ai": 0.299106,
+    "rates": -0.349694
+   },
+   {
+    "name": "SPCX",
+    "market": 1.526287,
+    "ai": 1.23245,
+    "rates": 0.059574
+   },
+   {
+    "name": "ORCL",
+    "market": 1.36074,
+    "ai": 1.447343,
+    "rates": 0.219328
+   }
+  ]
+ },
  "worst_days": [
   {
    "date": "2020-03-16",
@@ -1161,12 +1259,12 @@
  ],
  "correlation": {
   "definition": "63-day exponentially weighted correlation of daily returns, book vs the 20-year par bond",
-  "book_63d": -0.000602,
-  "nasdaq_63d": 0.044561,
-  "book_36m_monthly": -0.096479,
+  "book_63d": 0.005142,
+  "nasdaq_63d": 0.048206,
+  "book_36m_monthly": -0.103791,
   "state": "neutral",
   "state_since": "2026-11-05",
-  "share_days_hedging": 0.509472,
+  "share_days_hedging": 0.522314,
   "by_year": {
    "2017": -0.123877,
    "2018": -0.100863,
@@ -1177,7 +1275,7 @@
    "2023": 0.139108,
    "2024": 0.039717,
    "2025": -0.088604,
-   "2026": 0.145008
+   "2026": 0.144378
   },
   "shock": [
    {
@@ -1201,82 +1299,82 @@
  "liquidity": [
   {
    "name": "MSFT",
-   "adv_usd": 14539326140.8,
+   "adv_usd": 14728061134.05,
    "position_usd": 14000000.0,
-   "days_100m": 0.004815,
-   "days_1bn": 0.048145,
-   "share_of_adv_100m": 0.000963
+   "days_100m": 0.004753,
+   "days_1bn": 0.047528,
+   "share_of_adv_100m": 0.000951
   },
   {
    "name": "AMZN",
-   "adv_usd": 12736444291.5,
+   "adv_usd": 12878212982.3,
    "position_usd": 14000000.0,
-   "days_100m": 0.005496,
-   "days_1bn": 0.05496,
-   "share_of_adv_100m": 0.001099
+   "days_100m": 0.005436,
+   "days_1bn": 0.054355,
+   "share_of_adv_100m": 0.001087
   },
   {
    "name": "GOOGL",
-   "adv_usd": 8012612759.65,
+   "adv_usd": 7997785145.9,
    "position_usd": 14000000.0,
-   "days_100m": 0.008736,
-   "days_1bn": 0.087362,
-   "share_of_adv_100m": 0.001747
+   "days_100m": 0.008752,
+   "days_1bn": 0.087524,
+   "share_of_adv_100m": 0.00175
   },
   {
    "name": "NVDA",
-   "adv_usd": 42310860876.75,
+   "adv_usd": 44014658769.6,
    "position_usd": 14000000.0,
-   "days_100m": 0.001654,
-   "days_1bn": 0.016544,
-   "share_of_adv_100m": 0.000331
+   "days_100m": 0.00159,
+   "days_1bn": 0.015904,
+   "share_of_adv_100m": 0.000318
   },
   {
    "name": "META",
-   "adv_usd": 14688718097.95,
+   "adv_usd": 13991236178.7,
    "position_usd": 12000000.0,
-   "days_100m": 0.004085,
-   "days_1bn": 0.040848,
-   "share_of_adv_100m": 0.000817
+   "days_100m": 0.004288,
+   "days_1bn": 0.042884,
+   "share_of_adv_100m": 0.000858
   },
   {
    "name": "TSLA",
-   "adv_usd": 14780094612.7,
+   "adv_usd": 14351518234.15,
    "position_usd": 10000000.0,
-   "days_100m": 0.003383,
-   "days_1bn": 0.033829,
-   "share_of_adv_100m": 0.000677
+   "days_100m": 0.003484,
+   "days_1bn": 0.03484,
+   "share_of_adv_100m": 0.000697
   },
   {
    "name": "AVGO",
-   "adv_usd": 9178526609.85,
+   "adv_usd": 9351323200.35,
    "position_usd": 8000000.0,
-   "days_100m": 0.004358,
-   "days_1bn": 0.04358,
-   "share_of_adv_100m": 0.000872
+   "days_100m": 0.004277,
+   "days_1bn": 0.042775,
+   "share_of_adv_100m": 0.000855
   },
   {
    "name": "SPCX",
-   "adv_usd": 16059446638.15,
+   "adv_usd": 14922040498.55,
    "position_usd": 8000000.0,
-   "days_100m": 0.002491,
-   "days_1bn": 0.024907,
-   "share_of_adv_100m": 0.000498
+   "days_100m": 0.002681,
+   "days_1bn": 0.026806,
+   "share_of_adv_100m": 0.000536
   },
   {
    "name": "ORCL",
-   "adv_usd": 5254236318.0,
+   "adv_usd": 5172842203.05,
    "position_usd": 6000000.0,
-   "days_100m": 0.00571,
-   "days_1bn": 0.057097,
-   "share_of_adv_100m": 0.001142
+   "days_100m": 0.0058,
+   "days_1bn": 0.057995,
+   "share_of_adv_100m": 0.00116
   }
  ],
  "drawdowns": {
   "max": 0.468869,
   "peak": "2021-11-19",
   "trough": "2022-11-03",
-  "now": 0.135961,
+  "now": 0.130355,
   "nasdaq_max": 0.351225,
   "monthly": {
    "months": [
@@ -1519,7 +1617,7 @@
     19.0702,
     19.5768,
     18.2926,
-    17.6978
+    17.8126
    ],
    "nasdaq": [
     1.0421,
@@ -1640,11 +1738,11 @@
     6.3904,
     6.6022,
     6.1624,
-    5.8631
+    5.8859
    ]
   },
-  "cagr": 0.338759,
-  "nasdaq_cagr": 0.196709
+  "cagr": 0.339481,
+  "nasdaq_cagr": 0.197095
  },
  "limitations": [
   "Today's weights applied to history: the record is what this book would have done, not what anyone held.",
@@ -1659,43 +1757,172 @@
  "meta": {
   "source": "mirror download"
  },
+ "validation": {
+  "ok": true,
+  "n": 12,
+  "failed": [],
+  "problems": {},
+  "warnings": 0,
+  "notes": [],
+  "asof": "2026-11-18",
+  "expected_asof": "2026-11-18",
+  "source": "yennanliu/finance_data on GitHub (Yahoo Finance via yfinance); split-adjusted closes, dividends on ex-dates",
+  "rules": {
+   "stale": "every file ends on the session before today in New York, and on the same day as the others",
+   "jump": "no one-day fall beyond 30% or rise beyond 45% without a recorded split",
+   "cross_check": "the newest close within 1% of a second source"
+  },
+  "cross_check": {
+   "status": "ok",
+   "tolerance": 0.01,
+   "sources": [
+    "yahoo"
+   ],
+   "independent": false,
+   "note": "Yahoo answered; the mirror is built from Yahoo, so this checks the copy against its origin, not the origin itself",
+   "detail": "10 of 10 names within 1.0% of yahoo",
+   "names": {
+    "amzn": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 267.74,
+     "second": 267.73999,
+     "gap": 0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "avgo": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 354.05,
+     "second": 354.049988,
+     "gap": 0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "goog": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 279.2,
+     "second": 279.200012,
+     "gap": -0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "meta": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 616.38,
+     "second": 616.380005,
+     "gap": -0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "msft": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 508.29,
+     "second": 508.290009,
+     "gap": -0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "nvda": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 150.96,
+     "second": 150.960007,
+     "gap": -0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "orcl": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 113.89,
+     "second": 113.889999,
+     "gap": 0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "qqq": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 659.51,
+     "second": 659.51001,
+     "gap": -0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "spcx": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 143.5,
+     "second": 143.5,
+     "gap": 0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    },
+    "tsla": {
+     "source": "yahoo",
+     "independent": false,
+     "date": "2026-11-18",
+     "close": 383.72,
+     "second": 383.720001,
+     "gap": -0.0,
+     "status": "ok",
+     "earlier_gaps": []
+    }
+   }
+  },
+  "checked_utc": "2026-11-19T19:44:46Z"
+ },
  "sources": {
   "prices": "https://github.com/yennanliu/finance_data",
   "treasury": "US Treasury daily par yield curve rates (home.treasury.gov)",
   "method": "buildout/book.py"
  },
  "findings": [
-  "Measured on the nine names' own daily prices from 2017-01-04 to 2026-11-17, the book at 1.00x runs 29% volatility, a one-month 95% expected shortfall of 18.9% (the most cautious of historical 14.8%, filtered 16.0% and Student-t 18.9%) and a one-year 95% drawdown of 44%, against limits of 12%, 20% and 25%.",
-  "The limits allow 0.63x (shortfall), 0.68x (volatility) and 0.53x (drawdown); the drawdown cap binds, so the book's size is 0.53x. Keeping every name at full size instead takes a Nasdaq-100 futures short of 81% of NAV.",
+  "Measured on the nine names' own daily prices from 2017-01-04 to 2026-11-18, the book at 1.00x runs 29% volatility, a one-month 95% expected shortfall of 18.9% (the most cautious of historical 14.8%, filtered 15.6% and Student-t 18.9%) and a one-year 95% drawdown of 44%, against limits of 12%, 20% and 25%.",
+  "The limits allow 0.64x (shortfall), 0.69x (volatility) and 0.54x (drawdown); the drawdown cap binds, so the book's size is 0.54x. Keeping every name at full size instead takes a Nasdaq-100 futures short of 81% of NAV.",
   "Exposures: Nasdaq-100 beta 1.14 (broad market 1.53 now, 1.34 over ten years), semis net of the market -0.32, rates -0.16. 83% of the variance is the market and 16% is stock-specific: effective independent bets 1.6 of nine.",
   "Hedges walked forward from 2017-07-06: a Nasdaq-100 short at the measured beta cut the variance 90% and turned 2022 from -42% to -0.2%; the long bond held only when its correlation said it hedged cut it 3% (2022 -45%), and a standing 30% long bond 0% (2022 -48%).",
-  "Stock-bond correlation (63-day, book against the 20-year bond): -0.00, state neutral. On the book's worst 5% of days since 2022 the bond rose 55% of the time.",
+  "Stock-bond correlation (63-day, book against the 20-year bond): +0.01, state neutral. On the book's worst 5% of days since 2022 the bond rose 55% of the time.",
   "The one-day 99% VaR, backtested on the book: a normal model at today's volatility was breached 55 times against 24 expected (p 0.000); filtered historical simulation 15 against 22 (p 0.12)."
  ],
  "sensitivity": {
   "schema": 1,
-  "asof": "2026-11-17",
-  "size": 0.533066,
+  "asof": "2026-11-18",
+  "size": 0.535431,
   "binding": "drawdown_cap",
   "sizes": {
-   "es_budget": 0.633379,
-   "vol_target": 0.682205,
-   "drawdown_cap": 0.533066,
+   "es_budget": 0.636023,
+   "vol_target": 0.685052,
+   "drawdown_cap": 0.535431,
    "gross_cap": 1.5
   },
-  "sigma": 0.293167,
-  "drift": 0.114977,
+  "sigma": 0.291948,
+  "drift": 0.114974,
   "cash_rate": 0.048,
-  "beta_broad": 1.339541,
+  "beta_broad": 1.339476,
   "models": {
    "rows": [
     {
      "key": "gbm",
      "label": "The engine's model",
      "what": "constant volatility, normal shocks, the assumed drift",
-     "dd_full": 0.44112,
-     "dd_at_size": 0.249995,
-     "size": 0.533066,
+     "dd_full": 0.439471,
+     "dd_at_size": 0.249966,
+     "size": 0.535431,
      "kind": "shape",
      "d_size": 0.0,
      "inside_at_size": true
@@ -1704,93 +1931,93 @@
      "key": "student_t",
      "label": "Fat tails",
      "what": "the same volatility and drift; shocks from a Student-t with 5 degrees of freedom, each day independent",
-     "dd_full": 0.443275,
-     "dd_at_size": 0.252438,
-     "size": 0.527618,
+     "dd_full": 0.441648,
+     "dd_at_size": 0.252444,
+     "size": 0.529907,
      "kind": "shape",
-     "d_size": -0.005447,
+     "d_size": -0.005524,
      "inside_at_size": false
     },
     {
      "key": "blocks",
      "label": "The book's own days, in runs",
      "what": "the same volatility and drift; the book's own daily moves since 2017, redrawn in runs averaging 21 days, so bad days stay together",
-     "dd_full": 0.43183,
-     "dd_at_size": 0.243924,
-     "size": 0.546478,
+     "dd_full": 0.433541,
+     "dd_at_size": 0.243271,
+     "size": 0.550323,
      "kind": "shape",
-     "d_size": 0.013412,
+     "d_size": 0.014893,
      "inside_at_size": true
     },
     {
      "key": "clustered",
      "label": "Volatility that moves",
      "what": "the same starting volatility and drift; each day's variance follows the last day's move, so a bad week raises what comes after",
-     "dd_full": 0.508623,
-     "dd_at_size": 0.29749,
-     "size": 0.444763,
+     "dd_full": 0.511453,
+     "dd_at_size": 0.301457,
+     "size": 0.437988,
      "kind": "shape",
-     "d_size": -0.088303,
+     "d_size": -0.097443,
      "inside_at_size": false
     },
     {
      "key": "no_premium",
      "label": "No equity premium",
      "what": "the engine's model with drift equal to cash: nothing is assumed to be earned for the risk",
-     "dd_full": 0.465532,
-     "dd_at_size": 0.268195,
-     "size": 0.49614,
+     "dd_full": 0.46403,
+     "dd_at_size": 0.268264,
+     "size": 0.498199,
      "kind": "level",
-     "d_size": -0.036926,
+     "d_size": -0.037231,
      "inside_at_size": false
     },
     {
      "key": "vol_now",
      "label": "Today's volatility",
-     "what": "the engine's model at the volatility of the last few weeks (32%) in place of the factor model's (29%)",
-     "dd_full": 0.473191,
-     "dd_at_size": 0.271826,
-     "size": 0.488129,
+     "what": "the engine's model at the volatility of the last few weeks (31%) in place of the factor model's (29%)",
+     "dd_full": 0.462285,
+     "dd_at_size": 0.265653,
+     "size": 0.50293,
      "kind": "level",
-     "d_size": -0.044937,
+     "d_size": -0.032501,
      "inside_at_size": false
     },
     {
      "key": "vol_worst",
      "label": "The worst year's volatility",
      "what": "the engine's model at the book's highest one-year realized volatility (42%)",
-     "dd_full": 0.585358,
-     "dd_at_size": 0.355774,
+     "dd_full": 0.585359,
+     "dd_at_size": 0.357111,
      "size": 0.366821,
      "kind": "level",
-     "d_size": -0.166245,
+     "d_size": -0.16861,
      "inside_at_size": false
     }
    ],
    "cap": 0.25,
-   "size": 0.533066,
+   "size": 0.535431,
    "paths": 4000,
    "block": 21,
    "nu": 5.0,
    "shape_range": [
-    0.444763,
-    0.546478
+    0.437988,
+    0.550323
    ],
    "all_range": [
     0.366821,
-    0.546478
+    0.550323
    ],
-   "worst_at_size": 0.29749,
+   "worst_at_size": 0.301457,
    "seeds": {
     "n": 20,
-    "min": 0.520477,
-    "max": 0.541168,
-    "sd": 0.005623,
-    "mean": 0.531523
+    "min": 0.522858,
+    "max": 0.54364,
+    "sd": 0.00566,
+    "mean": 0.53389
    },
    "check_normal": {
-    "size": 0.529724,
-    "dd_full": 0.442495
+    "size": 0.532104,
+    "dd_full": 0.440812
    }
   },
   "settings": [
@@ -1798,12 +2025,12 @@
     "group": "Loss budget, a month",
     "label": "10%",
     "now": false,
-    "size": 0.527816,
+    "size": 0.530019,
     "binding": "es_budget",
     "sizes": {
-     "es_budget": 0.527816,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.530019,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1811,12 +2038,12 @@
     "group": "Loss budget, a month",
     "label": "12%",
     "now": true,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1824,12 +2051,12 @@
     "group": "Loss budget, a month",
     "label": "15%",
     "now": false,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.791724,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.795029,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1837,12 +2064,12 @@
     "group": "Volatility target",
     "label": "15%",
     "now": false,
-    "size": 0.511654,
+    "size": 0.513789,
     "binding": "vol_target",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.511654,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.513789,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1850,12 +2077,12 @@
     "group": "Volatility target",
     "label": "20%",
     "now": true,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1863,12 +2090,12 @@
     "group": "Volatility target",
     "label": "25%",
     "now": false,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.852756,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.856316,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1876,12 +2103,12 @@
     "group": "Drawdown cap, a year",
     "label": "20%",
     "now": false,
-    "size": 0.426559,
+    "size": 0.428467,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.426559,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.428467,
      "gross_cap": 1.5
     }
    },
@@ -1889,12 +2116,12 @@
     "group": "Drawdown cap, a year",
     "label": "25%",
     "now": true,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1902,12 +2129,12 @@
     "group": "Drawdown cap, a year",
     "label": "30%",
     "now": false,
-    "size": 0.633379,
+    "size": 0.636023,
     "binding": "es_budget",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.646057,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.649033,
      "gross_cap": 1.5
     }
    },
@@ -1915,12 +2142,12 @@
     "group": "Equity premium in the drift",
     "label": "0%",
     "now": false,
-    "size": 0.49614,
+    "size": 0.498199,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.49614,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.498199,
      "gross_cap": 1.5
     }
    },
@@ -1928,12 +2155,12 @@
     "group": "Equity premium in the drift",
     "label": "3%",
     "now": false,
-    "size": 0.518646,
+    "size": 0.520935,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.518646,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.520935,
      "gross_cap": 1.5
     }
    },
@@ -1941,12 +2168,12 @@
     "group": "Equity premium in the drift",
     "label": "5%",
     "now": true,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1954,12 +2181,12 @@
     "group": "Equity premium in the drift",
     "label": "7%",
     "now": false,
-    "size": 0.547028,
+    "size": 0.549622,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.547028,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.549622,
      "gross_cap": 1.5
     }
    },
@@ -1967,12 +2194,12 @@
     "group": "Method for the tail",
     "label": "the most cautious of the three (student t)",
     "now": true,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1980,12 +2207,12 @@
     "group": "Method for the tail",
     "label": "the book's own months",
     "now": false,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
      "es_budget": 0.809835,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -1993,12 +2220,12 @@
     "group": "Method for the tail",
     "label": "its months rescaled to today's volatility",
     "now": false,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.751273,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.771317,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -2006,12 +2233,12 @@
     "group": "Method for the tail",
     "label": "a fat-tailed curve at the model's volatility",
     "now": false,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     }
    },
@@ -2019,76 +2246,76 @@
     "group": "Half-lives of the factor model",
     "label": "betas 126 days, covariance 63 days",
     "now": true,
-    "size": 0.533066,
+    "size": 0.535431,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.633379,
-     "vol_target": 0.682205,
-     "drawdown_cap": 0.533066,
+     "es_budget": 0.636023,
+     "vol_target": 0.685052,
+     "drawdown_cap": 0.535431,
      "gross_cap": 1.5
     },
-    "vol": 0.293167
+    "vol": 0.291948
    },
    {
     "group": "Half-lives of the factor model",
     "label": "betas 63 days, covariance 63 days",
     "now": false,
-    "size": 0.563965,
+    "size": 0.566254,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.666993,
-     "vol_target": 0.71841,
-     "drawdown_cap": 0.563965,
+     "es_budget": 0.669576,
+     "vol_target": 0.721192,
+     "drawdown_cap": 0.566254,
      "gross_cap": 1.5
     },
-    "vol": 0.278392
+    "vol": 0.277319
    },
    {
     "group": "Half-lives of the factor model",
     "label": "betas 252 days, covariance 63 days",
     "now": false,
-    "size": 0.506897,
+    "size": 0.509338,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.604797,
-     "vol_target": 0.651419,
-     "drawdown_cap": 0.506897,
+     "es_budget": 0.607418,
+     "vol_target": 0.654243,
+     "drawdown_cap": 0.509338,
      "gross_cap": 1.5
     },
-    "vol": 0.307022
+    "vol": 0.305697
    },
    {
     "group": "Half-lives of the factor model",
     "label": "betas 126 days, covariance 21 days",
     "now": false,
-    "size": 0.44838,
+    "size": 0.454407,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.53912,
-     "vol_target": 0.580679,
-     "drawdown_cap": 0.44838,
+     "es_budget": 0.546029,
+     "vol_target": 0.588121,
+     "drawdown_cap": 0.454407,
      "gross_cap": 1.5
     },
-    "vol": 0.344424
+    "vol": 0.340066
    },
    {
     "group": "Half-lives of the factor model",
     "label": "betas 126 days, covariance 126 days",
     "now": false,
-    "size": 0.564346,
+    "size": 0.565567,
     "binding": "drawdown_cap",
     "sizes": {
-     "es_budget": 0.667383,
-     "vol_target": 0.718829,
-     "drawdown_cap": 0.564346,
+     "es_budget": 0.668769,
+     "vol_target": 0.720323,
+     "drawdown_cap": 0.565567,
      "gross_cap": 1.5
     },
-    "vol": 0.27823
+    "vol": 0.277653
    }
   ],
   "settings_range": [
-   0.426559,
-   0.633379
+   0.428467,
+   0.636023
   ],
   "note": "Each row changes one thing and holds the rest. The call is unchanged by any of this; it is how far to trust the size."
  }

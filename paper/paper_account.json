@@ -1,6 +1,111 @@
 {
  "account_type": "agentic (paper)",
- "cash": 49383.87000000001,
+ "cash": 49003.97000000001,
+ "corrections": [
+  {
+   "amount": 379.9,
+   "applied": "2026-11-19T19:45:13Z",
+   "cash_delta": -379.9,
+   "corrects": "tkt-5c12ef101db360fd",
+   "detail": [
+    {
+     "close": 266.17,
+     "close_from": "the account's marks",
+     "difference": -134.376705,
+     "paid": 271.28,
+     "price_under_the_rule": 266.303085,
+     "quantity": 27.0,
+     "side": "buy",
+     "symbol": "AMZN"
+    },
+    {
+     "close": 173.73,
+     "close_from": "the account's marks",
+     "difference": 201.105195,
+     "paid": 169.14,
+     "price_under_the_rule": 173.816865,
+     "quantity": 43.0,
+     "side": "buy",
+     "symbol": "NVDA"
+    },
+    {
+     "close": 290.63,
+     "close_from": "the account's marks",
+     "difference": 135.632875,
+     "paid": 285.35,
+     "price_under_the_rule": 290.775315,
+     "quantity": 25.0,
+     "side": "buy",
+     "symbol": "GOOGL"
+    },
+    {
+     "close": 521.13,
+     "close_from": "the account's marks",
+     "difference": -163.402655,
+     "paid": 533.96,
+     "price_under_the_rule": 521.390565,
+     "quantity": 13.0,
+     "side": "buy",
+     "symbol": "MSFT"
+    },
+    {
+     "close": 628.77,
+     "close_from": "the account's marks",
+     "difference": -119.390535,
+     "paid": 642.35,
+     "price_under_the_rule": 629.084385,
+     "quantity": 9.0,
+     "side": "buy",
+     "symbol": "META"
+    },
+    {
+     "close": 390.84,
+     "close_from": "the account's marks",
+     "difference": 138.91046,
+     "paid": 380.35,
+     "price_under_the_rule": 391.03542,
+     "quantity": 13.0,
+     "side": "buy",
+     "symbol": "TSLA"
+    },
+    {
+     "close": 139.75,
+     "close_from": "the account's marks",
+     "difference": -100.923625,
+     "paid": 143.3,
+     "price_under_the_rule": 139.819875,
+     "quantity": 29.0,
+     "side": "buy",
+     "symbol": "SPCX"
+    },
+    {
+     "close": 345.22,
+     "close_from": "the account's marks",
+     "difference": 154.95132,
+     "paid": 332.48,
+     "price_under_the_rule": 345.39261,
+     "quantity": 12.0,
+     "side": "buy",
+     "symbol": "AVGO"
+    },
+    {
+     "close": 128.38,
+     "close_from": "the account's marks",
+     "difference": 267.38894,
+     "paid": 118.16,
+     "price_under_the_rule": 128.44419,
+     "quantity": 26.0,
+     "side": "buy",
+     "symbol": "ORCL"
+    }
+   ],
+   "equity_after": 97882.66,
+   "equity_before": 98262.56,
+   "first_corrected_mark": "2026-11-17",
+   "id": "corr-2026-11-11-stale-close",
+   "session": "2026-11-11"
+  }
+ ],
  "equity_history": [
   [
    "2026-11-11",
@@ -20,14 +125,17 @@
   ],
   [
    "2026-11-17",
-   98262.56
+   97882.66
+  ],
+  [
+   "2026-11-18",
+   98219.02
   ]
  ],
  "marks": {
   "AMZN": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 245.63,
     "2026-11-03": 250.69,
     "2026-11-04": 266.03,
     "2026-11-05": 260.21,
@@ -38,14 +146,14 @@
     "2026-11-12": 267.44,
     "2026-11-13": 266.66,
     "2026-11-16": 257.75,
-    "2026-11-17": 257.89
+    "2026-11-17": 257.89,
+    "2026-11-18": 267.74
    },
-   "last": 257.89
+   "last": 267.74
   },
   "AVGO": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 322.23,
     "2026-11-03": 332.13,
     "2026-11-04": 325.48,
     "2026-11-05": 291.53,
@@ -56,14 +164,14 @@
     "2026-11-12": 364.36,
     "2026-11-13": 347.01,
     "2026-11-16": 333.4,
-    "2026-11-17": 341.6
+    "2026-11-17": 341.6,
+    "2026-11-18": 354.05
    },
-   "last": 341.6
+   "last": 354.05
   },
   "GOOGL": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 278.04,
     "2026-11-03": 278.27,
     "2026-11-04": 287.3,
     "2026-11-05": 281.74,
@@ -74,14 +182,14 @@
     "2026-11-12": 295.35,
     "2026-11-13": 292.52,
     "2026-11-16": 281.26,
-    "2026-11-17": 277.6
+    "2026-11-17": 277.6,
+    "2026-11-18": 279.2
    },
-   "last": 277.6
+   "last": 279.2
   },
   "META": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 606.73,
     "2026-11-03": 621.03,
     "2026-11-04": 630.0,
     "2026-11-05": 605.08,
@@ -92,14 +200,14 @@
     "2026-11-12": 623.61,
     "2026-11-13": 641.69,
     "2026-11-16": 626.41,
-    "2026-11-17": 618.87
+    "2026-11-17": 618.87,
+    "2026-11-18": 616.38
    },
-   "last": 618.87
+   "last": 616.38
   },
   "MSFT": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 507.12,
     "2026-11-03": 520.99,
     "2026-11-04": 555.8,
     "2026-11-05": 535.93,
@@ -110,14 +218,14 @@
     "2026-11-12": 523.0,
     "2026-11-13": 523.88,
     "2026-11-16": 517.99,
-    "2026-11-17": 506.24
+    "2026-11-17": 506.24,
+    "2026-11-18": 508.29
    },
-   "last": 506.24
+   "last": 508.29
   },
   "NVDA": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 202.06,
     "2026-11-03": 206.69,
     "2026-11-04": 200.13,
     "2026-11-05": 181.6,
@@ -128,14 +236,14 @@
     "2026-11-12": 166.19,
     "2026-11-13": 162.85,
     "2026-11-16": 156.14,
-    "2026-11-17": 155.46
+    "2026-11-17": 155.46,
+    "2026-11-18": 150.96
    },
-   "last": 155.46
+   "last": 150.96
   },
   "ORCL": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 119.22,
     "2026-11-03": 126.19,
     "2026-11-04": 123.73,
     "2026-11-05": 115.16,
@@ -146,14 +254,14 @@
     "2026-11-12": 127.11,
     "2026-11-13": 125.35,
     "2026-11-16": 119.09,
-    "2026-11-17": 115.0
+    "2026-11-17": 115.0,
+    "2026-11-18": 113.89
    },
-   "last": 115.0
+   "last": 113.89
   },
   "SPCX": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 136.37,
     "2026-11-03": 141.31,
     "2026-11-04": 135.92,
     "2026-11-05": 123.62,
@@ -164,14 +272,14 @@
     "2026-11-12": 139.94,
     "2026-11-13": 139.11,
     "2026-11-16": 137.36,
-    "2026-11-17": 141.7
+    "2026-11-17": 141.7,
+    "2026-11-18": 143.5
    },
-   "last": 141.7
+   "last": 143.5
   },
   "TSLA": {
-   "asof": "2026-11-17",
+   "asof": "2026-11-18",
    "closes": {
-    "2026-11-02": 403.82,
     "2026-11-03": 398.5,
     "2026-11-04": 385.19,
     "2026-11-05": 343.69,
@@ -182,9 +290,10 @@
     "2026-11-12": 397.45,
     "2026-11-13": 390.22,
     "2026-11-16": 379.74,
-    "2026-11-17": 380.11
+    "2026-11-17": 380.11,
+    "2026-11-18": 383.72
    },
-   "last": 380.11
+   "last": 383.72
   }
  },
  "opened": "2026-11-11",
@@ -296,6 +405,114 @@
    "side": "buy",
    "status": "filled",
    "symbol": "ORCL"
+  },
+  "tkt-cbd6f4d6502d480a-1": {
+   "avg_price": null,
+   "client_id": "tkt-cbd6f4d6502d480a-1",
+   "filled_qty": 0.0,
+   "fills_in_session": "2026-11-19",
+   "limit": 151.19,
+   "order_id": "paper-tkt-cbd6f4d6502d480a-1",
+   "placed": "2026-11-19T19:45:13+00:00",
+   "planning_quote": {
+    "asof": "2026-11-18",
+    "last": 150.96
+   },
+   "quantity": 6.0,
+   "side": "buy",
+   "status": "open",
+   "symbol": "NVDA",
+   "type": "market_on_close"
+  },
+  "tkt-cbd6f4d6502d480a-2": {
+   "avg_price": null,
+   "client_id": "tkt-cbd6f4d6502d480a-2",
+   "filled_qty": 0.0,
+   "fills_in_session": "2026-11-19",
+   "limit": 617.3,
+   "order_id": "paper-tkt-cbd6f4d6502d480a-2",
+   "placed": "2026-11-19T19:45:13+00:00",
+   "planning_quote": {
+    "asof": "2026-11-18",
+    "last": 616.38
+   },
+   "quantity": 1.0,
+   "side": "buy",
+   "status": "open",
+   "symbol": "META",
+   "type": "market_on_close"
+  },
+  "tkt-cbd6f4d6502d480a-3": {
+   "avg_price": null,
+   "client_id": "tkt-cbd6f4d6502d480a-3",
+   "filled_qty": 0.0,
+   "fills_in_session": "2026-11-19",
+   "limit": 509.05,
+   "order_id": "paper-tkt-cbd6f4d6502d480a-3",
+   "placed": "2026-11-19T19:45:13+00:00",
+   "planning_quote": {
+    "asof": "2026-11-18",
+    "last": 508.29
+   },
+   "quantity": 1.0,
+   "side": "buy",
+   "status": "open",
+   "symbol": "MSFT",
+   "type": "market_on_close"
+  },
+  "tkt-cbd6f4d6502d480a-4": {
+   "avg_price": null,
+   "client_id": "tkt-cbd6f4d6502d480a-4",
+   "filled_qty": 0.0,
+   "fills_in_session": "2026-11-19",
+   "limit": 384.3,
+   "order_id": "paper-tkt-cbd6f4d6502d480a-4",
+   "placed": "2026-11-19T19:45:13+00:00",
+   "planning_quote": {
+    "asof": "2026-11-18",
+    "last": 383.72
+   },
+   "quantity": 1.0,
+   "side": "buy",
+   "status": "open",
+   "symbol": "TSLA",
+   "type": "market_on_close"
+  },
+  "tkt-cbd6f4d6502d480a-5": {
+   "avg_price": null,
+   "client_id": "tkt-cbd6f4d6502d480a-5",
+   "filled_qty": 0.0,
+   "fills_in_session": "2026-11-19",
+   "limit": 279.62,
+   "order_id": "paper-tkt-cbd6f4d6502d480a-5",
+   "placed": "2026-11-19T19:45:13+00:00",
+   "planning_quote": {
+    "asof": "2026-11-18",
+    "last": 279.2
+   },
+   "quantity": 1.0,
+   "side": "buy",
+   "status": "open",
+   "symbol": "GOOGL",
+   "type": "market_on_close"
+  },
+  "tkt-cbd6f4d6502d480a-6": {
+   "avg_price": null,
+   "client_id": "tkt-cbd6f4d6502d480a-6",
+   "filled_qty": 0.0,
+   "fills_in_session": "2026-11-19",
+   "limit": 114.06,
+   "order_id": "paper-tkt-cbd6f4d6502d480a-6",
+   "placed": "2026-11-19T19:45:13+00:00",
+   "planning_quote": {
+    "asof": "2026-11-18",
+    "last": 113.89
+   },
+   "quantity": 2.0,
+   "side": "buy",
+   "status": "open",
+   "symbol": "ORCL",
+   "type": "market_on_close"
   }
  },
  "positions": {

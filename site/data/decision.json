@@ -34,11 +34,11 @@
   "date": "2026-09",
   "exposure": 1.0,
   "capped": false,
-  "es_1x": 0.065766,
+  "es_1x": 0.065762,
   "feasible_max": 1.5,
-  "var5": 0.046788,
-  "es5": 0.066297,
-  "ce_gain_vs_hold_annual": 0.014463,
+  "var5": 0.046784,
+  "es5": 0.066293,
+  "ce_gain_vs_hold_annual": 0.014488,
   "distribution": {
    "p_below_1": 0.253,
    "p_above_1": 0.7375,
@@ -3302,9 +3302,9 @@
   "forecasts": {
    "now": {
     "mean": 0.064245,
-    "ridge": 0.01151,
-    "combo": 0.04319,
-    "nn": -0.048045
+    "ridge": 0.011729,
+    "combo": 0.043226,
+    "nn": -0.047885
    },
    "weights": {
     "mean": 0.0,
@@ -3312,15 +3312,15 @@
     "combo": 0.887456,
     "nn": 0.112544
    },
-   "stacked": 0.032922,
-   "nn_sd": 0.202175,
-   "nn_epistemic_sd": 0.108094,
+   "stacked": 0.032972,
+   "nn_sd": 0.202303,
+   "nn_epistemic_sd": 0.108334,
    "nn_members": [
-    -0.12091,
-    0.06148,
-    -0.125881,
-    0.003292,
-    -0.071707
+    -0.120931,
+    0.06156,
+    -0.125918,
+    0.003761,
+    -0.071581
    ],
    "names": {
     "mean": "Historical mean",
@@ -3362,7 +3362,7 @@
    }
   ],
   "flip": {
-   "stacked_now": 0.032922,
+   "stacked_now": 0.032972,
    "raise_if_above": null,
    "cut_if_below": 0.01,
    "curve": {
@@ -3484,7 +3484,7 @@
    }
   },
   "evpi": {
-   "ce_month": 0.005182,
+   "ce_month": 0.00518,
    "by_state": [
     {
      "state": 0,
@@ -3578,7 +3578,7 @@
     ]
    }
   },
-  "tilt": -0.00261,
+  "tilt": -0.002606,
   "gh": {
    "z": [
     -10.077423,
@@ -3745,8 +3745,8 @@
   "inputs": {
    "features": {
     "log_cape": 3.710152,
-    "ecy": 0.005623,
-    "y10": 0.0513,
+    "ecy": 0.005923,
+    "y10": 0.051,
     "infl12": 0.033401,
     "mom12_1": 0.154716,
     "trend_gap": 0.084434,
@@ -3757,11 +3757,18 @@
     "date": "2026-09",
     "cape": {
      "value": 40.86,
-     "source": "research (multpl, secondary)"
+     "source": "research (multpl, secondary)",
+     "as_of": "2026-10-20",
+     "knowledge_id": "val-cape-2026-10-20",
+     "source_url": "https://www.multpl.com/shiller-pe",
+     "assumed": true,
+     "note": "a dated reading from the knowledge base, not refreshed by the daily run"
     },
     "y10": {
-     "value": 5.13,
-     "source": "research (Treasury)"
+     "value": 5.1,
+     "source": "FRED DGS10 (macro.json)",
+     "date": "2026-11-17",
+     "assumed": false
     }
    },
    "names": {
@@ -8287,6 +8294,6 @@
   "What moves the engine's own choice most: hidden Markov regimes (without it, 1.00x). The optimum would fall if the stacked 12-month real return forecast dropped below 1%; it would fall if the stressed regime's probability passed 32%.",
   "On the regime model's own numbers, knowing the regime for certain would be worth 622 basis points a year in certainty-equivalent terms, yet the gate is shut: the model's confidence in its regimes has not shown up in results, which is the gap between a model's value and its record."
  ],
- "content_sha256": "abd36c775551cb84",
- "computed_utc": "2026-11-18T19:34:35Z"
+ "content_sha256": "a7ca1674667908eb",
+ "computed_utc": "2026-11-19T19:44:07Z"
 }

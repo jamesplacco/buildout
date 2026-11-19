@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "version": "0.46.0",
- "run_at": "2026-11-18T19:35:02+00:00",
+ "version": "0.47.0",
+ "run_at": "2026-11-19T19:44:41+00:00",
  "engines": [
   {
    "name": "macro",
@@ -15,7 +15,7 @@
    ],
    "status": "external",
    "outputs": {
-    "macro.json": "1bdc9e364fbb5806"
+    "macro.json": "e0965c7d0716f56d"
    }
   },
   {
@@ -77,7 +77,7 @@
    ],
    "status": "external",
    "outputs": {
-    "capex.json": "43cf3b52b337b26c"
+    "capex.json": "97cbb8cee7bfa2d6"
    }
   },
   {
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "fd68c74f6017467d"
+    "atlas.json": "226e9c797ff9628e"
    }
   },
   {
@@ -107,7 +107,7 @@
    ],
    "status": "external",
    "outputs": {
-    "labs.json": "54d825819a279bec"
+    "labs.json": "19194fc0b55b5293"
    }
   },
   {
@@ -122,7 +122,7 @@
    ],
    "status": "external",
    "outputs": {
-    "ml.json": "d3691820a7d1420b"
+    "ml.json": "a33c45cd4614f83b"
    }
   },
   {
@@ -139,7 +139,7 @@
    ],
    "status": "external",
    "outputs": {
-    "reality.json": "38144b920ec79ce6"
+    "reality.json": "eddfec4143d8ed04"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "8c29908882a2a55a"
+    "connections.json": "86776319473990b1"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "43fcda83d69676ad",
-    "statements.json": "86799e7c494e74b0"
+    "technicals.json": "2aa9f9feb6357bbd",
+    "statements.json": "67988f585028cef2"
    }
   },
   {
@@ -231,7 +231,7 @@
    ],
    "status": "external",
    "outputs": {
-    "decision.json": "6a20de5b74a607b0"
+    "decision.json": "06cc292af1c1a724"
    }
   },
   {
@@ -246,7 +246,7 @@
    ],
    "status": "external",
    "outputs": {
-    "bonds.json": "60a1113da17064b8"
+    "bonds.json": "fdddae7b0bc1f6a5"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "81291c833a1df5d4"
+    "feeds.json": "fc78858e9ac8f4d1"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "c36e0809470d7600"
+    "reason.json": "074b1c36b7abaa38"
    }
   },
   {
@@ -300,12 +300,12 @@
    ],
    "status": "ok",
    "outputs": {
-    "valuation.json": "9fd85ef5c336652c"
+    "valuation.json": "605a486e171e232e"
    },
-   "seconds": 0.696,
+   "seconds": 0.747,
    "inputs": {
-    "capex.json": "43cf3b52b337b26c",
-    "macro.json": "1bdc9e364fbb5806"
+    "capex.json": "97cbb8cee7bfa2d6",
+    "macro.json": "e0965c7d0716f56d"
    },
    "attempts": 1
   },
@@ -336,16 +336,21 @@
    "title": "Hedge book",
    "module": "hedgebook.py",
    "offline": true,
-   "does": "Prebuilt hedges, priced and run through the scenarios; the advisor",
-   "reads": [],
+   "does": "Prebuilt hedges, priced at the run's market levels and run through the scenarios; the advisor",
+   "reads": [
+    "macro.json"
+   ],
    "writes": [
     "hedges.json"
    ],
    "status": "ok",
    "outputs": {
-    "hedges.json": "4da792fc58c3f6e4"
+    "hedges.json": "d9ef39f763296e5e"
    },
-   "seconds": 0.503,
+   "seconds": 0.594,
+   "inputs": {
+    "macro.json": "e0965c7d0716f56d"
+   },
    "attempts": 1
   },
   {
@@ -366,14 +371,14 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "5ecc0cc7bd17ec67"
+    "ooda.json": "34940e3077cf5bd2"
    },
-   "seconds": 0.805,
+   "seconds": 0.931,
    "inputs": {
-    "macro.json": "1bdc9e364fbb5806",
+    "macro.json": "e0965c7d0716f56d",
     "research.json": "d2c6580ba083f72a",
     "brain.json": "e8144ce521a6d89f",
-    "capex.json": "43cf3b52b337b26c",
+    "capex.json": "97cbb8cee7bfa2d6",
     "report.json": "48d2862035cf54e2"
    },
    "attempts": 1
@@ -449,7 +454,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "e8b2f3a9ad12c77d"
+    "status.json": "6ea83e31bc2e5501"
    }
   }
  ],
@@ -458,9 +463,9 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 1.467,
-  "serial_seconds": 2.052,
-  "speedup": 1.4,
+  "wall_seconds": 1.633,
+  "serial_seconds": 2.32,
+  "speedup": 1.42,
   "levels": [
    [
     "atlas",
@@ -471,7 +476,6 @@
     "decide",
     "feeds",
     "geometry",
-    "hedges",
     "labs",
     "macro",
     "market",
@@ -485,6 +489,7 @@
    [
     "book",
     "causal",
+    "hedges",
     "reality",
     "valuation"
    ],

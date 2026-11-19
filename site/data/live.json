@@ -1,14 +1,33 @@
 {
  "schema": 2,
- "calls": 12,
+ "calls": 13,
  "first_call": "2026-11-03T15:38:15Z",
  "first_effective": "2026-11-04",
- "marked_days": 10,
- "last_mark": "2026-11-17",
- "total": -0.024136,
- "total_hedged": -0.008325,
- "book_total": -0.043667,
- "qqq_total": -0.041341,
+ "restated": [
+  {
+   "seq": 5,
+   "ts_utc": "2026-11-07T17:08:01Z",
+   "data_asof": "2026-11-06",
+   "effective_from": "2026-11-09",
+   "governs_from": "2026-11-10",
+   "why": "written after the close that begins the stored effective day's return"
+  },
+  {
+   "seq": 10,
+   "ts_utc": "2026-11-14T17:22:36Z",
+   "data_asof": "2026-11-13",
+   "effective_from": "2026-11-16",
+   "governs_from": "2026-11-17",
+   "why": "written after the close that begins the stored effective day's return"
+  }
+ ],
+ "convention": "a call governs from the session after the first close that follows its writing (ledger.governs_from)",
+ "marked_days": 11,
+ "last_mark": "2026-11-18",
+ "total": -0.020667,
+ "total_hedged": -0.005075,
+ "book_total": -0.037462,
+ "qqq_total": -0.037605,
  "series": [
   [
    "2026-11-04",
@@ -33,58 +52,67 @@
   ],
   [
    "2026-11-09",
-   0.995663,
+   0.995638,
    1.000965,
    0.993787,
-   0.5319
+   0.531
   ],
   [
    "2026-11-10",
-   0.992556,
+   0.992532,
    1.000825,
    0.987866,
    0.5319
   ],
   [
    "2026-11-11",
-   0.996982,
+   0.996958,
    0.989629,
    0.996157,
    0.5249
   ],
   [
    "2026-11-12",
-   0.998103,
+   0.998079,
    0.994409,
    0.998174,
    0.5293
   ],
   [
    "2026-11-13",
-   0.994043,
+   0.994018,
    0.996942,
    0.990406,
    0.5302
   ],
   [
    "2026-11-16",
-   0.978146,
+   0.978199,
    0.989877,
    0.960602,
-   0.5373
+   0.5348
   ],
   [
    "2026-11-17",
-   0.975864,
+   0.975916,
    0.991675,
    0.956333,
    0.5373
+  ],
+  [
+   "2026-11-18",
+   0.979333,
+   0.994925,
+   0.962538,
+   0.5311
   ]
  ],
  "stats": null,
  "ledger": {
   "ok": true,
-  "entries": 12,
-  "head": "6f253fe9ac269c5ed41d40632b1bb6f5c1bb59dc87bdb9a7f83d261d84143204"
- }
+  "entries": 13,
+  "head": "3188eb04f95a4b82f804041c1655476c55362fff6df5ba8c881799861103c887"
+ },
+ "ledger_head": "3188eb04f95a4b82f804041c1655476c55362fff6df5ba8c881799861103c887",
+ "ledger_entries": 13
 }

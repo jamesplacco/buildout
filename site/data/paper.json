@@ -2,9 +2,9 @@
  "schema": 2,
  "opened": "2026-11-11",
  "start_cash": 100000.0,
- "equity": 98262.56,
- "cash": 49383.87,
- "marks_asof": "2026-11-17",
+ "equity": 98219.02,
+ "cash": 49003.97,
+ "marks_asof": "2026-11-18",
  "positions": [
   {
    "symbol": "AMZN",
@@ -62,9 +62,153 @@
   ],
   [
    "2026-11-17",
-   98262.56
+   97882.66
+  ],
+  [
+   "2026-11-18",
+   98219.02
   ]
  ],
+ "corrections": [
+  {
+   "id": "corr-2026-11-11-stale-close",
+   "applied": "2026-11-19T19:45:13Z",
+   "amount": 379.9,
+   "cash_delta": -379.9,
+   "ticket": "tkt-5c12ef101db360fd",
+   "session": "2026-11-11",
+   "equity_before": 98262.56,
+   "equity_after": 97882.66,
+   "first_corrected_mark": "2026-11-17",
+   "reason": "The account's first ticket was written on Nov 11, 2026 at 19:54 UTC, during that day's session, and filled at once at a price built on the Nov 10 close: a price older than the order, under the convention in use before v0.42.5. The rule since then fills an order at the close of the first session that ends after it was written, with a 5 basis point half-spread. This takes from cash the difference between what those fills paid and what the same shares cost at the Nov 11 close under that rule. The fills stay in the log as recorded.",
+   "detail": [
+    {
+     "close": 266.17,
+     "close_from": "the account's marks",
+     "difference": -134.376705,
+     "paid": 271.28,
+     "price_under_the_rule": 266.303085,
+     "quantity": 27.0,
+     "side": "buy",
+     "symbol": "AMZN"
+    },
+    {
+     "close": 173.73,
+     "close_from": "the account's marks",
+     "difference": 201.105195,
+     "paid": 169.14,
+     "price_under_the_rule": 173.816865,
+     "quantity": 43.0,
+     "side": "buy",
+     "symbol": "NVDA"
+    },
+    {
+     "close": 290.63,
+     "close_from": "the account's marks",
+     "difference": 135.632875,
+     "paid": 285.35,
+     "price_under_the_rule": 290.775315,
+     "quantity": 25.0,
+     "side": "buy",
+     "symbol": "GOOGL"
+    },
+    {
+     "close": 521.13,
+     "close_from": "the account's marks",
+     "difference": -163.402655,
+     "paid": 533.96,
+     "price_under_the_rule": 521.390565,
+     "quantity": 13.0,
+     "side": "buy",
+     "symbol": "MSFT"
+    },
+    {
+     "close": 628.77,
+     "close_from": "the account's marks",
+     "difference": -119.390535,
+     "paid": 642.35,
+     "price_under_the_rule": 629.084385,
+     "quantity": 9.0,
+     "side": "buy",
+     "symbol": "META"
+    },
+    {
+     "close": 390.84,
+     "close_from": "the account's marks",
+     "difference": 138.91046,
+     "paid": 380.35,
+     "price_under_the_rule": 391.03542,
+     "quantity": 13.0,
+     "side": "buy",
+     "symbol": "TSLA"
+    },
+    {
+     "close": 139.75,
+     "close_from": "the account's marks",
+     "difference": -100.923625,
+     "paid": 143.3,
+     "price_under_the_rule": 139.819875,
+     "quantity": 29.0,
+     "side": "buy",
+     "symbol": "SPCX"
+    },
+    {
+     "close": 345.22,
+     "close_from": "the account's marks",
+     "difference": 154.95132,
+     "paid": 332.48,
+     "price_under_the_rule": 345.39261,
+     "quantity": 12.0,
+     "side": "buy",
+     "symbol": "AVGO"
+    },
+    {
+     "close": 128.38,
+     "close_from": "the account's marks",
+     "difference": 267.38894,
+     "paid": 118.16,
+     "price_under_the_rule": 128.44419,
+     "quantity": 26.0,
+     "side": "buy",
+     "symbol": "ORCL"
+    }
+   ],
+   "summary": "$379.90 taken from cash on 2026-11-19: ticket tkt-5c12ef101db360fd repriced at the 2026-11-11 close under the current fill rule."
+  }
+ ],
+ "equity_history_corrected": [
+  [
+   "2026-11-11",
+   99974.51
+  ],
+  [
+   "2026-11-12",
+   100068.55
+  ],
+  [
+   "2026-11-13",
+   99635.26
+  ],
+  [
+   "2026-11-16",
+   98097.5
+  ],
+  [
+   "2026-11-17",
+   97882.66
+  ],
+  [
+   "2026-11-18",
+   98219.02
+  ]
+ ],
+ "reconcile": {
+  "ok": true,
+  "cash": 49003.97,
+  "cash_from_log": 49003.97,
+  "positions_match": true,
+  "corrections": 1
+ },
  "pre_inception_marks": [
   [
    "2026-11-10",
@@ -72,7 +216,50 @@
   ]
  ],
  "tickets_filled": 1,
- "resting": [],
+ "resting": [
+  {
+   "symbol": "NVDA",
+   "side": "buy",
+   "quantity": 6.0,
+   "ordered": "2026-11-19T19:45:13+00:00",
+   "fills_in_session": "2026-11-19"
+  },
+  {
+   "symbol": "META",
+   "side": "buy",
+   "quantity": 1.0,
+   "ordered": "2026-11-19T19:45:13+00:00",
+   "fills_in_session": "2026-11-19"
+  },
+  {
+   "symbol": "MSFT",
+   "side": "buy",
+   "quantity": 1.0,
+   "ordered": "2026-11-19T19:45:13+00:00",
+   "fills_in_session": "2026-11-19"
+  },
+  {
+   "symbol": "TSLA",
+   "side": "buy",
+   "quantity": 1.0,
+   "ordered": "2026-11-19T19:45:13+00:00",
+   "fills_in_session": "2026-11-19"
+  },
+  {
+   "symbol": "GOOGL",
+   "side": "buy",
+   "quantity": 1.0,
+   "ordered": "2026-11-19T19:45:13+00:00",
+   "fills_in_session": "2026-11-19"
+  },
+  {
+   "symbol": "ORCL",
+   "side": "buy",
+   "quantity": 2.0,
+   "ordered": "2026-11-19T19:45:13+00:00",
+   "fills_in_session": "2026-11-19"
+  }
+ ],
  "timeline": [
   {
    "ticket": "tkt-5c12ef101db360fd",
@@ -86,40 +273,33 @@
    "recorded": "2026-11-11T19:54:15Z",
    "outside_limit": null,
    "convention": "limit against the previous close (before v0.42.5)",
-   "causal": false
+   "causal": false,
+   "corrected_by": "corr-2026-11-11-stale-close",
+   "correction_amount": 379.9
   }
  ],
  "non_causal_fills": 9,
  "fills_chain": {
   "ok": true,
-  "entries": 1
+  "entries": 2
  },
- "passes": 12,
+ "passes": 14,
  "last": {
+  "approval": "autonomous",
   "broker": "paper",
-  "event": "pass",
-  "outcome": "nothing to trade: holdings are within the drift band",
-  "ts_utc": "2026-11-18T19:35:27Z"
+  "decision_id": "13-3188eb04",
+  "decision_ts": "2026-11-19T19:45:10Z",
+  "event": "resting",
+  "failures": 0,
+  "fills_in_session": "2026-11-19",
+  "mandate_hash": "b2d64f2e31dfd9af",
+  "mode": "autonomous",
+  "ordered": "2026-11-19T19:45:13Z",
+  "orders": 6,
+  "ticket": "tkt-cbd6f4d6502d480a",
+  "ts_utc": "2026-11-19T19:45:14Z"
  },
  "recent": [
-  {
-   "broker": "paper",
-   "event": "pass",
-   "outcome": "the ticket failed a check",
-   "reasons": [
-    "the call is in force today (on or after its effective date)"
-   ],
-   "ts_utc": "2026-11-10T19:01:14Z"
-  },
-  {
-   "broker": "paper",
-   "event": "pass",
-   "outcome": "the ticket failed a check",
-   "reasons": [
-    "the call is in force today (on or after its effective date)"
-   ],
-   "ts_utc": "2026-11-10T22:37:21Z"
-  },
   {
    "broker": "paper",
    "event": "pass",
@@ -189,15 +369,39 @@
    "event": "pass",
    "outcome": "nothing to trade: holdings are within the drift band",
    "ts_utc": "2026-11-18T19:35:27Z"
+  },
+  {
+   "broker": "paper",
+   "cash_delta": -379.9,
+   "event": "correction",
+   "id": "corr-2026-11-11-stale-close",
+   "outcome": "cash -379.90: the first ticket repriced at the 2026-11-11 close",
+   "ticket": "tkt-5c12ef101db360fd",
+   "ts_utc": "2026-11-19T19:45:13Z"
+  },
+  {
+   "approval": "autonomous",
+   "broker": "paper",
+   "decision_id": "13-3188eb04",
+   "decision_ts": "2026-11-19T19:45:10Z",
+   "event": "resting",
+   "failures": 0,
+   "fills_in_session": "2026-11-19",
+   "mandate_hash": "b2d64f2e31dfd9af",
+   "mode": "autonomous",
+   "ordered": "2026-11-19T19:45:13Z",
+   "orders": 6,
+   "ticket": "tkt-cbd6f4d6502d480a",
+   "ts_utc": "2026-11-19T19:45:14Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
  "convention": {
-  "order": "written by the daily pass, before the open on most days",
+  "order": "written by the daily pass, which has started during the US session on every day so far (the ticket carries the time)",
   "fill": "the close of the first exchange session that ends after the order was written",
   "cost": "5 bp half-spread on every fill; no commission",
   "limit": "the ticket's limit is recorded; the paper fill does not depend on it",
   "since": "v0.42.5"
  },
- "note": "A model account of $100,000 run by the trader from the daily workflow. Each order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread, so the price is never older than the order. The first 9 fills (written Nov 11, 2026) were made under the earlier convention, at the limit against the previous day's close: a price older than the order. They are kept as recorded and marked. A simulation convention, not evidence of an achievable execution. Not a personal account."
+ "note": "A model account of $100,000 run by the trader from the daily workflow. Each order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread, so the price is never older than the order. The first 9 fills (written Nov 11, 2026) were made under the earlier convention, at the limit against the previous day's close: a price older than the order. They are kept as recorded and marked. Correction: $379.90 taken from cash on 2026-11-19: ticket tkt-5c12ef101db360fd repriced at the 2026-11-11 close under the current fill rule. Equity marks dated before 2026-11-17 do not carry it. A simulation convention, not evidence of an achievable execution. Not a personal account."
 }
