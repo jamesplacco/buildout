@@ -195,18 +195,38 @@ def test_the_published_block_is_the_published_calls():
 
 
 def test_the_pages_claims_follow_what_was_found():
-    """Asserted here so that a rerun which changes a finding fails loudly and the copy is reread."""
+    """Asserted here so that a rerun which changes a finding fails loudly and the copy is reread.
+
+    v0.47: the sensitivity half no longer pins the day's numbers. It used fixed thresholds (a fat-tail shift under
+    0.015x, a clustered fall above 27%, the worst year's volatility above the last weeks') that an ordinary day's
+    data can cross without any finding having changed: on Nov 17 the block shift stood at 0.013x against the 0.015x
+    bar, with a seed spread of 0.02x. What is asserted now is what the models make true by construction, and the
+    qualitative findings measured against the block's own noise."""
     S = _snap("snap30.js", "SNAP30")["book"]["sensitivity"]
-    by = {r["key"]: r for r in S["models"]["rows"]}
-    eng = by["gbm"]["size"]
-    assert abs(by["student_t"]["d_size"]) < 0.015 and abs(by["blocks"]["d_size"]) < 0.015, "the shape of the tail hardly matters over a year"
-    assert by["clustered"]["size"] < 0.9 * eng and not by["clustered"]["inside_at_size"], "volatility that moves does"
-    assert by["clustered"]["dd_at_size"] > 0.27
-    assert by["no_premium"]["size"] < eng and by["vol_worst"]["size"] < by["vol_now"]["size"] < eng
-    assert S["models"]["seeds"]["max"] - S["models"]["seeds"]["min"] > 0.01, "the third decimal of the size is noise"
-    assert S["models"]["shape_range"][0] == by["clustered"]["size"]
+    M = S["models"]
+    by = {r["key"]: r for r in M["rows"]}
+    eng, cap = by["gbm"]["size"], M["cap"]
+    spread = M["seeds"]["max"] - M["seeds"]["min"]
+    for r in M["rows"]:                                                    # the table is internally consistent
+        assert r["d_size"] == pytest.approx(r["size"] - eng, abs=2e-6), r["key"]
+        assert r["inside_at_size"] == (r["dd_at_size"] <= cap + 1e-9), r["key"]
+        assert r["inside_at_size"] == (r["size"] >= eng - 1e-3) or abs(r["d_size"]) < 2e-3, f"{r['key']}: a model that allows less than the call is past the cap at the call"
+    shape = [r for r in M["rows"] if r["kind"] == "shape"]
+    assert M["shape_range"] == [min(r["size"] for r in shape), max(r["size"] for r in shape)]
+    level = sorted([by["gbm"]] + [r for r in M["rows"] if r["kind"] == "level"], key=lambda r: r["dd_full"])
+    assert [r["size"] for r in level] == sorted((r["size"] for r in level), reverse=True), "in one model, a deeper fall at full size is a smaller size"
+    assert by["no_premium"]["size"] < eng, "taking the premium away can only lower the size"
+    # the findings, against the block's own noise rather than against a number that was true on one day
+    assert spread > 0.01 * eng, "the third decimal of the size is noise"
+    for k in ("student_t", "blocks"):
+        assert abs(by[k]["d_size"]) < max(2 * spread, 0.05 * eng), f"{k}: the shape of the tail moves the size by no more than the draws do"
+    assert by["clustered"]["size"] < eng - spread and not by["clustered"]["inside_at_size"], "volatility that moves does, by more than the draws"
+    assert abs(by["clustered"]["d_size"]) > max(abs(by["student_t"]["d_size"]), abs(by["blocks"]["d_size"]))
+    for r in S["settings"]:
+        assert r["size"] == pytest.approx(min(r["sizes"].values())) and r["sizes"][r["binding"]] == r["size"], r["label"]
     tail = [r for r in S["settings"] if r["group"] == "Method for the tail"]
-    assert len({round(r["size"], 6) for r in tail}) == 1, "the tail method does not move the size while the drawdown cap binds"
+    if all(r["binding"] == "drawdown_cap" for r in tail):
+        assert len({round(r["size"], 6) for r in tail}) == 1, "the tail method does not move the size while the drawdown cap binds"
     U = _snap("snap38.js", "SNAP38")["universe"]
     rows = {r["key"]: r["cap_check"] for r in U["rows"]}
     assert set(rows) == {"pit", "frozen", "ex_top", "qqq", "soxx", "robo"}
@@ -233,7 +253,7 @@ def test_the_page_carries_the_section():
     assert body.index('id="bk-front-t"') < body.index('id="bk-sens-t"') < body.index('id="bk-hedge-t"')
     assert "function renderSensitivity(B)" in book and "sec.hidden = !S;" in book and "B.sensitivity.failed" in book
     assert 'guard("How sure is the size", () => renderSensitivity(B)' in book
-    assert "None of it changes the call." in book and "The cap is a modelled percentile, not a stop." in book
+    assert "None of it changes the call." in book and "The cap is a modeled percentile, not a stop." in book
     assert "the count of stretches is the honest sample" in book and "they can only fail to contradict it" in book
     assert '"bk-front-t", "bk-sens-t", "bk-hedge-t"' in boot
     for page in ("core.html", "page.html"):

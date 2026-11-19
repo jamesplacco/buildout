@@ -22,7 +22,7 @@
     // tiles
     tiles.replaceChildren();
     const big = T.entries.reduce((a, e) => (e.count > a.count ? e : a), T.entries[0]);
-    [[String(T.entries.length), "Learned objects", "matrices, vectors and scalars shaped by optimisation"], [T.total.toLocaleString(), "Numbers", `the ${big.name.toLowerCase()} is ${pct0(big.count / T.total)} of them`],
+    [[String(T.entries.length), "Learned objects", "matrices, vectors and scalars shaped by optimization"], [T.total.toLocaleString(), "Numbers", `the ${big.name.toLowerCase()} is ${pct0(big.count / T.total)} of them`],
       [T.core.toLocaleString(), "Decision core", "regimes, forecasters, allocation, portfolio, learner"], [String(T.layers.length), "Layers", "in the order data flows through them"],
       [String(T.set_by_hand.length), "Set by hand", "constants with reasons, not fitted"], [String(Object.keys(T.feeds).length), "Desks fed", "directly; the rest read derived figures"]]
       .forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });

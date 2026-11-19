@@ -46,15 +46,15 @@
     const st = TD.gates.state.value;
     out.push({ id: "corr", k: "obs", what: `Stocks and bonds ${st === "amplifying" ? "are moving together" : st === "hedging" ? "are moving opposite" : "have no clear relationship"}`,
       v: `correlation ${sgn2(I.corr.v)}`, d: I.corr.live ? isoNice(I.corr.d) : monthNice(I.corr.d), live: I.corr.live,
-      why: `TLT hedge: ${TD.status !== "ok" ? "unavailable" : TD.on ? "on" : "off"} under policy hedge.tlt.v2. It returns at −0.10 (${fx(Math.max(0, I.corr.v + 0.1), 2)} away).`, href: "#d-duration" });
+      why: `${I.corr.what}. Long-bond hedge: ${TD.status !== "ok" ? "unavailable" : TD.on ? "on" : "off"} under the bond-hedge rule (hedge.tlt.v2). It returns at a correlation of −0.10 or lower (${fx(Math.max(0, I.corr.v + 0.1), 2)} away).`, href: "#d-duration" });
     const inBand = HL.band && I.infl.avg36 / 100 >= HL.band[0] && I.infl.avg36 / 100 <= HL.band[1];
     out.push({ id: "infl", k: inBand ? "est" : "obs", what: inBand ? "Inflation is in the 2.75 to 4.25% zone where 156 years of data cannot say whether bonds hedge" : I.infl.avg36 / 100 < HL.lo ? "Inflation is below the band: bonds hedged most months at this level" : "Inflation is above the band",
       v: `${pctPts(I.infl.avg36)} over 36 months${HL.band ? `; band ${fx(HL.band[0] * 100, 2)} to ${fx(HL.band[1] * 100, 2)}%` : ""}`, d: monthNice(I.infl.d), live: I.infl.live,
-      why: `Inflation sleeve: ${I.infl.avg36 >= I.lineAt ? "8%, half gold, half energy" : "2%"}. TLT inflation gate ${TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "passes" : "fails") : "not applied"}.`, href: "#fi-hedge" });
+      why: `The bond hedge's inflation test ${TD.gates.inflation.status === "ok" ? (TD.gates.inflation.pass ? "passes" : "fails") : "is not applied"}: the hedge needs the correlation and inflation both on its side.`, href: "#fi-hedge" });
     let third = null;
     try {
       const near = rocRows().filter((x) => !x.row.meanReverting && x.at13.state === "line" && x.at13.esc && fin(x.at13.weeks)).sort((a, b) => a.at13.weeks - b.at13.weeks)[0];
-      if (near && near.at13.weeks <= 26) third = { id: "roc", k: "est", what: `${near.row.n} is heading for a rule line`, v: `${fmtRocLevel(near.row, near.at13.at)} in ${durTxt(near.at13.weeks)} at the 13-week pace`, d: isoNice(near.r.date), live: !!near.r.live,
+      if (near && near.at13.weeks <= 26) third = { id: "roc", k: "est", what: `${rocPlain(near.row, true)} is heading for a rule line`, v: `${fmtRocLevel(near.row, near.at13.at)} in ${durTxt(near.at13.weeks)} at the 13-week pace`, d: isoNice(near.r.date), live: !!near.r.live,
         why: `Crossing it reads "${near.at13.label}". A straight-line projection, not a forecast of the date.`, href: "#roc-title" };
     } catch (e) { third = null; }
     if (!third) {
@@ -68,14 +68,19 @@
   }
   // previous values: what each headline read at the last data date this browser saw, so a change shows its "was"
   function todayCompare(items, asof) {
-    let hist = LS.get("bo-today-hist", []);
+    // v0.47: only readings from the daily files are stored and compared. The page draws once from its shipped
+    // snapshot before the daily files arrive; storing that first draw made every new visitor's page report a
+    // "change since Oct 23" between two different series (a 36-month correlation against a 63-day one).
+    const liveItems = items.filter((c) => c.id && c.live);
+    if (!liveItems.length) return { prev: null, note: "These are the readings shipped with this version; the daily files have not loaded, so no change is shown." };
+    let hist = LS.get("bo-today-hist2", []);
     if (!Array.isArray(hist)) hist = [];
     hist = hist.filter((e) => e && isoOk(e.asof) && e.vals && typeof e.vals === "object");
     const vals = {};
-    items.forEach((c) => { if (c.id) vals[c.id] = c.v; });
+    liveItems.forEach((c) => { vals[c.id] = c.v; });
     const prev = hist.filter((e) => e.asof < asof).sort((a, b) => b.asof.localeCompare(a.asof))[0] || null;
     hist = hist.filter((e) => e.asof !== asof).concat([{ asof, vals }]).sort((a, b) => a.asof.localeCompare(b.asof)).slice(-12);
-    LS.set("bo-today-hist", hist);
+    LS.set("bo-today-hist2", hist);
     if (!prev) return { prev: null, note: `First look at data through ${isoNice(asof)} in this browser. Next time, each line shows what it read before.` };
     const moved = Object.keys(vals).filter((k) => prev.vals[k] != null && prev.vals[k] !== vals[k]).length;
     return { prev, note: moved ? `${moved} of ${Object.keys(vals).length} headlines moved since ${isoNice(prev.asof)}.` : `Quiet: nothing on this screen moved since ${isoNice(prev.asof)}. No action is a decision too; the policies above still hold.` };
@@ -98,21 +103,25 @@
       const ol = h("ol", "t7-steps");
       const li = (strong, text, ev) => { const x = h("li"); x.append(h("strong", null, strong + " "), document.createTextNode(text + " ")); if (ev) x.append(evTag(ev)); ol.append(x); };
       li("At full size the book breaks its risk limits.", `Measured on the nine names' own daily prices since ${B.from.slice(0, 4)}: its average loss in the worst 5% of months is ${pctPlain(B.tail.es95.governing, 0)} against a ${pctPlain(L0.es_budget, 0)} budget, its volatility ${pctPlain(B.risk.vol, 0)} against ${pctPlain(L0.vol_target, 0)}, and a bad year (95th percentile) ${pctPlain(B.at_full.drawdown95, 0)} down against a ${pctPlain(L0.max_drawdown, 0)} cap. The drawdown cap is the tightest: it allows ${xx(S0.drawdown_cap)}.`, "obs");
-      li("Nothing argues for a different size.", `The decision engine, tested on every month since 1940, finds no evidence that timing beats holding, and the one sizing rule with support (cut exposure when volatility is high; its gain comes from two crashes, 2000 and 2008, a thin record) reads full size today. So the limits, not a forecast, set the size.`, "obs");
+      li("Nothing argues for a different size.", `The decision engine, tested on every month since 1940, finds no evidence that timing beats holding, and the one sizing rule with support (cut exposure when volatility is high; its gain comes from two crashes, 2000 and 2008, a thin record) is not adopted: on the book's own record it did worse than holding${B.vol_rule && B.vol_rule.book && B.vol_rule.book.headline && fin(B.vol_rule.book.headline.exposure_now) ? `, and today it reads ${xx(B.vol_rule.book.headline.exposure_now)} for the book, a reading beside the limits` : ""}. So the limits, not a forecast, set the size.`, "obs");
       if (M) li("There are two ways to meet the limits.", `Cut to ${xx(M.lo.gross)}, or hold ${xx(M.hi.gross)} and short ${pct0(M.hi.short)} of NAV in Nasdaq-100 futures; every mix in between also works${fin(M.hi.vol) ? `, and all run near ${pctPlain(M.hi.vol, 0)} volatility` : ""}. The first is a smaller bet on the market; the second is a bet that these nine names beat the index. Which bet to hold is the PM's call.`, null);
       ans.append(ol);
       const hp = h("p", "t7-hedge");
-      hp.append(h("strong", null, "Why not bonds. "), document.createTextNode(`${st === "amplifying" ? "Bonds have not been hedging: stocks and bonds have moved together" : st === "hedging" ? "Bonds are hedging stocks at the moment, but" : "Whether bonds hedge is unproven"} (S&P 500 against the 10-year, 36 months: ${sgn2(I.corr.v)})${P ? `, and on the book's own days since ${B.hedges.from.slice(0, 4)} a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} against ${pct0(P.nasdaq_beta.variance_cut)} for a Nasdaq-100 short` : ""}. `), evTag("obs"));
+      hp.append(h("strong", null, "Why not bonds. "), document.createTextNode(`${st === "amplifying" ? "Bonds have not been hedging: stocks and bonds have moved together" : st === "hedging" ? "Bonds are hedging stocks at the moment, but" : "Whether bonds hedge is unproven"} (${I.corr.what}: ${sgn2(I.corr.v)})${P ? `, and on the book's own days since ${B.hedges.from.slice(0, 4)} a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} against ${pct0(P.nasdaq_beta.variance_cut)} for a Nasdaq-100 short` : ""}. `), evTag("obs"));
       ans.append(hp);
       const cp = h("p", "t7-change");
       cp.append(h("strong", null, "What would change it. "), document.createTextNode(`The size rises if the book's volatility or tail falls back inside its limits at full size, or if the engine's evidence gate opens; it falls if a limit tightens. Bonds come back as the hedge if the stock-bond correlation turns negative (below ${sgn2(-0.10)}) with inflation easing.`));
       ans.append(cp);
     } else {
       const lead = TD.status !== "ok" ? "Would bonds hedge the book? Unknown today." : TD.on ? "Would bonds hedge the book? Reliable enough to hold." : st === "amplifying" ? "Would bonds hedge the book? Not in this regime." : "Would bonds hedge the book? Unproven.";
-      ans.append(h("strong", null, lead + " "), document.createTextNode(`S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}. `), evTag("obs"));
+      ans.append(h("strong", null, lead + " "), document.createTextNode(`${I.corr.what}: ${sgn2(I.corr.v)}. `), evTag("obs"));
     }
     const Bs = typeof B30 === "function" ? B30() : null;
-    $("#t7-status").textContent = `Model book, not personal positions · ${Bs && Bs.asof ? `call on prices through ${isoNice(Bs.asof)} · ` : ""}market data to ${isoNice(latestDataDate())}${LIVE.status && Array.isArray(LIVE.status.checks) ? ` · ${LIVE.status.checks.filter((c) => c.ok).length} of ${LIVE.status.checks.length} data checks pass` : ""}`;
+    // v0.47: which decision this is and when it governs (New York date); and a failing data check is named, not counted
+    const dNew = BC && BC.decision, dNow = typeof decisionInForce === "function" ? decisionInForce(nyToday()) : null;
+    const inForce = !dNew ? "" : dNew.governs_from > nyToday() ? `decision ${dNew.id} takes effect ${isoNice(dNew.governs_from)}${dNow ? `; in force today: decision ${dNow.id} (${xx(dNow.call.size)})` : ""} · ` : `decision ${dNew.id}, in force since ${isoNice(dNew.governs_from)} · `;
+    const chk = LIVE.status && Array.isArray(LIVE.status.checks) ? LIVE.status.checks : null, failing = chk ? chk.filter((c) => !c.ok && c.level !== "warn") : [], warned = chk ? chk.filter((c) => !c.ok && c.level === "warn") : [];
+    $("#t7-status").textContent = `${Bs && Bs.asof ? `Call on prices through ${isoNice(Bs.asof)} · ` : ""}${inForce}market data to ${isoNice(latestDataDate())}${chk ? ` · ${chk.length - failing.length - warned.length} of ${chk.length} data checks pass${failing.length ? ` (failing: ${failing.map((c) => c.name).join("; ")})` : ""}${warned.length ? `${failing.length ? "," : " ·"} ${warned.length} warning${warned.length === 1 ? "" : "s"}` : ""}` : ""}`;
     // one governing size, and the other rules named as cross-checks so the desks cannot seem to disagree
     const sz = $("#t7-sizing");
     if (sz) {
@@ -148,7 +157,7 @@
       top.append(h("strong", null, c.what), evTag(c.k, c.live ? "latest available" : "as shipped with this version"));
       const a = h("a", null, "Details →"); a.href = c.href;
       const v = h("span", "t7-v num", `${c.v} · ${c.d}`), was = cmp.prev && cmp.prev.vals[c.id];
-      if (was && was !== c.v) v.append(h("span", "t7-was", ` · was ${was} on ${isoNice(cmp.prev.asof)}`));
+      if (c.live && was && was !== c.v) v.append(h("span", "t7-was", ` · was ${was} on ${isoNice(cmp.prev.asof)}`));
       li.append(top, v, h("span", "t7-why", c.why), a);
       ch.append(li);
     });
@@ -158,17 +167,34 @@
     // what would reverse it
     const rv = $("#t7-reverse");
     rv.replaceChildren();
-    const rows = [[`TLT hedge back on`, `correlation at −0.10 or below (now ${sgn2(I.corr.v)})${fin(HL.line) ? ` and 36-month inflation below ${fx(HL.line * 100, 2)}%` : ""}`],
-      ["Inflation sleeve back to 2%", `36-month inflation below 2.75% (now ${pctPts(I.infl.avg36)}) and Brent below $${fx(1.3 * I.oilAvg5, 0)}`]];
+    const rows = [[`Long-bond hedge back on`, `stock-bond correlation at −0.10 or below (now ${sgn2(I.corr.v)}, ${I.corr.short})${fin(HL.line) ? ` and 36-month inflation below ${fx(HL.line * 100, 2)}%` : ""}`],
+      ["A larger size", "the book's volatility, tail and one-year drawdown back inside their limits at a larger size, or the engine's evidence gate opening"]];
     const top = R.voi && R.voi.signals[0];
     if (top && top.evsi_bp > 1) rows.push(["Most worth learning", `${top.name}: ${fx(top.evsi_bp, 0)}bp of certainty-equivalent return over three months`]);
     rows.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); rv.append(li); });
     // can I trust it
     const tr = $("#t7-trust");
     tr.replaceChildren();
-    const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 23, 2026"], ["Research", `monthly panel to ${readF().panel.end}; inflation line ${HL.status === "ok" ? "validated" : HL.status.replace(/_/g, " ")}`],
-      ["Filings", FUND.note || FUND.as_of], ["Book", LIVE.report && LIVE.report.summary ? `engine run ${isoNice(LIVE.report.summary.as_of)}${adjTxt(LIVE.report.summary.adjustments)}` : "model book, as shipped"]];
+    const pend = String(readF().panel.end || "");
+    const fresh = [["Market data", I.vix.live ? isoNice(I.vix.d) : "as of Oct 23, 2026"], ["Research", `monthly panel to ${/^\d{4}-\d{2}$/.test(pend) ? monthNice(pend + "-01") : pend}; inflation line ${HL.status === "ok" ? "validated" : HL.status.replace(/_/g, " ")}`],
+      ["Filings", FUND.note || FUND.as_of], ["The call's prices", Bs && Bs.asof ? `public daily closes through ${isoNice(Bs.asof)}, validated before sizing (the book step)` : "model book, as shipped"]];
+    if (LIVE.report && LIVE.report.summary) fresh.push(["Cross-check run", `Databento, ${isoNice(LIVE.report.summary.as_of)}${adjTxt(LIVE.report.summary.adjustments)}; it does not set the call`]);
     fresh.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); tr.append(li); });
+    // v0.47: the library's put, credit and inflation rules, read on today's data and kept apart from the call. None
+    // is in the ledger, the record or the paper account; a rule whose input is not from today's files is left out.
+    const rr = $("#t7-research"), rc = $("#t7-research-card");
+    if (rr && rc) {
+      rr.replaceChildren();
+      const ds = typeof decisions === "function" ? decisions() : [], dt = ds.find((d) => d.id === "d-tail"), dc = ds.find((d) => d.id === "d-credit");
+      const plain = { "Buy protection: HYG puts or CDX HY": "buy credit protection (puts on the high-yield bond fund, HYG, or the high-yield default-swap index, CDX HY)", "Monetize half the protection": "sell half of any credit protection held", "No protection needed": "no credit protection needed" };
+      const lc0 = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+      const rowsR = [];
+      if (dt && I.vix.live) rowsR.push(["Index puts", `The put rule reads: ${lc0(dt.act)} (VIX ${fx(I.vix.v, 1)} on ${isoNice(I.vix.d)}, ${fx(I.term.v, 2)} times its three-month reading; the rule says to sell puts in stages once the VIX passes 30 or stands above its three-month reading). The book holds no puts.`]);
+      if (dc && I.ccc.live && I.hy.live) rowsR.push(["Credit protection", `The credit rule reads: ${plain[dc.act] || lc0(dc.act)} (lowest-rated spread ${pctPts(I.ccc.v)}, high-yield spread ${pctPts(I.hy.v)}, ${isoNice(I.ccc.d)}). The book holds none.`]);
+      if (I.infl.live) rowsR.push(["Inflation sleeve", `The sleeve rule reads: ${I.infl.avg36 >= I.lineAt ? "8% of the book, half gold and half energy" : "2% of the book"} (36-month inflation ${pctPts(I.infl.avg36)}, ${monthNice(I.infl.d)}; back to 2% below 2.75% with Brent below $${fx(1.3 * I.oilAvg5, 0)}). The book holds no sleeve.`]);
+      rowsR.forEach(([k, v]) => { const li = h("li"); li.append(h("b", null, k), h("span", null, v)); rr.append(li); });
+      rc.hidden = !rowsR.length;
+    }
     if (typeof renderLanding === "function") renderLanding();   // the call board, the stages and the counts read the same inputs
   }
 
@@ -185,5 +211,5 @@
     const r = LIVE.report, d = r && r.decision, S = r && r.summary;
     if (!d || !S) { box.replaceChildren(h("p", null, "The engine's decision record (inputs with dates, policy outputs, binding constraints and anything blocked) appears here after a book run. The model book needs the Databento key; until then the page applies the same policies to its snapshot.")); return; }
     const hd = d.hedge || {}, sz = d.size || {}, lim = d.limits || {};
-    box.replaceChildren(h("p", null, `Engine run of ${isoNice(d.as_of)} (${S.data}): TLT ${hd.status !== "ok" ? "unavailable" : hd.on ? `on at ${fx(hd.ratio, 2)}x` : "off"}, stock-bond state ${(hd.gates && hd.gates.state && hd.gates.state.value) || "n/a"}; equity scale ${xx(sz.scale)} with ${(sz.binding || "n/a").replace(/_/g, " ")} binding; total gross ${xx(lim.total_gross)}${(lim.binding || []).length ? ` (capped by ${lim.binding.join(", ").replace(/_/g, " ")})` : ""}. Effective risk contributors ${fx(S.effective_risk_contributors, 1)}; effective independent bets ${fx(S.effective_independent_bets, 2)}. ${d.blocked && d.blocked.length ? "Blocked: " + d.blocked.join("; ") + "." : "Nothing blocked."} Trials counted for the deflated Sharpe: ${S.trials_counted || "n/a"}.${adjTxt(S.adjustments) ? ` Prices: ${adjTxt(S.adjustments).slice(2)}.` : ""}`));
+    box.replaceChildren(h("p", null, `Databento cross-check run of ${isoNice(d.as_of)}, not the engine that sets the call (the call is on the Book risk desk): TLT ${hd.status !== "ok" ? "unavailable" : hd.on ? `on at ${fx(hd.ratio, 2)}x` : "off"}, stock-bond state ${(hd.gates && hd.gates.state && hd.gates.state.value) || "n/a"}; this run's equity scale ${xx(sz.scale)} with ${(sz.binding || "n/a").replace(/_/g, " ")} binding; total gross ${xx(lim.total_gross)}${(lim.binding || []).length ? ` (capped by ${lim.binding.join(", ").replace(/_/g, " ")})` : ""}. Effective risk contributors ${fx(S.effective_risk_contributors, 1)}; effective independent bets ${fx(S.effective_independent_bets, 2)}. ${d.blocked && d.blocked.length ? "Blocked: " + d.blocked.join("; ") + "." : "Nothing blocked."} Trials counted for the deflated Sharpe: ${S.trials_counted || "n/a"} (the deflation covers the variants tried on this book; it cannot deflate the choice of the nine names).${adjTxt(S.adjustments) ? ` Prices: ${adjTxt(S.adjustments).slice(2)}.` : ""}`));
   }

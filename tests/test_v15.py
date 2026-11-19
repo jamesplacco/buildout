@@ -8,6 +8,7 @@ import math
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -316,11 +317,11 @@ def test_mcp_tools_for_ml_reality_triage_and_damodaran_never_execute():
 
 
 def test_cli_think_prints_a_what_if_and_json():
-    r = subprocess.run(["python", "-m", "buildout", "think", "If AI capex slows, what happens to the book?"], cwd=ROOT, capture_output=True, text=True, timeout=300)
+    r = subprocess.run([sys.executable, "-m", "buildout", "think", "If AI capex slows, what happens to the book?"], cwd=ROOT, capture_output=True, text=True, timeout=300)
     assert r.returncode == 0 and "what-if" in r.stdout and "model book" in r.stdout
-    j = subprocess.run(["python", "-m", "buildout", "think", "What is the Kelly criterion?", "--json"], cwd=ROOT, capture_output=True, text=True, timeout=300)
+    j = subprocess.run([sys.executable, "-m", "buildout", "think", "What is the Kelly criterion?", "--json"], cwd=ROOT, capture_output=True, text=True, timeout=300)
     assert json.loads(j.stdout)["define"]["name"] == "Kelly criterion"
-    t = subprocess.run(["python", "-m", "buildout", "triage", "1.0", "5", "45"], cwd=ROOT, capture_output=True, text=True, timeout=120)
+    t = subprocess.run([sys.executable, "-m", "buildout", "triage", "1.0", "5", "45"], cwd=ROOT, capture_output=True, text=True, timeout=120)
     assert "minimum backtest" in t.stdout
 
 
@@ -334,7 +335,7 @@ def test_editor_plugins_call_the_engine_and_never_trade():
     assert "(define-minor-mode buildout-mode" in el and "global-buildout-mode" in el
     if shutil.which("vim"):
         out = ROOT / ".pytest_vim.txt"
-        subprocess.run(["vim", "-Nes", "-u", "NONE", "-i", "NONE", "-c", f"let g:buildout_root='{ROOT}'", "-c", "let g:buildout_sync=1", "-c", "source editors/buildout.vim", "-c", "BuildoutTriage 1.0 5 45",
+        subprocess.run(["vim", "-Nes", "-u", "NONE", "-i", "NONE", "-c", f"let g:buildout_root='{ROOT}'", "-c", f"let g:buildout_python='{sys.executable}'", "-c", "let g:buildout_sync=1", "-c", "source editors/buildout.vim", "-c", "BuildoutTriage 1.0 5 45",
                         "-c", f"call writefile(getbufline('buildout://out', 1, '$'), '{out}')", "-c", "qa!"], cwd=ROOT, timeout=120)
         try:
             assert "minimum backtest" in out.read_text()

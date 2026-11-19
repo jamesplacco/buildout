@@ -47,6 +47,17 @@ def _call():
     return c
 
 
+def _live_call():
+    """v0.47: a live order fills at once and is held through today, so it needs the call that governs today. On Monday
+    Nov 9 that is the Nov 5 entry, written on Friday before the close. The Nov 6 entry was written on Saturday, after
+    the close that begins Monday's return, and governs from Tuesday (ledger.governs_from); a paper order, filled at
+    Monday's close and held through Tuesday, still trades it (_call)."""
+    c = dict(ex.latest_call())
+    c["asof"] = "2026-11-05"
+    c["effective_from"] = "2026-11-09"
+    return c
+
+
 def test_mandate_defaults_are_safe_and_problems_are_named():
     M = md.Mandate()
     assert M.mode == "manual" and not M.armed and M.broker == "paper" and M.problems() == []
@@ -136,7 +147,7 @@ def test_the_assistant_route_hands_over_exact_orders(state, monkeypatch):
     monkeypatch.setattr(trader, "evidence", lambda *a, **k: {"open": True, "missing": []})        # the gate has its own tests (test_v42_4)
     ab = br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
     M = md.Mandate(mode="autonomous", armed=True, broker="assistant", signed_by="J", signed_on="2026-11-08", notes="rehearsal", max_order_usd=50_000)
-    r = trader.run_once(ab, M, _params(), now=NOW, call=_call())
+    r = trader.run_once(ab, M, _params(), now=NOW, call=_live_call())
     assert r["outcome"] == "handed to the assistant" and len(r["handoff"]) == 9
     t = ex.load_ticket(r["ticket"])
     assert [(h["symbol"], h["side"], h["quantity"], h["limit"]) for h in r["handoff"]] == [(o["symbol"], o["side"], o["quantity"], o["limit_price"]) for o in t["orders"]]

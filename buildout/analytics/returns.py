@@ -5,7 +5,12 @@ import pandas as pd
 
 
 def simple_returns(prices: pd.DataFrame) -> pd.DataFrame:
-    return prices.pct_change(fill_method=None)
+    """Close-to-close returns. A missing close INSIDE a name's history (v0.47) is carried from the last close, so
+    that day's return is zero and the next close carries the whole move: before, both days were NaN and the move
+    across the gap vanished from the record. Dates before a name's first close and after its last stay NaN. The
+    gap itself is still counted, on the raw prices, by data/quality.py."""
+    filled = prices.ffill().where(prices.bfill().notna())
+    return filled.pct_change(fill_method=None)
 
 
 def equal_weight(returns: pd.DataFrame, cols: list[str]) -> pd.Series:

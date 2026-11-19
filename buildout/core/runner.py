@@ -272,6 +272,10 @@ def run(tasks: list[Task], out_dir, jobs: int | None = None, isolate: bool = Tru
             finish(name, res, secs)
         if running or pending:
             time.sleep(0.005)
+    try:                                                   # v0.47: the empty last-good folder does not outlive the run
+        (out / ".lastgood").rmdir()
+    except OSError:
+        pass
     wall = time.perf_counter() - t_start
     serial = sum(r.get("seconds", 0) for r in rows.values())
     order = [n for lvl in levels(tasks) for n in lvl]

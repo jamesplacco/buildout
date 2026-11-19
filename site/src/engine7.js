@@ -60,12 +60,29 @@
     return capex <= ocf ? "self_funded" : "funding_gap";
   }
   const FUND_FIELDS = ["revenue", "ocf", "capex", "da", "op_income", "nonop", "net_income", "interest", "debt", "cash", "rpo", "capex_last_q", "capex_last_q_yoy", "revenue_growth", "debt_yoy"];
+  // v0.47: a balance-sheet figure (debt, cash, backlog) has its own date. A newer filing replaces the snapshot's
+  // figure only when the new one is dated that filing's quarter end. Before, any finite value replaced it, and the
+  // daily file carried the newest observation of a tag however old (a cash line last filed in 2017 beside this
+  // quarter's debt). A figure the newer filing does not date to its quarter leaves the snapshot's in place, with the
+  // snapshot's date beside it; with nothing to keep it is null and the table says n/a. Handles both shapes of the
+  // daily file: the old one (a stale value with its old date) and the new one (null when not filed for the quarter).
+  const FUND_INSTANT = { debt: "debt_date", cash: "cash_date", rpo: "rpo_date" };
+  const nearQuarter = (d, q, days = 10) => isoOk(d) && isoOk(q) && Math.abs(Date.parse(d.slice(0, 10)) - Date.parse(q.slice(0, 10))) <= days * 86400000;
   function effectiveFund(rows, live) {
     return rows.map((r0) => {
       const r = Object.assign({}, r0), m = live && live[r0.t], src = {};
-      FUND_FIELDS.forEach((f) => { if (fin(r0[f])) src[f] = "filings to " + r0.quarter_end; });
+      FUND_FIELDS.forEach((f) => { if (fin(r0[f])) src[f] = "filings to " + (r0[FUND_INSTANT[f]] || r0.quarter_end); });
       if (m && typeof m === "object" && isoOk(m.quarter_end) && m.quarter_end > r0.quarter_end) {
-        FUND_FIELDS.forEach((f) => { if (fin(m[f])) { r[f] = m[f]; src[f] = "filing " + m.quarter_end; } });
+        FUND_FIELDS.forEach((f) => {
+          const dk = FUND_INSTANT[f];
+          if (f === "debt_yoy") return;                                    // follows debt, below
+          if (!dk) { if (fin(m[f])) { r[f] = m[f]; src[f] = "filing " + m.quarter_end; } return; }
+          if (fin(m[f]) && (m[dk] == null || nearQuarter(m[dk], m.quarter_end))) {      // no date given: the filing's own quarter
+            r[f] = m[f]; r[dk] = isoOk(m[dk]) ? m[dk].slice(0, 10) : m.quarter_end; src[f] = "filing " + r[dk];
+            if (f === "debt") { r.debt_secondary = null; r.debt_yoy = fin(m.debt_yoy) ? m.debt_yoy : null; if (fin(m.debt_yoy)) src.debt_yoy = "filing " + r[dk]; else delete src.debt_yoy; }
+          } else if (fin(r0[f])) { r[dk] = r0[dk] || r0.quarter_end; (r.carried = r.carried || []).push(f); }
+          else { r[f] = null; r[dk] = null; }
+        });
         r.quarter_end = m.quarter_end; r.refreshed = true;
       }
       const div = (a, b) => (fin(a) && fin(b) && b !== 0 ? a / b : null);
@@ -331,7 +348,7 @@
   }
 
   // v0.8: the decision boundary. Tilt the odds of the four downside scenarios by f (renormalized) and move the loss
-  // limit; at every pair, the grid's optimal equity. Where the colour changes is where the preferred action changes.
+  // limit; at every pair, the grid's optimal equity. Where the color changes is where the preferred action changes.
   const RZ_DOWN = ["termprem", "digest", "stagfl", "crash"];
   function rzTilt(post, f) {
     const w = post.map((p, i) => p * (RZ_DOWN.includes(RZ_SCENARIOS[i].id) ? f : 1)), z = w.reduce((a, b) => a + b, 0);

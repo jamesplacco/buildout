@@ -58,6 +58,39 @@ def _P(P: dict | None) -> dict:
     return {**DEFAULTS, **(P or {})}
 
 
+# the four market levels the prices rest on, and where each is read in macro.json (v0.47). The limits: a reading
+# outside them is a bad print, and the default stands in, labelled.
+_LEVELS = {"vix": (("latest", "VIXCLS"), ("latest", "VIXCLS_date"), 1.0, (5.0, 150.0), "the VIX (FRED VIXCLS)"),
+           "index_vol": (("vol", "latest", "ndx", "implied"), ("vol", "latest", "ndx", "date"), 1.0, (5.0, 150.0), "the Nasdaq-100's implied volatility (VXN)"),
+           "y30": (("latest", "DGS30"), ("latest", "DGS30_date"), 0.01, (0.0, 0.20), "the 30-year Treasury yield (DGS30)"),
+           "rf": (("latest", "DGS3MO"), ("latest", "DGS3MO_date"), 0.01, (-0.01, 0.20), "the 3-month Treasury yield (DGS3MO)")}
+
+
+def _dig(o, path):
+    for k in path:
+        o = o.get(k) if isinstance(o, dict) else None
+    return o
+
+
+def market_params(macro: dict | None) -> tuple[dict, dict]:
+    """The scenario set's market levels from the run's own macro.json, and a record of where each came from.
+
+    Returns (P, inputs): P is the overrides to hand to catalog / evaluate / advisor; inputs has one row per level
+    with its value, date, source and `assumed`. A level macro.json does not carry (or carries outside its limits)
+    keeps reasoner.DEFAULTS and is marked assumed: true. Before v0.47 the published hedges.json priced every option
+    at the defaults (VIX 18, index volatility 25, a 4.85% long yield) whatever the market was doing."""
+    P, rec = {}, {}
+    for k, (path, dpath, scale, (lo, hi), what) in _LEVELS.items():
+        v = _dig(macro or {}, path)
+        ok = isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and lo <= v * scale <= hi
+        if ok:
+            P[k] = float(v) * scale
+            rec[k] = {"value": P[k], "date": _dig(macro, dpath), "source": f"macro.json: {what}", "assumed": False}
+        else:
+            rec[k] = {"value": DEFAULTS[k], "date": None, "source": f"default: macro.json carries no usable reading of {what}", "assumed": True}
+    return P, rec
+
+
 def vix_end(s: dict, vix0: float) -> float:
     return max(9.0, vix0 - ASSUMED["vix_per_market"] * s["market"])
 

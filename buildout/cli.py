@@ -54,6 +54,25 @@ def research_line(out_dir) -> tuple:
         return (None, "unavailable")
 
 
+Y10_ASSUMED = 5.13      # percent; used by the decision engine only when macro.json cannot supply the 10-year yield
+
+
+def decide_y10(out_dir) -> tuple[float, dict]:
+    """The 10-year Treasury yield (percent) for the decision engine's "today" row, and where it came from (v0.47):
+    macro.json's latest DGS10 with its date when the file is there and the value is a plausible yield; otherwise the
+    constant above, labelled as assumed."""
+    from pathlib import Path
+    try:
+        lat = json.loads((Path(out_dir) / "macro.json").read_text())["latest"]
+        v = float(lat["DGS10"])
+        if 0.0 < v < 25.0:
+            return v, {"value": v, "source": "FRED DGS10 (macro.json)", "date": lat.get("DGS10_date"), "assumed": False}
+        why = f"macro.json's DGS10 is {v}, not a plausible yield"
+    except (OSError, KeyError, ValueError, TypeError) as exc:
+        why = f"macro.json not usable ({type(exc).__name__})"
+    return Y10_ASSUMED, {"value": Y10_ASSUMED, "source": f"assumed constant: {why}", "date": None, "assumed": True}
+
+
 def _trade(a) -> None:
     import os
     from pathlib import Path as _P
@@ -98,6 +117,33 @@ def _trade(a) -> None:
     if a.out:
         from .jsonout import write
         print("wrote", write(trader.paper_summary(os.environ["BUILDOUT_TRADER_STATE"]), a.out, "paper.json"))
+
+
+def _download_when_fresh(bk, cache, wait_minutes: float, pause: float = 300.0, sleep=None, clock=None):
+    """bk.download, waiting for the mirror when the only thing wrong is that it has not been refreshed yet (v0.47).
+
+    The mirror publishes the prior session's closes in the morning, New York time. A run that starts earlier gets a
+    pull that ends a session short; that is the one validation failure worth waiting for. Anything else (a name behind
+    the others, an unexplained jump, a disagreement with the second source) raises at once, and so does a pull that is
+    still short when the wait runs out."""
+    import time as _time
+    from pathlib import Path as _P
+    sleep, clock = sleep or _time.sleep, clock or _time.monotonic
+    deadline = clock() + max(0.0, wait_minutes) * 60
+    while True:
+        try:
+            return bk.download(cache)
+        except ValueError as exc:
+            v = dict(bk.LAST_VALIDATION)
+            behind = bool(v.get("asof") and v.get("expected_asof") and v["asof"] < v["expected_asof"])
+            if not behind or clock() >= deadline:
+                raise
+            print(f"prices end {v['asof']}, the last completed session is {v['expected_asof']}: waiting for the mirror ({exc})"[:300], flush=True)
+            if cache:                           # the day's cache would answer the next try with the same short pull
+                for f in _P(cache).glob("*.csv"):
+                    f.unlink(missing_ok=True)
+                (_P(cache) / "cross_check.json").unlink(missing_ok=True)
+            sleep(min(pause, max(1.0, deadline - clock())))
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -244,6 +290,8 @@ def main(argv: list[str] | None = None) -> None:
     bkp = sub.add_parser("book", help="v0.30: the book on its names' own daily prices: exposures, risk, tail, the size each limit allows, hedges tested out of sample, stress, liquidity")
     bkp.add_argument("--out", default="out")
     bkp.add_argument("--cache", default=".cache/book")
+    bkp.add_argument("--wait-minutes", type=float, default=0.0,
+                     help="v0.47: when the price mirror has not reached the last completed session yet, try again every five minutes for this long before failing")
     lgp = sub.add_parser("ledger", help="v0.38: the append-only, hash-chained call ledger: append | verify | show")
     lgp.add_argument("action", nargs="?", default="verify")
     lgp.add_argument("--book", default=None)
@@ -341,6 +389,9 @@ def main(argv: list[str] | None = None) -> None:
             print(f"{r['name']:10s} {r['status']:9s} {r.get('seconds', '')}  {r.get('error', '')}{note}")
         rn = m["runner"]
         print(f"{m['ok']} ok, {m['failed']} failed; {rn['wall_seconds']}s wall for {rn['serial_seconds']}s of work on {rn['jobs']} workers ({rn['speedup']}x)")
+        if m["failed"]:        # v0.47: a failed, timed-out or rejected engine fails the command; before, it kept yesterday's file and exited 0
+            bad = ", ".join(r["name"] for r in m["engines"] if r["status"] in ("failed", "timeout", "rejected"))
+            raise SystemExit(f"{m['failed']} engine(s) did not finish: {bad} (their last good files are kept and marked in engines.json)")
         return
     if a.cmd == "ooda":
         from .jsonout import write
@@ -420,7 +471,7 @@ def main(argv: list[str] | None = None) -> None:
         K = {k["id"]: k for k in mind.load_knowledge()}
         cape = (K.get("val-cape-2026-10-20") or {}).get("value")
         dl = labs.download()
-        mlo = ml.build(dl, cape_now=cape, y10_now=5.13)
+        mlo = ml.build(dl, cape_now=cape, y10_now=decide_y10(a.out)[0])      # v0.47: the 10-year from the run's macro.json, not a typed constant
         mlo["findings"] = ml.summary(mlo)
         if a.cmd == "ml":
             print("wrote", write(mlo, a.out, "ml.json"))
@@ -443,7 +494,8 @@ def main(argv: list[str] | None = None) -> None:
             print(f"{r['source']:10s} {'ok ' if r['ok'] else 'NO '} {cred:8s} {str(r['ms'] or ''):>6s}ms  {r['what']}  {r['note']}")
         if a.out:
             from .jsonout import write
-            print("wrote", write({"checked": __import__("datetime").datetime.utcnow().isoformat(timespec="seconds") + "Z", "sources": rows}, a.out, "connections.json"))
+            _dt = __import__("datetime")       # v0.47: utcnow() is deprecated; the same "YYYY-MM-DDTHH:MM:SSZ" string from an aware clock
+            print("wrote", write({"checked": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "sources": rows}, a.out, "connections.json"))
         return
     if a.cmd == "market":
         from . import datahub
@@ -621,7 +673,7 @@ def main(argv: list[str] | None = None) -> None:
         from . import book as bk
         from .jsonout import write
         from . import sensitivity
-        prices = bk.download(a.cache)
+        prices = _download_when_fresh(bk, a.cache, a.wait_minutes)
         o = bk.build(prices, meta={"source": "mirror download"})
         o["findings"] = bk.summary(o)
         sensitivity.attach(o, prices)                    # v0.44: the size under other models and settings; never blocks the call
@@ -636,16 +688,28 @@ def main(argv: list[str] | None = None) -> None:
     if a.cmd == "track":
         from . import book as bk, ledger, track
         from .jsonout import write
-        o = bk._clean(track.build(bk.download(a.cache), bk.treasury(), None, ledger.read()))
+        # v0.47: every candidate, not only today's book. Before, this command pulled the nine names of the book, so
+        # the "point-in-time" universe was ranked among today's survivors and the record read better than it is (holding:
+        # a worst drawdown of 44%, not 52%). The published snapshot was built from all sixteen and was not affected.
+        universe = {**bk.BOOK, **{t.upper(): 0.0 for t in track.CANDIDATES}}
+        o = bk._clean(track.build(bk.download(a.cache, book=universe), bk.treasury(), None, ledger.read()))
         print("wrote", write(o, a.out, "track.json"))
         return
     if a.cmd == "live":
+        from pathlib import Path as _P
         from . import book as bk, jsonout, ledger, track
-        v = ledger.verify()
+        v = ledger.verify(ledger.PATH)
         if not v["ok"]:
             raise SystemExit(f"the ledger fails verification: {v['problems'][:2]}")
-        L = track.live_record(ledger.read(), bk.download(a.cache), bk.treasury())
+        # v0.47: verify() passes a chain that was rewritten and rehashed, or cut short. The live.json this run is
+        # about to replace recorded yesterday's head; if today's chain no longer contains it, history changed
+        # after it was published, and the run stops before it overwrites the evidence.
+        broken = ledger.continuity(_P(a.out) / "live.json", ledger.PATH)
+        if broken:
+            raise SystemExit(f"refusing to write live.json: {broken}. The file in {a.out} is left as it was; compare ledger/calls.jsonl with git's history.")
+        L = track.live_record(ledger.read(ledger.PATH), bk.download(a.cache), bk.treasury())
         L["ledger"] = {"ok": True, "entries": v["entries"], "head": v.get("head")}
+        L["ledger_head"], L["ledger_entries"] = v.get("head"), v["entries"]
         p = jsonout.write(L, a.out, "live.json")
         print(f"{p}: {L['calls']} calls, {L['marked_days']} days marked" + (f", {L['total']:+.2%} unhedged, {L['total_hedged']:+.2%} hedged" if L.get("marked_days") else ""))
         return
@@ -809,7 +873,21 @@ def main(argv: list[str] | None = None) -> None:
         except Exception:  # noqa: BLE001
             gh = None
         from .jsonout import clean
-        o = clean(decide.build(labs.download(), cape_now=cape, y10_now=5.13, quick=a.quick, gh=gh))
+        # v0.47: the 10-year yield is the run's own (macro.json, written earlier in the same run), not a constant typed
+        # here; when that file is missing the old constant is used and labelled as assumed. The CAPE is still the
+        # knowledge base's reading, and now says which one and from what day.
+        y10, y10_note = decide_y10(a.out)
+        o = clean(decide.build(labs.download(), cape_now=cape, y10_now=y10, quick=a.quick, gh=gh))
+        notes = ((o.get("now") or {}).get("inputs") or {}).get("notes")
+        if isinstance(notes, dict):
+            if isinstance(notes.get("y10"), dict):
+                notes["y10"].update(y10_note)
+            if isinstance(notes.get("cape"), dict):
+                kc = K.get("val-cape-2026-10-20") or {}
+                notes["cape"].update({"as_of": kc.get("as_of"), "knowledge_id": kc.get("id"), "source_url": kc.get("source_url"),
+                                      "assumed": True, "note": "a dated reading from the knowledge base, not refreshed by the daily run"})
+            if gh is None:
+                notes["mirror"] = {"available": False, "note": "the GitHub mirrors did not answer; the 10-year yield history stops where Shiller's file does"}
         o["content_sha256"] = decide.content_hash(o)        # v0.42.5: the page prefers the published package when its content differs
         o["computed_utc"] = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         path = write(o, a.out, "decision.json")
@@ -991,16 +1069,21 @@ def main(argv: list[str] | None = None) -> None:
                         out[t] = prev["companies"][t]
                         if t in (prev.get("ttm") or {}) and t not in ttm:
                             ttm[t] = prev["ttm"][t]
-                        carried[t] = (prev.get("carried") or {}).get(t) or prev.get("as_of") or "an earlier run"
-            print("wrote", write({"units": "USD billions", "as_of": __import__("datetime").date.today().isoformat(), "companies": out, "ttm": ttm,
+                        carried[t] = (prev.get("carried") or {}).get(t) or str(prev.get("generated_utc") or "")[:10] or prev.get("as_of") or "an earlier run"
+            # v0.47: as_of is the date of the data (the newest quarter end among the companies), not the day the
+            # command ran; the run time is generated_utc. Before, a file of September filings carried today's date.
+            import datetime as _dt
+            ends = [str(m.get("quarter_end"))[:10] for m in ttm.values() if isinstance(m, dict) and m.get("quarter_end")]
+            print("wrote", write({"units": "USD billions", "as_of": max(ends) if ends else None,
+                                  "generated_utc": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "companies": out, "ttm": ttm,
                                   "skipped": failed, "carried": carried}, Path(a.json).parent, Path(a.json).name))
     elif a.cmd == "status":
         from .status import build_status
         from .jsonout import write
         stat = build_status(a.out)
-        print(json.dumps({k: stat[k] for k in ("ok", "generated_utc")}, indent=1))
-        for c in stat["checks"]:
-            print(("PASS " if c["ok"] else "FAIL ") + c["name"] + (f": {c['detail']}" if c["detail"] else ""))
+        print(json.dumps({k: stat[k] for k in ("ok", "failed", "warnings", "generated_utc")}, indent=1))
+        for c in stat["checks"]:      # v0.47: a warning is reported and leaves the run green; a failure turns it red (daily.yml, Status check)
+            print(("PASS " if c["ok"] else "WARN " if c.get("level") == "warn" else "FAIL ") + c["name"] + (f": {c['detail']}" if c["detail"] else ""))
         print("wrote", write(stat, a.out, "status.json"))
     elif a.cmd == "reason":
         from .jsonout import write

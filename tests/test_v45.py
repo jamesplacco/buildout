@@ -86,7 +86,7 @@ def test_names_and_what_sits_above_each_desk():
     assert ".toc a::before { content: counter(toc);" in head
     # Home says how the site is laid out, in the menu's order, and every link there is a desk
     home = body[body.index('id="view-home"'):body.index('id="view-track"')]
-    lay = home[home.index('id="hm-how-t"'):home.index('id="hm-plug-t"')]
+    lay = home[home.index('id="hm-how-t"'):home.index('class="hm-sign"')]      # v0.47: the "lean investment team" block that followed is gone
     assert "How this site is laid out" in lay and re.findall(r"<h3>(\w+)</h3>", lay) == NAMES
     _, groups, _ = _structure()
     core = {v for _, vs in groups.values() for v in vs}

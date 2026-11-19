@@ -98,6 +98,9 @@ def pit_book(prices: dict[str, pd.DataFrame], cal: pd.DatetimeIndex, candidates:
     day (the daily trades back to equal weight and each January's change of names), so the record pays for the
     rebalancing it earns from (v0.42.5; before, only the January change was counted)."""
     cands = candidates or CANDIDATES
+    missing = [t for t in cands if t not in prices]
+    if missing:          # v0.47: a candidate without prices is an error, not a smaller list: ranking the survivors alone is hindsight
+        raise ValueError("the point-in-time universe needs prices for every candidate; missing: " + ", ".join(missing))
     R = pd.DataFrame({t: bk.total_returns(prices[t]) for t in cands if t in prices}).reindex(cal)
     years = sorted({d.year for d in cal})
     mem = pit_members(prices, years, cands)
@@ -317,6 +320,15 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
 
 
 # ---------------------------------------------------------------- statistics
+def max_drawdown(x: pd.Series) -> float:
+    """The worst fall from a running peak, the starting value of 1 included (v0.47). Before, the peak began at the
+    first day's close, so a record that opened with a loss did not count it: -10% then -5% read 5%, not 14.5%."""
+    lv = (1 + x.dropna()).cumprod()
+    if not len(lv):
+        return 0.0
+    return float(1 - (lv / lv.cummax().clip(lower=1.0)).min())
+
+
 def stats(x: pd.Series, cash: pd.Series, turnover: float | None = None, F: pd.DataFrame | None = None) -> dict:
     x = x.dropna()
     if len(x) < 20:
@@ -328,7 +340,7 @@ def stats(x: pd.Series, cash: pd.Series, turnover: float | None = None, F: pd.Da
     out = {"from": str(x.index[0].date()), "to": str(x.index[-1].date()), "days": int(len(x)),
            "cagr": float(lv.iloc[-1] ** (1 / yrs) - 1), "vol": float(x.std() * math.sqrt(252)),
            "sharpe": float(ex.mean() / x.std() * math.sqrt(252)) if x.std() > 0 else None,
-           "maxdd": float(1 - (lv / lv.cummax()).min()), "hit_month": float((m > 0).mean()), "months": int(len(m)),
+           "maxdd": max_drawdown(x), "hit_month": float((m > 0).mean()), "months": int(len(m)),
            "best_month": float(m.max()), "worst_month": float(m.min()), "y2022": float((1 + x.loc["2022"]).prod() - 1) if (x.index.year == 2022).any() else None,
            "turnover_yr": turnover}
     if F is not None:
@@ -645,36 +657,49 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
 
 
 def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
-    """The ledger's calls marked to market, day by day: each call held from its effective date until the next call
-    takes over (two effective the same day: the newer governs). Two variants, as the call offers them: the book at the
-    call's size with the rest in cash, and the book at 1.00x with the call's Nasdaq-100 short. Costs: 5 bp of every
-    trade in the names (each change in size, and from v0.42.5 the daily trades that hold the target weights and the
-    target size); 1 bp of each change in the short. Written daily to site/data/live.json (buildout live)."""
+    """The ledger's calls marked to market, day by day: each call held from the first session it governs until the
+    next call takes over (two governing from the same day: the newer). Two variants, as the call offers them: the
+    book at the call's size with the rest in cash, and the top of the call's menu (the book at that row's gross,
+    1.00x when the menu reaches it, with that row's Nasdaq-100 short). Costs: 5 bp of every trade in the names (each
+    change in size, and from v0.42.5 the daily trades that hold the target weights and the target size); 1 bp of
+    each change in the short; cash plus 50 bp on anything borrowed above 1.00x, as the walk-forward charges.
+    Written daily to site/data/live.json (buildout live).
+
+    v0.47. A call governs from ledger.governs_from, not from the date it stored: the return of a day starts at the
+    close before it, so a call written after that close (a Saturday's, a holiday's, a late run's) cannot have been
+    held through it and takes over one session later. The entries this moves are listed under `restated`. The
+    hedged variant used to assume 1.00x whatever the menu's top row said, and neither variant paid to borrow."""
+    from . import ledger
     if not rows:
         return {"calls": 0, "marked_days": 0, "note": "No call logged yet."}
     P = bk.panel(prices, ust)
     rb = bk.book_returns(P["R"], pd.Series(bk.BOOK))
-    first = pd.Timestamp(rows[0]["effective_from"])
+    gov = [ledger.governs_from(r) for r in rows]
+    first = pd.Timestamp(min(gov))
     x = rb[rb.index >= first].dropna()
-    base = {"calls": len(rows), "first_call": rows[0]["ts_utc"], "first_effective": rows[0]["effective_from"]}
+    moved = ledger.restated(rows)
+    base = {"calls": len(rows), "first_call": rows[0]["ts_utc"], "first_effective": min(gov), "restated": moved,
+            "convention": "a call governs from the session after the first close that follows its writing (ledger.governs_from)"}
     if not len(x):
         return {**base, "marked_days": 0, "note": "Calls logged; no price after the first call's effective date yet."}
     def path(key):
-        s = pd.Series([float(key(r)) for r in rows], index=[pd.Timestamp(r["effective_from"]) for r in rows])
+        s = pd.Series([float(key(r)) for r in rows], index=[pd.Timestamp(g) for g in gov])
         return s.groupby(level=0).last().reindex(x.index, method="ffill")
     size = path(lambda r: r["call"]["size"])
     short = path(lambda r: (r["call"].get("menu_high") or {}).get("short") or 0.0)
+    gh = path(lambda r: (r["call"].get("menu_high") or {}).get("gross") or 1.0)          # the gross the menu's top row holds
     cash = P["cash"].reindex(x.index).fillna(0.0)
     qx = (P["E"]["QQQ"].reindex(x.index) - cash).fillna(0.0)
     tn = book_turnover(P["R"], pd.Series(bk.BOOK)).reindex(x.index).fillna(0.0)      # v0.42.5: the daily trades back to the target weights
-    g_unh = size * x + (1 - size) * cash
+    borrow = COST["borrow_spread"] / 252
+    g_unh = size * x + (1 - size) * cash - (size - 1).clip(lower=0) * borrow
     d_size = (size - size.shift(1) * (1 + x.shift(1)) / (1 + g_unh).shift(1)).abs().fillna(size.iloc[0])
     unh = g_unh - (d_size + size * tn) * COST["stock_bp"] / 1e4
-    g_hed = x - short * qx
+    g_hed = gh * x + (1 - gh) * cash - (gh - 1).clip(lower=0) * borrow - short * qx
     nav1 = (1 + g_hed).shift(1)
-    d_one = (1 - (1 + x.shift(1)) / nav1).abs().fillna(1.0)
+    d_one = (gh - gh.shift(1) * (1 + x.shift(1)) / nav1).abs().fillna(gh.iloc[0])
     d_short = (short - short.shift(1) * (1 + qx.shift(1) + cash.shift(1)) / nav1).abs().fillna(short.iloc[0])
-    hed = g_hed - d_short * COST["fut_bp"] / 1e4 - (d_one + tn) * COST["stock_bp"] / 1e4
+    hed = g_hed - d_short * COST["fut_bp"] / 1e4 - (d_one + gh * tn) * COST["stock_bp"] / 1e4
     nav = lambda r: (1 + r).cumprod()
     q_tot = float((1 + P["E"]["QQQ"].reindex(x.index).fillna(0.0)).prod() - 1)
     return {**base, "marked_days": int(len(x)), "last_mark": str(x.index[-1].date()),

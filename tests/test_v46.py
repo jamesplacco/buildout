@@ -98,7 +98,7 @@ def test_the_node_graphs_stack_by_their_own_width():
 def test_version_and_notes():
     import buildout
     assert buildout.__version__ >= "0.46.0"
-    assert '["v0.46", "Nov 16, 2026"' in (SRC / "reference.js").read_text() and "Version 0.46:" in (ROOT / "CHANGELOG.md").read_text()
+    assert '["v0.46", "Nov 17, 2026"' in (SRC / "reference.js").read_text() and "Version 0.46:" in (ROOT / "CHANGELOG.md").read_text()
     for p in ("tests/test_v46.py", "site/src/guide.js", "site/src/views.js"):
         low = (ROOT / p).read_text().lower()
         for b in (chr(0x2014), "inter" "section", "load" "-bearing"):

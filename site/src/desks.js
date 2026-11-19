@@ -36,8 +36,13 @@
       const st = h("td");
       st.append(h("span", "stage mk " + (r.stage || ""), r.coverage === "interest_uncovered" ? "Interest not covered" : r.coverage === "funding_gap" ? `Funding gap ${B$(r.funding_gap, 0)}` : r.coverage === "self_funded" ? "Self-funded" : "n/a"));
       if (r.refreshed) st.append(h("small", null, ` new filing to ${isoNice(r.quarter_end)}`));
-      if (fin(r.gap_cover_years)) st.title = `Cash on hand covers ${fx(r.gap_cover_years, 1)} years of the gap at this rate; debt maturities are not modelled.`;
-      tr.append(th, td(B$(r.revenue)), td(B$(r.ocf)), td(B$(r.capex)), td(B$(r.fcf), r.fcf < 0), td(pct0(r.capex_to_ocf), r.capex_to_ocf > 1), g, td(pct0(r.nonop_share), r.nonop_share > 0.3), (() => { const c = td(B$(r.net_cash), r.net_cash < 0); if (r.debt_secondary) { c.append(h("small", "ttl", " secondary")); c.title = r.debt_secondary; } else if (r.debt_date && r.cash_date && r.debt_date !== r.cash_date) { c.append(h("small", "ttl", ` debt ${isoNice(r.debt_date)}`)); c.title = `Debt as of ${isoNice(r.debt_date)} against cash as of ${isoNice(r.cash_date)}: mixed dates.`; } return c; })(), st);
+      if (fin(r.gap_cover_years)) st.title = `Cash on hand covers ${fx(r.gap_cover_years, 1)} years of the gap at this rate; debt maturities are not modeled.`;
+      tr.append(th, td(B$(r.revenue)), td(B$(r.ocf)), td(B$(r.capex)), td(B$(r.fcf), r.fcf < 0), td(pct0(r.capex_to_ocf), r.capex_to_ocf > 1), g, td(pct0(r.nonop_share), r.nonop_share > 0.3), (() => { const c = td(fin(r.net_cash) ? B$(r.net_cash) : "n/a", r.net_cash < 0);
+        // v0.47: a debt or cash figure that is not this quarter's is named with its date, whichever of the two it is
+        const off = fin(r.net_cash) ? [["debt", r.debt_date], ["cash", r.cash_date]].filter(([, d]) => d && !nearQuarter(d, r.quarter_end)) : [];
+        if (r.debt_secondary) { c.append(h("small", "ttl", " secondary")); c.title = r.debt_secondary; }
+        else if (off.length) { c.append(h("small", "ttl", " " + off.map(([k, d]) => `${k} ${isoNice(d)}`).join(", "))); c.title = `${off.map(([k, d]) => `${k.charAt(0).toUpperCase() + k.slice(1)} as of ${isoNice(d)}`).join(" and ")}, against a quarter ending ${isoNice(r.quarter_end)}: mixed dates.`; }
+        return c; })(), st);
       tb.append(tr);
     });
     tbl.replaceChildren(thead, tb);
@@ -45,7 +50,10 @@
     const nv = fundRow("NVDA"), ts = fundRow("TSLA"), ms = fundRow("MSFT"), oc = fundRow("ORCL"), cw = fundRow("CRWV");
     const note = $("#fu-note");
     note.replaceChildren();
-    note.append(document.createTextNode(`The five builders: capex ${B$(cx, 0)} against operating cash flow of ${B$(ocf, 0)} (${pct0(cx / ocf)}); next-fiscal-year guidance adds up to about ${B$(guide, 0)} (a mixed basis: Microsoft's fiscal 2027 to June and Oracle's to May beside three calendar-2026 guides; the four hyperscalers' calendar-2026 guides alone are about $725B). Microsoft also took on ${B$(ms.leases)} of finance leases, which are capex by another name. Nvidia, the main supplier, spends ${pct0(nv.capex_to_ocf)} of its ${B$(nv.ocf, 0)} cash flow; Tesla ${pct0(ts.capex_to_ocf)}. Supplements the standard tags miss: ${oc.notes} ${cw.notes} `));
+    // v0.47: the headline sentence is written from the same table, so it cannot quote an older total than the note under it
+    const lede = $("#fu-lede");
+    if (lede && fin(cx) && fin(ocf) && ocf > 0) lede.textContent = `Five builders spent ${B$(cx, 0)} on capex in the last twelve months against ${B$(ocf, 0)} of operating cash flow${fin(guide) && guide > ocf ? ", and their next-year guidance adds up to more than that cash flow" : ""}. The set is the AI builders, not the book: CoreWeave is covered and is not held, and Broadcom, which is held, is not covered. Underneath: cash coverage from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.`;
+    note.append(document.createTextNode(`The five builders (Microsoft, Alphabet, Amazon, Meta, Oracle): capex ${B$(cx, 0)} against operating cash flow of ${B$(ocf, 0)} (${pct0(cx / ocf)}); next-fiscal-year guidance adds up to about ${B$(guide, 0)} (a mixed basis: Microsoft's fiscal 2027 to June and Oracle's to May beside three calendar-2026 guides; the railway test above uses the four hyperscalers' calendar-2026 guides alone). Microsoft also took on ${B$(ms.leases)} of finance leases, which are capex by another name. Nvidia, the main supplier, spends ${pct0(nv.capex_to_ocf)} of its ${B$(nv.ocf, 0)} cash flow; Tesla ${pct0(ts.capex_to_ocf)}. Supplements the standard tags miss: ${oc.notes} ${cw.notes} `));
     const s = srcLink(SRC5.secapi), c = srcLink(SRC5.crwv), e = srcLink(SRC5.sec);
     [e, s, c].forEach((x, i) => { if (i) note.append(document.createTextNode(" · ")); note.append(x); });
     const newer = FUND.rows.filter((r) => r.refreshed);
@@ -58,7 +66,7 @@
     const all = FUND.rows.filter((r) => r.stage);
     [["hedge", "Cash flow covers capex", "A year of operating cash flow pays for a year of the build and the interest."],
       ["speculative", "Capex exceeds cash flow", "Interest is covered but the build needs cash on hand, asset sales, leases or new debt. A funding gap, not distress."],
-      ["ponzi", "Interest not covered", "Operating income below interest, or negative cash flow. Survival leans on refinancing; maturities are not modelled here."]].forEach(([k, t, d]) => {
+      ["ponzi", "Interest not covered", "Operating income below interest, or negative cash flow. Survival leans on refinancing; maturities are not modeled here."]].forEach(([k, t, d]) => {
       const col = h("div");
       col.append(h("h3", null, t), h("p", null, d));
       const who = h("div", "who");
@@ -211,7 +219,7 @@
   }
 
   /* ============================== PHYSICS ============================== */
-  const PH = { capex: 770, cost: 45, load: 0.8 };   // capex: the five builders' latest reported quarter, annualised (Fundamentals desk)
+  const PH = { capex: 770, cost: 45, load: 0.8 };   // capex: the five builders' latest reported quarter, annualized (Fundamentals desk)
   function buildPhysics() {
     const bind = (id, k) => { const el = $(id); if (!el) return; el.value = String(PH[k]); el.addEventListener("input", () => { PH[k] = Number(el.value); guard("Watts calculator", updatePhysics, $("#ph-out")); }); };
     bind("#ph-capex", "capex"); bind("#ph-cost", "cost"); bind("#ph-load", "load");

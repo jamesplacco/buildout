@@ -70,8 +70,16 @@ def _hedges(out: Path) -> None:
     post = [s["prior"] for s in reasoner.SCENARIOS]
     sizes = {h["id"]: h["default"] for h in hedgebook.HEDGES}
     sizes.update(snap.get("hedges_default", {}).get("sizes", {}))
-    _write(out, "hedges.json", {"catalog": hedgebook.catalog(), "advisor_prior_odds": hedgebook.advisor(sizes, 1.0, post),
-                                "assumed": hedgebook.ASSUMED})
+    # v0.47: the options are priced at the market levels of this run's macro.json (the VIX, the Nasdaq-100's implied
+    # volatility, the long yield, cash), not at reasoner.DEFAULTS; a level that is missing keeps its default and
+    # says so (inputs[level].assumed). Before, the file priced a VIX call spread at a VIX of 18 on a day it was 25.
+    try:
+        macro = json.loads((out / "macro.json").read_text())
+    except (OSError, ValueError):
+        macro = None
+    P, levels = hedgebook.market_params(macro)
+    _write(out, "hedges.json", {"catalog": hedgebook.catalog(P), "advisor_prior_odds": hedgebook.advisor(sizes, 1.0, post, P),
+                                "assumed": hedgebook.ASSUMED, "inputs": levels, "inputs_assumed": any(v["assumed"] for v in levels.values())})
 
 
 def _ooda(out: Path) -> None:
@@ -146,7 +154,7 @@ REGISTRY: list[Engine] = [
            "Accounting quality, reverse DCF, base rates, irrationality and why, per position", _valuation),
     Engine("causal", "Causal statistics", ["brain.json"], ["causal.json"], "causal_stats.py", True,
            "Granger, partial correlations, crisis behaviour, tail dependence, lead-lag", _causal),
-    Engine("hedges", "Hedge book", [], ["hedges.json"], "hedgebook.py", True, "Prebuilt hedges, priced and run through the scenarios; the advisor", _hedges),
+    Engine("hedges", "Hedge book", ["macro.json"], ["hedges.json"], "hedgebook.py", True, "Prebuilt hedges, priced at the run's market levels and run through the scenarios; the advisor", _hedges),
     Engine("ooda", "Decision loop", ["macro.json", "research.json", "brain.json", "capex.json", "report.json"], ["ooda.json"], "ooda.py", True,
            "Observe, orient, decide, act: one decision record per position and hedge", _ooda),
     Engine("mind", "The mind", ["atlas.json", "labs.json", "research.json", "ml.json", "reality.json"], ["mind.json"], "mind.py", True,

@@ -143,9 +143,10 @@ def test_a_bad_pull_stops_the_book(tmp_path):
     good = pd.DataFrame({"date": d.strftime("%Y-%m-%d"), "open": 10.0, "high": 10.5, "low": 9.5, "close": np.linspace(10, 12, 60), "volume": 1e6})
     for f in files:
         good.to_csv(tmp_path / f"{f}.csv", index=False)
-    assert len(bk.download(tmp_path)) == len(files) and bk.LAST_VALIDATION["ok"]
+    now = d[-1] + pd.Timedelta(days=1, hours=15)              # v0.47: staleness is measured against the clock, so the test supplies it
+    assert len(bk.download(tmp_path, now=now)) == len(files) and bk.LAST_VALIDATION["ok"]
     bad = pd.concat([good, good.tail(1)])                     # a duplicated last bar
     bad.to_csv(tmp_path / f"{files[0]}.csv", index=False)
     with pytest.raises(ValueError, match="duplicate_dates"):
-        bk.download(tmp_path)
+        bk.download(tmp_path, now=now)
     assert len(bk.download(tmp_path, validate=False)) == len(files)

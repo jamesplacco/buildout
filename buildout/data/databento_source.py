@@ -42,6 +42,21 @@ def session_filter(bars: pd.DataFrame, min_rel_volume: float = 0.10) -> tuple[pd
     return bars.loc[keep].copy(), [t.strftime("%Y-%m-%d") for t in sorted(drop)]
 
 
+def final_bar_warning(newest, dropped: list[str]) -> dict | None:
+    """When the newest bar in a pull was dropped by session_filter although the exchange held a session that day: the
+    date, and what it means. None when the newest bar was kept, or was a weekend or holiday sliver (dropped rightly)."""
+    if newest is None or pd.isna(newest):
+        return None
+    d = pd.Timestamp(newest).strftime("%Y-%m-%d")
+    if d not in set(dropped):
+        return None
+    from .. import sessions
+    if not sessions.is_session(d):
+        return None
+    return {"date": d, "note": f"the newest bar ({d}) had under a tenth of normal volume and was dropped as a non-session, but the exchange was open: "
+                               "the pull looks partial, and the data ends one session earlier than it should"}
+
+
 def _range_bound(rng: dict, key: str, schema: str | None = None) -> pd.Timestamp:
     """Read 'start' or 'end' from metadata.get_dataset_range, which may also carry per-schema ranges
     and, in older API versions, 'start_date'/'end_date' keys."""
@@ -166,6 +181,17 @@ class DatabentoSource:
         return float(self.hist.metadata.get_cost(dataset=ds, symbols=list(symbols), schema=schema,
                                                  start=start, end=self.resolve_end(ds, end, schema)))
 
+    # ---- retries (v0.47) --------------------------------------------------------------------------
+    RETRIES, RETRY_BACKOFF = 3, 2.0
+
+    def _call(self, fn):
+        """One vendor call with retries on transient failures (5xx, 429, timeouts); each retry is kept in self.retried."""
+        from . import http
+        if not hasattr(self, "retried"):
+            self.retried = []
+        return http.with_retries(fn, tries=self.RETRIES, backoff=self.RETRY_BACKOFF, sleep=getattr(self, "_sleep", http.time.sleep),
+                                 on_retry=lambda n, exc: self.retried.append(f"try {n}: {type(exc).__name__}: {exc}"[:160]))
+
     # ---- equities --------------------------------------------------------------------------------
     def raw_daily_bars(self, symbols: list[str], start: str, end: str | None = None) -> pd.DataFrame:
         ds = self.equities_dataset_for(start)
@@ -175,9 +201,9 @@ class DatabentoSource:
         if self.cache is not None and (hit := self.cache.get(key)) is not None:
             return hit
         self.dataset_used = ds
-        store = self.hist.timeseries.get_range(dataset=ds, schema="ohlcv-1d", symbols=list(symbols),
-                                               start=start, end=end, stype_in="raw_symbol")
-        df = store.to_df().reset_index()
+        # v0.47: a gateway timeout (504) is retried with backoff before the run gives up or falls back
+        df = self._call(lambda: self.hist.timeseries.get_range(dataset=ds, schema="ohlcv-1d", symbols=list(symbols),
+                                                               start=start, end=end, stype_in="raw_symbol").to_df().reset_index())
         df["date"] = _naive_date(df["ts_event"])
         out = df[["date", "symbol", "open", "high", "low", "close", "volume"]].copy()
         if self.cache is not None:
@@ -217,9 +243,16 @@ class DatabentoSource:
                 info["former_ticker"][sym] = {"from": old, "until": until, "rows": int(len(prev)), "first": prev["date"].min().strftime("%Y-%m-%d")}
             except Exception as exc:          # the name then starts at its own ticker's first day, and the report says so
                 info["former_ticker"][sym] = {"from": old, "until": until, "rows": 0, "error": f"{type(exc).__name__}: {exc}"[:200]}
+        newest = bars["date"].max() if len(bars) else None
         bars, dropped = session_filter(bars)
         info["non_session_dates_dropped"] = {"count": len(dropped), "weekend": int(sum(pd.Timestamp(x).day_of_week >= 5 for x in dropped)),
                                              "first": dropped[:3], "last": dropped[-3:]}
+        # v0.47: the filter cannot tell a holiday's after-hours sliver from a partial pull of a real session. When the
+        # newest bar the vendor sent is dropped and its date is an exchange session, the data ends a day earlier than
+        # it should, and the report says so instead of quietly moving its date back.
+        info["final_bar_dropped"] = final_bar_warning(newest, dropped)
+        if getattr(self, "retried", None):
+            info["retries"] = list(self.retried)
         self.cleaning = info
         return bars.sort_values(["date", "symbol"]).reset_index(drop=True)
 
@@ -255,7 +288,7 @@ class DatabentoSource:
         """adjustments: "databento" (paid reference factors, strict), "public" (the free split table in
         corporate_actions.py), or "auto" (Databento's factors when the account has them, else the public table).
         self.adjustments_used records which one applied; bond-fund income is added later, where FRED is loaded."""
-        from .corporate_actions import PENDING, split_factors
+        from .corporate_actions import jump_message, split_factors, unexplained_jumps
         if adjustments not in ("auto", "databento", "public"):
             raise ValueError(f"data.adjustments must be auto, databento or public, not {adjustments!r}")
         bars = self.daily_bars(symbols, start, end)
@@ -275,21 +308,17 @@ class DatabentoSource:
         if not done and adjustments in ("auto", "public"):
             closes = apply_factors(closes, split_factors(symbols))
             self.adjustments_used = "public"
-        jumps = closes.pct_change(fill_method=None).abs() > 0.45
-        if jumps.any().any():
-            bad = {c: list(closes.index[jumps[c]].strftime("%Y-%m-%d")) for c in closes if jumps[c].any()}
-            hint = "; ".join(f"{k}: {v}" for k, v in PENDING.items() if k in bad)
-            raise ValueError(f"Daily moves above 45% look like unadjusted corporate actions: {bad}. "
-                             f"Add the split to SPLITS in buildout/data/corporate_actions.py.{(' Pending: ' + hint) if hint else ''}")
+        bad = unexplained_jumps(closes)          # v0.47: a fall beyond 30% or a rise beyond 45% (was 45% either way)
+        if bad:
+            raise ValueError(jump_message(bad))
         return closes
 
     # ---- Treasury futures ------------------------------------------------------------------------
     def futures_daily(self, roots: list[str], start: str, end: str | None = None) -> pd.DataFrame:
         symbols = [f"{r}.v.{k}" for r in roots for k in (0, 1)]
-        store = self.hist.timeseries.get_range(dataset=self.futures_dataset, schema="ohlcv-1d", symbols=symbols,
-                                               stype_in="continuous", start=start,
-                                               end=self.resolve_end(self.futures_dataset, end))
-        df = store.to_df().reset_index()
+        end = self.resolve_end(self.futures_dataset, end)
+        df = self._call(lambda: self.hist.timeseries.get_range(dataset=self.futures_dataset, schema="ohlcv-1d", symbols=symbols,
+                                                               stype_in="continuous", start=start, end=end).to_df().reset_index())
         df["date"] = _naive_date(df["ts_event"])
         return df[["date", "symbol", "instrument_id", "close", "volume"]]
 

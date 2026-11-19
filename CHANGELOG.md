@@ -3,6 +3,92 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.47: an audit of everything, and what it changed. Four independent reviews (the math that sets the call;
+the ledger, the marked record and the paper bot; the data pipeline and the workflows; every number the pages and the
+README state) were run against the code and the published files, each finding reproduced before it was fixed.
+**The call is unchanged**: on the same prices the engine returns 0.533066x with the drawdown cap binding, before
+and after. **The walk-forward record is unchanged**: rebuilt through Nov 17 on the fixed code, every policy matches
+to four decimals (the call's Sharpe 0.78, worst drawdown 23%). What did change is listed here, with its size.
+
+The record:
+
+- **A call is marked from the first close after it was written.** The ledger stamped the effective date from the
+  UTC calendar day, so a call written on a Saturday (or after the close) was marked from Friday's close, a price
+  that came before it. Two of twelve entries (5 and 10) were affected. New entries store the causal date; old
+  lines are never edited, so `ledger.governs_from` puts each in force where its write time allows and `live.json`
+  lists the two that moved (`restated`). The live record: -2.4136% restated to -2.4084% (half a basis point).
+- **The chain is anchored outside the repository.** `verify` detects an edit that was not rehashed; it could not
+  show that the whole chain had not been rewritten, since whoever can push can rehash. The daily run now signs the
+  SHA-256 of `ledger/calls.jsonl` and writes it to Sigstore's public transparency log (`gh attestation verify
+  ledger/calls.jsonl --repo jamesplacco/buildout`). `verify` also checks that data dates advance, that no entry is
+  stamped in the future and that every effective date is a session, and `live` refuses to overwrite a `live.json`
+  whose ledger head is no longer in the chain. The docstring says what the chain proves and what it does not.
+- **The paper account's first fill is corrected, in dollars.** Its only fill (Nov 11) was priced at the Nov 10
+  close, a price older than the order. Nothing chained is rewritten: the next pass appends a correction record that
+  debits $379.90 (equity $98,262.56 to $97,882.66, -1.74% to -2.12%), and `paper.json` carries it.
+- **The paper bot follows the call.** Its only trigger was a 2%-of-equity band per name, so the largest name needed
+  the size to move about 0.14x before anything traded: any call from 0.36x to 0.62x produced no order. It now also
+  rebalances when the whole book is more than 1% of equity from the call, and plans on the call that governs the
+  session the fill is held through, as `live.json` does. The evidence gate counts exchange sessions closed with a
+  position after a fill made under that rule (0 today, not 6 pass dates).
+- **The bond-hedge flag reads today's regime.** It was "on" only if a nine-year statistic crossed a line; it now
+  follows the book's stock-bond state and logs the state and the ratio. Today: off, as before.
+- **The record and the tear sheet are rebuilt every day.** Both were made by hand at each release and read Nov 5 on
+  Nov 18. The daily run now writes `track.json` and `site/tearsheet.pdf`; the page reads the daily record and keeps
+  the release studies (the universe checks, the deep RL sizer, the VIX study) under their own date. The tear sheet
+  is redrawn: the headline figures against holding, growth on a log scale, drawdowns, the months, and the line that
+  the short's 0.94 is the nine names beating the index.
+- **`buildout track` ranked the universe among today's survivors.** The command downloaded the nine names of the
+  book, so "chosen point in time each January" was chosen among names that are large today, and holding read a
+  worst drawdown of 44%, not 52%. The published record was built from all sixteen candidates and was not affected;
+  the command now pulls every candidate and a missing one is an error.
+
+The math (none of it moves the size):
+
+- **Scenarios had the AI shock upside down.** The "AI beyond the Nasdaq-100" move was put on semiconductors net of
+  the index, a factor this book loads on negatively, so an AI sell-off raised the book. It now loads on the book's
+  own return beyond the index. "AI capex digestion": -13.9% to -30.0%; "AI melt-up": +7.6% to +25.0%.
+- **Hedge tables charge financing** (cash plus 100 bp on the overlay), as the backtester always did; a static 30%
+  bond position's "return per year" goes from -0.2% to about -1.3%.
+- **The cross-check run sized on its own past return.** `report.json`'s drawdown cap and Kelly used the book's
+  in-sample mean (19% a year on names chosen in 2026) as drift; they now use cash plus 5% times beta, as the call
+  does: 0.54x to about 0.50x, Kelly 0.39 to about 0.15. The old figures are kept beside them, labelled.
+- **"Cash only" had a Sharpe ratio of 0.31**: rounding noise divided by rounding noise. Zero, with no PSR or DSR.
+- A missing yield made the cap solver return 0.00x silently: it now raises. The size is a function of the data
+  date (yields are cut at the prices' date; two runs on one day gave 0.5249 and 0.5271). Drawdowns count a fall
+  from the first dollar; the plateau Sharpe is over cash; the VIX roll cost was charged at a twelfth; hedge prices
+  read today's VIX and yields, not typed constants (the call spread: 1.70 points to about 4.2).
+
+The data and the workflows:
+
+- **Fundamentals showed balance-sheet figures up to fourteen years old** under the current quarter (Amazon's cash
+  from 2017, Tesla's from 2012). Figures are read at the quarter end or shown as missing.
+- **The call's prices are checked against the clock and a second source.** Staleness was measured against the
+  newest date inside the pull, so a mirror frozen for a month passed. It is now the last completed session; a name
+  behind the others, an unexplained move beyond a split-sized line, or a newest close more than 1% from the second
+  source stops the call, and the result is published in `book.json`. The second source is Yahoo, which the mirror
+  is built from, so it catches a broken copy, not a wrong original; that is stated.
+- **A run can no longer publish half of two runs.** The commit step merged generated JSON on a concurrent push and
+  on Nov 11 left conflict markers in `status.json`. It now places its own files whole on top of main, and commits
+  nothing if another run already published a ledger line.
+- **Failures are loud.** Freshness and sanity checks fail the run and reach the alert issue (one false alarm,
+  a rounding tolerance, is fixed); the alert closes itself on recovery; `engine` exits non-zero when an engine
+  fails; a fallback to another price source is recorded and flagged; Databento calls retry.
+- **The schedule is described as it runs.** Every page said 11:17 UTC, before the open; no run has started before
+  the open (GitHub starts them 5 to 9 hours late). The pages say so, and a run that does start on time waits for
+  the price mirror's morning refresh.
+
+The pages:
+
+- The front page shows the call in force today (it showed tomorrow's as "in force" after 7 pm New York); fourteen
+  links that fell back to Home resolve; the correlation label names the series it prints; figures from the
+  Databento cross-check run are labelled as not the call's; desks that show a release snapshot say so and give its
+  date; the README is a front door of about 150 lines, with the reference moved to `docs/REFERENCE.md`.
+- Tests: `tests/test_v47_record.py`, `test_v47_math.py`, `test_v47_ops.py`, `test_v47_track.py`.
+
+Not done, and why: the run still starts mid-session (moving it needs a scheduler other than GitHub's, or a price
+source that publishes at the close); the futures workflow's fix (smaller requests, retries) has not run yet.
+
 Version 0.46: a layout to find your way around. Where things sit changed; what they say did not. No desk was
 removed, no number changed, and the call is unchanged.
 

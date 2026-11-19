@@ -14,7 +14,8 @@ engine refuses unadjusted prices, because a 10-for-1 split reads as a 90% crash.
   3. Stock dividends are left out (price return). For this book they are small (0 to 1.3% a year) and barely move
      daily betas or correlations; the report says so.
 
-The 45% one-day jump guard still runs after this, so a split missing from the table stops the run by name.
+The split guard (a one-day fall beyond 30% or rise beyond 45%, unexplained_jumps below) still runs after this, so a
+split missing from the table stops the run by name.
 """
 from __future__ import annotations
 
@@ -47,6 +48,49 @@ FORMER_TICKER = {"META": ("FB", "2022-06-09")}                    # the same com
 BOND_INCOME = {"TLT": ("DGS20", 0.0015), "IEF": ("DGS7", 0.0015)}
 
 PRICE_ONLY_NOTE = "public split table; stock dividends excluded (price return); bond-fund income estimated from Treasury yields"
+
+
+# The split guard (v0.47). After adjustment, a one-day fall beyond SPLIT_GUARD_DOWN or a rise beyond SPLIT_GUARD_UP is
+# treated as a corporate action nobody recorded, and stops the run by name. A forward split is a fall (2-for-1 is -50%,
+# 3-for-2 is -33%); a reverse split is a rise of 100% or more. Before, one symmetric 45% line let a 2-for-1 through on
+# any day the stock itself rose 10% (-44.5%), and every 3-for-2. The lines sit outside every genuine one-day move of
+# the book's names and factor funds since 2016 (largest fall: Meta -26.4% on Feb 3, 2022; largest rise: Oracle +35.9%
+# on Sep 10, 2025). A genuine move beyond them is possible: once checked against the company's own news it is listed
+# in CONFIRMED_MOVES and the run goes on. Failing closed costs a day; sizing a book on a phantom -50% costs more.
+SPLIT_GUARD_DOWN = 0.30
+SPLIT_GUARD_UP = 0.45
+CONFIRMED_MOVES: dict[str, tuple[str, ...]] = {}       # symbol: ("YYYY-MM-DD", ...) genuine moves beyond the guard, verified by hand
+
+
+def unexplained_jumps(closes: pd.DataFrame, down: float = SPLIT_GUARD_DOWN, up: float = SPLIT_GUARD_UP,
+                      confirmed: dict | None = None) -> dict[str, list[dict]]:
+    """One-day moves in adjusted closes that look like an unrecorded corporate action: {symbol: [{date, change,
+    looks_like}]}. `closes` is indexed by date, one column a symbol; `looks_like` names the standard split the ratio
+    is nearest ('2:1', '3:2', '1:10') when there is one."""
+    from .validate import match_split
+    ok = CONFIRMED_MOVES if confirmed is None else confirmed
+    out: dict[str, list[dict]] = {}
+    for sym in closes.columns:
+        s = closes[sym].astype(float).dropna()
+        r = s / s.shift(1) - 1.0
+        bad = r[(r < -down) | (r > up)]
+        skip = set(ok.get(str(sym).upper(), ())) | set(ok.get(str(sym), ()))
+        rows = [{"date": d.strftime("%Y-%m-%d"), "change": float(v), "looks_like": match_split(1.0 + float(v), tol=0.15)}
+                for d, v in bad.items() if d.strftime("%Y-%m-%d") not in skip]
+        if rows:
+            out[str(sym)] = rows
+    return out
+
+
+def jump_message(bad: dict[str, list[dict]]) -> str:
+    """The error text for unexplained_jumps: every move by name and date, what it looks like, and what to do."""
+    parts = []
+    for sym, rows in bad.items():
+        parts.append(f"{sym}: " + ", ".join(f"{r['date']} {r['change']:+.0%}" + (f" (a {r['looks_like']} split?)" if r["looks_like"] else "") for r in rows[:5]))
+    hint = "; ".join(f"{k}: {v}" for k, v in PENDING.items() if k in bad)
+    return ("One-day moves beyond the split guard look like unadjusted corporate actions: " + "; ".join(parts)
+            + ". Add the split to SPLITS in buildout/data/corporate_actions.py, or, if the move is genuine, the date to CONFIRMED_MOVES."
+            + (f" Pending: {hint}" if hint else ""))
 
 
 def split_factors(symbols, splits: dict | None = None) -> pd.DataFrame:

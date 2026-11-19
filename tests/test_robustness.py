@@ -92,10 +92,10 @@ def test_status_flags_synthetic_stale_and_broken_outputs(world, tmp_path):
     st = build_status(tmp_path, now=as_of)
     by = {c["name"]: c for c in st["checks"]}
     assert by["Correlations are within -1 and 1"]["ok"] and by["Treasury curve has at least 8 tenors"]["ok"]
-    assert by["FRED data is at most 3 weekdays old"]["ok"]
+    assert by["FRED data is at most 2 sessions behind the last completed one"]["ok"]       # v0.47: counted in exchange sessions, not weekdays
     assert not by["Book run used market data, not the synthetic test market"]["ok"] and st["ok"] is False
     stale = build_status(tmp_path, now=as_of + pd.Timedelta(days=14))
-    assert not {c["name"]: c for c in stale["checks"]}["FRED data is at most 3 weekdays old"]["ok"]
+    assert not {c["name"]: c for c in stale["checks"]}["FRED data is at most 2 sessions behind the last completed one"]["ok"]
     (tmp_path / "capex.json").write_text('{"companies": ')           # truncated file
     broken = build_status(tmp_path, now=as_of)
     assert broken["files"]["capex.json"]["valid"] is False

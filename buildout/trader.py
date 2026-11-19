@@ -60,7 +60,7 @@ def _effective(call: dict) -> str | None:
         rows = ledger.read()
         for r in reversed(rows):
             if r.get("call", {}).get("asof") == call.get("asof") or r.get("data_asof") == call.get("asof"):
-                return r.get("effective_from")
+                return ledger.governs_from(r)              # v0.47: the session it governs, not the date it stored
     except Exception:  # noqa: BLE001
         return None
     return None
@@ -153,13 +153,69 @@ def _approved(tid: str, M: md.Mandate, now: datetime, mode: str | None = None) -
 
 
 # ---------------------------------------------------------------- the evidence gate (v0.42.4)
-PAPER_DAYS_REQUIRED = 60            # trading days the public paper bot has held a position, marked daily
+PAPER_DAYS_REQUIRED = 60            # exchange sessions the public paper bot has closed holding a position, after its first causal fill
 LIVE_MANUAL_TICKETS_REQUIRED = 5    # live tickets filled after the person approved that ticket's id
+
+
+def paper_sessions_held(paper_dir: Path) -> tuple[int, str | None]:
+    """(sessions, first causal fill): the exchange sessions the paper account closed holding a position, counted
+    after the session of its first causal fill (v0.47). A causal fill is one made at a close that came after its
+    order (the v0.42.5 convention; its entry in the fills log says so and carries the session). A session counts
+    when the account's own equity path has a mark for it, the exchange was open, and the fills log shows shares
+    held at that close. Before, the count was of the dates the trader ran: a Saturday pass counted, so did the day
+    of a fill priced before its order, and a week with a holiday counted five."""
+    from . import sessions
+    paper_dir = Path(paper_dir)
+
+    def jsonl(p: Path) -> list[dict]:
+        if not p.exists():
+            return []
+        out = []
+        for line in p.read_text().splitlines():
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(r, dict):
+                out.append(r)
+        return out
+
+    moves, causal = [], []                               # (session, signed shares) for every fill; the causal fills' sessions
+    for e in jsonl(paper_dir / "fills.jsonl"):
+        if e.get("status") not in ("filled", "partially_filled"):
+            continue
+        for f in e.get("fills", []):
+            day = str(f.get("session") or e.get("ts_utc", ""))[:10]
+            try:
+                q = float(f.get("quantity") or 0) * (1.0 if f.get("side") == "buy" else -1.0)
+            except (TypeError, ValueError):
+                continue
+            moves.append((day, q))
+            if e.get("convention") and f.get("session"):
+                causal.append(str(f["session"])[:10])
+    first = min(causal, default=None)
+    if first is None:
+        return 0, None
+    try:
+        hist = json.loads((paper_dir / "paper_account.json").read_text()).get("equity_history") or []
+    except (OSError, ValueError, AttributeError):
+        hist = []
+    days = set()
+    for h in hist:
+        try:
+            d = str(h[0])[:10]
+            ok = d > first and sessions.is_session(d)
+        except (TypeError, ValueError, IndexError):
+            continue
+        if ok and sum(q for day, q in moves if day <= d) > 1e-9:
+            days.add(d)
+    return len(days), first
 
 
 def evidence(paper_dir: Path | None = None, private_dir: Path | None = None) -> dict:
     """Has unattended live trading been earned? Two records, both read from files the trader itself writes:
-      1. the paper bot (paper/, committed by the daily run): days marked since its first filled ticket;
+      1. the paper bot (paper/, committed by the daily run): exchange sessions closed holding a position, after its
+         first causal fill (paper_sessions_held);
       2. the live route (private/): tickets filled through a live broker after an approval of that ticket's id.
     Until both are met, a live broker trades in manual mode whatever the mandate says. The thresholds are constants
     in this file on purpose: changing them is a code change, visible in the repository's history."""
@@ -177,16 +233,15 @@ def evidence(paper_dir: Path | None = None, private_dir: Path | None = None) -> 
                 continue
         return out
 
-    pj = rows(paper_dir / "trader" / "journal.jsonl")
-    first = min((r["ts_utc"][:10] for r in pj if r.get("event") == "executed"), default=None)
-    paper_days = len({r["date"] for r in rows(paper_dir / "trader" / "equity.jsonl") if first and r.get("date", "") >= first})
+    paper_days, first = paper_sessions_held(paper_dir)
     lj = rows(private_dir / "trader" / "journal.jsonl")
     approved = {r["ticket"] for r in lj if r.get("event") in ("executed", "handoff") and r.get("broker") not in (None, "paper") and r.get("approval") == "ticket"}
-    filled = {r["ticket"] for r in rows(private_dir / "fills.jsonl") if r.get("status") in ("filled", "partially_filled")}
+    filled = {r["ticket"] for r in rows(private_dir / "fills.jsonl") if r.get("status") in ("filled", "partially_filled") and r.get("ticket")}
     live = len(approved & filled)
     missing = []
     if paper_days < PAPER_DAYS_REQUIRED:
-        missing.append(f"the paper bot has {paper_days} of {PAPER_DAYS_REQUIRED} trading days with a position")
+        missing.append(f"the paper bot has closed {paper_days} of {PAPER_DAYS_REQUIRED} exchange sessions holding a position since its first causal fill"
+                       + ("" if first else " (it has none yet: no fill at a close that came after its order)"))
     if live < LIVE_MANUAL_TICKETS_REQUIRED:
         missing.append(f"{live} of {LIVE_MANUAL_TICKETS_REQUIRED} live tickets have filled under an approval of their own id")
     return {"open": not missing, "paper_days": paper_days, "paper_days_required": PAPER_DAYS_REQUIRED, "paper_first_fill": first,
@@ -253,6 +308,95 @@ def _reconcile_paper(broker, now: datetime, M: md.Mandate) -> dict | None:
         out["recorded"] += len(done)
         out["tickets"].append({"ticket": tid, "fills": len(done), "status": rec.get("status")})
     return out
+
+
+# ---------------------------------------------------------------- corrections to the paper record (v0.47)
+# A correction puts right an entry the chained fills log already holds, without touching that entry: a dated cash
+# adjustment in the account and a record of kind "correction" appended to the same chain. Each is listed here, in
+# code, so what was corrected and by how much is a commit, and each is applied once, by the first pass that finds it
+# due. The closes are those the price mirror carried for that session when the correction was written (the paper
+# account's own marks held the same figures); the account's marks are used when they still hold that session, and
+# these when they no longer do.
+PAPER_CORRECTIONS = (
+    {"id": "corr-2026-11-11-stale-close", "ticket": "tkt-5c12ef101db360fd", "session": "2026-11-11",
+     "closes": {"AMZN": 266.17, "NVDA": 173.73, "GOOGL": 290.63, "MSFT": 521.13, "META": 628.77, "TSLA": 390.84, "SPCX": 139.75, "AVGO": 345.22, "ORCL": 128.38},
+     "reason": ("The account's first ticket was written on Nov 11, 2026 at 19:54 UTC, during that day's session, and filled at once at a price built on "
+                "the Nov 10 close: a price older than the order, under the convention in use before v0.42.5. The rule since then fills an order at the "
+                "close of the first session that ends after it was written, with a 5 basis point half-spread. This takes from cash the difference "
+                "between what those fills paid and what the same shares cost at the Nov 11 close under that rule. The fills stay in the log as recorded.")},
+)
+
+
+def _correction_amount(C: dict, entry: dict, state: dict) -> tuple[float, list[dict]]:
+    """(cash to take out, per-fill detail): what the entry's fills would have cost at the session's close under the
+    paper broker's rule (the close plus the half-spread to buy, less it to sell, to six decimals as the broker
+    rounds), less what they paid. Rounded to the cent, the unit the account's equity is kept in."""
+    from .broker import PaperBroker
+    half = PaperBroker.HALF_SPREAD
+    detail, total = [], 0.0
+    for f in entry.get("fills", []):
+        s, side, qty, paid = f["symbol"], f["side"], float(f["quantity"]), float(f["price"])
+        held = (((state.get("marks") or {}).get(s) or {}).get("closes") or {}).get(C["session"])
+        close = float(held) if held is not None else float(C["closes"][s])
+        px = round(close * (1 + half if side == "buy" else 1 - half), 6)
+        diff = qty * (px - paid) if side == "buy" else qty * (paid - px)
+        detail.append({"symbol": s, "side": side, "quantity": qty, "paid": paid, "close": close, "price_under_the_rule": px,
+                       "difference": round(diff, 6), "close_from": "the account's marks" if held is not None else "the correction's recorded closes"})
+        total += diff
+    return round(total, 2), detail
+
+
+def _apply_corrections(broker, now: datetime) -> list[dict] | None:
+    """Apply every correction that is due and not yet applied; None when there is nothing to do. Two steps, each
+    safe to repeat: the account (cash, a marker beside it, one atomic save), then the chained record. A pass that
+    dies between them leaves the marker, and the next pass writes only the record; a second pass after both does
+    nothing. The equity point for the marks in hand is restated in the same save (as any second pass on the same
+    marks restates it) and the marker keeps the figure it replaced."""
+    st = getattr(broker, "state", None)
+    if not isinstance(st, dict) or not getattr(broker, "fills_at_close", False):
+        return None
+    log = ex._fills()
+    out = []
+    for C in PAPER_CORRECTIONS:
+        entry = next((e for e in log if e.get("ticket") == C["ticket"] and e.get("status") in ("filled", "partially_filled") and not e.get("convention")), None)
+        if entry is None:
+            continue                                       # this account never held the entry the correction is for
+        rec = next((e for e in log if e.get("kind") == "correction" and e.get("id") == C["id"]), None)
+        marker = next((m for m in st.get("corrections") or [] if m.get("id") == C["id"]), None)
+        if rec is not None and marker is not None:
+            continue
+        if marker is None:
+            if rec is not None:                            # the chain says it was applied and the account file does not: the chain stands
+                amount, detail = -float(rec["cash_delta"]), rec.get("detail") or []
+            else:
+                amount, detail = _correction_amount(C, entry, st)
+            before = broker.mark()
+            st["cash"] = float(st["cash"]) - amount
+            marker = {"id": C["id"], "corrects": C["ticket"], "session": C["session"], "amount": abs(amount), "cash_delta": -amount,
+                      "applied": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "equity_before": before["equity"], "first_corrected_mark": before["asof"] or None,
+                      "detail": detail}
+            st.setdefault("corrections", []).append(marker)
+            marker["equity_after"] = broker.mark()["equity"]
+            broker.save()
+        if rec is None:
+            ex.record_correction(C["id"], marker["cash_delta"], C["reason"], corrects=C["ticket"], detail=marker.get("detail"), now=now,
+                                 extra={"session": C["session"], "equity_before": marker.get("equity_before"), "equity_after": marker.get("equity_after"),
+                                        "first_corrected_mark": marker.get("first_corrected_mark")})
+            _journal({"event": "correction", "id": C["id"], "ticket": C["ticket"], "broker": getattr(broker, "name", "?"),
+                      "outcome": f"cash {marker['cash_delta']:+,.2f}: the first ticket repriced at the {C['session']} close", "cash_delta": marker["cash_delta"]})
+        out.append({"id": C["id"], "cash_delta": marker["cash_delta"], "equity_before": marker.get("equity_before"), "equity_after": marker.get("equity_after")})
+    return out or None
+
+
+def paper_reconcile(state: dict) -> dict:
+    """The account file against the fills log (v0.47): cash and shares rebuilt from the log alone, corrections
+    included, beside what the account holds. ok when both agree to the cent and the share."""
+    want = ex.cash_and_positions_from_log(float(state.get("start_cash") or 0.0))
+    have = {s: float(q) for s, q in (state.get("positions") or {}).items() if abs(float(q)) > 1e-9}
+    cash = float(state.get("cash") or 0.0)
+    same = set(want["positions"]) == set(have) and all(abs(want["positions"][s] - have[s]) < 1e-6 for s in have)
+    return {"ok": bool(abs(want["cash"] - cash) < 0.005 and same), "cash": round(cash, 2), "cash_from_log": round(want["cash"], 2), "positions_match": bool(same),
+            "corrections": len(ex.corrections())}
 
 
 def _settle_resting(broker, now: datetime, M: md.Mandate, cancel: bool = False) -> dict | None:
@@ -337,6 +481,13 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     h = ex.halted()
     if hasattr(broker, "clock"):
         broker.clock = lambda: now                      # one clock for the pass: the broker stamps orders with the trader's time
+    if getattr(broker, "fills_at_close", False):        # v0.47: a correction that is due is booked before anything else reads the account
+        try:
+            cx = _apply_corrections(broker, now)
+            if cx:
+                rep["corrections"] = cx
+        except Exception as exc:  # noqa: BLE001 - both steps are safe to repeat; the next pass tries again
+            rep["corrections_error"] = str(exc)[:200]
     if getattr(broker, "fills_at_close", False):        # v0.42.5: yesterday's resting orders meet their close first
         try:
             rc = _reconcile_paper(broker, now, M)       # v0.44.1: and before that, anything a dead pass left unrecorded
@@ -375,9 +526,18 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     _mark_equity(account, now)
     rep["account"] = {"equity": account.get("equity"), "cash": account.get("cash"), "positions": len(account.get("positions") or [])}
     # the recommendation and the quotes
-    call = call or ex.call_in_force(today)
+    # v0.47: the call to trade is the one that governs the first session the position is held through. A paper order
+    # fills at the close of its session and is held through the next, which is the day the live record marks the
+    # same call; before, the pass planned on the call in force on the day of the pass, one session behind the record
+    # (and two entries behind on a Saturday). A live order fills now and is held through today.
+    held_session = today
+    if getattr(broker, "fills_at_close", False):
+        from . import sessions
+        held_session = sessions.next_session(sessions.session_of_close_after(now)).isoformat()
+    rep["steps"].append({"held_session": held_session})
+    call = call or ex.call_in_force(held_session, now=now)
     if call is None:
-        return stop("no call in force today", reasons=["the ledger holds no call whose effective date has come"])
+        return stop("no call in force today", reasons=[f"the ledger holds no call that governs {held_session}"])
     T = ex.target(call, P, dict(bk.BOOK))
     symbols = sorted(set(T["weights"]) | {p["symbol"] for p in account.get("positions") or []})
     try:
@@ -396,16 +556,26 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     _mark_equity(account, now)
     rep["account"] = {"equity": account.get("equity"), "cash": account.get("cash"), "positions": len(account.get("positions") or [])}
     # a staged ticket from an earlier pass today, still valid? else plan a new one
-    staged = [t for t in todays if not t.get("status") and t.get("all_checks_pass")]
+    # v0.47: the newest staged ticket that has not expired and was planned on this call. Before, the last by file
+    # name (a hash) was taken, so an expired ticket could hide a valid, approved one planned after it; and a ticket
+    # planned on another call was reused as it stood. One that has expired or been overtaken is marked, once.
+    stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     ticket = None
-    if staged:
-        t = staged[-1]
-        if t["expires"] > now.strftime("%Y-%m-%dT%H:%M:%SZ"):
-            ticket = t
-        else:
+    for t in sorted((t for t in todays if not t.get("status") and t.get("all_checks_pass")), key=lambda t: str(t.get("created", ""))):
+        tc = t.get("call") or {}
+        if str(t.get("expires", "")) <= stamp:
+            t["status"] = "expired"
             _journal({"event": "expired", "ticket": t["id"]})
+        elif not _same_call(tc, call):
+            t["status"] = "superseded"
+            _journal({"event": "superseded", "ticket": t["id"],
+                      "why": f"planned on the call on data through {tc.get('asof')} at {tc.get('size')}x; the call to trade now is on data through {call.get('asof')} at {call.get('size')}x"})
+        else:
+            ticket = t                                   # sorted by creation: the last kept is the newest
+            continue
+        ex._save_ticket(t)
     if ticket is None:
-        ticket = ex.plan(account, quotes, call=call, P=P, today=today, now=now)
+        ticket = ex.plan(account, quotes, call=call, P=P, today=today, now=now, held_session=held_session)
         ex._save_ticket(ticket)
         rep["steps"].append({"planned": ticket["id"], "orders": len(ticket["orders"]), "checks_pass": ticket["all_checks_pass"]})
     rep["ticket"] = ticket["id"]
@@ -530,6 +700,19 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     return rep
 
 
+def _same_call(tc: dict, call: dict) -> bool:
+    """Was a staged ticket planned on the call the pass would trade now? The data date and the size must match, and
+    the ledger entry's id where both carry one."""
+    if tc.get("asof") != call.get("asof"):
+        return False
+    try:
+        if abs(float(tc.get("size")) - float(call.get("size"))) > 1e-9:
+            return False
+    except (TypeError, ValueError):
+        return False
+    return not (tc.get("decision_id") and call.get("decision_id") and tc["decision_id"] != call["decision_id"])
+
+
 def _epoch(stamp: str) -> float:
     return datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
 
@@ -602,9 +785,10 @@ def paper_summary(state_dir: str | Path) -> dict:
     try:
         pb = PaperBroker(sd / "paper_account.json")
         acct = pb.account()
-        j = [r for r in journal(2000) if r.get("event") in ("executed", "unfilled", "pass", "handoff", "resting", "cancelled")]
+        j = [r for r in journal(2000) if r.get("event") in ("executed", "unfilled", "pass", "handoff", "resting", "cancelled", "correction")]
         fills = ex._fills()
         chain = ex.verify_fills()
+        recon = paper_reconcile(pb.state)
     finally:
         if prev is None:
             os.environ.pop("BUILDOUT_TRADER_STATE", None)
@@ -613,29 +797,48 @@ def paper_summary(state_dir: str | Path) -> dict:
     opened = str(pb.state.get("opened") or "")
     orders = list(pb.state.get("orders", {}).values())
     old = [o for o in orders if o.get("status") == "filled" and o.get("type") != "market_on_close"]
+    # v0.47: the corrections booked against the record, from the chained log (the account's marker adds nothing the
+    # record does not carry), in plain words for the page
+    corrections = [{"id": e.get("id"), "applied": e.get("ts_utc"), "amount": e.get("amount"), "cash_delta": e.get("cash_delta"), "ticket": e.get("corrects"),
+                    "session": e.get("session"), "equity_before": e.get("equity_before"), "equity_after": e.get("equity_after"),
+                    "first_corrected_mark": e.get("first_corrected_mark"), "reason": e.get("reason"), "detail": e.get("detail") or [],
+                    "summary": (f"${float(e.get('amount') or 0):,.2f} {'taken from' if float(e.get('cash_delta') or 0) <= 0 else 'added to'} cash on {str(e.get('ts_utc', ''))[:10]}: "
+                                f"ticket {e.get('corrects')} repriced at the {e.get('session')} close under the current fill rule.")}
+                   for e in fills if e.get("kind") == "correction"]
+    by_ticket = {c["ticket"]: c for c in corrections}
     timeline = []
     for e in fills:
         if e.get("status") not in ("filled", "partially_filled"):
             continue
         ex_ev = next((r for r in reversed(j) if r.get("event") == "executed" and r.get("ticket") == e.get("ticket")), {})
         at_close = bool(e.get("convention"))
+        c = by_ticket.get(e.get("ticket"))
         timeline.append({"ticket": e.get("ticket"), "fills": len(e.get("fills", [])), "status": e.get("status"),
                          "decision_id": ex_ev.get("decision_id"), "decision_ts": ex_ev.get("decision_ts"), "ordered": ex_ev.get("ordered"),
                          "fill_session": ex_ev.get("fill_session"), "filled_at": ex_ev.get("filled_at"), "recorded": e.get("ts_utc"),
                          "outside_limit": ex_ev.get("outside_limit"),
-                         "convention": "close of the order's session" if at_close else "limit against the previous close (before v0.42.5)", "causal": at_close})
+                         "convention": "close of the order's session" if at_close else "limit against the previous close (before v0.42.5)", "causal": at_close,
+                         **({"corrected_by": c["id"], "correction_amount": c["amount"]} if c else {})})
+    history = [h for h in pb.state.get("equity_history", []) if not opened or h[0] >= opened]
+    # the path as it would read had each correction been in the account from the start: every mark dated before the
+    # first one that already carries a correction moves by that correction's cash
+    corrected = [[h[0], None if h[1] is None else
+                  round(float(h[1]) + sum(float(c["cash_delta"] or 0) for c in corrections if c.get("first_corrected_mark") and h[0] < c["first_corrected_mark"]), 2)]
+                 for h in history]
     return {"schema": 2, "opened": opened, "start_cash": pb.state.get("start_cash"), "equity": acct["equity"], "cash": acct["cash"], "marks_asof": acct.get("marks_asof"),
-            "positions": acct["positions"], "equity_history": [h for h in pb.state.get("equity_history", []) if not opened or h[0] >= opened],
+            "positions": acct["positions"], "equity_history": history,
+            "corrections": corrections, "equity_history_corrected": corrected if corrections else history, "reconcile": recon,
             "pre_inception_marks": pb.state.get("pre_inception_marks", []),
             "tickets_filled": sum(1 for e in fills if e.get("status") in ("filled", "partially_filled")),
             "resting": [{"symbol": o["symbol"], "side": o["side"], "quantity": o["quantity"], "ordered": o["placed"], "fills_in_session": o.get("fills_in_session")} for o in orders if o.get("status") == "open"],
             "timeline": timeline, "non_causal_fills": len(old),
             "fills_chain": chain, "passes": len(j), "last": j[-1] if j else None, "recent": j[-12:],
             "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",
-            "convention": {"order": "written by the daily pass, before the open on most days", "fill": "the close of the first exchange session that ends after the order was written",
+            "convention": {"order": "written by the daily pass, which has started during the US session on every day so far (the ticket carries the time)", "fill": "the close of the first exchange session that ends after the order was written",
                            "cost": "5 bp half-spread on every fill; no commission", "limit": "the ticket's limit is recorded; the paper fill does not depend on it",
                            "since": "v0.42.5"},
             "note": ("A model account of $100,000 run by the trader from the daily workflow. Each order rests until the close of the first exchange session that ends after it was "
                      "written and fills at that close with a 5 bp half-spread, so the price is never older than the order. "
                      + (f"The first {len(old)} fills (written Nov 11, 2026) were made under the earlier convention, at the limit against the previous day's close: a price older than the order. They are kept as recorded and marked. " if old else "")
+                     + "".join(f"Correction: {c['summary']} Equity marks dated before {c.get('first_corrected_mark') or 'it'} do not carry it. " for c in corrections)
                      + "A simulation convention, not evidence of an achievable execution. Not a personal account.")}

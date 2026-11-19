@@ -42,7 +42,8 @@ def _ann_sharpe(R: np.ndarray, cash: np.ndarray, periods: int) -> np.ndarray:
 
 def _max_dd(R: np.ndarray) -> np.ndarray:
     eq = np.cumprod(1 + R, axis=-1)
-    return (eq / np.maximum.accumulate(eq, axis=-1) - 1).min(axis=-1)
+    peak = np.maximum(np.maximum.accumulate(eq, axis=-1), 1.0)       # v0.47: a fall on the first day is a fall from 1.0
+    return (eq / peak - 1).min(axis=-1)
 
 
 def bootstrap_stats(returns: dict[str, pd.Series], rf: pd.Series | float = 0.0, draws: int = 500, mean_block: float = 21.0,
@@ -124,18 +125,28 @@ def rule_family(book, hedge, corr, mv, ratio_fn, cost_bps=2.0, rf=0.0, enters=EN
     return pd.DataFrame(cols).dropna()
 
 
-def plateau(F: pd.DataFrame, chosen: str, periods: int = 252) -> dict:
-    sh = F.mean() / F.std() * np.sqrt(periods)
+def excess(F: pd.DataFrame, rf: pd.Series | float = 0.0, periods: int = 252) -> pd.DataFrame:
+    """Daily returns less the cash accrued that day (rf is the annualized cash rate, a number or a dated series)."""
+    cash = (rf.reindex(F.index).ffill().fillna(0.0) if isinstance(rf, pd.Series) else pd.Series(float(rf), index=F.index)) / periods
+    return F.sub(cash, axis=0)
+
+
+def plateau(F: pd.DataFrame, chosen: str, periods: int = 252, rf: pd.Series | float = 0.0) -> dict:
+    """The chosen rule's Sharpe ratio against its neighbours'. v0.47: in excess of cash (rf), the same definition as
+    the backtest table and the bootstrap; before, it was the ratio of the total return, which read about 0.1 higher."""
+    X = excess(F, rf, periods)
+    sh = X.mean() / X.std() * np.sqrt(periods)
     rank = int((sh > sh[chosen]).sum()) + 1
     others = sh.drop(chosen)
     return {"chosen": chosen, "chosen_sharpe": float(sh[chosen]), "rank": rank, "of": len(sh),
             "neighbour_median": float(others.median()), "neighbour_min": float(others.min()), "neighbour_max": float(others.max()),
-            "spread": float(sh.max() - sh.min()), "grid": {k: float(v) for k, v in sh.items()}}
+            "spread": float(sh.max() - sh.min()), "grid": {k: float(v) for k, v in sh.items()}, "sharpe": "excess over cash"}
 
 
 def robustness_block(variant_returns: dict[str, pd.Series], rf, family: pd.DataFrame, chosen: str, base: str,
                      draws: int = 500) -> dict:
     out = {"bootstrap": bootstrap_stats(variant_returns, rf, draws=draws, base=base)}
-    out["pbo"] = cscv_pbo(family.to_numpy()) if family.shape[1] >= 2 else {"pbo": None}
-    out["plateau"] = plateau(family, chosen) if chosen in family else None
+    # v0.47: the overfitting test ranks, and reports, Sharpe ratios in excess of cash too
+    out["pbo"] = cscv_pbo(excess(family, rf).to_numpy()) if family.shape[1] >= 2 else {"pbo": None}
+    out["plateau"] = plateau(family, chosen, rf=rf) if chosen in family else None
     return out

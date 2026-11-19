@@ -59,3 +59,34 @@ def get(url: str, user_agent: str = "buildout/0.1", retries: int = 3, timeout: i
 
 def get_json(url: str, user_agent: str = "buildout/0.1") -> dict:
     return json.loads(get(url, user_agent))
+
+
+# v0.47: retries for vendor SDK calls (Databento's client raises its own errors and retries nothing). A gateway timeout
+# is the vendor's bad minute, not a reason to lose the day's run or to fall back to another source without saying so.
+TRANSIENT_STATUS = {429, 500, 502, 503, 504}
+_TRANSIENT_NAMES = ("ServerError", "Timeout", "ConnectionError", "ConnectionReset", "ChunkedEncoding", "RemoteDisconnected", "IncompleteRead")
+
+
+def is_transient(exc: BaseException) -> bool:
+    """Is this the kind of failure a second try can fix: a 5xx or 429 from the server, a timeout, a dropped connection?
+    A refusal (401, 403, 422: a missing licence, a bad request) is not."""
+    code = getattr(exc, "http_status", None) or getattr(exc, "status_code", None) or getattr(exc, "code", None)
+    if isinstance(code, int):
+        return code in TRANSIENT_STATUS
+    if isinstance(exc, (TimeoutError, ConnectionError)):
+        return True
+    return any(n in type(exc).__name__ for n in _TRANSIENT_NAMES)
+
+
+def with_retries(fn, tries: int = 3, backoff: float = 2.0, sleep=time.sleep, on_retry=None):
+    """Call fn(); on a transient failure wait backoff, 2 x backoff, ... and call again, `tries` times in all. Anything
+    else, and the last transient failure, is raised unchanged. `on_retry(attempt, exc)` is told about each retry."""
+    for attempt in range(1, max(1, tries) + 1):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 - re-raised below unless it is transient and tries remain
+            if attempt >= tries or not is_transient(exc):
+                raise
+            if on_retry is not None:
+                on_retry(attempt, exc)
+            sleep(backoff * 2 ** (attempt - 1))

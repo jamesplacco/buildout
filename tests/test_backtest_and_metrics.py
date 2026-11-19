@@ -40,8 +40,12 @@ def test_leverage_pays_cash_rate_plus_spread():
     r = pd.DataFrame({"X": 0.0}, index=idx)
     tg = pd.DataFrame({"X": 2.0}, index=idx)
     res = backtest.run(r, tg, cost_bps=0, cash_rate=0.04, borrow_spread_bps=100)
-    # borrowed ~1x NAV for 252 days at 5%/252 per day
-    assert abs(res.equity.iloc[-1] - (1 - 0.05 / 252) ** 252) < 2e-3
+    # borrowed 1x NAV for 252 days at 5%/252 per day: exact. v0.47: the tolerance was 2e-3, wide enough to pass a
+    # spread of 80bp in place of 100bp; the two cases below are told apart now.
+    assert abs(res.equity.iloc[-1] - (1 - 0.05 / 252) ** 252) < 1e-12
+    wrong = backtest.run(r, tg, cost_bps=0, cash_rate=0.04, borrow_spread_bps=80)
+    assert abs(wrong.equity.iloc[-1] - (1 - 0.05 / 252) ** 252) > 1e-3
+    assert abs(res.financing.sum() - 252 * (-0.05 / 252)) < 1e-12      # the financing line carries exactly that charge
 
 
 def test_compounding_is_exact():

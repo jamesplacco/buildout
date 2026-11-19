@@ -58,5 +58,24 @@ jobs:
             echo "No new results."
             exit 0
           fi
-          git commit -m "Filings engine $(date -u +%Y-%m-%d)"
-          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep $((i * 10)); done; exit 1
+          msg="Filings engine $(date -u +%Y-%m-%d)"
+          git commit -q -m "$msg"
+          ours=$(git rev-parse HEAD)
+          # v0.47: the same rule as the daily run. Nothing is merged: the one file this job writes is placed, whole, on
+          # top of main as it is at that moment, so a push that landed meanwhile can neither conflict nor be undone.
+          for i in 1 2 3 4; do
+            git fetch -q origin main
+            git checkout -q --detach origin/main
+            git checkout -q "$ours" -- site/data/filings.json
+            if git diff --cached --quiet; then
+              echo "main already has these results."
+              exit 0
+            fi
+            git commit -q -m "$msg"
+            if git push -q origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((i * 10))
+          done
+          echo "::error::could not push the results after four tries"
+          exit 1

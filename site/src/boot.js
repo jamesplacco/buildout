@@ -119,7 +119,7 @@
     options: () => { guard("Payoff builder", updatePayoff, $("#po-chart")); guard("Tail budget", updateTail, $("#tb-chart")); guard("Insurance charts", drawInsurance); },
     hedges: () => { guard("Hedge lab", () => renderScenarioChart(hedgeState()), $("#scen-chart")); guard("Sizing lab", () => (sizeReady ? renderDD() : updateSize()), $("#dd-chart")); guard("Futures hedge", updateFutures); },
     securities: () => guard("Risk drivers", renderDrivers, $("#drv-chart")),
-    insurers: () => {}, lenses: () => {}, engine: () => {}, appendix: () => {}, decide: () => {}, legends: () => guard("Voices", wireVoices, $("#voices")),
+    insurers: () => {}, lenses: () => {}, engine: () => guard("Test count", renderTestCount), appendix: () => {}, decide: () => {}, legends: () => guard("Voices", wireVoices, $("#voices")),
     theses: () => { guard("Alphabet chart", renderGoog, $("#goog-chart")); guard("Guidance chart", renderGuide, $("#guide-chart")); guard("Capex panel", drawCapex); },
     journal: () => guard("Calibration", () => renderCal(scorecard(allRecs())), $("#jrs-cal")),
     swans: () => { guard("Fat tails", renderTailsDesk, $("#sw-tails")); guard("Tail-hedge lab", () => drawTailLab(tailState()), $("#th-chart")); },
@@ -163,7 +163,9 @@
     if (!el && LAZY.pending) { lazyFlushAll(); el = document.getElementById(token); }      // a deep link into a desk not built yet
     // v0.44.1: a link to a security, an episode or a legend is a link into the library when this page does not carry
     // that desk. In v0.43 it threw (the filter it resets was a constant stand-in) and the core page stayed blank.
-    if (!el && CORE && /^(sec|ep|lg)-/.test(token)) { toLibrary(token); return { view: current || "home", el: null }; }
+    // v0.47: any id this page does not carry is a link into the library, which has every desk. Before, only the three
+    // families above were sent on and every other one (a finding, a decision, a tool) opened Home without a word.
+    if (!el && CORE && /^[A-Za-z][\w-]*$/.test(token)) { toLibrary(token); return { view: current || "home", el: null }; }
     const v = el && el.closest(".view");
     return v ? { view: v.id.slice(5), el } : { view: FRONT, el: null };      // v0.38: an unknown link opens the front page (v0.45: the library's is its index)
   }
@@ -216,6 +218,7 @@
     guard("Guide", () => guideOnShow(view));
     document.title = (view === "desk" ? "" : TAB_NAME[view] + " · ") + "Buildout Risk Engine";
     guard(TAB_NAME[view], RENDER[view]);
+    guard("Snapshot badge", () => snapBadge(view));
     guard("Fold", () => foldDesk(view));
     guard("Rail", () => { railFor(view); guideHere(); });          // v0.46: the desk's sections, beside it
     hideTip();
@@ -378,7 +381,18 @@
   // published). The published package replaces the embedded one, in place, when its content hash differs and it was
   // not computed earlier; the comparison is on content, because both carried the same month.
   const decOk = (d) => !!(d && typeof d.end === "string" && d.now && fin(d.now.exposure) && d.now.gate && fin(d.now.es_1x) && d.gate_hist && Array.isArray(d.gate_hist.dates) && d.curve && Array.isArray(d.curve.dates) && d.forecast_scores && Array.isArray(d.pipeline));
-  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json"), loadJSON("data/paper.json"), loadJSON("data/decision.json")]).then(([bkj, cl, lv, pp, dj]) => {
+  // v0.47: the walk-forward record. The daily run now rebuilds it (data/track.json) and the tear sheet. When that file
+  // is newer than the record built into the page, it replaces the parts the daily run computes: the point-in-time
+  // record policy by policy, the hindsight record, the backtest, survivorship, the weeks, the sizing path, the
+  // members, the regime table. What only a release computes stays from the snapshot and is labeled with the
+  // snapshot's date wherever it is drawn (SNAP38.kept): the deep RL sizer's row, the universe checks, the deep RL
+  // study, the VIX study, the alternatives, the regime walk, the restatement. The live record still comes from
+  // data/live.json. Before this the record was fixed at each release ("record through Nov 5" on Nov 18).
+  const trackOk = (k) => { try { const P = k.pit.policies; return isoOk(k.asof) && ["call", "hold", "call_short"].every((x) => P[x] && P[x].net && fin(P[x].net.sharpe) && fin(P[x].net.maxdd) && fin(P[x].net.cagr) && isoOk(P[x].net.to) && P[x].meta && fin(P[x].meta.avg_gross))
+    && fin(k.pit.bench.sharpe) && Array.isArray(k.pit.curve.call) && k.pit.curve.call.length > 100 && fin(k.backtest.size) && k.backtest.stats && fin(k.survivorship.pit_hold_cagr) && k.members && k.hindsight.policies.hold.net && k.policy_name && Array.isArray(k.weeks) && Array.isArray(k.sizing_path); } catch (e) { return false; } };
+  Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json"), loadJSON("data/paper.json"), loadJSON("data/decision.json"),
+    // the record is asked for only when this deployment lists it (data/manifest.json, written by scripts/build_site.py), so a site built before the first daily record logs no failed request
+    loadJSON("data/manifest.json").then((mf) => (mf && mf.data && mf.data["track.json"] ? loadJSON("data/track.json") : null))]).then(([bkj, cl, lv, pp, dj, tk]) => {
     let changed = false;
     const PK = LIVE.pkg = {};
     if (typeof DX19 !== "undefined" && DX19) {
@@ -391,13 +405,29 @@
       // v0.44: a published book from a run that predates the sensitivity block keeps the embedded one, which says
       // which book and date it was computed on; the next daily run writes its own.
       if (!(bkj.sensitivity && bkj.sensitivity.models) && SNAP30.book.sensitivity) bkj.sensitivity = SNAP30.book.sensitivity;
+      // v0.47: two more blocks the daily run cannot rebuild (it has no futures record and plants no test world) stay
+      // from the snapshot: the volatility rule's long record, and the planted-beta self-test. Without them the Book
+      // risk desk lost its only "supported" row and its validation paragraph the day the first daily file loaded.
+      const SB = SNAP30.book;
+      if (bkj.vol_rule && !bkj.vol_rule.long_record && SB.vol_rule && SB.vol_rule.long_record) bkj.vol_rule.long_record = SB.vol_rule.long_record;
+      if (!bkj.selftest) bkj.selftest = SB.selftest || (SB.validation && SB.validation.mean_abs_beta_error != null ? SB.validation : null);
       SNAP30.book = bkj; LIVE.book = bkj; changed = true;
     }
     else if (bkj && !bookOk(bkj)) LIVE.problems.push("book.json did not match the expected shape; the page keeps the call in its snapshot");
     const T = typeof SNAP38 !== "undefined" ? SNAP38 : null;
+    if (tk && trackOk(tk) && T && T.pit && T.pit.policies && isoOk(T.asof) && tk.asof > T.asof) {
+      const was = T.asof, keptPol = Object.keys(T.pit.policies).filter((k) => !tk.pit.policies[k]);
+      const pit = Object.assign({}, tk.pit, { policies: Object.assign({}, tk.pit.policies), curve: Object.assign({}, tk.pit.curve) });
+      keptPol.forEach((k) => { pit.policies[k] = T.pit.policies[k]; if (T.pit.curve && T.pit.curve[k] && !pit.curve[k]) pit.curve[k] = T.pit.curve[k]; });
+      ["hindsight", "backtest", "survivorship", "weeks", "sizing_path", "live_rule", "members", "regimes", "book_hedges", "cost"].forEach((k) => { if (tk[k] != null) T[k] = tk[k]; });
+      T.policy_name = Object.assign({}, T.policy_name, tk.policy_name);
+      T.pit = pit; T.asof = tk.asof;
+      T.kept = { asof: was, policies: keptPol, blocks: ["universe", "deeprl", "deeprl_book", "vix", "alternatives", "restated", "regime_walk"].filter((k) => T[k] != null) };
+      LIVE.track = tk; changed = true;
+    } else if (tk && !trackOk(tk)) LIVE.problems.push("track.json did not match the expected shape; the page keeps the record in its snapshot");
     if (cl && T && cl.verify && cl.verify.ok && Array.isArray(cl.entries) && cl.entries.length > ((T.ledger && T.ledger.entries) || []).length) {
       T.ledger = { verify: cl.verify, entries: cl.entries };
-      T.live = { ...(T.live || {}), calls: cl.entries.length, first_effective: cl.entries[0].effective_from };
+      T.live = { ...(T.live || {}), calls: cl.entries.length, first_effective: governsFrom(cl.entries[0]) || cl.entries[0].effective_from };
       changed = true;
     }
     if (lv && T && Number.isFinite(lv.marked_days) && lv.calls >= ((T.live && T.live.calls) || 0) && (lv.last_mark || "") >= ((T.live && T.live.last_mark) || "")) { T.live = lv; changed = true; }   // v0.40: the daily marks
@@ -408,11 +438,30 @@
     PK.calls = { showing: cl && E0 === cl.entries ? "published" : "embedded", same: !!(cl && Array.isArray(cl.entries) && cl.entries.length === E0.length && head(cl.entries) === head(E0)), n: E0.length, fetch: LIVE.fetch["data/calls.json"] };
     PK.live = { showing: T && T.live === lv ? "published" : "embedded", through: T && T.live ? T.live.last_mark || null : null, fetch: LIVE.fetch["data/live.json"] };
     PK.paper = { showing: T && T.paper === pp ? "published" : "embedded", through: T && T.paper ? T.paper.marks_asof || null : null, fetch: LIVE.fetch["data/paper.json"] };
-    PK.record = { showing: "embedded", through: T ? T.asof : null, fetch: "built into the page" };
+    PK.record = { showing: LIVE.track ? "daily" : "embedded", through: T ? T.asof : null, fetch: LIVE.track ? LIVE.fetch["data/track.json"] : (LIVE.fetch["data/track.json"] && LIVE.fetch["data/track.json"] !== "loaded" ? `${LIVE.fetch["data/track.json"]}; built into the page` : "built into the page"), kept: T && T.kept ? T.kept.asof : null };
     guard("Data packages", renderPackages, $("#pkg-body"));
     if (LIVE.decision) guard("Decision engine", () => { if (typeof dxRebuild === "function") dxRebuild(); });
     if (changed) guard("Search", reindexDesk);
     if (changed && current && RENDER[current]) guard(TAB_NAME[current], RENDER[current]);
+    if (changed && typeof renderBrief === "function" && $("#brief")) guard("Brief", renderBrief, $("#brief"));   // v0.47: the Do card cited the snapshot's decision
+    if (current) guard("Snapshot badge", () => snapBadge(current));
+  });
+  // v0.47: two library desks said things the daily files contradict (the filings engine "awaiting first run", one of
+  // eight data sources reachable). Both files are published every day; the library now reads them.
+  const filingsOk = (f) => !!(f && typeof f.built === "string" && Array.isArray(f.tests) && f.tests.length && f.universe && fin(f.universe.tickers_ever) && f.coverage && fin(f.coverage.months) && f.fakes && fin(f.n_hypotheses));
+  const connOk = (c) => !!(c && Array.isArray(c.sources) && c.sources.length && c.sources.every((r) => r && typeof r.source === "string" && typeof r.ok === "boolean"));
+  if (!CORE) Promise.all([loadJSON("data/filings.json"), loadJSON("data/connections.json"), loadJSON("data/hedges.json")]).then(([fl, cn, hj]) => {
+    if (hj && hj.inputs && typeof hj.inputs === "object") { LIVE.hedges = hj; guard("Hedge inputs", renderHedgeInputs, $("#hb-inputs")); }
+    if (fl && filingsOk(fl) && typeof SNAP28 !== "undefined" && SNAP28 && SNAP28.filings && typeof SNAP28.filings === "object") {
+      SNAP28.filings.run = fl; SNAP28.filings.status = "run"; LIVE.filings = fl;
+      if (current === "filings") guard("Filings", renderFilings, $("#fl-tiles"));
+    } else if (fl) LIVE.problems.push("filings.json did not match the expected shape; the page keeps the filings snapshot");
+    if (cn && connOk(cn)) {
+      LIVE.connections = cn;
+      const t = $("#an-tiles"); if (t) t.replaceChildren();
+      if (current === "analysis") guard("Technicals and fundamentals", renderAnalysisDesk, $("#an-tiles"));
+    } else if (cn) LIVE.problems.push("connections.json did not match the expected shape; the page keeps the connection snapshot");
+    if (current) guard("Snapshot badge", () => snapBadge(current));
   });
   loadJSON("data/atlas.json").then((at) => {
     if (at && atlasOk(at)) { LIVE.atlas = at; AT_M = null; if (current === "atlas") guard("The atlas", renderAtlasDesk, $("#atv-tiles")); }

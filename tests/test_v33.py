@@ -98,7 +98,10 @@ def test_every_daily_data_step_has_a_limit_and_never_blocks_the_rest():
     data = [s for s in job["steps"] if "name" in s and not s["name"].startswith(("Install", "Smoke test", "Status", "Commit results"))]
     assert len(data) >= 15
     for s in data:
-        assert s.get("continue-on-error") is True and 0 < s.get("timeout-minutes", 0) <= 20, s["name"]
+        # v0.47: the book step may wait up to 110 minutes for the price mirror's morning refresh (--wait-minutes); the
+        # record step rebuilds the walk-forward (about three minutes on a runner's four cores)
+        limit = 130 if s.get("id") == "ledger" else 25 if s.get("id") == "record" else 20
+        assert s.get("continue-on-error") is True and 0 < s.get("timeout-minutes", 0) <= limit, s["name"]
     smoke = next(s for s in job["steps"] if s.get("name", "").startswith("Smoke test"))
     assert "pytest" in smoke["run"] and "tests/test_page.py" not in smoke["run"]
 

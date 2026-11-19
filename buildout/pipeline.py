@@ -150,13 +150,15 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
     gate_ok = line_status == "ok" and line is not None
     pol["regime_gated"] = P.tlt_ratio_series(corr, mv, inp.infl36 if gate_ok else None, line if gate_ok else None,
                                              rp.max_hedge_ratio)     # the one hedge policy: recommendation = backtest
-    pol_eval = hedge.evaluate_policies(book, hedge_r, pol, rp.tail_quantile)
+    # v0.47: the overlay sits on top of a full book, so it is bought with borrowed money: cash plus the borrow spread,
+    # as the backtest below charges it. Before, "return per year" credited the hedge with the cash it never earned.
+    pol_eval = hedge.evaluate_policies(book, hedge_r, pol, rp.tail_quantile, rf=inp.rf, borrow_spread_bps=rp.financing_spread_bps)
     reg_stats = hedge.by_regime(book, hedge_r, reg, rp.tail_quantile)
     candidates = {}
     for h in u.hedges:
         ratio = hedge.min_var_ratio(book, rets[h].reindex(book.index), rp.corr_halflife).clip(0, rp.max_hedge_ratio)
         candidates[h] = hedge.evaluate_policies(book, rets[h].reindex(book.index), ratio.to_frame("min_var"),
-                                                rp.tail_quantile).iloc[0].to_dict()
+                                                rp.tail_quantile, rf=inp.rf, borrow_spread_bps=rp.financing_spread_bps).iloc[0].to_dict()
 
     # 3. Exposures (short-history names shrink toward their prior)
     ai_names = u.ai_factor or names
@@ -173,12 +175,24 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
     erc_w = sizing.erc(cov) * w_book.sum()
     years = len(book) / 252
     mu_hat = float(book.mean() * 252)
-    rf_now = float(inp.rf.iloc[-1])
+    rf_now = float(inp.rf.dropna().iloc[-1])
     mu_shrunk = float(sizing.shrink_mean(pd.Series([mu_hat]), years, rp.mean_prior_years, prior=rf_now + 0.04).iloc[0])
     long_run_vol = float(book.std() * np.sqrt(252))
-    kelly_lev = rp.kelly_fraction * (mu_shrunk - rf_now) / long_run_vol ** 2
-    dd_lev = sizing.max_leverage(mu_shrunk, long_run_vol, rp.max_drawdown, q=rp.drawdown_confidence,
+    # v0.47: the drift behind the drawdown cap and the Kelly check is cash plus a premium per unit of market beta, the
+    # convention book.py sizes the call with. Before, it was the book's own mean return over this sample, shrunk: a
+    # list of names chosen in 2026 for having done well, so the size leaned on hindsight. That figure is kept below
+    # as a labelled comparison and sizes nothing.
+    from .book import EQUITY_PREMIUM
+    mk = pd.concat([book, rets[u.market].reindex(book.index)], axis=1).dropna()
+    beta_mkt = float(mk.cov().iloc[0, 1] / mk.iloc[:, 1].var())
+    mu_drift = rf_now + EQUITY_PREMIUM * beta_mkt
+    kelly_lev = rp.kelly_fraction * (mu_drift - rf_now) / long_run_vol ** 2
+    dd_lev = sizing.max_leverage(mu_drift, long_run_vol, rp.max_drawdown, q=rp.drawdown_confidence,
                                  cash_rate=rf_now, borrow_spread=rp.financing_spread_bps / 1e4)
+    insample = {"mu_shrunk": mu_shrunk, "kelly_leverage": rp.kelly_fraction * (mu_shrunk - rf_now) / long_run_vol ** 2,
+                "drawdown_leverage_cap": sizing.max_leverage(mu_shrunk, long_run_vol, rp.max_drawdown, q=rp.drawdown_confidence,
+                                                             cash_rate=rf_now, borrow_spread=rp.financing_spread_bps / 1e4),
+                "note": "comparison only: the same two numbers at the book's own shrunk in-sample mean return, which sized them before v0.47"}
     # Risk limits set the size; Kelly is the edge check: what excess return would justify this size?
     size_dec = P.sizing_decision(scale_now, dd_lev, rp.max_gross, kelly_lev, long_run_vol, rp.kelly_fraction)
     lev_now = float(size_dec["scale"])
@@ -199,8 +213,13 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
                                rp.max_hedge_ratio)
     limits = P.portfolio_limits(lev_now, h_now, 0.0, getattr(rp, "max_total_gross", 2.0))
     y0 = float(inp.yields["DGS30"].dropna().iloc[-1] / 100) if inp.yields is not None else 0.0558
-    scen = [stress.scenario_pnl(w_book, betas, h, s, y0=y0) | {"hedge_ratio": h}
+    # v0.47: a scenario states the AI basket's move beyond the market, so its loadings are on that basket itself.
+    # The exposure table above leaves each name out of its own basket (a measurement of the name); summed over a
+    # book that IS the basket, those loadings said a 15% fall in the names beyond the index cost the book about 3%.
+    scen_betas = latest_betas(rets, fac, names, rp.beta_halflife, rp.min_obs, u.priors)
+    scen = [stress.scenario_pnl(w_book, scen_betas, h, s, y0=y0) | {"hedge_ratio": h}
             for s in stress.SCENARIOS for h in (0.0, 0.3, h_now)]
+    scen_loadings = {f: float((w_book * scen_betas.reindex(w_book.index)[f].astype(float)).sum()) for f in ("market", "ai", "rates")}
 
     # 7. Backtest four policies on the same book
     base = book_targets(prices, u.book).reindex(rets.index)
@@ -235,8 +254,9 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
     n_trials = len(bt) + len(pol.columns) + len(u.hedges)
     srs = [v["sr_per_period"] for k, v in bt.items() if k != "Cash only"]
     for v in bt.values():
-        v["dsr"] = metrics.deflated_sharpe(v["sr_per_period"], v["n"], v["skew"], v["kurtosis"],
-                                           n_trials=n_trials, sr_var=float(np.var(srs, ddof=1)) if len(srs) > 1 else 0.0)
+        # v0.47: a variant with no excess return at all (cash) has no Sharpe to deflate; perf says so with psr None
+        v["dsr"] = None if v["psr"] is None else metrics.deflated_sharpe(
+            v["sr_per_period"], v["n"], v["skew"], v["kurtosis"], n_trials=n_trials, sr_var=float(np.var(srs, ddof=1)) if len(srs) > 1 else 0.0)
     drift = final_navs["Book, unhedged"].weights.iloc[-1].drop(tlt, errors="ignore")
 
     # 7a. Robustness: would the backtest survive another history, and is the chosen hedge rule a peak or a plateau?
@@ -280,6 +300,10 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
                         "financing": f"cash rate + {rp.financing_spread_bps:g}bp on borrowed money", "inception": "first trade's cost is in the first return",
                         "sharpe": "excess over the accrued cash rate", "window": "every variant on the same dates after warm-up"},
         "mu_shrunk": mu_shrunk, "rf": rf_now,
+        "drift": mu_drift, "drift_beta": beta_mkt,
+        "drift_method": f"cash plus {EQUITY_PREMIUM:.0%} a year per unit of the book's full-sample beta to {u.market} "
+                        "(book.py's convention; it uses the broad market, which this run's universe does not carry)",
+        "insample_mean_comparison": insample,
         "limits": {"max_gross": rp.max_gross, "target_vol": rp.target_vol, "kelly_fraction": rp.kelly_fraction,
                    "max_drawdown": rp.max_drawdown, "drawdown_confidence": rp.drawdown_confidence,
                    "trim_band": rp.trim_band, "max_hedge_ratio": rp.max_hedge_ratio},
@@ -288,9 +312,13 @@ def analyze(cfg: Config, inp: Inputs, line: float | None = None, line_status: st
         "summary": summary,
         "regime": {"corr": _series(corr), "label_episodes": regime.episodes(reg).tail(12), "shock_table": shocks},
         "hedge": {"policies": pol_eval, "by_regime": reg_stats, "candidates": candidates,
-                  "ratio_history": _series(pol["regime_gated"])},
+                  "ratio_history": _series(pol["regime_gated"]),
+                  "financing": f"the overlay is financed at the cash rate + {rp.financing_spread_bps:g}bp; ann_return_drag is after it, ann_financing is it"},
         "exposures": betas, "risk_contributions": rc, "erc_weights": erc_w,
-        "stress": {"episodes": episodes, "scenarios": scen},
+        "stress": {"episodes": episodes, "scenarios": scen, "scenario_loadings": scen_loadings,
+                   "method": "market leg: each name's loading on the market proxy; AI leg: its loading on the AI basket's return "
+                             "less the market's, the basket including the name (the scenario's own definition of the AI move); "
+                             "rates leg: its loading on the long bond's return times the bond's repriced return"},
         "backtest": {"stats": bt, "curves": curves},
         "signal": {k: v for k, v in sig_eval.items()},
         "trims": {"basis": "example: model-book drift since the last rebalance, not your holdings",

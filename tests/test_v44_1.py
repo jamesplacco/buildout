@@ -45,6 +45,14 @@ def _call():
     return c
 
 
+def _live_call():
+    """v0.47: a live order is held through today and needs the call that governs today. On Monday Nov 9 that is the
+    Nov 5 entry (written Friday before the close); the Nov 6 entry, written on Saturday, governs from Tuesday."""
+    c = dict(ex.latest_call())
+    c["asof"], c["effective_from"] = "2026-11-05", "2026-11-09"
+    return c
+
+
 def _write_equity(state, rows):
     d = state / "trader"
     d.mkdir(parents=True, exist_ok=True)
@@ -109,9 +117,9 @@ def test_the_assistant_route_never_hands_the_same_orders_twice(state, monkeypatc
 
     def ab():
         return br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
-    r1 = trader.run_once(ab(), M, _params(), now=NOW, call=_call())
+    r1 = trader.run_once(ab(), M, _params(), now=NOW, call=_live_call())
     assert r1["outcome"] == "handed to the assistant"
-    r2 = trader.run_once(ab(), M, _params(), now=NOW + timedelta(minutes=5), call=_call())
+    r2 = trader.run_once(ab(), M, _params(), now=NOW + timedelta(minutes=5), call=_live_call())
     assert r2["outcome"] == "already handed to the assistant" and r2["ticket"] == r1["ticket"] and "handoff" not in r2
 
 
@@ -148,7 +156,7 @@ class _LiveBroker:
 def test_a_timed_out_live_order_keeps_what_filled(state, monkeypatch):
     monkeypatch.setattr(trader, "evidence", lambda *a, **k: {"open": True, "missing": []})
     M = md.Mandate(mode="autonomous", armed=True, broker="robinhood_mcp", signed_by="J", signed_on="2026-11-08", notes="rehearsal", max_order_usd=50_000)
-    r = trader.run_once(_LiveBroker(), M, _params(), now=NOW, call=_call(), poll_seconds=0.0, max_wait_seconds=0.0)
+    r = trader.run_once(_LiveBroker(), M, _params(), now=NOW, call=_live_call(), poll_seconds=0.0, max_wait_seconds=0.0)
     assert r["outcome"] == "executed" and r["fills"] and all(f["quantity"] == 1.0 for f in r["fills"])
 
 
@@ -192,13 +200,13 @@ def test_a_handed_off_ticket_still_takes_its_fills(state, monkeypatch):
 
     def ab():
         return br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
-    r1 = trader.run_once(ab(), M, _params(), now=NOW, call=_call())
+    r1 = trader.run_once(ab(), M, _params(), now=NOW, call=_live_call())
     t = ex.load_ticket(r1["ticket"])
     assert t["status"] == "handed_off"
     fills = [{"symbol": o["symbol"], "side": o["side"], "quantity": o["quantity"], "price": o["limit_price"], "order_id": f"rh-{o['seq']}", "status": "filled"} for o in t["orders"]]
     rec = ex.record_fills(r1["ticket"], fills, NOW + timedelta(minutes=10))
     assert rec["status"] == "filled" and rec["chain_ok"] and ex.load_ticket(r1["ticket"])["status"] == "filled"
-    r3 = trader.run_once(ab(), M, _params(), now=NOW + timedelta(minutes=20), call=_call())
+    r3 = trader.run_once(ab(), M, _params(), now=NOW + timedelta(minutes=20), call=_live_call())
     assert r3["outcome"] == "already traded today"
 
 
@@ -307,8 +315,9 @@ def test_a_library_link_on_the_core_page_goes_to_the_library():
     import assemble_page as A
     assert "let X = __stub;" in A.stand_in("x.js", {"consts": ["X"]}) and "const X" not in A.stand_in("x.js", {"consts": ["X"]})
     boot = (ROOT / "site" / "src" / "boot.js").read_text()
-    assert "if (!el && CORE && /^(sec|ep|lg)-/.test(token)) { toLibrary(token);" in boot
-    assert boot.index("lazyFlushAll(); el = document.getElementById(token);") < boot.index("/^(sec|ep|lg)-/.test(token)) { toLibrary")
+    # v0.47: every id the core page lacks goes to the library, not only a security, an episode or a legend
+    assert "if (!el && CORE && /^[A-Za-z][\\w-]*$/.test(token)) { toLibrary(token);" in boot
+    assert boot.index("lazyFlushAll(); el = document.getElementById(token);") < boot.index("/^[A-Za-z][\\w-]*$/.test(token)) { toLibrary")
     # Back from the library returns to where the reader was: the hand-off replaces the #<desk> entry, it does not add to it
     assert 'location.replace(LIBRARY_HREF + "#" + v)' in boot and "location.href = LIBRARY_HREF" not in boot
     stress = (ROOT / "site" / "tests" / "stress.py").read_text()

@@ -98,9 +98,17 @@ def test_hedges_use_yesterdays_ratio():
     rb2 = rb.copy()
     rb2.iloc[-1] = -0.5                                                    # a crash on the last day only
     b = B.hedge_tests(rb2, P["F"], P["E"], P["cash"])
-    assert a["now"]["nasdaq_beta"] != b["now"]["nasdaq_beta"]
-    for k in ("nasdaq_beta", "bond_static_30"):                            # every policy still loses the crash day in full
-        assert b["policies"][k]["mean_ann"] < a["policies"][k]["mean_ann"]
+    for k in ("nasdaq_beta", "nasdaq", "semis", "bond_ratio"):             # the crash moves every ratio measured at that close
+        assert a["now"][k] != b["now"][k] or (k == "bond_ratio" and a["now"][k] in (0.0, 1.0)), k
+    # v0.47: and none of those ratios was applied to the crash day itself. The hedge legs' returns are the same in
+    # both runs to the last digit, so every policy loses exactly what the unhedged book loses that day. A ratio that
+    # saw the day it was applied to (no lag) would change the leg, and the old form of this test (the mean only had
+    # to fall) would still have passed.
+    lost = b["policies"]["none"]["mean_ann"] - a["policies"]["none"]["mean_ann"]
+    assert lost < -0.1
+    for k in a["policies"]:
+        assert b["policies"][k]["leg_mean_ann"] == pytest.approx(a["policies"][k]["leg_mean_ann"], abs=1e-12), k
+        assert b["policies"][k]["mean_ann"] - a["policies"][k]["mean_ann"] == pytest.approx(lost, abs=1e-10), k
 
 
 def test_var_backtest_counts_breaches():

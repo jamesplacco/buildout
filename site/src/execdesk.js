@@ -38,7 +38,7 @@
       ["Buildout's research server (MCP tools)", "No. It plans and checks tickets and records fills; it has no tool that places an order", "none", "n/a", "none"],
       ["The paper bot (the daily workflow)", "Yes, simulated orders only, with no person in the loop", "the $100,000 model account in paper/", "none: autonomous by design, under a wide paper mandate", "yes: the paper account below"],
       ["The trader with an assistant (broker = assistant)", "Buildout hands over exact orders; an assistant holding Robinhood's connector places them", "a Robinhood Agentic account", "the mandate must be signed and armed; each ticket approved by its id", "no: private records"],
-      ["The trader's direct route (broker = robinhood_mcp)", "Yes, from the person's own machine, once a mandate is signed and armed. Untested against the live endpoint", "a Robinhood Agentic account", "each ticket by its id until 60 paper days and 5 approved live tickets are on record, then as the mandate says", "no: private records"]], 1);
+      ["The trader's direct route (broker = robinhood_mcp)", "Yes, from the person's own machine, once a mandate is signed and armed. Untested against the live endpoint", "a Robinhood Agentic account", "each ticket by its id until 60 sessions have closed with the paper bot holding a position under the current rule and 5 approved live tickets are on record, then as the mandate says", "no: private records"]], 1);
     $("#ex-map-p").textContent = "Robinhood's Agentic account (support pages read Nov 5, 2026) allows long stocks and ETFs, single-leg long options, and market, limit and stop orders. It does not allow margin borrowing, short selling, futures or multi-leg options. So the call's Nasdaq-100 futures short becomes a long position in an inverse ETF, and everything long stays under the account's equity.";
     fillTable($("#ex-map"), ["The call says", "In the Agentic account", "The difference"], [
       ["Hold the nine names at the call's size", "The nine names, long, at that share of equity", "None, at sizes up to 0.98x"],
@@ -52,7 +52,7 @@
       rows.push(["PSQ (index short)", pctPlain(U.short, 1), pctPlain(Hd.short, 1)], ["VIXY (VIX sleeve)", pctPlain(U.vix, 1), pctPlain(Hd.vix, 1)], ["Cash", pctPlain(1 - U.gross - U.short - U.vix, 1), pctPlain(1 - Hd.gross - Hd.short - Hd.vix, 1)]);
       fillTable($("#ex-tgt"), ["Holding", "Unhedged (default)", "Hedged"], rows, 1);
       const TT = typeof T38 === "function" ? T38() : null, PP = TT && TT.pit && TT.pit.policies;
-      const rec = PP && PP.call && PP.call_short ? ` Which variant? The walk-forward record favours the hedge: full size with the call's short earned a Sharpe of ${fx(PP.call_short.net.sharpe, 2)} against ${fx(PP.call.net.sharpe, 2)} for the call as sized. A cash account can hold only part of that hedge, so the hedged variant here is a partial version of it.` : "";
+      const rec = PP && PP.call && PP.call_short ? ` Which variant? Walked forward, full size with the call's short earned a Sharpe of ${fx(PP.call_short.net.sharpe, 2)} against ${fx(PP.call.net.sharpe, 2)} for the call as sized, but that edge is the nine names beating the index (the universe checks on the Track record desk), not the hedge. The unhedged variant is the default. A cash account can hold only part of the short, so the hedged variant here is a partial version of it.` : "";
       $("#ex-tgt-p").textContent = `From the call on data through ${isoNice(call.asof)}: the unhedged variant holds the book at ${xx(U.gross)}, the smallest size every limit allows. The hedged variant walks the call's menu (more book, more index short) until the book, PSQ and the VIX sleeve fill 98% of the account: ${xx(Hd.gross)} of book with ${pct0(Hd.short)} in PSQ. Whole shares and limit orders, so the account will sit a little under these.${rec}`;
     }
     fillTable($("#ex-chk"), ["Check", "Default", "Why"], [
@@ -79,7 +79,7 @@
       ["paper", "The paper broker fills each order at the close of the first session that ends after it was written, with a 5 bp half-spread, in a model account.", "None", "Running: the public paper bot below, and private rehearsals"],
       ["assistant", "The assistant holding Robinhood's Trading MCP (Claude with the Robinhood connector) places what the trader hands it and reports fills through record_fills.", "Robinhood's OAuth, held by the assistant", "Built and tested against a stand-in account; every order is one the trader wrote. No live use is recorded on this page"],
       ["robinhood_mcp", "Buildout's own JSON-RPC client on Robinhood's Trading MCP, with OAuth in the standard library.", "Robinhood's OAuth, tokens in private/", "Built; the tool names Robinhood has not published are filled in from `broker probe`; untested against the live endpoint"]], 4);
-    $("#ex-tr-n").textContent = "The evidence gate (v0.42.4, in code): a live broker trades in manual mode, whatever the mandate says, until the paper bot has held a position for 60 trading days and 5 live tickets have filled after an approval of their own id. Robinhood's own terms (support pages read Nov 8, 2026): an external agent trades only in the Agentic account; it can act without confirmation if the person has asked it to; and the person is responsible for the trades it places. The trader's modes sit inside those terms: manual and supervised keep the confirmation on Buildout's side, autonomous removes it under the mandate.";
+    $("#ex-tr-n").textContent = "The evidence gate (v0.42.4, in code): a live broker trades in manual mode, whatever the mandate says, until 60 NYSE sessions have closed with the paper bot holding a position, counted from its first fill under the v0.47 rule (the earlier fills do not count), and 5 live tickets have filled after an approval of their own id. Robinhood's own terms (support pages read Nov 8, 2026): an external agent trades only in the Agentic account; it can act without confirmation if the person has asked it to; and the person is responsible for the trades it places. The trader's modes sit inside those terms: manual and supervised keep the confirmation on Buildout's side, autonomous removes it under the mandate.";
     fillTable($("#ex-mandate"), ["Term", "Default", "What it does"], [
       ["mode", "manual", "manual, supervised or autonomous"], ["armed", "false", "a live broker sends nothing until true, in every mode, over signed_by and signed_on"], ["broker", "paper", "paper, assistant or robinhood_mcp"],
       ["max_order_usd / max_order_pct", "$10,000 / 25%", "one order at most this much"], ["max_day_turnover_pct", "60%", "one day's notional (a first build is exempt)"],
@@ -93,38 +93,67 @@
     $("#ex-pb-grid").hidden = !has; $("#ex-pb-jp").hidden = !has;
     const tp = $("#ex-pb-tp"); if (tp) tp.hidden = !(has && Array.isArray(Pp.timeline) && Pp.timeline.length);
     if (!has) {
-      $("#ex-pb-p").textContent = "The paper bot starts with the first run after v0.42 ships: the daily workflow runs one pass of the trader against a $100,000 model account, unhedged and without the VIX sleeve (PSQ and VIXY are not in the price mirror). Each order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread, so the price is never older than the order. Its state is committed in paper/ and summarized to data/paper.json, which this section reads.";
-      rsKpi($("#ex-pb-tiles"), [["$100,000", "Opening cash", "the model account"], ["0", "Tickets filled", "none yet"], ["autonomous", "Mode", "paper broker, under a wide mandate"], ["Tuesday to Saturday", "Cadence", "one pass a day, 11:17 UTC, on the prior session's close"]]);
-      $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice.";
+      $("#ex-pb-p").textContent = "The paper bot starts with the first run after v0.42 ships: the daily workflow runs one pass of the trader against a $100,000 model account, unhedged and without the VIX sleeve (PSQ and VIXY are not in the price mirror). Each order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread, so the price is never older than the order. Since v0.47 the bot follows the call: it rebalances when the whole book is more than 1% of equity away from the call's size or any name is outside its 2% band, and then brings every name to target, in whole shares rounded to the nearest. A paper order fills at the first close after it is written and is planned on the call that governs the session it is held through. Its state is committed in paper/ and summarized to data/paper.json, which this section reads.";
+      rsKpi($("#ex-pb-tiles"), [["$100,000", "Opening cash", "the model account"], ["0", "Tickets filled", "none yet"], ["autonomous", "Mode", "paper broker, under a wide mandate"], ["Tuesday to Saturday", "Cadence", "one pass a day with the daily run, scheduled for 11:17 UTC and started later by GitHub, on the prior session's close"]]);
+      $("#ex-pb-n").textContent = "A model account; nothing here is advice.";
       return;
     }
-    const eq = Pp.equity_history || [], lp = eq.length ? eq[eq.length - 1][1] : null;
+    // v0.47: the corrected equity record when the daily file carries one (a correction restates the marks after it)
+    const eqC = Array.isArray(Pp.equity_history_corrected) && Pp.equity_history_corrected.length ? Pp.equity_history_corrected : null;
+    const eq = eqC || Pp.equity_history || [], lp = eq.length ? eq[eq.length - 1][1] : null;
     const last = fin(lp) && lp > 0 ? lp : fin(Pp.equity) && Pp.equity > 0 ? Pp.equity : Pp.start_cash, ret = last / Pp.start_cash - 1;      // v0.44.1: a null mark is not $0
     const early = !!(Pp.marks_asof && Pp.opened && Pp.marks_asof < Pp.opened);
     rsKpi($("#ex-pb-tiles"), [[`$${Math.round(last).toLocaleString()}`, "Equity", `${ret >= 0 ? "+" : MINUS}${Math.abs(ret * 100).toFixed(2)}% since ${isoNice(Pp.opened)}`],
       [String(Pp.tickets_filled), "Tickets filled", `${Pp.passes} passes; fills chain ${Pp.fills_chain && Pp.fills_chain.ok ? "verified" : "BROKEN"}`],
       [`${Math.round((1 - Pp.cash / last) * 100)}%`, "Invested", `cash $${Math.round(Pp.cash).toLocaleString()}`],
       [isoNice(Pp.marks_asof), "Marked at the close of", early ? "before the account opened: the first equity point comes with the next close" : Pp.last ? `last pass: ${Pp.last.outcome || Pp.last.event}` : ""]]);
-    $("#ex-pb-p").textContent = `${Pp.note} ${Pp.mode}.`;
+    $("#ex-pb-p").textContent = `${Pp.note} ${Pp.mode}. Since v0.47 the bot follows the call: it rebalances when the whole book is more than 1% of equity away from the call's size or any name is outside its 2% band, and then brings every name to target, in whole shares rounded to the nearest. A paper order fills at the first close after it is written and is planned on the call that governs the session it is held through.`;
     const lD = (s) => { const d = new Date(s + "T00:00:00Z"); return d.getUTCFullYear() + (d.getUTCMonth() + (d.getUTCDate() - 1) / 31) / 12; };
     if (!eq.length) $("#ex-pb-curve").replaceChildren(h("p", "empty", "No equity point yet: the account's only mark is dated before it opened. The first point comes with the next session's close."));
     else xyChart($("#ex-pb-curve"), { height: 180, label: "Equity, $", series: [{ pts: eq.map(([d, v]) => [lD(d), v]), color: "var(--s1)", name: "Paper account" }],
       xticks: eq.length > 1 ? [[lD(eq[0][0]), isoNice(eq[0][0]).replace(/, \d{4}$/, "")], [lD(eq[eq.length - 1][0]), isoNice(eq[eq.length - 1][0]).replace(/, \d{4}$/, "")]] : [[lD(eq[0][0]), isoNice(eq[0][0])]],
       yfmt: (v) => `$${Math.round(v / 1000)}k` });
+    if (eqC && eq.length) $("#ex-pb-curve").append(h("p", "note", "Equity as corrected: the marks after a correction are restated with it; the account's log keeps the originals."));
     fillTable($("#ex-pb-pos"), ["Symbol", "Shares"], (Pp.positions || []).map((p) => [p.symbol, String(p.quantity)]), 1);
     fillTable($("#ex-pb-j"), ["When (UTC)", "Event", "Outcome", "Ticket", "Fills"], (Pp.recent || []).map((r) => [r.ts_utc, r.event, r.outcome || r.status || "", r.ticket || "", r.fills != null ? String(r.fills) : ""]), 4);
     // v0.42.5: the four times of each filled ticket, in the order they must come, and the convention it filled under
     const TL = Array.isArray(Pp.timeline) ? Pp.timeline : [];
     if (TL.length) {
-      const tU = (s) => (s ? String(s).replace("T", " ").replace(/(\+00:00|Z)$/, "").slice(0, 16) : "not recorded");
-      fillTable($("#ex-pb-tl"), ["Ticket", "Decision", "Decided (UTC)", "Order written (UTC)", "Priced at the close of", "Filled (UTC)", "Convention", "Order before price"],
-        TL.map((r) => [r.ticket, r.decision_id || "not recorded", tU(r.decision_ts), tU(r.ordered), r.fill_session ? isoNice(r.fill_session) : "the previous close", tU(r.filled_at || r.recorded), r.convention, r.causal ? "yes" : "no"]), 2);
+      // v0.47: a column no ticket has a value for is left out (the first ticket predates the fields; the table had
+      // three cells reading "not recorded"); a cell missing in a column others fill is a dash
+      const tU = (s) => (s ? String(s).replace("T", " ").replace(/(\+00:00|Z)$/, "").slice(0, 16) : "");
+      const cols = [["Ticket", (r) => r.ticket || ""], ["Decision", (r) => r.decision_id || ""], ["Decided (UTC)", (r) => tU(r.decision_ts)], ["Order written (UTC)", (r) => tU(r.ordered)],
+        ["Priced at the close of", (r) => (r.fill_session ? isoNice(r.fill_session) : "the previous close")], ["Filled (UTC)", (r) => tU(r.filled_at || r.recorded)], ["Convention", (r) => r.convention || ""], ["Order before price", (r) => (r.causal ? "yes" : "no")],
+        ["Corrected", (r) => (r.corrected_by ? `${fin(r.correction_amount) ? `${r.correction_amount < 0 ? MINUS : "+"}$${Math.abs(r.correction_amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ` : ""}(${r.corrected_by})` : "")]]
+        .filter(([, f]) => TL.some((r) => f(r) !== ""));
+      fillTable($("#ex-pb-tl"), cols.map((c) => c[0]), TL.map((r) => cols.map(([, f]) => f(r) || "–")), 2);
       const bad = TL.filter((r) => !r.causal).length;
       $("#ex-pb-tn").textContent = (bad ? `${bad} ticket${bad === 1 ? " was" : "s were"} filled before v0.42.5 at the limit against the previous day's close, a price older than the order; ${bad === 1 ? "it is" : "they are"} kept as recorded and marked. ` : "")
         + "From v0.42.5 an order fills at the close of the first session that ends after it was written. The ticket's limit is recorded but the paper fill does not depend on it. A simulation convention, not evidence of an achievable execution.";
     }
     if (Array.isArray(Pp.resting) && Pp.resting.length) $("#ex-pb-p").textContent += ` ${Pp.resting.length} order${Pp.resting.length === 1 ? " rests" : "s rest"} until the close of ${isoNice(Pp.resting[0].fills_in_session)}.`;
-    $("#ex-pb-n").textContent = "Not a personal account; nothing here is advice. The account is marked at the last close in the price mirror; no point is shown for a date before it opened.";
+    // v0.47: corrections to the account, when the daily file lists any (paper.json corrections)
+    const CR = Array.isArray(Pp.corrections) ? Pp.corrections.filter((c) => c && typeof c === "object") : [], cb = $("#ex-pb-corr");
+    if (cb) {
+      cb.hidden = !CR.length;
+      cb.replaceChildren();
+      if (CR.length) {
+        cb.append(h("span", "panel-title", "Corrections"));
+        const ul = h("ul", "t7-list");
+        CR.forEach((c) => {
+          // paper.json corrections: { id, applied, amount, cash_delta, ticket, session, equity_before, equity_after, first_corrected_mark, reason, summary, detail }
+          const when = [c.applied, c.session, c.date, c.ts_utc].find((x) => isoOk(x)), amt = [c.cash_delta, c.amount != null ? -Math.abs(c.amount) : null].find((x) => fin(x));
+          const sum = typeof c.summary === "string" && c.summary ? c.summary
+            : `${fin(amt) ? `${amt < 0 ? MINUS : "+"}$${Math.abs(amt).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of cash. ` : ""}${typeof c.reason === "string" ? c.reason : ""}${c.ticket ? ` (${c.ticket})` : ""}`;
+          const li = h("li");
+          li.append(h("b", null, when ? isoNice(String(when).slice(0, 10)) : "Correction"), h("span", null, sum));
+          if (typeof c.detail === "string" && c.detail) li.title = c.detail;
+          ul.append(li);
+        });
+        cb.append(ul);
+      }
+    }
+    $("#ex-pb-n").textContent = "A model account; nothing here is advice. The account is marked at the last close in the price mirror; no point is shown for a date before it opened.";
   }
 
   function renderVix() {
@@ -138,8 +167,9 @@
       [tS(V.carry.ann_all, 0), "What holding them costs, a year", `on average; they lost money in ${tP(V.carry.share_months_negative, 0)} of months`],
       [`${tS(none.y2020q1, 0)} to ${tS(f10.y2020q1, 0)}`, "The book, Feb 19 to Mar 23, 2020", `with 10% of its value in VIX futures; ${f10.cagr_cost > 0 ? `${tP(f10.cagr_cost, 1)} a year of growth given up` : `growth ${tS(-f10.cagr_cost, 1)} a year higher on these days, a window that holds the Feb 2018 and Mar 2020 spikes`}`],
       [`${tS(none.y2022, 0)} to ${tS(f10.y2022, 0)}`, "The book in 2022, the same hedge", `the slow bear: a 25% index short took it to ${tS(s25.y2022, 0)}`]]);
-    $("#vx-p").textContent = `The VIX rises when stocks fall, so owning it looks like the natural hedge for an AI book. The record says it is a crash hedge, not a bear-market hedge. VIX futures (what VIXY holds) paid in the fast falls (2008, March 2020) and cost about ${tP(-V.carry.ann_all, 0)} a year on average the rest of the time, because the futures sit above the spot VIX in calm markets and drift down to it. In 2022 the VIX never spiked, the futures barely moved, and the hedge did almost nothing. ${f05.cagr_cost > 0 ? `Per point of one-month tail cut, VIX futures were the cheapest hedge on the book (${fx(f05.es_cut_per_cost, 1)} points of tail per point of growth at 5% of the book, against ${fx(s25.es_cut_per_cost, 1)} for a 25% index short)` : `On the book's days from ${isoNice(V.book.from)} to ${isoNice(V.book.to)}, a 5% VIX sleeve cut the one-month tail from ${tP(none.es21, 1)} to ${tP(f05.es21, 1)} and cost nothing, because those days hold two VIX spikes; that is the window's luck, not the hedge's carry, which over the longer monthly record ran near ${tS(V.carry.ann_all, 0)} a year`}, but only the index short cut the worst drawdown and 2022. The two do different jobs: the default execution keeps a 5% VIX sleeve for the crash and leaves the bear market to the call's size.`;
-    const lab = { none: "No hedge", vix_fut: "VIX futures", vix_call: "VIX calls, 125% strike (modelled)", nq_put: "Nasdaq-100 puts, 90% strike (modelled)", nq_short: "Nasdaq-100 futures short" };
+    const vxKept = typeof keptNote === "function" ? keptNote("vix", "This study") : "";
+    $("#vx-p").textContent = `The VIX rises when stocks fall, so owning it looks like the natural hedge for an AI book. The record says it is a crash hedge, not a bear-market hedge. VIX futures (what VIXY holds) paid in the fast falls (2008, March 2020) and cost about ${tP(-V.carry.ann_all, 0)} a year on average the rest of the time, because the futures sit above the spot VIX in calm markets and drift down to it. In 2022 the VIX never spiked, the futures barely moved, and the hedge did almost nothing. ${f05.cagr_cost > 0 ? `Per point of one-month tail cut, VIX futures were the cheapest hedge on the book (${fx(f05.es_cut_per_cost, 1)} points of tail per point of growth at 5% of the book, against ${fx(s25.es_cut_per_cost, 1)} for a 25% index short)` : `On the book's days from ${isoNice(V.book.from)} to ${isoNice(V.book.to)}, a 5% VIX sleeve cut the one-month tail from ${tP(none.es21, 1)} to ${tP(f05.es21, 1)} and cost nothing, because those days hold two VIX spikes; that is the window's luck, not the hedge's carry, which over the longer monthly record ran near ${tS(V.carry.ann_all, 0)} a year`}, but only the index short cut the worst drawdown and 2022. The two do different jobs: the default execution keeps a 5% VIX sleeve for the crash and leaves the bear market to the call's size.${vxKept}`;
+    const lab = { none: "No hedge", vix_fut: "VIX futures", vix_call: "VIX calls, 125% strike (modeled)", nq_put: "Nasdaq-100 puts, 90% strike (modeled)", nq_short: "Nasdaq-100 futures short" };
     fillTable($("#vx-book"), ["Hedge", "Share of the book", "One-month tail (ES 95%)", "Worst drawdown", "Feb 19 to Mar 23, 2020", "2022", "CAGR", "Tail cut per point of growth given up"],
       B.map((r) => [lab[r.hedge] || r.hedge, r.hedge === "none" ? "" : pct0(r.share), tP(r.es21, 1), tP(r.maxdd, 0), tS(r.y2020q1, 0), tS(r.y2022, 0), tS(r.cagr, 1), fin(r.es_cut_per_cost) ? fx(r.es_cut_per_cost, 2) : ""]), 2);
     $("#vx-book-n").textContent = `The point-in-time book at 1.00x, ${isoNice(V.book.from)} to ${isoNice(V.book.to)} (the VIX futures record ends in March 2024), with each hedge rebalanced monthly and marked every day. Options are priced, not traded: VIX calls by Black-76 at a volatility of volatility of 100% (at 80% they cost ${tS(V.call_vov["0.8"].ann, 0)} a year per $1 of notional, at 120% ${tS(V.call_vov["1.2"].ann, 0)}), Nasdaq-100 puts at the VIX times 1.25; half a 3% spread is paid on each side.`;

@@ -197,8 +197,8 @@ def test_one_stale_name_stops_the_book(tmp_path):
     for f in files:
         good.to_csv(tmp_path / f"{f}.csv", index=False)
     good.iloc[:-6].to_csv(tmp_path / f"{files[0]}.csv", index=False)     # six sessions behind the rest
-    with pytest.raises(ValueError, match="stale"):
-        bk.download(tmp_path)
+    with pytest.raises(ValueError, match=rf"^price validation failed: {files[0]}: stale: [^;]*6 sessions before the last completed session \([0-9-]+\)$"):
+        bk.download(tmp_path, now=d[-1] + pd.Timedelta(days=1, hours=15))      # v0.47: against the clock; only the lagging name is named
 
 
 def test_drawdown_paths_are_reused_and_answers_unchanged():

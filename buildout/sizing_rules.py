@@ -86,7 +86,7 @@ def test_rule(r: pd.Series, cash: pd.Series, rule: dict, gamma: float = GAMMA) -
     half = len(d) // 2
     sharpe = lambda m: float((m - m_cash.reindex(m.index)).mean() / m.std() * math.sqrt(12)) if m.std() > 0 else float("nan")
     lv = lambda s: (1 + s).cumprod()
-    mdd = lambda s: float(1 - (lv(s) / lv(s).cummax()).min())
+    mdd = lambda s: float(1 - (lv(s) / lv(s).cummax().clip(lower=1.0)).min())      # v0.47: a fall on the first day counts from 1.0
     x = exposure_path(r, rule).reindex(rr.index)
     return {"rule": rule, "months": int(len(d)), "from": str(rr.index[0].date()), "to": str(rr.index[-1].date()),
             "utility_gain_month": float(d.mean()), "t": e["t"], "p": e["p"], "df": e["df"],
@@ -170,7 +170,7 @@ def frontier(rb: pd.Series, qx: pd.Series, fm: dict, beta_b: float, beta_q: floa
         return {"gross": g, "short": float(h), "meets": True, "long": g, "gross_total": float(g + h), "net": float(g - h),
                 "es95": m["es"], "vol": m["sig"], "drawdown95": m["dd"], "cash_in_record": cash is not None,
                 "cagr": float(lv.iloc[-1] ** (252 / len(tot)) - 1), "y2022": float((1 + tot.loc["2022"]).prod() - 1) if tot.index[0].year <= 2022 <= tot.index[-1].year else None,
-                "maxdd": float(1 - (lv / lv.cummax()).min()), "hedge_drag_ann": float(h * qx.reindex(x.index).mean() * 252),
+                "maxdd": float(1 - (lv / lv.cummax().clip(lower=1.0)).min()), "hedge_drag_ann": float(h * qx.reindex(x.index).mean() * 252),
                 "market_beta_left": float(g * fm["exposure"]["market"] - h), "stock_specific_share": None, **(extra or {})}
 
     rows = []

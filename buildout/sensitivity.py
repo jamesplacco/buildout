@@ -182,16 +182,15 @@ def settings(P: dict, w: pd.Series, rb: pd.Series, fm: dict, tail: dict, beta_vt
 def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book: dict[str, float] = bk.BOOK, seed: int = 0) -> dict:
     """The sensitivity block for the page (site/data/book.json: sensitivity). About ten seconds; run by the daily
     `book` command, not by the walk-forward, which builds the book a hundred times."""
-    ust = bk.treasury() if ust is None else ust
+    I = bk.inputs(prices, ust, book)                 # v0.47: the call's own panel and rates, cut at the same as-of date
+    P, rf = I["P"], I["rf"]
     w = pd.Series(book, dtype=float)
-    P = bk.panel(prices, ust, book)
     R, F, E = P["R"], P["F"], P["E"]
     rb = bk.book_returns(R, w)
     fm = bk.factor_model(R, F, w)
     sigma = fm["vol"]
     tail = bk.tail_block(rb, sigma)
     beta_vti = float(pd.concat([rb, E["VTI"]], axis=1).dropna().cov().iloc[0, 1] / E["VTI"].var())
-    rf = float(ust["DGS2"].iloc[-1]) / 100
     mu = rf + bk.EQUITY_PREMIUM * beta_vti
     now = _sizes(tail["es95"]["governing"], sigma, mu, rf)
     M = models(rb, sigma, mu, rf, now["size"], vol_now=float(tail["daily_vol_now_ann"]), seed=seed)

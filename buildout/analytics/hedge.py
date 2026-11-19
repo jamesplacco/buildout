@@ -14,10 +14,24 @@ def min_var_ratio(book: pd.Series, hedge: pd.Series, halflife: int = 63) -> pd.S
     return (-cov / var).rename("h")
 
 
-def apply_hedge(book: pd.Series, hedge: pd.Series, ratio: pd.Series | float) -> pd.Series:
-    """Hedged daily return with yesterday's ratio (no lookahead)."""
+def financing(h: pd.Series | float, index: pd.Index, rf: pd.Series | float | None, borrow_spread_bps: float = 0.0,
+              periods: int = 252) -> pd.Series:
+    """What holding h of the hedge on top of a fully invested book costs each day (v0.47): the overlay is bought with
+    borrowed money, so it pays the cash rate, plus the borrow spread on a long overlay. rf is the annualized cash
+    rate (a number or a dated series); None means the overlay is not financed (a futures leg already in excess)."""
+    if rf is None:
+        return pd.Series(0.0, index=index)
+    cash = (rf.reindex(index).ffill().fillna(0.0) if isinstance(rf, pd.Series) else pd.Series(float(rf), index=index)) / periods
+    hh = h.reindex(index) if isinstance(h, pd.Series) else pd.Series(float(h), index=index)
+    return hh * cash + hh.clip(lower=0.0) * (borrow_spread_bps / 1e4 / periods)
+
+
+def apply_hedge(book: pd.Series, hedge: pd.Series, ratio: pd.Series | float, rf: pd.Series | float | None = None,
+                borrow_spread_bps: float = 0.0, periods: int = 252) -> pd.Series:
+    """Hedged daily return with yesterday's ratio (no lookahead). With rf, the overlay is financed: a hedge held on
+    top of a full book is paid for at the cash rate plus the borrow spread, as backtest.run charges it."""
     h = ratio.shift(1) if isinstance(ratio, pd.Series) else ratio
-    return book + h * hedge
+    return book + h * hedge - financing(h, book.index, rf, borrow_spread_bps, periods)
 
 
 def variance_reduction(book: pd.Series, hedged: pd.Series) -> float:
@@ -41,20 +55,26 @@ def policies(book: pd.Series, hedge: pd.Series, halflife: int = 63, static: floa
 
 
 def evaluate_policies(book: pd.Series, hedge: pd.Series, ratios: pd.DataFrame, q: float = 0.05,
-                      periods: int = 252) -> pd.DataFrame:
-    """Out-of-sample comparison: variance reduction, tail behaviour, and what the hedge cost in return."""
+                      periods: int = 252, rf: pd.Series | float | None = None, borrow_spread_bps: float = 0.0) -> pd.DataFrame:
+    """Out-of-sample comparison: variance reduction, tail behaviour, and what the hedge cost in return.
+
+    v0.47: with rf (the annualized cash rate) the overlay is financed at cash plus borrow_spread_bps, so
+    ann_return_drag is what the hedge added or cost after paying for it; ann_financing is that payment on its own.
+    Without rf nothing is charged (the old reading, which credited a hedge that earned exactly cash with a gain)."""
     rows = {}
     base = book[ratios.dropna().index]
     cut = base.quantile(q)
     for name in ratios:
-        hedged = apply_hedge(book, hedge, ratios[name]).reindex(base.index)
+        hedged = apply_hedge(book, hedge, ratios[name], rf, borrow_spread_bps, periods).reindex(base.index)
         d = pd.concat([base, hedged], axis=1).dropna()
         tail = d[d.iloc[:, 0] <= cut]
+        fin = financing(ratios[name].shift(1), book.index, rf, borrow_spread_bps, periods).reindex(d.index)
         rows[name] = {"ann_vol": d.iloc[:, 1].std() * np.sqrt(periods),
                       "variance_reduction": 1 - d.iloc[:, 1].var() / d.iloc[:, 0].var(),
                       "worst_days_avg": tail.iloc[:, 1].mean(),
                       "worst_days_saved": tail.iloc[:, 1].mean() - tail.iloc[:, 0].mean(),
                       "ann_return_drag": (d.iloc[:, 1].mean() - d.iloc[:, 0].mean()) * periods,
+                      "ann_financing": float(fin.mean() * periods),
                       "avg_ratio": ratios[name].mean()}
     return pd.DataFrame(rows).T
 

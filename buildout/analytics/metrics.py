@@ -9,8 +9,16 @@ from scipy.stats import kurtosis, norm, skew
 EULER_GAMMA = 0.5772156649015329
 
 
-def max_drawdown(equity: pd.Series) -> float:
-    return float((equity / equity.cummax() - 1).min())
+SD_FLOOR = 1e-12      # a daily excess-return deviation below this is rounding, not risk (v0.47)
+
+
+def max_drawdown(equity: pd.Series, start: float | None = None) -> float:
+    """Worst fall from a running peak, as a negative number. `start` (v0.47) is the value the series began from,
+    before its first row: with it, a fall on the first day counts as a fall from where the record started."""
+    peak = equity.cummax()
+    if start is not None:
+        peak = peak.clip(lower=start)
+    return float((equity / peak - 1).min())
 
 
 def probabilistic_sharpe(sr: float, n: int, sk: float, ku: float, sr_star: float = 0.0) -> float:
@@ -40,15 +48,21 @@ def perf(returns: pd.Series, periods: int = 252, rf: float | pd.Series = 0.0) ->
     years = len(r) / periods
     cash = (rf.reindex(r.index).ffill().fillna(0.0) if isinstance(rf, pd.Series) else pd.Series(float(rf), index=r.index)) / periods
     ex = r - cash
-    sr = ex.mean() / ex.std() if ex.std() > 0 else 0.0
+    # v0.47: a series that earns exactly cash has an excess return of rounding error (about 1e-17 a day), and the
+    # ratio of two rounding errors is not a Sharpe ratio. Below SD_FLOOR the excess is zero: Sharpe 0, and the
+    # statistics that divide by it (Sortino, the probabilistic and deflated Sharpe) are not defined.
+    sd = float(ex.std()) if len(ex) > 1 else 0.0
+    flat = not (sd > SD_FLOOR)
+    sr = 0.0 if flat else float(ex.mean() / sd)
     downside = np.sqrt((np.minimum(ex, 0) ** 2).mean())
-    mdd = max_drawdown(eq)
+    mdd = max_drawdown(eq, start=1.0)             # v0.47: a fall on the first day is a fall from the starting value
     cagr = eq.iloc[-1] ** (1 / years) - 1 if years > 0 else np.nan
     sk, ku = float(skew(r)), float(kurtosis(r, fisher=False))
     return {"cagr": cagr, "vol": r.std() * np.sqrt(periods), "sharpe": sr * np.sqrt(periods),
-            "sortino": ex.mean() / downside * np.sqrt(periods) if downside > 0 else np.nan,
+            "sortino": ex.mean() / downside * np.sqrt(periods) if (downside > SD_FLOOR and not flat) else np.nan,
             "max_drawdown": mdd, "calmar": cagr / abs(mdd) if mdd < 0 else np.nan,
             "skew": sk, "kurtosis": ku, "hit_rate": float((r > 0).mean()),
             "worst_day": float(r.min()), "best_day": float(r.max()),
-            "psr": probabilistic_sharpe(sr, len(r), sk, ku), "sr_per_period": sr, "n": len(r), "years": years,
+            "psr": None if flat else probabilistic_sharpe(sr, len(r), sk, ku), "excess_is_zero": bool(flat),
+            "sr_per_period": sr, "n": len(r), "years": years,
             "final_equity": float(eq.iloc[-1]) if len(eq) else 1.0, "cash_cagr": float((1 + cash).prod() ** (1 / years) - 1) if years > 0 else np.nan}
