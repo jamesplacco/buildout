@@ -906,7 +906,13 @@ def gradcheck(model: MLP, X, y, eps: float = 1e-5, n_params: int = 200, seed: in
     data, with one fixed set of dropout masks so the function is deterministic.
     Samples up to `n_params` parameter entries. The model is not modified; an
     unfitted model is initialized on a private copy. Relative error is
-    |a - n| / max(|a| + |n|, 1e-8).
+    max(|a - n| - noise, 0) / max(|a| + |n|, 1e-8), where noise is what
+    rounding alone can put into a central difference: a few units in the last
+    place of the loss, divided by 2 eps. Without it (before v0.47) an entry
+    whose true gradient is exactly zero (the bias of a linear model on
+    standardized data) scored one rounding unit of the loss, 5.6e-12, against
+    the 1e-8 floor as an error of 5.6e-4 on machines whose BLAS happened to
+    round the two losses differently.
     """
     m = copy.deepcopy(model)
     X = m._check_X(X)
@@ -937,7 +943,8 @@ def gradcheck(model: MLP, X, y, eps: float = 1e-5, n_params: int = 200, seed: in
         p[j] = v
         num = (lp - lm) / (2.0 * eps)
         ana = float(grads[k].reshape(-1)[j])
-        err = abs(num - ana) / max(abs(num) + abs(ana), 1e-8)
+        noise = 4.0 * np.finfo(float).eps * max(abs(lp), abs(lm), 1.0) / (2.0 * eps)
+        err = max(abs(num - ana) - noise, 0.0) / max(abs(num) + abs(ana), 1e-8)
         worst = max(worst, err)
     return worst
 

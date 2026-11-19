@@ -3,6 +3,7 @@
     python3 scripts/snapshot_v38.py --mirror-pickle PATH --carver-pickle PATH      # from cached data
     python3 scripts/snapshot_v38.py --track-json PATH                               # from a saved track.json
     python3 scripts/snapshot_v38.py --track-json NEW --prior-json OLD               # and publish the restatement (v0.42.5)
+    python3 scripts/snapshot_v38.py --pdf-only --track-json PATH [--out PDF]        # the tear sheet alone (the daily run, v0.47)
 
 The PDF is the monthly tear sheet: three records on separate panels (backtest, walk-forward, live paper), never
 mixed, with return, volatility, Sharpe, maximum drawdown, hit rate, turnover and factor exposures.
@@ -31,95 +32,236 @@ def pct(v, d=1):
     return "n/a" if v is None else f"{v * 100:.{d}f}%"
 
 
-def tearsheet_pdf(T: dict, out: Path) -> bytes:
+def _nice(d: str | None) -> str:
+    """2026-11-17 -> Nov 17, 2026 (and 2026-09 -> Sep 2026)."""
+    from datetime import date
+    if not d:
+        return "n/a"
+    d = str(d)[:10]
+    if len(d) == 7:
+        return date(int(d[:4]), int(d[5:7]), 1).strftime("%b %Y")
+    x = date.fromisoformat(d)
+    return f"{x.strftime('%b')} {x.day}, {x.year}"
+
+
+def _signed(v, d=1):
+    """A signed percentage that never prints a negative zero."""
+    if v is None:
+        return ""
+    t = f"{v * 100:+.{d}f}%"
+    return t.replace("+", "").replace("-", "") if float(t[:-1]) == 0 else t.replace("-", "\u2212")
+
+
+def _num(v, d=2):
+    if v is None:
+        return ""
+    t = f"{v:.{d}f}"
+    return t.lstrip("-") if float(t) == 0 else t.replace("-", "\u2212")
+
+
+def tearsheet_pdf(T: dict, out: Path, generated: str | None = None) -> bytes:
+    """Two letter pages. Page 1: the three records, kept apart; the headline numbers; growth of $1 on a log scale;
+    the policy table. Page 2: drawdowns, the call's monthly returns, stocks against bonds by regime. v0.47: rebuilt
+    by the daily run from track.json (scripts/snapshot_v38.py --pdf-only), so its date is the record's date."""
+    import textwrap
+
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import pandas as pd
     from matplotlib.backends.backend_pdf import PdfPages
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 8, "axes.spines.top": False, "axes.spines.right": False})
-    ink, accent, muted = "#1d2421", "#1d5b49", "#7a837e"
-    buf = io.BytesIO()
+    from matplotlib.ticker import FuncFormatter
+
+    from buildout import __version__
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 8, "axes.spines.top": False, "axes.spines.right": False,
+                         "axes.edgecolor": "#b9c2bd", "xtick.color": "#59625d", "ytick.color": "#59625d", "pdf.fonttype": 42})
+    ink, accent, muted, rule, gold, blue, grey = "#1d2421", "#1d5b49", "#6b746f", "#dde3df", "#c9a227", "#3b7dd8", "#8a938e"
     W = T["pit"]
-    with PdfPages(buf) as pdf:
-        # page 1: the three records and the walk-forward table
-        fig = plt.figure(figsize=(8.5, 11))
-        fig.text(0.06, 0.965, "Buildout: track record and tear sheet", fontsize=15, weight="bold", color=ink)
-        fig.text(0.06, 0.948, f"Model book, not personal positions. Data through {T['asof']}. Research only; not investment advice.", fontsize=8, color=muted)
-        y = 0.92
-        blocks = [("1. Backtest (in-sample)", f"Size {T['backtest']['size']:.2f}x, chosen with the whole history and applied to it: hindsight on the names and the size. "
-                   f"CAGR {pct(T['backtest']['stats'].get('cagr'))}, volatility {pct(T['backtest']['stats'].get('vol'))}, max drawdown {pct(T['backtest']['stats'].get('maxdd'))}."),
-                  ("2. Walk-forward (out-of-sample)", f"Size and hedge recomputed each month-end from data to that close, held the next month, costs charged; universe chosen point in time each January from a candidate list set in 2026 (a retrospectively selected universe). {W['policies']['call']['net']['from']} to {W['policies']['call']['net']['to']}."),
-                  ("3. Live paper", (f"{T['live']['calls']} call(s) in the hash-chained ledger, the first governing from {str(T['live'].get('first_effective') or T['live'].get('first_call') or '2026-11-04')[:10]}; " + (f"{T['live']['marked_days']} days marked." if T['live'].get('marked_days') else "no day of marks yet.")))]
-        import textwrap
-        for title, text in blocks:
-            fig.text(0.06, y, title, fontsize=10, weight="bold", color=accent)
-            lines = textwrap.wrap(text, 125)
-            for k, ln in enumerate(lines):
-                fig.text(0.06, y - 0.018 - 0.013 * k, ln, fontsize=7.5, color=ink)
-            y -= 0.032 + 0.013 * len(lines)
-        ax = fig.add_axes([0.08, 0.50, 0.86, 0.22])
-        for k, col, lw in (("call", accent, 2.0), ("call_short", "#3b7dd8", 1.4), ("hold", muted, 1.2), ("qqq", "#c9a227", 1.0)):
-            c = W["curve"].get(k)
-            if c:
-                import pandas as pd
-                s = pd.Series([v for _, v in c], index=pd.to_datetime([d for d, _ in c]))
-                ax.plot(s.index, s.values, color=col, lw=lw, label=NAMES.get(k, "Nasdaq-100 (QQQ)"))
-        ax.set_title("Walk-forward growth of $1, net of costs (point-in-time universe)", fontsize=9, loc="left", color=ink)
-        ax.legend(frameon=False, fontsize=7, loc="upper left")
-        ax.grid(alpha=0.2)
-        rows = []
-        for k in [k for k in ("call", "call_short", "call_simple", "call_rl", "product", "bond30", "hold") if k in W["policies"]]:
-            p = W["policies"][k]
-            n, g = p["net"], p["gross"]
-            ex = n.get("exposure", {})
-            rows.append([SHORT.get(k, NAMES[k]), pct(n["cagr"]), pct(g["cagr"]), pct(n["vol"]), f"{n['sharpe']:.2f}", pct(n["maxdd"]), pct(n["hit_month"], 0),
-                         f"{(n.get('turnover_yr') or 0):.1f}x", f"{ex.get('market', 0):.2f}", f"{ex.get('rates', 0):.2f}", pct(n.get("y2022"))])
-        b = W["bench"]
-        rows.append(["Nasdaq-100 (QQQ)", pct(b["cagr"]), pct(b["cagr"]), pct(b["vol"]), f"{b['sharpe']:.2f}", pct(b["maxdd"]), pct(b["hit_month"], 0), "", "1.00", "", pct(b.get("y2022"))])
-        tab = fig.add_axes([0.04, 0.16, 0.92, 0.28]); tab.axis("off")
-        t = tab.table(cellText=rows, colLabels=["Policy", "CAGR\nnet", "CAGR\ngross", "Vol", "Sharpe", "Max\nDD", "Up\nmonths", "Turn-\nover", "Mkt\nbeta", "Rates\nbeta", "2022"],
-                      loc="upper center", cellLoc="right", colLoc="right", colWidths=[0.25] + [0.075] * 10)
-        t.auto_set_font_size(False); t.set_fontsize(7); t.scale(1, 1.5)
+    P = W["policies"]
+    call, hold, short_, bench = P["call"]["net"], P["hold"]["net"], P["call_short"]["net"], W["bench"]
+    live = T.get("live") or {}
+    L, R_ = 0.07, 0.93
+
+    def footer(fig, page):
+        fig.lines.append(plt.Line2D([L, R_], [0.047, 0.047], color=rule, lw=0.6, transform=fig.transFigure))
+        fig.text(L, 0.032, f"Buildout {__version__} · jamesplacco.github.io/buildout · results of a model, not of an account · research, not investment advice",
+                 fontsize=6.3, color=muted)
+        fig.text(R_, 0.032, f"{page} / 2", fontsize=6.3, color=muted, ha="right")
+
+    def para(fig, x, y, text, width=128, size=7.4, color=ink, lead=0.0128):
+        for ln in textwrap.wrap(text, width):
+            fig.text(x, y, ln, fontsize=size, color=color)
+            y -= lead
+        return y
+
+    def style(t, header_h=1.0, left=(0,)):
+        t.auto_set_font_size(False)
         for (r, c), cell in t.get_celld().items():
-            cell.set_edgecolor("#dde3df")
-            if c == 0:
+            cell.set_edgecolor(rule); cell.set_linewidth(0.5)
+            cell.visible_edges = "B"
+            cell.PAD = 0.04
+            if c in left:
                 cell.set_text_props(ha="left"); cell._loc = "left"
             if r == 0:
-                cell.set_text_props(weight="bold"); cell.set_height(cell.get_height() * 1.6)
-        sv, P = T["survivorship"], W["policies"]["product"]
-        notes = ["Restated in v0.42.5: the daily trades that hold the equal weights and the size are counted in turnover and charged, and the hedged policy shorts what the ledger logs (5% steps). Costs: stocks 5 bp per dollar traded; Nasdaq-100 futures 1 bp a trade plus 1 bp a quarter to roll; borrowing above 1.00x at cash plus 50 bp; the long bond 2 bp a trade. Sharpe is in excess of cash; betas from a daily regression on the Nasdaq-100 and the 20-year bond.",
-                 f"Survivorship: today's nine held with hindsight grew {pct(sv['hindsight_hold_cagr'])} a year, the point-in-time nine {pct(sv['pit_hold_cagr'])} (gap {abs(sv['gap_cagr']) * 100:.1f} points); hindsight flatters risk more than return (worst drawdown {pct(T['hindsight']['policies']['hold']['net']['maxdd'], 0)} against {pct(W['policies']['hold']['net']['maxdd'], 0)}).",
-                 f"The call is sized by the live rule at every month-end (v0.40). It cut the worst drawdown from {pct(W['policies']['hold']['net']['maxdd'], 0)} to {pct(W['policies']['call']['net']['maxdd'], 0)} at a Sharpe of {W['policies']['call']['net']['sharpe']:.2f} against {W['policies']['hold']['net']['sharpe']:.2f} for holding; full size with its short earned {W['policies']['call_short']['net']['sharpe']:.2f}. Vol target with quarter Kelly averaged {P['meta']['avg_gross']:.2f}x gross: the same bet, smaller."]
-        yy = 0.105
-        for ntext in notes:
-            for ln in textwrap.wrap(ntext, 150):
-                fig.text(0.06, yy, ln, fontsize=6.5, color=muted); yy -= 0.012
-            yy -= 0.004
-        pdf.savefig(fig); plt.close(fig)
-        # page 2: monthly returns of the call, and the hedge by regime
+                cell.set_text_props(weight="bold", color=ink); cell.set_height(cell.get_height() * header_h)
+
+    def series(c):
+        return pd.Series([v for _, v in c], index=pd.to_datetime([d for d, _ in c]))
+
+    buf = io.BytesIO()
+    with PdfPages(buf) as pdf:
+        # ------------------------------------------------------------------ page 1
         fig = plt.figure(figsize=(8.5, 11))
-        fig.text(0.06, 0.965, "Monthly returns, walk-forward, net of costs: the call", fontsize=12, weight="bold", color=ink)
-        m = W["policies"]["call"]["monthly"]
+        fig.text(L, 0.955, "Buildout", fontsize=20, weight="bold", color=ink)
+        fig.text(L + 0.165, 0.9565, "track record and tear sheet", fontsize=12, color=accent)
+        fig.text(L, 0.938, f"A risk, sizing and hedge call for a nine-name AI-infrastructure model book. Prices through {_nice(T['asof'])}."
+                 + (f" Generated {generated} (UTC)." if generated else ""), fontsize=7.6, color=muted)
+        fig.lines.append(plt.Line2D([L, R_], [0.927, 0.927], color=ink, lw=1.0, transform=fig.transFigure))
+        # the headline strip: the walk-forward record of the call, each number against holding the same names
+        tiles = [(f"{call['sharpe']:.2f}", "Sharpe ratio, the call", f"holding the names {hold['sharpe']:.2f}; Nasdaq-100 {bench['sharpe']:.2f}"),
+                 (pct(call["maxdd"], 0), "Worst drawdown", f"holding {pct(hold['maxdd'], 0)}; Nasdaq-100 {pct(bench['maxdd'], 0)}"),
+                 (_signed(call.get("y2022"), 0), "In 2022", f"holding {_signed(hold.get('y2022'), 0)}; Nasdaq-100 {_signed(bench.get('y2022'), 0)}"),
+                 (_signed(call["cagr"], 1), "A year, compounded", f"at {P['call']['meta']['avg_gross']:.2f}x average exposure; holding {_signed(hold['cagr'], 1)}"),
+                 (str(live.get("calls", 0)), "Live calls logged", (f"{live['marked_days']} sessions marked: {_signed(live.get('total'), 1)}" if live.get("marked_days") else "none marked yet"))]
+        tw = (R_ - L) / len(tiles)
+        for i, (big, lab, sub) in enumerate(tiles):
+            x = L + i * tw
+            fig.text(x, 0.893, big, fontsize=17, color=ink)
+            fig.text(x, 0.876, lab, fontsize=7.4, weight="bold", color=ink)
+            for k, ln in enumerate(textwrap.wrap(sub, 30)):
+                fig.text(x, 0.864 - 0.0105 * k, ln, fontsize=6.3, color=muted)
+        yy = para(fig, L, 0.838, f"Walk-forward, {_nice(call['from'])} to {_nice(call['to'])}, net of costs. The call gives up Sharpe ratio against holding the same names "
+                  "and takes less than half the drawdown: sizing down protects, at a cost.", width=150, size=6.9, color=accent, lead=0.0118)
+        fig.lines.append(plt.Line2D([L, R_], [yy + 0.003, yy + 0.003], color=rule, lw=0.6, transform=fig.transFigure))
+        # three records, never on one chart
+        y = yy - 0.017
+        bt = T["backtest"]["stats"]
+        if live.get("marked_days"):
+            lv = (f"{live.get('calls', 0)} calls in the hash-chained ledger, the first governing from {_nice(live.get('first_effective'))}. {live['marked_days']} sessions marked through "
+                  f"{_nice(live.get('last_mark'))}: the call {_signed(live.get('total'), 1)}, full size with the call's short {_signed(live.get('total_hedged'), 1)}, the names at full size "
+                  f"{_signed(live.get('book_total'), 1)}, the Nasdaq-100 {_signed(live.get('qqq_total'), 1)}. Too short to annualize or to judge.")
+        else:
+            lv = f"{live.get('calls', 0)} calls in the hash-chained ledger; no session marked yet."
+        blocks = [("1  Backtest: fitted, shown for contrast",
+                   f"Today's size ({T['backtest']['size']:.2f}x), chosen with the whole history and applied back to it, on today's nine names: hindsight on both. "
+                   f"CAGR {pct(bt.get('cagr'))}, volatility {pct(bt.get('vol'))}, worst drawdown {pct(bt.get('maxdd'))}. Not evidence."),
+                  ("2  Walk-forward: every decision from data it had",
+                   "The live rule run at each month-end close on data to that close, held the next month, costs charged. The nine names are the most traded each January "
+                   "of sixteen candidates; that candidate list was written in 2026, so this is a walk-forward rule on a retrospectively selected universe."),
+                  ("3  Live: the only record that cannot have been fitted", lv)]
+        for title, text in blocks:
+            fig.text(L, y, title, fontsize=8.6, weight="bold", color=accent)
+            y = para(fig, L, y - 0.0155, text) - 0.008
+        # growth of $1, log scale so the four lines can be told apart
+        ax = fig.add_axes([L + 0.035, 0.405, R_ - L - 0.035, y - 0.405 - 0.028])
+        for k, col, lw, z in (("hold", grey, 1.0, 1), ("qqq", gold, 1.0, 2), ("call_short", blue, 1.2, 3), ("call", accent, 2.0, 4)):
+            c = W["curve"].get(k)
+            if c:
+                s_ = series(c)
+                ax.plot(s_.index, s_.values, color=col, lw=lw, zorder=z, label=SHORT.get(k, "Nasdaq-100 (QQQ)") if k != "hold" else "Holding the names at 1.00x")
+        ax.set_yscale("log")
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v:g}"))
+        ax.yaxis.set_minor_formatter(FuncFormatter(lambda v, _: ""))
+        ax.set_yticks([1, 2, 4, 8])
+        ax.set_title("Walk-forward growth of $1, net of costs (log scale)", fontsize=8.6, loc="left", color=ink, weight="bold", pad=6)
+        ax.legend(frameon=False, fontsize=6.8, loc="upper left", handlelength=1.6)
+        ax.grid(alpha=0.25, lw=0.5)
+        ax.tick_params(labelsize=6.8, length=2)
+        # the policy table
+        rows = []
+        for k in [k for k in ("call", "call_short", "call_simple", "call_rl", "product", "vm_rule", "bond30", "hold") if k in P]:
+            p = P[k]
+            n, g = p["net"], p["gross"]
+            ex = n.get("exposure", {})
+            rows.append([SHORT.get(k, NAMES[k]), _signed(n["cagr"]), _signed(g["cagr"]), pct(n["vol"]), f"{n['sharpe']:.2f}", pct(n["maxdd"], 0), pct(n["hit_month"], 0),
+                         f"{(n.get('turnover_yr') or 0):.1f}x", _num(ex.get("market", 0)), _num(ex.get("rates", 0)), _signed(n.get("y2022"), 0)])
+        rows.append(["Nasdaq-100 (QQQ), for reference", _signed(bench["cagr"]), _signed(bench["cagr"]), pct(bench["vol"]), f"{bench['sharpe']:.2f}", pct(bench["maxdd"], 0), pct(bench["hit_month"], 0), "", "1.00", "", _signed(bench.get("y2022"), 0)])
+        tab = fig.add_axes([L, 0.170, R_ - L, 0.205]); tab.axis("off")
+        t = tab.table(cellText=rows, colLabels=["Policy", "CAGR,\nnet", "CAGR,\ngross", "Vol", "Sharpe", "Worst\nfall", "Months\nup", "Turnover\na year", "Market\nbeta", "Rates\nbeta", "2022"],
+                      loc="upper center", cellLoc="right", colLoc="right", colWidths=[0.27] + [0.073] * 10)
+        style(t, header_h=1.7); t.set_fontsize(6.9); t.scale(1, 1.42)
+        for c in range(11):
+            t[1, c].set_text_props(weight="bold", color=accent)
+        sv = T["survivorship"]
+        notes = ["Net is after costs, gross before; worst fall is the largest drop from a prior peak. Costs: stocks 5 bp per dollar traded, including the daily trades that hold the weights and the size; Nasdaq-100 futures 1 bp a trade plus 1 bp a quarter to roll; "
+                 "borrowing above 1.00x at cash plus 50 bp; the long bond 2 bp a trade. Sharpe ratios are in excess of cash; betas from a daily regression on the Nasdaq-100 and the 20-year bond.",
+                 f"What the short's number is: full size with the call's Nasdaq-100 short earned a Sharpe of {short_['sharpe']:.2f} against {call['sharpe']:.2f} for the call. That edge is the nine names "
+                 "beating the index, which a candidate list written in 2026 knew; on index baskets chosen before 2018 it did not carry over (the universe checks on the site's Track record desk).",
+                 f"Survivorship: today's nine held with hindsight grew {pct(sv['hindsight_hold_cagr'])} a year against {pct(sv['pit_hold_cagr'])} for the point-in-time nine; hindsight flatters risk more than "
+                 f"return (worst drawdown {pct(T['hindsight']['policies']['hold']['net']['maxdd'], 0)} against {pct(hold['maxdd'], 0)})."]
+        yy = 0.150
+        for ntext in notes:
+            yy = para(fig, L, yy, ntext, width=168, size=6.2, color=muted, lead=0.0108) - 0.004
+        footer(fig, 1)
+        pdf.savefig(fig); plt.close(fig)
+        # ------------------------------------------------------------------ page 2
+        fig = plt.figure(figsize=(8.5, 11))
+        fig.text(L, 0.955, "Drawdowns, months and the bond hedge", fontsize=14, weight="bold", color=ink)
+        fig.text(L, 0.940, f"Walk-forward, net of costs, {_nice(call['from'])} to {_nice(call['to'])}.", fontsize=7.6, color=muted)
+        fig.lines.append(plt.Line2D([L, R_], [0.929, 0.929], color=ink, lw=1.0, transform=fig.transFigure))
+        ax = fig.add_axes([L + 0.035, 0.778, R_ - L - 0.035, 0.118])
+        for k, col, lw, z in (("hold", grey, 1.0, 1), ("qqq", gold, 1.0, 2), ("call", accent, 1.8, 3)):
+            c = W["curve"].get(k)
+            if c:
+                s_ = series(c)
+                peak = s_.cummax().clip(lower=1.0)          # a fall from the first dollar counts
+                dd = s_ / peak - 1
+                ax.plot(dd.index, dd.values, color=col, lw=lw, zorder=z, label={"hold": "Holding the names at 1.00x", "qqq": "Nasdaq-100 (QQQ)", "call": "The call"}[k])
+                if k == "call":
+                    ax.fill_between(dd.index, dd.values, 0, color=accent, alpha=0.10, lw=0)
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v * 100:.0f}%"))
+        ax.set_title("Fall from the prior peak (weekly marks)", fontsize=8.6, loc="left", color=ink, weight="bold", pad=6)
+        ax.legend(frameon=False, fontsize=6.8, loc="upper left", bbox_to_anchor=(0.0, -0.13), ncol=3, handlelength=1.6, borderaxespad=0)
+        ax.grid(alpha=0.25, lw=0.5); ax.tick_params(labelsize=6.8, length=2)
+        # monthly returns of the call, with the year; a part month is marked
+        m = P["call"]["monthly"]
         years = sorted({k[:4] for k in m})
-        cells = [[y] + [pct(m.get(f"{y}-{mm:02d}"), 1) if m.get(f"{y}-{mm:02d}") is not None else "" for mm in range(1, 13)] for y in years]
-        tab = fig.add_axes([0.04, 0.62, 0.92, 0.32]); tab.axis("off")
-        t = tab.table(cellText=cells, colLabels=["Year", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], loc="upper center", cellLoc="right")
-        t.auto_set_font_size(False); t.set_fontsize(7); t.scale(1, 1.35)
-        for (r, c), cell in t.get_celld().items():
-            cell.set_edgecolor("#dde3df")
-        R = T.get("regimes", {}).get("rows", [])
-        if R:
-            fig.text(0.06, 0.58, f"Stocks against 10-year Treasuries by regime, monthly {T['regimes']['from']} to {T['regimes']['to']}", fontsize=11, weight="bold", color=ink)
-            cells = [[r["regime"], str(r["months"]), f"{r['corr']:+.2f}", pct(r["var_cut_30"], 0), pct(r["var_cut_minvar"], 0), pct(r["bond_in_selloffs"], 1)] for r in R]
-            tab = fig.add_axes([0.04, 0.12, 0.92, 0.44]); tab.axis("off")
-            t = tab.table(cellText=cells, colLabels=["Regime", "Months", "Correlation", "Variance cut, 30% bond", "Variance cut, best weight", "Bond in stock selloffs"], loc="upper center", cellLoc="right",
-                          colWidths=[0.36, 0.09, 0.11, 0.15, 0.15, 0.14])
-            t.auto_set_font_size(False); t.set_fontsize(7); t.scale(1, 1.3)
-            for (r, c), cell in t.get_celld().items():
-                cell.set_edgecolor("#dde3df")
-                if c == 0:
-                    cell.set_text_props(ha="left"); cell._loc = "left"
-        fig.text(0.06, 0.08, "Inflation direction from CPI against a year earlier; policy direction from the 3-month rate futures (100 less price), a proxy for the Fed.", fontsize=7, color=muted)
+        last_key = max(m)
+        part = str(call["to"])[:7] == last_key and pd.Timestamp(call["to"]) < (pd.Timestamp(call["to"]) + pd.offsets.BMonthEnd(0))
+        first_key = min(m)
+        cells, shade = [], []
+        for yv in years:
+            row, sh, tot = [yv], [None], 1.0
+            for mm in range(1, 13):
+                key = f"{yv}-{mm:02d}"
+                v = m.get(key)
+                if v is None:
+                    row.append(""); sh.append(None)
+                else:
+                    tot *= 1 + v
+                    row.append(_signed(v) + ("*" if (key == last_key and part) else "")); sh.append(v)
+            row.append(_signed(tot - 1)); sh.append(None)
+            cells.append(row); shade.append(sh)
+        fig.text(L, 0.722, "Monthly returns of the call", fontsize=8.6, weight="bold", color=ink)
+        tab = fig.add_axes([L, 0.470, R_ - L, 0.245]); tab.axis("off")
+        t = tab.table(cellText=cells, colLabels=["Year", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Year"], loc="upper center", cellLoc="right",
+                      colWidths=[0.07] + [0.0705] * 12 + [0.084])
+        style(t); t.set_fontsize(6.9); t.scale(1, 1.32)
+        for r, sh in enumerate(shade, 1):
+            for c, v in enumerate(sh):
+                if v is not None and abs(v) >= 0.0005:           # a tint by size: green up, red down (a cell fills only with closed edges)
+                    a_ = min(0.42, 0.06 + abs(v) * 3.6)
+                    base = (0.114, 0.357, 0.286) if v > 0 else (0.72, 0.20, 0.16)
+                    t[r, c].visible_edges = "closed"
+                    t[r, c].set_edgecolor("white"); t[r, c].set_linewidth(1.0)
+                    t[r, c].set_facecolor(tuple(1 - a_ * (1 - ch) for ch in base))
+            t[r, 13].set_text_props(weight="bold")
+        note = f"{years[0]} starts in {_nice(first_key)}." + (f" * {_nice(last_key)} is a part month, through {_nice(call['to'])}." if part else "")
+        fig.text(L, 0.462, note, fontsize=6.2, color=muted)
+        # stocks against bonds by regime: why the bond hedge is off
+        Rg = (T.get("regimes") or {}).get("rows", [])
+        if Rg:
+            fig.text(L, 0.425, "When bonds hedge: stocks against 10-year Treasuries by regime", fontsize=8.6, weight="bold", color=ink)
+            fig.text(L, 0.411, f"Monthly, {_nice(T['regimes']['from'])} to {_nice(T['regimes']['to'])}. A negative variance cut means the bond position added risk.", fontsize=6.9, color=muted)
+            cells = [[r["regime"], str(r["months"]), _num(r["corr"]) if r["corr"] <= 0 else f"+{r['corr']:.2f}", _signed(r["var_cut_30"], 0), _signed(r["var_cut_minvar"], 0), _signed(r["bond_in_selloffs"], 1)] for r in Rg]
+            tab = fig.add_axes([L, 0.150, R_ - L, 0.250]); tab.axis("off")
+            t = tab.table(cellText=cells, colLabels=["Regime", "Months", "Stock-bond\ncorrelation", "Variance cut,\n30% in bonds", "Variance cut,\nbest weight", "Bond return in\nstock selloffs"], loc="upper center", cellLoc="right",
+                          colWidths=[0.34, 0.10, 0.14, 0.14, 0.14, 0.14])
+            style(t, header_h=1.7); t.set_fontsize(6.9); t.scale(1, 1.36)
+            para(fig, L, 0.118, "Inflation direction from CPI against a year earlier. Best weight is the minimum-variance bond weight, floored at zero. Selloffs are months when stocks fell more than 5%. "
+                 "The call turns the bond hedge on only when the book's own stock-bond correlation reads hedging.",
+                 width=168, size=6.2, color=muted, lead=0.0108)
+        footer(fig, 2)
         pdf.savefig(fig); plt.close(fig)
     data = buf.getvalue()
     out.write_bytes(data)
@@ -128,6 +270,13 @@ def tearsheet_pdf(T: dict, out: Path) -> bytes:
 
 def main(argv: list[str]) -> None:
     arg = lambda k: argv[argv.index(k) + 1] if k in argv else None
+    if "--pdf-only" in argv:                    # v0.47: the daily run rebuilds the tear sheet from the day's track.json
+        from datetime import datetime, timezone
+        T = json.loads(Path(arg("--track-json")).read_text())
+        dest = Path(arg("--out") or ROOT / "site" / "tearsheet.pdf")
+        pdf = tearsheet_pdf(T, dest, generated=_nice(datetime.now(timezone.utc).date().isoformat()))
+        print(dest, len(pdf) // 1024, "KB, record through", T["asof"])
+        return
     if arg("--track-json"):
         T = json.loads(Path(arg("--track-json")).read_text())
     else:
@@ -178,10 +327,10 @@ def main(argv: list[str]) -> None:
     T["ledger"] = {"verify": ledger.verify(), "entries": rows}
     if rows and T.get("live"):
         T["live"]["calls"] = len(rows)
-        T["live"]["first_effective"] = rows[0]["effective_from"]
+        T["live"]["first_effective"] = ledger.governs_from(rows[0])
     if rows and not T.get("live", {}).get("marked_days"):      # calls logged after the build's last price: none marked yet
-        T["live"] = {"calls": len(rows), "marked_days": 0, "first_call": rows[0]["ts_utc"], "first_effective": rows[0]["effective_from"],
-                     "note": f"{len(rows)} call(s) logged; the first governs from {rows[0]['effective_from']}, after the last price in this build."}
+        T["live"] = {"calls": len(rows), "marked_days": 0, "first_call": rows[0]["ts_utc"], "first_effective": ledger.governs_from(rows[0]),
+                     "note": f"{len(rows)} calls logged; the first governs from {ledger.governs_from(rows[0])}, after the last price in this build."}
     pdf = tearsheet_pdf(T, ROOT / "site" / "tearsheet.pdf")
     T["tearsheet_pdf_b64"] = base64.b64encode(pdf).decode()
     s = json.dumps(T, separators=(",", ":"), ensure_ascii=False).replace("</", "<\\/")

@@ -94,26 +94,49 @@ TREASURY_CSV = ("https://home.treasury.gov/resource-center/data-chart-center/int
                 "?type=daily_treasury_yield_curve&field_tdr_date_value={y}&page&_format=csv")
 
 
-def treasury(path: Path = TREASURY, start_year: int = 2017) -> pd.DataFrame:
-    """The Treasury's daily par yields (2, 10 and 20 years, percent). Read from the local cache file when it exists
-    (git-ignored: raw data stays out of the repository); otherwise downloaded year by year from home.treasury.gov
-    and cached."""
-    path = Path(path)
-    if not path.exists():
-        from .data import http
-        frames = []
-        for y in range(start_year, pd.Timestamp.now().year + 1):
-            d = pd.read_csv(io.StringIO(http.get(TREASURY_CSV.format(y=y), timeout=45).decode()))
-            d["Date"] = pd.to_datetime(d["Date"])
-            frames.append(d.set_index("Date")[["2 Yr", "10 Yr", "20 Yr"]].rename(columns={"2 Yr": "DGS2", "10 Yr": "DGS10", "20 Yr": "DGS20"}))
-        f = pd.concat(frames).sort_index()
-        f = f[~f.index.duplicated()].astype(float)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"source": "US Treasury, daily par yield curve rates (home.treasury.gov); percent", "series": list(f.columns),
-                                    "from": str(f.index[0].date()), "to": str(f.index[-1].date()), "dates": [str(d.date()) for d in f.index],
-                                    **{c: [round(float(v), 4) for v in f[c]] for c in f.columns}}))
+TREASURY_MAX_AGE = 86400.0             # seconds: a cache file older than a day is refreshed (v0.47)
+TREASURY_STATUS: dict = {}             # how the last treasury() call got its data: {"source", "error"}
+
+
+def _read_treasury(path: Path) -> pd.DataFrame:
     o = json.loads(path.read_text())
     return pd.DataFrame({k: o[k] for k in o["series"]}, index=pd.to_datetime(o["dates"])).astype(float)
+
+
+def treasury(path: Path = TREASURY, start_year: int = 2017, max_age: float = TREASURY_MAX_AGE) -> pd.DataFrame:
+    """The Treasury's daily par yields (2, 10 and 20 years, percent), from a local cache file (git-ignored: raw data
+    stays out of the repository) that is downloaded year by year from home.treasury.gov.
+
+    v0.47: a cache older than `max_age` seconds is refreshed (the years from its last one on are downloaded again
+    and merged). Before, a file that existed was never read again from the source, so a machine that had run once
+    sized every later day on yields frozen at that first run. If the refresh fails the old file is used and
+    TREASURY_STATUS says so; build() then stops if the file is too far behind the prices."""
+    path = Path(path)
+    have = _read_treasury(path) if path.exists() else None
+    TREASURY_STATUS.clear()
+    TREASURY_STATUS.update({"source": "cache", "error": None})
+    stale = have is None or (pd.Timestamp.now().timestamp() - path.stat().st_mtime) > max_age
+    if stale:
+        try:
+            from .data import http
+            first = start_year if have is None else int(have.index[-1].year)
+            frames = [] if have is None else [have[have.index.year < first]]
+            for y in range(first, pd.Timestamp.now().year + 1):
+                d = pd.read_csv(io.StringIO(http.get(TREASURY_CSV.format(y=y), timeout=45).decode()))
+                d["Date"] = pd.to_datetime(d["Date"])
+                frames.append(d.set_index("Date")[["2 Yr", "10 Yr", "20 Yr"]].rename(columns={"2 Yr": "DGS2", "10 Yr": "DGS10", "20 Yr": "DGS20"}).astype(float))
+            f = pd.concat(frames).sort_index()
+            f = f[~f.index.duplicated(keep="last")].astype(float)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps({"source": "US Treasury, daily par yield curve rates (home.treasury.gov); percent", "series": list(f.columns),
+                                        "from": str(f.index[0].date()), "to": str(f.index[-1].date()), "dates": [str(d.date()) for d in f.index],
+                                        **{c: [round(float(v), 4) for v in f[c]] for c in f.columns}}))
+            TREASURY_STATUS["source"] = "download"
+        except Exception as exc:  # noqa: BLE001 - with a file in hand the run goes on and says so; with none it cannot
+            if have is None:
+                raise
+            TREASURY_STATUS["error"] = f"refresh failed, using the file to {have.index[-1].date()}: {type(exc).__name__}: {exc}"[:240]
+    return _read_treasury(path)
 
 
 def _frame(df: pd.DataFrame) -> pd.DataFrame:
@@ -321,7 +344,7 @@ def hedge_tests(rb: pd.Series, F: pd.DataFrame, E: pd.DataFrame, cash: pd.Series
             "vol": float(x.std() * math.sqrt(252)), "variance_cut": float(1 - x.var() / base.var()),
             "mean_ann": float(x.mean() * 252), "leg_mean_ann": float(leg.loc[start:].mean() * 252),
             "worst_5pct_days": float(x.loc[worst_days].mean()), "worst_10pct_months": float(xm.loc[worst_months].mean()),
-            "es95_month": es(lv, 0.05), "max_drawdown": float(1 - ((1 + x).cumprod() / (1 + x).cumprod().cummax()).min()),
+            "es95_month": es(lv, 0.05), "max_drawdown": float(1 - ((1 + x).cumprod() / (1 + x).cumprod().cummax().clip(lower=1.0)).min()),      # v0.47: from the starting value too
             "y2022": float((1 + x.loc[y22]).prod() - 1), "sharpe": float((x - d["cash"].loc[start:]).mean() / x.std() * math.sqrt(252))}
     out["now"] = {"nasdaq_beta": float(beta_q.iloc[-1]), "nasdaq": float(two["q"].iloc[-1]), "semis": float(two["s"].iloc[-1]),
                   "bond_ratio": float(h_bond.iloc[-1])}
@@ -383,20 +406,49 @@ def episodes(rb: pd.Series, R: pd.DataFrame, F: pd.DataFrame, E: pd.DataFrame) -
     return out
 
 
-def scenarios(fm: dict, w: pd.Series, y20: float, h_short: float | None) -> list[dict]:
-    """The engine's scenarios (stress.SCENARIOS) through the measured betas. The scenarios' AI move in excess of the
-    Nasdaq-100 is carried by the semis factor, the nearest external measure of it."""
+SCENARIO_FACTORS = ["market", "ai", "rates"]
+SCENARIO_METHOD = (
+    "Each scenario states three moves: the Nasdaq-100, the AI names beyond the Nasdaq-100, and the long yield. "
+    "Nasdaq leg: each name's loading on QQQ times the Nasdaq-100 move. "
+    "AI leg: each name's loading on the book's own daily return less QQQ's (today's weights), times the scenario's AI move; "
+    "the scenario's AI basket is these nine names, so the whole book's loading on this leg is about 1 by construction "
+    "and a name's is its share of that. "
+    "Rates leg: each name's loading on the 20-year par bond's return, given the other two, times the bond's repriced "
+    "return for the yield move (duration and convexity at today's 20-year yield). "
+    "Loadings are exponentially weighted least squares, half-life 126 days, on all three at once; a name with under "
+    "two years of history leans on its prior. Before v0.47 the AI move was put on semiconductors net of the "
+    "Nasdaq-100, a factor this book loads on negatively, so an AI sell-off raised the book and an AI rally lowered it.")
+
+
+def scenario_betas(R: pd.DataFrame, F: pd.DataFrame, rb: pd.Series, halflife: int = BETA_HL) -> pd.DataFrame:
+    """Each name's loadings for the scenarios (v0.47): the Nasdaq-100, the AI leg and the bond, measured together.
+
+    The engine's scenarios (stress.SCENARIOS) give the AI names' move in excess of the Nasdaq-100. The AI names are
+    this book, so the leg is the book's own return less QQQ's. That is a definition at the level of the book (its
+    loading is about 1, as it must be: if the nine names fall 15% more than the index, a book of the nine names does
+    too) and a measurement at the level of a name (which names carry it). It is used for the scenario table only:
+    the risk model, the limits and the size still rest on the three external factors, which are measured."""
+    X = pd.DataFrame({"market": F["market"], "ai": rb - F["market"], "rates": F["rates"]})
+    return exposures.latest_betas(R, X, list(R.columns), halflife=halflife, priors=PRIORS)
+
+
+def scenarios(betas: pd.DataFrame, w: pd.Series, y20: float, h_short: float | None) -> list[dict]:
+    """The engine's scenarios (stress.SCENARIOS) through scenario_betas: see SCENARIO_METHOD, which is published
+    beside the rows. `legs` splits the book's move into the three parts, so the Nasdaq leg can be read on its own."""
     D, C = duration_convexity(y20, 20.0, y20)
-    B = fm["betas"].reindex(w.index)
+    B = betas.reindex(w.index)[SCENARIO_FACTORS].astype(float)
     rows = []
     for sc in stress.SCENARIOS:
         dy = sc["dy_bp"] / 1e4
         bond = -D * dy + 0.5 * C * dy * dy
-        move = {"market": sc["market"], "semis": sc["ai"], "rates": bond}
-        names = sum(B[f].astype(float) * move[f] for f in FACTORS)
+        move = {"market": sc["market"], "ai": sc["ai"], "rates": bond}
+        names = sum(B[f] * move[f] for f in SCENARIO_FACTORS)
+        legs = {f: float((w * B[f]).sum() * move[f]) for f in SCENARIO_FACTORS}
         book = float((w * names).sum())
-        rows.append({"scenario": sc["name"], "nasdaq": sc["market"], "semis_vs_nasdaq": sc["ai"], "dy_bp": sc["dy_bp"],
-                     "bond20": float(bond), "book": book,
+        rows.append({"scenario": sc["name"], "nasdaq": sc["market"], "ai_vs_nasdaq": sc["ai"],
+                     "semis_vs_nasdaq": sc["ai"],             # the old name of the same input, kept for pages built before v0.47
+                     "dy_bp": sc["dy_bp"], "bond20": float(bond), "book": book,
+                     "legs": {"nasdaq": legs["market"], "ai": legs["ai"], "rates": legs["rates"]},
                      "with_bond_30": book + STATIC_BOND * float(bond),
                      "with_nasdaq_hedge": book - (h_short or 0.0) * sc["market"],
                      "worst_name": str(names.idxmin()), "worst_name_move": float(names.min())})
@@ -424,7 +476,7 @@ def correlation_block(rb: pd.Series, F: pd.DataFrame) -> dict:
     return {"definition": "63-day exponentially weighted correlation of daily returns, book vs the 20-year par bond",
             "book_63d": float(c_book.iloc[-1]), "nasdaq_63d": float(c_q.iloc[-1]), "book_36m_monthly": m36,
             "state": lab.iloc[-1], "state_since": str(lab.index[(lab != lab.shift()).to_numpy()][-1].date()) if (lab != lab.iloc[-1]).any() else None,      # v0.44.1: the first day of the state, not the last day before it
-            "share_days_hedging": float((lab == regime.HEDGING).mean()),
+            "share_days_hedging": float((lab.dropna() == regime.HEDGING).mean()),      # v0.47: of the days that have a state (the warm-up has none)
             "by_year": {int(k): float(v) for k, v in yearly.items()},
             "shock": [{"group": g, **{k: float(v) for k, v in r.items()}} for g, r in shock.iterrows()]}
 
@@ -442,13 +494,13 @@ def liquidity(vol: dict[str, pd.DataFrame], w: pd.Series, asof: pd.Timestamp) ->
 
 def drawdowns(rb: pd.Series, q: pd.Series) -> dict:
     lv = (1 + rb.dropna()).cumprod()
-    dd = lv / lv.cummax() - 1
+    dd = lv / lv.cummax().clip(lower=1.0) - 1          # v0.47: the record starts at 1.0, so a fall on its first days is a fall from there
     t = dd.idxmin()
-    peak = lv.loc[:t].idxmax()
+    peak = lv.loc[:t].idxmax() if lv.loc[:t].max() >= 1.0 else lv.index[0]      # a peak at the start is dated to the first day
     lq = (1 + q.reindex(lv.index).fillna(0.0)).cumprod()
     mo = pd.DataFrame({"book": lv, "nasdaq": lq}).resample("ME").last()
-    return {"max": float(-dd.min()), "peak": str(peak.date()), "trough": str(t.date()), "now": float(-dd.iloc[-1]),
-            "nasdaq_max": float(-(lq / lq.cummax() - 1).min()),
+    return {"max": float(max(-dd.min(), 0.0)), "peak": str(peak.date()), "trough": str(t.date()), "now": float(max(-dd.iloc[-1], 0.0)),
+            "nasdaq_max": float(max(-(lq / lq.cummax().clip(lower=1.0) - 1).min(), 0.0)),
             "monthly": {"months": [str(i.date())[:7] for i in mo.index], "book": [round(float(v), 4) for v in mo["book"]],
                         "nasdaq": [round(float(v), 4) for v in mo["nasdaq"]]},
             "cagr": float(lv.iloc[-1] ** (252 / len(lv)) - 1), "nasdaq_cagr": float(lq.iloc[-1] ** (252 / len(lq)) - 1)}
@@ -462,13 +514,61 @@ def _slim(o: dict) -> dict:
             "rules": [{"rule": t["rule"], "t": t["t"], "sharpe_rule": t["sharpe_rule"], "maxdd_rule": t["maxdd_rule"]} for t in o["tests"]]}
 
 
+TREASURY_LAG_OK = 1                    # sessions the yields may trail the prices without comment: one bond-market holiday on which stocks trade
+TREASURY_LAG_MAX = 3                   # beyond this the run stops, as it does for a price that stale (download: stale_bdays=3)
+
+
+def inputs(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book: dict[str, float] = BOOK) -> dict:
+    """The panel and the rates a call is sized on, all as of the prices' last session (v0.47). build() and
+    sensitivity.build() both start here, so they cannot read different rates.
+
+    The yields are cut at the prices' as-of date: a Treasury row that posts after that session is not this call's
+    data, and a second run later the same day must give the same size. The cash rate and the 20-year yield are the
+    last ones actually printed (a blank on the last row used to become a size of zero). Yields that end more than
+    TREASURY_LAG_OK sessions before the prices are reported in `warnings`; more than TREASURY_LAG_MAX stops the
+    run, because every later day's bond return would be a silent zero."""
+    warn = []
+    if ust is None:
+        ust = treasury()
+        if TREASURY_STATUS.get("error"):
+            warn.append(f"Treasury yields: {TREASURY_STATUS['error']}")
+    P = panel(prices, ust, book)
+    asof = P["R"].dropna(how="all").index[-1]
+    ignored = int((ust.index > asof).sum())
+    if ignored or P["R"].index[-1] > asof:
+        ust = ust.loc[:asof]
+        P = panel(prices, ust, book)
+        for k in ("R", "F", "E", "cash", "bond"):
+            P[k] = P[k].loc[:asof]
+    lag = int(np.busday_count(ust.index[-1].date(), asof.date()))
+    if lag > TREASURY_LAG_MAX:
+        raise ValueError(f"Treasury yields end {ust.index[-1].date()}, {lag} sessions before the prices ({asof.date()}): "
+                         f"refusing to size on bond returns and a cash rate that stale (limit {TREASURY_LAG_MAX})")
+    if lag > TREASURY_LAG_OK:
+        warn.append(f"Treasury yields end {ust.index[-1].date()}, {lag} sessions before the prices ({asof.date()}); the bond's "
+                    "return on the sessions between is carried as zero and the cash rate is the last one printed.")
+
+    def last(col: str) -> tuple[float, pd.Timestamp]:
+        s = ust[col].dropna()
+        if s.empty or int(np.busday_count(s.index[-1].date(), asof.date())) > TREASURY_LAG_MAX:
+            raise ValueError(f"no {col} yield printed within {TREASURY_LAG_MAX} sessions of {asof.date()} "
+                             f"(last: {s.index[-1].date() if len(s) else 'none'}): the call needs a cash rate and a long yield")
+        return float(s.iloc[-1]) / 100, s.index[-1]
+
+    rf, rf_date = last("DGS2")
+    y20, _ = last("DGS20")
+    if rf_date < ust.index[-1]:
+        warn.append(f"The 2-year yield is blank after {rf_date.date()}; the cash rate is that day's.")
+    return {"ust": ust, "P": P, "asof": asof, "rf": rf, "rf_date": rf_date, "y20": y20, "treasury_lag_bdays": lag,
+            "treasury_rows_after_asof": ignored, "warnings": warn}
+
+
 def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book: dict[str, float] = BOOK,
           meta: dict | None = None, long_record: dict | None = None) -> dict:
-    ust = treasury() if ust is None else ust
+    I = inputs(prices, ust, book)
+    ust, P, asof, rf, y20 = I["ust"], I["P"], I["asof"], I["rf"], I["y20"]
     w = pd.Series(book, dtype=float)
-    P = panel(prices, ust, book)
     R, F, E, cash = P["R"], P["F"], P["E"], P["cash"]
-    asof = R.dropna(how="all").index[-1]
     rb = book_returns(R, w)
     fm = factor_model(R, F, w)
     sigma = fm["vol"]
@@ -480,17 +580,17 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
         own = float(b["m"].iloc[-1]) if len(b) else float("nan")
         n = float(b["n_obs"].iloc[-1]) if len(b) else 0.0
         broad[k] = own if n >= 504 else exposures.shrink(own, n, broad.get(PRIORS.get(k), own), 126.0)
-    rf = float(ust["DGS2"].iloc[-1]) / 100
-    mu = rf + EQUITY_PREMIUM * beta_vti
+    mu = rf + EQUITY_PREMIUM * beta_vti              # rf: the last 2-year yield printed on or before the as-of date (inputs)
     sizes = {"es_budget": ES_BUDGET / tail["es95"]["governing"], "vol_target": VOL_TARGET / sigma,
              "drawdown_cap": sizing.max_leverage(mu, sigma, MAX_DD, cash_rate=rf), "gross_cap": MAX_GROSS}
     binding = min(sizes, key=sizes.get)
     hedge_need = keep_names_hedge(rb, E, cash, fm, w, rf)
-    y20 = float(ust["DGS20"].iloc[-1]) / 100
     rc = fm["rc"]
     B = fm["betas"]
+    SB = scenario_betas(R, F, rb)                    # v0.47: the scenario table's own loadings; nothing above this line reads them
     out = {
         "schema": 1, "asof": str(asof.date()), "treasury_to": str(ust.index[-1].date()),
+        "treasury_lag_bdays": I["treasury_lag_bdays"], "treasury_rows_after_asof": I["treasury_rows_after_asof"], "warnings": I["warnings"],
         "from": str(rb.dropna().index[0].date()), "days": int(rb.notna().sum()),
         "weights": book, "nav_usd": NAV_USD, "first_date": P["first"], "last_date": P["last"],
         "exposure": {**fm["exposure"], "beta_broad_market": float(exposures.ewls_betas(rb, E[["VTI"]].rename(columns={"VTI": "m"}), halflife=BETA_HL, min_obs=60).dropna()["m"].iloc[-1]),
@@ -507,7 +607,7 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
                  "contributions": [{"name": k, "weight": float(rc.loc[k, "weight"]), "share": float(rc.loc[k, "share"])} for k in rc.index]},
         "tail": tail, "var_backtest": {"normal": kupiec(rb), "filtered": kupiec(rb, model="filtered")},
         "limits": {"es_budget": ES_BUDGET, "vol_target": VOL_TARGET, "max_drawdown": MAX_DD, "max_gross": MAX_GROSS,
-                   "drawdown_drift": mu, "cash_rate": rf},
+                   "drawdown_drift": mu, "cash_rate": rf, "cash_rate_date": str(I["rf_date"].date())},
         "sizes": sizes, "binding": binding, "size": min(sizes.values()),
         "at_full": {"es95": tail["es95"]["governing"], "vol": sigma,
                     "drawdown95": sizing.drawdown_quantile(mu, sigma, 1.0, cash_rate=rf)},
@@ -522,10 +622,15 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
                      "long_record": long_record, "rule": sizing_rules.HEADLINE, "n_rules": sizing_rules.N_RULES, "t_bar": sizing_rules.expected_max_t(sizing_rules.N_RULES),
                      "gamma": sizing_rules.GAMMA},
         "hedges": hedge_tests(rb, F, E, cash), "episodes": episodes(rb, R, F, E),
-        "scenarios": scenarios(fm, w, y20, hedge_need.get("best_short")),
+        "scenarios": scenarios(SB, w, y20, hedge_need.get("best_short")),
+        "scenarios_method": SCENARIO_METHOD,
+        "scenario_loadings": {"book": {f: float((w * SB.reindex(w.index)[f].astype(float)).sum()) for f in SCENARIO_FACTORS},
+                              "names": [{"name": k, **{f: float(SB.loc[k, f]) for f in SCENARIO_FACTORS}} for k in w.index]},
         "worst_days": worst_days(rb, F, E), "correlation": correlation_block(rb, F),
         "liquidity": liquidity(P["vol"], w, asof), "drawdowns": drawdowns(rb, E["QQQ"]),
         "limitations": LIMITATIONS, "meta": meta or {},
+        # v0.47: what the price validation found (download()), published with the call it guards
+        **({"validation": prices.validation} if getattr(prices, "validation", None) else {}),
         "sources": {"prices": MIRROR_REPO, "treasury": "US Treasury daily par yield curve rates (home.treasury.gov)",
                     "method": "buildout/book.py"},
     }
@@ -547,31 +652,178 @@ def _clean(o):
 
 
 # ---------------------------------------------------------------- download and the synthetic world
-def download(cache: Path | None = None, book: dict[str, float] = BOOK, validate: bool = True) -> dict[str, pd.DataFrame]:
+# ---- v0.47: the price pull and what it must pass before a call is sized on it ----------------------------------
+# The mirror is one person's GitHub repository, refreshed from Yahoo Finance by yfinance (its README) at about 10:30 to
+# 12:20 UTC, Tuesday to Saturday. The call ledger, the marked record and the paper account are all built on it, so the
+# pull is checked four ways and any failure stops the step (the daily job then turns red and opens the issue):
+#   form       duplicates, order, non-positive or missing closes (buildout/data/validate.py)
+#   date       every file ends on the session before today in New York (buildout/sessions.py). Before, staleness was
+#              measured against the newest date inside the pull itself, so a mirror frozen for six weeks passed
+#   together   every file ends on the same day: a name a session behind the others is not quietly re-weighted
+#   jumps      no one-day fall beyond 30% or rise beyond 45% (data/corporate_actions.py): the mirror's prices are
+#              already split-adjusted, so such a move is a split it missed or a bad print, unless listed as confirmed
+# and the newest closes are compared with a second source (Stooq, then Yahoo; datahub.recent_closes). A newest close
+# more than CROSS_CHECK_TOL away fails the step; a second source that does not answer is recorded and warned about.
+CROSS_CHECK_TOL = 0.01          # 1%: wider than any dividend adjustment on a close of the last week, far inside a bad print
+CROSS_CHECK_DAYS = 5
+CROSS_CHECK_EXTRA = ("qqq",)    # besides the book's own names
+SECOND_SOURCE_ORDER = ("stooq", "yahoo")      # Stooq first: the mirror is itself built from Yahoo, so Yahoo is not independent of it
+MIRROR_SOURCE = "yennanliu/finance_data on GitHub (Yahoo Finance via yfinance); split-adjusted closes, dividends on ex-dates"
+
+
+class Prices(dict):
+    """What download() returns: the frames by file name, and what the validation found (`validation`, None when
+    validate=False). A dict in every other way; a filtered copy is a plain dict and carries no validation."""
+    validation: dict | None = None
+
+
+def expected_asof(now=None) -> pd.Timestamp:
+    """The newest close a pull made now should have: the session before today in New York."""
+    from datetime import datetime, timezone
+    from . import sessions
+    t = pd.Timestamp(now).to_pydatetime() if now is not None else datetime.now(timezone.utc)
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=timezone.utc)
+    return pd.Timestamp(sessions.prev_session(t.astimezone(sessions.NY).date()))
+
+
+def _closes(df: pd.DataFrame) -> pd.Series:
+    d = pd.to_datetime(df.iloc[:, 0], errors="coerce")
+    s = pd.Series(pd.to_numeric(df["close"], errors="coerce").to_numpy(), index=d)
+    return s[s.index.notna()].dropna().sort_index()
+
+
+def cross_check(prices: dict, names: list[str], fetch=None, tol: float = CROSS_CHECK_TOL, days: int = CROSS_CHECK_DAYS) -> dict:
+    """The newest closes of `names` (file names) against a second source. Returns
+        status   "ok" (every name's newest close agrees), "disagrees" (one or more differ by more than tol),
+                 "partial" (some names had no second quote; the rest agree) or "unavailable" (no second quote at all)
+        names    per file: the second source, the newest date compared, both closes, the gap, and earlier closes that
+                 differ by more than tol (reported, not fatal: an older close can differ by an adjustment)
+    `fetch(ticker, days, order)` returns (closes indexed by date, source, errors); default datahub.recent_closes.
+    Never raises: the caller decides what a disagreement means."""
+    from . import datahub
+    fetch = fetch or (lambda t, n, order: datahub.recent_closes(t, n, order))
+    order, rows, bad, missing = list(SECOND_SOURCE_ORDER), {}, [], []
+    for f in names:
+        mine = _closes(prices[f]).tail(days)
+        try:
+            other, src, errs = fetch(f.upper(), days + 5, tuple(order))
+        except Exception as exc:  # noqa: BLE001 - a second source that breaks is a second source that did not answer
+            other, src, errs = pd.Series(dtype=float), "none", {"error": f"{type(exc).__name__}: {exc}"[:120]}
+        if f == names[0] and src != "none":         # a source that had nothing for the first name (Stooq behind its browser
+            order = [s for s in order if s == src or s not in (errs or {})] or order      # check) is not asked ten more times
+        other = pd.Series(other, dtype=float)
+        other.index = pd.to_datetime(other.index)
+        last = mine.index[-1] if len(mine) else None
+        if last is None or last not in other.index:
+            missing.append(f)
+            rows[f] = {"source": src, "status": "unavailable",
+                       "why": (f"the second source has no close for {last.date()}" if last is not None and len(other) else "no second quote") + (f" ({errs})" if errs else "")[:200]}
+            continue
+        gap = float(mine[last] / other[last] - 1.0)
+        earlier = [{"date": d.strftime("%Y-%m-%d"), "gap": float(mine[d] / other[d] - 1.0)} for d in mine.index[:-1] if d in other.index and abs(mine[d] / other[d] - 1.0) > tol]
+        rows[f] = {"source": src, "independent": src != "yahoo", "date": last.strftime("%Y-%m-%d"), "close": float(mine[last]), "second": float(other[last]), "gap": gap,
+                   "status": "ok" if abs(gap) <= tol else "disagrees", "earlier_gaps": earlier}
+        if abs(gap) > tol:
+            bad.append(f)
+    checked = [f for f in names if rows[f]["status"] != "unavailable"]
+    status = "disagrees" if bad else "unavailable" if not checked else "partial" if missing else "ok"
+    used = sorted({rows[f]["source"] for f in checked})
+    detail = ("; ".join(f"{f} {rows[f]['date']}: {rows[f]['close']:.2f} here, {rows[f]['second']:.2f} at {rows[f]['source']} ({rows[f]['gap']:+.2%})" for f in bad) if bad
+              else f"{len(checked)} of {len(names)} names within {tol:.1%} of {', '.join(used) or 'no source'}" + (f"; no second quote for {', '.join(missing)}" if missing else ""))
+    return {"status": status, "tolerance": tol, "sources": used, "independent": bool(used) and "yahoo" not in used,
+            "note": None if not used or "yahoo" not in used else "Yahoo answered; the mirror is built from Yahoo, so this checks the copy against its origin, not the origin itself",
+            "detail": detail, "names": rows}
+
+
+def validate_pull(out: dict, book: dict[str, float] = BOOK, now=None, check: dict | None = None) -> dict:
+    """Every rule above on one pull. Returns the validation record that book.json publishes (ok, failed, notes,
+    dates, the cross-check); `ok` False means the call must not be sized on this pull. Does not raise."""
+    from datetime import datetime, timezone
+    from . import sessions
+    from .data.corporate_actions import SPLIT_GUARD_DOWN, SPLIT_GUARD_UP, unexplained_jumps
+    from .data.validate import FATAL, validate_all
+    rep = validate_all(out, asof=None)
+    failed: dict[str, list[str]] = {r["name"]: [i["kind"] + ": " + i["detail"] for i in r["issues"] if i["kind"] in FATAL] for r in rep["results"] if not r["ok"]}
+    notes = [f"{r['name']}: {i['kind'][5:]}: {i['detail']}" for r in rep["results"] for i in r["issues"] if i["kind"].startswith("warn_") and i["kind"] != "warn_columns"]
+    lasts = {k: _closes(df).index[-1] for k, df in out.items() if len(df) and "close" in df and len(_closes(df))}
+    want, newest = expected_asof(now), (max(lasts.values()) if lasts else None)
+    for k, d in sorted(lasts.items()):
+        n = sessions.sessions_between(d.date(), want.date())
+        if n > 0:
+            failed.setdefault(k, []).append(f"stale: ends {d.date()}, {n} session{'s' if n != 1 else ''} before the last completed session ({want.date()})")
+        elif d < newest:
+            failed.setdefault(k, []).append(f"stale: ends {d.date()}, behind the other names ({newest.date()})")
+    closes = pd.DataFrame({k.upper(): _closes(df) for k, df in out.items() if len(df) and "close" in df})
+    for sym, rows in unexplained_jumps(closes).items():
+        failed.setdefault(sym.lower(), []).append("jump: " + ", ".join(f"{r['date']} {r['change']:+.0%}" + (f" (a {r['looks_like']} split?)" if r["looks_like"] else "") for r in rows[:5])
+                                                  + " with no split recorded; if genuine, add the date to CONFIRMED_MOVES in buildout/data/corporate_actions.py")
+    if check is not None:
+        for f in [f for f, r in (check.get("names") or {}).items() if r.get("status") == "disagrees"]:
+            r = check["names"][f]
+            failed.setdefault(f, []).append(f"cross-check: the {r['date']} close is {r['close']:.2f} here and {r['second']:.2f} at {r['source']} ({r['gap']:+.2%}, limit {check['tolerance']:.1%})")
+        if check.get("status") in ("unavailable", "partial", "not_run"):
+            notes.append(f"cross-check {check['status']}: {check.get('detail', '')}")
+        notes += [f"{f}: the second source's {g['date']} close differs by {g['gap']:+.2%}" for f, r in (check.get("names") or {}).items() for g in r.get("earlier_gaps") or []]
+    return {"ok": not failed, "n": len(out), "failed": sorted(failed), "problems": {k: v for k, v in sorted(failed.items())}, "warnings": len(notes), "notes": notes[:40],
+            "asof": newest.strftime("%Y-%m-%d") if newest is not None else None, "expected_asof": want.strftime("%Y-%m-%d"), "source": MIRROR_SOURCE,
+            "rules": {"stale": "every file ends on the session before today in New York, and on the same day as the others",
+                      "jump": f"no one-day fall beyond {SPLIT_GUARD_DOWN:.0%} or rise beyond {SPLIT_GUARD_UP:.0%} without a recorded split",
+                      "cross_check": f"the newest close within {CROSS_CHECK_TOL:.0%} of a second source"},
+            "cross_check": check or {"status": "not_run", "detail": "no second source was asked"},
+            "checked_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+
+
+def download(cache: Path | None = None, book: dict[str, float] = BOOK, validate: bool = True, now=None, second_source=None) -> dict[str, pd.DataFrame]:
     """The mirror's CSVs, one per name and ETF, cached for a day. One missing file raises: a book without a name is
-    a different book. Every pull is validated (buildout/data/validate.py: duplicates, order, non-positive closes,
-    staleness are fatal; gaps, unrecorded split-sized jumps are warnings)."""
+    a different book. Every pull is validated (validate_pull above) and a pull that fails raises ValueError, so the
+    step stops rather than sizing on it. The result carries the validation record (`.validation`), which build()
+    publishes in book.json. The second-source check runs when prices were fetched in this call (not when every file
+    came from the day's cache: the check made when they were fetched is stored beside them and reused).
+    `now` and `second_source` are for tests."""
     from .data import http
     files = sorted({FILE.get(k, k.lower()) for k in book} | set(FACTOR_ETF.values()))
-    out = {}
+    out, fetched = Prices(), False
     for f in files:
         p = Path(cache) / f"{f}.csv" if cache else None
         if p and p.exists() and (pd.Timestamp.now().timestamp() - p.stat().st_mtime) < 86400:
             text = p.read_text()
         else:
             text = http.get(MIRROR.format(f), timeout=45).decode()
+            fetched = True
             if p:
                 p.parent.mkdir(parents=True, exist_ok=True)
-                p.write_text(text)
+                tmp = p.with_name(f".{p.name}.tmp")          # a killed run never leaves half a file for tomorrow's cache hit
+                tmp.write_text(text)
+                tmp.replace(p)
         out[f] = pd.read_csv(io.StringIO(text))
     if validate:
-        from .data.validate import FATAL, validate_all
-        newest = max((pd.to_datetime(df.iloc[:, 0], errors="coerce").max() for df in out.values() if len(df)), default=None)
-        rep = validate_all(out, asof=newest, stale_bdays=3)      # v0.39.1: one name lagging the others is stale, not silently re-weighted
-        LAST_VALIDATION.clear(); LAST_VALIDATION.update({k: v for k, v in rep.items() if k != "results"})
-        if not rep["ok"]:   # v0.38: a bad pull stops the run (and the daily job alerts) rather than sizing on it
-            bad = [r for r in rep["results"] if not r["ok"]]
-            raise ValueError("price validation failed: " + "; ".join(f"{r['name']}: " + ", ".join(i["kind"] for i in r["issues"] if i["kind"] in FATAL) for r in bad))
+        names = sorted({FILE.get(k, k.lower()) for k in book} | set(CROSS_CHECK_EXTRA) & set(out))
+        lasts = [_closes(df).index[-1] for df in out.values() if len(df) and "close" in df and len(_closes(df))]
+        newest = max(lasts).strftime("%Y-%m-%d") if lasts else None
+        stored = Path(cache) / "cross_check.json" if cache else None
+        check = None
+        if fetched or second_source is not None:
+            try:
+                check = cross_check(out, [n for n in names if n in out and len(out[n]) and "close" in out[n]], fetch=second_source)
+            except Exception as exc:  # noqa: BLE001 - the check itself must never be what stops the call
+                check = {"status": "unavailable", "detail": f"the cross-check could not run: {type(exc).__name__}: {exc}"[:200], "names": {}, "tolerance": CROSS_CHECK_TOL}
+            if stored is not None:
+                stored.parent.mkdir(parents=True, exist_ok=True)
+                stored.write_text(json.dumps({"asof": newest, "check": check}))
+        elif stored is not None and stored.exists():
+            try:
+                prev = json.loads(stored.read_text())
+                check = prev["check"] if prev.get("asof") == newest else None
+            except (OSError, ValueError, KeyError):
+                check = None
+        if check is None:
+            check = {"status": "not_run", "detail": "the prices came from the local cache and no check is stored for this date", "names": {}, "tolerance": CROSS_CHECK_TOL}
+        v = validate_pull(out, book, now=now, check=check)
+        out.validation = v
+        LAST_VALIDATION.clear(); LAST_VALIDATION.update(v)
+        if not v["ok"]:   # v0.38: a bad pull stops the run (and the daily job alerts) rather than sizing on it
+            raise ValueError("price validation failed: " + "; ".join(f"{k}: " + "; ".join(p) for k, p in v["problems"].items()))
     return out
 
 

@@ -2,7 +2,7 @@
      voices.js (v0.12): what legendary and current investors actually said, extreme bear to extreme bull.
      Retrieval mirrors buildout/voices.py exactly (tests/test_v12.py holds them equal). Every quote is verbatim from
      its linked source; nothing on this page writes a quote. The optional Claude step may reorder library quotes and
-     summarize a side in its own words, labelled as such; ids it returns that are not in the library are dropped.
+     summarize a side in its own words, labeled as such; ids it returns that are not in the library are dropped.
      ===================================================================================== */
   const VC = VOICES_CFG;
   const VQ = VOICES_LIB.quotes.filter((q) => q && VC.topics[q.topic] && [-2, -1, 0, 1, 2].includes(q.stance));

@@ -702,13 +702,37 @@ def carver_download(cache: str | Path, markets: list[str] | None = None) -> tupl
     return frames, failed
 
 
-def databento_frames(start: str = "2010-06-06", end: str | None = None, markets: list[str] | None = None, max_cost_usd: float = 5.0) -> tuple[dict, dict]:
+def range_in_windows(client, schema: str, symbols: list[str], start: str, end: str, years: int = 2, tries: int = 3, backoff: float = 5.0,
+                     sleep=None, retried: list | None = None) -> pd.DataFrame:
+    """One Databento schema over [start, end) pulled in windows of `years`, each window retried on a transient failure
+    (v0.47). The weekly run asked for sixteen years of contract definitions in one request and the gateway timed out
+    (504) on every run since the workflow was written; a window of two years is a request the gateway finishes, and a
+    timeout on one window costs a retry of that window, not the run. Windows are half-open and contiguous, so no row
+    is read twice."""
+    from .data import http
+    a, b = pd.Timestamp(start), pd.Timestamp(end)
+    edges = [a]
+    while edges[-1] < b:
+        edges.append(min(edges[-1] + pd.DateOffset(years=years), b))
+    parts = []
+    for lo, hi in zip(edges[:-1], edges[1:]):
+        fn = lambda lo=lo, hi=hi: client.timeseries.get_range(dataset=DATASET, schema=schema, symbols=symbols, stype_in="continuous",  # noqa: E731
+                                                              start=lo.strftime("%Y-%m-%d"), end=hi.strftime("%Y-%m-%d")).to_df().reset_index()
+        note = (lambda n, exc, lo=lo: retried.append(f"{schema} from {lo.date()}: try {n}: {type(exc).__name__}: {exc}"[:160])) if retried is not None else None
+        parts.append(http.with_retries(fn, tries=tries, backoff=backoff, sleep=sleep or http.time.sleep, on_retry=note))
+    parts = [x for x in parts if len(x)]
+    return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+
+
+def databento_frames(start: str = "2010-06-06", end: str | None = None, markets: list[str] | None = None, max_cost_usd: float = 5.0,
+                     client=None) -> tuple[dict, dict]:
     """CME Globex daily bars for each root's two most traded contracts (ROOT.v.0 and ROOT.v.1, Databento's volume
     roll) with their contract months from the definition schema, in the same daily format as parse_carver: the held
     contract is v.0, and v.1 serves as both the carry and the forward contract. Prices are Databento's, unadjusted;
     returns come from each contract's own closes. Refuses a pull estimated above max_cost_usd."""
-    import databento as db
-    client = db.Historical()
+    if client is None:
+        import databento as db
+        client = db.Historical()
     roots = [MARKETS[k][1] for k in (markets or list(MARKETS)) if k not in ("GE",)]
     symbols = [f"{r}.v.{i}" for r in roots for i in (0, 1)]
     end = end or (pd.Timestamp.now(tz="UTC").normalize() - pd.Timedelta(days=1)).strftime("%Y-%m-%d")
@@ -716,8 +740,11 @@ def databento_frames(start: str = "2010-06-06", end: str | None = None, markets:
     cost += float(client.metadata.get_cost(dataset=DATASET, schema="definition", symbols=symbols, stype_in="continuous", start=start, end=end))
     if cost > max_cost_usd:
         raise RuntimeError(f"Databento estimates ${cost:.2f} for this pull, above the ${max_cost_usd:.2f} limit; raise max_cost_usd to proceed")
-    bars = client.timeseries.get_range(dataset=DATASET, schema="ohlcv-1d", symbols=symbols, stype_in="continuous", start=start, end=end).to_df().reset_index()
-    defs = client.timeseries.get_range(dataset=DATASET, schema="definition", symbols=symbols, stype_in="continuous", start=start, end=end).to_df().reset_index()
+    retried: list[str] = []
+    bars = range_in_windows(client, "ohlcv-1d", symbols, start, end, years=8, retried=retried)
+    defs = range_in_windows(client, "definition", symbols, start, end, years=2, retried=retried)
+    if not len(bars) or not len(defs):
+        raise RuntimeError(f"Databento returned {len(bars)} bars and {len(defs)} definitions for {len(symbols)} symbols from {start} to {end}")
     def _day(x):
         x = pd.to_datetime(x)
         return (x.dt.tz_convert(None) if x.dt.tz is not None else x).dt.normalize()
@@ -733,6 +760,8 @@ def databento_frames(start: str = "2010-06-06", end: str | None = None, markets:
     fwd = pd.merge_asof(bars, D, left_on="date", right_on="dday", by="instrument_id", direction="forward")["m"].to_numpy()
     bars["m"] = np.where(np.isfinite(back), back, fwd)                     # each bar takes the definition in force on its date
     frames, failed = {}, {"cost_usd": round(cost, 2)}
+    if retried:
+        failed["retries"] = retried[:20]
     for k in markets or list(MARKETS):
         r = MARKETS[k][1]
         a = bars[bars["symbol"] == f"{r}.v.0"].drop_duplicates("date", keep="last").set_index("date")

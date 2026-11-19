@@ -93,6 +93,21 @@ def test_a_link_to_a_library_desk_opens_the_library():
     assert "BUILD_CORE === true && !(box && box.isConnected)" in v, "a step with no panel on the core page is skipped, not reported as failed"
 
 
+def test_every_link_on_the_core_page_has_a_target():
+    """v0.47: a link on the core page to an element only the library has (a finding, a decision, a tool) opened Home
+    without a word; fourteen targets on Today's call and the Appendix did. boot.js now sends any id the core page
+    lacks to the library, and the build checks that every link target the core page can show exists on one page."""
+    links = A.core_links()
+    assert len(links) > 200 and not [t for t, where in links.items() if where == "nowhere"]
+    for t in ("fi-hedge", "d-duration", "roc-title", "bc-title", "lanes-title", "size"):      # six of the fourteen
+        assert links.get(t) in ("library", "made at run time"), (t, links.get(t))
+    assert links["book"] == "core" and links["bonds"] == "library"
+    boot = (SRC / "boot.js").read_text()
+    assert "if (!el && CORE && /^[A-Za-z][\\w-]*$/.test(token)) { toLibrary(token);" in boot
+    broken = A.core_links(A.assemble(core=True).replace('href="#track"', 'href="#no-such-desk-anywhere"', 1))
+    assert broken.get("no-such-desk-anywhere") == "nowhere", "a link to nothing is caught"
+
+
 def _node_has_playwright() -> bool:
     try:
         return subprocess.run(["node", "-e", "require('playwright')"], capture_output=True, timeout=60).returncode == 0

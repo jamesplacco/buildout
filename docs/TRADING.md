@@ -14,7 +14,7 @@ Buildout call (logged in ledger/calls.jsonl)
   -> the mode gate:   manual      wait for your approval of this ticket id
                       supervised  wait for an approval, or act under a standing one
                       autonomous  act, if the mandate is armed
-  -> sells first, then buys; each order polled to its fill or cancelled at expiry
+  -> sells first, then buys; each order polled to its fill or canceled at expiry
   -> record_fills: fills checked against the ticket, hash-chained log; journal; digest
 ```
 
@@ -30,14 +30,24 @@ Buildout call (logged in ledger/calls.jsonl)
 
 | `broker` | Who places the orders | Credential | Status |
 |---|---|---|---|
-| `paper` | the paper broker, in a model account. An order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread (v0.42.5; before, at the limit against the last stored close, a price that could be older than the order) | none | running: the public paper bot (`paper/`, from the daily workflow, Tuesday to Saturday at 11:17 UTC on the prior session's close) and private rehearsals |
-| `assistant` | the assistant that holds Robinhood's Trading MCP (Claude with the Robinhood connector) places exactly what the trader hands it and reports the fills through `record_fills` | Robinhood's OAuth, held by the assistant | works today |
+| `paper` | the paper broker, in a model account. An order rests until the close of the first exchange session that ends after it was written and fills at that close with a 5 bp half-spread (v0.42.5; before, at the limit against the last stored close, a price that could be older than the order) | none | running: the public paper bot (`paper/`, from the daily workflow, on the prior session's close; see "When the daily run happens" below) and private rehearsals |
+| `assistant` | the assistant that holds Robinhood's Trading MCP (Claude with the Robinhood connector) places exactly what the trader hands it and reports the fills through `record_fills` | Robinhood's OAuth, held by the assistant | built; tested against a stand-in account; no live order has been placed |
 | `robinhood_mcp` | Buildout's own JSON-RPC client on `https://agent.robinhood.com/mcp/trading`, OAuth 2.1 with PKCE in the standard library | Robinhood's OAuth, tokens in `private/` (mode 600) | built; Robinhood has not published its tool names, so `python -m buildout broker probe` lists them and you fill `private/broker.toml`; untested against the live endpoint from this build |
 
 What Robinhood says (support pages read Nov 8, 2026): the agent trades only in the Agentic account; "before your agent
 takes action, you can review what it's about to do," but "if you've asked your agent to take action without asking
 your approval, it can place trades without your confirmation"; and "you are ultimately responsible for the trades your
 AI agent places in your account." The trader's modes sit inside those terms.
+
+## When the daily run happens
+
+Scheduled for 11:17 UTC, Tuesday to Saturday; GitHub starts scheduled jobs late, and runs have started between about 16:00 and 20:00 UTC, during the US session. The ledger's timestamp is the record. A call governs from the first session whose prior close came after it was written.
+
+The paper bot runs one pass with each daily run. Since v0.47 it follows the call: it rebalances when the whole book
+is more than 1% of equity away from the call's size, or any name is outside its 2% band, and then brings every name
+to target, in whole shares rounded to the nearest. (Before, it checked only each name's 2% band, so it did not
+follow a change in the call's size.) A paper order fills at the first close after it is written and is planned on
+the call that governs the session it is held through.
 
 ## The mandate (`private/mandate.toml`)
 
@@ -71,8 +81,9 @@ notes = ""                 # an armed autonomous mandate must say why unattended
 
 A live broker trades in **manual** mode, whatever the mandate says, until two records exist:
 
-1. **60 trading days of the paper bot holding a position** (`paper/trader/`, committed by the daily run; days before
-   its first filled ticket do not count).
+1. **60 NYSE sessions closed with the paper bot holding a position** (`paper/trader/`, committed by the daily run),
+   counted from its first fill made under the v0.47 rule above. Sessions before that fill do not count, so the
+   count restarted at 0 with v0.47.
 2. **5 live tickets filled after you approved that ticket's id** (`private/trader/journal.jsonl` and
    `private/fills.jsonl`). Standing approvals and paper fills do not count.
 
@@ -88,12 +99,13 @@ A live broker also needs `armed = true` in every mode, manual included.
 ## Going autonomous, in order
 
 1. **Paper**: nothing to do. The public paper bot runs from the daily workflow in `paper/`; a private rehearsal is
-   `python -m buildout trader --once` on the default mandate. The trader acts on the call in force today (the newest
-   ledger entry whose effective date has come), not the call written today, which takes effect tomorrow.
+   `python -m buildout trader --once` on the default mandate. The trader acts on the call in force (the newest
+   ledger entry whose governing date has come), not the call written today, which governs from the first session
+   whose prior close came after it was written.
 2. **Live, manual** (this is where the gate keeps you until the evidence is in): `broker = "assistant"`,
    `armed = true`, your name and the date. In Claude Code, `/rebalance` calls `trading_recommendation` with the
    account and quotes from Robinhood; the ticket is staged; you approve its id; the assistant places the orders and
-   records the fills. Five filled tickets and sixty paper days open the gate.
+   records the fills. Five filled tickets and sixty paper sessions open the gate.
 3. **Supervised**: `mode = "supervised"`; give a standing approval before a session (`--standing 120`) and let
    `/autotrade` run without a question inside that window.
 4. **Autonomous**: `mode = "autonomous"` and the reason in `notes`. Set Robinhood's own agent permission to act
@@ -135,7 +147,8 @@ Halt switch (`private/HALT` or `BUILDOUT_TRADING_HALT`), Agentic account only, t
 old, the call logged in the verified ledger before trading, every symbol on the allowlist, quotes for every symbol and
 spreads under 1%, no sale larger than the holding, everything long at most 98% of equity, cash at least 2%, each order at
 most 25% of equity and $25,000, turnover at most 60% of equity (100% for a first build), one executed ticket a day.
-Tickets expire after 15 minutes. Change the limits under `[trading]` in `config.private.toml`.
+Tickets expire after 15 minutes. Change the limits under `[trading]` in `config.private.toml`. These are the planner's
+checks; the mandate's own ceilings (`max_order_usd = 10000` by default) apply on top, and the tighter one binds.
 
 ## Stop everything
 

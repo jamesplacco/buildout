@@ -32,7 +32,7 @@ UA = "buildout/0.16 research engine"
 SOURCES = {
     "databento": {"needs": "DATABENTO_API_KEY", "probe": "https://hist.databento.com", "cost": "paid", "what": "Split-adjusted daily OHLCV, futures"},
     "yahoo": {"needs": None, "probe": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=5d&interval=1d", "cost": "free", "what": "Daily OHLCV, adjusted"},
-    "stooq": {"needs": None, "probe": "https://stooq.com/q/d/l/?s=spy.us&i=d", "cost": "free", "what": "Daily OHLCV"},
+    "stooq": {"needs": None, "probe": "https://stooq.com/q/d/l/?s=spy.us&i=d", "cost": "free", "what": "Daily OHLCV", "expect": "Date,"},
     "sec": {"needs": "SEC_USER_AGENT", "probe": "https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/Revenues.json", "cost": "free", "what": "XBRL company facts"},
     "treasury": {"needs": None, "probe": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{y}/all?type=daily_treasury_yield_curve&field_tdr_date_value={y}&page&_format=csv",
                  "cost": "free", "what": "Daily par yield curve", "timeout": 45},
@@ -60,6 +60,11 @@ def check(timeout: int = 12) -> list[dict]:
                          timeout=s.get("timeout", timeout))          # v0.42.1: the Treasury's year CSV takes longer than 12 s
             row["reachable"] = len(b) > 0
             row["ms"] = int((time.time() - t) * 1000)
+            # v0.47: an answer is not data. Stooq answers a program with a browser-check page (796 bytes of HTML); the
+            # probe counted that as reachable while every pull from it parsed to no bars.
+            if s.get("expect") and s["expect"] not in b[:400].decode("utf-8", "replace"):
+                row["reachable"] = False
+                row["note"] = (row["note"] + "; " if row["note"] else "") + "answered, but not with data (a page for browsers, not the CSV)"
         except Exception as e:  # noqa: BLE001 - every failure is a recorded status, never fatal
             row["note"] = (row["note"] + "; " if row["note"] else "") + type(e).__name__
         row["ok"] = row["reachable"] and row["credential"] is not False
@@ -78,12 +83,14 @@ def _frame(rows: list[dict]) -> pd.DataFrame:
     return df[[c for c in ("open", "high", "low", "close", "volume") if c in df]].astype(float).dropna(subset=["close"])
 
 
-def parse_yahoo(js: dict, now: float | None = None) -> pd.DataFrame:
+def parse_yahoo(js: dict, now: float | None = None, adjusted: bool = True) -> pd.DataFrame:
     """Yahoo's chart JSON to OHLCV, scaled by adjclose/close so splits and dividends are adjusted on every column.
-    v0.44.1: a session still trading is dropped; its bar is the latest trade, not a close (the daily run starts mid-session)."""
+    v0.44.1: a session still trading is dropped; its bar is the latest trade, not a close (the daily run starts mid-session).
+    v0.47: adjusted=False keeps the quoted closes (split-adjusted, dividends not taken out), the basis a second source
+    is compared on."""
     r = js["chart"]["result"][0]
     q = r["indicators"]["quote"][0]
-    adj = (r["indicators"].get("adjclose") or [{}])[0].get("adjclose")
+    adj = (r["indicators"].get("adjclose") or [{}])[0].get("adjclose") if adjusted else None
     reg = (((r.get("meta") or {}).get("currentTradingPeriod") or {}).get("regular") or {})
     open_from = reg.get("start") if reg.get("start") and reg.get("end") and (time.time() if now is None else now) < reg["end"] else None
     rows = []
@@ -117,9 +124,44 @@ def parse_stooq(text: str) -> pd.DataFrame:
     return _frame(rows)
 
 
+def drop_open_session(df: pd.DataFrame, now: dt.datetime | None = None) -> pd.DataFrame:
+    """Without a bar dated today in New York while today's session has not closed (v0.47): that bar is the latest
+    trade, not a close. Yahoo's JSON says when the session ends (parse_yahoo); a CSV does not, so the calendar does."""
+    if df.empty:
+        return df
+    from . import sessions
+    now = now or dt.datetime.now(dt.timezone.utc)
+    today = now.astimezone(sessions.NY).date()
+    if pd.Timestamp(df.index[-1]).date() == today and sessions.is_session(today) and now < sessions.close_utc(today):
+        return df.iloc[:-1]
+    return df
+
+
 def stooq(ticker: str) -> pd.DataFrame:
     sym = ticker.lower().replace(".", "-") + ("" if "." in ticker or ticker.startswith("^") else ".us")
-    return parse_stooq(http.get(f"https://stooq.com/q/d/l/?s={sym}&i=d", retries=2).decode("utf-8", "replace"))
+    return drop_open_session(parse_stooq(http.get(f"https://stooq.com/q/d/l/?s={sym}&i=d", retries=2).decode("utf-8", "replace")))
+
+
+def recent_closes(ticker: str, days: int = 10, order: tuple[str, ...] = ("yahoo", "stooq")) -> tuple[pd.Series, str, dict]:
+    """The last `days` completed sessions' closes from a second source (v0.47), for checking another source's newest
+    prices: (closes indexed by date, the source that answered, the errors). Quoted closes, split-adjusted, dividends
+    not taken out. Empty with source "none" when no source answers; never raises."""
+    errs: dict = {}
+    for name in order:
+        try:
+            if name == "yahoo":
+                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range={max(days, 5) + 5}d&interval=1d"
+                df = parse_yahoo(json.loads(http.get(url, user_agent="Mozilla/5.0 (buildout research)", retries=2, timeout=20)), adjusted=False)
+            elif name == "stooq":
+                df = stooq(ticker)
+            else:
+                continue
+            if len(df):
+                return df["close"].astype(float).tail(days), name, errs
+            errs[name] = "no bars"
+        except Exception as e:  # noqa: BLE001 - a second source that does not answer is recorded, never fatal
+            errs[name] = f"{type(e).__name__}: {str(e)[:120]}"
+    return pd.Series(dtype=float), "none", errs
 
 
 def databento(tickers: list[str], start: str, cfg_data=None, max_cost_usd: float | None = None) -> dict[str, pd.DataFrame]:
@@ -152,6 +194,12 @@ def databento(tickers: list[str], start: str, cfg_data=None, max_cost_usd: float
         df = ohlc.mul(ratio, axis=0)
         df["volume"] = g["volume"] / ratio
         out[t] = df.astype(float)
+    # v0.47: the split guard the book's run has always had. This path applied the split table and checked nothing, so
+    # a split missing from the table would have reached the technical readings as a 50% fall.
+    from .data.corporate_actions import jump_message, unexplained_jumps
+    bad = unexplained_jumps(pd.DataFrame({t: d["close"] for t, d in out.items()}))
+    if bad:
+        raise ValueError(jump_message(bad))
     return out
 
 
@@ -267,6 +315,17 @@ def import_positions(path: str | Path) -> dict:
 
 
 # ---------------------------------------------------------------- the market run
+def source_flags(src: str, errs: dict, configured: str) -> dict:
+    """How one name's data arrived, against the source the run is configured for (v0.47):
+      fallback       it came from another source (the configured one failed or was short)
+      short_history  no source had a year of bars (a new listing): expected, not a failure
+      missing        no source answered at all"""
+    if src == "none":
+        short = any(str(e).startswith("only ") and not str(e).startswith("only 0 ") for e in errs.values())   # some source had bars, under a year of them
+        return {"fallback": False, "short_history": short, "missing": not short}
+    return {"fallback": src != configured, "short_history": False, "missing": False}
+
+
 def market(out: str | Path, tickers: list[str], bench: str = "QQQ", years: int = 10, fundamentals: bool = True) -> dict:
     """Technical analysis for every ticker (benchmark-relative), fundamental analysis for the operating companies;
     writes technicals.json and statements.json (derived only) and returns a summary with each source used."""
@@ -278,18 +337,28 @@ def market(out: str | Path, tickers: list[str], bench: str = "QQQ", years: int =
             pre = databento(sorted(set(tickers + [bench])), (pd.Timestamp.now() - pd.DateOffset(years=years)).strftime("%Y-%m-%d"))
         except Exception as e:  # noqa: BLE001
             pre = {"_error": str(e)[:200]}
+    # v0.47: the source the run is set up to use, and every name that did not come from it. Before, a Databento
+    # timeout sent all thirteen names to Yahoo (another close, another history length) and the step said nothing.
+    configured = "databento" if os.environ.get("DATABENTO_API_KEY") else next(n for n in PRIORITY if n != "databento")
     b, bsrc, _ = ohlcv(bench, years, prefetched=pre)
     tech, used = {}, {}
     for t in tickers:
         df, src, errs = ohlcv(t, years, prefetched=pre)
-        used[t] = {"source": src, "errors": errs}
+        used[t] = {"source": src, "errors": errs, **source_flags(src, errs, configured)}
         if df.empty:
             continue
         a = technicals.analyze(df, t, b["close"] if not b.empty else None)
         a["source"] = src
         a["text"] = technicals.text(a)
         tech[t] = a
-    write({"as_of": dt.date.today().isoformat(), "bench": bench, "bench_source": bsrc, "assets": tech, "sources": used}, out, "technicals.json")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    fell = sorted(t for t, u in used.items() if u["fallback"]) + ([f"{bench} (benchmark)"] if bsrc not in (configured, "none") and bench not in used else [])
+    dates = [a.get("date") for a in tech.values() if a.get("date")]
+    # v0.47: as_of is the newest bar's date (the data), generated_utc is when the command ran. Before, as_of was the run day.
+    write({"as_of": max(dates) if dates else None, "generated_utc": stamp, "bench": bench, "bench_source": bsrc,
+           "configured_source": configured, "fallback": bool(fell), "fallback_names": fell,
+           "missing": sorted(t for t, u in used.items() if u["missing"]), "short_history": sorted(t for t, u in used.items() if u["short_history"]),
+           "batch_error": pre.get("_error"), "assets": tech, "sources": used}, out, "technicals.json")
     fund = {}
     if fundamentals:
         for t in tickers:
@@ -300,5 +369,8 @@ def market(out: str | Path, tickers: list[str], bench: str = "QQQ", years: int =
                 fund[t] = statements.analyze(companyfacts(t), t, price=px)
             except Exception as e:  # noqa: BLE001
                 fund[t] = {"ticker": t, "ok": False, "note": f"{type(e).__name__}: {str(e)[:150]}"}
-        write({"as_of": dt.date.today().isoformat(), "companies": fund}, out, "statements.json")
-    return {"technicals": len(tech), "statements": sum(1 for v in fund.values() if v.get("ok")), "sources": used}
+        ends = [str(v.get("fiscal_year_end"))[:10] for v in fund.values() if v.get("ok") and v.get("fiscal_year_end")]
+        write({"as_of": max(ends) if ends else None, "as_of_basis": "the newest fiscal year end among the companies", "generated_utc": stamp,
+               "companies": fund}, out, "statements.json")
+    return {"technicals": len(tech), "statements": sum(1 for v in fund.values() if v.get("ok")), "configured_source": configured,
+            "fallback": bool(fell), "fallback_names": fell, "sources": used}

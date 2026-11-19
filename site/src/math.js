@@ -32,6 +32,18 @@
   const isoOk = (iso) => typeof iso === "string" && /^\d{4}-\d{2}-\d{2}/.test(iso);
   const niceDate = (iso) => { if (!isoOk(iso)) return ""; const [y, m, d] = iso.slice(0, 10).split("-").map(Number); return m >= 1 && m <= 12 && d >= 1 && d <= 31 ? `${MONTHS[m - 1]} ${d}, ${y}` : ""; };
   const dateLabel = (t) => new Date(t).toISOString().slice(0, 10);
+  // v0.47: "today" on the exchange's calendar (New York), as YYYY-MM-DD. A call's effective date is a New York
+  // session; the UTC date is already tomorrow from 7 or 8 pm New York, and the page then said a call that had not
+  // started was "in force". Every comparison of today with an effective date reads this.
+  function nyToday() {
+    try {
+      const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+      const g = (k) => (p.find((x) => x.type === k) || {}).value;
+      const iso = `${g("year")}-${g("month")}-${g("day")}`;
+      if (isoOk(iso)) return iso;
+    } catch (e) { /* no time-zone data: fall through */ }
+    return new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 10);      // UTC minus five hours, close enough without it
+  }
   const seriesPts = (o) => (o && Array.isArray(o.dates) && Array.isArray(o.values) ? o.dates.map((d, i) => [Date.parse(d), o.values[i]]).filter((p) => Number.isFinite(p[0]) && fin(p[1])) : []);
   const hasSeries = (o) => seriesPts(o).length > 1;
   function yearTicks(t0, t1) {

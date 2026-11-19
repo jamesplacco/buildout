@@ -58,7 +58,8 @@ class TradingParams:
     max_order_pct: float = 0.25         # one order at most this share of equity
     max_order_usd: float = 25_000.0
     max_turnover_pct: float = 0.60      # one ticket's total notional (a first build from cash may reach 100%)
-    drift_band: float = 0.02            # leave a holding alone within this share of equity of its target
+    drift_band: float = 0.02            # one name this share of equity from its target starts a rebalance
+    gross_band: float = 0.01            # v0.47: so does the whole book, when what is held is this share of equity from the call's size
     min_trade_usd: float = 50.0
     collar_bp: float = 10.0             # limit price: ask plus 10 bp to buy, bid less 10 bp to sell
     max_spread_pct: float = 1.0
@@ -161,22 +162,30 @@ def latest_call() -> dict:
     return snap
 
 
-def call_in_force(today: str | None = None) -> dict | None:
-    """The call a trade may act on today (v0.42.4): the newest ledger entry whose effective date has come. Each day's
-    call takes effect on the next trading day, so the newest call (latest_call) is never the one in force on the day
-    it is written; trading it was refused every day. Rebuilt from the ledger entry, with its two-point menu as the
-    frontier the hedged variant walks. None when the ledger holds no entry in force."""
+def call_in_force(today: str | None = None, now: datetime | None = None) -> dict | None:
+    """The call that governs the session `today` (v0.42.4): the newest ledger entry whose governing session has come.
+    Each day's call takes effect on a later trading day, so the newest call (latest_call) is never the one in force
+    on the day it is written. Rebuilt from the ledger entry, with its two-point menu as the frontier the hedged
+    variant walks. None when the ledger holds no entry in force.
+
+    v0.47: the governing session is ledger.governs_from (the same rule the live record marks by), not the stored
+    effective date: a call written on a Saturday governs from Tuesday, the session after the first close that
+    followed it. `now` leaves out entries written after that moment, so a pass replayed at an earlier time sees
+    the ledger as it stood then."""
     from . import ledger
     today = today or datetime.now(timezone.utc).date().isoformat()
-    rows = [e for e in ledger.read() if e.get("effective_from", "9999") <= today]
+    stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ") if now is not None else None
+    rows = [(ledger.governs_from(e) or "9999", e) for e in ledger.read() if stamp is None or str(e.get("ts_utc", "")) <= stamp]
+    rows = [(g, e) for g, e in rows if g <= today]
     if not rows:
         return None
-    e = max(rows, key=lambda r: (r["effective_from"], r["seq"]))
+    g, e = max(rows, key=lambda r: (r[0], r[1]["seq"]))
     c = e.get("call", {})
     frontier = [{"gross": m["gross"], "short": m.get("short", 0.0), "meets": True} for m in (c.get("menu_low"), c.get("menu_high")) if isinstance(m, dict) and m.get("gross") is not None]
-    return {"asof": e.get("data_asof"), "effective_from": e["effective_from"], "size": c.get("size"), "binding": c.get("binding"), "frontier": frontier,
+    return {"asof": e.get("data_asof"), "effective_from": g, "size": c.get("size"), "binding": c.get("binding"), "frontier": frontier,
             "menu_high": c.get("menu_high"), "ledger_seq": e["seq"], "source": f"ledger entry {e['seq']}",
-            "decision_id": decision_id(e), "decision_ts": e.get("ts_utc")}
+            "decision_id": decision_id(e), "decision_ts": e.get("ts_utc"),
+            **({"stored_effective_from": e.get("effective_from")} if g != e.get("effective_from") else {})}
 
 
 def decision_id(entry: dict) -> str:
@@ -185,16 +194,27 @@ def decision_id(entry: dict) -> str:
 
 
 def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams | None = None, weights: dict | None = None,
-         today: str | None = None, ledger_check: dict | None = None, now: datetime | None = None) -> dict:
+         today: str | None = None, ledger_check: dict | None = None, now: datetime | None = None, held_session: str | None = None) -> dict:
     """The ticket. `account`: {"equity": .., "cash": .., "account_type": "agentic", "positions": [{"symbol", "quantity"}]}.
-    `quotes`: {symbol: {"bid": .., "ask": .., "last": ..}}. Nothing here places an order."""
+    `quotes`: {symbol: {"bid": .., "ask": .., "last": ..}}. Nothing here places an order.
+
+    held_session (v0.47): the first session the position will be held through, when that is not today. The paper
+    broker fills at a close, so what it buys is held through the next session, and the call it must trade is the
+    one that governs that session (the live record marks the same call over the same day).
+
+    When it trades (v0.47). The holdings are left alone while every name is inside its band (drift_band of equity)
+    and the book as a whole is inside gross_band of equity of the call's size. Outside either, every name is
+    brought to its target, in whole shares rounded to the nearest (to the floor if the nearest would breach the cash
+    floor or the gross cap). Before, only names outside their own band traded, so a call cut from 0.53x to 0.40x
+    moved no name far enough and traded nothing."""
     from . import book as bk
     from . import ledger
     P = P or load_params()
-    call = call or call_in_force(today) or latest_call()
+    call = call or call_in_force(held_session or today) or latest_call()
     weights = weights or dict(bk.BOOK)
     now = now or datetime.now(timezone.utc)
     today = today or now.date().isoformat()
+    held_session = held_session or today
     eq = float(account.get("equity") or 0.0)
     cash = float(account.get("cash") or 0.0)
     held = {str(p["symbol"]).upper(): float(p["quantity"]) for p in account.get("positions", []) if float(p.get("quantity", 0)) != 0}
@@ -216,12 +236,17 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     lv = ledger_check if ledger_check is not None else ledger.verify()
     if ledger_check is None:
         ent = [e for e in (ledger.read() if lv.get("ok") else []) if e.get("data_asof") == call.get("asof")]
-        logged, eff = bool(ent), (ent[-1]["effective_from"] if ent else None)
+        logged, eff = bool(ent), (ledger.governs_from(ent[-1]) if ent else None)      # v0.47: the session it governs, as the live record reads it
     else:
         logged, eff = ledger_check.get("logged", True), ledger_check.get("effective_from")
     chk("call logged in the verified ledger before trading", lv.get("ok") and logged, {"ledger_ok": lv.get("ok"), "logged": logged})
-    chk("the call is in force today (on or after its effective date)", eff is None or eff <= today, {"effective_from": eff, "today": today},
-        "a call governs from the trading day after it is logged; trading it sooner would run ahead of the record")
+    if held_session == today:
+        chk("the call is in force today (on or after its effective date)", eff is None or eff <= today, {"effective_from": eff, "today": today},
+            "a call governs from the trading day after it is logged; trading it sooner would run ahead of the record")
+    else:
+        chk("the call is in force for the session the position is held through", eff is None or eff <= held_session,
+            {"effective_from": eff, "today": today, "held_session": held_session},
+            "an order filled at a close is held through the next session; the call traded is the one that governs that session, never a later one")
 
     def num(v):
         try:
@@ -245,7 +270,7 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
         "a stale or wrong equity figure would size every order wrong")
     chk("every quote is a positive number with bid at most ask", not bad_quotes, bad_quotes)
     syms = sorted(set(T["weights"]) | set(held))
-    orders, missing, wide = [], [], []
+    gaps, missing, wide = [], [], []
     for s in syms:
         ref, bid, ask, last = px(s, "buy")
         mid = ((bid + ask) / 2) if bid and ask else last
@@ -254,28 +279,50 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
             continue
         if bid and ask and (ask - bid) / mid * 100 > P.max_spread_pct:
             wide.append(s)
-        tgt_usd = T["weights"].get(s, 0.0) * eq
-        cur_usd = held.get(s, 0.0) * mid
-        diff = tgt_usd - cur_usd
-        if abs(diff) < max(P.drift_band * eq, P.min_trade_usd) and not (s not in T["weights"] and held.get(s)):
-            continue
-        side = "buy" if diff > 0 else "sell"
-        ref, bid, ask, last = px(s, side)
-        lim = round(ref * (1 + P.collar_bp / 1e4) if side == "buy" else ref * (1 - P.collar_bp / 1e4), 2)
-        qty = abs(diff) / lim
-        if s not in T["weights"]:
-            qty = held.get(s, 0.0)                     # out of the plan: sell all of it
-        if s not in T["weights"]:
-            pass                                       # an exit sells the whole holding, fractions included
-        else:
-            qty = round(qty, 4) if P.fractional else float(math.floor(qty + 1e-9))
-        if side == "sell":
-            qty = min(qty, held.get(s, 0.0))
-        if qty <= 0:
-            continue
-        orders.append({"symbol": s, "side": side, "quantity": qty, "type": "limit", "limit_price": lim, "time_in_force": "gfd",
-                       "notional": round(qty * lim, 2), "target_share": round(T["weights"].get(s, 0.0), 4),
-                       "reason": HEDGE_LABEL.get(s, "book name to the call's size") if s in T["weights"] else "not in the plan"})
+        gaps.append((s, T["weights"].get(s, 0.0) * eq - held.get(s, 0.0) * mid))        # target less held, in dollars
+    # v0.47: one name outside its band, or the whole book outside the gross band, brings every name to target
+    name_band = max(P.drift_band * eq, P.min_trade_usd)
+    gross_gap = sum(d for s, d in gaps if s in T["weights"])
+    outside = sorted(s for s, d in gaps if s in T["weights"] and abs(d) >= name_band)
+    rebalance = bool(outside) or abs(gross_gap) > max(P.gross_band * eq, P.min_trade_usd)
+
+    def build(nearest: bool) -> list[dict]:
+        out = []
+        for s, diff in gaps:
+            exit_ = s not in T["weights"] and bool(held.get(s))
+            if not exit_ and (not rebalance or abs(diff) < P.min_trade_usd):
+                continue
+            side = "buy" if diff > 0 else "sell"
+            ref = px(s, side)[0]
+            lim = round(ref * (1 + P.collar_bp / 1e4) if side == "buy" else ref * (1 - P.collar_bp / 1e4), 2)
+            if exit_:
+                qty = held.get(s, 0.0)                 # out of the plan: sell all of it, fractions included
+            elif P.fractional:
+                qty = round(abs(diff) / lim, 4)
+            else:
+                qty = float(math.floor(abs(diff) / lim + (0.5 if nearest else 1e-9)))
+            if side == "sell":
+                qty = min(qty, held.get(s, 0.0))
+            if qty <= 0:
+                continue
+            out.append({"symbol": s, "side": side, "quantity": qty, "type": "limit", "limit_price": lim, "time_in_force": "gfd",
+                        "notional": round(qty * lim, 2), "target_share": round(T["weights"].get(s, 0.0), 4),
+                        "reason": HEDGE_LABEL.get(s, "book name to the call's size") if s in T["weights"] else "not in the plan"})
+        return out
+
+    def fits(os_: list[dict]) -> bool:
+        b = sum(o["notional"] for o in os_ if o["side"] == "buy")
+        sl = sum(o["notional"] for o in os_ if o["side"] == "sell")
+        aft = dict(held)
+        for o in os_:
+            aft[o["symbol"]] = aft.get(o["symbol"], 0.0) + (o["quantity"] if o["side"] == "buy" else -o["quantity"])
+        g = sum(q * (px(s, "buy")[0] or 0) for s, q in aft.items() if q > 0) / eq if eq else 0
+        return cash + sl - b >= P.cash_floor * eq - 1e-6 and g <= P.max_gross + 1e-6
+
+    orders = build(nearest=True)
+    rounding = "nearest share"
+    if not P.fractional and not fits(orders):          # the nearest share would borrow or eat the cash floor: round down instead
+        orders, rounding = build(nearest=False), "whole shares, rounded down"
     orders.sort(key=lambda o: (o["side"] != "sell", -o["notional"]))   # sells first
     stage = "single"
     sell_orders = [o for o in orders if o["side"] == "sell"]
@@ -308,8 +355,11 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     ok = all(c["pass"] for c in checks)
     body = {"created": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "expires": (now + timedelta(minutes=P.ticket_ttl_min)).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "mode": P.mode, "broker": P.broker, "call": {"asof": call.get("asof"), "size": call.get("size"), "binding": call.get("binding"), "effective_from": eff,
+                                                                **({"held_session": held_session} if held_session != today else {}),
                                                                 **({"decision_id": call["decision_id"], "decision_ts": call.get("decision_ts")} if call.get("decision_id") else {})},
-            "target": T, "orders": orders, "stage": stage, "account": {"equity": eq, "cash": cash, "positions": held}, "quotes": Q}
+            "target": T, "orders": orders, "stage": stage, "account": {"equity": eq, "cash": cash, "positions": held}, "quotes": Q,
+            "rebalance": {"triggered": rebalance, "gross_gap": round(gross_gap / eq, 4) if eq else None, "gross_band": P.gross_band,
+                          "names_outside_band": outside, "name_band": P.drift_band, "rounding": "fractional" if P.fractional else rounding}}
     ticket = {**body, "checks": checks, "all_checks_pass": ok, "execute": bool(ok and P.mode == "live" and orders),
               "summary": {"orders": len(orders), "buys_usd": round(buys, 2), "sells_usd": round(sells, 2), "cash_after": round(cash_after, 2), "gross_after": round(gross_after, 4)},
               "placed_by_buildout": False,
@@ -435,6 +485,53 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_cl
     t["status"] = status
     _atomic_write_text(_tickets_dir() / f"{tid}.json", json.dumps(t, indent=1))
     return {"ticket": tid, "status": status, "issues": issues, "entry": e["seq"], "chain_ok": verify_fills()["ok"]}
+
+
+def corrections() -> list[dict]:
+    """The correction records in the fills log (v0.47), in the order they were written."""
+    return [e for e in _fills() if e.get("kind") == "correction"]
+
+
+def record_correction(cid: str, cash_delta: float, reason: str, corrects: str | None = None, detail: list | None = None,
+                      now: datetime | None = None, extra: dict | None = None) -> dict:
+    """Append a correction to the hash-chained fills log (v0.47): a dated cash adjustment that puts right an entry
+    already written, which is itself never edited. One record per id, ever: a second call with the same id appends
+    nothing. The record carries no fills (`fills` is empty and `status` is "correction"), so every reader that
+    walks fills sees none, and it names the ticket it corrects under `corrects`, not `ticket`, so it is never
+    taken for that ticket's own entry. The caller changes the account; this only records why."""
+    v = verify_fills()
+    if not v["ok"]:
+        raise RuntimeError(f"the fills log fails verification at entry {v.get('broken_at')}; nothing was appended")
+    log = _fills()
+    for e in log:
+        if e.get("kind") == "correction" and e.get("id") == cid:
+            return {"recorded": False, "id": cid, "entry": e["seq"], "chain_ok": True}
+    amount = round(abs(float(cash_delta)), 2)
+    e = {"seq": len(log) + 1, "kind": "correction", "id": cid, "corrects": corrects, "status": "correction", "fills": [],
+         "ts_utc": (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"), "cash_delta": round(float(cash_delta), 2), "amount": amount,
+         "reason": reason, "detail": detail or [], **(extra or {}), "prev": log[-1]["hash"] if log else "0" * 64}
+    e["hash"] = _sha(e)
+    _fills_path().parent.mkdir(parents=True, exist_ok=True)
+    with _fills_path().open("a") as fh:
+        fh.write(_canon(e) + "\n")
+    return {"recorded": True, "id": cid, "entry": e["seq"], "chain_ok": verify_fills()["ok"]}
+
+
+def cash_and_positions_from_log(start_cash: float) -> dict:
+    """What the fills log alone says the account holds (v0.47): opening cash, less every buy, plus every sell, plus
+    every correction's cash adjustment; and the shares each fill left. The reconcile check sets this beside the
+    account file."""
+    cash, pos = float(start_cash), {}
+    for e in _fills():
+        if e.get("kind") == "correction":
+            cash += float(e.get("cash_delta") or 0.0)
+            continue
+        for f in e.get("fills", []):
+            q, p = float(f.get("quantity") or 0), float(f.get("price") or 0)
+            sign = 1.0 if str(f.get("side")) == "buy" else -1.0
+            cash -= sign * q * p
+            pos[f["symbol"]] = pos.get(f["symbol"], 0.0) + sign * q
+    return {"cash": cash, "positions": {s: q for s, q in pos.items() if abs(q) > 1e-9}}
 
 
 def _paper_path() -> Path:

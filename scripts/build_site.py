@@ -43,15 +43,16 @@ def build(src: str = "site", out: str = "_site") -> Path:
     if pdf.exists():                      # v0.38: the tear sheet the Home and Track record pages link to
         shutil.copy(pdf, dest / "tearsheet.pdf")
     data = Path(src, "data")
-    if data.exists():
-        shutil.copytree(data, dest / "data")
+    if data.exists():                     # v0.47: never the debris of a killed run (dot-files, temporary files, last-good copies)
+        shutil.copytree(data, dest / "data", ignore=shutil.ignore_patterns(".*", "*.tmp"))
     led = Path(src).resolve().parent / "ledger" / "calls.jsonl"
     if led.exists():                      # v0.39.1: the ledger, verified, so the published page shows every call logged since its build
         import sys as _sys
         _sys.path.insert(0, str(Path(src).resolve().parent))
         from buildout import ledger as _ledger
         (dest / "data").mkdir(parents=True, exist_ok=True)
-        (dest / "data" / "calls.json").write_text(json.dumps({"verify": _ledger.verify(led), "entries": _ledger.read(led)}))
+        (dest / "data" / "calls.json").write_text(json.dumps({"verify": _ledger.verify(led),          # v0.47: each call with the session it governs from (ledger.governs_from)
+                                                                "entries": [{**e, "governs_from": _ledger.governs_from(e)} for e in _ledger.read(led)]}))
     (dest / "data").mkdir(parents=True, exist_ok=True)
     dec = reconcile(dest, Path(src).resolve().parent)
     (dest / "data" / "manifest.json").write_text(json.dumps({**manifest(dest), "decision": dec}, indent=1))
@@ -122,6 +123,31 @@ def reconcile(dest: Path, root: Path) -> dict:
     return out
 
 
+# v0.47: where each file keeps the date of its data, tried in order, and where it keeps the time it was written. Before,
+# only six top-level keys were tried, so twenty of thirty-two files had no date in the manifest, and a file that carried
+# only its run day (technicals, statements, capex) was listed as that fresh.
+DATA_DATE_PATHS = ("asof", "as_of", "summary.as_of", "latest.as_of", "last_mark", "marks_asof", "panel.end", "latest.month", "now.date", "end",
+                   "notes.end", "today.notes.date", "curve_meta.as_of", "data.shiller_to", "state.eq.month", "date")
+RUN_TIME_PATHS = ("generated_utc", "computed_utc", "run_at", "built", "checked")
+
+
+def _dig(d, path: str):
+    for k in path.split("."):
+        if not isinstance(d, dict) or k not in d:
+            return None
+        d = d[k]
+    return d if isinstance(d, str) and d else None
+
+
+def data_date(d) -> str | None:
+    """The date of a file's data (not of the run that wrote it), or None when the file states none."""
+    return next((v for v in (_dig(d, p) for p in DATA_DATE_PATHS) if v), None)
+
+
+def run_time(d) -> str | None:
+    return next((v for v in (_dig(d, p) for p in RUN_TIME_PATHS) if v), None)
+
+
 def manifest(dest: Path) -> dict:
     """What this deployment serves (v0.42.3): the source commit, when it was built, and how old each data file is.
     A fresh build is not fresh data; this says which is which. Standard library only."""
@@ -143,15 +169,9 @@ def manifest(dest: Path) -> dict:
             d = json.loads(p.read_text())
         except ValueError:
             d = {}
-        asof = None
-        if isinstance(d, dict):
-            for k in ("asof", "as_of", "generated_utc", "last_mark", "marks_asof", "date"):
-                if isinstance(d.get(k), str):
-                    asof = d[k]
-                    break
-            if asof is None and isinstance(d.get("summary"), dict):
-                asof = d["summary"].get("as_of")
-        files[p.name] = {"bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()[:16], "asof": asof}
+        asof, written = data_date(d), run_time(d)
+        files[p.name] = {"bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()[:16], "asof": asof if asof is not None else written,
+                         "asof_kind": "data" if asof is not None else ("written" if written is not None else None), "written": written}
     page = dest / "index.html"
     return {"source_commit": sha, "built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "page_bytes": page.stat().st_size if page.exists() else None,

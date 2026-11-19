@@ -76,10 +76,14 @@ def _curve_at(f: pd.DataFrame, date: pd.Timestamp) -> dict | None:
 
 def rates_block(fred: pd.DataFrame, since: str = "2000-01-01") -> dict:
     """Curve snapshots, spread history and cross-asset levels for the Rates and Desk views."""
-    f = fred.ffill()
-    if "DGS10" not in f or f["DGS10"].dropna().empty:
+    if "DGS10" not in fred or fred["DGS10"].dropna().empty:
         return {}
-    last = f["DGS10"].dropna().index[-1]
+    # v0.47: the curve's date is the last day the Treasury yields were published. Before, it was read after the
+    # forward-fill, so it became the last date of ANY series: one posted ahead (IORB, the reverse-repo balance) dated
+    # a two-day-old curve today, or the coming Monday on a Saturday run.
+    # Every snapshot (latest, start of year, a year ago) is taken on a day the 10-year was published.
+    f = fred.ffill().loc[fred["DGS10"].notna()]
+    last = f.index[-1]
     curves = {"latest": _curve_at(f, last), "start_of_year": _curve_at(f, pd.Timestamp(last.year, 1, 1) - pd.Timedelta(days=1)),
               "year_ago": _curve_at(f, last - pd.DateOffset(years=1)), "two_years_ago": _curve_at(f, last - pd.DateOffset(years=2))}
     spreads = {}
@@ -190,6 +194,10 @@ def analyze_macro(fred: pd.DataFrame, halflife: int = 63, q: float = 0.05, since
         era.loc[s:e] = name
     pol = hedge.policies(eq, bd, halflife, static=0.30)
     recent = slice("2022-01-01", None)
+    # v0.47: the overlay is financed at the 3-month bill plus 100 bp, as the book run does (analytics/hedge.py); before,
+    # this table charged nothing, so a bond position that earned exactly cash showed as a gain
+    rf = (fred["DGS3MO"].ffill().reindex(eq.index, method="ffill") / 100.0) if "DGS3MO" in fred and fred["DGS3MO"].notna().any() else None
+    fin = {"rf": rf, "borrow_spread_bps": 100.0} if rf is not None and rf.notna().all() else {}
 
     latest = {"as_of": df.index[-1].strftime("%Y-%m-%d"), "corr63": float(c63.dropna().iloc[-1]),
               "corr252": float(c252.dropna().iloc[-1]), "regime": lab.dropna().iloc[-1],
@@ -212,8 +220,10 @@ def analyze_macro(fred: pd.DataFrame, halflife: int = 63, q: float = 0.05, since
         "yearly": yearly,
         "shock_by_era": regime.shock_table(eq, bd, q, by=era).reindex([e[0] for e in ERAS]).dropna(how="all"),
         "shock_by_regime": regime.shock_table(eq, bd, q, by=lab),
-        "policies_full": hedge.evaluate_policies(eq, bd, pol, q),
-        "policies_since_2022": hedge.evaluate_policies(eq.loc[recent], bd.loc[recent], pol.loc[recent], q),
+        "policies_full": hedge.evaluate_policies(eq, bd, pol, q, **fin),
+        "policies_since_2022": hedge.evaluate_policies(eq.loc[recent], bd.loc[recent], pol.loc[recent], q,
+                                                       **({**fin, "rf": fin["rf"].loc[recent]} if fin else {})),
+        "policies_financing": "cash (3-month bill) plus 100 bp on the overlay" if fin else "not charged: no 3-month bill series in this pull",
         "rates": rates_block(fred),
         "moves": marketstate.moves_block(fred),
         "vol": marketstate.vol_block(fred),

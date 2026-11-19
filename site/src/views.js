@@ -309,30 +309,38 @@
     "summary.var99_fhs": "num", "backtest.curves": "str", "backtest.stats": "str", exposures: "arr", "hedge.policies": "arr" };
   function renderBook(r) {
     const S = r.summary, body = $("#book-body");
-    $("#book-asof").textContent = asOfLine(S.as_of, "Databento");
+    $("#book-asof").textContent = asOfLine(S.as_of, "Databento cross-check run, not the engine that sets the call");
     body.replaceChildren();
     const tiles = h("div", "tiles compact");
     tiles.append(
       tile("Book vs TLT regime", regimeNode(S.regime_now), `Correlation ${sgn2(S.stock_bond_corr_now)}, 63-day half-life.`),
       tile("TLT hedge now", Math.round(S.hedge_ratio_now * 100) + "% of book", "Regime-gated minimum-variance ratio."),
-      tile("Size to run", xx(S.recommended_gross), `Vol target ${xx(S.vol_target_scale)} · drawdown cap ${xx(S.drawdown_leverage_cap)}`),
-      tile("1-day VaR, 99%", pctPlain(S.var99_fhs, 1), `Filtered historical simulation; expected shortfall ${pctPlain(S.cvar99_fhs, 1)}.`)
+      tile("Cross-check size", xx(S.recommended_gross), `Vol target ${xx(S.vol_target_scale)} · drawdown cap ${xx(S.drawdown_leverage_cap)}. Not the call: a different model on Databento bars.`),
+      tile("1-day VaR, 99%", pctPlain(S.var99_fhs, 1), `Filtered historical simulation; expected shortfall ${pctPlain(S.cvar99_fhs, 1)}. The cross-check run's, not the Book risk desk's.`)
     );
+    // v0.47: this panel is a second run on a second data source. It never sets the call; the Book risk desk does.
+    const BkC = typeof B30 === "function" ? B30() : null;
+    const xnote = h("p", "note", `Databento cross-check run, not the engine that sets the call. The call (${BkC ? xx(BkC.size) : "on the Book risk desk"}) comes from the book step: the nine names' public daily closes, validated, with three limits (expected shortfall, volatility, one-year drawdown) on a three-factor model. This run prices the same book on Databento bars with a different model (volatility from the book's own recent returns, a volatility target and a drawdown cap, no shortfall budget), so its size, volatility target and VaR differ from the call's. It is here as an independent reading.`);
     const labels = Object.keys(r.backtest.curves), colors = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
     const fig = figureBlock("Growth of $1 under four hedge and sizing policies", labels.map((l, i) => [colors[i], l, true]), "bt-chart");
-    const stats = labels.map((l) => { const s = r.backtest.stats[l]; return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), fx(s.dsr, 2)]; });
+    // v0.47: cash has no risk to divide by, so its Sharpe ratio and deflated Sharpe are noise over noise and are not shown
+    const noRisk = (l, s) => s.excess_is_zero === true || /^cash\b/i.test(l) || !(s.vol > 0.005);      // excess_is_zero: the engine's own flag, when the file has it
+    const stats = labels.map((l) => { const s = r.backtest.stats[l], nr = noRisk(l, s); return [l, pct(s.cagr, 1), pctPlain(s.vol, 1), nr || !fin(s.sharpe) ? "n/a" : fx(s.sharpe, 2), pctPlain(Math.abs(s.max_drawdown), 1), nr || !fin(s.dsr) ? "n/a" : fx(s.dsr, 2)]; });
     const statFig = h("figure", "chart");
     statFig.append(tableBlock(["Policy", "CAGR", "Volatility", "Sharpe", "Max drawdown", "Deflated Sharpe"], stats),
-      h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of every variant, policy and hedge tried would show by luck. Above 0.95 is the bar."));
+      h("p", "hint", "Deflated Sharpe is the probability the true Sharpe beats what the best of every variant, policy and hedge tried would show by luck. Above 0.95 is the bar. The deflation covers the variants tried on this book; it cannot deflate the choice of the nine names. Cash earns no excess over cash, so a ratio for it means nothing and none is shown."));
     const exp = (r.exposures || []).map((e) => [e.index, fx(e.market, 2), fx(e.ai, 2), fx(e.rates, 2), String(Math.round(e.n_obs))]);
     const expFig = h("figure", "chart");
     expFig.append(h("span", "chart-title", "Factor betas (market = QQQ, AI = basket minus QQQ, rates = TLT)"), tableBlock(["Ticker", "Market", "AI", "Rates", "Days of history"], exp));
-    const pol = (r.hedge.policies || []).filter((p) => p.index !== "none").map((p) => [POLICY[p.index] || p.index, pct(p.variance_reduction, 1), pct(p.worst_days_saved, 2), pct(p.ann_return_drag, 1)]);
+    const pol = (r.hedge.policies || []).filter((p) => p.index !== "none").map((p) => [POLICY[p.index] || p.index, fin(p.variance_reduction) ? pct(p.variance_reduction, 1) : "n/a", fin(p.worst_days_saved) ? pct(p.worst_days_saved, 2) : "n/a", fin(p.ann_return_drag) ? pct(p.ann_return_drag, 1) : "n/a"]);
+    // v0.47: the return column is after the hedge's financing when the file says so (ann_financing on each policy)
+    const financed = (r.hedge.policies || []).some((p) => p && p.ann_financing != null);
     const polFig = h("figure", "chart");
-    polFig.append(h("span", "chart-title", "TLT hedge policies on the book"), tableBlock(["Policy", "Variance cut", "Worst-day saving", "Return per year"], pol));
+    polFig.append(h("span", "chart-title", "TLT hedge policies on the book"), tableBlock(["Policy", "Variance cut", "Worst-day saving", financed ? "Return per year, after financing" : "Return per year"], pol));
+    if (typeof r.hedge.financing === "string" && r.hedge.financing) polFig.append(h("p", "hint", r.hedge.financing));
     const two = h("div", "grid2");
     two.append(expFig, polFig);
-    body.append(tiles, fig, statFig, two);
+    body.append(xnote, tiles, fig, statFig, two);
     const rb = robustnessFigure(r.robustness, r.data_quality);
     if (rb) body.append(rb);
     LIVE.btSeries = labels.map((l, i) => ({ name: l, color: colors[i], pts: seriesPts(r.backtest.curves[l]) }));
@@ -348,8 +356,8 @@
       Object.entries(V).filter(([, v]) => v && typeof v === "object").map(([k, v]) => [k, q(v.sharpe, (x) => fx(x, 2)), q(v.cagr, (x) => pct(x, 1)), q(Array.isArray(v.max_drawdown) ? v.max_drawdown.slice().reverse() : v.max_drawdown, (x) => pctPlain(Math.abs(x), 1)), fin(v.p_beats_base) ? pct0(v.p_beats_base) : ""])));
     const P = R.pbo || {}, L = R.plateau || {};
     const lines = [];
-    if (fin(P.pbo)) lines.push(`Probability of backtest overfitting across ${P.rules} neighbouring hedge rules and ${P.splits} splits of the history: ${pct0(P.pbo)}. ${P.pbo >= 0.4 ? "Picking the best backtested rule is close to picking at random: the rule should be justified by economics, not by its backtest." : P.pbo <= 0.15 ? "The best rule in one half of history tends to stay good in the other." : "Selection explains part of the best rule's edge."}`);
-    if (fin(L.chosen_sharpe) && fin(L.rank)) lines.push(`The chosen rule (enter at −0.10, leave at 0) ranks ${L.rank} of ${L.of} on Sharpe (${fx(L.chosen_sharpe, 2)}; neighbours ${fx(L.neighbour_min, 2)} to ${fx(L.neighbour_max, 2)}). ${fin(L.spread) && L.spread < 0.15 ? "A plateau: nearby rules perform about the same." : "Performance varies across nearby rules: treat the exact thresholds as fragile."}`);
+    if (fin(P.pbo)) lines.push(`Probability of backtest overfitting across ${P.rules} neighboring hedge rules and ${P.splits} splits of the history: ${pct0(P.pbo)}. ${P.pbo >= 0.4 ? "Picking the best backtested rule is close to picking at random: the rule should be justified by economics, not by its backtest." : P.pbo <= 0.15 ? "The best rule in one half of history tends to stay good in the other." : "Selection explains part of the best rule's edge."}`);
+    if (fin(L.chosen_sharpe) && fin(L.rank)) lines.push(`The chosen rule (enter at −0.10, leave at 0) ranks ${L.rank} of ${L.of} on Sharpe${typeof L.sharpe === "string" && L.sharpe ? `, ${L.sharpe},` : ""} (${fx(L.chosen_sharpe, 2)}; neighbors ${fx(L.neighbour_min, 2)} to ${fx(L.neighbour_max, 2)}). ${fin(L.spread) && L.spread < 0.15 ? "A plateau: nearby rules perform about the same." : "Performance varies across nearby rules: treat the exact thresholds as fragile."}`);
     if (dq && fin(dq.flagged)) lines.push(dq.flagged ? `The price screen flagged ${dq.flagged} symbol${dq.flagged > 1 ? "s" : ""} (bad prints, frozen prices or gaps); see the run status.` : "The price screen found no bad prints, frozen prices or gaps.");
     lines.forEach((t) => fig.append(h("p", "hint", t)));
     return fig;
@@ -1856,15 +1864,16 @@
     if (miss.length) { errorState(box, "The status file is incomplete.", "Missing: " + miss.join(", ") + "."); return; }
     box.replaceChildren();
     const passed = st.checks.filter((c) => c.ok).length, when = String(st.generated_utc);
+    const failed = st.checks.filter((c) => !c.ok && c.level !== "warn"), warned = st.checks.filter((c) => !c.ok && c.level === "warn");   // v0.47: a warning is not a failure
     const tiles = h("div", "tiles compact");
     tiles.append(tile("Last run", `${niceDate(when.slice(0, 10))}, ${when.slice(11, 16)} UTC`, st.commit ? `Commit ${st.commit}` : "Local run"),
-      tile("Checks passed", `${passed} of ${st.checks.length}`, st.ok ? "Every check passed." : "Failures are listed below."));
+      tile("Checks passed", `${passed} of ${st.checks.length}`, passed === st.checks.length ? "Every check passed." : `${failed.length ? `Failing: ${failed.map((c) => c.name).join("; ")}. ` : "None failing. "}${warned.length ? `Warnings: ${warned.map((c) => c.name).join("; ")}.` : ""}`));
     Object.entries(st.files).forEach(([name, f]) => {
       const age = f && f.cadence === "quarterly" ? "Quarterly SEC filings" : f && fin(f.weekdays_old) ? `${f.weekdays_old} weekday${f.weekdays_old === 1 ? "" : "s"} old` : "";
       tiles.append(tile(name, !f || !f.present ? "Missing" : f.valid === false ? "Invalid" : (niceDate(f.as_of) || "Present"), !f || !f.present ? "Not written by the last run." : f.valid === false ? String(f.error || "") : age));
     });
     const ul = h("ul", "checks");
-    st.checks.forEach((c) => { const li = h("li", c.ok ? null : "fail"); li.append(document.createTextNode(c.name)); if (c.detail) li.append(h("span", null, String(c.detail))); ul.append(li); });
+    st.checks.forEach((c) => { const li = h("li", c.ok ? null : c.level === "warn" ? "warn" : "fail"); li.append(document.createTextNode(c.name)); if (c.detail) li.append(h("span", null, String(c.detail))); ul.append(li); });
     box.append(tiles, ul);
     const chip = $("#chip-run");
     if (!chip) return;                                   // v0.43: the chip sits in the part of the Desk the core page leaves out
@@ -1884,12 +1893,14 @@
     const how = (k) => { const p = P[k]; if (!p) return "not in this build"; return p.showing === "published" ? "the published copy" : (p.same ? "the same content as the published copy" : "this build's snapshot"); };
     const st = (k) => { const p = P[k]; return p ? (p.fetch || "not requested") : ""; };
     const rows = [
-      ["The call (book risk and limits)", "daily", how("book"), nd(P.book && P.book.through), st("book"), next ? `decision ${next.id}, in force from ${nd(next.effective_from)}` : "not yet in the ledger"],
-      ["The ledger of calls", "daily", how("calls"), P.calls ? `${P.calls.n} entries` : "n/a", st("calls"), D ? `in force today: decision ${D.id} (since ${nd(D.effective_from)})` : "no call in force yet"],
+      ["The call (book risk and limits)", "daily", how("book"), nd(P.book && P.book.through), st("book"), next ? `decision ${next.id}, ${next.governs_from > nyToday() ? "takes effect" : "in force from"} ${nd(next.governs_from)}` : "not yet in the ledger"],
+      ["The ledger of calls", "daily", how("calls"), P.calls ? `${P.calls.n} entries` : "n/a", st("calls"), D ? `in force today: decision ${D.id} (since ${nd(D.governs_from)})` : "no call in force yet"],
       ["The calls marked to market", "daily", how("live"), nd(P.live && P.live.through), st("live"), ""],
       ["The paper account", "daily", how("paper"), nd(P.paper && P.paper.through), st("paper"), ""],
       ["The decision engine (S&P 500 sizing)", "monthly", how("decision"), P.decision ? `${P.decision.through}` : "n/a", st("decision"), P.decision && P.decision.id ? `package ${P.decision.id}` : ""],
-      ["The walk-forward record", "per release", "this build's snapshot", nd(P.record && P.record.through), "built into the page", ""]];
+      P.record && P.record.showing === "daily"
+        ? ["The walk-forward record", "daily", "the published copy", nd(P.record.through), st("record"), P.record.kept ? `the universe checks, the deep RL row and the hedge studies are from the release snapshot of ${nd(P.record.kept)}` : ""]
+        : ["The walk-forward record", "per release until the daily file is published", "this build's snapshot", nd(P.record && P.record.through), P.record ? P.record.fetch : "built into the page", ""]];
     const wrap = h("div");
     wrap.append(h("p", "prose", "Each package has its own cadence, so one date cannot describe the page. What the page is showing for each, where it came from, and the decision it carries:"));
     const tb = h("div", "tablewrap"), t = h("table", "rs-table");

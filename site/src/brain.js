@@ -2,7 +2,7 @@
      brain.js (v0.6, v0.8): the system as a signed, weighted graph, and (v0.8) a reasoner over it. Shocks propagate order by order
      (x_k = W' x_k-1), so the desk can show what arrives first, second, third and fourth.
      Eleven edges are measured from monthly data in two regimes (BRAIN_SNAP, or data/brain.json);
-     the rest are judged, labelled as such, and editable. Nothing here is a forecast: it is a
+     the rest are judged, labeled as such, and editable. Nothing here is a forecast: it is a
      consistent way to carry assumptions to their conclusions, and to see which ones carry the weight.
      ===================================================================================== */
   // ring 0 = drivers (outside), 1 = transmission, 2 = markets, 3 = holdings, 4 = the book (centre); a = angle in degrees, 0 = right, clockwise
@@ -429,7 +429,7 @@
     if (nx && top.length >= 2 && nx.info > 1e-4) {
       const hs = ex.filter((r) => r.p > 1e-6).slice(0, 6), i0 = 0, i1 = 1, mid = (nx.means[i0] + nx.means[i1]) / 2;
       steps.push({ k: "hyp", h: "Look next", nodes: [nx.node], t: `To tell "${hyp(hs[i0])}" from "${hyp(hs[i1])}", watch ${name(nx.node)}: the first implies ${sg(nx.means[i0], 2)}σ, the second ${sg(nx.means[i1], 2)}σ. It carries ${fx(nx.info, 3)} nats about which explanation is right, the most of any unobserved node.` });
-      steps.push({ k: "hyp", h: "Change my mind", nodes: [nx.node], t: `A reading of ${name(nx.node)} ${nx.means[i1] > nx.means[i0] ? "above" : "below"} ${sg(mid, 2)}σ would favour "${hyp(hs[i1])}" over the current leader. Add it as an observation above and the brain re-reasons.` });
+      steps.push({ k: "hyp", h: "Change my mind", nodes: [nx.node], t: `A reading of ${name(nx.node)} ${nx.means[i1] > nx.means[i0] ? "above" : "below"} ${sg(mid, 2)}σ would favor "${hyp(hs[i1])}" over the current leader. Add it as an observation above and the brain re-reasons.` });
     }
     return steps;
   }

@@ -18,10 +18,10 @@
     const A = TA_SNAP.assets, keys = Object.keys(A);
     const sig = keys.reduce((n, k) => n + Object.values(A[k].studies).filter((s) => s.t != null && s.bh < 0.05).length, 0);
     const tests = keys.reduce((n, k) => n + Object.values(A[k].studies).filter((s) => s.t != null).length, 0);
-    const conn = CONN_SNAP.filter((r) => r.ok).length;
+    const CN = anConnRows(), conn = CN.rows.filter((r) => r.ok).length;
     [[String(keys.length), "Series analyzed here", "every holding in the daily run"], [`${sig} of ${tests}`, "Signals that survive", "Benjamini-Hochberg at 5%, on each asset's own history"],
       [String(Object.values(FA_SNAP.companies).filter((c) => c.ok).length), "Companies from filings", "ratios, Piotroski, Altman, Beneish"],
-      [`${conn} of ${CONN_SNAP.length}`, "Data sources reachable", "from the build workspace; the daily run checks with the configured keys"]].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
+      [`${conn} of ${CN.rows.length}`, "Data sources reachable", CN.live ? `in the daily run's check of ${isoNice(String(CN.checked).slice(0, 10))}, with the configured keys` : "from the build workspace, when this snapshot was made; the daily run checks with the configured keys"]].forEach(([v, k, s]) => { const d = h("div", "at-kpi"); d.append(h("b", null, v), h("span", null, k), h("small", null, s)); tiles.append(d); });
     anAssetSeg();
     anCompanySeg();
     anConnections();
@@ -81,12 +81,18 @@
     $("#an-co-flags").replaceChildren(...c.flags.map((f) => h("li", null, f)));
     $("#an-co-tags").textContent = `Tags used: ${Object.entries(c.tags).map(([k, v]) => `${k} = ${v}`).join("; ")}.`;
   }
+  // v0.47: the daily run's own check (data/connections.json) when it is published; the build-time snapshot otherwise
+  function anConnRows() {
+    const L = typeof LIVE !== "undefined" && LIVE.connections && Array.isArray(LIVE.connections.sources) ? LIVE.connections : null;
+    return L ? { rows: L.sources, live: true, checked: L.checked || "" } : { rows: CONN_SNAP, live: false, checked: "" };
+  }
   function anConnections() {
-    fillTable($("#an-conn"), ["Source", "What", "Cost", "Key", "Reachable from the build workspace", "Note"],
-      CONN_SNAP.map((r) => {
+    const CN = anConnRows();
+    fillTable($("#an-conn"), ["Source", "What", "Cost", "Key", CN.live ? "Reachable from the daily run" : "Reachable from the build workspace", "Note"],
+      CN.rows.map((r) => {
         // the build workspace reaches only package registries; an exception's name is for the log, not the reader
         const raw = String(r.note || ""), clean = raw.replace(/;?\s*[A-Za-z]*(?:Error|Exception)\b.*$/, "").trim();
-        const note = h("span", "hint", clean || (r.reachable ? "" : "Not reachable from the build workspace; the daily run reaches it"));
+        const note = h("span", "hint", clean || (r.reachable ? "" : CN.live ? "Not reachable in the daily run's check" : "Not reachable from the build workspace; the daily run reaches it"));
         if (raw && raw !== clean) note.title = raw;
         return [r.source, r.what, r.cost, r.credential == null ? "none needed" : r.credential ? "set" : "not set", r.reachable ? `yes (${r.ms} ms)` : "no", note];
       }), 2);

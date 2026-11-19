@@ -1,6 +1,10 @@
 name: daily-run
 
-# Runs before the US open, Tuesday to Saturday (UTC), so each run sees the prior session's close.
+# Scheduled for 11:17 UTC, Tuesday to Saturday, so each run sees the prior session's close. GitHub starts scheduled
+# jobs late: these runs have started between about 16:00 and 20:00 UTC, during the US session. Nothing depends on the
+# start time: the ledger stamps each call when it is written, and a call governs from the first session whose prior
+# close came after that (buildout/ledger.py, governs_from). A run that does start on time waits for the price mirror's
+# morning refresh (the book step, --wait-minutes).
 # Steps that need a secret or variable skip themselves cleanly until it is set.
 on:
   schedule:
@@ -10,6 +14,8 @@ on:
 permissions:
   contents: write
   issues: write   # the Status alert step opens or comments on the "Daily run failed" issue
+  id-token: write        # v0.47: the ledger's digest is signed and logged outside this repository (the Anchor step)
+  attestations: write
 
 concurrency:
   group: daily-run
@@ -20,7 +26,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       FRED_API_KEY: ${{ secrets.FRED_API_KEY }}   # v0.33: optional; FRED's official API when set, its graph CSV otherwise
-    timeout-minutes: 120      # v0.33: every data step has its own limit; this is the backstop
+    timeout-minutes: 240      # v0.33: every data step has its own limit; this is the backstop (v0.47: room for the book step's wait)
     steps:
       - uses: actions/checkout@v5
 
@@ -34,13 +40,18 @@ jobs:
         # exact pins for every dependency, then the package without re-resolving; databento is optional, so it goes last
         env:
           FRED_API_KEY: ""        # v0.39.1: no secret is in the environment while packages install
+        # v0.47: databento's own requirements are pinned too. They were resolved fresh on every run (aiohttp, requests,
+        # urllib3 and fourteen more at whatever version was newest that hour). These are the versions pip resolved on
+        # ubuntu-24.04, CPython 3.12.16, x86_64 in the run of 2026-11-18 (run 44380275965), every one of them.
         run: |
           pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
-          pip install "databento==0.88.0"
+          pip install "databento==0.88.0" "databento-dbn==0.70.0" "aiohttp==3.14.5" "aiohappyeyeballs==2.7.1" "aiosignal==1.4.0" \
+            "attrs==26.1.0" "certifi==2026.10.23" "charset_normalizer==3.5.2" "frozenlist==1.8.0" "idna==3.20" "multidict==7.2.1" \
+            "propcache==0.5.4" "requests==2.34.2" "typing_extensions==4.16.0" "urllib3==2.8.0" "yarl==1.25.1" "zstandard==0.25.0"
 
       - name: Smoke test the engine
         id: smoke
-        # v0.32: the full suite runs in CI on every push (tests.yml); the data run keeps a two-minute smoke test so a
+        # v0.32: the full suite runs in CI on every push (ci.yml); the data run keeps a two-minute smoke test so a
         # broken install stops it, without spending its time budget on 600 tests
         run: pytest -q -x -p no:cacheprovider tests/test_v08.py tests/test_v12.py tests/test_book.py tests/test_sizing_rules.py
 
@@ -199,14 +210,28 @@ jobs:
       - name: Book risk and the call ledger (validated prices; one hash-chained entry per new data date)
         id: ledger
         if: always() && steps.smoke.outcome == 'success'      # v0.39.1: a broken install never writes a call
-        timeout-minutes: 15
+        timeout-minutes: 130
         continue-on-error: true
         run: |
-          python -m buildout book --out site/data
+          # v0.47: prices must reach the last completed session. The mirror refreshes between about 10:30 and 12:30 UTC;
+          # a run that starts before that waits for it (checking every five minutes) rather than failing or sizing on
+          # a day-old pull. Any other validation failure stops at once.
+          python -m buildout book --out site/data --wait-minutes 110
           python -m buildout ledger append --book site/data/book.json
           python -m buildout ledger verify
           python -m buildout live --out site/data       # v0.40: the ledger's calls marked to market, every day
           python -m buildout trader --once --paper --out site/data   # v0.42: the public paper bot, a model account run by the trader
+
+      - name: Walk-forward record and tear sheet (every candidate's prices; the PDF from the day's record)
+        id: record
+        if: always() && steps.ledger.outcome == 'success'
+        timeout-minutes: 25
+        continue-on-error: true
+        # v0.47: the record on the page and the tear sheet were rebuilt by hand at each release and went stale between
+        # releases (they read Nov 5 on Nov 18). They are now rebuilt from the day's prices: about three minutes.
+        run: |
+          python -m buildout track --out site/data
+          python scripts/snapshot_v38.py --pdf-only --track-json site/data/track.json --out site/tearsheet.pdf
 
       - name: Status (freshness and sanity checks for the page)
         id: status
@@ -220,12 +245,58 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data ledger/calls.jsonl paper
+          if [ -f site/tearsheet.pdf ]; then git add site/tearsheet.pdf; fi      # v0.47: rebuilt by the record step
           if git diff --cached --quiet; then
             echo "No new data."
             exit 0
           fi
-          git commit -m "Daily data $(date -u +%Y-%m-%d)"
-          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep $((i * 10)); done; exit 1   # v0.39.1: another workflow may have pushed first
+          msg="Daily data $(date -u +%Y-%m-%d)"
+          base=$(git rev-parse HEAD)
+          git commit -q -m "$msg"
+          ours=$(git rev-parse HEAD)
+          # v0.47: main may have moved since this run checked out (a queued run checks out the commit it was queued at;
+          # a push can land while it works). Before, `git pull --rebase` merged two runs' JSON line by line, stopped on
+          # the conflicts, was retried inside the unfinished rebase, and left conflict markers in status.json (the run
+          # of Nov 11). Now nothing is merged: the commit is rebuilt on top of main as it is at that moment, taking each
+          # file this run wrote whole. The one thing this run must not do is replace a ledger line or the paper
+          # account another run already published, so when those moved, this run's results are not committed at all.
+          for i in 1 2 3 4; do
+            git fetch -q origin main
+            if ! git diff --quiet "$base" origin/main -- ledger/calls.jsonl paper ':(exclude)paper/README.md'; then
+              echo "::warning title=Not committed::main already carries a newer ledger or paper account than this run started from (another run published first). This run's results were not committed, so the published set stays one consistent run."
+              exit 0
+            fi
+            git checkout -q --detach origin/main
+            git diff --name-only --diff-filter=AM -z "$base" "$ours" | xargs -0 -r git checkout -q "$ours" --
+            git diff --name-only --diff-filter=D -z "$base" "$ours" | xargs -0 -r git rm -q --ignore-unmatch --
+            if git diff --cached --quiet; then
+              echo "main already has these results."
+              exit 0
+            fi
+            git commit -q -m "$msg"
+            if git push -q origin HEAD:main; then
+              echo "Committed $(git rev-parse --short HEAD) on top of $(git rev-parse --short origin/main)."
+              exit 0
+            fi
+            sleep $((i * 10))
+          done
+          echo "::error::could not push the day's results after four tries"
+          exit 1
+
+      # v0.47: an anchor outside this repository. The hash chain shows an edit that was not rehashed; on its own it
+      # cannot show that the whole chain was not rewritten, because whoever can push here can rehash it. This step signs
+      # the SHA-256 of ledger/calls.jsonl as it stands after this run's commit and writes the signature to Sigstore's
+      # public transparency log, with the log's own timestamp. Anyone can check any day's ledger against it:
+      #   gh attestation verify ledger/calls.jsonl --repo <owner>/buildout
+      # A rewritten history has no attestation for its earlier lines at the dates it claims.
+      - name: Anchor the ledger outside the repository (signed digest, public transparency log)
+        id: anchor
+        if: always() && steps.commit.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: ledger/calls.jsonl
 
       # A failed data step is kept from blocking the steps after it (continue-on-error), which also keeps the job green.
       # The two steps below turn any failure back into a red run and an issue, so a broken day is never silent.
@@ -256,6 +327,7 @@ jobs:
             reason|Reasoner and games|${{ steps.reason.outcome }}
             engines|Decision engines and the manifest|${{ steps.engines.outcome }}
             ledger|Book risk and the call ledger|${{ steps.ledger.outcome }}
+            record|Walk-forward record and tear sheet|${{ steps.record.outcome }}
             status|Status (freshness and sanity checks)|${{ steps.status.outcome }}
             commit|Commit results|${{ steps.commit.outcome }}
           # report.json and capex.json are only written once their credential is set; until then their absence is expected
@@ -285,8 +357,13 @@ jobs:
               status_err = None
           except (OSError, ValueError) as exc:
               missing, invalid, checks, status_err = [], [], [], f"{p} could not be read: {exc}"
+          # v0.47: a check that did not pass fails the run and reaches the issue, unless status.py marked it a warning
+          # (level "warn": worth reading, not a reason to distrust the day's numbers). Before, every check was only
+          # listed, so data a week old left the run green.
+          fatal = [c for c in checks if c.get("level", "fail") != "warn"]
+          warns = [c for c in checks if c.get("level", "fail") == "warn"]
 
-          bad = bool(failed or missing or invalid or status_err)
+          bad = bool(failed or missing or invalid or status_err or fatal)
           md = ["## Daily run: " + ("FAILED" if bad else "all data steps succeeded"), "", f"Run: {os.environ['RUN_URL']}", ""]
           if failed:
               md += ["### Failed steps", "", "| Step | Id | Outcome |", "|---|---|---|"] + [f"| {n} | `{i}` | {o} |" for i, n, o in failed] + [""]
@@ -298,8 +375,11 @@ jobs:
               md += ["Not expected yet (credential not set): " + ", ".join(f"`{f}`" for f in sorted(expected_absent)), ""]
           if skipped:
               md += ["Skipped: " + ", ".join(skipped), ""]
-          if checks:
-              md += ["### Sanity checks that did not pass (reported, not failing the run)", ""] + [f"- {c.get('name')}" + (f": {c['detail']}" if c.get("detail") else "") for c in checks] + [""]
+          line = lambda c: f"- {c.get('name')}" + (f": {c['detail']}" if c.get("detail") else "")
+          if fatal:
+              md += ["### Checks that failed", ""] + [line(c) for c in fatal] + [""]
+          if warns:
+              md += ["### Warnings (reported, not failing the run)", ""] + [line(c) for c in warns] + [""]
           text = "\n".join(md) + "\n"
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
               fh.write(text)
@@ -308,11 +388,33 @@ jobs:
               print(f"::error title=Daily step failed::{n} ({i}): {o}")
           for f in missing:
               print(f"::error title=Output missing::site/data/{f}")
+          for c in fatal:
+              print(f"::error title=Check failed::{c.get('name')}" + (f": {c['detail']}" if c.get("detail") else ""))
+          for c in warns:
+              print(f"::warning title=Check warning::{c.get('name')}" + (f": {c['detail']}" if c.get("detail") else ""))
           if status_err:
               print(f"::error title=status.json::{status_err}")
           print(text)
           raise SystemExit(1 if bad else 0)
           PY
+
+      # v0.47: the alert is closed by the run that proves it is over. Before, the issue opened on Nov 3 stayed open
+      # through every green run after Nov 12, so the repository's front page said the daily run was failing.
+      - name: Status recovered (close the alert issue)
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Daily run failed"
+          num=$(gh issue list --state open --limit 200 --json number,title --jq "map(select(.title == \"$title\")) | sort_by(.number) | .[0].number // empty") || num=""
+          if [ -n "$num" ]; then
+            gh issue close "$num" --comment "Recovered: the daily run of $(date -u +%Y-%m-%d) finished with every step and every check passing: $RUN_URL" \
+              || echo "::warning::could not close issue #$num; close it by hand"
+          else
+            echo "No open alert."
+          fi
 
       - name: Status alert
         if: failure()

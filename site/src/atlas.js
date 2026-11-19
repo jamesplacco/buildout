@@ -485,7 +485,7 @@
     if (i == null) return;
     $("#atv-name").textContent = n.name;
     const comm = a.communities.find((c) => c.id === n.community);
-    $("#atv-meta").textContent = n.measured ? `${n.family} · community: ${comm ? comm.name : "n/a"} · ${n.source} · ${n.from} to ${n.to}${n.clipped ? ` · ${n.clipped} extreme month${n.clipped === 1 ? "" : "s"} winsorized` : ""}` : `${n.family === "Book" ? "A holding or the book" : "A judged concept from the core map"}: its links are judged and labelled, not measured.`;
+    $("#atv-meta").textContent = n.measured ? `${n.family} · community: ${comm ? comm.name : "n/a"} · ${n.source} · ${n.from} to ${n.to}${n.clipped ? ` · ${n.clipped} extreme month${n.clipped === 1 ? "" : "s"} winsorized` : ""}` : `${n.family === "Book" ? "A holding or the book" : "A judged concept from the core map"}: its links are judged and labeled, not measured.`;
     const rows = (dir) => M.ce.filter((e) => (dir === "in" ? e.t === i : e.f === i)).sort((x, y) => Math.abs(y.w) - Math.abs(x.w)).slice(0, 10).map((e) => {
       const o = M.nodes[dir === "in" ? e.f : e.t];
       return [o.short, sg(e.w), e.judged ? "judged" : `${pctTxt(e.p)}${e.est ? " ★" : ""}`, e.judged ? (e.why || "") : e.agree ? "agrees" : "against own evidence"];

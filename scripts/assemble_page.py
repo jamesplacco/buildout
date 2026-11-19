@@ -7,7 +7,7 @@ and boot.js (navigation, live data and boot) last. Because the scope is shared, 
 same name would silently replace the first, so assembly stops if it finds one.
 
     python scripts/assemble_page.py           # write site/page.html (every desk) and site/core.html (the core page)
-    python scripts/assemble_page.py --check   # exit 1 if either is out of date
+    python scripts/assemble_page.py --check   # exit 1 if either is out of date, or a link on the core page leads nowhere
 
 v0.43: the same sources build two pages. page.html carries every desk and is the library; core.html carries only
 the desks the call depends on (CORE_VIEWS) and none of the snapshots only the library reads (CORE_STUBS).
@@ -25,7 +25,7 @@ OUT = ROOT / "site" / "page.html"
 # and the published copy render the same standards-mode document (without it the raw file renders in quirks mode)
 SKELETON = '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>'
 SCRIPTS = ["math.js", "engine7.js", "ui.js", "data.js", "reference.js", "research.js", "views.js", "decide.js", "journal.js", "desks.js", "wisdom.js",
-           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "snap19.js", "dx.js", "dxlive.js", "snap20.js", "pf.js", "snap21.js", "mx.js", "snap22.js", "geo.js", "snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "snap29.js", "futures.js", "snap30.js", "book.js", "snappc.js", "credit.js", "sources.js", "reading.js", "snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "execdesk.js", "deeprl.js", "landing.js", "guide.js", "keys.js", "today7.js",
+           "lab.js", "snap6.js", "snap7.js", "snap9.js", "brain.js", "brainx.js", "noteworthy.js", "trading.js", "buyside6.js", "pulse.js", "solve.js", "games.js", "field.js", "snap11.js", "hedgebook.js", "ooda.js", "snap12.js", "robustb.js", "hero.js", "voices.js", "snap13.js", "atlas.js", "snap14.js", "mind.js", "labs.js", "snap15.js", "ml.js", "reality.js", "edge.js", "snap16.js", "analysis.js", "snap17.js", "bondlab.js", "bonds.js", "complexity.js", "snap19.js", "dx.js", "dxlive.js", "snap20.js", "pf.js", "snap21.js", "mx.js", "snap22.js", "geo.js", "snap23.js", "params.js", "explain.js", "snap24.js", "digest.js", "snap25.js", "reasoning.js", "snap26.js", "edges.js", "snap27.js", "nowcast.js", "snap28.js", "filings.js", "snap29.js", "futures.js", "snap30.js", "book.js", "snappc.js", "credit.js", "sources.js", "reading.js", "snap38.js", "trackdesk.js", "memos.js", "levers_data.js", "levers.js", "execdesk.js", "deeprl.js", "landing.js", "guide.js", "badges.js", "keys.js", "today7.js",
            "boot.js"]
 
 
@@ -158,6 +158,62 @@ def assemble(src: Path = SRC, core: bool = False, stubs: dict | None = None) -> 
     return f'{SKELETON}\n{head}\n{body}\n<script>\n(() => {{\n  "use strict";\n{flag}\n{js}\n}})();\n</script>\n\n</body></html>\n'
 
 
+# ---------------------------------------------------------------- links on the core page (v0.47)
+# The core page carries fifteen desks; a link on it to anything else must open the library there (boot.js resolve()).
+# Before v0.47 a link to an element of a library desk (a finding, a decision, a tool) opened Home without a word:
+# fourteen targets on Today's call and the Appendix did. This is the build's check that every internal link the core
+# page can show has a target: a core desk, an element of the core page, or a desk or element of the library.
+LINK_GROUPS = {"today", "record", "evidence", "engine", "library", "markets", "research", "reference"}
+# ids made at run time from a list (a security, an episode, a legend, a lens, a glossary term, an assumption, a trend):
+# the family is known to the library, the member cannot be read from the source
+LINK_FAMILIES = ("sec-", "ep-", "lg-", "lens-", "g-", "as-", "nw-")
+_SCRIPT_START = '\n<script>\n(() => {\n  "use strict";'
+
+
+def _split(page: str) -> tuple[str, str]:
+    i = page.index(_SCRIPT_START)
+    return page[:i], page[i:]
+
+
+def _made_by_script(token: str, js: str) -> bool:
+    """An element id a module writes itself: id: "x", el.id = "x", id="x" in a template, or a finding's card."""
+    return bool(re.search(r"""(\bid: ?|\.id = |\bid=|findingCard\()["'`]""" + re.escape(token) + r"""["'`]""", js))
+
+
+def core_links(core: str | None = None, full: str | None = None) -> dict:
+    """Every internal link target the core page can show, with where it lands: "core" (a desk or element in the core
+    page's markup), "library" (a desk or element only the library's markup has; boot.js sends the reader there),
+    "made at run time" (an id a module writes when its desk is drawn: on the core page if that desk is, in the
+    library otherwise), or "nowhere". Targets are read from the markup's href="#x" and from the scripts' link
+    strings ("#x" outside a selector call, and the at:, link: and [id, label] forms the desks use)."""
+    core = assemble(core=True) if core is None else core
+    full = assemble() if full is None else full
+    cb, cj = _split(core)
+    fb, fj = _split(full)
+    core_ids, full_ids = set(re.findall(r'\bid="([^"]+)"', cb)), set(re.findall(r'\bid="([^"]+)"', fb))
+    lib_views = set(re.findall(r'id="view-([a-z0-9]+)"', fb))
+    tokens: set[str] = set(re.findall(r'href="#([^"]+)"', cb))
+    for m in re.finditer(r"""(?<![$\w(])(["'`])#([A-Za-z][\w-]*)\1""", cj):
+        if re.search(r"(\$|querySelector(All)?|closest|matches|getElementById)\(\s*$", cj[max(0, m.start() - 28): m.start()]):
+            continue                                              # a selector, not a link
+        if re.fullmatch(r"[0-9a-fA-F]{3,8}", m.group(2)) or m.group(2).endswith("-"):
+            continue                                              # a color, or the stem of an id built at run time
+        tokens.add(m.group(2))
+    tokens |= {m.group(2) for m in re.finditer(r'\b(at|link): "([A-Za-z][\w-]*)"', cj)}
+    tokens |= {m.group(1) for m in re.finditer(r"""\[\s*"([a-z][\w]*-[\w-]+)",\s*"[A-Z][^"]{2,40}"\]""", cj)}
+    out = {}
+    for t in sorted(tokens):
+        if t in CORE_VIEWS or t in core_ids or t in LINK_GROUPS:
+            out[t] = "core"
+        elif t in lib_views or t in full_ids:
+            out[t] = "library"
+        elif _made_by_script(t, fj) or t.startswith(LINK_FAMILIES):
+            out[t] = "made at run time"                           # drawn by a module: on the core page if its desk is, else in the library
+        else:
+            out[t] = "nowhere"
+    return out
+
+
 def main(argv: list[str]) -> int:
     page, core = assemble(), assemble(core=True)
     if "--check" in argv:
@@ -165,7 +221,16 @@ def main(argv: list[str]) -> int:
         if stale:
             print(f"{', '.join('site/' + n for n in stale)} out of date: run python scripts/assemble_page.py", file=sys.stderr)
             return 1
-        print("site/page.html and site/core.html are current")
+        links = core_links(core, page)
+        dead = sorted(t for t, where in links.items() if where == "nowhere")
+        if dead:
+            print(f"the core page links to {len(dead)} target(s) that exist on neither page: {', '.join('#' + t for t in dead)}", file=sys.stderr)
+            return 1
+        if "CORE && /^[A-Za-z][\\w-]*$/.test(token)) { toLibrary(token)" not in core:
+            print("boot.js no longer sends an id the core page lacks to the library: links to library elements would open Home", file=sys.stderr)
+            return 1
+        n = {k: sum(1 for v in links.values() if v == k) for k in ("core", "library", "made at run time")}
+        print(f"site/page.html and site/core.html are current; {len(links)} link targets on the core page: {n['core']} in its markup, {n['library']} in the library's, {n['made at run time']} made at run time, none missing")
         return 0
     OUT.write_text(page)
     CORE_OUT.write_text(core)

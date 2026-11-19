@@ -507,7 +507,7 @@ def test_the_page_says_who_can_send_an_order():
     assert "Orders Buildout can place" not in t.replace("0 orders Buildout can place", "") and "nothing executes without a person" not in t
     assert "has no tool that places an order.</p></div>\n  <div class=\"at-tiles\" id=\"ex-tiles\">" not in t
     js = (SRC / "execdesk.js").read_text()
-    for s in ("The paper bot (the daily workflow)", "Yes, simulated orders only, with no person in the loop", "broker = robinhood_mcp", "Untested against the live endpoint", "60 paper days and 5 approved live tickets"):
+    for s in ("The paper bot (the daily workflow)", "Yes, simulated orders only, with no person in the loop", "broker = robinhood_mcp", "Untested against the live endpoint", "60 sessions have closed with the paper bot holding a position under the current rule and 5 approved live tickets"):      # v0.47: the gate counts sessions under the current rule
         assert s in js, s
     assert 'id="ex-who"' in (SRC / "body.html").read_text()
     assert "Works today" not in js

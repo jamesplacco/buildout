@@ -78,7 +78,16 @@ def drawdown_quantile(mu: float, sigma: float, leverage: float, years: float = 1
 
 def max_leverage(mu: float, sigma: float, max_dd: float, years: float = 1.0, q: float = 0.95,
                  cash_rate: float = 0.04, borrow_spread: float = 0.01, hi: float = 5.0, tol: float = 1e-4) -> float:
-    """Largest leverage whose q-quantile one-year drawdown stays inside max_dd (bisection to `tol`, common seed)."""
+    """Largest leverage whose q-quantile one-year drawdown stays inside max_dd (bisection to `tol`, common seed).
+
+    v0.47: a drift, volatility, cap or rate that is not a finite number raises. Before, every comparison with NaN
+    was False, the bisection walked down to zero, and a missing input came back as "hold nothing"."""
+    bad = [k for k, v in (("mu", mu), ("sigma", sigma), ("max_dd", max_dd), ("cash_rate", cash_rate), ("borrow_spread", borrow_spread))
+           if not np.isfinite(v)]
+    if bad or sigma < 0:
+        raise ValueError("max_leverage needs finite inputs and a volatility of zero or more; got "
+                         + ", ".join(f"{k}={v!r}" for k, v in (("mu", mu), ("sigma", sigma), ("max_dd", max_dd), ("cash_rate", cash_rate),
+                                                               ("borrow_spread", borrow_spread)) if k in bad or (k == "sigma" and sigma < 0)))
     lo = 0.0
     if drawdown_quantile(mu, sigma, hi, years, q, cash_rate, borrow_spread) <= max_dd:
         return hi

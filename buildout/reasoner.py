@@ -53,6 +53,9 @@ SIGNALS = [
     {"id": "capex", "name": "Builders' capex above 80% of operating cash flow", "cluster": "ai", "lik": [0.50, 0.40, 0.60, 0.70, 0.70, 0.50, 0.50]},
     {"id": "curve", "name": "2s10s curve inverted", "cluster": "growth", "lik": [0.25, 0.35, 0.20, 0.20, 0.55, 0.45, 0.50]},
 ]
+# The market levels here are fallbacks. hedgebook.market_params (hedges.json, v0.47) reads vix, index_vol, y30 and rf
+# from the run's own macro.json and publishes any that fall back to these as assumed; build() below reads vix and
+# index_vol from it and still takes y30 and rf from here.
 DEFAULTS = {"beta_market": 1.15, "beta_ai": 1.0, "tlt_duration": 16.5, "tlt_convexity": 360.0, "y30": 0.0485, "rf": 0.042,
             "borrow_spread": 0.01, "vix": 18.0, "index_vol": 25.0, "skew_pts": 3.0, "horizon": 0.25,
             "max_loss": 0.15, "max_equity": 1.5, "max_gross": 2.0, "max_premium": 0.02}

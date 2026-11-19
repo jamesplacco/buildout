@@ -57,7 +57,14 @@ def write(obj: dict, out_dir: str | Path, name: str) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     path = out / name
     payload = json.dumps(clean({"schema": SCHEMA, **obj}), indent=1, allow_nan=False)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(payload)
-    os.replace(tmp, path)
+    # v0.47: a dot-file with the writer's process id. A step killed between the two lines below (a timeout) leaves this
+    # file behind; as name.json.tmp it was neither git-ignored nor skipped by the site build, so the daily commit
+    # (git add site/data) would have published it. Two writers of one file no longer share a temporary name either.
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_text(payload)
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
     return path

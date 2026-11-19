@@ -24,3 +24,6 @@ private/
 
 # A crash mid-write can leave the temporary file an atomic write renames into place (v0.44.1)
 .*.tmp
+*.json.tmp
+# The engine runner's last-good copies, removed when a task finishes; a killed run can leave them (v0.47)
+.lastgood/

@@ -107,6 +107,21 @@ def _at(s: pd.Series, when: pd.Timestamp, tol_days: int = 10) -> float | None:
     return float(near.iloc[-1]) if len(near) else None
 
 
+INSTANT_TOL_DAYS = 10      # a balance sheet is dated the quarter's last day; fiscal calendars drift by a few days
+
+
+def instant_at(s: pd.Series, end: pd.Timestamp, tol_days: int = INSTANT_TOL_DAYS) -> tuple[float | None, str | None]:
+    """The balance-sheet value (USD billions) dated within `tol_days` of `end`, and its date; (None, None) when the
+    concept was not filed for that quarter. Never the newest value regardless of its age."""
+    s = s.dropna()
+    if s.empty:
+        return None, None
+    near = s[(s.index >= end - pd.Timedelta(days=tol_days)) & (s.index <= end + pd.Timedelta(days=tol_days))]
+    if not len(near):
+        return None, None
+    return float(near.iloc[-1]) / 1e9, near.index[-1].strftime("%Y-%m-%d")
+
+
 def analyze_company(units: dict[str, list[dict]], supplements: dict | None = None) -> dict:
     """TTM metrics, balance sheet, ratios and the Minsky stage for one company (USD billions)."""
     qs = {k: _first(units, v, quarterly_flow) for k, v in FLOWS.items()}
@@ -145,23 +160,42 @@ def analyze_company(units: dict[str, list[dict]], supplements: dict | None = Non
     oqa = _at(qs["op_income"], end - pd.DateOffset(years=1))
     m["op_income_last_q_yoy"] = (float(oq) / oqa - 1) if oq is not None and oqa and oqa > 0 else None
 
-    def last(name: str) -> tuple[float | None, str | None]:
-        s = inst[name].dropna()
-        return (float(s.iloc[-1]) / 1e9, s.index[-1].strftime("%Y-%m-%d")) if len(s) else (None, None)
+    # v0.47: a balance-sheet figure is read at this quarter's end or not at all. Before, the newest observation of a
+    # concept was taken however old it was, so a tag a company stopped using years ago (Amazon's and Tesla's combined
+    # cash line, last filed in 2017 and 2012; Oracle's long-term debt, last filed in 2022) was published beside this
+    # quarter's flows and subtracted from this quarter's debt. A figure not filed for this quarter is None; the last
+    # one that was filed, with its date, is kept under "stale" so nothing is hidden, and nothing is derived from it.
+    stale: dict = {}
 
-    m["debt"], m["debt_date"] = last("debt")
-    total, total_date = last("cash_total")
-    cash, cash_date = last("cash")
-    sec, _ = last("securities")
-    m["cash"], m["cash_date"] = (total, total_date) if total is not None else ((cash + (sec or 0.0)), cash_date) if cash is not None else (None, None)
-    m["rpo"], m["rpo_date"] = last("rpo")
-    m["receivables"], _ = last("receivables")
-    rc = inst["receivables"].dropna()
-    rprior = _at(rc, rc.index[-1] - pd.DateOffset(years=1), 40) if len(rc) else None
+    def at_end(name: str) -> tuple[float | None, str | None]:
+        v, d = instant_at(inst[name], end)
+        if v is None:
+            s = inst[name].dropna()
+            if len(s):
+                stale[name] = {"value": float(s.iloc[-1]) / 1e9, "date": s.index[-1].strftime("%Y-%m-%d")}
+        return v, d
+
+    m["debt"], m["debt_date"] = at_end("debt")
+    total, total_date = at_end("cash_total")
+    cash, cash_date = at_end("cash")
+    sec, _ = at_end("securities")
+    if total is not None:                       # the combined line, when it is this quarter's
+        m["cash"], m["cash_date"], m["cash_basis"] = total, total_date, "cash, equivalents and short-term investments"
+    elif cash is not None:                      # else cash plus this quarter's marketable securities
+        m["cash"], m["cash_date"] = cash + (sec or 0.0), cash_date
+        m["cash_basis"] = "cash and equivalents plus marketable securities" if sec is not None else "cash and equivalents only"
+    else:
+        m["cash"], m["cash_date"], m["cash_basis"] = None, None, None
+    if m["cash"] is not None:                   # a component that was not needed is not a gap
+        for k in ("cash_total", "cash", "securities"):
+            stale.pop(k, None)
+    m["rpo"], m["rpo_date"] = at_end("rpo")
+    m["receivables"], m["receivables_date"] = at_end("receivables")
+    rprior = _at(inst["receivables"], end - pd.DateOffset(years=1), 40)
     m["receivables_yoy"] = (m["receivables"] * 1e9 / rprior - 1) if m["receivables"] is not None and rprior else None
-    d = inst["debt"].dropna()
-    prior = _at(d, d.index[-1] - pd.DateOffset(years=1), 40) if len(d) else None
+    prior = _at(inst["debt"], end - pd.DateOffset(years=1), 40)
     m["debt_yoy"] = (m["debt"] * 1e9 / prior - 1) if m["debt"] is not None and prior else None
+    m["stale"] = stale
     if supplements:
         for k, v in supplements.items():
             if v is not None and (m.get(k) is None or k in supplements.get("_override", ())):

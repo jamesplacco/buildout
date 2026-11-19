@@ -8,8 +8,8 @@
   const B30 = () => (typeof SNAP30 !== "undefined" && SNAP30 && SNAP30.book && SNAP30.book.sizes) ? SNAP30.book : null;
   const b30P = (v, d = 1) => (fin(v) ? pctPlain(v, d) : "n/a");
   const b30S = (v, d = 1) => (fin(v) ? pct(v, d) : "n/a");
-  const B30_LIMIT = { es_budget: "Expected-shortfall budget", vol_target: "Volatility target", drawdown_cap: "One-year drawdown cap", gross_cap: "Gross cap" };
-  const B30_LIMIT_LC = { es_budget: "the expected-shortfall budget", vol_target: "the volatility target", drawdown_cap: "the drawdown cap", gross_cap: "the gross cap" };
+  const B30_LIMIT = { es_budget: "Expected-shortfall budget", vol_target: "Volatility target", drawdown_cap: "One-year drawdown cap", gross_cap: "Long exposure cap" };
+  const B30_LIMIT_LC = { es_budget: "the expected-shortfall budget", vol_target: "the volatility target", drawdown_cap: "the drawdown cap", gross_cap: "the long exposure cap" };
   const B30_POLICY = { none: "No hedge", nasdaq_beta: "Short Nasdaq-100 at the measured beta", nasdaq_and_semis: "Short Nasdaq-100 and semis at the measured betas",
     bond_when_it_hedges: "Long 20-year bond, only when its correlation says it hedges", bond_static_30: "Long 20-year bond, 30% always (the TLT 0.3x rule)" };
 
@@ -40,19 +40,42 @@
       decision: dec,
       menu: lo && hi ? { lo, hi, n: FR.length } : null };
   }
+  // v0.47: the date a call governs from. The ledger stores effective_from as written; where the engine has restated
+  // the date a call actually governs (the entry's own governs_from, or the list the daily run publishes in
+  // data/live.json as restated: [{ seq, effective_from, governs_from }]), that date is used. Every surface reads
+  // the date through this one function.
+  function governsFrom(e) {
+    if (!e) return null;
+    if (isoOk(e.governs_from)) return e.governs_from.slice(0, 10);
+    const R = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.live && Array.isArray(SNAP38.live.restated) ? SNAP38.live.restated : [];
+    const r = R.find((x) => x && x.seq === e.seq && isoOk(x.governs_from));
+    return r ? r.governs_from.slice(0, 10) : (isoOk(e.effective_from) ? e.effective_from.slice(0, 10) : null);
+  }
+  // the daily run's note on an entry whose governing date differs from the date stored with it (data/live.json restated), or null
+  function restatedRow(e) {
+    const R = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.live && Array.isArray(SNAP38.live.restated) ? SNAP38.live.restated : [];
+    const g = governsFrom(e);
+    const r = e ? R.find((x) => x && x.seq === e.seq) : null;
+    return e && g && isoOk(e.effective_from) && g !== e.effective_from.slice(0, 10) ? { stored: e.effective_from.slice(0, 10), governs: g, why: (r && typeof r.why === "string" && r.why) || (typeof e.governs_why === "string" ? e.governs_why : "") } : null;
+  }
+  const ledgerEntries = () => (typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.ledger && Array.isArray(SNAP38.ledger.entries) ? SNAP38.ledger.entries : []);
+  const decisionOf = (e) => (e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, governs_from: governsFrom(e), ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null);
   // the ledger entry that recorded the call made on this data date: its number and the head of its hash name the decision
   function decisionFor(asof) {
-    const L = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.ledger && Array.isArray(SNAP38.ledger.entries) ? SNAP38.ledger.entries : [];
-    const e = L.filter((x) => x.data_asof === asof).pop();
-    return e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null;
+    return decisionOf(ledgerEntries().filter((x) => x.data_asof === asof).pop());
   }
-  // the call that governs a given day: the newest entry whose effective date has come
+  // the call that governs a given day (a New York date): the newest entry whose governing date has come
   function decisionInForce(today) {
-    const L = typeof SNAP38 !== "undefined" && SNAP38 && SNAP38.ledger && Array.isArray(SNAP38.ledger.entries) ? SNAP38.ledger.entries : [];
-    const t = today || new Date().toISOString().slice(0, 10);
-    const ok = L.filter((x) => x.effective_from <= t).sort((a, b) => (a.effective_from === b.effective_from ? a.seq - b.seq : a.effective_from < b.effective_from ? -1 : 1));
-    const e = ok.pop();
-    return e ? { id: `${e.seq}-${String(e.hash || "").slice(0, 8)}`, seq: e.seq, effective_from: e.effective_from, ts_utc: e.ts_utc, data_asof: e.data_asof, call: e.call } : null;
+    const t = today || nyToday();
+    const ok = ledgerEntries().filter((x) => { const g = governsFrom(x); return g && g <= t; })
+      .sort((a, b) => { const ga = governsFrom(a), gb = governsFrom(b); return ga === gb ? a.seq - b.seq : ga < gb ? -1 : 1; });
+    return decisionOf(ok.pop());
+  }
+  // a logged call in words: the unhedged size, the full-size alternative with its short, and the bond hedge, as the ledger holds them
+  function callWords(c) {
+    if (!c) return "";
+    const bond = c.bond_hedge && c.bond_hedge !== "off" ? "Bond hedge on." : "No bond hedge.";
+    return c.menu_low && c.menu_high ? `Hold ${xx(c.menu_low.gross)} of the book, or ${xx(c.menu_high.gross)} with ${pct0(c.menu_high.short)} of NAV short Nasdaq-100 futures. ${bond}` : `Hold ${xx(c.size)} of the book. ${bond}`;
   }
   // v0.44: how sure is the size. The drawdown cap binds and comes from one model; this shows the same number under
   // other defensible models (sensitivity.py), what the walk-forward did against the cap (track.window_drawdowns),
@@ -73,7 +96,7 @@
       [xx(eng.size), same ? "The engine's size" : `The engine's size on ${isoNice(S.asof)}`, `a bad year at this size: ${pctPlain(eng.dd_at_size, 0)} down, the cap`],
       [`${xx(M.shape_range[0])} to ${xx(M.shape_range[1])}`, "Across models of the shocks", `lowest: ${low.label.toLowerCase()}`],
       [`${xx(M.seeds.min)} to ${xx(M.seeds.max)}`, "From the random draws alone", `${M.seeds.n} seeds of the engine's own model; one standard deviation ${fx(M.seeds.sd, 3)}x`],
-      cc ? [`${cc.breaches} of ${cc.windows}`, "One-year windows past the cap", `the call on the nine names, walked forward from ${cc.first.slice(0, 4)}; worst year ${pctPlain(cc.worst, 1)} down`] : [xx(M.all_range[0]), "At the worst year's volatility", "the lowest size in the table"]]);
+      cc ? [`${cc.breaches} of ${cc.windows}`, "One-year windows past the cap", `the call on the nine names, walked forward from ${cc.first.slice(0, 4)}; worst year ${pctPlain(cc.worst, 1)} down${typeof keptTag === "function" ? keptTag("universe") : ""}`] : [xx(M.all_range[0]), "At the worst year's volatility", "the lowest size in the table"]]);
     fillTable($("#bk-sens-m"), ["Model and what changes", "A bad year at 1.00x", `At ${xx(S.size)}`, `Size inside ${pctPlain(cap, 0)}`, "Against the engine"],
       M.rows.map((r) => [r.label, pctPlain(r.dd_full, 0), pctPlain(r.dd_at_size, 1), xx(r.size), r.key === "gbm" ? "" : sg(r.d_size)]), 1);
     document.querySelectorAll("#bk-sens-m tbody tr").forEach((tr, i) => { const sm = document.createElement("small"); sm.textContent = M.rows[i].what; tr.firstElementChild.append(sm); });
@@ -101,7 +124,7 @@
         + `The furthest it fell in any year was ${pctPlain(far.cap_check.call.worst, 1)} (${short(far.label)}). `
         + (hs.length ? `Holding at full size went past the cap in ${pctPlain(Math.min(...hs), 0)} to ${pctPlain(Math.max(...hs), 0)} of windows. ` : "")
         + (ss.length ? `Full size with the Nasdaq-100 short went past the cap in more than one window in twenty on ${ss.map((r) => `${short(r.label)} (${pctPlain(r.cap_check.call_short.share, 0)})`).join(" and ")}, so the short stood in for cutting size only on the names and on the index itself. ` : "")
-        + `This is not the test the table above runs: there the size is held for the whole year, here the rule changes it every month. About ${fx(yrs, 0)} years with a few bad stretches cannot confirm a 1-in-20 number; they can only fail to contradict it. The cap is a modelled percentile, not a stop.`;
+        + `This is not the test the table above runs: there the size is held for the whole year, here the rule changes it every month. About ${fx(yrs, 0)} years with a few bad stretches cannot confirm a 1-in-20 number; they can only fail to contradict it. The cap is a modeled percentile, not a stop.`;
     }
     const rows = [], others = ["es_budget", "vol_target", "drawdown_cap"].filter((k) => k !== S.binding).map((k) => S.sizes[k]).filter((v) => isFinite(v));
     const nextLimit = others.length ? Math.min(...others) : S.size;
@@ -124,6 +147,8 @@
       [b30P(R.vol, 0), "Volatility at 1.00x", `factor model; the names' own covariance says ${b30P(R.vol_names_cov, 0)}; the target is ${b30P(L.vol_target, 0)}`],
       [fx(R.effective_bets, 1), "Independent bets, of nine", `${b30P(R.variance_share.market, 0)} of the variance is one factor, the Nasdaq-100`]]);
     const F = (B.findings || []).map((x) => x.replace(/(^|[\s(])-(\d)/g, "$1\u2212$2"));
+    // v0.47: one wording for the short. The engine's sentence gives the exact minimum (81%); the ledger logs it in 5% steps (85%).
+    if (F[1] && HI && Math.abs(HI.gross - 1) < 1e-9) F[1] = F[1].replace(/takes a Nasdaq-100 futures short of (\d+)% of NAV\.?$/, (m, p) => (Number(p) === Math.round(HI.short * 100) ? m : `takes a Nasdaq-100 futures short of at least ${p}% of NAV, the exact minimum, logged in 5% steps as ${b30P(HI.short, 0)}.`));
     $("#bk-sub").textContent = `Every other desk sizes the S&P 500 or the Nasdaq-100. This one measures the book that is held: the nine names' own daily prices from ${isoNice(B.from)} to ${isoNice(B.asof)}, each name's betas to three outside factors (the Nasdaq-100, semiconductors net of the market, a 20-year Treasury bond), and the book's risk against its own limits.`;
     // the size
     $("#bk-size-p").textContent = `${F[1] || ""} The decision engine supplies the baseline (it finds no evidence for any size but holding, so it holds 1.00x), and the tightest of the book's limits sets the size. Readings at 1.00x and at the size, on the same methods:`;
@@ -132,9 +157,9 @@
       ["Expected-shortfall budget", "one month, mean of the worst 5%, most cautious of three methods", b30P(e95.governing), b30P(L.es_budget, 0), xx(S.es_budget), b30P(at(B.size, "es_budget")), S.es_budget < 1 ? "breached" : "within"],
       ["Volatility target", "annual, factor model at today's factor volatility", b30P(R.vol, 1), b30P(L.vol_target, 0), xx(S.vol_target), b30P(at(B.size, "vol_target")), S.vol_target < 1 ? "breached" : "within"],
       ["One-year drawdown cap", `95th percentile, constant-volatility simulation, drift ${b30P(L.drawdown_drift, 1)}`, b30P(B.at_full.drawdown95, 0), b30P(L.max_drawdown, 0), xx(S.drawdown_cap), "at the cap", S.drawdown_cap < 1 ? "breached" : "within"],
-      ["Gross cap", "gross exposure", "1.00x", xx(L.max_gross), xx(S.gross_cap), xx(B.size), "within"]], 2);
+      ["Long exposure cap", "the nine names, long, as a share of NAV; a futures short beside them is not counted here", "1.00x", xx(L.max_gross), xx(S.gross_cap), xx(B.size), "within"]], 2);
     $("#bk-keep-p").textContent = K.meets_all
-      ? `Keeping every name at full size takes a Nasdaq-100 futures short of at least ${b30P(K.short_nasdaq_frac, 1)} of NAV ($${fx(K.notional_usd_per_100m / 1e6, 1)}m per $100m), the exact minimum; the call is logged in 5% steps${HI && Math.abs(HI.gross - 1) < 1e-9 ? `, ${b30P(HI.short, 0)} for this date${BCd && BCd.decision ? ` (decision ${BCd.decision.id})` : ""}` : ""}, and that is the figure every desk and the ledger quote.${BCd && BCd.recomputed != null ? ` Held to every limit exactly, the engine now computes ${b30P(BCd.recomputed, 0)} for the same date; the logged call stands as written, and the next call is computed without the tolerance.` : ""} Total gross is then about ${fx(1 + (HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac), 2)}x (1.00x long plus the short) and net about ${fx(1 - (HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac), 2)}x. At the exact minimum the short leaves a Nasdaq-100 beta of ${fx(K.market_beta_left, 2)}, ${b30P(K.vol, 0)} volatility, a ${b30P(K.es95, 1)} average loss in the worst 5% of months and a ${b30P(K.drawdown95, 0)} one-year drawdown; ${B30_LIMIT_LC[K.binding_after]} still binds. The choice between cutting gross and shorting the index is the PM's: the short keeps the stock-specific bets and the semis tilt, cutting gross keeps the market bet smaller and simpler. Both carry the same limits.`
+      ? `Keeping every name at full size takes a Nasdaq-100 futures short of at least ${b30P(K.short_nasdaq_frac, 1)} of NAV ($${fx(K.notional_usd_per_100m / 1e6, 1)}m per $100m), the exact minimum; the call is logged in 5% steps${HI && Math.abs(HI.gross - 1) < 1e-9 ? `, ${b30P(HI.short, 0)} for this date${BCd && BCd.decision ? ` (decision ${BCd.decision.id})` : ""}` : ""}, and the logged figure is the one the call, the ledger and the record use; where a desk quotes the exact minimum it says so.${BCd && BCd.recomputed != null ? ` Held to every limit exactly, the engine now computes ${b30P(BCd.recomputed, 0)} for the same date; the logged call stands as written, and the next call is computed without the tolerance.` : ""} Total gross is then about ${fx(1 + (HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac), 2)}x (1.00x long plus the short) and net about ${fx(1 - (HI && Math.abs(HI.gross - 1) < 1e-9 ? HI.short : K.short_nasdaq_frac), 2)}x. The ${xx(L.max_gross)} cap in the table is on the long exposure alone: it limits how far the names can be levered, not the long plus the short, which the three risk limits govern. At the exact minimum the short leaves a Nasdaq-100 beta of ${fx(K.market_beta_left, 2)}, ${b30P(K.vol, 0)} volatility, a ${b30P(K.es95, 1)} average loss in the worst 5% of months and a ${b30P(K.drawdown95, 0)} one-year drawdown; ${B30_LIMIT_LC[K.binding_after]} still binds. The choice between cutting gross and shorting the index is the PM's: the short keeps the stock-specific bets and the semis tilt, cutting gross keeps the market bet smaller and simpler. Both carry the same limits.`
       : `No Nasdaq-100 short alone brings the full-size book inside every limit (the best, ${b30P(K.best_short, 0)} of NAV, leaves ${b30P(K.drawdown95, 0)} of one-year drawdown): cut gross to ${xx(B.size)}.`;
     $("#bk-math").innerHTML = `<span class="mlabel">The method</span>daily total returns <var>r</var><sub>i,t</sub> = (<var>P</var><sub>t</sub> + <var>D</var><sub>t</sub>) / <var>P</var><sub>t&minus;1</sub> &minus; 1 (prices split-adjusted, dividends on their ex-dates); the book <var>r</var><sub>B,t</sub> = &Sigma; <var>w</var><sub>i</sub><var>r</var><sub>i,t</sub> at today's weights, a name without a price that day handing its weight to the others pro rata; factors: <var>m</var> = QQQ, <var>s</var> = SOXX &minus; &beta;<sub>t&minus;1</sub>QQQ (semis net of the market, the beta through the day before), <var>y</var> = a 20-year par bond repriced daily from the Treasury's par yields; betas by exponentially weighted least squares (half-life ${126} days; SPCX shrunk toward TSLA, weight <var>n</var>/(<var>n</var> + 126) on its own); &Sigma; = <var>B</var>&Phi;<var>B</var>&prime; + <var>D</var> with &Phi; the factors' 63-day exponentially weighted covariance; ES<sub>&alpha;</sub> one month by historical simulation of 21-day compounded returns, filtered historical simulation (standardized by RiskMetrics &lambda; 0.94 volatility, rescaled to today's) and a Student-t (&nu; 5) at the factor-model volatility; the governing ES is the largest of the three; sizes: ${b30P(L.es_budget, 0)} &divide; ES<sub>5%</sub>, ${b30P(L.vol_target, 0)} &divide; &sigma;, the largest leverage whose 95th-percentile one-year drawdown stays within ${b30P(L.max_drawdown, 0)}; the call is the smallest.`;
     // v0.32: the menu of size-and-hedge choices that meet every limit
@@ -153,7 +178,7 @@
     if (recs.length) {
       const VN = { supported: "works", one_era: "one era only", chance: "no evidence", reversed: "reversed" };
       const bk = VRl.book && VRl.book.headline, lr = VRl.long_record && VRl.long_record.headline;
-      $("#bk-rule-p").textContent = `Moreira and Muir (2017) found that scaling exposure by target variance over last month's realized variance raised Sharpe ratios on the market and most factors. The engine tried it the way it tries every rule: the monthly utility gain over holding for a risk-averse investor (the decision engine's risk aversion), its t by the equal-weighted cosine test, against the best of ${VRl.n_rules} variants tried (so the bar is ${fx(VRl.t_bar, 2)}, the expected best of that many useless rules), and both halves of each record. ${lr ? `On the Nasdaq-100 future since 1999 the rule lifted the Sharpe from ${fx(lr.sharpe_hold, 2)} to ${fx(lr.sharpe_rule, 2)}, cut the worst fall from ${pctPlain(lr.maxdd_hold, 0)} to ${pctPlain(lr.maxdd_rule, 0)}, and its utility t of ${fx(lr.t, 2)} clears the ${fx(VRl.t_bar, 2)} bar${lr.t_at_5x_cost != null ? ` (${fx(lr.t_at_5x_cost, 2)} at five times the cost)` : ""}, with a gain in each third of the record: ${VN[VRl.long_record.verdict] || VRl.long_record.verdict}. The gain lives in the two long crashes, though: from 2003 on the t is ${lr.from_2003 ? fx(lr.from_2003.t, 2) : "n/a"}, so the rule helps in a 2000 or a 2008 and is about neutral otherwise. ` : ""}${bk ? `On the book's own days since 2017 it cost utility (t ${fx(bk.t, 2)}; Sharpe ${fx(bk.sharpe_rule, 2)} against ${fx(bk.sharpe_hold, 2)} holding), because the names' crashes were short and the recoveries fast. ` : ""}${bk && fin(bk.exposure_now) ? `Today it reads ${xx(bk.exposure_now)} for the book, so it would not change the call. ` : ""}It is adopted as a reading beside the limits, not as the size: the record that supports it is one index over two crashes, and the book's own record does not.`;
+      $("#bk-rule-p").textContent = `Moreira and Muir (2017) found that scaling exposure by target variance over last month's realized variance raised Sharpe ratios on the market and most factors. The engine tried it the way it tries every rule: the monthly utility gain over holding for a risk-averse investor (the decision engine's risk aversion), its t by the equal-weighted cosine test, against the best of ${VRl.n_rules} variants tried (so the bar is ${fx(VRl.t_bar, 2)}, the expected best of that many useless rules), and both halves of each record. ${lr ? `On the Nasdaq-100 future since 1999 the rule lifted the Sharpe from ${fx(lr.sharpe_hold, 2)} to ${fx(lr.sharpe_rule, 2)}, cut the worst fall from ${pctPlain(lr.maxdd_hold, 0)} to ${pctPlain(lr.maxdd_rule, 0)}, and its utility t of ${fx(lr.t, 2)} clears the ${fx(VRl.t_bar, 2)} bar${lr.t_at_5x_cost != null ? ` (${fx(lr.t_at_5x_cost, 2)} at five times the cost)` : ""}, with a gain in each third of the record: ${VN[VRl.long_record.verdict] || VRl.long_record.verdict}. The gain lives in the two long crashes, though: from 2003 on the t is ${lr.from_2003 ? fx(lr.from_2003.t, 2) : "n/a"}, so the rule helps in a 2000 or a 2008 and is about neutral otherwise. ` : ""}${bk ? `On the book's own days since 2017 it cost utility (t ${fx(bk.t, 2)}; Sharpe ${fx(bk.sharpe_rule, 2)} against ${fx(bk.sharpe_hold, 2)} holding), because the names' crashes were short and the recoveries fast. ` : ""}${bk && fin(bk.exposure_now) ? `Today it reads ${xx(bk.exposure_now)} for the book, ${bk.exposure_now < B.size - 0.005 ? `below the call's ${xx(B.size)}: adopted, it would cut the size, and it is not adopted` : bk.exposure_now > B.size + 0.005 ? `above the call's ${xx(B.size)}, so it would not change the call` : "the same as the call"}. ` : ""}It is adopted as a reading beside the limits, not as the size: the record that supports it is one index over two crashes, and the book's own record does not.`;
       fillTable($("#bk-rule"), ["Record", "Months", "Utility gain t", "Bar (best of " + VRl.n_rules + ")", "Sharpe, rule", "Sharpe, holding", "Worst fall, rule", "Worst fall, holding", "First half t", "Second half t", "Average exposure", "Verdict"],
         recs.map((r) => { const t = r.headline; return [r.name.charAt(0).toUpperCase() + r.name.slice(1), String(t.months), fx(t.t, 2), fx(r.t_bar, 2), fx(t.sharpe_rule, 2), fx(t.sharpe_hold, 2), pctPlain(t.maxdd_rule, 0), pctPlain(t.maxdd_hold, 0), fx(t.halves.first.t, 2), fx(t.halves.second.t, 2), xx(t.avg_exposure), h("span", "rs-v rs-v-" + (r.verdict === "supported" ? "supported" : r.verdict === "one_era" ? "one-era" : "no-evidence"), VN[r.verdict] || r.verdict)]; }), 1);
       const rl = VRl.rule || {};
@@ -184,14 +209,20 @@
     $("#bk-ep-p").textContent = "The engine's episodes replayed on the names' own returns (SPCX had not listed; its weight goes to the others). The worst point is the deepest the book fell inside the window.";
     fillTable($("#bk-ep"), ["Episode", "Window", "Book", "Worst point", "Nasdaq-100", "Semis (SOXX)", "20-year bond", "Worst name"],
       (B.episodes || []).map((x) => [x.episode, `${isoNice(x.from)} to ${isoNice(x.to)}`, b30S(x.book, 1), b30S(x.worst_point, 1), b30S(x.nasdaq, 1), b30S(x.semis_etf, 1), b30S(x.bond20, 1), `${x.worst_name} ${b30S(x.worst_name_return, 0)}`]), 2);
-    $("#bk-sc-p").textContent = `The engine's scenarios through the measured betas (assumptions, not forecasts; the scenarios' AI move beyond the Nasdaq-100 is carried by the semis factor). The bond is the 20-year par bond repriced for the yield move. The last column holds the names and shorts ${b30P(K.best_short, 0)} of NAV in Nasdaq-100 futures.`;
-    fillTable($("#bk-sc"), ["Scenario", "Nasdaq-100", "Semis net", "Long yield", "Book", "Book plus 30% bond", "Book plus index short", "Worst name"],
-      (B.scenarios || []).map((x) => [x.scenario, b30S(x.nasdaq, 0), b30S(x.semis_vs_nasdaq, 0), bp(x.dy_bp), b30S(x.book, 1), b30S(x.with_bond_30, 1), b30S(x.with_nasdaq_hedge, 1), `${x.worst_name} ${b30S(x.worst_name_move, 0)}`]), 1);
+    // v0.47: the mapping of each scenario onto the book is the engine's own sentence (scenarios_method) when the daily
+    // file carries it: the AI leg loads on the book's own return in excess of the Nasdaq-100. A file from before
+    // that change routed the AI leg through the semis factor, and says so.
+    const scMethod = typeof B.scenarios_method === "string" && B.scenarios_method.trim() ? B.scenarios_method.trim().replace(/\.?$/, ".")
+      : "The engine's scenarios through the measured betas (assumptions, not forecasts; in this file the scenarios' AI move beyond the Nasdaq-100 is carried by the semis factor).";
+    const scNew = (B.scenarios || []).some((x) => x && x.ai_vs_nasdaq != null);
+    $("#bk-sc-p").textContent = `${scMethod} The bond is the 20-year par bond repriced for the yield move. The last column holds the names and shorts ${b30P(K.best_short, 0)} of NAV in Nasdaq-100 futures, the exact minimum${HI && Math.abs(HI.gross - 1) < 1e-9 && Math.round(HI.short * 100) !== Math.round(K.best_short * 100) ? ` (the call logs ${b30P(HI.short, 0)})` : ""}.`;
+    fillTable($("#bk-sc"), ["Scenario", "Nasdaq-100", scNew ? "AI names beyond the Nasdaq-100" : "Semis net", "Long yield", "Book", "Book plus 30% bond", "Book plus index short", "Worst name"],
+      (B.scenarios || []).map((x) => [x.scenario, b30S(x.nasdaq, 0), b30S(x.ai_vs_nasdaq != null ? x.ai_vs_nasdaq : x.semis_vs_nasdaq, 0), bp(x.dy_bp), b30S(x.book, 1), b30S(x.with_bond_30, 1), b30S(x.with_nasdaq_hedge, 1), `${x.worst_name} ${b30S(x.worst_name_move, 0)}`]), 1);
     fillTable($("#bk-wd"), ["Worst days", "Book", "Nasdaq-100", "Semis (SOXX)", "20-year bond"],
       (B.worst_days || []).map((x) => [isoNice(x.date), b30S(x.book, 1), b30S(x.nasdaq, 1), b30S(x.semis_etf, 1), b30S(x.bond20, 1)]), 1);
     // correlation
     const C = B.correlation || {};
-    $("#bk-corr-p").textContent = `One definition: ${C.definition}, with the engine's hysteresis (enter a state at 0.10, leave it at 0). Today ${sgn2(C.book_63d)}, ${C.state}${C.state_since ? ` since ${isoNice(C.state_since)}` : ""}; the Nasdaq-100 on the same definition ${sgn2(C.nasdaq_63d)}; the book's 36-month correlation of monthly returns ${sgn2(C.book_36m_monthly)}. Other desks quote other definitions (Today's call quotes the 36-month S&P 500 against the 10-year, the Futures desk's S&P 500 future against Treasury futures); they are labelled where they appear and are not interchangeable.`;
+    $("#bk-corr-p").textContent = `One definition: ${C.definition}, with the engine's hysteresis (enter a state at 0.10, leave it at 0). Today ${sgn2(C.book_63d)}, ${C.state}${C.state_since ? ` since ${isoNice(C.state_since)}` : ""}; the Nasdaq-100 on the same definition ${sgn2(C.nasdaq_63d)}; the book's 36-month correlation of monthly returns ${sgn2(C.book_36m_monthly)}. Other desks quote other definitions (Today's call quotes the daily market file's Nasdaq-100 against the long Treasury on a 63-day half-life, the Hedge test the S&P 500 against the 10-year by month, the Futures desk the S&P 500 future against Treasury futures); they are labeled where they appear and are not interchangeable.`;
     fillTable($("#bk-corr"), ["On the book's worst 5% of days", "Days", "Book, average", "Bond, average", "Bond up on", "Bond offset per dollar"],
       (C.shock || []).map((g) => [g.group, String(g.days), b30S(g.avg_equity, 1), b30S(g.avg_bond, 2), b30P(g.bond_up_share, 0), b30P(g.offset, 0)]), 1);
     // growth chart
@@ -211,7 +242,13 @@
     fillTable($("#bk-liq"), ["Name", "Average daily volume", "Position at $100m", "Days at $100m", "Days at $1bn"],
       LQ.map((x) => [x.name, `$${fx(x.adv_usd / 1e9, 1)}bn`, `$${fx(x.position_usd / 1e6, 0)}m`, fx(x.days_100m, 3), fx(x.days_1bn, 2)]), 1);
     // validation and limits
-    const V = B.validation || {};
+    // v0.47: the planted-beta self-test is carried from the build's snapshot (selftest); a daily file's own "validation" block is about prices and is shown on the Data lineage desk
+    const V = B.selftest || (B.validation && B.validation.mean_abs_beta_error != null ? B.validation : {});
+    // v0.47: what the run itself flagged (book.json warnings), and how far the Treasury file lags the prices
+    const warn = Array.isArray(B.warnings) ? B.warnings.filter((w) => typeof w === "string" && w) : [];
+    const lagT = fin(B.treasury_lag_bdays) && B.treasury_lag_bdays > 0 ? `The Treasury yields in this run are ${B.treasury_lag_bdays} business day${B.treasury_lag_bdays === 1 ? "" : "s"} older than the prices${B.limits && isoOk(B.limits.cash_rate_date) ? ` (cash rate as of ${isoNice(B.limits.cash_rate_date)})` : ""}. ` : "";
+    const wn = $("#bk-warn");
+    if (wn) { wn.hidden = !(warn.length || lagT); wn.textContent = `${warn.length ? `This run's warnings: ${warn.join(" ")} ` : ""}${lagT}`.trim(); }
     $("#bk-val-p").textContent = V.mean_abs_beta_error != null ? `On a synthetic world with planted betas (nine names, a fat-tailed market, a semis factor, a bond from simulated yields, the last name listing ninety days before the end), the engine recovered the betas with a mean error of ${fx(V.mean_abs_beta_error, 2)} (largest ${fx(V.max_abs_beta_error, 2)}) and the book's Nasdaq-100 exposure as ${fx(V.book_exposure.market, 2)} against ${fx(V.planted_exposure.market, 2)} planted; the short-history name leans on the others' average as designed.` : "";
     const ul = $("#bk-limits"); ul.replaceChildren(); (B.limitations || []).forEach((l) => ul.append(h("li", null, l)));
   }

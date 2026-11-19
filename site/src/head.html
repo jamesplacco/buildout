@@ -565,6 +565,7 @@ input.invalid, input[aria-invalid="true"] { border-color: var(--bad) !important;
 .checks li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; }
 .checks li::before { content: "✓"; color: var(--good-ink); font-weight: 700; }
 .checks li.fail::before { content: "✕"; color: var(--bad-ink); }
+.checks li.warn::before { content: "!"; color: var(--warn-ink); }   /* v0.47: a warning is reported, not counted as a failure */
 .checks li span { color: var(--muted); font-size: var(--t-xs); grid-column: 2; }
 
 /* search palette and dialogs */
@@ -2281,11 +2282,6 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
 .hm-steps .hm-links { line-height: 1.7; color: var(--muted); }
 .hm-steps .hm-links a { font-weight: 600; color: var(--accent); text-decoration: none; }
 .hm-steps .hm-links a:hover { text-decoration: underline; }
-.hm-plug { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); border-top: 2px solid var(--hm-rule); }
-.hm-plug > div { padding: 14px 20px 4px 0; min-width: 0; }
-.hm-plug > div + div { padding-left: 20px; border-left: 1px solid var(--rule); }
-.hm-plug dt { font: 600 var(--t-md)/1.3 var(--f-display); color: var(--ink); margin-bottom: 6px; }
-.hm-plug dd { margin: 0; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
 .hm-sign { padding-block: 28px 8px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 18px 40px; align-items: end; }
 .hm-name { margin: 0; font: 500 var(--t-2xl)/1.05 var(--f-display); color: var(--ink); }
 .hm-sign p#hm-contact { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--t-md); }
@@ -2295,7 +2291,7 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
   .hm-hero .hm-callbox { order: -1; }
   .hm-callbox { padding-right: 0; }
   .hm-chartbox { padding-left: 0; }
-  .hm-figs > div + div, .hm-find li + li, .hm-steps li + li, .hm-plug > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }
+  .hm-figs > div + div, .hm-find li + li, .hm-steps li + li { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }
   .hm-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hm-figs > div:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--rule); }
   .hm-figs > div:nth-child(2) { border-top: 0; }
@@ -2324,6 +2320,9 @@ h3.sub { margin: 22px 0 8px; font: 600 var(--t-md)/1.3 var(--f-display); color: 
 .hm-when { font: 500 var(--t-xs)/1.45 var(--f-body); color: var(--muted); letter-spacing: 0.01em; }
 .hm-when b { font-weight: 600; color: var(--ink-2); }
 .hm-behind { font: 500 var(--t-xs)/1.45 var(--f-body); color: var(--bad, #b3261e); margin-top: 4px; }
+.hm-next { margin-top: 4px; color: var(--ink-2); }
+/* v0.47: one badge for every desk drawn from a snapshot built into the page */
+.snap-badge { display: inline-block; margin: 10px 0 0; padding: 4px 9px; border: 1px solid var(--rule); border-radius: 6px; background: var(--zone-warn, #fbf3dc); color: var(--warn-ink, #6b4e00); font: 500 var(--t-xs)/1.3 var(--f-mono); letter-spacing: 0.01em; max-width: 100%; }
 /* v0.45: the Library is the fifth group on both pages and reads like the other four */
 /* v0.46 (all media): the rail never prints, and the button that labels a desk's contents reads as the label it replaced. */
 .rail { display: none; }

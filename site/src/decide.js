@@ -30,8 +30,8 @@
       : { avg36: R.cpi.avg36, yoy: R.cpi.value, d: R.cpi.date, live: false, months: R.cpi.months_to_line, v3: R.cpi.avg36_v3 };
     const HL = hedgeLineInfo(), lineAt = HL.lo * 100;          // the low edge of the uncertain band (2.75%), for distances and the sleeve
     const corr = m && m.latest && fin(m.latest.corr63) && isoOk(m.latest.as_of)
-      ? { v: m.latest.corr63, d: m.latest.as_of, live: true, what: "Nasdaq-100 against the 20-year Treasury, 63-day half-life" }
-      : { v: readF().hedge.latest.corr, d: readF().hedge.latest.month + "-01", live: false, what: "S&P 500 against the 10-year Treasury, 36 months (Findings)" };
+      ? { v: m.latest.corr63, d: m.latest.as_of, live: true, what: "Nasdaq-100 against the long Treasury, daily returns, 63-day half-life", short: "63-day" }
+      : { v: readF().hedge.latest.corr, d: readF().hedge.latest.month + "-01", live: false, what: "S&P 500 against the 10-year Treasury, 36 months of monthly returns", short: "36 months" };
     const vol = m && m.vol && m.vol.latest ? m.vol.latest : null;
     const vxn = vol && vol.ndx && fin(vol.ndx.implied) && isoOk(vol.ndx.date) ? { v: vol.ndx.implied, d: vol.ndx.date, live: true } : lvl("vxn") || { v: STATIC_VOL.vxn[0], d: "2026-10-23", live: false };
     const term = vol && vol.term && fin(vol.term.ratio) && isoOk(vol.term.date) ? { v: vol.term.ratio, d: vol.term.date, live: true }
@@ -299,6 +299,9 @@
     if (mo < 24) return `${Math.round(mo)} months`;
     return mo > 120 ? "over 10 years" : `${fx(mo / 12, 1)} years`;
   }
+  // v0.47: the first screen names a series in plain words, with the desk's term after it
+  const ROC_PLAIN = { curve: "the yield curve (10-year minus 2-year yield, the 2s10s)", ccc: "the lowest-rated credit spread (CCC)" };
+  const rocPlain = (row, cap) => { const s = ROC_PLAIN[row.k] || row.n; return cap ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
   function rocRows() {
     return ROC_ROWS.map((row) => {
       const r = rocValues(row);
@@ -487,12 +490,15 @@
     box.append(
       (typeof DX19 !== "undefined" && DX19 && DX19.now
         ? (() => { const BC = typeof bookCall === "function" ? bookCall(DX19.now) : null;
-            return BC ? cell("Do", BC.menu ? `Cut to ${xx(BC.menu.lo.gross)}, or keep ${xx(BC.menu.hi.gross)} and short ${pct0(BC.menu.hi.short)} of NAV in Nasdaq-100 futures. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}` : `Run the book at ${xx(BC.size)}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${BC.menu ? `Every mix between meets the limits at about ${pctPlain(BC.menu.hi.vol, 0)} volatility; the menu is on the Book risk desk. ` : BC.keep != null ? `Or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}${tail.act}; ${lower(cr.act)}.`, "#book", "Book risk")
+            // v0.47: the Do cell is the logged call and nothing else (size, the short alternative, the bond hedge). The
+            // put, credit and inflation rules are research readings, lower on the desk and labeled as not logged.
+            const lc = BC && BC.decision && BC.decision.call, bondTxt = lc ? (lc.bond_hedge && lc.bond_hedge !== "off" ? "Bond hedge on." : "No bond hedge.") : (dur.level === 2 ? "No bond hedge." : "Bond hedge on.");
+            return BC ? cell("Do", BC.menu ? `Cut to ${xx(BC.menu.lo.gross)}, or keep ${xx(BC.menu.hi.gross)} and short ${pct0(BC.menu.hi.short)} of NAV in Nasdaq-100 futures. ${bondTxt}` : `Run the book at ${xx(BC.size)}. ${bondTxt}`, `${BC.menu ? `Every mix between meets the limits${fin(BC.menu.hi.vol) ? ` at about ${pctPlain(BC.menu.hi.vol, 0)} volatility` : ""}; the menu is on the Book risk desk. ` : BC.keep != null ? `Or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures. ` : ""}${BC.decision ? `Logged as decision ${BC.decision.id}.` : "Not yet in the ledger."}`, "#book", "Book risk")
               : cell("Do", `Hold ${xx(DX19.now.exposure)} equity. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `The engine's gated call governs; the volatility rule's ${xx(g.vol)} is a cross-check. ${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions"); })()
         : cell("Do", `${g.act}. ${dur.level === 2 ? "No bond hedge." : "Bond hedge on."}`, `${tail.act}; ${lower(cr.act)}.`, "#decide", "The seven decisions")),
-      cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds have not been hedging: stocks and bonds have moved together (${sgn2(I.corr.v)}, 36 months).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
+      cell("Risk", TD.on ? "The bond hedge is on: stocks and bonds are moving opposite." : TD.gates.state.value === "amplifying" ? `Bonds have not been hedging: stocks and bonds have moved together (${sgn2(I.corr.v)}, ${I.corr.short}).` : `The bond hedge is unproven: correlation ${sgn2(I.corr.v)}.`,
         above ? `${b34 ? `Since 1871, with inflation at 3 to 4%, bonds hedged ${Math.round(b34.share_hedging * 100)}% of months. ` : ""}${fin(I.infl.months) ? `At 2% inflation from here, the 36-month average stays above 2.75% for ${I.infl.months} months.` : ""}` : "", "#fi-hedge", "The finding"),
-      near.length ? cell("Watch", near.map((x) => `${x.row.n} on pace to reach ${fmtRocLevel(x.row, x.at13.at)} in ${durTxt(x.at13.weeks)}`).join("; ") + ".",
+      near.length ? cell("Watch", near.map((x, i) => `${rocPlain(x.row, i === 0)} on pace to reach ${fmtRocLevel(x.row, x.at13.at)} in ${durTxt(x.at13.weeks)}`).join("; ") + ".",
         `A straight-line projection of the last 13 weeks, not a forecast. Crossing reads: ${near.map((x) => `${x.row.n} "${x.at13.label}"`).join("; ")}.`, "#roc-title", "Rates of change")
         : cell("Watch", "No rule line is approaching at the current pace.", "", "#roc-title", "Rates of change"));
   }

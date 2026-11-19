@@ -598,7 +598,7 @@
     const text = exportDoc();
     if (!JR.recs.length) { jrMsg("Nothing to export yet: examples are never exported."); return; }
     if (JR.downloads) {
-      try { await JR.downloads.save({ filename: `decisions-${todayIso()}.json`, data: text }); jrMsg("Exported."); return; } catch (e) { if (e && e.code === "declined") { jrMsg("Export cancelled."); return; } }
+      try { await JR.downloads.save({ filename: `decisions-${todayIso()}.json`, data: text }); jrMsg("Exported."); return; } catch (e) { if (e && e.code === "declined") { jrMsg("Export canceled."); return; } }
     }
     const box = $("#jr-exportbox"), ta = $("#jr-export-text");
     if (!box || !ta) return;

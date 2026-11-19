@@ -38,13 +38,13 @@
   function h(tag, cls, txt) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
-    if (txt != null) { if (typeof txt === "object" && txt.nodeType) e.append(txt); else e.textContent = txt; }   // a node (a link, a coloured figure) is appended, not stringified
+    if (txt != null) { if (typeof txt === "object" && txt.nodeType) e.append(txt); else e.textContent = txt; }   // a node (a link, a colored figure) is appended, not stringified
     return e;
   }
   function svg(tag, attrs, parent) {
     const e = document.createElementNS(NS, tag);
     for (const k in attrs) e.setAttribute(k, attrs[k]);
-    // a labelled shape needs a role for assistive tech to read the label (a focusable data point is an image)
+    // a labeled shape needs a role for assistive tech to read the label (a focusable data point is an image)
     if (tag !== "svg" && attrs && attrs["aria-label"] && !attrs.role) e.setAttribute("role", "img");
     if (parent) parent.appendChild(e);
     return e;

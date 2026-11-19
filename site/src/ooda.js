@@ -72,8 +72,20 @@
       catch (err) { const ta = $("#hb-export"); ta.hidden = false; ta.value = txt; ta.select(); $("#hb-msg").textContent = "Copy was blocked here: the settings are selected below."; }
     });
   }
+  // v0.47: the levels the daily run's hedge book was priced from (data/hedges.json inputs), when the file carries them
+  function renderHedgeInputs() {
+    const el = $("#hb-inputs"), I = typeof LIVE !== "undefined" && LIVE.hedges && LIVE.hedges.inputs && typeof LIVE.hedges.inputs === "object" ? LIVE.hedges.inputs : null;
+    if (!el) return;
+    el.hidden = !I;
+    if (!I) return;
+    const one = (name, o, f) => (o && typeof o === "object" && fin(o.value) ? `${name} ${f(o.value)}${isoOk(o.date) ? ` (${isoNice(o.date)}${o.source ? `, ${o.source}` : ""}${o.assumed ? ", assumed" : ""})` : o.assumed ? " (assumed)" : ""}` : fin(o) ? `${name} ${f(o)}` : null);
+    const parts = [one("VIX", I.vix, (v) => fx(v, 1)), one("index volatility", I.index_vol, (v) => fx(v, 1)), one("30-year yield", I.y30, (v) => fx(v, 2) + "%"), one("cash rate", I.rf, (v) => (Math.abs(v) < 1 ? pctPlain(v, 2) : fx(v, 2) + "%"))].filter(Boolean);
+    el.textContent = parts.length ? `The daily run's hedge book (data/hedges.json) was priced from: ${parts.join("; ")}.${LIVE.hedges.inputs_assumed ? " At least one level was assumed because the day's files did not carry it." : ""} The switches above use the page's own levels.` : "";
+    el.hidden = !parts.length;
+  }
   function renderHedgeBook() {
     if (!$("#hb-list")) return;
+    renderHedgeInputs();
     buildHedgeBook();
     const post = hbPost(), on = {};
     HB_IDS.forEach((k) => { if (HBS.on[k]) on[k] = HBS.sizes[k]; });
@@ -294,10 +306,32 @@
     const ran = live && /^\d{4}-\d{2}-\d{2}/.test(String(live.run_at || "")) ? ` of ${isoNice(String(live.run_at).slice(0, 10))}` : "";
     const ver = live && typeof live.version === "string" && /^[\d.]+$/.test(live.version) ? `, version ${live.version}` : "";
     $("#en-t").textContent = live ? `Manifest${ran}: ${okN} engines ran, ${failN} failed${ver}. Every output is recorded with the content hashes of its inputs.` : "The registry as shipped. After a daily run, engines.json adds each engine's status, timing and input and output hashes here.";
+    // v0.47: which run sets the call. Two runs price the book: the book step (public daily closes, validated; it sets
+    // the call) and the Databento run (a cross-check). The daily file's own price checks are listed when it has them.
+    const cp = $("#en-call-p"), Bk = typeof B30 === "function" ? B30() : null;
+    if (cp) {
+      const src = Bk && Bk.sources && typeof Bk.sources.prices === "string" ? Bk.sources.prices : "a public mirror of daily closes";
+      cp.textContent = `The call is set by the book step of the daily run (python -m buildout book): the nine names' daily closes${Bk ? ` through ${isoNice(Bk.asof)}` : ""} from ${src}, validated before anything is sized, with the Treasury's par yields for the rates factor. It writes data/book.json; the ledger step logs that file's size and menu as the day's call, the live step marks the logged calls to market, and the paper trader acts on the call in force. The Databento run (data/report.json, the Engine readout below) prices the same book with a different model on a second data source. It is a cross-check and never sets the call; its size can differ from the call's, and where it is shown it is labeled.`;
+      const rowsX = [], seen = (o) => o && typeof o === "object" && !Array.isArray(o);
+      const cell = (v) => (v == null ? "n/a" : typeof v === "boolean" ? (v ? "yes" : "no") : typeof v === "number" ? (Number.isInteger(v) ? v.toLocaleString("en-US") : fx(v, Math.abs(v) < 1 ? 4 : 2)) : Array.isArray(v) ? (v.every((x) => typeof x !== "object") ? v.join(", ") || "none" : `${v.length} items`) : typeof v === "object" ? Object.entries(v).filter(([, x]) => typeof x !== "object" || x == null).map(([k, x]) => `${k.replace(/_/g, " ")}: ${cell(x)}`).join("; ") : String(v));
+      const block = (name, o) => {
+        if (!seen(o)) return;
+        if (Array.isArray(o.checks)) o.checks.filter(seen).forEach((c) => rowsX.push([name, String(c.name || c.check || c.key || "check"), c.ok == null ? cell(c.status) : c.ok ? "passed" : "FAILED", cell(c.detail != null ? c.detail : c.note)]));
+        Object.entries(o).forEach(([k, v]) => { if (k === "checks" && Array.isArray(v)) return; rowsX.push([name, k.replace(/_/g, " "), "", cell(v)]); });
+      };
+      if (Bk) {
+        if (seen(Bk.validation) && Bk.validation.mean_abs_beta_error == null) block("Price validation", Bk.validation);
+        block("Second-source cross-check", Bk.cross_check);
+        (Array.isArray(Bk.warnings) ? Bk.warnings : []).filter((w) => typeof w === "string" && w).forEach((w) => rowsX.push(["Warning", "from the book step", "", w]));
+        if (fin(Bk.treasury_lag_bdays)) rowsX.push(["Treasury yields", "business days older than the prices", "", String(Bk.treasury_lag_bdays)]);
+      }
+      const w = $("#en-call-w");
+      if (w) { w.hidden = !rowsX.length; if (rowsX.length) fillTable($("#en-call-x"), ["Block", "Item", "Result", "Detail"], rowsX, 1); }
+    }
     const fl = $("#en-flow");
     if (fl.children.length) return;
-    [["Sources", "FRED, Treasury, SEC XBRL, Databento, public long-history datasets, feeds; every source registered with its licence (sources.json)."],
-      ["Data engines", "macro, research, brain, book, fundamentals: dated JSON, raw data never enters the repository."],
+    [["Sources", "FRED, Treasury, SEC XBRL, Databento, public long-history datasets, feeds; every source registered with its license (sources.json)."],
+      ["Data engines", "macro, research, brain, the book step that sets the call (book.json), the Databento cross-check run (report.json), fundamentals: dated JSON, raw data never enters the repository."],
       ["Reasoning engines", "the brain (inference, counterfactuals, structure learning, robust links), the solver (Bayes, robust to the odds), games, valuation and accounting, causal statistics, the hedge book, the shape of the market (geometry.py)."],
       ["Decision engines", "decide.py sizes the stock exposure (stacked forecasts, the neural ensemble in nn.py, regimes and changepoints in infer.py, model averaging, a risk budget, an evidence gate); portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns both into one record per position and hedge, with frameworks and kill criteria."],
       ["Harnesses", "this page renders the files; the MCP server answers any assistant with the same engines; the journal scores the decisions."]].forEach(([k, v], i) => {

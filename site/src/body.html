@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.46</span>
+      Buildout <span class="ver">v0.47</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#home" data-group="today">Call</a>
@@ -53,14 +53,11 @@
       <section class="t7-card" aria-labelledby="t7t-title"><h2 id="t7t-title">Reliability and testing</h2><ul class="t7-list" id="t7-trust"></ul><a class="more-link" href="#reality">Reality check →</a></section>
       <section class="t7-card" aria-labelledby="cal-title"><h2 id="cal-title">Upcoming catalysts</h2>
         <ul class="cal cal-compact">
-          <li><b>Done</b><span>Oct 28: the Fed held at 3.75 to 4.00%, 10 to 2, two dissents for a hike. Microsoft: revenue $92.3B (+19%), Azure +48%, capex $39.4B. Alphabet: Cloud $30.7B (+103%), capex $51.4B, free cash flow −$9.1B, 2026 guide $195 to 205B kept; shares fell about 8% after hours. Oct 29, Amazon: AWS $46.0B (+39%), capex $77.3B in the quarter, about $220B for 2026 kept. <a class="src" href="https://www.xtb.com/en/market-analysis/news-and-research/alphabet-disappoints-wall-street-despite-record-results-shares-plunge-over-8-and-test-300">XTB</a> · <a class="src" href="https://www.datastudios.org/post/amazon-q3-2026-results-aws-39-percent-growth-46-billion-220-billion-capex">Amazon summary</a></span></li>
-          <li><b>Done</b><span>Nov 4: OBDC, Blue Owl's listed fund, reported Q3: NAV $14.32 a share (up from $14.26), non-accruals 2.9% of cost and 0.8% of fair value (2.8% and 0.8% in Q2), net investment income $0.34 against $0.32 of dividends (Private credit desk). <a class="src" href="https://www.sec.gov/Archives/edgar/data/0001655888/000165588826000070/exhibit991pressrelease-ann.htm">Release</a></span></li>
-          <li data-date="2026-11-10"><b>Nov 10</b><span>October CPI, 8:30 ET. September printed 3.7% headline and 2.6% core.</span></li>
-          <li data-date="2026-11-17"><b>Nov 17</b><span>NVIDIA reports, 5 pm ET; the largest weight in the book with Microsoft, Amazon and Alphabet.</span></li>
           <li data-date="2026-12-08"><b>Dec 8</b><span>The last scheduled SpaceX lockup release (a tranche of about 1.3 billion shares already unlocked around Oct 22, after its Q3 results; Musk's stake stays locked to June 2027). <a class="src" href="https://www.webull.com/news/15414125170">Webull</a></span></li>
           <li data-date="2026-12-09"><b>Dec 9</b><span>FOMC decision; markets priced a December hike near 85% after the Oct 28 meeting.</span></li>
         </ul>
       </section>
+      <section class="t7-card t7-wide" id="t7-research-card" aria-labelledby="t7x-title" hidden><h2 id="t7x-title">Research readings, not part of the logged call</h2><p class="t7-quiet">Rules from the research library, read on today's market data. None is in the ledger, the walk-forward record or the paper account. The logged call is the size, the short alternative and the bond hedge above.</p><ul class="t7-list" id="t7-research"></ul><a class="more-link" href="#decide">The seven decision rules →</a></section>
     </div>
     <p class="ev-key" aria-label="Evidence labels"><span class="ev ev-obs">Observed</span><span class="ev ev-est">Estimated</span><span class="ev ev-asm">Assumed</span><span class="ev ev-hist">Historical pattern</span><span class="ev ev-hyp">Hypothesis</span><span class="ev ev-na">Unavailable</span></p>
   </section>
@@ -76,7 +73,7 @@
     <div class="section-head">
       <p class="eyebrow">How the engine thinks</p>
       <h2 id="flow-title">From 156 years of data to one sized call, in six stages</h2>
-      <p class="prose">Every month the engine reads 156 years of data, works out what kind of market this is, estimates what the next year is likely to pay, chooses how much stock a cautious investor would hold, and trusts that answer only as far as its record since 1940 has earned. Each stage is a fitted object with a stated optimiser; the numbers are today's.</p>
+      <p class="prose">Every month the engine reads 156 years of data, works out what kind of market this is, estimates what the next year is likely to pay, chooses how much stock a cautious investor would hold, and trusts that answer only as far as its record since 1940 has earned. Each stage is a fitted object with a stated optimizer; the numbers are today's.</p>
     </div>
     <ol class="flow" id="flow" aria-label="The engine's stages"></ol>
     <div class="hood-links"><a class="more-link" href="#explained">The same six stages in plain English, with any month since 1940 replayed →</a></div>
@@ -86,7 +83,7 @@
     <div class="section-head">
       <p class="eyebrow">The parameters</p>
       <h2 id="theta-title">Θ: what the engine has learned, counted</h2>
-      <p class="prose">The product is the parameters: numerical matrices shaped by optimisation, each with its shape, its objective, its data and its refit schedule. The decision core is small enough to print; the knowledge graph is the one large object.</p>
+      <p class="prose">The product is the parameters: numerical matrices shaped by optimization, each with its shape, its objective, its data and its refit schedule. The decision core is small enough to print; the knowledge graph is the one large object.</p>
     </div>
     <div class="theta" id="theta"></div>
     <div class="theta-layers" id="theta-layers" aria-label="Parameters by layer"></div>
@@ -241,7 +238,7 @@
   <section class="section" aria-labelledby="dx-f-title">
     <div class="section-head"><p class="eyebrow">Findings</p><h2 id="dx-f-title">What the decision engine concludes</h2></div>
     <ol class="dx-find" id="dx-find"></ol>
-    <p class="hint">Code: buildout/decide.py (the pipeline), buildout/infer.py (regimes, changepoints, Kalman, stacking), buildout/nn.py (the networks, gradient-checked). Run it: python -m buildout decide. Agents: the decision_engine tool. The MODEL book, not personal positions; research only, never an order.</p>
+    <p class="hint">Code: buildout/decide.py (the pipeline), buildout/infer.py (regimes, changepoints, Kalman, stacking), buildout/nn.py (the networks, gradient-checked). Run it: python -m buildout decide. Agents: the decision_engine tool. Research only, never an order.</p>
   </section>
 </section>
 <section class="view" id="view-portfolio" hidden aria-labelledby="pf-title">
@@ -302,7 +299,7 @@
   </section>
   <section class="section" aria-labelledby="mx-scan-title">
     <div class="section-head"><p class="eyebrow">The scan</p><h2 id="mx-scan-title">The regime filter as a parallel scan</h2>
-      <p class="prose">The regime filter carries yesterday's odds into today's: odds(t) = odds(t - 1) times A times the month's evidence. Written out, the odds for every month are running products of matrices, and products can be grouped in any order. So in round one each month multiplies in its neighbour's matrix, in round two the product from two months back, then four, eight, and so on: after eleven rounds (2 to the 11th is more than 1,868 months) every month's odds are known, each round being one batched matrix multiplication. The backward pass runs the same scan from the end, and every random start of the fit runs in the same batch.</p></div>
+      <p class="prose">The regime filter carries yesterday's odds into today's: odds(t) = odds(t - 1) times A times the month's evidence. Written out, the odds for every month are running products of matrices, and products can be grouped in any order. So in round one each month multiplies in its neighbor's matrix, in round two the product from two months back, then four, eight, and so on: after eleven rounds (2 to the 11th is more than 1,868 months) every month's odds are known, each round being one batched matrix multiplication. The backward pass runs the same scan from the end, and every random start of the fit runs in the same batch.</p></div>
     <div class="panel"><div class="mx-scan" id="mx-scan" aria-hidden="true"></div>
       <span class="panel-title">Measured on the build machine, step by step against matrix products</span><div class="tablewrap"><table id="mx-bench"></table></div>
       <p class="hint" id="mx-spec-note"></p></div>
@@ -389,7 +386,7 @@
       <p class="prose">Each claim is walked forward with only what was known at the time, scored against a simple benchmark with errors that respect overlapping years, and its p-value is adjusted with the others by the Benjamini-Hochberg procedure. A q below 0.10 means fewer than one in ten such survivors should be flukes.</p></div>
     <div class="panel"><div class="tablewrap"><table id="geo-tests"></table></div></div>
     <div class="panel"><span class="panel-title">Findings</span><ul class="geo-find" id="geo-find"></ul>
-      <p class="dx-note">The MODEL book, not personal positions. Research only: the engine never places orders.</p></div>
+      <p class="dx-note">The model book. Research only: the engine never places orders.</p></div>
   </section>
 </section>
 <section class="view" id="view-noteworthy" hidden aria-labelledby="nw-title">
@@ -864,7 +861,7 @@
   <section class="section" aria-labelledby="rules-title">
     <div class="section-head"><p class="eyebrow">Rules</p><h2 id="rules-title">Risk limits enforced by the engine</h2></div>
     <ol class="steps">
-      <li><div><strong>Ruin is the only unrecoverable loss.</strong><span>Size so the 95th-percentile one-year drawdown stays inside the limit, before any view on return. (Ole Peters' ergodicity point, popularised by Taleb: a bet you cannot repeat forever is not worth its average.)</span></div></li>
+      <li><div><strong>Ruin is the only unrecoverable loss.</strong><span>Size so the 95th-percentile one-year drawdown stays inside the limit, before any view on return. (Ole Peters' ergodicity point, popularized by Taleb: a bet you cannot repeat forever is not worth its average.)</span></div></li>
       <li><div><strong>Barbell the book.</strong><span>Very safe on one side (bills, TIPS), very convex on the other (options, the concentrated AI sleeve). Avoid the fragile middle: leveraged carry that loses everything in one gap.</span></div></li>
       <li><div><strong>Prefer contracts to correlations.</strong><span>A put pays by contract. A bond hedge pays only if the correlation holds, and it flipped in 2022 and again in 2026.</span></div></li>
       <li><div><strong>Trim on rules.</strong><span>A position that runs 20% over its target weight gets cut back to target. Sell in pieces; never all or nothing.</span></div></li>
@@ -1515,7 +1512,7 @@
       <div class="panel" aria-live="polite"><p class="sentence" id="gt-ladder-out"></p><figure class="chart"><div class="chart-head"><span class="chart-title">Implied probability by range</span></div><div class="svgbox" id="gt-pmf"></div></figure></div>
     </div>
   </section>
-  <footer class="foot"><p>Models with closed forms, solved exactly. Their inputs are assumptions unless labelled Observed; their value is in what changes the answer, not in the point estimate.</p></footer>
+  <footer class="foot"><p>Models with closed forms, solved exactly. Their inputs are assumptions unless labeled Observed; their value is in what changes the answer, not in the point estimate.</p></footer>
 </section>
 
 <!-- ======================= BRAIN ======================= -->
@@ -1523,7 +1520,7 @@
   <div class="vhead">
     <p class="eyebrow">The brain · higher-order thinking, computed</p>
     <h1 id="br-title">Second- through fourth-order effects of the core assumptions</h1>
-    <p class="lede">Thirty-four parts of the system, from Hormuz and the Fed through credit and the curve to each holding and your book, joined by a hundred and ten signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labelled and adjustable. A shock to any node can be traced through the system. Or let the brain think: it reads what moved, infers the most likely causes, checks what else must then be true, doubts its own map, and names what to check next.</p>
+    <p class="lede">Thirty-four parts of the system, from Hormuz and the Fed through credit and the curve to each holding and your book, joined by a hundred and ten signed links. Eleven links are measured from monthly data since 1990 in two regimes; the rest are judged, labeled and adjustable. A shock to any node can be traced through the system. Or let the brain think: it reads what moved, infers the most likely causes, checks what else must then be true, doubts its own map, and names what to check next.</p>
   </div>
   <section class="section" aria-labelledby="brm-title">
     <h2 class="sr-only" id="brm-title">The map</h2>
@@ -1704,7 +1701,7 @@
     <p class="sentence" id="atv-sum"></p></div>
   <div class="at-tiles" id="atv-tiles"></div>
   <section class="section" aria-labelledby="atv-map-title">
-    <div class="section-head"><p class="eyebrow">Explore</p><h2 id="atv-map-title">The map</h2><p class="prose">Colours are learned communities; hollow rings are judged concepts and holdings. Solid lines are same-month links (brighter when established), dashed lines carry last month forward, dotted lines are judged. Ctrl or ⌘ and scroll to zoom, drag to pan, double-click to reset.</p></div>
+    <div class="section-head"><p class="eyebrow">Explore</p><h2 id="atv-map-title">The map</h2><p class="prose">Colors are learned communities; hollow rings are judged concepts and holdings. Solid lines are same-month links (brighter when established), dashed lines carry last month forward, dotted lines are judged. Ctrl or ⌘ and scroll to zoom, drag to pan, double-click to reset.</p></div>
     <div class="hero-grid">
       <div class="hero-stage"><canvas id="atv-cv" role="img" aria-label="The atlas"></canvas>
         <div class="hero-ctl"><button class="pill" type="button" id="atv-play">Pause</button><span class="hero-k" id="atv-k">h = 0</span><span class="hint">Click any node to shock it and read its links.</span></div></div>
@@ -1731,7 +1728,7 @@
     <div class="grid2">
       <div class="panel"><span class="panel-title">Learned communities (modularity, Newman's leading eigenvector)</span><ul class="at-comms" id="atv-comms"></ul></div>
       <figure class="chart panel"><div class="chart-head"><span class="chart-title">Choosing how sparse: links against the penalty</span></div><div class="svgbox" id="atv-ebic"></div>
-        <p class="hint">The graphical lasso trades fit for sparsity; the extended BIC (Foygel and Drton 2010) picks the penalty, favouring sparse graphs when series are many against months. Stability selection then keeps only links that survive half-samples.</p></figure>
+        <p class="hint">The graphical lasso trades fit for sparsity; the extended BIC (Foygel and Drton 2010) picks the penalty, favoring sparse graphs when series are many against months. Stability selection then keeps only links that survive half-samples.</p></figure>
     </div>
   </section>
   <section class="section" aria-labelledby="atv-rob-title">
@@ -1821,10 +1818,11 @@
         <div><h3 class="h3">The advisor</h3><ol class="br-list" id="hb-adv"></ol><p class="hint" id="hb-adv-t"></p></div>
       </div>
       <div class="fd-actions"><button class="pill" type="button" id="hb-reset">All off</button><button class="pill" type="button" id="hb-copy">Copy as config.toml</button><span class="hint" id="hb-msg" aria-live="polite"></span></div>
+      <p class="hint" id="hb-inputs" hidden></p>
       <textarea id="hb-export" class="fd-export" hidden readonly aria-label="Hedge settings for config.toml"></textarea>
     </div>
     <div class="panel"><span class="panel-title">Every position, through the frameworks</span><div class="tablewrap"><table class="rz" id="oo-actions"></table></div>
-      <p class="hint">Outside view sets the direction, inside view the size: a price outside 99% of base-rate outcomes trims half, or a quarter when the company already grows faster than the price needs and its accounting is not weak; a price outside 95% holds and leans on the hedges. Rules are stated in the engine's code and labelled; none is a forecast.</p></div>
+      <p class="hint">Outside view sets the direction, inside view the size: a price outside 99% of base-rate outcomes trims half, or a quarter when the company already grows faster than the price needs and its accounting is not weak; a price outside 95% holds and leans on the hedges. Rules are stated in the engine's code and labeled; none is a forecast.</p></div>
   </section>
   <section class="section" id="oo-act-sec" aria-labelledby="oo-act-title">
     <div class="section-head"><p class="eyebrow">Act</p><h2 id="oo-act-title">Act: proposals, monitoring and review dates</h2><p class="prose" id="oo-act-t"></p></div>
@@ -1850,7 +1848,7 @@
   <h2 class="sr-only">The holdings</h2>
   <div class="cards2" id="ps-grid"></div>
   <div class="math"><span class="mlabel">How it is computed</span>Enterprise value = market value &minus; cash + debt. Free cash flow margin moves in a straight line from today's (after stock pay) to the steady-state margin (what the business throws off when it stops growing: the lower of after-tax operating earnings and operating cash flow &minus; D&amp;A &minus; stock pay, over revenue, so customer prepayments, deferred taxes and other timing do not flatter it) over ten years; terminal growth 3%; discount rate = 10-year yield + beta &times; 4.5% equity premium, blended with after-tax debt. The implied growth solves PV = EV by bisection. Base rates: Mauboussin, Callahan and Majd, The Base Rate Book (2016), 10-year real sales CAGR by starting size, 1950 to 2015; implied nominal growth less 2.5% inflation is compared with them.</div>
-  <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are dated market readings. Assumptions are labelled. Research on a model book, not advice.</p></footer>
+  <footer class="foot"><p>Reported figures are trailing twelve months from each company's latest filing as collected; prices are dated market readings. Assumptions are labeled. Research on a model book, not advice.</p></footer>
 </section>
 
 <!-- ======================= ENGINES ======================= -->
@@ -1911,11 +1909,15 @@
     <div class="section-head"><p class="eyebrow">Flow</p><h2 id="en-flow-title">Data lineage</h2></div>
     <ol class="en-flow" id="en-flow"></ol>
   </section>
+  <section class="section" aria-labelledby="en-call-title">
+    <div class="section-head"><p class="eyebrow">The call</p><h2 id="en-call-title">Which run sets the call, and from which data</h2><p class="prose" id="en-call-p"></p></div>
+    <div class="tablewrap" id="en-call-w" hidden><table class="rs-table" id="en-call-x"></table></div>
+  </section>
   <section class="section" id="live" aria-labelledby="live-title">
     <div class="section-head">
       <p class="eyebrow">Live data</p>
       <h2 id="live-title">Engine readout</h2>
-      <p class="prose">Computed every weekday morning on GitHub Actions. The market panel runs on free FRED data; the book panel switches on once the Databento key is in place.</p>
+      <p class="prose">Computed by the daily run on GitHub Actions. The market panel runs on free FRED data. The book panel is the Databento cross-check run: a second model on a second data source, not the engine that sets the call. The call comes from the book step (public daily closes, validated), on the Book risk desk.</p>
     </div>
     <div class="panel">
       <div class="panel-head"><span class="panel-title">Nasdaq-100 and the long Treasury</span><span class="src" id="macro-asof">Live panel: fills from the daily run</span></div>
@@ -1924,7 +1926,7 @@
       </div>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Model book</span><span class="src" id="book-asof">Needs the Databento key</span></div>
+      <div class="panel-head"><span class="panel-title">Model book: Databento cross-check run</span><span class="src" id="book-asof">Needs the Databento key</span></div>
       <div id="book-body" class="section">
         <div class="empty"><strong>Book analytics start with the Databento key.</strong> <span>Once the key is saved as a repository secret, each daily run adds the book's own regime, the hedge ratio it implies, a four-policy backtest with deflated Sharpe ratios, factor exposures, and the size to run.</span></div>
       </div>
@@ -2030,7 +2032,7 @@
   <div class="vhead">
     <p class="eyebrow">Fundamentals · Straight from the 10-Ks and 10-Qs</p>
     <h1 id="fu-title">Capital expenditure now absorbs most of operating cash flow</h1>
-    <p class="lede" id="fu-lede">Five builders spent $586B on capex in the last twelve months against $707B of operating cash flow, and their 2026 guidance adds up to more than that cash flow. Underneath: cash coverage from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.</p>
+    <p class="lede" id="fu-lede">The AI builders' capex against their operating cash flow over the last twelve months, from their filings: the table below carries the figures. The set is the AI builders, not the book: CoreWeave is covered and is not held, and Broadcom, which is held, is not covered. Underneath: cash coverage from the filings, paper profits, a depreciation wave the income statement has not felt yet, and backlog worth up to 14 years of revenue.</p>
   </div>
   <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#rq-title">The railway test</a><a href="#fu-t-title">The table</a><a href="#mi-title">Cash coverage</a><a href="#pp-title">Paper profits</a><a href="#dw-title">Depreciation wave</a><a href="#bl-title">Backlog and leases</a></nav>
   <section class="section" aria-labelledby="rq-title">
@@ -2053,11 +2055,11 @@
     <div class="panel"><div class="tablewrap"><table class="fund" id="fund-table"></table></div><p class="hint" id="fu-note"></p></div>
   </section>
   <section class="section" id="fu-latest-sec" aria-labelledby="fu-latest-title">
-    <div class="section-head"><p class="eyebrow">Latest quarter</p><h2 id="fu-latest-title">What the most recent releases say, company by company</h2><p class="prose">The quarter each builder reported most recently, from its own release or filing, checked twice; the trailing-twelve-month table above moves when the daily run reads the filings. Meta and Tesla reported Q3 on Oct 21, SpaceX on Oct 20, Microsoft and Alphabet on Oct 28, Amazon on Oct 29; the filings run reads them when it next runs.</p></div>
+    <div class="section-head"><p class="eyebrow">Latest quarter</p><h2 id="fu-latest-title">What the most recent releases say, company by company</h2><p class="prose">The quarter each builder reported most recently, from its own release or filing, checked twice; the trailing-twelve-month table above moves when the daily run reads the filings. Meta and Tesla reported Q3 on Oct 21, SpaceX on Oct 20, Microsoft and Alphabet on Oct 28, Amazon on Oct 29; the table above carries each filing once the SEC publishes its figures.</p></div>
     <div class="dg-items" id="fu-latest"></div>
   </section>
   <section class="section" aria-labelledby="mi-title">
-    <div class="section-head"><p class="eyebrow">Coverage, from the filings</p><h2 id="mi-title">Internal versus external funding of capital expenditure</h2><p class="prose">Descriptive coverage categories from one year of filings (the Minsky framing, without the verdict): cash flow against capex and interest. Capex above cash flow is a funding gap, not proof of distress; cash, asset sales, discretionary spending and debt maturities all matter, and maturities are not modelled here.</p></div>
+    <div class="section-head"><p class="eyebrow">Coverage, from the filings</p><h2 id="mi-title">Internal versus external funding of capital expenditure</h2><p class="prose">Descriptive coverage categories from one year of filings (the Minsky framing, without the verdict): cash flow against capex and interest. Capex above cash flow is a funding gap, not proof of distress; cash, asset sales, discretionary spending and debt maturities all matter, and maturities are not modeled here.</p></div>
     <div class="minsky" id="fu-minsky"></div>
   </section>
   <section class="section" aria-labelledby="pp-title">
@@ -2273,7 +2275,7 @@
     <div class="section-head"><p class="eyebrow">Calculator</p><h2 id="dw2-title">Converting capital expenditure to power demand</h2><p class="prose">What a year of AI capex asks of the grid, at today's cost per gigawatt.</p></div>
     <div class="lab">
       <form class="panel controls" id="ph-form">
-        <div class="field"><div class="field-top"><label for="ph-capex">AI capex per year ($B; default: the five builders' latest quarter annualised)</label><output id="ph-capex-o" for="ph-capex"></output></div><input type="range" id="ph-capex" min="100" max="1500" step="10" value="770"></div>
+        <div class="field"><div class="field-top"><label for="ph-capex">AI capex per year ($B; default: the five builders' latest quarter annualized)</label><output id="ph-capex-o" for="ph-capex"></output></div><input type="range" id="ph-capex" min="100" max="1500" step="10" value="770"></div>
         <div class="field"><div class="field-top"><label for="ph-cost">All-in cost per gigawatt ($B)</label><output id="ph-cost-o" for="ph-cost"></output></div><input type="range" id="ph-cost" min="25" max="80" step="1" value="45"></div>
         <div class="field"><div class="field-top"><label for="ph-load">Average load (utilization)</label><output id="ph-load-o" for="ph-load"></output></div><input type="range" id="ph-load" min="0.4" max="0.95" step="0.05" value="0.8"></div>
         <p class="hint">Cost per gigawatt: about $41B (Brookings, 2025) to about $50B (Nvidia, 2025). Some capex (warehouses, offices) is not AI; treat the result as an upper bound.</p>
@@ -2440,7 +2442,7 @@
     </form>
     <div id="fd-notes" class="tablewrap"></div>
   </section>
-  <footer class="foot"><p>Field notes are research inputs, not trading signals. Keep material non-public information out entirely; record only what you are permitted to use. Likelihoods on this desk are hypotheses, labelled as such.</p></footer>
+  <footer class="foot"><p>Field notes are research inputs, not trading signals. Keep material non-public information out entirely; record only what you are permitted to use. Likelihoods on this desk are hypotheses, labeled as such.</p></footer>
 </section>
 
 <!-- ======================= LAB ======================= -->
@@ -2459,11 +2461,11 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 33,000 lines of engine code and 73 test files, run every weekday on GitHub Actions. One timing rule runs through all of it: a value at date t uses data through the close of t, and a decision made at t earns returns from t+1.</p>
+    <p class="lede">Python, about 41,000 lines of engine code and 77 test files, run by GitHub Actions. Scheduled for 11:17 UTC, Tuesday to Saturday; GitHub starts scheduled jobs late, and runs have started between about 16:00 and 20:00 UTC, during the US session. The ledger's timestamp is the record. A call governs from the first session whose prior close came after it was written. Throughout, a value at date t uses data through the close of t; in the walk-forward a decision made at a month-end close is held from the next session.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">
-    <li><h3>Data</h3><p>99 sources: FRED curve, credit, volatility, oil, inflation, jobs, sentiment and financial conditions daily; feeds from Substack, Telegram, X, Reddit and the wires; SEC 10-K and 10-Q facts; 156 years of public data monthly; Databento bars with split and dividend factors; Kalshi odds.</p></li>
+    <li><h3>Data</h3><p>99 sources: FRED curve, credit, volatility, oil, inflation, jobs, sentiment and financial conditions daily; feeds from Substack, Telegram, X, Reddit and the wires; SEC 10-K and 10-Q facts; 156 years of public data monthly; daily closes for the nine names from a public mirror, validated, for the run that sets the call; Databento bars for a cross-check run (splits from a public table when the vendor's factors are not licensed); Kalshi odds.</p></li>
     <li><h3>Exposures</h3><p>Daily betas to market, AI and rates factors. SPCX leans on TSLA's betas until it has its own history.</p></li>
     <li><h3>Regime</h3><p>Stock-bond correlation, exponentially weighted with a 63-day half-life, read with hysteresis: hedging, neutral or amplifying.</p></li>
     <li><h3>Hedge &amp; size</h3><p>Min-variance TLT ratio when the regime allows it. Vol target and drawdown cap set gross; Kelly checks the edge.</p></li>
@@ -2489,7 +2491,7 @@
   </section>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">670 of 670 pass</span></span></div>
+      <div class="panel-head"><span class="panel-title">Self-tests on a market with planted answers</span><span class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="tests-pass">All pass</span></span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Check</th><th class="r">Result</th></tr></thead>
         <tbody>
@@ -2561,7 +2563,7 @@
       <p class="hint">Ten years of simulated daily data with two correlation regimes and known betas. Passing proves the machinery; it says nothing about markets until real data runs through it.</p>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Model book</span><span class="src">Illustration, not personal positions</span></div>
+      <div class="panel-head"><span class="panel-title">Model book</span><span class="src">An illustration</span></div>
       <div class="tablewrap"><table>
         <thead><tr><th>Ticker</th><th class="r">Weight</th><th>Role</th></tr></thead>
         <tbody>
@@ -2595,10 +2597,9 @@
   <section class="section" aria-labelledby="rm-title">
     <div class="section-head"><p class="eyebrow">Next</p><h2 id="rm-title">Roadmap</h2></div>
     <ol class="steps">
-      <li><div><strong>Add the Databento key</strong><span>The daily run already reads the market from FRED. With the key saved as a repository secret, it adds the book's regime, hedge results by regime, and a four-policy backtest.</span></div></li>
       <li><div><strong>Hedge with futures and options data</strong><span>Size UB and ZN by measured DV01; pull listed option chains to replace assumed implied volatility with market skew.</span></div></li>
       <li><div><strong>Test the theses</strong><span>Turn each thesis's kill criteria into tracked signals; Kalshi's Fed-path odds become a regime input, walk-forward, kept only if they survive the deflated Sharpe.</span></div></li>
-      <li><div><strong>Publish</strong><span>Make the repository public with GitHub Pages, and write a one-page case study on process and results.</span></div></li>
+      <li><div><strong>Case study</strong><span>Write a one-page case study on process and results.</span></div></li>
     </ol>
   </section>
   <footer class="foot"><p>Built by James Placco with Claude. Engine: Python (numpy, pandas, scipy). This page computes its bond, option, hedge and sizing math in the browser with the same formulas the engine uses.</p></footer>
@@ -2620,7 +2621,7 @@
     <div class="hw-para">
       <p class="prose">The engine is a set of numbers learned from history, with the rules that update them written down in advance. It starts from monthly US stock returns since 1871 and a handful of things known at the time: how expensive stocks are, where bond yields and inflation stand, how the market has been trending, how volatile it has been and how far it sits below its last high. From these it keeps two kinds of belief up to date. One is about the <b>state</b> of the market: a few regimes (calm, turbulent, stressed), each with its own typical return and risk, and the odds of being in each this month. The other is about the <b>next year</b>: four simple forecasters, combined by how well each has actually done.</p>
       <p class="prose">It then asks one question. For an investor who dislikes losses about as much as the average long-run investor must have (the dislike is set so that holding exactly one times capital is the neutral answer), what exposure to stocks makes the next month's expected outcome best, provided the average loss across the worst 5% of months is no more than <span id="hw-es">12%</span> of capital? That number is the engine's <b>optimum</b>, <span id="hw-opt">1.50x</span> today.</p>
-      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the engine holds the index at <span id="hw-x">1.00x</span>; the book's own risk limits, measured on its nine names, then cut it (Today's call shows the size). Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
+      <p class="prose">Between that optimum and the book sits a <b>gate</b>. The engine moves the book away from plain holding only in proportion to how strong its own record since 1940 is, after discounting for every version of itself that was tried. Today that record is not strong enough, so the gate is <span id="hw-gate">0%</span> and the engine holds the index at <span id="hw-x">1.00x</span>; the book's own risk limits, measured on its nine names, then cut it (Today's call shows the size). That last step is the book step of the daily run: it reads the nine names' public daily closes, validates them, sizes the book against its limits and writes the call the ledger logs. A second run on Databento bars is a cross-check and never sets the call. Two standing guards sit alongside: a <b>hedge selector</b> that chooses between all stocks, a Treasury sleeve and a cash sleeve by their recent record in the current regime, and a <b>trend overlay</b> that would scale exposure when the market is below its 10-month average, adopted only if the scaling survives the same walk-forward test the engine applies to itself. Today the overlay is <span id="hw-f">tested and not adopted, because it failed the same walk-forward test the engine applies to itself</span>.</p>
     </div>
   </section>
 
@@ -2670,7 +2671,7 @@
       <div class="panel"><span class="panel-title">Not a price predictor</span><p class="prose">Its forecasters barely beat the long-run average out of sample, and it says so. The value is in the risk budget, the regime odds, the gate and the written-down rules, not in calling the market.</p></div>
       <div class="panel"><span class="panel-title">What can and cannot send an order</span><p class="prose">Nothing on this site places, routes or cancels a trade, and the MCP server has no order tool: both write proposals a person approves. The trader is a separate program in the same repository. It trades a public paper account on its own, and on a person's machine it can reach a broker under a signed, armed mandate (Execution).</p></div>
       <div class="panel"><span class="panel-title">Not tuned</span><p class="prose">Eleven constants are set by hand and listed with reasons; the gate is a fixed function of the record once the count of strategies tried is fixed; the overlay factor was chosen by a rule stated before the result and then rejected by that rule's own walk-forward. No parameter was tuned to the backtest's result, though the design was chosen knowing the history.</p></div>
-      <div class="panel"><span class="panel-title">Not a black box</span><p class="prose">Twenty-two learned objects, 2,850 numbers in the decision core, each with its shape and its optimiser on the <a href="#parameters">Parameters desk</a>; the source is on the <a href="#code">source desk</a>; the daily record is the Engine room.</p></div>
+      <div class="panel"><span class="panel-title">Not a black box</span><p class="prose">Twenty-two learned objects, 2,850 numbers in the decision core, each with its shape and its optimizer on the <a href="#parameters">Parameters desk</a>; the source is on the <a href="#code">source desk</a>; the daily record is on the <a href="#engines">Data lineage desk</a>.</p></div>
     </div>
   </section>
 </section>
@@ -2753,17 +2754,17 @@
     <div class="tablewrap"><table class="rs-table" id="bk-liq"></table></div>
   </section>
   <section class="section" aria-labelledby="bk-val-t">
-    <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Checks that the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p></div>
+    <div class="section-head"><p class="eyebrow">Validation and limits</p><h2 id="bk-val-t">Checks that the machine works, and what it cannot show</h2><p class="prose" id="bk-val-p"></p><p class="note" id="bk-warn" hidden></p></div>
     <ul class="prose" id="bk-limits"></ul>
-    <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror).</p>
+    <p class="hint">Run it: python -m buildout book --out out (no key; the prices come from a public GitHub mirror of daily closes, and each run validates them before it sizes anything). This is the run that sets the call.</p>
   </section>
 </section>
 <section class="view" id="view-home" data-guide="off" hidden aria-labelledby="hm-title">
   <header class="hm-hero">
    <div class="hm-lead">
     <p class="hm-kicker"><span class="hm-who">James Placco</span><span>Buildout research</span><span id="hm-asof">Data through Oct 23, 2026</span></p>
-    <h1 id="hm-title">Own the AI buildout at the size its risk allows. <em>Prove it out of sample.</em></h1>
-    <p class="hm-dek">A risk, sizing and hedging engine for a concentrated nine-name AI book. Every limit is measured on the names' own prices, every rule is walked forward before it may move the size, and every call is logged before it trades.</p>
+    <h1 id="hm-title">Own the AI buildout at the size its risk allows. <em>Every call logged first.</em></h1>
+    <p class="hm-dek">A risk, sizing and hedging engine for a concentrated nine-name AI book: Microsoft, Amazon, Alphabet, Nvidia, Meta, Tesla, Broadcom, Oracle and SPCX (SpaceX, listed June 2026). A model book, not personal positions. Every limit is measured on the names' own prices, every rule is walked forward before it may move the size, and every call is logged before it takes effect.</p>
     <div class="hm-cta"><a class="btn" href="#desk">Today's call and why</a><a class="btn ghost" href="#track">Track record</a><button type="button" class="btn ghost" id="hm-pdf">Tear sheet (PDF)</button></div>
     <p class="hm-note" id="hm-pdf-note" aria-live="polite"></p>
    </div>
@@ -2805,16 +2806,6 @@
     </ol>
   </section>
 
-  <section class="hm-sect" aria-labelledby="hm-plug-t">
-    <h2 class="hm-label" id="hm-plug-t">For a lean investment team</h2>
-    <dl class="hm-plug">
-      <div><dt>Monday risk note</dt><dd>Holdings in as a CSV; out come the size each limit allows, the one that binds, and the hedge that keeps every name.</dd></div>
-      <div><dt>Hedge selector</dt><dd>Index short, puts, bonds or a short basket, chosen by regime and tested on your book's days, not a 60/40 habit.</dd></div>
-      <div><dt>Early-warning list</dt><dd>Private-credit queues, capex nowcasts, power and memory trackers, each with the reading that would change the view.</dd></div>
-      <div><dt>Audit trail</dt><dd>Every call timestamped and reproducible with one command. This page and the research tools only propose. The public paper bot trades a model account on its own; a live order needs a signed, armed mandate and, until the evidence gate opens, a person's approval of each ticket.</dd></div>
-    </dl>
-  </section>
-
   <footer class="hm-sign" aria-labelledby="hm-contact-t">
     <div><h2 class="hm-name" id="hm-contact-t">James Placco</h2><p id="hm-contact"></p></div>
     <p class="hm-fine">A research tool for a model book: not personal positions, not investment advice, and this page places no orders. The engine, the code and how it was built: <a href="#explained">How it works</a> · <a href="#code">Code</a> · <a href="#agents">How it was built</a>.</p>
@@ -2822,7 +2813,7 @@
 </section>
 <section class="view" id="view-track" hidden aria-labelledby="tr-title">
   <div class="vhead"><p class="eyebrow">Today · the track record</p><h1 id="tr-title">The track record: calls made in advance, sized by rule, and honest about their misses</h1>
-    <p class="lede">Three records, never on one chart: the backtest with hindsight, the walk-forward record that recomputes every decision from data it had, and the live ledger, which starts now.</p></div>
+    <p class="lede">Three records, never on one chart: the backtest with hindsight, the walk-forward record that recomputes every decision from data it had, and the live ledger, which started Nov 4, 2026.</p></div>
   <div class="at-tiles" id="tr-tiles"></div>
   <section class="section" aria-labelledby="tr-three-t">
     <div class="section-head"><p class="eyebrow">Three records</p><h2 id="tr-three-t">Backtest, walk-forward, live: what each can and cannot show</h2><p class="prose" id="tr-three-p"></p></div>
@@ -2926,7 +2917,7 @@
   </section>
   <section class="section" aria-labelledby="ex-tr-t">
     <div class="section-head"><p class="eyebrow">The trader · v0.42</p><h2 id="ex-tr-t">From the recommendation to orders, under a mandate, in one of three modes</h2>
-      <p class="prose">The trader is a separate program (<code>python -m buildout trader</code>) that can act for a person. Each pass runs the same way whatever the mode: is trading halted, is it inside the window, has it already acted today; read the account and quotes from the broker; build the ticket (the planner above, every check); check the ticket against the mandate's limits; then the mode decides whether it waits for a person or goes. Execution is sells first, buys from the proceeds, each order polled to its fill or cancelled at the ticket's expiry; the fills go to the hash-chained log; the account is marked; a journal line and a digest are written. One ticket a day, one order per id, the ticket's id covering every field: a pass can be repeated without repeating a trade.</p></div>
+      <p class="prose">The trader is a separate program (<code>python -m buildout trader</code>) that can act for a person. Each pass runs the same way whatever the mode: is trading halted, is it inside the window, has it already acted today; read the account and quotes from the broker; build the ticket (the planner above, every check); check the ticket against the mandate's limits; then the mode decides whether it waits for a person or goes. Execution is sells first, buys from the proceeds, each order polled to its fill or canceled at the ticket's expiry; the fills go to the hash-chained log; the account is marked; a journal line and a digest are written. One ticket a day, one order per id, the ticket's id covering every field: a pass can be repeated without repeating a trade.</p></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">The three modes</span><div class="tablewrap"><table class="rs-table" id="ex-modes"></table></div></div>
       <div class="panel"><span class="panel-title">Three routes to the market</span><div class="tablewrap"><table class="rs-table" id="ex-routes"></table></div></div>
@@ -2947,6 +2938,7 @@
       <div class="panel"><span class="panel-title">Holdings</span><div class="tablewrap"><table class="rs-table" id="ex-pb-pos"></table></div></div>
     </div>
     <div class="panel" id="ex-pb-tp" hidden><span class="panel-title">Each filled ticket's times, in order</span><div class="tablewrap"><table class="rs-table" id="ex-pb-tl"></table></div><p class="note" id="ex-pb-tn"></p></div>
+    <div class="panel" id="ex-pb-corr" hidden></div>
     <div class="panel" id="ex-pb-jp" hidden><span class="panel-title">The journal, newest last</span><div class="tablewrap"><table class="rs-table" id="ex-pb-j"></table></div></div>
     <p class="note" id="ex-pb-n"></p>
   </section>
@@ -3273,7 +3265,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
 <!-- ======================= PARAMETERS ======================= -->
 <section class="view" id="view-parameters" hidden aria-labelledby="pm-title">
   <div class="vhead"><p class="eyebrow">The engine · parameters</p><h1 id="pm-title">Θ: every matrix the engine learns, and what shaped it</h1>
-    <p class="lede">The engine is one system whose parameters are numerical matrices, vectors and scalars shaped by optimisation: transition matrices by expectation-maximisation, regression weights by penalised least squares, network weights by Adam with early stopping, a Q-table by fitted Q-iteration, model weights by discounted Bayesian updating, a causal skeleton by a graphical lasso, and a knowledge graph compressed to 64 numbers a node by an eigendecomposition. This desk is the inventory: what has been learned, how much, by which algorithm against which objective, on what data, refit how often, and feeding which desks. The few constants chosen by judgment are listed apart, each with its reason.</p></div>
+    <p class="lede">The engine is one system whose parameters are numerical matrices, vectors and scalars shaped by optimization: transition matrices by expectation-maximisation, regression weights by penalized least squares, network weights by Adam with early stopping, a Q-table by fitted Q-iteration, model weights by discounted Bayesian updating, a causal skeleton by a graphical lasso, and a knowledge graph compressed to 64 numbers a node by an eigendecomposition. This desk is the inventory: what has been learned, how much, by which algorithm against which objective, on what data, refit how often, and feeding which desks. The few constants chosen by judgment are listed apart, each with its reason.</p></div>
   <div class="at-tiles" id="pm-tiles"></div>
   <nav class="toc" aria-label="On this desk"><span class="flabel">On this desk</span><a href="#pm-flow-title">The layers</a><a href="#pm-inv-title">The inventory</a><a href="#pm-hand-title">Set by hand</a><a href="#pm-read-title">How to read it</a></nav>
 
@@ -3283,7 +3275,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
   </section>
 
   <section class="section" aria-labelledby="pm-inv-title">
-    <div class="section-head"><p class="eyebrow">The inventory</p><h2 id="pm-inv-title">Every learned object: shape, count, optimiser, objective, data, refit, destination</h2><p class="prose">Select a row for its data, its as-of date, today's values and the module that fits it. Counts are the numbers the engine multiplies, not free parameters: a 3 by 3 transition matrix counts nine although six are free.</p></div>
+    <div class="section-head"><p class="eyebrow">The inventory</p><h2 id="pm-inv-title">Every learned object: shape, count, optimizer, objective, data, refit, destination</h2><p class="prose">Select a row for its data, its as-of date, today's values and the module that fits it. Counts are the numbers the engine multiplies, not free parameters: a 3 by 3 transition matrix counts nine although six are free.</p></div>
     <div class="pm-filter" id="pm-filter" role="group" aria-label="Filter by layer"></div>
     <div class="tablewrap"><table class="rz pm-table" id="pm-table"></table></div>
   </section>
@@ -3297,7 +3289,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
     <div class="section-head"><p class="eyebrow">How to read it</p><h2 id="pm-read-title">Why the decision core is small, and why that is the point</h2></div>
     <div class="grid2">
       <div class="panel"><span class="panel-title">Learned against set</span>
-        <p class="prose">A parameter is learned when an algorithm chose its value to optimise a stated objective on stated data; it is set when a person chose it. The engine keeps the two apart because they fail differently: a learned value drifts with the data and is caught by the refit schedule and the walk-forward record; a set value is a judgment and is caught only by a reader who disagrees. Every row above says which it is.</p></div>
+        <p class="prose">A parameter is learned when an algorithm chose its value to optimize a stated objective on stated data; it is set when a person chose it. The engine keeps the two apart because they fail differently: a learned value drifts with the data and is caught by the refit schedule and the walk-forward record; a set value is a judgment and is caught only by a reader who disagrees. Every row above says which it is.</p></div>
       <div class="panel"><span class="panel-title">Why so few numbers decide</span>
         <p class="prose">The decision core is a few thousand numbers because the targets are noisy and the history, though long, is one history. Each forecaster is refit every two years on a few hundred effective observations; a model with many more parameters than that would fit the noise, which is what the machine-learning lab finds when it tries. The one large object, the knowledge graph's spectral map, is not a forecast: it compresses what the system knows so that every question becomes a matrix product, and it is judged by retrieval, not by returns.</p></div>
       <div class="panel"><span class="panel-title">Walked forward, with a lag</span>
@@ -3316,7 +3308,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
 
   <section class="hero-brain" id="hero" aria-labelledby="hero-title">
     <div class="hero-head"><p class="eyebrow">The mind · live</p><h2 id="hero-title">Query the knowledge graph</h2>
-      <p class="prose">The knowledge graph is one layer of the engine, and the causal map (the brain) is another: every concept an investor needs, every measured market, every sourced fact and paper, every verified quote, every module and parameter object of the engine, and the world economy, in one graph. Type a question and it recalls what matches, spreads activation through the links, frames the claim, weighs the evidence for and against in log-odds, tests how fragile the verdict is, traces the causal chain to the book and proposes an action it never executes. The whole brain and the core map show a shock travelling the markets themselves.</p>
+      <p class="prose">The knowledge graph is one layer of the engine, and the causal map (the brain) is another: every concept an investor needs, every measured market, every sourced fact and paper, every verified quote, every module and parameter object of the engine, and the world economy, in one graph. Type a question and it recalls what matches, spreads activation through the links, frames the claim, weighs the evidence for and against in log-odds, tests how fragile the verdict is, traces the causal chain to the book and proposes an action it never executes. The whole brain and the core map show a shock traveling the markets themselves.</p>
       <div class="seg hero-which" id="hero-which" role="group" aria-label="Which view of the brain"><button type="button" data-w="mind" aria-pressed="true">The mind</button><button type="button" data-w="full" aria-pressed="false">Whole brain</button><button type="button" data-w="core" aria-pressed="false">Core map · 34 nodes</button></div></div>
     <div id="hero-mind">
       <div class="hero-grid">
@@ -3621,7 +3613,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
   </section>
   <section class="section" aria-labelledby="ml-an-title">
     <div class="section-head"><p class="eyebrow">Analogs and novelty</p><h2 id="ml-an-title">Historical analogs and current novelty</h2>
-      <p class="prose">Nearest neighbours on the same standardized features, no two within 18 months of each other. The eight nearest months run from July 1929 to October 2018, and they split evenly: four were followed by a fall of 15% or more within a year (1929, 1966, 2000 and 2007) and four by gains. Novelty measures how far today sits from its 24 nearest months against how far a typical month sits from its own; a model is extrapolating when today is further out than most of history.</p></div>
+      <p class="prose">Nearest neighbors on the same standardized features, no two within 18 months of each other. The eight nearest months run from July 1929 to October 2018, and they split evenly: four were followed by a fall of 15% or more within a year (1929, 1966, 2000 and 2007) and four by gains. Novelty measures how far today sits from its 24 nearest months against how far a typical month sits from its own; a model is extrapolating when today is further out than most of history.</p></div>
     <div class="grid2"><div class="panel"><div class="tablewrap"><table id="ml-an"></table></div></div><div class="panel"><div class="tablewrap"><table id="ml-shift"></table></div></div></div>
   </section>
   <section class="section" aria-labelledby="rl-title">
@@ -3689,7 +3681,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
     </div>
   </section>
   <section class="section" aria-labelledby="rt-t-title">
-    <div class="section-head"><p class="eyebrow">Tests</p><h2 id="rt-t-title">Common modelling assumptions</h2></div>
+    <div class="section-head"><p class="eyebrow">Tests</p><h2 id="rt-t-title">Common modeling assumptions</h2></div>
     <div class="panel"><div class="tablewrap"><table id="rt-tests"></table></div></div>
     <div class="grid2"><div class="panel"><span class="panel-title">Fat tails</span><div class="tablewrap"><table id="rt-tails"></table></div><p class="hint">The tail index is a Hill estimate on the largest losses; below 4 the fourth moment, and with it the usual error bars on volatility, is unreliable.</p></div>
       <div class="panel"><span class="panel-title">Taleb's kappa: how much data the tails cost you</span><div class="tablewrap"><table id="rt-kappa"></table></div><p class="hint">κ = 2 − (log n − log n<sub>0</sub>) / log(M(n)/M(n<sub>0</sub>)), with M the mean absolute deviation of a sum of n draws (Taleb 2019). The Gaussian row is a check: it should read 0.</p></div></div>
@@ -3700,7 +3692,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
     <div class="panel"><div class="tablewrap"><table id="rt-worlds"></table></div></div>
   </section>
   <section class="section" aria-labelledby="rt-f-title">
-    <div class="section-head"><p class="eyebrow">Fragility</p><h2 id="rt-f-title">Convexity of portfolio losses</h2><p class="prose">Taleb and Douady's heuristic: shift the market by s, then by s ± 5%, and compare. If the average of the two neighbours is worse than the middle, losses accelerate (fragile); if better, they slow (convex). Priced on the hedge book's own option model.</p></div>
+    <div class="section-head"><p class="eyebrow">Fragility</p><h2 id="rt-f-title">Convexity of portfolio losses</h2><p class="prose">Taleb and Douady's heuristic: shift the market by s, then by s ± 5%, and compare. If the average of the two neighbors is worse than the middle, losses accelerate (fragile); if better, they slow (convex). Priced on the hedge book's own option model.</p></div>
     <div class="grid2"><div class="panel"><div class="svgbox" id="rt-frag-c"></div><div class="legend" id="rt-frag-l"></div></div><div class="panel"><div class="tablewrap"><table id="rt-frag"></table></div><p class="hint">Selling puts earns income in calm markets and turns fragile in the tail. The collar keeps the book convex across the range; a put spread is convex down to its lower strike and fragile again beyond it.</p></div></div>
   </section>
   <section class="section" aria-labelledby="rt-hc-title">
@@ -3721,7 +3713,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
   </section>
   <section class="section" aria-labelledby="ed-dist-title">
     <div class="section-head"><p class="eyebrow">Distribution is the new moat</p><h2 id="ed-dist-title">Distribution advantage</h2>
-      <p class="prose">When a capable model can be copied in months, the durable advantage is the path to the user: the seats, the daily users, the developers and the installed base that receive a new feature on day one. Each figure below is the company's own disclosure, checked on its page by a second agent. Nvidia and Broadcom do not disclose user counts, so their entries are revenue, labelled as such.</p></div>
+      <p class="prose">When a capable model can be copied in months, the durable advantage is the path to the user: the seats, the daily users, the developers and the installed base that receive a new feature on day one. Each figure below is the company's own disclosure, checked on its page by a second agent. Nvidia and Broadcom do not disclose user counts, so their entries are revenue, labeled as such.</p></div>
     <div class="ed-grid" id="ed-dist"></div>
     <div class="panel"><span class="panel-title">The idea, and the case against it</span><div id="ed-dist-idea"></div></div>
   </section>
@@ -3800,7 +3792,7 @@ python -m buildout trade halt             # the kill switch, every route</pre>
       <li><b>Measure.</b> atlas.py learns the market graph (graphical lasso, stability selection, LiNGAM, structural VAR); labs.py tests trading claims; valuation.py and fundamentals.py read the filings; brain_robust.py checks the brain out of sample.</li>
       <li><b>Know.</b> ontology.py, concepts17.json and concepts25.json define 4,575 concepts and their relations; knowledge.json holds 903 facts, papers, source profiles, distribution metrics, Treasury ETF figures and today's tape, each checked twice; voices.json holds 371 verified quotes; world.json and companies.json hold 213 economies and the S&amp;P 500.</li>
       <li><b>Think.</b> mind.py joins all of it into one graph of 9,435 nodes and about 38,000 typed links, with 4,575 concepts and every month since 1871 (chronicle.py), and runs the reasoning loop: recall, spread, frame, weigh, test, trace, decide; the belief network links thirteen claims for what-if questions.</li><li><b>Measure.</b> datahub.py reads Databento, Yahoo, Stooq, the SEC, the Treasury and the CFTC with fallbacks; technicals.py tests every chart signal on its own asset; statements.py reads ratios and scores from filings; rl.py learns a sizing policy.</li><li><b>Doubt.</b> ml.py scores machine learning out of sample; assumptions.py tests every model's assumptions, finds each breakpoint and reruns decisions in stressed worlds; damodaran.py prices the story a valuation needs.</li><li><b>Price.</b> bondlab.py reprices every Treasury ETF bond by bond at any 10-year and 30-year yield, with convexity, roll and the stock read-through by inflation band; complexity.py measures why flexible models fit the past and miss the future; chronicle.py remembers every month since 1871 and its closest analogs.</li>
-      <li><b>Count.</b> parameters.py inventories every matrix, vector and scalar the engine learns (22 objects, about 598,000 numbers) with its shape, the optimiser and objective that shaped it, its data, its refit schedule and the desks it feeds, read from the engines' own outputs; the constants set by hand are listed apart with reasons.</li>
+      <li><b>Count.</b> parameters.py inventories every matrix, vector and scalar the engine learns (22 objects, about 598,000 numbers) with its shape, the optimizer and objective that shaped it, its data, its refit schedule and the desks it feeds, read from the engines' own outputs; the constants set by hand are listed apart with reasons.</li>
       <li><b>Decide.</b> decide.py sizes the stock exposure from stacked forecasts (nn.py's neural ensemble), regimes and changepoints (infer.py), model averaging that now includes geometric analogs (geometry.py), a risk budget and an evidence gate; portfolio.py decides stocks, Treasuries, gold and cash together; ooda.py turns the readings into a decision record; reasoner.py and hedgebook.py size the choices against seven scenarios and the book's limits; decisions.py scores the process afterwards.</li>
       <li><b>Propose.</b> mcp_server.py exposes all of it as tools an assistant can call. create_order_proposal writes a structured proposal, hashes it (SHA-256) and checks it against the limits; it requires a rationale and a kill criterion.</li>
       <li><b>Approve.</b> A person reads the proposal. If they want it, they place it in their own brokerage, for example through Robinhood's own MCP, outside this engine. The engine never sees an account and never sends an order.</li>
@@ -3876,7 +3868,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
       <div class="at-kpi"><b>11% vs 0.8%</b><span>Market's markdown on OBDC's loans against its booked non-accruals</span><small>77% of NAV after 1.11x leverage</small></div>
       <div class="at-kpi"><b>0.6%</b><span>Fitch's software default rate, the lowest sector</span><small>industrials and consumer 9.7%; the fear and the defaults are in different places</small></div>
       <div class="at-kpi"><b>4 of 8</b><span>Gauges red on the scorecard</span><small>both queues, the discount, the default rate</small></div></div>
-    <p class="prose">A lens the user asked for by name. The lead agent fetched Blue Owl's Q3 results and call, OBDC's June results and 10-Q schedules, the funds' tender filings and Fitch's 3Q26 monitor, kept only figures with a date and a filing, and built the arithmetic on them: a queue model checked against the reported fills, a markdown identity, a cash-cover estimate labelled as one. Two things it could not get: a live OBDC price (the price mirror carries no BDC tickers, so the fund's own June buyback prices stand in) and the Hyperion deal's current valuation. Both are listed on the desk as limits.</p>
+    <p class="prose">A lens the user asked for by name. The lead agent fetched Blue Owl's Q3 results and call, OBDC's June results and 10-Q schedules, the funds' tender filings and Fitch's 3Q26 monitor, kept only figures with a date and a filing, and built the arithmetic on them: a queue model checked against the reported fills, a markdown identity, a cash-cover estimate labeled as one. Two things it could not get: a live OBDC price (the price mirror carries no BDC tickers, so the fund's own June buyback prices stand in) and the Hyperion deal's current valuation. Both are listed on the desk as limits.</p>
   </section>
   <section class="section" aria-labelledby="ag-v33-t">
     <div class="section-head"><p class="eyebrow">v0.33</p><h2 id="ag-v33-t">Release metrics, v0.33</h2></div>
@@ -3961,7 +3953,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
   </section>
   <section class="section" aria-labelledby="ag-v23-t">
     <div class="section-head"><p class="eyebrow">v0.23</p><h2 id="ag-v23-t">Release metrics, v0.23</h2></div>
-    <div class="at-tiles"><div class="at-kpi"><b>22</b><span>Parameter objects inventoried</span><small>shape, optimiser, objective, data, refit, destination</small></div>
+    <div class="at-tiles"><div class="at-kpi"><b>22</b><span>Parameter objects inventoried</span><small>shape, optimizer, objective, data, refit, destination</small></div>
       <div class="at-kpi"><b>0.50</b><span>Trend overlay chosen, then rejected</span><small>chosen by a rule written first; withdrawn in v0.24 when the rule failed walked forward</small></div>
       <div class="at-kpi"><b>14 to 5</b><span>Screens on Today</span><small>one call, six stages, the counts, the fund block</small></div>
       <div class="at-kpi"><b>6</b><span>Navigation groups</span><small>Engine and Workshop added; the Decide group dispersed into Today, Markets, Engine and Workshop</small></div></div>
@@ -4032,7 +4024,7 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
       <div class="at-kpi"><b>45</b><span>Findings from an accuracy auditor</span><small>a separate agent read the whole v0.14 site against its own code and sources</small></div></div>
     <ol class="m-steps">
       <li><b>Research and check.</b> The same brief as v0.14 (primary sources first, every number confirmed on the linked page), now with source profiles: what each source is uniquely good for, what to watch for, its cadence, cost and a feed confirmed to load.</li>
-      <li><b>Audit.</b> An auditor that had not written the site compared every figure, count and formula on the page with the engine's code, the snapshots and the cited sources, and returned a list of contradictions, stale numbers and misstatements. The lead fixed them or labelled them; the few it could not settle without a source (one project's financing framing) are left as they were and noted here.</li>
+      <li><b>Audit.</b> An auditor that had not written the site compared every figure, count and formula on the page with the engine's code, the snapshots and the cited sources, and returned a list of contradictions, stale numbers and misstatements. The lead fixed them or labeled them; the few it could not settle without a source (one project's financing framing) are left as they were and noted here.</li>
       <li><b>Build.</b> The lead wrote the ML lab, the assumption tests, Damodaran's tools, the belief network, the key modes and the editor plugins, with Python and the page held equal by tests.</li>
     </ol>
   </section>
@@ -4050,13 +4042,13 @@ create_order_proposal({"rationale": "...", "kill": "...", ...})   // hashed, lim
       <li><b>Merge.</b> scripts/build_knowledge.py applies the checkers' corrections, drops anything that failed or could not be reached (nothing did this time), records who confirmed what, and refuses text that breaks the house style.</li>
       <li><b>Use.</b> mind.py reads each signal's numbers from the checked items by id, so a correction to a source flows into the verdicts on the next build.</li>
     </ol>
-    <p class="prose">Earlier releases used the same pattern: in v0.12 independent agents re-checked all 267 investor quotes against their sources (11 corrected, none failed). Things the agents could not confirm stayed out, for example a retail-trading share from a primary source and a mislabelled World Bank inflation file, which the lead found matched the GDP deflator and left out.</p>
+    <p class="prose">Earlier releases used the same pattern: in v0.12 independent agents re-checked all 267 investor quotes against their sources (11 corrected, none failed). Things the agents could not confirm stayed out, for example a retail-trading share from a primary source and a mislabeled World Bank inflation file, which the lead found matched the GDP deflator and left out.</p>
   </section>
   </details>
   <section class="section" aria-labelledby="ag-run-t">
     <div class="section-head"><p class="eyebrow">At run time</p><h2 id="ag-run-t">Agents available at run time</h2></div>
     <ul class="m-learn-l">
-      <li><b>Ask Claude on the voices panel.</b> With permission, the page sends the question and the library's own quotes to Claude, which may reorder them and summarize a side in its own words, labelled as such. Any quote id it returns that is not in the library is dropped.</li>
+      <li><b>Ask Claude on the voices panel.</b> With permission, the page sends the question and the library's own quotes to Claude, which may reorder them and summarize a side in its own words, labeled as such. Any quote id it returns that is not in the library is dropped.</li>
       <li><b>The MCP server.</b> Any assistant that speaks the Model Context Protocol can call the engine's tools: reason (the mind), labs_lookup, game_math, investor_voices, atlas_trace, decision_loop, hedge_book, evaluate_trade, create_order_proposal and the rest. It is research and proposals only.</li>
       <li><b>Where judgment stays human.</b> Every proposal needs a rationale and a kill criterion, is hashed so it cannot be altered after review, and is marked proposal_only. The person decides.</li>
     </ul>

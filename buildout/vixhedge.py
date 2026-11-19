@@ -64,11 +64,12 @@ def monthly(frames: dict, vxf: pd.DataFrame, vix: pd.Series, vov: float = VOV) -
     from . import futures as fu
     nq = (1 + fu.front_returns(frames["NQ"]).dropna()).resample("ME").prod() - 1
     vd = fu.front_returns(vxf).dropna()
-    vf = (1 + vd).resample("ME").prod() - 1 - COST_BP / 1e4 / 12            # one roll a month
+    vg = (1 + vd).resample("ME").prod() - 1                                 # the contract's own move over the month
+    vf = vg - COST_BP / 1e4                                                 # one roll a month, one round trip (v0.47: was a twelfth of one, against on_book's full one)
     F0 = vxf["price"].resample("ME").last().shift(1)                        # the future at the start of the month
     K = STRIKE * F0
     prem = _black76_call(F0, K, 1 / 12, vov) * (1 + OPTION_SPREAD / 2)
-    F1 = F0 * (1 + vf)                                                      # the same contract at the month's end
+    F1 = F0 * (1 + vg)                                                      # the same contract at the month's end (its price, not the holder's net return)
     call = (np.maximum(F1 - K, 0) * (1 - OPTION_SPREAD / 2) - prem) / F0
     vi = vix.resample("ME").last().pct_change()
     M = pd.DataFrame({"NQ": nq, "vix_fut": vf, "vix_call": call, "vix_index": vi}).dropna(subset=["NQ", "vix_fut", "vix_call"])
@@ -117,7 +118,7 @@ def _es21(x: pd.Series, alpha: float = 0.05) -> float:
 
 def _dd(x: pd.Series) -> float:
     lv = (1 + x).cumprod()
-    return float((1 - lv / lv.cummax()).max())
+    return float((1 - lv / lv.cummax().clip(lower=1.0)).max())      # v0.47: a fall on the first day is a fall from 1.0
 
 
 def option_daily(level_ret: pd.Series, vol: pd.Series | float, kind: str, k: float, spread: float = OPTION_SPREAD) -> pd.Series:

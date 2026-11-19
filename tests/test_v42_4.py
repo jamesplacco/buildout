@@ -40,9 +40,13 @@ def _assistant():
 def test_the_call_in_force_is_the_newest_entry_whose_day_has_come():
     rows = ledger.read()
     assert ex.call_in_force("2026-11-03") is None                                     # before the first effective date
+    # v0.47: entry 5 was written on Saturday Nov 7, after the close that begins Monday's return, so it governs from
+    # Tuesday; Monday belongs to entry 4, written on Friday before the close (before, the newer of the two took Monday)
     c = ex.call_in_force("2026-11-09")
-    assert c["ledger_seq"] == 5 and c["asof"] == "2026-11-06" and c["effective_from"] == "2026-11-09"     # the newer of two effective that day
-    assert ex.call_in_force("2026-11-11")["ledger_seq"] == 6 and ex.call_in_force("2026-11-10")["ledger_seq"] == 5
+    assert c["ledger_seq"] == 4 and c["asof"] == "2026-11-05" and c["effective_from"] == "2026-11-09"
+    c5 = ex.call_in_force("2026-11-10")
+    assert c5["ledger_seq"] == 5 and c5["effective_from"] == "2026-11-10" and c5["stored_effective_from"] == "2026-11-09"
+    assert ex.call_in_force("2026-11-11")["ledger_seq"] == 6
     last = ex.call_in_force("2099-01-01")
     assert last["ledger_seq"] == rows[-1]["seq"] and last["frontier"][0]["gross"] == pytest.approx(rows[-1]["call"]["size"], abs=1e-3)
     assert [f["meets"] for f in last["frontier"]] == [True, True]
@@ -64,19 +68,19 @@ def test_the_paper_bot_trades_the_day_after_a_call_is_written(state):
 def test_a_live_broker_needs_armed_in_every_mode(state):
     for mode in md.MODES:
         M = md.Mandate(mode=mode, armed=False, broker="assistant", max_order_usd=50_000)
-        r = trader.run_once(_assistant(), M, T._params(), now=T.NOW, call=T._call())
+        r = trader.run_once(_assistant(), M, T._params(), now=T.NOW, call=T._live_call())
         assert r["outcome"] == "not armed: staged only", mode
 
 
 @pytest.mark.parametrize("mode", ["supervised", "autonomous"])
 def test_until_the_evidence_is_in_a_live_broker_is_manual(state, mode):
-    r = trader.run_once(_assistant(), _live(mode), T._params(), now=T.NOW, call=T._call())
+    r = trader.run_once(_assistant(), _live(mode), T._params(), now=T.NOW, call=T._live_call())
     assert r["outcome"] == "staged, awaiting approval" and not r["gate"]["open"]
     assert any(x.startswith("gate: the paper bot has") for x in r["reasons"]) and any("live tickets" in x for x in r["reasons"])
     trader.approve("standing", by="test", standing_minutes=120, now=T.NOW)             # a standing approval does not open a gated pass
-    assert trader.run_once(_assistant(), _live(mode), T._params(), now=T.NOW + timedelta(minutes=1), call=T._call())["outcome"] == "staged, awaiting approval"
+    assert trader.run_once(_assistant(), _live(mode), T._params(), now=T.NOW + timedelta(minutes=1), call=T._live_call())["outcome"] == "staged, awaiting approval"
     trader.approve(r["ticket"], by="test", now=T.NOW)                                  # this ticket's id does
-    r2 = trader.run_once(_assistant(), _live(mode), T._params(), now=T.NOW + timedelta(minutes=2), call=T._call())
+    r2 = trader.run_once(_assistant(), _live(mode), T._params(), now=T.NOW + timedelta(minutes=2), call=T._live_call())
     assert r2["outcome"] == "handed to the assistant"
     j = [e for e in trader.journal() if e["event"] == "handoff"][-1]
     assert j["broker"] == "assistant" and j["mode"] == "manual" and j["approval"] == "ticket"
@@ -84,7 +88,7 @@ def test_until_the_evidence_is_in_a_live_broker_is_manual(state, mode):
 
 def test_with_the_evidence_in_the_mandates_mode_applies(state, monkeypatch):
     monkeypatch.setattr(trader, "evidence", lambda *a, **k: {"open": True, "missing": []})
-    assert trader.run_once(_assistant(), _live("autonomous"), T._params(), now=T.NOW, call=T._call())["outcome"] == "handed to the assistant"
+    assert trader.run_once(_assistant(), _live("autonomous"), T._params(), now=T.NOW, call=T._live_call())["outcome"] == "handed to the assistant"
 
 
 def _write(p: Path, rows):
@@ -95,12 +99,31 @@ def _write(p: Path, rows):
 def test_evidence_counts_what_the_records_show(tmp_path):
     paper, private = tmp_path / "paper", tmp_path / "private"
     assert trader.evidence(paper, private) == {**trader.evidence(paper, private), "open": False, "paper_days": 0, "live_manual_tickets": 0}
-    days = [f"2026-11-{d:02d}" for d in range(10, 31)] + [f"2026-12-{d:02d}" for d in range(1, 32)] + [f"2027-01-{d:02d}" for d in range(1, 21)]
-    _write(paper / "trader" / "equity.jsonl", [{"date": d, "equity": 1e5} for d in days])
+    # v0.47: the count is of exchange sessions the account closed holding a position after its first causal fill, read
+    # from the account's own marks and the fills log. Before, this test fed every calendar day from Nov 10 to Jan 20
+    # (weekends and holidays included) through the trader's pass dates and asserted that all of them counted.
+    from buildout import sessions
+    days = [f"2026-11-{d:02d}" for d in range(10, 31)] + [f"2026-12-{d:02d}" for d in range(1, 32)] + [f"2027-{m:02d}-{d:02d}" for m, n in ((1, 31), (2, 28)) for d in range(1, n + 1)]
+    _write(paper / "trader" / "equity.jsonl", [{"date": d, "equity": 1e5} for d in days])                # pass dates no longer count for anything
     _write(paper / "trader" / "journal.jsonl", [{"event": "pass", "ts_utc": "2026-11-10T19:00:00Z"}, {"event": "executed", "ts_utc": "2026-11-12T19:00:00Z", "ticket": "p1"}])
+    (paper / "paper_account.json").write_text(json.dumps({"equity_history": [[d, 1e5] for d in days]}))
+    old = {"ticket": "p0", "status": "filled", "ts_utc": "2026-11-11T19:54:15Z", "fills": [{"symbol": "NVDA", "side": "buy", "quantity": 10, "price": 169.14}]}
+    _write(paper / "fills.jsonl", [old])
     e = trader.evidence(paper, private)
-    assert e["paper_first_fill"] == "2026-11-12" and e["paper_days"] == len(days) - 2 and e["paper_days"] >= trader.PAPER_DAYS_REQUIRED       # days before the first fill do not count
+    assert e["paper_days"] == 0 and e["paper_first_fill"] is None, "a fill priced before its order starts no count"
+    causal = {"ticket": "p1", "status": "filled", "ts_utc": "2026-11-13T19:00:00Z", "convention": "market on close",
+              "fills": [{"symbol": "NVDA", "side": "buy", "quantity": 5, "price": 166.27, "session": "2026-11-12"}]}
+    _write(paper / "fills.jsonl", [old, causal])
+    e = trader.evidence(paper, private)
+    want = [d for d in days if d > "2026-11-12" and sessions.is_session(d)]
+    assert e["paper_first_fill"] == "2026-11-12" and e["paper_days"] == len(want) and e["paper_days"] >= trader.PAPER_DAYS_REQUIRED
+    assert len(want) < len([d for d in days if d > "2026-11-12"]) - 30, "weekends and holidays are not sessions"
     assert not e["open"] and len(e["missing"]) == 1
+    sold = {"ticket": "p2", "status": "filled", "ts_utc": "2026-12-01T19:00:00Z", "convention": "market on close",
+            "fills": [{"symbol": "NVDA", "side": "sell", "quantity": 15, "price": 170.0, "session": "2026-11-30"}]}
+    _write(paper / "fills.jsonl", [old, causal, sold])
+    assert trader.evidence(paper, private)["paper_days"] == len([d for d in want if d < "2026-11-30"]), "a session closed in cash is not one with a position"
+    _write(paper / "fills.jsonl", [old, causal])
     J = [{"event": "handoff", "ticket": f"t{i}", "broker": "assistant", "approval": "ticket"} for i in range(5)]
     J += [{"event": "handoff", "ticket": "s1", "broker": "assistant", "approval": "standing"}, {"event": "executed", "ticket": "pp", "broker": "paper", "approval": "ticket"}]
     _write(private / "trader" / "journal.jsonl", J)

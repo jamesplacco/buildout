@@ -1018,7 +1018,7 @@
     }
   }
   /* a small highlighter for the engine's own languages: comments, strings (Python's triple quotes span lines), keywords,
-     numbers, decorators and the names being defined. It colours; it never changes a character. */
+     numbers, decorators and the names being defined. It colors; it never changes a character. */
   const CD_KW = { py: new Set("False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield self".split(" ")),
     js: new Set("const let var function return if else for while do break continue new typeof instanceof in of class extends super this null undefined true false try catch finally throw switch case default async await yield import export from".split(" ")) };
   function cdLang(path) { return /\.py$/.test(path) ? "py" : /\.(js|mjs)$/.test(path) ? "js" : /\.el$/.test(path) ? "el" : /\.vim$/.test(path) ? "vim" : "txt"; }

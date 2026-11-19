@@ -5,8 +5,8 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 51;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 73;      // tests/test_*.py, pinned by tests/test_v39_1.py
-  const TESTS_PASSING = 941;     // the shipped test count (the chip and the hood tile read it)
+  const TEST_FILES = 77;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TESTS_PASSING = 1039;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -52,9 +52,15 @@
       ? (M ? `Cut the book to about ${xx(M.lo.gross)}${M.lo.short ? ` with a ${pct0(M.lo.short)} Nasdaq-100 short` : ""}, or keep it at ${xx(M.hi.gross)} and short ${pct0(M.hi.short)} of NAV in Nasdaq-100 futures; ${hw || "no bond hedge"}.`
         : `Run the book at ${xx(BC.size)}${BC.keep != null ? `, or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures` : ""}${hw ? "; " + hw : ""}.`)
       : `Hold equity at ${xx(N.exposure)}${hw ? " with " + hw : ""}${tail ? "; " + tail : ""}.`;
-    // v0.39.1: a catalyst whose date has passed is marked as passed rather than shown as upcoming
-    const todayIso = new Date().toISOString().slice(0, 10);
-    document.querySelectorAll(".cal li[data-date]").forEach((li) => { if (li.dataset.date < todayIso) { const b = li.querySelector("b"); if (b && !/passed/.test(b.textContent)) b.textContent += " (passed)"; li.classList.add("cal-past"); } });
+    // v0.47: a catalyst whose date has passed (New York date) is not shown, and the card goes when none is left.
+    // v0.39.1 marked it "(passed)" and left it, so the card listed events days old with no outcome.
+    const todayIso = nyToday();
+    document.querySelectorAll(".cal").forEach((ul) => {
+      const items = [...ul.querySelectorAll("li")];
+      items.forEach((li) => { if (li.dataset.date) li.hidden = li.dataset.date < todayIso; });
+      const card = ul.closest(".t7-card");
+      if (card) card.hidden = !items.some((li) => !li.hidden);
+    });
     const eb = $("#t7-eyebrow");
     // v0.43: the date that governs the call is the date of the prices it was sized on, not the newest market file
     const Bk = typeof B30 === "function" ? B30() : null;
@@ -77,10 +83,10 @@
       (() => { const BC = typeof bookCall === "function" ? bookCall(N) : null;
         return BC ? cell(BC.cut ? "rule" : "model", "Book size", xx(BC.size), `The decision engine's baseline (${xx(N.exposure)}) cut to ${BC.bindingName}, measured on the nine names' own prices: at 1.00x the book breaks ${BC.breaches === 3 ? "all three" : `${BC.breaches} of its three`} limits.`, "#book", "Book risk")
           : cell("model", "Equity exposure", xx(N.exposure), `The gated call for the model book${N.capped ? ", capped by the risk budget" : ""}.`, "#decision", "Decision engine"); })(),
-      cell("model", "Engine optimum", xx(N.engine_exposure), `What the engine would hold if it trusted its own forecast${N.engine_exposure >= 1.5 - 1e-9 ? ": the top of its 0 to 1.5x range, a ceiling rather than a measured best" : ""}. Risk aversion γ ${fx(O.gamma, 2)}; worst-month budget ${pct0(O.es_limit)}.`, "#dx-gate", "The gate"),
+      cell("model", "Engine optimum", xx(N.engine_exposure), `What the engine would hold if it trusted its own forecast${N.engine_exposure >= 1.5 - 1e-9 ? ": the top of its 0 to 1.5x range, a ceiling rather than a measured best" : ""}. Risk aversion ${fx(O.gamma, 2)} (γ in the formulas); worst-month budget ${pct0(O.es_limit)}.`, "#dx-gate", "The gate"),
       cell("rule", "Evidence gate", pct0(N.gate.value), `How much of that the evidence lets through. The engine's edge over simply holding scores t = ${fx(N.gate.t, 2)} on monthly data since ${O.start.slice(0, 4)}; after ${N.gate.n_tried} strategies tried, it needs ${fx(N.gate.t0, 2)} to count.`, "#dx-gate", "Why so little"),
       cell("model", "Regime", `${rg.name} ${pct0(rg.p)}`, regimeWords(N, R, rg), "#dx-states", "The states"),
-      cell(TD.on ? "on" : "off", "Bond hedge", TD.status !== "ok" ? "Unknown" : TD.on ? "On" : "Off", `${(() => { const B = typeof B30 === "function" ? B30() : null, P = B && B.hedges && B.hedges.policies; return P ? `On the book's own days a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} and an index short ${pct0(P.nasdaq_beta.variance_cut)}. ` : ""; })()}S&P 500 against the 10-year, 36 months of monthly returns: ${sgn2(I.corr.v)}; the selector's pick: ${N.hedge.name.toLowerCase()} (${pct0(N.hedge.p_best[Math.max(0, ["stocks", "bonds", "cash"].indexOf(N.hedge.choice))])} best).`, "#bonds", "Bonds"),
+      cell(TD.on ? "on" : "off", "Bond hedge", TD.status !== "ok" ? "Unknown" : TD.on ? "On" : "Off", `${(() => { const B = typeof B30 === "function" ? B30() : null, P = B && B.hedges && B.hedges.policies; return P ? `On the book's own days a bond hedge cut its variance ${pct0(P.bond_when_it_hedges.variance_cut)} and an index short ${pct0(P.nasdaq_beta.variance_cut)}. ` : ""; })()}${I.corr.what}: ${sgn2(I.corr.v)}; the selector's pick: ${N.hedge.name.toLowerCase()} (${pct0(N.hedge.p_best[Math.max(0, ["stocks", "bonds", "cash"].indexOf(N.hedge.choice))])} best).`, "#bonds", "Bonds"),
       (!fin(ov.factor) || ov.factor >= 1)
         ? cell("off", "Trend overlay", "None", `Tested, not adopted: on the full record a 0.50 scaling looked free, but re-chosen yearly on the record to date it cost expected utility. The 10-month trend is ${ov.trend_on ? "on" : "off"}; the rule stays a cross-check.`, "#dx-overlay", "The overlay study")
         : cell(ov.trend_on ? "rule" : "off", "Trend overlay", ov.trend_on ? `Armed · ${fx(ov.factor, 2)}` : `On · ${fx(ov.factor, 2)}`,
@@ -148,7 +154,11 @@
     }
     try {
       const R = typeof runReasoner === "function" ? (typeof RZ_LAST !== "undefined" && RZ_LAST) || runReasoner(false) : null, keep = R && R.alts && R.alts.keep;
-      if (keep && fin(keep.worst)) rows.push(["Scenario loss limit", "the Allocation desk, a stress test", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} for the book as it stands against a ${RZS.loss}% limit`, keep.feasible ? "within" : "breached on that desk's scenarios", "#solve"]);
+      // v0.47: information, not a limit of this book. The row said "breached" beside a call that does not cure it;
+      // it now states the figure at the call's own size and that the 15% line belongs to the Allocation desk.
+      if (keep && fin(keep.worst)) rows.push(BC
+        ? ["Scenario loss (stress test)", "information: the Allocation desk's scenarios, not a limit of this book", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} at 1.00x, about ${sPct(keep.worst * BC.size, 1)} at ${xx(BC.size)}; that desk's line is ${RZS.loss}%, which ${xx(Math.min(1, RZS.loss / 100 / Math.abs(keep.worst)))} would meet`, "reported", "#solve"]
+        : ["Scenario loss limit", "the Allocation desk, a stress test", "three months, worst of seven scenarios", `${sPct(keep.worst, 1)} for the book as it stands against a ${RZS.loss}% limit`, keep.feasible ? "within" : "breached on that desk's scenarios", "#solve"]);
     } catch (e) { /* the solver is optional here */ }
     if (!BC) try {                          // v0.25: the actuarial cross-checks (crossfield.py, walked forward since 1940); v0.31: on the Borrowed methods desk once the book is measured
       const C = typeof SNAP25 !== "undefined" && SNAP25 && SNAP25.crossfield, tm = C && C.tail && C.tail.methods, ru = C && C.ruin && C.ruin["1.0"];
@@ -251,6 +261,12 @@
     if (ft) ft.textContent = String(MCP_TOOLS);
     const ct = $("#chip-tests");
     if (ct) ct.textContent = `Tests ${TESTS_PASSING} of ${TESTS_PASSING}`;
+  }
+
+  // v0.47: the Architecture desk's count is the shipped one (it had said 670 since v0.36)
+  function renderTestCount() {
+    const tp = $("#tests-pass");
+    if (tp) tp.textContent = `${TESTS_PASSING} of ${TESTS_PASSING} pass`;
   }
 
   function renderLanding() {
