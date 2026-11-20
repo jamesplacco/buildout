@@ -17,8 +17,8 @@
   "y30": 0.0485,
   "rf": 0.042,
   "borrow_spread": 0.01,
-  "vix": 24.56,
-  "index_vol": 33.12,
+  "vix": 28.44,
+  "index_vol": 36.48,
   "skew_pts": 3.0,
   "horizon": 0.25,
   "max_loss": 0.15,
@@ -259,26 +259,26 @@
  "alternatives": {
   "keep": {
    "port": [
-    0.542603,
+    0.496902,
     0.0,
     0.0,
     0.0
    ],
    "rets": [
-    0.053094,
-    0.06476,
-    0.133942,
-    -0.077673,
-    -0.135189,
-    -0.121353,
-    -0.175884
+    0.049507,
+    0.06019,
+    0.123545,
+    -0.070247,
+    -0.122918,
+    -0.110247,
+    -0.160186
    ],
-   "elog": -0.01947,
-   "ce": -0.019282,
-   "worst": -0.175884,
-   "mean": -0.014475,
+   "elog": -0.016527,
+   "ce": -0.016391,
+   "worst": -0.160186,
+   "mean": -0.012372,
    "feasible": false,
-   "max_regret": 0.181334
+   "max_regret": 0.165636
   },
   "reduce": {
    "port": [
@@ -305,26 +305,26 @@
   },
   "hedge": {
    "port": [
-    0.55,
+    0.5,
     0.0,
-    0.02,
+    0.01,
     0.1
    ],
    "rets": [
-    0.033415,
-    0.04624,
-    0.114365,
-    -0.077948,
-    -0.109664,
-    -0.074452,
-    -0.139727
+    0.039595,
+    0.051345,
+    0.113095,
+    -0.069893,
+    -0.109878,
+    -0.086116,
+    -0.146366
    ],
-   "elog": -0.017328,
-   "ce": -0.017179,
-   "worst": -0.139727,
-   "mean": -0.014219,
+   "elog": -0.015496,
+   "ce": -0.015377,
+   "worst": -0.146366,
+   "mean": -0.012271,
    "feasible": true,
-   "max_regret": 0.145177
+   "max_regret": 0.151816
   },
   "optimal": {
    "port": [
@@ -347,7 +347,7 @@
    "worst": 0.00545,
    "mean": 0.011586,
    "feasible": true,
-   "max_regret": 0.124492
+   "max_regret": 0.114095
   },
   "minimax_regret": "optimal"
  },
@@ -382,7 +382,7 @@
   ]
  },
  "value_of_info": {
-  "evpi_bp": 386.486931,
+  "evpi_bp": 376.8829,
   "signals": [
    {
     "id": "vix",
@@ -408,7 +408,7 @@
     "id": "oil",
     "name": "Brent at or above 1.3x its 5-year average",
     "p_on": 0.257758,
-    "evsi_bp": 31.10965,
+    "evsi_bp": 26.201486,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -428,7 +428,7 @@
     "id": "curve",
     "name": "2s10s curve inverted",
     "p_on": 0.298917,
-    "evsi_bp": 20.517154,
+    "evsi_bp": 15.735009,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -448,7 +448,7 @@
     "id": "hy",
     "name": "High-yield spread at or above 4.5%",
     "p_on": 0.343002,
-    "evsi_bp": 5.315142,
+    "evsi_bp": 12.860274,
     "observed": false,
     "flip_changes_choice": true,
     "choice_if_on": [
@@ -529,27 +529,27 @@
  "reverse_stress": {
   "low_inflation": {
    "shock": [
-    -0.060094,
-    -0.207337,
-    -0.000571,
-    -0.035418,
-    0.005326
+    -0.065621,
+    -0.226406,
+    -0.000624,
+    -0.038676,
+    0.005816
    ],
-   "sigmas": 1.915284,
-   "p_normal": 0.027728,
-   "port_sd": 0.078317
+   "sigmas": 2.091436,
+   "p_normal": 0.018245,
+   "port_sd": 0.071721
   },
   "inflation": {
    "shock": [
-    -0.056902,
-    -0.211007,
-    0.001198,
-    0.027814,
-    -0.009334
+    -0.062136,
+    -0.230414,
+    0.001308,
+    0.030373,
+    -0.010192
    ],
-   "sigmas": 1.932161,
-   "p_normal": 0.02667,
-   "port_sd": 0.077633
+   "sigmas": 2.109866,
+   "p_normal": 0.017435,
+   "port_sd": 0.071095
   }
  },
  "factor_cov": {

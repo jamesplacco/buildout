@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "version": "0.47.0",
- "run_at": "2026-11-19T19:44:41+00:00",
+ "run_at": "2026-11-20T19:20:47+00:00",
  "engines": [
   {
    "name": "macro",
@@ -15,7 +15,7 @@
    ],
    "status": "external",
    "outputs": {
-    "macro.json": "e0965c7d0716f56d"
+    "macro.json": "c980cd1f92460596"
    }
   },
   {
@@ -62,7 +62,7 @@
    ],
    "status": "external",
    "outputs": {
-    "report.json": "48d2862035cf54e2"
+    "report.json": "6775b3160c3ebd60"
    }
   },
   {
@@ -77,7 +77,7 @@
    ],
    "status": "external",
    "outputs": {
-    "capex.json": "97cbb8cee7bfa2d6"
+    "capex.json": "7271348cb4672df8"
    }
   },
   {
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "226e9c797ff9628e"
+    "atlas.json": "b002295b5524a1c9"
    }
   },
   {
@@ -122,7 +122,7 @@
    ],
    "status": "external",
    "outputs": {
-    "ml.json": "a33c45cd4614f83b"
+    "ml.json": "69eaa36e828d3668"
    }
   },
   {
@@ -139,7 +139,7 @@
    ],
    "status": "external",
    "outputs": {
-    "reality.json": "eddfec4143d8ed04"
+    "reality.json": "744b12b3023b038f"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "86776319473990b1"
+    "connections.json": "40cc5adca04e92e0"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "2aa9f9feb6357bbd",
-    "statements.json": "67988f585028cef2"
+    "technicals.json": "b1519b357622af22",
+    "statements.json": "0beb1ff44cfbb113"
    }
   },
   {
@@ -231,7 +231,7 @@
    ],
    "status": "external",
    "outputs": {
-    "decision.json": "06cc292af1c1a724"
+    "decision.json": "12c464b612925264"
    }
   },
   {
@@ -246,7 +246,7 @@
    ],
    "status": "external",
    "outputs": {
-    "bonds.json": "fdddae7b0bc1f6a5"
+    "bonds.json": "68730282e2f7dad5"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "fc78858e9ac8f4d1"
+    "feeds.json": "7e7828da958d6093"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "074b1c36b7abaa38"
+    "reason.json": "1f140662fc37ad0f"
    }
   },
   {
@@ -300,12 +300,12 @@
    ],
    "status": "ok",
    "outputs": {
-    "valuation.json": "605a486e171e232e"
+    "valuation.json": "0992effafdf8f1c4"
    },
-   "seconds": 0.747,
+   "seconds": 1.904,
    "inputs": {
-    "capex.json": "97cbb8cee7bfa2d6",
-    "macro.json": "e0965c7d0716f56d"
+    "capex.json": "7271348cb4672df8",
+    "macro.json": "c980cd1f92460596"
    },
    "attempts": 1
   },
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.048,
+   "seconds": 0.067,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -345,11 +345,11 @@
    ],
    "status": "ok",
    "outputs": {
-    "hedges.json": "d9ef39f763296e5e"
+    "hedges.json": "8ac989616e44f54c"
    },
-   "seconds": 0.594,
+   "seconds": 0.755,
    "inputs": {
-    "macro.json": "e0965c7d0716f56d"
+    "macro.json": "c980cd1f92460596"
    },
    "attempts": 1
   },
@@ -371,15 +371,15 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "34940e3077cf5bd2"
+    "ooda.json": "b9a28703990690bb"
    },
-   "seconds": 0.931,
+   "seconds": 1.16,
    "inputs": {
-    "macro.json": "e0965c7d0716f56d",
+    "macro.json": "c980cd1f92460596",
     "research.json": "d2c6580ba083f72a",
     "brain.json": "e8144ce521a6d89f",
-    "capex.json": "97cbb8cee7bfa2d6",
-    "report.json": "48d2862035cf54e2"
+    "capex.json": "7271348cb4672df8",
+    "report.json": "6775b3160c3ebd60"
    },
    "attempts": 1
   },
@@ -454,7 +454,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "6ea83e31bc2e5501"
+    "status.json": "1c41ec3278465167"
    }
   }
  ],
@@ -463,9 +463,9 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 1.633,
-  "serial_seconds": 2.32,
-  "speedup": 1.42,
+  "wall_seconds": 3.012,
+  "serial_seconds": 3.886,
+  "speedup": 1.29,
   "levels": [
    [
     "atlas",

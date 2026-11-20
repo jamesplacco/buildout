@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "calls": 13,
+ "calls": 14,
  "first_call": "2026-11-03T15:38:15Z",
  "first_effective": "2026-11-04",
  "restated": [
@@ -22,12 +22,12 @@
   }
  ],
  "convention": "a call governs from the session after the first close that follows its writing (ledger.governs_from)",
- "marked_days": 11,
- "last_mark": "2026-11-18",
- "total": -0.020667,
- "total_hedged": -0.005075,
- "book_total": -0.037462,
- "qqq_total": -0.037605,
+ "marked_days": 12,
+ "last_mark": "2026-11-19",
+ "total": -0.035868,
+ "total_hedged": -0.015493,
+ "book_total": -0.06559,
+ "qqq_total": -0.058721,
  "series": [
   [
    "2026-11-04",
@@ -105,14 +105,21 @@
    0.994925,
    0.962538,
    0.5311
+  ],
+  [
+   "2026-11-19",
+   0.964132,
+   0.984507,
+   0.93441,
+   0.5331
   ]
  ],
  "stats": null,
  "ledger": {
   "ok": true,
-  "entries": 13,
-  "head": "3188eb04f95a4b82f804041c1655476c55362fff6df5ba8c881799861103c887"
+  "entries": 14,
+  "head": "b344d09eea174604db59895188bf0b6f533d772d32639c3957f5e682b81f1d25"
  },
- "ledger_head": "3188eb04f95a4b82f804041c1655476c55362fff6df5ba8c881799861103c887",
- "ledger_entries": 13
+ "ledger_head": "b344d09eea174604db59895188bf0b6f533d772d32639c3957f5e682b81f1d25",
+ "ledger_entries": 14
 }
