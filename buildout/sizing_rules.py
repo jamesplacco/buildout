@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from . import limits as lim
 from .analytics import sizing
 
 GAMMA = 2.2                 # the decision engine's calibrated risk aversion (decide.calibrate_gamma, 1871 to 1939)
@@ -160,8 +161,8 @@ def frontier(rb: pd.Series, qx: pd.Series, fm: dict, beta_b: float, beta_q: floa
         sig = math.sqrt(max(g * g * s_b2 - 2 * g * h * cov_bq + h * h * s_q2, 1e-12))
         e = es_fn(x, sig)
         dd = sizing.drawdown_quantile(rf + equity_premium * (g * beta_b - h * beta_q), sig, 1.0, cash_rate=rf)
-        ok = e <= limits["es"] + SOLVER_TOL and sig <= limits["vol"] + SOLVER_TOL and dd <= limits["dd"] + SOLVER_TOL
-        return {"x": x, "sig": sig, "es": e, "dd": dd, "ok": ok}
+        ev = lim.evaluate_row({"gross": g, "short": h, "es95": e, "vol": sig, "drawdown95": dd}, limits)          # v0.48: one evaluator, every limit stated
+        return {"x": x, "sig": sig, "es": e, "dd": dd, "ok": ev["meets"], "ev": ev}
 
     def record(g: float, h: float, m: dict, extra: dict | None = None) -> dict:
         x = m["x"]
@@ -171,7 +172,9 @@ def frontier(rb: pd.Series, qx: pd.Series, fm: dict, beta_b: float, beta_q: floa
                 "es95": m["es"], "vol": m["sig"], "drawdown95": m["dd"], "cash_in_record": cash is not None,
                 "cagr": float(lv.iloc[-1] ** (252 / len(tot)) - 1), "y2022": float((1 + tot.loc["2022"]).prod() - 1) if tot.index[0].year <= 2022 <= tot.index[-1].year else None,
                 "maxdd": float(1 - (lv / lv.cummax().clip(lower=1.0)).min()), "hedge_drag_ann": float(h * qx.reindex(x.index).mean() * 252),
-                "market_beta_left": float(g * fm["exposure"]["market"] - h), "stock_specific_share": None, **(extra or {})}
+                "market_beta_left": float(g * fm["exposure"]["market"] - h), "stock_specific_share": None,
+                "constraints": {k: m["ev"][k] for k in ("status", "failed", "unchecked", "required", "binding")},
+                "checks": [{k: c[k] for k in ("metric", "value", "limit", "headroom", "units", "status")} for c in m["ev"]["checks"]], **(extra or {})}
 
     rows = []
     for i, g in enumerate(grosses):
@@ -199,8 +202,10 @@ def recheck(rows: list[dict], limits: dict) -> list[dict]:
     out = []
     for r in rows or []:
         r = dict(r)
-        if r.get("meets") and not (r.get("es95", 0) <= limits["es"] + SOLVER_TOL and r.get("vol", 0) <= limits["vol"] + SOLVER_TOL and r.get("drawdown95", 0) <= limits["dd"] + SOLVER_TOL):
-            r["meets"] = False
-            r["over_limit"] = True
+        if r.get("meets"):
+            ev = lim.evaluate_row(r, limits)          # v0.48: the same evaluator the menu was built with; a check it cannot make is not a pass
+            if not ev["meets"]:
+                r["meets"], r["over_limit"] = False, True
+                r["constraints"] = {k: ev[k] for k in ("status", "failed", "unchecked", "required", "binding")}
         out.append(r)
     return out

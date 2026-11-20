@@ -16,7 +16,7 @@ from buildout import mcp_server, vixhedge
 
 ROOT = Path(__file__).resolve().parents[1]
 CALL = {"asof": "2026-10-23", "size": 0.586, "binding": "drawdown_cap",
-        "frontier": [{"gross": 0.586, "short": 0.0}, {"gross": 0.7, "short": 0.2}, {"gross": 0.8, "short": 0.4}, {"gross": 1.0, "short": 0.85}]}
+        "frontier": [{"gross": g, "short": h, "meets": True} for g, h in ((0.586, 0.0), (0.7, 0.2), (0.8, 0.4), (1.0, 0.85))]}          # v0.48: a row says whether it meets the limits
 W = {"MSFT": 0.14, "AMZN": 0.14, "GOOGL": 0.14, "NVDA": 0.14, "META": 0.12, "TSLA": 0.10, "AVGO": 0.08, "SPCX": 0.08, "ORCL": 0.06}
 PX = {"MSFT": 520, "AMZN": 230, "GOOGL": 260, "NVDA": 190, "META": 720, "TSLA": 440, "AVGO": 350, "SPCX": 180, "ORCL": 280, "PSQ": 30, "VIXY": 32}
 Q = {s: {"bid": p * 0.9995, "ask": p * 1.0005, "last": p} for s, p in PX.items()}
@@ -52,7 +52,7 @@ def test_targets_fit_a_cash_account():
     assert H["book_gross"] + H["short"] + H["vix"] == pytest.approx(0.98)       # the largest the account allows
     assert 0.7 <= H["book_gross"] <= 0.8 and H["short"] == pytest.approx(0.2 + 2 * (H["book_gross"] - 0.7))
     assert ex.target(CALL, ex.TradingParams(vix_share=0.0), W)["vix"] == 0
-    big = {**CALL, "frontier": [{"gross": 0.96, "short": 0.0}]}
+    big = {**CALL, "frontier": [{"gross": 0.96, "short": 0.0, "meets": True}]}
     assert ex.target(big, ex.TradingParams(), W)["vix"] == pytest.approx(0.02)   # the sleeve gives way to the call
 
 

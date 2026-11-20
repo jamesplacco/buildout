@@ -277,8 +277,36 @@ def _mark_equity(account: dict, now: datetime) -> None:
     ex._atomic_write_text(p, "".join(json.dumps(r) + "\n" for r in rows))
 
 
+def stale(ticket: dict, account: dict, quotes: dict, call: dict, P) -> str | None:
+    """Why a staged ticket no longer describes the present, or None (v0.48). The decision (as _same_call reads it),
+    the holdings, the cash and every quote an order was priced from are compared with what the ticket recorded."""
+    tc = ticket.get("call") or {}
+    if not _same_call(tc, call):
+        return f"the decision changed: the ticket was written for {tc.get('decision_id') or tc.get('asof')}, the call in force is {call.get('decision_id') or call.get('asof')}"
+    was = ticket.get("account") or {}
+    now_pos = {str(p["symbol"]).upper(): float(p["quantity"]) for p in account.get("positions") or [] if float(p.get("quantity", 0)) != 0}
+    then_pos = {str(k).upper(): float(v) for k, v in (was.get("positions") or {}).items() if float(v) != 0}
+    moved = sorted(s for s in set(now_pos) | set(then_pos) if abs(now_pos.get(s, 0.0) - then_pos.get(s, 0.0)) > 1e-6)
+    if moved:
+        return "the holdings changed: " + ", ".join(moved)
+    eq = float(account.get("equity") or 0.0) or 1.0
+    if abs(float(account.get("cash") or 0.0) - float(was.get("cash") or 0.0)) > 0.001 * eq:
+        return f"the cash changed: {float(was.get('cash') or 0):,.2f} then, {float(account.get('cash') or 0):,.2f} now"
+    for o in ticket.get("orders") or []:
+        a, b = (ticket.get("quotes") or {}).get(o["symbol"]) or {}, (quotes or {}).get(o["symbol"]) or {}
+        k = "ask" if o["side"] == "buy" else "bid"
+        then, cur = a.get(k) or a.get("last"), b.get(k) or b.get("last")
+        if not then or not cur:
+            return f"no quote for {o['symbol']} to compare"
+        if abs(float(cur) / float(then) - 1) * 1e4 > P.max_requote_bp:
+            return f"{o['symbol']} moved {abs(float(cur) / float(then) - 1):.2%} from the quote the ticket used (more than {P.max_requote_bp:g} bp)"
+    return None
+
+
 def _paper_fill_rows(done: list[dict]) -> list[dict]:
+    # v0.48: one execution per paper order, named by the order and the session whose close priced it
     return [{"symbol": o["symbol"], "side": o["side"], "quantity": o["filled_qty"], "price": o["avg_price"], "order_id": o["order_id"], "status": "filled",
+             "execution_id": f"{o['order_id']}:close:{o['fill_session']}",
              "session": o["fill_session"], "filled": o["filled"], "ordered": o["placed"], "inside_limit": o.get("inside_limit")} for o in done]
 
 
@@ -563,6 +591,7 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
     ticket = None
     for t in sorted((t for t in todays if not t.get("status") and t.get("all_checks_pass")), key=lambda t: str(t.get("created", ""))):
         tc = t.get("call") or {}
+        why = None if str(t.get("expires", "")) <= stamp or not _same_call(tc, call) else stale(t, account, quotes, call, P)
         if str(t.get("expires", "")) <= stamp:
             t["status"] = "expired"
             _journal({"event": "expired", "ticket": t["id"]})
@@ -570,12 +599,19 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
             t["status"] = "superseded"
             _journal({"event": "superseded", "ticket": t["id"],
                       "why": f"planned on the call on data through {tc.get('asof')} at {tc.get('size')}x; the call to trade now is on data through {call.get('asof')} at {call.get('size')}x"})
+        elif why:
+            # v0.48: a staged ticket is good only for the account and the quotes it was written for. An approval
+            # given to it is an approval of that ticket, not of whatever the account has become.
+            t["status"] = "superseded"
+            _journal({"event": "restaged", "ticket": t["id"], "why": why})
+            rep["steps"].append({"restaged": t["id"], "why": why})
         else:
             ticket = t                                   # sorted by creation: the last kept is the newest
             continue
         ex._save_ticket(t)
+    mandate_limits = {"max_gross": M.max_gross, "cash_floor": M.cash_floor, "max_order_usd": M.max_order_usd, "max_order_pct": M.max_order_pct}
     if ticket is None:
-        ticket = ex.plan(account, quotes, call=call, P=P, today=today, now=now, held_session=held_session)
+        ticket = ex.plan(account, quotes, call=call, P=P, today=today, now=now, held_session=held_session, limits=mandate_limits)
         ex._save_ticket(ticket)
         rep["steps"].append({"planned": ticket["id"], "orders": len(ticket["orders"]), "checks_pass": ticket["all_checks_pass"]})
     rep["ticket"] = ticket["id"]
@@ -667,7 +703,9 @@ def run_once(broker, M: md.Mandate | None = None, P: ex.TradingParams | None = N
                     failures.append({"symbol": o["symbol"], "side": side, "error": f"order state after cancel unknown: {exc}", "unknown": True})
             fq = float(st.get("filled_qty") or (o["quantity"] if st.get("status") == "filled" else 0))
             if fq > 0:
-                fills.append({"symbol": o["symbol"], "side": side, "quantity": fq, "price": float(st.get("avg_price") or o["limit_price"]), "order_id": od["order_id"], "status": st.get("status", "filled")})
+                # v0.48: what the broker's order state gives is the order's total so far and its average price
+                fills.append({"symbol": o["symbol"], "side": side, "quantity": fq, "price": float(st.get("avg_price") or o["limit_price"]), "order_id": od["order_id"],
+                              "status": st.get("status", "filled"), "cumulative": True})
             elif st.get("status") in ("rejected", "failed"):
                 failures.append({"symbol": o["symbol"], "side": side, "error": st.get("status")})
         if (side == "sell" and failures) or unknown:

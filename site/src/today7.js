@@ -21,7 +21,7 @@
   }
   function sizeBindingTxt() {
     const d = LIVE.report && LIVE.report.decision && LIVE.report.decision.size;
-    const names = { vol_target: "the volatility target binds", drawdown_cap: "the drawdown cap binds", max_gross: "the 1.5x gross cap binds" };
+    const names = { vol_target: "the volatility target binds", drawdown_cap: "the drawdown cap binds", max_gross: "the 1.5x leverage cap binds" };
     return d && d.binding ? names[d.binding] || d.binding : "the smallest of the volatility target and the drawdown cap; Kelly checks the edge";
   }
 

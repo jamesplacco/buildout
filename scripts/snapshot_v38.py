@@ -308,8 +308,11 @@ def main(argv: list[str]) -> None:
         T["restated"] = {"version": arg("--restated-version") or "v0.42.5", "date": arg("--restated-date") or T["asof"], "asof": T["asof"], "prior_asof": P0.get("asof"), "policies": pol, "put": put}
     if arg("--revised-from-json") and T.get("restated"):     # v0.44.1: a later fix that moves the restated numbers is stated beside them, with its size
         P1 = json.loads(Path(arg("--revised-from-json")).read_text())
+        # v0.48: a second revision exists, so the first one's size is measured to the record as that revision left it
+        # (--revised-to-json), not to today's
+        T1 = json.loads(Path(arg("--revised-to-json")).read_text()) if arg("--revised-to-json") else T
         mv = {}
-        for k, v in T["pit"]["policies"].items():
+        for k, v in T1["pit"]["policies"].items():
             a = (P1.get("pit", {}).get("policies", {}).get(k) or {})
             if a:
                 mv[k] = {m: [a["net"][m], v["net"][m]] for m in ("sharpe", "cagr", "maxdd")}
@@ -317,6 +320,23 @@ def main(argv: list[str]) -> None:
                                     "head_sharpe_move": max((abs(mv[k]["sharpe"][1] - mv[k]["sharpe"][0]) for k in ("hold", "call", "call_short") if k in mv), default=0.0),
                                     "max_sharpe_move": max((abs(x["sharpe"][1] - x["sharpe"][0]) for x in mv.values()), default=0.0),
                                     "max_maxdd_move": max((abs(x["maxdd"][1] - x["maxdd"][0]) for x in mv.values()), default=0.0)}
+    if arg("--revised2-from-json") and T.get("restated"):    # v0.48: a second revision (one net trade per name; the high end held to the 2.00x limit)
+        P2 = json.loads(Path(arg("--revised2-from-json")).read_text())
+        mv = {}
+        for k, v in T["pit"]["policies"].items():
+            a = (P2.get("pit", {}).get("policies", {}).get(k) or {})
+            if a:
+                mv[k] = {m: [a["net"][m], v["net"][m]] for m in ("sharpe", "cagr", "maxdd")}
+                mv[k]["turnover"] = [a["meta"]["turnover_yr"], v["meta"]["turnover_yr"]]
+                mv[k]["gross_maxdd"] = [a["gross"]["maxdd"], v["gross"]["maxdd"]]
+        T["restated"]["revised2"] = {"version": arg("--revised2-version") or "v0.47", "date": arg("--revised2-date") or T["asof"], "policies": mv,
+                                     "max_sharpe_move": max((abs(x["sharpe"][1] - x["sharpe"][0]) for x in mv.values()), default=0.0),
+                                     "max_sharpe_move_unhedged": max((abs(x["sharpe"][1] - x["sharpe"][0]) for k, x in mv.items() if k != "call_short"), default=0.0),
+                                     "max_maxdd_move": max((abs(x["maxdd"][1] - x["maxdd"][0]) for x in mv.values()), default=0.0),
+                                     "max_gross_maxdd_move": max((abs(x["gross_maxdd"][1] - x["gross_maxdd"][0]) for k, x in mv.items() if k != "call_short"), default=0.0)}
+        if arg("--revised2-costs-only-json"):                # the same record with the cost fix alone, so the hedged row's two causes can be told apart
+            P3 = json.loads(Path(arg("--revised2-costs-only-json")).read_text())
+            T["restated"]["revised2"]["costs_only"] = {k: P3["pit"]["policies"][k]["net"]["sharpe"] for k in ("call", "call_short", "hold") if k in P3["pit"]["policies"]}
     try:                                        # v0.42.5: the paper account as committed, so a copy of the page without the daily files is not blank
         from buildout import trader
         if (ROOT / "paper" / "paper_account.json").exists():

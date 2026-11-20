@@ -163,17 +163,26 @@ class PaperBroker:
         return o
 
     def settle(self, now: datetime | None = None) -> list[dict]:
-        """Fill every resting order whose session has closed, at that session's close (sells first, so the buys are
-        funded by what the sells raised). The close must be in the marks: call quotes() for the open orders' symbols
-        first. Returns the orders that changed. All or nothing on disk."""
+        """Fill every resting order whose session has closed, at that session's close, in the order the closes
+        happened. The close must be in the marks: call quotes() for the open orders' symbols first. Returns the
+        orders that changed. All or nothing on disk.
+
+        v0.48: economic time. Each order's session is resolved first, and the fills are then taken session by
+        session; inside one close, sells go before buys (both happen at the same instant, so the sale can fund the
+        buy), then by the time the order was written, then by its id. Before, every sale in the batch went ahead
+        of every purchase, so when two sessions were settled in one pass a sale at the later close paid for a
+        purchase at the earlier one. Settling late is now the same as settling after each session: the same
+        fills, the same rejections, the same cash. An order's own fill time is its close; the pass that noticed
+        it is recorded separately by the caller.
+
+        Buying power is cash, settled at the close: no margin, and no credit for a sale that has not happened."""
         from . import sessions
         now = now or self.clock()
         new = json.loads(json.dumps(self.state))
         changed = []
-        todo = sorted((o for o in new["orders"].values() if o["status"] == "open"), key=lambda o: (o["side"] != "sell", o["placed"], o["client_id"]))
-        for o in todo:
-            s, side, qty = o["symbol"], o["side"], float(o["quantity"])
-            mk = new["marks"].get(s) or {}
+        due = []
+        for o in sorted((o for o in new["orders"].values() if o["status"] == "open"), key=lambda o: (o["placed"], o["client_id"])):
+            mk = new["marks"].get(o["symbol"]) or {}
             closes = dict(mk.get("closes") or ({mk["asof"]: mk["last"]} if mk.get("asof") else {}))
             first = o.get("fills_in_session") or sessions.session_of_close_after(datetime.fromisoformat(o["placed"])).isoformat()
             ok = sorted(d for d in closes if d >= first and sessions.close_utc(d) <= now)
@@ -182,7 +191,10 @@ class PaperBroker:
                     o.update({"status": "cancelled", "reason": f"no close on or after {first} within {self.MAX_REST_DAYS} days"})
                     changed.append(o)
                 continue
-            d = ok[0]
+            due.append((ok[0], o["side"] != "sell", o["placed"], o["client_id"], o, float(closes[ok[0]])))
+        for d, _, _, _, o, close in sorted(due, key=lambda x: x[:4]):
+            s, side, qty = o["symbol"], o["side"], float(o["quantity"])
+            closes = {d: close}
             px = round(float(closes[d]) * (1 + self.HALF_SPREAD if side == "buy" else 1 - self.HALF_SPREAD), 6)
             held = float(new["positions"].get(s, 0.0))
             if side == "sell" and qty > held + 1e-9:

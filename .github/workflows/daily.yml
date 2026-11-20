@@ -233,6 +233,18 @@ jobs:
           python -m buildout track --out site/data
           python scripts/snapshot_v38.py --pdf-only --track-json site/data/track.json --out site/tearsheet.pdf
 
+      - name: Restatement of the record for v0.48 (once; the record before and after on the same prices)
+        id: restate
+        # v0.48: the release corrected how the record is costed and held the hedged row to the 2.00x limit on long plus
+        # short. The before and after need the raw prices and the Treasury file, which live only in this run's cache,
+        # so the run computes them once and commits site/data/restatement.json; the page states the revision from it.
+        if: always() && steps.record.outcome == 'success' && hashFiles('site/data/restatement.json') == ''
+        timeout-minutes: 20
+        continue-on-error: true
+        run: |
+          git fetch --depth=1 origin 1c8e926ebd90e7870fe3fec81498728fa745a265
+          python scripts/restate.py --base 1c8e926ebd90e7870fe3fec81498728fa745a265 --version v0.48 --out site/data/restatement.json
+
       - name: Status (freshness and sanity checks for the page)
         id: status
         if: always()

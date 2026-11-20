@@ -343,7 +343,9 @@ def test_the_site_build_reconciles_the_call_and_marks_rows_over_a_limit(tmp_path
 
 def test_the_walk_forward_shorts_what_the_ledger_would_log():
     src = (ROOT / "buildout" / "track.py").read_text()
-    assert '"short_exact": exact' in src and 'fr[-1]["short"]' in src
+    # v0.48: the last row inside every limit, its long side and its short together (the total-gross limit included)
+    assert '"short_exact": exact' in src and "hi = fr[-1] if fr else None" in src and '"short_gross": sg' in src
+    assert 'pol["call_short"] = run(held["short_gross"], short=held["short"])' in src
 
 
 # ---------------------------------------------------------------- 6. limits mean limits

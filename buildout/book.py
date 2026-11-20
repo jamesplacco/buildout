@@ -36,6 +36,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from . import limits as lim
 from . import sizing_rules
 from .analytics import exposures, regime, risk, sizing, stress
 from .analytics.bonds import constant_maturity_returns, duration_convexity
@@ -58,7 +59,8 @@ NAV_USD = 100e6                        # the page's model NAV
 ES_BUDGET = 0.12                       # one-month expected shortfall at 95%, the Desk's budget
 VOL_TARGET = 0.20                      # config.toml [risk] target_vol
 MAX_DD = 0.25                          # config.toml [risk] max_drawdown, 95th percentile over a year
-MAX_GROSS = 1.50                       # config.toml [risk] max_gross
+MAX_GROSS = 1.50                       # config.toml [risk] max_gross: the leverage cap on the LONG side (the names)
+MAX_TOTAL_GROSS = 2.00                 # buildout/config.py max_total_gross: long plus short, after every hedge is added (v0.48: checked on the menu)
 BETA_HL, COV_HL = 126, 63              # config.toml [risk] beta_halflife, corr_halflife
 EWMA_LAMBDA = 0.94                     # RiskMetrics daily decay for the filtered simulation and the VaR backtest
 HORIZON = 21                           # trading days in a month
@@ -382,7 +384,11 @@ def keep_names_hedge(rb: pd.Series, E: pd.DataFrame, cash: pd.Series, fm: dict, 
             lo, hi = (mid, hi) if read(mid)["worst"] > 1 else (lo, mid)
         h, r = hi, read(hi)
     ratios = {"es_budget": r["es95"] / ES_BUDGET, "vol_target": r["vol"] / VOL_TARGET, "drawdown_cap": r["drawdown95"] / MAX_DD}
-    return {"short_nasdaq_frac": float(h) if ok else None, "best_short": float(h), **r, "meets_all": bool(ok),
+    # v0.48: the short that satisfies the three risk limits is then judged like any menu row, the two gross rules
+    # included: 1.00x long with a short above 1.00x is past the 2.00x limit on long plus short, and is not on offer
+    ev = lim.evaluate_row({"gross": 1.0, "short": float(h), **r}, {"es_budget": ES_BUDGET, "vol_target": VOL_TARGET, "max_drawdown": MAX_DD, "max_gross": MAX_GROSS, "max_total_gross": MAX_TOTAL_GROSS})
+    return {"short_nasdaq_frac": float(h) if ok and ev["meets"] else None, "best_short": float(h), **r, "meets_all": bool(ok and ev["meets"]),
+            "long": 1.0, "gross_total": 1.0 + float(h), "net": 1.0 - float(h), "constraints": {k: ev[k] for k in ("status", "failed", "unchecked", "required", "binding")},
             "binding_after": max(ratios, key=ratios.get), "notional_usd_per_100m": float(h) * NAV_USD}
 
 
@@ -607,6 +613,7 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
                  "contributions": [{"name": k, "weight": float(rc.loc[k, "weight"]), "share": float(rc.loc[k, "share"])} for k in rc.index]},
         "tail": tail, "var_backtest": {"normal": kupiec(rb), "filtered": kupiec(rb, model="filtered")},
         "limits": {"es_budget": ES_BUDGET, "vol_target": VOL_TARGET, "max_drawdown": MAX_DD, "max_gross": MAX_GROSS,
+                   "max_long": MAX_GROSS, "max_total_gross": MAX_TOTAL_GROSS,          # v0.48: the two gross rules, each by name
                    "drawdown_drift": mu, "cash_rate": rf, "cash_rate_date": str(I["rf_date"].date())},
         "sizes": sizes, "binding": binding, "size": min(sizes.values()),
         "at_full": {"es95": tail["es95"]["governing"], "vol": sigma,
@@ -614,7 +621,7 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame | None = None, book
         "keep_names_hedge": hedge_need,
         "frontier": sizing_rules.frontier(rb, (E["QQQ"] - cash), fm, beta_vti,
                                           float(pd.concat([E["QQQ"] - cash, E["VTI"]], axis=1).dropna().cov().iloc[0, 1] / E["VTI"].var()), rf,
-                                          {"es": ES_BUDGET, "vol": VOL_TARGET, "dd": MAX_DD}, lambda x, sig: tail_block(x, sig)["es95"]["governing"],
+                                          {"es": ES_BUDGET, "vol": VOL_TARGET, "dd": MAX_DD, "long": MAX_GROSS, "gross_total": MAX_TOTAL_GROSS}, lambda x, sig: tail_block(x, sig)["es95"]["governing"],
                                           grosses=tuple(sorted({float(min(sizes.values()))} | {g for g in (0.6, 0.7, 0.8, 0.9, 1.0) if g > min(sizes.values()) + 0.02})),
                                           cash=cash),
         "vol_rule": {"book": _slim(sizing_rules.test_all(rb, cash.reindex(rb.index).fillna(0.0), "the book, 2017 on")),

@@ -1319,7 +1319,7 @@ def record_fills(ctx: Context, args: dict) -> dict:
     from . import execution as ex
     tid, fills = str(args.get("ticket_id", "")), args.get("fills")
     if not isinstance(fills, list):
-        raise ToolError("fills is a list of {symbol, side, quantity, price, order_id, status} as Robinhood reports them")
+        raise ToolError("fills is a list of {symbol, side, quantity, price, order_id, execution_id, status} as Robinhood reports them")
     try:
         return ex.record_fills(tid, fills)
     except (KeyError, ValueError, RuntimeError) as exc:
@@ -1614,7 +1614,9 @@ TOOLS: dict[str, tuple[Callable[[Context, dict], dict], str, dict, dict]] = {
                          "vix_share": {**NUM, "description": "VIX sleeve as a share of equity, 0 to 0.2 (default from config, 0.05)"}}, ["account", "quotes"]),
                    {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False}),
     "record_fills": (record_fills, "Record the fills Robinhood reported for a ticket: each checked against the ticket's orders (symbol, side, no more shares, "
-                     "not through the limit) and appended to a hash-chained private log.",
+                     "not through the limit) and appended to a hash-chained private log. A row is one execution {symbol, side, quantity, price, "
+                     "order_id, execution_id, fees}; pass execution_id when Robinhood gives one, or cumulative=true when quantity and price are "
+                     "an order's total so far and its average price. The same execution reported twice is recorded once.",
                      _obj({"ticket_id": {"type": "string"}, "fills": {"type": "array", "items": {"type": "object"}}}, ["ticket_id", "fills"]),
                      {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False}),
     "trading_status": (trading_status, "Trading mode (paper or live), the halt switch, the limits, today's tickets, the fills chain and the paper account.",

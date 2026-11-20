@@ -22,7 +22,8 @@ SPCX = "TSLA"                      # seed SPCX's betas from TSLA until its own h
 
 [risk]
 target_vol = 0.20
-max_gross = 1.50
+max_gross = 1.50                   # leverage cap on the long side (the names)
+max_total_gross = 2.00             # long plus short, after every hedge is added
 kelly_fraction = 0.25
 max_drawdown = 0.25
 trim_band = 0.20

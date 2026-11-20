@@ -5,7 +5,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#home">
       <svg class="lotus" viewBox="0 0 330 330" aria-hidden="true"><use href="#lotus"></use></svg>
-      Buildout <span class="ver">v0.47</span>
+      Buildout <span class="ver">v0.48</span>
     </a>
     <nav class="tabs" aria-label="Sections">
       <a href="#home" data-group="today">Call</a>
@@ -825,7 +825,7 @@
   </section>
 
   <section class="section" id="size" aria-labelledby="size-title">
-    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="size-title">Sizing lab</h2><p class="prose">Risk limits set the size: the smaller of the volatility target, the drawdown cap and the engine's 1.5x gross limit. Kelly then checks whether the return assumption supports it. Leverage needs edge: on a 32%-volatility book, full Kelly at 1.5x requires about 15% a year over cash, and the engine's quarter Kelly about 61%.</p></div>
+    <div class="section-head"><p class="eyebrow">Tool</p><h2 id="size-title">Sizing lab</h2><p class="prose">Risk limits set the size: the smaller of the volatility target, the drawdown cap and the engine's 1.5x leverage cap. Kelly then checks whether the return assumption supports it. Leverage needs edge: on a 32%-volatility book, full Kelly at 1.5x requires about 15% a year over cash, and the engine's quarter Kelly about 61%.</p></div>
     <div class="lab">
       <form class="panel controls" id="size-form" aria-label="Sizing inputs">
         <div class="field"><div class="field-top"><label for="s-mu">Expected return, per year</label><output id="s-mu-o" for="s-mu"></output></div><input type="range" id="s-mu" min="0" max="30" step="0.5" value="12"></div>
@@ -2461,7 +2461,7 @@
   <div class="vhead">
     <p class="eyebrow">System</p>
     <h1 id="eng-title">Engine architecture, conventions and status</h1>
-    <p class="lede">Python, about 41,000 lines of engine code and 77 test files, run by GitHub Actions. Scheduled for 11:17 UTC, Tuesday to Saturday; GitHub starts scheduled jobs late, and runs have started between about 16:00 and 20:00 UTC, during the US session. The ledger's timestamp is the record. A call governs from the first session whose prior close came after it was written. Throughout, a value at date t uses data through the close of t; in the walk-forward a decision made at a month-end close is held from the next session.</p>
+    <p class="lede">Python, about 41,000 lines of engine code and 81 test files, run by GitHub Actions. Scheduled for 11:17 UTC, Tuesday to Saturday; GitHub starts scheduled jobs late, and runs have started between about 16:00 and 20:00 UTC, during the US session. The ledger's timestamp is the record. A call governs from the first session whose prior close came after it was written. Throughout, a value at date t uses data through the close of t; in the walk-forward a decision made at a month-end close is held from the next session.</p>
   </div>
   <h2 class="sr-only" id="pipe-title">The five stages of the daily run</h2>
   <ol class="pipeline" aria-labelledby="pipe-title">

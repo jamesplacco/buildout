@@ -354,6 +354,7 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 | | `analytics/risk.py`, `research.py` | Effective risk contributors vs effective independent bets, diversification ratio; hedge line chosen in training only, walk-forward, block bootstrap, holdout, null results, the hedge experiment |
 | v0.6 | `brain.py` | Recursive regressions on standardized monthly changes by regime; propagation, Leontief total, spectral radius |
 | | `buyside.py`, `accounting.py` | Regime label and gross scaler, hedge selector by shortfall per carry, Student-t shortfall, replays; depreciation, cash EPS, reverse DCF, credit stress, red flags |
+| | `nav.py`, `limits.py` | Portfolio accounting (NAV, a drawdown from the starting value, net trades per instrument, costs once); one evaluator for every limit (value, limit, headroom, units, pass / fail / unchecked), the two gross rules by name, and the account a ticket's orders would leave |
 | | `microstructure.py` | Avellaneda-Stoikov quotes and simulation, Glosten-Milgrom, square-root impact, Almgren-Chriss, Roll, Amihud, Kyle |
 | | `feeds.py`, `sources.py` | Feed fetchers and parsers, theme tagging, heat, niche skew, novelty and lead time; the source registry |
 | Exposure | `analytics/exposures.py` | Recursive exponentially weighted betas to market, AI and rates factors; IPO shrinkage |
@@ -369,6 +370,9 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 
 ## What the tests prove
 
+- v0.48: a 10-share order filled 4 then 6 records 10; a bad fill row changes nothing; paper fills settle in session
+  order; a menu row is compliant only if every required limit passed, total gross included; a ticket is checked on
+  the account its orders would leave, under the tighter of the planner's and the mandate's limits.
 - v0.46: on a wide screen every desk with two or more sections has a rail whose lines match its headings and mark
   the one being read; on a narrow one the list folds to a line that opens.
 - v0.45: both pages carry the same five groups; every desk is filed once; the library's index, sub-tabs and map

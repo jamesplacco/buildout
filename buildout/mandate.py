@@ -163,6 +163,27 @@ def authorize(ticket: dict, account: dict, M: Mandate, history: dict | None = No
     tgt = ticket.get("target") or {}
     if float(tgt.get("gross_total", 0) or 0) > M.max_gross + 1e-9:
         reasons.append(f"the target's gross {tgt.get('gross_total'):.2f} is above max_gross {M.max_gross:.2f}")
+    # v0.48: the target is what was wanted; the mandate is about what would be held. The account these orders would
+    # leave is worked out from the account as it is now (not as it was when the ticket was written): every
+    # position at the ticket's mark, the ones no order touches included, each order at its limit, gross and cash
+    # over that account's value. Before, a ticket whose target was inside max_gross passed even when positions
+    # sitting inside the drift band left the account well outside it.
+    from . import limits as lim
+    held = {str(x["symbol"]).upper(): float(x["quantity"]) for x in (account.get("positions") or []) if float(x.get("quantity", 0)) != 0}
+    marks = {}
+    for sym, q in (ticket.get("quotes") or {}).items():
+        if isinstance(q, dict):
+            b, a, last = (lim._f(q.get(k)) for k in ("bid", "ask", "last"))
+            marks[str(sym).upper()] = (b + a) / 2 if b and a else last
+    proj = lim.project(held, float(account.get("cash") or 0.0), orders, marks)
+    buys = sum(float(o["quantity"]) * float(o["limit_price"]) for o in orders if o["side"] == "buy")
+    acct = lim.account_checks(proj, {"max_gross": M.max_gross, "cash_floor": M.cash_floor}, buys)
+    for c in acct["checks"]:
+        name = "max_gross" if c["metric"] == "gross" else "cash_floor"
+        if c["status"] == "fail":
+            reasons.append(f"after these orders the account would be {c['value']:.2%} " + ("gross, above" if c["metric"] == "gross" else "cash, below") + f" the mandate's {name} {c['limit']:.2%}")
+        elif c["status"] == "unchecked":
+            reasons.append(f"the account after these orders could not be checked against {name}: {c['note']}")
     peak = float(history.get("peak_equity") or eq or 0)
     prev = float(history.get("prev_equity") or eq or 0)
     if peak and eq and eq / peak - 1 < -M.halt_drawdown:
@@ -177,7 +198,9 @@ def authorize(ticket: dict, account: dict, M: Mandate, history: dict | None = No
     today = now.date().isoformat()
     if today in set(M.quiet_days):
         reasons.append(f"{today} is a quiet day in the mandate")
-    return {"ok": not reasons, "reasons": reasons, "mandate_hash": M.hash(), "mode": M.mode, "armed": M.armed, "checked_at": now.isoformat(timespec="seconds")}
+    return {"ok": not reasons, "reasons": reasons, "mandate_hash": M.hash(), "mode": M.mode, "armed": M.armed, "checked_at": now.isoformat(timespec="seconds"),
+            "projected": {"gross": proj["after"]["gross"], "cash_share": proj["after"]["cash_share"], "gross_before": proj["before"]["gross"],
+                          "repairs": [c["metric"] for c in acct["checks"] if c.get("repair")]}}
 
 
 def in_window(M: Mandate, now: datetime | None = None) -> tuple[bool, str]:

@@ -76,7 +76,7 @@
     out.push({ id: "d-gross", n: "How big?", q: "Gross exposure for the model book", level: g < 0.75 ? 2 : g < 1 ? 1 : 0, vol: g,
       ins: [["Nasdaq-100 implied volatility (VXN)", fx(I.vxn.v, 2), `${isoNice(I.vxn.d)} · ${liveTag(I.vxn)}`],
         ["Book volatility forecast, 1.1 times VXN", fx(bookVol, 1) + "%", "assumption: the book runs hotter than the index"],
-        ["Volatility target", "20%", "config.toml; gross capped at 1.5x"],
+        ["Volatility target", "20%", "config.toml; the long side capped at 1.5x"],
         I.gross ? ["Engine's size to run", xx(I.gross.v), `${isoNice(I.gross.d)}: ${sizeBindingTxt()}`] : ["Bond hedge available?", hedgeOn ? "Yes" : "No", "decision 2: options carry the hedge"]],
       rule: "Policy size.equity.v2: equity scale = the smallest of 20% target volatility ÷ forecast volatility, the 25% one-year drawdown cap and 1.5x. Quarter Kelly is not a size input: it reports the excess return this size would need.",
       act: govSize() ? `Governing size ${xx(govSize().x)}; volatility rule ${xx(g)}` : `Run ${xx(g)} gross`, sub: `${govNote("The volatility rule's size", g)} ${I.gross ? `From the engine's sizing stack; ${sizeBindingTxt()}.` : "The daily run adds the drawdown cap and the Kelly check."}`,

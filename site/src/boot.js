@@ -392,7 +392,8 @@
     && fin(k.pit.bench.sharpe) && Array.isArray(k.pit.curve.call) && k.pit.curve.call.length > 100 && fin(k.backtest.size) && k.backtest.stats && fin(k.survivorship.pit_hold_cagr) && k.members && k.hindsight.policies.hold.net && k.policy_name && Array.isArray(k.weeks) && Array.isArray(k.sizing_path); } catch (e) { return false; } };
   Promise.all([loadJSON("data/book.json"), loadJSON("data/calls.json"), loadJSON("data/live.json"), loadJSON("data/paper.json"), loadJSON("data/decision.json"),
     // the record is asked for only when this deployment lists it (data/manifest.json, written by scripts/build_site.py), so a site built before the first daily record logs no failed request
-    loadJSON("data/manifest.json").then((mf) => (mf && mf.data && mf.data["track.json"] ? loadJSON("data/track.json") : null))]).then(([bkj, cl, lv, pp, dj, tk]) => {
+    loadJSON("data/manifest.json").then((mf) => (mf && mf.data && mf.data["track.json"] ? loadJSON("data/track.json") : null)),
+    loadJSON("data/manifest.json").then((mf) => (mf && mf.data && mf.data["restatement.json"] ? loadJSON("data/restatement.json") : null))]).then(([bkj, cl, lv, pp, dj, tk, rs]) => {
     let changed = false;
     const PK = LIVE.pkg = {};
     if (typeof DX19 !== "undefined" && DX19) {
@@ -425,6 +426,9 @@
       T.kept = { asof: was, policies: keptPol, blocks: ["universe", "deeprl", "deeprl_book", "vix", "alternatives", "restated", "regime_walk"].filter((k) => T[k] != null) };
       LIVE.track = tk; changed = true;
     } else if (tk && !trackOk(tk)) LIVE.problems.push("track.json did not match the expected shape; the page keeps the record in its snapshot");
+    // v0.48: the before and after of the v0.48 correction, computed once by the daily run on the same prices
+    // (scripts/restate.py). Until that file exists the restatement panel says nothing about v0.48.
+    if (rs && T && T.restated && rs.policies && rs.policies.call && Array.isArray(rs.policies.call.sharpe)) { T.restated.revised2 = rs; changed = true; }
     if (cl && T && cl.verify && cl.verify.ok && Array.isArray(cl.entries) && cl.entries.length > ((T.ledger && T.ledger.entries) || []).length) {
       T.ledger = { verify: cl.verify, entries: cl.entries };
       T.live = { ...(T.live || {}), calls: cl.entries.length, first_effective: governsFrom(cl.entries[0]) || cl.entries[0].effective_from };

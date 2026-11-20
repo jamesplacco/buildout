@@ -28,7 +28,7 @@ import json
 import math
 import os
 import re
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -67,6 +67,8 @@ class TradingParams:
     max_tickets_per_day: int = 1
     max_data_age_bd: int = 3            # the call's data at most 3 business days old
     fractional: bool = False            # whole shares by default
+    fee_bp: float = 0.0                 # commission, in basis points of each order (the Agentic account charges none)
+    max_requote_bp: float = 50.0        # a staged ticket is planned again once a quote has moved this far from the one it used
     extra_allowed: list[str] = field(default_factory=list)
 
 
@@ -121,7 +123,8 @@ def target(call: dict, P: TradingParams, weights: dict[str, float]) -> dict:
     """Target shares of equity by symbol: the book at the chosen size, the PSQ short sleeve, the VIX sleeve."""
     vix = max(0.0, float(P.vix_share))
     room = P.max_gross - vix
-    fr = [r for r in (call.get("frontier") or []) if r.get("meets", True) and r.get("short") is not None and r.get("gross") is not None]
+    # v0.48: a row with no word on whether it meets the limits is not one that does
+    fr = [r for r in (call.get("frontier") or []) if r.get("meets") is True and r.get("short") is not None and r.get("gross") is not None]
     fr = sorted(fr or [{"gross": call["size"], "short": 0.0}], key=lambda r: r["gross"])      # rows that meet every limit only
     g, h = float(fr[0]["gross"]), float(fr[0].get("short") or 0.0)
     if P.variant == "hedged":
@@ -193,8 +196,12 @@ def decision_id(entry: dict) -> str:
     return f"{entry['seq']}-{str(entry.get('hash', ''))[:8]}"
 
 
+POLICY_KEYS = ("max_gross", "cash_floor", "max_order_usd", "max_order_pct")
+
+
 def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams | None = None, weights: dict | None = None,
-         today: str | None = None, ledger_check: dict | None = None, now: datetime | None = None, held_session: str | None = None) -> dict:
+         today: str | None = None, ledger_check: dict | None = None, now: datetime | None = None, held_session: str | None = None,
+         limits: dict | None = None) -> dict:
     """The ticket. `account`: {"equity": .., "cash": .., "account_type": "agentic", "positions": [{"symbol", "quantity"}]}.
     `quotes`: {symbol: {"bid": .., "ask": .., "last": ..}}. Nothing here places an order.
 
@@ -206,10 +213,21 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     and the book as a whole is inside gross_band of equity of the call's size. Outside either, every name is
     brought to its target, in whole shares rounded to the nearest (to the floor if the nearest would breach the cash
     floor or the gross cap). Before, only names outside their own band traded, so a call cut from 0.53x to 0.40x
-    moved no name far enough and traded nothing."""
+    moved no name far enough and traded nothing.
+
+    The account the orders leave (v0.48). `limits` are a second set of account limits (the mandate's): the ticket is
+    planned under the tighter of the two, limit by limit (limits.tighter), so the planner does not size a ticket the
+    mandate will refuse. The gross and cash checks are made on the account the orders would actually leave
+    (limits.project): every position at its mark, untouched ones included, each order at its own price, whole
+    shares, fees out of cash, gross and cash both over that account's value. Buys that would take it past a limit
+    are cut to fit and the ticket says so. An account already past a limit is brought back: it rebalances whatever
+    the bands say, and a ticket that only sells and moves the account toward the limit passes, with the breach stated."""
     from . import book as bk
     from . import ledger
+    from . import limits as lm
     P = P or load_params()
+    policy = lm.tighter({k: getattr(P, k) for k in POLICY_KEYS}, {k: v for k, v in (limits or {}).items() if k in POLICY_KEYS})
+    P = replace(P, **policy)
     call = call or call_in_force(held_session or today) or latest_call()
     weights = weights or dict(bk.BOOK)
     now = now or datetime.now(timezone.utc)
@@ -270,6 +288,9 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
         "a stale or wrong equity figure would size every order wrong")
     chk("every quote is a positive number with bid at most ask", not bad_quotes, bad_quotes)
     syms = sorted(set(T["weights"]) | set(held))
+    mark_of = {s: (lambda r: ((r[1] + r[2]) / 2) if r[1] and r[2] else r[3])(px(s, "buy")) for s in syms}
+    start = lm.account_checks(lm.project(held, cash, [], mark_of), policy)
+    in_breach = [c["metric"] for c in start["checks"] if c["status"] == "fail"]          # the account as it stands, before any order
     gaps, missing, wide = [], [], []
     for s in syms:
         ref, bid, ask, last = px(s, "buy")
@@ -284,7 +305,7 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     name_band = max(P.drift_band * eq, P.min_trade_usd)
     gross_gap = sum(d for s, d in gaps if s in T["weights"])
     outside = sorted(s for s, d in gaps if s in T["weights"] and abs(d) >= name_band)
-    rebalance = bool(outside) or abs(gross_gap) > max(P.gross_band * eq, P.min_trade_usd)
+    rebalance = bool(outside) or abs(gross_gap) > max(P.gross_band * eq, P.min_trade_usd) or bool(in_breach)      # v0.48: an account past a limit is brought back
 
     def build(nearest: bool) -> list[dict]:
         out = []
@@ -328,6 +349,38 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     sell_orders = [o for o in orders if o["side"] == "sell"]
     if sell_orders and sum(o["notional"] for o in orders if o["side"] == "buy") > cash - P.cash_floor * eq + 1e-6:
         orders, stage = sell_orders, "sells first"     # buys that need the sale proceeds wait: plan again once the sells have filled
+    # v0.48: the account these orders would leave, under the tighter policy. Buys that take it past a limit are cut
+    # to fit, in whole shares. The rounding check above uses the same limits but the opening equity as its base.
+    def projected(os_):
+        return lm.project(held, cash, os_, mark_of, P.fee_bp)
+
+    def scaled(f):
+        out = []
+        for o in orders:
+            if o["side"] != "buy":
+                out.append(o); continue
+            q = o["quantity"] * f
+            q = round(q, 4) if P.fractional else float(math.floor(q + 1e-9))
+            if q > 0 and q * o["limit_price"] >= P.min_trade_usd:
+                out.append({**o, "quantity": q, "notional": round(q * o["limit_price"], 2)})
+        return out
+
+    def fits_acct(os_):
+        return lm.account_checks(projected(os_), policy, sum(o["notional"] for o in os_ if o["side"] == "buy"))
+
+    resized = None
+    buys0 = sum(o["notional"] for o in orders if o["side"] == "buy")
+    if buys0 and not fits_acct(orders)["meets"]:
+        lo, hi = 0.0, 1.0                                # the largest share of the buys that fits both limits
+        for _ in range(30):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if fits_acct(scaled(mid))["meets"] else (lo, mid)
+        was = fits_acct(orders)
+        orders = scaled(lo) if fits_acct(scaled(lo))["meets"] else [o for o in orders if o["side"] != "buy"]
+        resized = {"buys_usd_wanted": round(buys0, 2), "buys_usd": round(sum(o["notional"] for o in orders if o["side"] == "buy"), 2),
+                   "binding": was["failed"], "why": "the buys as first sized would leave the account past " + " and ".join(
+                       f"{'max gross' if c['metric'] == 'gross' else 'the cash floor'} ({c['value']:.2%} against {c['limit']:.2%})" for c in was["checks"] if c["status"] == "fail")
+                   + "; positions the ticket does not trade still count"}
     for i, o in enumerate(orders, 1):
         o["seq"] = i
     chk("every symbol has a quote", not missing, missing)
@@ -338,12 +391,13 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
     sells = sum(o["notional"] for o in orders if o["side"] == "sell")
     cash_after = cash + sells - buys
     chk("buys funded from cash on hand", buys <= cash - P.cash_floor * eq + 1e-6 or not buys, {"buys": round(buys, 2), "cash": round(cash, 2)})
-    after = dict(held)
-    for o in orders:
-        after[o["symbol"]] = after.get(o["symbol"], 0.0) + (o["quantity"] if o["side"] == "buy" else -o["quantity"])
-    gross_after = sum(q * (px(s, "buy")[0] or 0) for s, q in after.items() if q > 0) / eq if eq else 0
-    chk(f"gross after at most {P.max_gross:.0%} of equity (no borrowing)", gross_after <= P.max_gross + 1e-6, round(gross_after, 4))
-    chk(f"cash after at least {P.cash_floor:.0%} of equity", cash_after >= P.cash_floor * eq - 1e-6, round(cash_after, 2))
+    proj = projected(orders)
+    acct = lm.account_checks(proj, policy, buys)
+    by_metric = {c["metric"]: c for c in acct["checks"]}
+    gross_after = proj["after"]["gross"] if proj["after"]["gross"] is not None else 0.0
+    cash_after = proj["after"]["cash"]
+    chk(f"gross after at most {P.max_gross:.0%} of equity (no borrowing)", by_metric["gross"]["status"] == "pass", round(gross_after, 4), by_metric["gross"]["note"])
+    chk(f"cash after at least {P.cash_floor:.0%} of equity", by_metric["cash"]["status"] == "pass", round(cash_after, 2), by_metric["cash"]["note"])
     big = [o["symbol"] for o in orders if o["notional"] > min(P.max_order_pct * eq, P.max_order_usd) + 1e-6]
     chk(f"each order at most {P.max_order_pct:.0%} of equity and ${P.max_order_usd:,.0f}", not big, big)
     first_build = not held
@@ -359,7 +413,14 @@ def plan(account: dict, quotes: dict, call: dict | None = None, P: TradingParams
                                                                 **({"decision_id": call["decision_id"], "decision_ts": call.get("decision_ts")} if call.get("decision_id") else {})},
             "target": T, "orders": orders, "stage": stage, "account": {"equity": eq, "cash": cash, "positions": held}, "quotes": Q,
             "rebalance": {"triggered": rebalance, "gross_gap": round(gross_gap / eq, 4) if eq else None, "gross_band": P.gross_band,
-                          "names_outside_band": outside, "name_band": P.drift_band, "rounding": "fractional" if P.fractional else rounding}}
+                          "names_outside_band": outside, "name_band": P.drift_band, "rounding": "fractional" if P.fractional else rounding,
+                          **({"because": "the account is outside " + " and ".join(in_breach)} if in_breach else {})},
+            "policy": policy,
+            "projected": {"basis": "every position at its mark, each order at its limit price, fees out of cash; gross and cash over the account's value after the orders",
+                          "before": {k: (round(v, 6) if isinstance(v, float) else v) for k, v in proj["before"].items()},
+                          "after": {k: (round(v, 6) if isinstance(v, float) else v) for k, v in proj["after"].items() if k != "positions"},
+                          "checks": [{k: c.get(k) for k in ("metric", "value", "limit", "headroom", "units", "kind", "status", "note", "repair") if c.get(k) is not None} for c in acct["checks"]],
+                          **({"breach_before": in_breach} if in_breach else {}), **({"resized": resized} if resized else {})}}
     ticket = {**body, "checks": checks, "all_checks_pass": ok, "execute": bool(ok and P.mode == "live" and orders),
               "summary": {"orders": len(orders), "buys_usd": round(buys, 2), "sells_usd": round(sells, 2), "cash_after": round(cash_after, 2), "gross_after": round(gross_after, 4)},
               "placed_by_buildout": False,
@@ -431,10 +492,74 @@ def verify_fills() -> dict:
     return {"ok": True, "entries": n}
 
 
+FILL_ADAPTERS = {
+    "paper": "one execution per order, at the close of its session; the id is the order id and the session",
+    "robinhood_mcp": "cumulative order observations (filled so far and the average price), read after the wait; "
+                     "each is turned into the quantity that is new since the last one",
+    "assistant": "execution events as Robinhood reports them; pass execution_id when it gives one, or cumulative=true "
+                 "when the figure is an order's total so far",
+}
+
+
+def _num(v) -> float | None:
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return None
+    return x if math.isfinite(x) else None
+
+
+def _exec_id(row: dict) -> str:
+    """An execution's identity (v0.48): the broker's execution id when it gives one; else what the fill is (order,
+    symbol, side, quantity, price and its own time), so a retry of the same report is the same execution and a
+    second, different fill on the same order is a new one. Rows written before v0.48 carry no id and are read
+    the same way."""
+    if row.get("execution_id"):
+        return str(row["execution_id"])[:96]
+    return "c:" + _sha([str(row.get("order_id", "")), str(row.get("symbol", "")).upper(), str(row.get("side", "")).lower(),
+                        round(float(row.get("quantity") or 0), 8), round(float(row.get("price") or 0), 8), str(row.get("filled") or row.get("event_time") or "")])[:20]
+
+
+def accepted_fills(tid: str | None = None) -> list[dict]:
+    """Every accepted execution in the log, in the order it was accepted (one ticket's, or all)."""
+    return [{**f, "ticket": e.get("ticket")} for e in _fills() if tid is None or e.get("ticket") == tid for f in e.get("fills", [])]
+
+
+def replay(start_cash: float = 0.0, start_positions: dict | None = None, tid: str | None = None) -> dict:
+    """The account the accepted executions imply: cash and shares, from a starting account. A buy costs quantity
+    times price plus its fee; a sale raises quantity times price less its fee (a negative fee is a rebate). Over the
+    whole log (no tid) each correction's cash adjustment is applied too, as cash_and_positions_from_log does."""
+    cash, pos = float(start_cash), {k: float(v) for k, v in (start_positions or {}).items()}
+    if tid is None:
+        cash += sum(float(e.get("cash_delta") or 0.0) for e in corrections())
+    for f in accepted_fills(tid):
+        q, px, fee = float(f["quantity"]), float(f["price"]), float(f.get("fees") or 0.0)
+        sgn = 1.0 if f["side"] == "buy" else -1.0
+        pos[f["symbol"]] = pos.get(f["symbol"], 0.0) + sgn * q
+        cash -= sgn * q * px + fee
+    return {"cash": cash, "positions": {k: v for k, v in pos.items() if abs(v) > 1e-9}}
+
+
 def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_close: bool = False) -> dict:
-    """Fills as Robinhood reports them ({symbol, side, quantity, price, order_id, status}) checked against the
-    ticket's orders and appended, one hash-chained entry per ticket. A fill for an order not on the ticket, on the
-    other side, for more shares, or far from the limit price is flagged. at_close (v0.42.5) is for the paper
+    """What the broker reports, checked against the ticket and appended to the hash-chained log.
+
+    v0.48. A row is an execution ({symbol, side, quantity, price, order_id, execution_id, fees}) or, with
+    cumulative=true, an order's total so far (quantity filled and average price), from which only what is new is
+    accepted. Which one a broker sends is written down (FILL_ADAPTERS), not guessed.
+
+      identity    executions are told apart by execution, not by order: a 10-share order that fills 4 and then 6
+                  is two executions and 10 shares. The same execution reported twice is recorded once, and says
+                  so under `duplicates`; it is not an issue and does not change the ticket's status.
+      validation  quantity and price must be finite and above zero, the side buy or sell, a fee finite (positive
+                  is a cost, negative a rebate). A row that fails is kept under `rejected` with the reason and
+                  changes no holding and no total. A cumulative total that falls is rejected the same way.
+      excess      a fill that takes an order past its quantity, a fill for an order not on the ticket, and a price
+                  through the limit are recorded, because they are what happened, and flagged under `issues`; a
+                  ticket with an issue is never marked filled.
+      status      from the accepted quantities alone: filled, partially_filled or unfilled. A cancelled order
+                  keeps what it filled.
+
+    Nothing new (every row a duplicate or an unchanged total) appends nothing. at_close (v0.42.5) is for the paper
     broker alone: its orders fill at the session's close, so the limit is not the test; the entry says so and
     carries each fill's session and close time."""
     t = load_ticket(tid)
@@ -442,22 +567,66 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_cl
     if not v["ok"]:
         raise RuntimeError(f"private/fills.jsonl fails verification at entry {v.get('broken_at')}; nothing was appended")
     by = {(o["symbol"], o["side"]): o for o in t["orders"]}
-    earlier = [f for e in _fills() if e.get("ticket") == tid for f in e.get("fills", [])]
-    seen_ids = {f["order_id"] for f in earlier if f.get("order_id")}
-    total = {}
+    earlier = accepted_fills(tid)
+    seen = {_exec_id(f) for f in earlier}
+    total: dict = {}
+    per_order: dict = {}                               # order id -> [quantity, dollars] accepted so far
     for f in earlier:
         total[(f["symbol"], f["side"])] = total.get((f["symbol"], f["side"]), 0.0) + float(f["quantity"])
-    issues, clean = [], []
+        if f.get("order_id"):
+            po = per_order.setdefault(f["order_id"], [0.0, 0.0])
+            po[0] += float(f["quantity"]); po[1] += float(f["quantity"]) * float(f["price"])
+    issues, clean, rejected, dup = [], [], [], 0
+    stamp = (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def refuse(f, why):
+        rejected.append({"row": {k: (f.get(k) if isinstance(f.get(k), (str, int, bool)) or f.get(k) is None else str(f.get(k))) for k in ("symbol", "side", "quantity", "price", "order_id", "execution_id", "cumulative", "fees")}, "why": why})
+
     for f in fills:
         s, side = str(f.get("symbol", "")).upper(), str(f.get("side", "")).lower()
-        try:
-            q, p = float(f.get("quantity") or 0), float(f.get("price") or 0)
-        except (TypeError, ValueError):
-            issues.append(f"{s}: quantity or price is not a number"); continue
-        oid = str(f.get("order_id", ""))[:64]
-        if oid and oid in seen_ids:
-            issues.append(f"{s}: order {oid} was already recorded"); continue
-        seen_ids.add(oid)
+        q, px = _num(f.get("quantity")), _num(f.get("price"))
+        fee = _num(f.get("fees", 0.0) if f.get("fees") is not None else 0.0)
+        oid = str(f.get("order_id", "") or "")[:64]
+        if side not in ("buy", "sell"):
+            refuse(f, f"side {side!r} is not buy or sell"); continue
+        if q is None or q <= 0:
+            refuse(f, "quantity is not a finite number above zero"); continue
+        if px is None or px <= 0:
+            refuse(f, "price is not a finite number above zero"); continue
+        if fee is None:
+            refuse(f, "the fee is not a finite number"); continue
+        extra = {}
+        if f.get("cumulative"):
+            if not oid:
+                refuse(f, "an order's total so far needs its order id"); continue
+            pq, pd_ = per_order.get(oid, [0.0, 0.0])
+            if q < pq - 1e-9:
+                refuse(f, f"the order's total fell: {q:g} after {pq:g}"); continue
+            if q - pq < 1e-9:
+                dup += 1; continue                      # the same total again: nothing new
+            nq = q - pq
+            npx = (q * px - pd_) / nq
+            if not math.isfinite(npx) or npx <= 0:
+                refuse(f, f"the new {nq:g} shares would have a price of {npx:.4f}: the totals do not agree with what was recorded"); continue
+            extra = {"execution_id": f"{oid}:total:{q:.8g}", "from_total": {"quantity": q, "avg_price": px}}
+            q, px = nq, round(npx, 6)
+        row = {"symbol": s, "side": side, "quantity": q, "price": px, "order_id": oid, "status": str(f.get("status", "filled"))[:20], **extra}
+        if f.get("execution_id") and "execution_id" not in row:
+            row["execution_id"] = str(f["execution_id"])[:96]
+        if at_close:
+            row.update({k: f[k] for k in ("session", "filled", "ordered", "inside_limit") if f.get(k) is not None})
+        elif f.get("event_time"):
+            row["event_time"] = str(f["event_time"])[:40]
+        if fee:
+            row["fees"] = fee
+        if str(f.get("currency") or "USD").upper() != "USD":
+            refuse(f, f"currency {f.get('currency')!r}: the account is in US dollars"); continue
+        eid = _exec_id(row)
+        if eid in seen:
+            dup += 1; continue
+        seen.add(eid)
+        row.setdefault("execution_id", eid)
+        row["observed"] = stamp
         o = by.get((s, side))
         if not o:
             issues.append(f"{s} {side}: not on the ticket")
@@ -465,17 +634,25 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_cl
             total[(s, side)] = total.get((s, side), 0.0) + q
             if total[(s, side)] > o["quantity"] + 1e-9:
                 issues.append(f"{s}: filled {total[(s, side)]:g} in all against {o['quantity']:g} ordered")
-            if not at_close and ((side == "buy" and p > o["limit_price"] + 1e-6) or (side == "sell" and p < o["limit_price"] - 1e-6)):
-                issues.append(f"{s}: price {p} through the limit {o['limit_price']}")
-        row = {"symbol": s, "side": side, "quantity": q, "price": p, "order_id": oid, "status": str(f.get("status", "filled"))[:20]}
-        if at_close:
-            row.update({k: f[k] for k in ("session", "filled", "ordered", "inside_limit") if f.get(k) is not None})
+            if not at_close and ((side == "buy" and px > o["limit_price"] + 1e-6) or (side == "sell" and px < o["limit_price"] - 1e-6)):
+                issues.append(f"{s}: price {px} through the limit {o['limit_price']}")
+        if oid:
+            po = per_order.setdefault(oid, [0.0, 0.0])
+            po[0] += q; po[1] += q * px
         clean.append(row)
+    issues += [f"{r['row'].get('symbol') or '?'}: not accepted ({r['why']})" for r in rejected]
+    earlier_issues = any(e.get("issues") for e in _fills() if e.get("ticket") == tid)
     complete = all(abs(total.get(k, 0.0) - o["quantity"]) < 1e-9 for k, o in by.items())
-    status = "filled" if complete and not issues else ("partially_filled" if any(v > 0 for v in total.values()) else "unfilled")
+    status = "filled" if complete and not issues and not earlier_issues else ("partially_filled" if any(x > 0 for x in total.values()) else "unfilled")
+    if not clean and not rejected and not issues:       # nothing new: the log is not written to, and a retry changes nothing
+        return {"ticket": tid, "status": t.get("status") or status, "issues": [], "entry": None, "accepted": 0, "duplicates": dup, "rejected": 0, "chain_ok": True}
     prev = _fills()[-1]["hash"] if _fills() else "0" * 64
-    e = {"seq": len(_fills()) + 1, "ticket": tid, "mode": t["mode"], "ts_utc": (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    e = {"seq": len(_fills()) + 1, "ticket": tid, "mode": t["mode"], "ts_utc": stamp, "schema": 2,
          "fills": clean, "issues": issues, "status": status, "prev": prev}
+    if rejected:
+        e["rejected"] = rejected
+    if dup:
+        e["duplicates"] = dup
     if at_close:
         e["convention"] = "market on close: each order filled at the close of the first session ending after it was written, 5 bp half-spread"
     e["hash"] = _sha(e)
@@ -484,7 +661,7 @@ def record_fills(tid: str, fills: list[dict], now: datetime | None = None, at_cl
         fh.write(_canon(e) + "\n")
     t["status"] = status
     _atomic_write_text(_tickets_dir() / f"{tid}.json", json.dumps(t, indent=1))
-    return {"ticket": tid, "status": status, "issues": issues, "entry": e["seq"], "chain_ok": verify_fills()["ok"]}
+    return {"ticket": tid, "status": status, "issues": issues, "entry": e["seq"], "accepted": len(clean), "duplicates": dup, "rejected": len(rejected), "chain_ok": verify_fills()["ok"]}
 
 
 def corrections() -> list[dict]:

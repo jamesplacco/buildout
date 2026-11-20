@@ -91,8 +91,12 @@ def test_fills_add_up_and_repeats_are_caught(priv):
     r1 = ex.record_fills(t["id"], [{"symbol": o["symbol"], "side": "buy", "quantity": half, "price": o["limit_price"], "order_id": "a1"}])
     r2 = ex.record_fills(t["id"], [{"symbol": o["symbol"], "side": "buy", "quantity": half, "price": o["limit_price"], "order_id": "a2"}])
     assert r1["status"] == "partially_filled" and any("in all against" in i for i in r2["issues"])
-    r3 = ex.record_fills(t["id"], [{"symbol": o["symbol"], "side": "buy", "quantity": 1, "price": o["limit_price"], "order_id": "a1"}])
-    assert any("already recorded" in i for i in r3["issues"])
+    # v0.48: the same report again is the same execution (recorded once, not an issue); a different fill on the same
+    # order is a new execution, and here takes the order further past its quantity
+    r3 = ex.record_fills(t["id"], [{"symbol": o["symbol"], "side": "buy", "quantity": half, "price": o["limit_price"], "order_id": "a1"}])
+    assert r3["duplicates"] == 1 and r3["accepted"] == 0 and r3["entry"] is None
+    r4 = ex.record_fills(t["id"], [{"symbol": o["symbol"], "side": "buy", "quantity": 1, "price": o["limit_price"], "order_id": "a1"}])
+    assert r4["accepted"] == 1 and any("in all against" in i for i in r4["issues"])
     t2 = plan(P=ex.TradingParams(mode="live"), today="2026-10-27", now=NOW + timedelta(days=1), lc={"ok": True, "logged": True, "effective_from": "2026-10-27"})
     r = ex.record_fills(t2["id"], [{"symbol": x["symbol"], "side": x["side"], "quantity": 1, "price": x["limit_price"]} for x in t2["orders"]])
     assert r["status"] == "partially_filled"                     # one share of every order is not a fill

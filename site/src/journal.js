@@ -494,7 +494,7 @@
     box.replaceChildren(
       tile("Break-even odds", pctPlain(s.breakeven, 0), "Below this probability the bet loses money on average."),
       tile("Expected value", `${s.ev >= 0 ? "+" : MINUS}${fx(Math.abs(s.ev) * 100, 2)}%`, "Per unit of position: p × gain − (1 − p) × loss."),
-      tile("Kelly size", kTxt, !(fin(s.quarter) && s.quarter > 0) ? "No edge, no size." : s.quarter > 1.5 ? "Above the 1.5x gross cap: a two-outcome model overstates Kelly for small moves, so the gross cap binds first." : `Quarter Kelly, ${pctPlain(s.quarter, 1)}, is the cap.`),
+      tile("Kelly size", kTxt, !(fin(s.quarter) && s.quarter > 0) ? "No edge, no size." : s.quarter > 1.5 ? "Above the 1.5x leverage cap: a two-outcome model overstates Kelly for small moves, so the leverage cap binds first." : `Quarter Kelly, ${pctPlain(s.quarter, 1)}, is the cap.`),
       tile("Growth at your size", `${s.g >= 0 ? "+" : MINUS}${fx(Math.abs(s.g) * 1e4, 1)}bp`, verdictSize));
     const out = $("#jr-as-out");
     if (out) out.textContent = r.assumptions.length ? `All ${r.assumptions.length} hold together: ${Math.round(s.conj * 100)}% (if independent). Weighted fragility ${fx(s.fragW, 2)}: the sum of (1 − p) × weight. ${s.conj < r.p ? `Your stated odds (${Math.round(r.p * 100)}%) are above what your own assumptions allow: either they are not independent, or the odds are too high.` : ""}` : "No assumptions yet: name what has to be true.";

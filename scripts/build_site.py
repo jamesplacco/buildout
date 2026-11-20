@@ -102,11 +102,18 @@ def reconcile(dest: Path, root: Path) -> dict:
     book = json.loads(bp.read_text())
     L = book.get("limits") or {}
     eps = 1e-9
-    over = [r for r in (book.get("frontier") or []) if r.get("meets") and (r.get("es95", 0) > L.get("es_budget", 9) + eps or r.get("vol", 0) > L.get("vol_target", 9) + eps or r.get("drawdown95", 0) > L.get("max_drawdown", 9) + eps)]
-    if over:                                    # a build from before v0.42.5 wrote this file: mark the rows, do not hide them
-        for r in book["frontier"]:
-            if r in over:
+    from buildout import limits as _limits
+    # v0.48: the evaluator the menu was built with (buildout/limits.py): every limit the file states, the two gross
+    # rules by name, and a check that cannot be made is not a pass
+    over = []
+    for r in (book.get("frontier") or []):
+        if r.get("meets"):
+            ev = _limits.evaluate_row(r, L)
+            if not ev["meets"]:
                 r["meets"], r["over_limit"] = False, True
+                r["constraints"] = {k: ev[k] for k in ("status", "failed", "unchecked", "required", "binding")}
+                over.append(r)
+    if over:                                    # an earlier build wrote this file: mark the rows, do not hide them
         bp.write_text(json.dumps(book, indent=1))
     rows = _ledger.read(root / "ledger" / "calls.jsonl") if (root / "ledger" / "calls.jsonl").exists() else []
     e = next((x for x in reversed(rows) if x.get("data_asof") == book.get("asof")), None)

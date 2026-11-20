@@ -35,6 +35,7 @@ import numpy as np
 import pandas as pd
 
 from . import book as bk
+from . import nav          # v0.48: one accounting primitive (drawdown from the starting value, net trades per name)
 from . import sizing_rules
 from .analytics import sizing
 
@@ -89,7 +90,9 @@ def rebalance_turnover(R: pd.DataFrame, W: pd.DataFrame) -> pd.Series:
     R, W = R.fillna(0.0), W.fillna(0.0)
     rp = (R * W).sum(axis=1)
     drift = (W * (1 + R)).div((1 + rp).replace(0, np.nan), axis=0)
-    return (W - drift.shift(1)).abs().sum(axis=1).where(np.arange(len(W)) > 0, 0.0).rename("turnover")
+    t = (W - drift.shift(1)).abs().sum(axis=1).where(np.arange(len(W)) > 0, 0.0).rename("turnover")
+    t.attrs["names"] = (R, W)          # v0.48: the names behind the number, so a holder of g of NAV can net its own trades with these
+    return t
 
 
 def pit_book(prices: dict[str, pd.DataFrame], cal: pd.DatetimeIndex, candidates: list[str] | None = None) -> tuple[pd.Series, dict, pd.Series]:
@@ -204,8 +207,15 @@ def _lr_one(job):
         # inside every limit), so the record tests the decision that is recorded; the exact minimum rides along
         fr = [r for r in (o.get("frontier") or []) if r.get("meets")]
         exact = float(k.get("short_nasdaq_frac") or 0.0)
-        short = float(fr[-1]["short"]) if fr and abs(fr[-1]["gross"] - 1) < 1e-9 else exact
-        return {"date": t, "size": float(o["size"]), "binding": o["binding"], "short": short, "short_exact": exact,
+        # v0.48: the hedged alternative is the menu's high end as the ledger logs it (ledger.make_entry: the last
+        # row that meets every limit), its long side and its short together. Usually that is every name at full
+        # size. When full size would take a short above 1.00x of NAV, long plus short is past the engine's 2.00x
+        # limit and the high end is the largest row inside it. Before, the record held 1.00x in those months
+        # with the over-limit short (the menu did not check total gross), and with no short at all where none
+        # was found. A month with no row inside the limits holds the call's own size, unhedged.
+        hi = fr[-1] if fr else None
+        short, sg = (float(hi["short"]), float(hi["gross"])) if hi is not None else (0.0, float(o["size"]))
+        return {"date": t, "size": float(o["size"]), "binding": o["binding"], "short": short, "short_gross": sg, "short_exact": exact,
                 "asof": o["asof"], "ok": True}
     except Exception as exc:                              # noqa: BLE001 - the month falls back to the simple limits, counted
         return {"date": t, "ok": False, "error": f"{type(exc).__name__}: {exc}"[:160]}
@@ -253,8 +263,10 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
         vt = bk.VOL_TARGET / L["sigma"]
         product = min(vt, kelly, bk.MAX_GROSS)
         lr = rule.loc[t] if rule is not None and t in rule.index and bool(rule.loc[t].get("ok")) else None
+        h_ok = h <= bk.MAX_TOTAL_GROSS - 1.0 + 1e-9          # v0.48: the stand-in's full-size short is on offer only inside the 2.00x limit on long plus short
         dec.append({"date": str(t.date()), "size": float(lr["size"]) if lr is not None else L["size"], "binding": lr["binding"] if lr is not None else L["binding"],
-                    "short": float(lr["short"]) if lr is not None else h, "rule": "live" if lr is not None else "simple",
+                    "short": float(lr["short"]) if lr is not None else (h if h_ok else 0.0), "rule": "live" if lr is not None else "simple",
+                    "short_gross": (float(lr["short_gross"]) if "short_gross" in lr and lr["short_gross"] == lr["short_gross"] else 1.0) if lr is not None else (1.0 if h_ok else L["size"]),
                     "size_simple": L["size"], "short_simple": h, "sigma": L["sigma"], "es": L["es"],
                     "vol_target": vt, "kelly": kelly, "product": product, "vm_rule": _next_vm(vm, t),
                     "es_size": L["sizes"]["es"], "dd_size": L["sizes"]["dd"]})
@@ -272,6 +284,9 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
     b = bond.reindex(held.index).fillna(0.0)
     c = cash.reindex(held.index).fillna(0.0)
     tn = (turn_names.reindex(held.index).fillna(0.0) if turn_names is not None else 0.0)
+    # v0.48: with the names' own returns and weights the trade is netted per name (nav.sleeve_turnover); with the
+    # single turnover number alone, the size change and the trades inside the sleeve are summed, an upper bound
+    names = getattr(turn_names, "attrs", {}).get("names") if turn_names is not None else None
 
     def run(gross: pd.Series, short: pd.Series | float = 0.0, bondw: pd.Series | float = 0.0, stop: bool = False) -> tuple[pd.Series, pd.Series, dict]:
         gross = gross if isinstance(gross, pd.Series) else pd.Series(gross, index=held.index)
@@ -294,20 +309,23 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
         # account do not move together; the size held into today is yesterday's g carried by yesterday's returns
         nav1 = (1 + gross_ret).shift(1)
         dg = (g - g.shift(1) * (1 + x.shift(1)) / nav1).abs().fillna(g.iloc[0])
-        stock_cost = (dg + g * tn) * COST["stock_bp"] / 1e4
+        st = nav.sleeve_turnover(g, names[0], names[1], gross_ret) if names is not None else dg + g * tn
+        stock_cost = st * COST["stock_bp"] / 1e4
         ds = (short - short.shift(1) * (1 + q.shift(1) + c.shift(1)) / nav1).abs().fillna(short.iloc[0])
         q_end = pd.Series(held.index.month.isin([3, 6, 9, 12]) & (pd.Series(held.index.day, index=held.index) >= 15) & (pd.Series(held.index.to_period("M"), index=held.index) != pd.Series(held.index.to_period("M"), index=held.index).shift(-1)), index=held.index)
         fut_cost = ds * COST["fut_bp"] / 1e4 + short * q_end.astype(float) * COST["roll_bp_q"] / 1e4
         db = bondw.diff().abs().fillna(bondw.iloc[0])
         bond_cost = db * 2.0 / 1e4
         net = gross_ret - stock_cost - fut_cost - bond_cost
-        turnover = float((dg.sum() + (g * tn).sum()) / max(len(held) / 252, 1e-9))
-        return gross_ret, net, {"turnover_yr": turnover, "avg_gross": float(g.mean()), "avg_short": float(short.mean())}
+        turnover = float(st.sum() / max(len(held) / 252, 1e-9))
+        return gross_ret, net, {"turnover_yr": turnover, "avg_gross": float(g.mean()), "avg_short": float(short.mean()),
+                                "turnover_method": "net per name" if names is not None else "size change plus trades inside the sleeve (an upper bound)",
+                                "turnover_convention": "two-way (buys plus sells) over the day's opening NAV, a year"}
 
     pol = {}
     pol["hold"] = run(pd.Series(1.0, index=held.index))
     pol["call"] = run(held["size"])
-    pol["call_short"] = run(pd.Series(1.0, index=held.index), short=held["short"])
+    pol["call_short"] = run(held["short_gross"], short=held["short"])          # v0.48: the menu's high end, its long side and its short
     if rule is not None:                                  # the stand-in rule, kept beside the live one so the change is visible
         pol["call_simple"] = run(held["size_simple"])
     if rl_rule is not None:
@@ -323,10 +341,7 @@ def walk_forward(r: pd.Series, qx: pd.Series, bond: pd.Series, cash: pd.Series, 
 def max_drawdown(x: pd.Series) -> float:
     """The worst fall from a running peak, the starting value of 1 included (v0.47). Before, the peak began at the
     first day's close, so a record that opened with a loss did not count it: -10% then -5% read 5%, not 14.5%."""
-    lv = (1 + x.dropna()).cumprod()
-    if not len(lv):
-        return 0.0
-    return float(1 - (lv / lv.cummax().clip(lower=1.0)).min())
+    return nav.max_drawdown(x)          # v0.48: the one accounting primitive (buildout/nav.py)
 
 
 def stats(x: pd.Series, cash: pd.Series, turnover: float | None = None, F: pd.DataFrame | None = None) -> dict:
@@ -551,7 +566,7 @@ def regime_hedge_walk(r: pd.Series, bond: pd.Series, H: pd.DataFrame, pol: pd.Se
     if D.empty:
         return {"rows": []}
     s = lambda col: {"vol": float(D[col].std() * math.sqrt(12)), "worst": float(D[col].min()),
-                     "maxdd": float(1 - ((1 + D[col]).cumprod() / (1 + D[col]).cumprod().cummax()).min()), "mean_ann": float(D[col].mean() * 12),
+                     "maxdd": nav.max_drawdown(D[col]), "mean_ann": float(D[col].mean() * 12),
                      "y2022": float((1 + D[D["month"].str.startswith("2022")][col]).prod() - 1)}
     return {"rows": rows, "summary": {"book": s("book"), "regime_switching": s("hedged"), "static30": s("static30")},
             "avg_weight": float(D["weight"].mean()), "share_off": float((D["weight"] == 0).mean())}
@@ -574,7 +589,7 @@ def weeks(pol: dict, bench: pd.Series) -> list[dict]:
 
 
 # ---------------------------------------------------------------- build
-POLICY_NAME = {"hold": "The book at 1.00x, unhedged", "call": "The call: the live rule's size", "call_short": "Full size, the live rule's Nasdaq-100 short",
+POLICY_NAME = {"hold": "The book at 1.00x, unhedged", "call": "The call: the live rule's size", "call_short": "The menu's high end: the names with the live rule's Nasdaq-100 short",
                "call_simple": "The simple limits (the stand-in before v0.40)", "call_rl": "The deep RL sizer (v0.41), unhedged",
                "bond30": "Full size, long bond 30% (the old TLT rule)", "product": "Vol target, quarter Kelly, drawdown stop", "vm_rule": "Volatility-managed rule (Moreira and Muir)"}
 
@@ -596,7 +611,10 @@ def build(prices: dict[str, pd.DataFrame], ust: pd.DataFrame, frames: dict | Non
         rule = None
         if name == "pit" and os.environ.get("BUILDOUT_SIMPLE_RULE") != "1":
             rule = live_rule_path(prices, ust, members, [t for t in month_ends(r.dropna().index)[:-1] if t >= pd.Timestamp(START)])
+            okr = rule[rule["ok"].astype(bool)]
             out["live_rule"] = {"months": int(len(rule)), "fallbacks": int((~rule["ok"].astype(bool)).sum()),
+                                "high_end_below_full_size": int((okr["short_gross"] < 1 - 1e-9).sum()), "high_end_max_total_gross": float((okr["short_gross"] + okr["short"]).max()),
+                                "total_gross_limit": bk.MAX_TOTAL_GROSS,
                                 "errors": rule.loc[~rule["ok"].astype(bool), "error"].dropna().head(3).tolist() if "error" in rule else []}
         rl_rule = None
         if name == "pit" and rl_nets:
@@ -690,22 +708,21 @@ def live_record(rows: list, prices: dict, ust: pd.DataFrame) -> dict:
     gh = path(lambda r: (r["call"].get("menu_high") or {}).get("gross") or 1.0)          # the gross the menu's top row holds
     cash = P["cash"].reindex(x.index).fillna(0.0)
     qx = (P["E"]["QQQ"].reindex(x.index) - cash).fillna(0.0)
-    tn = book_turnover(P["R"], pd.Series(bk.BOOK)).reindex(x.index).fillna(0.0)      # v0.42.5: the daily trades back to the target weights
+    tn = book_turnover(P["R"], pd.Series(bk.BOOK))      # v0.42.5: the daily trades back to the target weights
+    Rn, Wn = tn.attrs["names"]
     borrow = COST["borrow_spread"] / 252
     g_unh = size * x + (1 - size) * cash - (size - 1).clip(lower=0) * borrow
-    d_size = (size - size.shift(1) * (1 + x.shift(1)) / (1 + g_unh).shift(1)).abs().fillna(size.iloc[0])
-    unh = g_unh - (d_size + size * tn) * COST["stock_bp"] / 1e4
+    unh = g_unh - nav.sleeve_turnover(size, Rn, Wn, g_unh) * COST["stock_bp"] / 1e4          # v0.48: one net trade per name
     g_hed = gh * x + (1 - gh) * cash - (gh - 1).clip(lower=0) * borrow - short * qx
     nav1 = (1 + g_hed).shift(1)
-    d_one = (gh - gh.shift(1) * (1 + x.shift(1)) / nav1).abs().fillna(gh.iloc[0])
     d_short = (short - short.shift(1) * (1 + qx.shift(1) + cash.shift(1)) / nav1).abs().fillna(short.iloc[0])
-    hed = g_hed - d_short * COST["fut_bp"] / 1e4 - (d_one + gh * tn) * COST["stock_bp"] / 1e4
-    nav = lambda r: (1 + r).cumprod()
+    hed = g_hed - d_short * COST["fut_bp"] / 1e4 - nav.sleeve_turnover(gh, Rn, Wn, g_hed) * COST["stock_bp"] / 1e4
+    lvl = lambda r: (1 + r).cumprod()
     q_tot = float((1 + P["E"]["QQQ"].reindex(x.index).fillna(0.0)).prod() - 1)
     return {**base, "marked_days": int(len(x)), "last_mark": str(x.index[-1].date()),
-            "total": float(nav(unh).iloc[-1] - 1), "total_hedged": float(nav(hed).iloc[-1] - 1), "book_total": float(nav(x).iloc[-1] - 1), "qqq_total": q_tot,
+            "total": float(lvl(unh).iloc[-1] - 1), "total_hedged": float(lvl(hed).iloc[-1] - 1), "book_total": float(lvl(x).iloc[-1] - 1), "qqq_total": q_tot,
             "series": [[str(d.date()), round(float(a), 6), round(float(b), 6), round(float(c), 6), round(float(s_), 4)]
-                       for d, a, b, c, s_ in zip(x.index, nav(unh), nav(hed), nav(x), size)],
+                       for d, a, b, c, s_ in zip(x.index, lvl(unh), lvl(hed), lvl(x), size)],
             "stats": stats(unh, cash) if len(unh) >= 20 else None}
 
 

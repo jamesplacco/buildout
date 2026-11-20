@@ -133,14 +133,23 @@ def test_the_mandate_refuses_and_the_halt_stops_everything(state):
     pb = br.PaperBroker(state / "paper_account.json", quote_fn=_qf)
     M = md.Mandate(mode="autonomous", broker="paper", max_order_usd=1_000)
     r = trader.run_once(pb, M, _params(), now=NOW, call=_call())
-    assert r["outcome"] == "outside the mandate" and any("max_order_usd" in x for x in r["reasons"])
+    # v0.48: the ticket is planned under the tighter of the planner's limits and the mandate's, so the mandate's
+    # order size is one of the planner's own checks and the refusal comes one step earlier
+    assert r["outcome"] == "the ticket failed a check" and any("$1,000" in x for x in r["reasons"])
+    t = ex.load_ticket(r["ticket"])
+    assert t["policy"]["max_order_usd"] == 1_000 and md.authorize(t, pb.account(), M, {}, NOW)["ok"] is False
     (state / "HALT").write_text("x")
     assert trader.run_once(pb, md.Mandate(mode="autonomous", max_order_usd=50_000), _params(), now=NOW, call=_call())["outcome"] == "halted"
     (state / "HALT").unlink()
     assert trader.run_once(pb, md.Mandate(mode="autonomous", max_order_usd=50_000), _params(), now=datetime(2026, 11, 8, 15, 0, tzinfo=timezone.utc), call=_call())["outcome"] == "outside the window"
     unarmed = md.Mandate(mode="autonomous", broker="assistant", max_order_usd=50_000)
-    ab = br.AssistantBroker({"equity": 50_000.0, "cash": 50_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
-    assert trader.run_once(ab, unarmed, _params(), now=NOW, call=_call())["outcome"] == "not armed: staged only"
+    # the same equity as the paper account above, whose history this state folder already holds (a 50,000 account
+    # would read as a 50% fall and trip the mandate's loss halts first)
+    ab = br.AssistantBroker({"equity": 100_000.0, "cash": 100_000.0, "account_type": "Agentic", "positions": []}, _qf(list(PX)))
+    # v0.48: planned afresh for this account (before, the paper account's staged ticket was reused for it), on the
+    # Tuesday: the Nov 6 call, logged on a Saturday, governs from Tuesday Nov 10 (ledger.governs_from, v0.48)
+    r = trader.run_once(ab, unarmed, _params(), now=datetime(2026, 11, 10, 15, 0, tzinfo=timezone.utc), call=_call())
+    assert r["outcome"] == "not armed: staged only", r.get("reasons")
 
 
 def test_the_assistant_route_hands_over_exact_orders(state, monkeypatch):

@@ -3,6 +3,41 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.48: accounting, fills and limits. Release 1 of the second outside audit's implementation plan (E01 to
+E05), first built on v0.46 and merged onto v0.47. Each finding was reproduced with an offline fixture, fixed, and
+pinned with hand-calculated tests. The call is unchanged and no ledger entry was rewritten.
+
+- **E01, accounting (`buildout/nav.py`).** One order of events: positions and cash, marks, desired dollars, net
+  trades per instrument, costs once, ending NAV. Turnover is two-way over the pre-trade NAV; targets are weights of
+  the pre-cost NAV. `track.max_drawdown` (v0.47's starting-value convention) now calls `nav.max_drawdown`. The
+  walk-forward and the live record net the sleeve's size change and the trades inside it per name
+  (`nav.sleeve_turnover`); they were charged as two sums.
+- **E02, fills (`execution.record_fills`).** Identity is the execution, not the order. An order's total so far
+  (`cumulative=true`) adds only what is new and may not fall. Quantity and price finite and above zero; a refused
+  row is kept under `rejected` and changes nothing. Excess, a stranger to the ticket and a price through the limit
+  are recorded and flagged. A repeat appends nothing. `execution.replay` rebuilds the account from the log,
+  v0.47's corrections included. `FILL_ADAPTERS` states what each route sends.
+- **E03, paper settlement (`PaperBroker.settle`).** Sessions resolved first, fills taken in session order (sells
+  before buys inside one close, then time written, then id). Settling late equals settling after each session.
+- **E04, constraints (`buildout/limits.py`).** One evaluator: metric, value, limit, headroom, units, pass / fail /
+  unchecked; compliant means every required check passed. The 1.50x long cap and the 2.00x limit on long plus short
+  (`max_total_gross`, in `config.py` since the hedge policy) are both checked by name in the menu, the recheck and
+  at publication. No limit was added or moved. The record's hedged row holds the menu's high end as the ledger logs
+  it, so in months where full size needed a short above 100% of NAV it holds the largest row inside 2.00x.
+- **E05, mandate.** `execution.plan(limits=...)` plans under the tighter of the planner's and the mandate's limits
+  (`limits.tighter`), so v0.47's whole-book rebalance aims at a target the mandate allows. Gross and cash are
+  checked on the projected account (`limits.project`); buys a fee or rounding would push past a limit are cut to
+  fit; an account in breach rebalances and may only be repaired. `mandate.authorize` reads the account as it is
+  now. `trader.stale` replans a staged ticket when the holdings, cash or a quote (50 bp) have moved, beside v0.47's
+  check that it was planned on the call in force.
+- **Restatement.** The before and after of the record need the raw prices and the Treasury file, which live only in
+  the daily run's cache. The next daily run computes them once on the same inputs (`scripts/restate.py`, base
+  1c8e926) and commits `site/data/restatement.json`; the Track record desk states the revision from it.
+- Tests: `tests/test_accounting_invariants.py`, `tests/test_execution_events.py`,
+  `tests/test_policy_constraints.py`, `tests/test_v48.py`. One v0.42 test relied on the assistant broker reusing a
+  ticket the paper broker had planned; it now plans its own.
+- Print: Home's call board no longer splits across a page break (its cards printed over the next page's text).
+
 Version 0.47: an audit of everything, and what it changed. Four independent reviews (the math that sets the call;
 the ledger, the marked record and the paper bot; the data pipeline and the workflows; every number the pages and the
 README state) were run against the code and the published files, each finding reproduced before it was fixed.
