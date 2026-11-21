@@ -27,17 +27,17 @@ def _structure():
 def test_one_menu_on_both_pages():
     boot, groups, _ = _structure()
     assert list(groups) == KEYS[:4] and [n for n, _ in groups.values()] == NAMES[:4]
-    assert 'const GROUP_ORDER = ["today", "record", "evidence", "engine", "library"];' in boot
+    assert 'const FULL_ORDER = ["today", "record", "evidence", "engine", "library"];' in boot          # v0.49: the library's menu; the brief has its own
     nav = re.search(r'<nav class="tabs".*?</nav>', (SRC / "body.html").read_text(), flags=re.S).group(0)
     assert re.findall(r'data-group="(\w+)">(\w+)</a>', nav) == list(zip(KEYS, NAMES)), "the full page's menu"
+    # v0.49: the front page is the brief, with its own five entries (tests/test_v49.py); the library keeps this menu
     core_nav = re.search(r'CORE_NAV = """(.*?)"""', (ROOT / "scripts" / "assemble_page.py").read_text(), flags=re.S).group(1)
-    assert re.findall(r">([A-Za-z]+)</a>", core_nav) == NAMES, "the core page's menu"
-    assert re.findall(r'href="#(\w+)" data-group', core_nav) == re.findall(r'href="#(\w+)" data-group', nav)[:4], "each group opens at the same desk"
+    assert re.findall(r">([A-Za-z' ]+)</a>", core_nav)[-1] == "Library" and 'href="page.html" class="lib-link"' in core_nav
     # the older menu is gone: no second set of names, and no link that says the reader is on another site
     for gone in ('name: "Today"', 'name: "Markets"', 'name: "Engine"', "core-link", "Core page"):
         assert gone not in boot, gone
-    # the core page drops the fifth group and nothing else
-    assert "delete GROUPS.library;" in boot and 'const FRONT = CORE ? "home" : "library";' in boot
+    # the front page has no Library group of its own: its Library entry is a link to the other page
+    assert "const GROUPS = CORE ? Object.fromEntries(BRIEF_VIEWS.map(" in boot and 'const FRONT = CORE ? "home" : "library";' in boot
 
 
 def test_every_desk_is_filed_once():
@@ -50,9 +50,10 @@ def test_every_desk_is_filed_once():
     assert set(filed) == set(views) and len(views) == 66
     assert len(shelves) == 7 and len(shelved) == 50 and len(core) == 15
     assert len({k for k, _, _ in shelves}) == 7 and all(2 <= len(vs) <= 9 for _, _, vs in shelves), "a shelf fits one row of sub-tabs"
-    # the assembler's list of core desks is the four groups
+    # v0.49: the assembler's list of core desks is the brief's five, each one of the four groups' desks
     asm = (ROOT / "scripts" / "assemble_page.py").read_text()
-    assert set(json.loads(re.search(r"CORE_VIEWS = (\[[^\]]+\])", asm).group(1))) == set(core)
+    brief = json.loads(re.search(r"CORE_VIEWS = (\[[^\]]+\])", asm).group(1))
+    assert len(brief) == 5 and set(brief) < set(core)
     # every desk has a name and a question, so the index never prints a blank line
     names = (SRC / "views.js").read_text().split("const TAB_NAME = ")[1].split("};")[0]
     guide = (SRC / "guide.js").read_text()
@@ -71,7 +72,7 @@ def test_index_menu_and_map_read_the_same_shelves():
     # the Library tab opens the index, and so does the page with no link
     assert 'a.dataset.group === "library" ? "library"' in boot and "if (!token) return { view: FRONT, el: null };" in boot
     # links written for the older menu still land on a desk
-    assert 'const OLD_GROUPS = { markets: "hedges", research: "digest", reference: "appendix" };' in boot
+    assert 'const OLD_GROUPS = Object.assign({ markets: "hedges", research: "digest", reference: "appendix" }' in boot
 
 
 def test_names_and_what_sits_above_each_desk():
@@ -81,7 +82,7 @@ def test_names_and_what_sits_above_each_desk():
     assert '"This desk answers"' in guide and "dguide-lvl" not in guide and "dguide-map" not in guide
     assert 'h("details", "dguide-d")' in guide
     # the line over the headline is written from the menu, so it cannot name a group that no longer exists
-    assert "`${GROUPS[groupOf(v)].name} · ${TAB_NAME[v] || v}`" in guide and "`Library · ${sh[1]}`" in guide
+    assert "`${GROUPS[groupOf(v)].name} · ${TAB_NAME[v] || v}` : TAB_NAME[v] || v" in guide and "`Library · ${sh[1]}`" in guide
     # a desk's contents: a numbered list, not pills
     assert ".toc a::before { content: counter(toc);" in head
     # Home says how the site is laid out, in the menu's order, and every link there is a desk

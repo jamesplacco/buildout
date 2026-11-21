@@ -5,8 +5,8 @@
      CODE_SNAP, ENGINES_SNAP, SNAP14.stats) so the landing page cannot disagree with the desks behind it.
      ===================================================================================== */
   const MCP_TOOLS = 51;          // buildout/mcp_server.py TOOLS (test_v23 checks this against the server)
-  const TEST_FILES = 81;      // tests/test_*.py, pinned by tests/test_v39_1.py
-  const TESTS_PASSING = 1079;     // the shipped test count (the chip and the hood tile read it)
+  const TEST_FILES = 82;      // tests/test_*.py, pinned by tests/test_v39_1.py
+  const TESTS_PASSING = 1086;     // the shipped test count (the chip and the hood tile read it)
   const dxEngine = () => (typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19 : null);
   const theta = () => (typeof THETA23 !== "undefined" && THETA23 && Array.isArray(THETA23.entries) ? THETA23 : null);
   const kcount = (n) => (!fin(n) ? "n/a" : n >= 1e6 ? fx(n / 1e6, 2) + "M" : n >= 1e4 ? fx(n / 1e3, 0) + "k" : n.toLocaleString());
@@ -48,7 +48,9 @@
     // v0.30: the call is about the book. The decision engine supplies the baseline; the book's own limits set the size.
     // v0.32: the call is the menu's two ends, not a point: the limits allow a range of size-and-hedge mixes at the same risk
     const M = BC && BC.menu;
-    el.textContent = BC && BC.cut
+    el.textContent = BUILD_CORE && BC && BC.cut && M
+      ? callPlain({ menu_low: M.lo, menu_high: M.hi, bond_hedge: hw && hw !== "no bond hedge" ? "on" : "off" })
+      : BC && BC.cut
       ? (M ? `Cut the book to about ${xx(M.lo.gross)}${M.lo.short ? ` with a ${pct0(M.lo.short)} Nasdaq-100 short` : ""}, or keep it at ${xx(M.hi.gross)} and short ${pct0(M.hi.short)} of NAV in Nasdaq-100 futures; ${hw || "no bond hedge"}.`
         : `Run the book at ${xx(BC.size)}${BC.keep != null ? `, or keep every name and short ${pct0(BC.keep)} of NAV in Nasdaq-100 futures` : ""}${hw ? "; " + hw : ""}.`)
       : `Hold equity at ${xx(N.exposure)}${hw ? " with " + hw : ""}${tail ? "; " + tail : ""}.`;
@@ -64,7 +66,7 @@
     const eb = $("#t7-eyebrow");
     // v0.43: the date that governs the call is the date of the prices it was sized on, not the newest market file
     const Bk = typeof B30 === "function" ? B30() : null;
-    if (eb) eb.textContent = `The engine's call · model book · ${Bk && Bk.asof ? `prices through ${isoNice(Bk.asof)}` : `data to ${isoNice(latestDataDate())}`}`;
+    if (eb) eb.textContent = `${BUILD_CORE ? "Model book" : "The engine's call · model book"} · ${Bk && Bk.asof ? `prices through ${isoNice(Bk.asof)}` : `data to ${isoNice(latestDataDate())}`}`;
   }
 
   function renderCallBoard(N, O) {
@@ -143,6 +145,28 @@
     el.replaceChildren();
     const rows = [];
     const esNow = N.es_1x * N.exposure, BC = typeof bookCall === "function" ? bookCall(N) : null;
+    if (BUILD_CORE && BC) {                  // v0.49: the brief: three limits, what each measures, fully invested and at the call's size
+      const B = BC.B, S = B.sizes, x = BC.size, L = B.limits;
+      const cap = h("p", "t7-sizing");
+      cap.append(h("strong", null, "The three risk limits. "), document.createTextNode(`Each is measured on the nine stocks' own daily prices since ${B.from.slice(0, 4)}. Fully invested, the book is over ${BC.breaches === 3 ? "all three" : BC.breaches === 0 ? "none" : BC.breaches + " of them"}. The tightest, ${BRIEF_LIMIT[BC.binding] || BC.bindingName}, sets the size at ${pct0(x)}.`));
+      const t = h("table", "limits limits-brief"), thead = h("thead"), hr = h("tr");
+      ["", "Limit", "Fully invested", `At ${pct0(x)}`].forEach((c, i) => { const th = h("th", i > 0 ? "num" : null, c); th.scope = "col"; hr.append(th); });
+      thead.append(hr); t.append(thead);
+      const tb = h("tbody");
+      [["drawdown_cap", "Loss in a bad year", "the fall from peak to trough in a one-in-twenty year", pctPlain(L.max_drawdown, 0), pctPlain(B.at_full.drawdown95, 0), BC.binding === "drawdown_cap" ? pctPlain(L.max_drawdown, 0) : "inside"],
+        ["vol_target", "Volatility", "how far the book swings in a typical year", pctPlain(L.vol_target, 0), pctPlain(B.risk.vol, 0), pctPlain(B.risk.vol * x, 0)],
+        ["es_budget", "Loss in a bad month", "the average of the worst 5% of months", pctPlain(O.es_limit, 0), pctPlain(B.tail.es95.governing, 0), pctPlain(B.tail.es95.governing * x, 0)]].forEach(([k, name, what, lim, full, at]) => {
+        const over = S[k] < 1 - 1e-9, tr = h("tr", over ? "breach" : null);
+        const nm = h("td"); nm.append(h("strong", null, name)); if (k === BC.binding) nm.append(document.createTextNode(" "), h("span", "lim-ok", "sets the size"));
+        nm.append(h("small", null, what));
+        tr.append(nm, h("td", "num", lim), h("td", "num " + (over ? "over" : "in"), full), h("td", "num", at));
+        tb.append(tr);
+      });
+      t.append(tb);
+      const wrap = h("div", "tablewrap"); wrap.append(t);
+      el.append(cap, wrap);
+      return;
+    }
     if (BC) {                                // v0.30: the book's own limits, measured on the names' prices, govern the size
       const B = BC.B, S = B.sizes, x = BC.size, st = (k) => (S[k] >= 1 - 1e-9 ? "within" : k === BC.binding ? `breached at 1.00x; binds, sets ${xx(x)}` : `breached at 1.00x; met at ${xx(x)}`);
       rows.push(["Book expected shortfall", "a hard limit on the book", "one month, mean of the worst 5%, most cautious of three methods", `${pctPlain(B.tail.es95.governing, 1)} at 1.00x, ${pctPlain(B.tail.es95.governing * x, 1)} at ${xx(x)}, against ${pctPlain(O.es_limit, 0)}`, st("es_budget"), "#book"]);

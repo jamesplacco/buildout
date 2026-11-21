@@ -31,8 +31,8 @@ import assemble_page as A  # noqa: E402
 PROBE = ROOT / "site" / "tests" / "core_probe.js"
 OUT = ROOT / "scripts" / "core_stubs.json"
 # never candidates: the shared machinery and the core desks' own modules
-KEEP = {"math.js", "ui.js", "views.js", "boot.js", "reference.js", "guide.js", "keys.js", "landing.js", "book.js", "trackdesk.js", "execdesk.js", "dx.js", "dxlive.js",
-        "memos.js", "today7.js", "snap19.js", "snap30.js", "snap38.js", "data.js", "sources.js", "hero.js", "engine7.js"}
+KEEP = {"math.js", "ui.js", "views.js", "boot.js", "guide.js", "keys.js", "landing.js", "book.js", "trackdesk.js", "today7.js", "explain.js",
+        "snap19.js", "snap30.js", "snap38.js", "data.js", "sources.js", "reference.js"}
 
 
 def declared(text: str) -> dict | None:

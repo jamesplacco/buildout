@@ -71,3 +71,57 @@
     }
     draw();
   }
+
+  /* v0.49: THE BRIEF'S METHOD PAGE. The desk above explains the forecasting model, which today has no say in the
+     call (its gate is at 0%). A reader with ten minutes needs the other half first: how the call is actually made.
+     Six steps, with the live limits; the terms the brief uses; what the thing is not. Drawn on the short page only. */
+  function renderBriefMethod() {
+    const view = $("#view-explained");
+    if (!view) return;
+    const B = typeof B30 === "function" ? B30() : null, L = (B && B.limits) || {};
+    const N = typeof DX19 !== "undefined" && DX19 && DX19.now ? DX19.now : null;
+    const T = typeof T38 === "function" ? T38() : null, Lv = (T && T.live) || {};
+    const lim = (v, d) => (fin(v) ? pctPlain(v, 0) : d);
+    let sec = $("#hw-call-s");
+    if (!sec) {
+      sec = h("section", "section");
+      sec.id = "hw-call-s";
+      sec.setAttribute("aria-labelledby", "hw-call-title");
+      const head = h("div", "section-head"), h2 = h("h2", null, "Six steps, repeated every trading day");
+      h2.id = "hw-call-title";
+      head.append(h("p", "eyebrow", "The steps"), h2);
+      const ol = h("ol", "steps"); ol.id = "hw-call-steps";
+      sec.append(head, ol);
+      const first = view.querySelector(":scope > section.section");
+      if (first) first.before(sec); else view.append(sec);
+    }
+    const gate = N && N.gate && fin(N.gate.value) ? pct0(N.gate.value) : null;
+    const steps = [
+      ["Measure the risk.", "Each day the nine stocks' own prices give three readings for the book held in full: how far it swings in a typical year, how much it loses in a bad month, and how far it would fall in a bad year."],
+      ["Apply the limits.", `Volatility no higher than ${lim(L.vol_target, "20%")}. Loss in a bad month no higher than ${lim(L.es_budget, "12%")}. Loss in a bad year no higher than ${lim(L.max_drawdown, "25%")}. Each limit allows some share of the book, and the call is the smallest of the three.`],
+      ["Offer the hedged alternative.", `The book can instead be held in full with a Nasdaq-100 futures short big enough to meet the same limits${fin(L.max_total_gross) ? `, as long as long plus short stays within ${pct0(L.max_total_gross)} of NAV` : ""}. Less of the book is a smaller bet on the market. The short is a bet that these stocks beat the index.`],
+      ["Hedge with bonds only when bonds are hedging.", "Treasuries are added only while they move opposite to stocks and inflation is low enough for that to last. When they move with stocks, as in 2022, they add risk and stay out."],
+      ["Let a forecast move the size only if it has earned it.", `A separate model reads 156 years of market history and proposes a size. Its proposal counts only as far as it has beaten simply holding since 1940, after a discount for every version tried.${gate ? ` Today that weight is ${gate}.` : ""}`],
+      ["Record the call before it takes effect.", `Each call is written to a tamper-evident log before the session it applies to, so the record cannot be edited afterward. A paper account follows the calls${Lv.first_effective ? ` and has since ${isoNice(Lv.first_effective)}` : ""}. Mistakes found later are published, not erased.`]];
+    const ol = $("#hw-call-steps");
+    ol.replaceChildren(...steps.map(([k, t]) => { const li = h("li"), d = h("div"); d.append(h("strong", null, k + " "), document.createTextNode(t)); li.append(d); return li; }));
+    const dl = view.querySelector(".hw-words");
+    if (dl) dl.replaceChildren(...[
+      ["Full size", "The model book held with 100% of NAV. The call is a share of that."],
+      ["NAV", "Net asset value: what the account is worth."],
+      ["Volatility", "How far returns swing in a typical year (one standard deviation)."],
+      ["Loss in a bad month", "The average of the worst 5% of months. Risk managers call it expected shortfall."],
+      ["Loss in a bad year", "How far the book falls from its peak in a one-in-twenty year. Also called drawdown."],
+      ["Beta", "How much the book moves when the Nasdaq-100 moves 1%."],
+      ["Sharpe ratio", "Return above cash for each unit of volatility. Higher is better."],
+      ["Simulation (walk-forward)", "A test that, at every past date, uses only what was known on that date."]]
+      .map(([k, t]) => { const d = h("div"); d.append(h("dt", null, k), h("dd", null, t)); return d; }));
+    const not = view.querySelector('[aria-labelledby="hw-not-title"] .grid2');
+    if (not) not.replaceChildren(...[
+      ["Not a price forecast", "It does not predict where these stocks go. Its forecasting model barely beats the long-run average, and says so. The value is in the limits and in following them."],
+      ["Not a trading system", "Nothing on this site places an order. A call is a proposal; a paper account follows it so the record builds in real time."],
+      ["Not a long track record", `The long record is a simulation, on stocks chosen with hindsight. The live record began ${Lv.first_effective ? isoNice(Lv.first_effective) : "in November 2026"}.`],
+      ["Not personal positions", "The book is a model portfolio. It is research, not investment advice."]]
+      .map(([k, t]) => { const d = h("div", "panel"); d.append(h("span", "panel-title", k), h("p", "prose", t)); return d; }));
+  }
+

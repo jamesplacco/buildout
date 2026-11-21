@@ -50,20 +50,23 @@ by `github-actions[bot]`. Only derived analytics are committed; raw market data 
 
 Two pages are built from the same sources in `site/src/` (v0.43):
 
-- **`site/core.html`, the site's front page.** Fifteen desks in four groups, and nothing the call does not depend
-  on: **Call** (Home, Today's call, Book risk, Decision engine, Hedge test), **Record** (Track record, Execution),
-  **Evidence** (Inventory, Memos and the failure log, Fundamentals), **Method** (How it works, Parameters, Data
-  lineage, Architecture and status, Appendix). About a third of the full page's size.
-- **`site/page.html`, the library.** Sixty-six views: the core fifteen, fifty research desks on seven shelves, and
-  the library's index. Published as `library.html`; a link on the core page to a desk it does not carry opens the library there.
+- **`site/core.html`, the site's front page: the brief (v0.49).** Five desks, one menu row: Home, Today's call, Book
+  risk, Track record, How it works. Each shows only its first screen, in plain words (`BRIEF_KEEP`, `BRIEF_HIDE`
+  and `BRIEF_WORDS` in `site/src/boot.js`; the modules write the short wording where `BUILD_CORE` is set). What a
+  desk leaves out is hidden, not deleted, and a link into it opens the library there.
+- **`site/page.html`, the library.** Sixty-six views: fifteen desks in four groups (**Call**: Home, Today's call,
+  Book risk, Decision engine, Hedge test; **Record**: Track record, Execution; **Evidence**: Inventory, Memos and
+  the failure log, Fundamentals; **Method**: How it works, Parameters, Data lineage, Architecture and status,
+  Appendix), fifty research desks on seven shelves, and the library's index. Published as `library.html`; a link on the core page to a desk it does not carry opens the library there.
 
-Both pages carry one menu (v0.45): the four groups above and **Library**, whose fifty desks sit on seven shelves
-(markets and hedges, live research, studies and tests, decision tools, models and maps, engine internals,
-workshop). The groups and shelves are defined once, in `site/src/boot.js`.
+The library's menu is the four groups above and **Library**, whose fifty desks sit on seven shelves (markets and
+hedges, live research, studies and tests, decision tools, models and maps, engine internals, workshop). The brief's
+menu is its five desks. Groups, shelves and the brief are defined once, in `site/src/boot.js`.
 
 What the core page leaves out is decided by rendering, not by hand. `scripts/prune_core.py` replaces a file with
 inert stand-ins, opens the page in a browser, uses every core desk, and leaves the file out only if nothing a reader
-sees or does changes; `tests/test_v43.py` holds every core desk to the same text, tables and charts on both pages.
+sees or does changes. Since v0.49 the brief words its desks differently from the library, so the two are no longer
+compared text for text; `tests/test_v49.py` checks that the brief's numbers are the library's.
 The list is `scripts/core_stubs.json`.
 
 The table below describes the library's older desks. Market figures carry a source and a date;
@@ -370,6 +373,9 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 
 ## What the tests prove
 
+- v0.49: the core page carries five desks and each shows only the sections the brief keeps; every desk it leaves
+  out, and every link into a part it hides, opens in the library; the brief's words are drawn from the same data as
+  the library's (tests/test_v49.py).
 - v0.48: a 10-share order filled 4 then 6 records 10; a bad fill row changes nothing; paper fills settle in session
   order; a menu row is compliant only if every required limit passed, total gross included; a ticket is checked on
   the account its orders would leave, under the tighter of the planner's and the mandate's limits.
@@ -502,3 +508,98 @@ checks the Emacs file's parentheses and names; `editors/buildout-test.el` holds 
 - Write the forecast down before the outcome, and score process separately from outcome.
 
 Research tool, not investment advice.
+
+## From the README before v0.49
+
+The README was cut to one page in v0.49. These sections are what it carried before, unchanged. Figures are as of the
+dates they state.
+
+### What the record says (and where it disappoints)
+
+The daily run rebuilds the walk-forward record (`site/data/track.json`), so its figures move a little every day. The
+ones below are as of Nov 17, 2026; the site carries the current run and says the date it runs through. The universe
+checks, the one-year windows and the deep RL comparison are rerun only at a release and are as of Nov 5, 2026.
+
+- Walked forward from 2018 with the live rule itself, after costs: the call earns a Sharpe of 0.78 with a 23% worst
+  drawdown; holding the point-in-time nine (the nine most traded of sixteen candidates each January, which are not
+  always today's nine) earns 0.89 with 52%; full size with the call's Nasdaq-100 short earns 0.94 with 24%. Sizing
+  down protects, at a cost in Sharpe ratio, and that held on index baskets other people chose before 2018 (the
+  Nasdaq-100, a semiconductor fund, the first AI theme fund). The short's edge did not carry over: it is the nine
+  names beating the index by about 8% a year, which a candidate list written in 2026 knew (the universe checks on
+  the Track record desk, v0.42.6). (Restated in v0.42.5 after an outside audit: the daily trades that hold the weights
+  are now charged. Before and after are on the Track record desk. The names come from a candidate list chosen in
+  2026, so this is a walk-forward rule on a retrospectively selected universe.)
+- How sure is the size (v0.44, the Book risk desk). The size is 0.53x because a modeled one-year drawdown cap of
+  25% binds, and that number came from one model. The alternatives are re-simulated every day; as of Nov 17, 2026:
+  with fat-tailed shocks the cap allows 0.53x, and with the book's own days redrawn in runs 0.55x; with volatility
+  that moves, a bad year at 0.53x is about 30% down and the cap allows 0.44x; with no assumed equity premium,
+  0.50x; at the worst year's volatility, 0.37x. The random draws alone move the answer by about 0.01x. The Book
+  risk desk carries today's figures. Walked forward, the call's worst one-year window on the nine names was 23.3%,
+  inside the cap in all 93 windows; on the Nasdaq-100 it was 25.3% (11 windows, one stretch) and on the first AI
+  theme fund 27.1% (4 windows, one stretch). Nine years cannot confirm a 1-in-20 number. The call is unchanged.
+- A deep RL sizer trained inside a learned market model beats holding, the trend rule and a tabular agent on the
+  S&P 500 since 1940 (Sharpe 0.88 against 0.64), and loses on this book (0.49 against 0.77 for the call, on the
+  record through Nov 5, 2026). Both are published.
+- The live record started Nov 4, 2026 and is days old: too short to read anything into.
+- Every number that turned out wrong is in the failure log on the Memos desk, with its cost and fix.
+
+### How the call is produced, and from which data
+
+Two runs price the book every day. Only the first sets the call.
+
+| Step of the daily run | Reads | Writes | Role |
+|---|---|---|---|
+| `python -m buildout book` | The nine names' public daily closes, volumes and cash dividends (a GitHub mirror, `yennanliu/finance_data`), validated before anything is sized; the Treasury's par yields | `site/data/book.json` | **Sets the call**: the three limits, the size, the menu of size-and-short mixes |
+| `python -m buildout ledger append`, then `ledger verify` | `site/data/book.json` | `ledger/calls.jsonl` | Logs the call, one hash-chained entry per new data date |
+| `python -m buildout live` | The ledger and the same closes | `site/data/live.json` | Marks every logged call to market |
+| `python -m buildout trader --once --paper` | The call in force | `paper/`, `site/data/paper.json` | The public paper bot, a model account |
+| `python -m buildout run` | Databento bars (needs `DATABENTO_API_KEY`) | `site/data/report.json` | **A cross-check run**: a different model on a second data source. It never sets the call, and the site labels its tiles |
+| `python -m buildout decide` | 156 years of monthly data | `site/data/decision.json` | The S&P 500 baseline (1.00x while its evidence gate is shut) that the book's limits cut |
+
+The walk-forward record and the tear sheet (`site/tearsheet.pdf`) come from `buildout/track.py` through
+`scripts/snapshot_v38.py`: the daily run rebuilds both (`site/data/track.json`), and a release reruns the slower
+studies beside them. The site has two pages: the front page (`site/core.html`, fifteen desks: the call, the
+record, the evidence, the method) and the library (`site/page.html`, the same fifteen plus fifty research desks). A
+library desk drawn from a snapshot built into the page, and not from a daily file, says so under its title.
+
+### Check it yourself
+
+- **The call.** `python -m buildout book --out out` needs no key. On the same day's closes it prints the size the
+  ledger logged (0.533066x on Nov 17, 2026), and `out/book.json` carries what the price validation found, including a
+  comparison of the newest closes with a second source.
+- **The ledger.** `python -m buildout ledger verify` recomputes the hash chain; `ledger show` lists every call with
+  the session it governs from. The chain shows an edit that was not rehashed. So that it also shows a rewrite, the
+  daily run signs the ledger's SHA-256 into Sigstore's public transparency log:
+  `gh attestation verify ledger/calls.jsonl --repo jamesplacco/buildout` (from the first run after v0.47).
+- **The record.** `python -m buildout track --out out` rebuilds the walk-forward from public prices in about three
+  minutes; the figures above are that file's.
+- **The misses.** The failure log on the site's Memos desk lists every number that was wrong, what it cost and what
+  changed; CHANGELOG.md has the same by release.
+
+### How it was built
+
+Built by one person directing AI coding agents (Claude), one release at a time: about 41,000 lines of engine, about
+1,040 tests, and 49 releases in the changelog since October 21, 2026. The method is the point. The figures behind
+the call are computed by code that tests check against planted answers or independent calculations; every release
+that changed a published number restated it beside the old one; and the code has been through four audits whose
+findings were each reproduced before they were fixed (v0.42.3, v0.42.5, v0.44.1 and v0.47, the last by four
+independent reviews of the math, the record, the data pipeline and the published claims). What the audits found
+is published, not smoothed over.
+
+### Limits
+
+- One book, one decision a day: long only, plus an index short. The executable version for a cash account adds a
+  VIX sleeve (docs/TRADING.md). It does not pick stocks.
+- Backtests start in 2018; the live record started Nov 4, 2026 and is days old.
+- The universe was chosen in 2026. The walk-forward ranks sixteen candidates point in time, but the list itself is
+  hindsight, and no source this build can reach carries delisted names.
+- The drawdown cap is a modeled 95th percentile, not a stop. Under a model where volatility moves, the same size
+  has a deeper bad year than 25% (the Book risk desk; `buildout/sensitivity.py`).
+- The call is sized on public daily closes from a third-party mirror, validated each run. The Databento cross-check
+  uses the last trade before midnight UTC, not the official close (stated in every report).
+- The site's research library reads beyond the call: rules for puts, credit protection and an inflation sleeve are
+  shown on Today's call as research readings. None is in the ledger, the record or the paper account.
+- The trader can act for a person under a signed mandate (docs/TRADING.md). Paper is the default. A live broker
+  trades only on per-ticket approval until 60 sessions have closed with the paper bot holding a position under its
+  current rule and 5 live tickets have filled under approval; that gate is in code. No live order has been placed,
+  and the direct Robinhood route is untested against the live endpoint.

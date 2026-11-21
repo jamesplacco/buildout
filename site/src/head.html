@@ -1226,6 +1226,28 @@ svg.lotus { color: var(--accent); overflow: visible; }
 @media (max-width: 400px) { .hero-mark { width: 48px; height: 48px; } }
 @media print { .br-step { break-inside: avoid; } }
 @media print { .call-board, .cb { break-inside: avoid; } .call-board { overflow: visible; } }
+/* v0.49: the brief. What a desk leaves out on the short page stays out whatever its module does to `hidden`;
+   the one line that leads to the full desk. */
+[data-brief-cut] { display: none !important; }
+.brief-more { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--rule); font-size: var(--t-sm); }
+.brief-more a { color: var(--accent); }
+.is-brief #map-open { display: none; }
+@media (max-width: 700px) {          /* the three records, one under another on a phone */
+  .is-brief #tr-three thead { display: none; }
+  .is-brief #tr-three, .is-brief #tr-three tbody, .is-brief #tr-three tr, .is-brief #tr-three td { display: block; width: auto; }
+  .is-brief #tr-three tr { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  .is-brief #tr-three td { border: 0; padding: 2px 0; text-align: left; }
+  .is-brief #tr-three td:first-child { font-weight: 600; }
+}
+table.limits-brief th.num, table.limits-brief td.num { text-align: right; padding-right: 0; padding-left: 14px; white-space: nowrap; }
+table.limits-brief td { padding-top: 10px; padding-bottom: 10px; }
+table.limits-brief td small { display: block; font-size: var(--t-xs); color: var(--ink-2); font-weight: 400; margin-top: 2px; }
+table.limits.limits-brief tr.breach td.over { color: var(--bad-ink, var(--bad)); font-weight: 600; }
+@media (max-width: 600px) { table.limits.limits-brief th:nth-child(3), table.limits.limits-brief td:nth-child(3) { display: table-cell; } }
+@media screen and (min-width: 1200px) {
+  .is-brief .t7 > .t7-limits { grid-column: 2; grid-row: 3; align-self: start; margin: 6px 0 0; padding: 20px 24px 14px; border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+  .is-brief .t7 > .t7-limits table.limits tr:last-child td { border-bottom: 0; }
+}
 
 /* v0.8 field desk */
 .field select, .field input { max-width: 100%; min-width: 0; }

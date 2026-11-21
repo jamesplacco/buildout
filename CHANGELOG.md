@@ -3,6 +3,33 @@
 Release notes, newest first. The page's Appendix desk carries the same history with dates; the failure log
 (Memos desk) carries every number that turned out wrong.
 
+Version 0.49: the brief. The front page is cut to five pages for a reader who knows finance and has ten minutes. No
+number, rule, call or ledger entry changed, and nothing was deleted: the library carries every desk as before.
+
+- **Five pages, one menu row.** Home, Today's call, Book risk, Track record, How it works. The other ten desks that
+  carried the call (Decision engine, Hedge test, Execution, Inventory, Memos, Fundamentals, Parameters, Data lineage,
+  Architecture, Appendix) are in the library under the four groups they always had, and a link to one opens it there.
+- **Each page is its first screen.** The sections the brief keeps are named in `site/src/boot.js` (`BRIEF_KEEP`);
+  the rest is hidden on the front page and shown in the library. About 2,700 words on screen where the fifteen
+  desks ran to about 62,000. Each page ends with one line of links to the full desk and the two a reader is most
+  likely to want next.
+- **Plain words.** "53% of full size", not "0.53x of the book". "Loss in a bad year", not "one-year drawdown, 95th
+  percentile". "Simulation", with "walk-forward" given once. The short wording is written by the same modules from
+  the same data as the library's (`BUILD_CORE` branches in `today7.js`, `landing.js`, `book.js`, `trackdesk.js`),
+  so the two pages cannot disagree on a number. The formulas are hidden on the brief until asked for.
+- **Today's call** is the call, three steps, why not bonds, what would change it, and the three limits in one card.
+  **Book risk** is the three limits and the menu, seven columns. **Track record** is the three records, four rows of
+  the simulation against holding and the Nasdaq-100, and the hindsight caveat. **Home** leads with the worst loss,
+  then what it cost.
+- **How it works is new on the brief.** The old page explained the forecasting model, which today has no say in the
+  call (its gate is at 0%). The brief's page is the six steps that make the call: measure the risk, apply the
+  limits, offer the hedged alternative, hedge with bonds only when bonds hedge, let a forecast move the size only if
+  it has earned it, record the call first. Then eight terms and what this is not. The old page is in the library.
+- **README** cut from 134 lines to 67; what it carried is in `docs/REFERENCE.md`, unchanged.
+- Tests: `tests/test_v49.py`. `tests/test_v43.py` and `tests/test_v45.py` pinned the fifteen-desk front page and
+  that a desk reads the same on both pages; they now pin the five desks and that the library still carries all
+  sixty-six views.
+
 Version 0.48: accounting, fills and limits. Release 1 of the second outside audit's implementation plan (E01 to
 E05), first built on v0.46 and merged onto v0.47. Each finding was reproduced with an offline fixture, fixed, and
 pinned with hand-calculated tests. The call is unchanged and no ledger entry was rewritten.

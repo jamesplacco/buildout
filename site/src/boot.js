@@ -22,23 +22,25 @@
     ["workshop", "Workshop", "The mathematics behind the rules, and the people they were borrowed from", ["lab", "games", "cardroom", "making", "prop", "legends", "lenses"]],
   ];
   const shelfOf = (v) => SHELVES.find((s) => s[3].includes(v)) || null;
-  const GROUPS = Object.assign({}, CORE_GROUPS, { library: { name: "Library", views: ["library"].concat(SHELVES.flatMap((s) => s[3])) } });
-  const GROUP_ORDER = ["today", "record", "evidence", "engine", "library"];
-  // v0.43: the core page. The same sources build two pages: the full one (every desk, the library) and a core one
-  // that carries only the desks the call depends on: the call and its risk, the record, the evidence, the method.
-  // The assembler sets BUILD_CORE, leaves the other desks' markup and snapshots out, and this drops the fifth group.
-  // A link to a desk the core page does not carry opens the library at that desk.
+  // v0.43: the same sources build two pages; the assembler sets BUILD_CORE for the short one.
+  // v0.49: the short page is the brief: five desks, one each in the menu, written for a reader who knows finance
+  // and has ten minutes. The call, the book, the record and the method are each one page there; the other ten
+  // desks that carried the call (the decision engine, the hedge test, execution, the evidence, the method's
+  // internals) are in the library with everything else, under the four groups they always had.
   const CORE = typeof BUILD_CORE !== "undefined" && BUILD_CORE === true;
+  if (CORE) document.documentElement.classList.add("is-brief");
   const LIBRARY_HREF = typeof BUILD_LIBRARY_HREF === "string" ? BUILD_LIBRARY_HREF : "page.html";
-  const ALL_VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
-  if (CORE) {
-    delete GROUPS.library;
-    GROUP_ORDER.splice(GROUP_ORDER.indexOf("library"), 1);
-  }
+  const BRIEF_VIEWS = ["home", "desk", "book", "track", "explained"];
+  const FULL_GROUPS = Object.assign({}, CORE_GROUPS, { library: { name: "Library", views: ["library"].concat(SHELVES.flatMap((s) => s[3])) } });
+  const FULL_ORDER = ["today", "record", "evidence", "engine", "library"];
+  const ALL_VIEWS = FULL_ORDER.flatMap((g) => FULL_GROUPS[g].views);
+  // on the brief each desk is its own menu entry (a group of one, keyed by the desk), so there is no second row
+  const GROUPS = CORE ? Object.fromEntries(BRIEF_VIEWS.map((v) => [v, { name: null, views: [v] }])) : FULL_GROUPS;
+  const GROUP_ORDER = CORE ? BRIEF_VIEWS.slice() : FULL_ORDER;
   // the page a reader lands on with no link: Home on the core page, the index on the library
   const FRONT = CORE ? "home" : "library";
   // links written for the menu before v0.45 still land somewhere sensible
-  const OLD_GROUPS = { markets: "hedges", research: "digest", reference: "appendix" };
+  const OLD_GROUPS = Object.assign({ markets: "hedges", research: "digest", reference: "appendix" }, CORE ? { today: "home", record: "track", evidence: "inventory", engine: "explained" } : {});
   const VIEWS = GROUP_ORDER.flatMap((g) => GROUPS[g].views);
   const inLibrary = (v) => CORE && ALL_VIEWS.includes(v) && !VIEWS.includes(v);
   // v0.44: one navigation per link. A link is resolved twice on its way to the screen (once to pick the view, once to
@@ -48,7 +50,7 @@
   // history; assigning left that entry behind, so Back from the library landed on it and was sent forward again.
   const toLibrary = (v) => { if (leavingFor === v) return; leavingFor = v; location.replace(LIBRARY_HREF + "#" + v); };
   window.addEventListener("pageshow", () => { leavingFor = null; });          // back from the library: its links work again
-  const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || "today";
+  const groupOf = (v) => GROUP_ORDER.find((g) => GROUPS[g].views.includes(v)) || GROUP_ORDER[0];
   const lastInGroup = {};
   function goGroup(g) {
     if (!GROUPS[g]) return;
@@ -75,7 +77,7 @@
   };
   function foldDesk(view) {
     const keep = FOLD[view], root = $("#view-" + view);
-    if (!keep || !root || root.dataset.folded) return;
+    if (CORE || !keep || !root || root.dataset.folded) return;          // v0.49: the brief cuts (briefDesk), it does not fold
     const secs = [...root.children].filter((e) => e.matches("section.section"));
     const rest = secs.filter((s) => !keep.includes(s.getAttribute("aria-labelledby")));
     if (!rest.length || rest.reduce((a, s) => a + s.innerText.length, 0) < 2500) { root.dataset.folded = "1"; return; }
@@ -86,6 +88,70 @@
     rest[0].before(det);
     rest.forEach((s) => det.append(s));
     root.dataset.folded = "1";
+  }
+  // v0.49: THE BRIEF. On the short page a desk is one page: the sections named here, in order, and nothing else.
+  // What is left out is hidden, not deleted (the modules that draw it still run, and the library shows all of it);
+  // a link into a hidden part opens the library there. BRIEF_KEEP lists sections by aria-labelledby; BRIEF_HIDE
+  // lists anything else on the desk that the short page drops.
+  const BRIEF_KEEP = {
+    book: ["bk-size-t", "bk-front-t"],
+    track: ["tr-three-t", "tr-wf-t", "tr-surv-t"],
+    explained: ["hw-call-title", "hw-words-title", "hw-not-title"],
+    desk: [],
+  };
+  const BRIEF_HIDE = {
+    desk: ["#brief", "#call-board", "#t7-sizing", ".rosette-end"],
+    book: [],
+    track: ["#tr-restate-p", "#tr-restate-w", "#tr-hind"],
+    explained: [],
+    home: ['[aria-labelledby="hm-how-t"]'],
+  };
+  const BRIEF_WORDS = {
+    "bk-title": "How risky the book is, and how much of it the limits allow",
+    "bk-size-t": "Three limits, and the one that decides",
+    "bk-front-t": "Every mix of size and hedge that meets the limits",
+    "tr-title": "The track record: what the rule would have done, and what it has done live",
+    "tr-three-t": "Three records, from least to most trustworthy",
+    "tr-wf-t": "The simulation: smaller losses, at a cost",
+    "tr-surv-t": "The catch: the stocks were picked with hindsight",
+    "hw-title": "How the call is made",
+    "hw-words-title": "Eight terms, one line each",
+    "hw-not-title": "What this is not",
+  };
+  // the short label over each heading (the rail beside the page lists these)
+  const BRIEF_LABEL = { "bk-size-t": "The size", "bk-front-t": "The choices", "tr-three-t": "Three records", "tr-wf-t": "The simulation", "tr-surv-t": "The catch", "hw-words-title": "The terms", "hw-not-title": "What it is not" };
+  const BRIEF_LEDE = {
+    track: "A rule earns trust from calls made in advance. This page shows what is simulated, what is live, and where the simulation flatters itself.",
+    explained: "The call comes from risk limits, not from a view on prices. Six steps, the terms they use, and what this is not.",
+  };
+  // the desks in the library that a reader of this page is most likely to want next
+  const BRIEF_NEXT = {
+    desk: [["hedgetest", "Why not bonds: the hedge test"], ["decision", "The forecasting model and its gate"]],
+    book: [["hedgetest", "Which hedge protected this book"], ["execution", "How a call becomes orders"]],
+    track: [["memos", "The failure log: every mistake found so far"], ["execution", "The paper account"]],
+    explained: [["parameters", "Every value set by hand"], ["engines", "Where each number comes from"]],
+  };
+  const briefCut = (el) => { if (el) { el.hidden = true; el.dataset.briefCut = "1"; } };
+  function briefDesk(view) {
+    const root = $("#view-" + view);
+    if (!CORE || !root || root.dataset.brief) return;
+    const keep = BRIEF_KEEP[view];
+    if (keep) [...root.children].filter((e) => e.matches("section.section") && !keep.includes(e.getAttribute("aria-labelledby"))).forEach(briefCut);
+    (BRIEF_HIDE[view] || []).forEach((sel) => root.querySelectorAll(sel).forEach(briefCut));
+    root.querySelectorAll(":scope > .toc, :scope > .dguide").forEach(briefCut);
+    Object.entries(BRIEF_WORDS).forEach(([id, txt]) => { const el = root.querySelector("#" + id); if (el) el.textContent = txt; });
+    Object.entries(BRIEF_LABEL).forEach(([id, txt]) => { const el = root.querySelector("#" + id), eb = el && el.parentElement.querySelector(":scope > .eyebrow"); if (eb) eb.textContent = txt; });
+    const lede = root.querySelector(":scope > .vhead > .lede");
+    if (lede && BRIEF_LEDE[view]) lede.textContent = BRIEF_LEDE[view];
+    if (view !== "home") {
+      const p = h("p", "brief-more"), a = h("a", null, `${TAB_NAME[view]} in full`);
+      a.href = LIBRARY_HREF + "#" + view;
+      p.append(h("span", "brief-more-k", "In the library: "), a);
+      (BRIEF_NEXT[view] || []).forEach(([v, txt]) => { const x = h("a", null, txt); x.href = LIBRARY_HREF + "#" + v; p.append(document.createTextNode(" · "), x); });
+      const nx = root.querySelector(":scope > .dnext");
+      if (nx) nx.before(p); else root.append(p);
+    }
+    root.dataset.brief = "1";
   }
   const RENDER = {
     atlas: () => guard("The atlas", renderAtlasDesk, $("#atv-tiles")),
@@ -101,7 +167,7 @@
     agents: () => {},
     desk: () => { guard("Today", renderToday7, $("#today7")); guard("Landing", renderLanding, $("#call-board")); guard("Nowcast today", renderNowcastToday, $("#t7-nowcast")); guard("Edge lab today", renderEdgesToday, $("#t7-edges")); guard("Rosette", () => drawRosette(true)); },
     parameters: () => guard("The parameters", renderParameters, $("#pm-tiles")),
-    explained: () => guard("How it works", renderExplained, $("#hw-read")),
+    explained: () => { guard("How it works", renderExplained, $("#hw-read")); if (CORE) guard("How the call is made", renderBriefMethod, $("#hw-read")); },
     digest: () => guard("Research digest", renderDigest, $("#dg-tiles")),
     reasoning: () => guard("Reasoning", renderReasoning, $("#rs-tiles")),
     filings: () => guard("Filings", renderFilings, $("#fl-tiles")),
@@ -166,6 +232,7 @@
     // v0.47: any id this page does not carry is a link into the library, which has every desk. Before, only the three
     // families above were sent on and every other one (a finding, a decision, a tool) opened Home without a word.
     if (!el && CORE && /^[A-Za-z][\w-]*$/.test(token)) { toLibrary(token); return { view: current || "home", el: null }; }
+    if (el && CORE && el.closest("[data-brief-cut]")) { toLibrary(token); return { view: current || "home", el: null }; }      // v0.49: hidden on the brief
     const v = el && el.closest(".view");
     return v ? { view: v.id.slice(5), el } : { view: FRONT, el: null };      // v0.38: an unknown link opens the front page (v0.45: the library's is its index)
   }
@@ -220,6 +287,7 @@
     guard(TAB_NAME[view], RENDER[view]);
     guard("Snapshot badge", () => snapBadge(view));
     guard("Fold", () => foldDesk(view));
+    guard("Brief", () => briefDesk(view));
     guard("Rail", () => { railFor(view); guideHere(); });          // v0.46: the desk's sections, beside it
     hideTip();
     if (el && el.id && !el.isConnected) el = document.getElementById(el.id) || el;     // v0.31: the desk re-rendered after the link resolved
@@ -236,13 +304,14 @@
     document.documentElement.classList.toggle("math-off", !on);
     const b = $("#math-toggle");
     if (b) { b.setAttribute("aria-pressed", on ? "true" : "false"); b.title = on ? "Hide the formulas" : "Show every formula on the page"; const l = b.querySelector(".lab-t"); if (l) l.textContent = on ? "Hide the math" : "Show the math"; }
-    LS.set("bo-math25", on);
+    LS.set(CORE ? "bo-math49" : "bo-math25", on);
   }
   const toggleMath = () => setMath(!document.documentElement.classList.contains("math-on"));
   function wireMath() {
     const b = $("#math-toggle");
     if (b) b.addEventListener("click", toggleMath);
-    setMath(LS.get("bo-math25", true) !== false);          // v0.25: the math shows by default; the button hides it
+    // v0.25: the math shows by default; the button hides it. v0.49: on the brief it is hidden until asked for.
+    setMath(CORE ? LS.get("bo-math49", false) === true : LS.get("bo-math25", true) !== false);
   }
 
   /* ---------- search: the v0.5 desks join the index ---------- */

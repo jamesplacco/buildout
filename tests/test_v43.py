@@ -38,15 +38,16 @@ def test_both_pages_are_current():
 
 
 def test_the_core_page_carries_the_core_desks_and_no_others():
-    assert sorted(_views(CORE)) == sorted(A.CORE_VIEWS) and len(A.CORE_VIEWS) == 15
+    assert sorted(_views(CORE)) == sorted(A.CORE_VIEWS) and len(A.CORE_VIEWS) == 5          # v0.49: the brief
     assert len(_views(FULL)) == 66 and set(A.CORE_VIEWS) < set(_views(FULL)), "the full page is the library: every desk"
     boot = (SRC / "boot.js").read_text()
     groups = re.search(r"const CORE_GROUPS = \{(.*?)\n  \};", boot, flags=re.S).group(1)
     in_groups = re.findall(r'"([a-z0-9]+)"', " ".join(re.findall(r"views: \[(.*?)\]", groups)))
-    assert sorted(in_groups) == sorted(A.CORE_VIEWS), "the navigation and the markup name the same desks"
+    assert set(A.CORE_VIEWS) < set(in_groups) and len(in_groups) == 15, "the brief's desks are five of the library's fifteen"
+    assert json.loads(re.search(r"const BRIEF_VIEWS = (\[[^\]]+\]);", boot).group(1)) == A.CORE_VIEWS, "the navigation and the markup name the same desks"
     assert "const BUILD_CORE = true;" in CORE and "const BUILD_CORE = false;" in FULL
     nav = re.search(r'<nav class="tabs".*?</nav>', CORE, flags=re.S).group(0)
-    assert [m for m in re.findall(r">([A-Za-z]+)</a>", nav)] == ["Call", "Record", "Evidence", "Method", "Library"]
+    assert re.findall(r">([A-Za-z' ]+)</a>", nav) == ["Home", "Today's call", "Book risk", "Track record", "How it works", "Library"]
     assert 'href="page.html" class="lib-link"' in nav
 
 
@@ -88,7 +89,7 @@ def test_cutting_a_desk_needs_balanced_markup():
 def test_a_link_to_a_library_desk_opens_the_library():
     boot = (SRC / "boot.js").read_text()
     assert "if (inLibrary(token)) { toLibrary(token);" in boot and 'location.replace(LIBRARY_HREF + "#" + v)' in boot
-    assert "const ALL_VIEWS = GROUP_ORDER.flatMap" in boot.split("if (CORE) {")[0], "the full list is taken before the groups are swapped"
+    assert "const ALL_VIEWS = FULL_ORDER.flatMap((g) => FULL_GROUPS[g].views);" in boot, "the full list is the library's, whichever page this is"
     v = (SRC / "views.js").read_text()
     assert "BUILD_CORE === true && !(box && box.isConnected)" in v, "a step with no panel on the core page is skipped, not reported as failed"
 
@@ -134,21 +135,20 @@ def test_the_core_page_renders_every_desk_without_an_error(probes):
     for v, x in c["views"].items():
         assert x["shown"] and x["chars"] > 800 and not x["errors"] and not x["used"]["errors"], (v, x)
     assert c["search"] and c["search"] > 3 and c["overflow"] == []
-    assert [n[0] for n in c["nav"]] == ["Call", "Record", "Evidence", "Method", "Library"]
+    assert [n[0] for n in c["nav"]] == ["Home", "Today's call", "Book risk", "Track record", "How it works", "Library"]
 
 
-def test_every_core_desk_is_the_same_desk_on_both_pages(probes):
-    """What was cut was not needed: a core desk's text and behaviour are identical on the core page and on the full
-    page, before and after it is used. Left out of the comparison: the guide card on each desk (it names the page's
-    own groups), the part of the Desk the core page cuts on purpose, and the glossary, which lists the terms of the
-    page it is on."""
+def test_the_brief_is_shorter_and_the_library_is_whole(probes):
+    """Until v0.49 a core desk read the same on both pages. The brief (v0.49) words its five desks for a reader with
+    ten minutes and shows only each desk's first screen, so the two are no longer equal text for text. What must
+    hold instead: every desk draws on both pages without an error, what the brief leaves out is still in its markup
+    (hidden, so the modules that draw it run) and in the library, and the brief draws no chart the library does
+    not. tests/test_v49.py holds the brief's numbers to the library's."""
     c, f = probes["core"]["views"], probes["full"]["views"]
     for v in A.CORE_VIEWS:
-        assert c[v]["body_hash"] == f[v]["body_hash"], f"{v} reads differently on the core page"
-        assert c[v]["used"]["body_hash"] == f[v]["used"]["body_hash"], f"{v} behaves differently on the core page"
-        if v not in ("desk", "appendix"):
-            assert c[v]["rows"] == f[v]["rows"] and c[v]["svgs"] == f[v]["svgs"] and c[v]["used"]["marks"] == f[v]["used"]["marks"], v
-    assert c["desk"]["chars"] < 0.6 * f["desk"]["chars"], "the Desk on the core page ends at what would reverse the call"
+        assert not c[v]["errors"] and not f[v]["errors"] and not c[v]["used"]["errors"], v
+        assert c[v]["svgs"] <= f[v]["svgs"], v
+    assert c["desk"]["chars"] < 0.6 * f["desk"]["chars"], "the Desk on the core page ends at what would change the call"
 
 
 def test_the_core_page_fits_a_phone(probes):

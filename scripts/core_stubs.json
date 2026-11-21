@@ -550,6 +550,121 @@
   "badges.js": {
    "consts": [],
    "funcs": []
+  },
+  "snap24.js": {
+   "consts": [
+    "SNAP24",
+    "DIGEST24"
+   ],
+   "funcs": []
+  },
+  "snap11.js": {
+   "consts": [
+    "OODA_SNAP",
+    "ENGINES_SNAP"
+   ],
+   "funcs": []
+  },
+  "memos.js": {
+   "consts": [
+    "MEMOS",
+    "FAILURES"
+   ],
+   "funcs": [
+    "renderMemos"
+   ]
+  },
+  "execdesk.js": {
+   "consts": [
+    "EX_DEFAULT"
+   ],
+   "funcs": [
+    "exTarget",
+    "renderExecution",
+    "renderTrader",
+    "renderVix"
+   ]
+  },
+  "snap23.js": {
+   "consts": [
+    "SNAP23",
+    "THETA23"
+   ],
+   "funcs": []
+  },
+  "trading.js": {
+   "consts": [
+    "gmSpread",
+    "sqrtImpact",
+    "growthPerTrade",
+    "chalTimer",
+    "scheduleChallenge"
+   ],
+   "funcs": [
+    "asQuotes",
+    "acTrajectory",
+    "acCost",
+    "edgeStats",
+    "readRange",
+    "updateEdge",
+    "simChallenge",
+    "chalState",
+    "labelsChallenge",
+    "updateChallenge",
+    "podNet",
+    "updatePods",
+    "simAS",
+    "asState",
+    "updateAS",
+    "updateGM",
+    "exState",
+    "updateExec",
+    "renderTape",
+    "buildTrading"
+   ]
+  },
+  "dx.js": {
+   "consts": [
+    "dxYear",
+    "dxX",
+    "dxTicks"
+   ],
+   "funcs": [
+    "dxOk",
+    "dxKpis",
+    "dxRebuild",
+    "renderDecision",
+    "dxCharts"
+   ]
+  },
+  "reading.js": {
+   "consts": [
+    "RR",
+    "RR_TYPE",
+    "RR_STATE",
+    "RR_PAGE",
+    "RR_PICKS",
+    "RQ_CLOUD_RUN"
+   ],
+   "funcs": [
+    "renderReading",
+    "requiredRevenue",
+    "renderRailway",
+    "bindRailway"
+   ]
+  },
+  "robustb.js": {
+   "consts": [
+    "MODEL_NAME",
+    "MODEL_COL",
+    "EQ_NAME",
+    "topModel"
+   ],
+   "funcs": [
+    "robustOk",
+    "robustData",
+    "renderRobustBrain"
+   ]
   }
  }
 }

@@ -31,7 +31,7 @@ SCRIPTS = ["math.js", "engine7.js", "ui.js", "data.js", "reference.js", "researc
 
 # ---------------------------------------------------------------- the core page (v0.43)
 CORE_OUT = ROOT / "site" / "core.html"
-CORE_VIEWS = ["home", "desk", "book", "decision", "hedgetest", "track", "execution", "inventory", "memos", "fundamentals", "explained", "parameters", "engines", "engine", "appendix"]
+CORE_VIEWS = ["home", "desk", "book", "track", "explained"]          # v0.49: the brief (boot.js BRIEF_VIEWS)
 # Files only the library's desks use are left out of the core page: each is replaced by inert stand-ins for the names it
 # declares (STUB below), so the modules that read them at load still load, and nothing on the core page renders from
 # them. The list is scripts/core_stubs.json, found by scripts/prune_core.py, which leaves a file out only if every core
@@ -47,11 +47,12 @@ STUB = """  // An inert stand-in for data the core page does not carry: any prop
     get: (t, k) => (k === Symbol.iterator ? function* () {} : k === Symbol.toPrimitive ? () => 0 : k === "length" ? 0 : k === "then" ? undefined : p),
     apply: () => p, has: () => false, ownKeys: () => [], getOwnPropertyDescriptor: () => undefined, set: () => true }); return p; })();"""
 CORE_NAV = """    <nav class="tabs" aria-label="Sections">
-      <a href="#home" data-group="today">Call</a>
-      <a href="#track" data-group="record">Record</a>
-      <a href="#inventory" data-group="evidence">Evidence</a>
-      <a href="#explained" data-group="engine">Method</a>
-      <a href="page.html" class="lib-link" id="lib-link" title="Every other desk: the research library">Library</a>
+      <a href="#home" data-group="home">Home</a>
+      <a href="#desk" data-group="desk">Today's call</a>
+      <a href="#book" data-group="book">Book risk</a>
+      <a href="#track" data-group="track">Track record</a>
+      <a href="#explained" data-group="explained">How it works</a>
+      <a href="page.html" class="lib-link" id="lib-link" title="The full research: sixty more desks, every table, test and formula">Library</a>
     </nav>"""
 
 
@@ -159,7 +160,7 @@ def assemble(src: Path = SRC, core: bool = False, stubs: dict | None = None) -> 
 
 
 # ---------------------------------------------------------------- links on the core page (v0.47)
-# The core page carries fifteen desks; a link on it to anything else must open the library there (boot.js resolve()).
+# The core page carries five desks (fifteen before v0.49); a link on it to anything else must open the library there (boot.js resolve()).
 # Before v0.47 a link to an element of a library desk (a finding, a decision, a tool) opened Home without a word:
 # fourteen targets on Today's call and the Appendix did. This is the build's check that every internal link the core
 # page can show has a target: a core desk, an element of the core page, or a desk or element of the library.

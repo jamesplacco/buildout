@@ -17,9 +17,12 @@
   const T_ORDER = T_ORDER_ALL;     // policies a build does not carry are skipped where the table is filled
   const CONTACT = { name: "James Placco", links: [["LinkedIn", "https://www.linkedin.com/in/james-placco/"]] };     // set in one place
 
+  // v0.49: the brief's names for the policies it shows
+  const BRIEF_POLICY = { call: "The rule", call_short: "The rule with the index short", hold: "Held in full", qqq: "Nasdaq-100" };
+  const polName = (k) => (BUILD_CORE && BRIEF_POLICY[k]) || (k === "qqq" ? "Nasdaq-100 (QQQ)" : SNAP38.policy_name[k]);
   function trackCurve(box, W, keys, title, height = 260) {
     const col = { call: "var(--accent)", call_short: "var(--s2)", product: "var(--s3)", vm_rule: "var(--s4)", bond30: "var(--s5)", call_rl: "#8e5bd1", call_simple: "#b07bd9", hold: "var(--muted)", qqq: "var(--warn)" };
-    const series = keys.filter((k) => W.curve[k]).map((k) => ({ name: k === "qqq" ? "Nasdaq-100 (QQQ)" : SNAP38.policy_name[k], color: col[k], width: k === "call" ? 2.5 : 1.5, pts: W.curve[k].map(([d, v]) => [Date.parse(d), v]) }));
+    const series = keys.filter((k) => W.curve[k]).map((k) => ({ name: polName(k), color: col[k], width: k === "call" ? 2.5 : 1.5, pts: W.curve[k].map(([d, v]) => [Date.parse(d), v]) }));
     const p0 = series[0].pts;
     xyChart(box, { series, yfmt: (v) => "$" + fx(v, 2), xfmt: dateLabel, xticks: yearTicks(p0[0][0], p0[p0.length - 1][0]), label: title, height, snapXs: p0.map((p) => p[0]) });
   }
@@ -129,24 +132,46 @@
     if (!tiles) return;
     if (!T) { tiles.replaceChildren(h("p", "empty", "The track record is not in this build.")); return; }
     const W = T.pit, C = W.policies.call, CS = W.policies.call_short, Hd = W.policies.hold, L = T.live, V = T.ledger && T.ledger.verify;
-    rsKpi(tiles, [
-      [String(L.calls || 0), "Calls in the ledger", V && V.ok ? `hash chain verified; the first governs from ${isoNice(governsFrom(T.ledger.entries[0]))}` : "ledger does not verify"],
-      [fx(C.net.sharpe, 2), "Walk-forward Sharpe, the call", `${isoNice(C.net.from)} to ${isoNice(C.net.to)}, net of costs; holding: ${fx(Hd.net.sharpe, 2)}`],
-      [tP(C.net.maxdd, 0), "Worst drawdown, the call", `holding the book: ${tP(Hd.net.maxdd, 0)}; the Nasdaq-100: ${tP(W.bench.maxdd, 0)}`],
-      [fx(CS.net.sharpe, 2), "Sharpe, the names with the call's short", `worst drawdown ${tP(CS.net.maxdd, 0)}; 2022 ${tS(CS.net.y2022, 0)} (holding ${tS(Hd.net.y2022, 0)})`]]);
-    // the three records
-    const bt = T.backtest;
-    fillTable($("#tr-three"), ["Record", "What it is", "Span", "Reading", "Can it have been fitted?"], [
-      ["1. Backtest", `The full-history size (${xx(bt.size)}, ${bt.binding.replace(/_/g, " ")} binding) applied to the same history, on today's nine names`, `${isoNice(bt.stats.from)} to ${isoNice(bt.stats.to)}`, `CAGR ${tS(bt.stats.cagr)}, volatility ${tP(bt.stats.vol)}, worst drawdown ${tP(bt.stats.maxdd, 0)}`, "Yes: the names and the size were both chosen knowing the history"],
-      ["2. Walk-forward", "Size and hedge recomputed at every month-end from data to that close, held the next month, costs charged, universe chosen point in time", `${isoNice(C.net.from)} to ${isoNice(C.net.to)}`, `CAGR ${tS(C.net.cagr)}, volatility ${tP(C.net.vol)}, worst drawdown ${tP(C.net.maxdd, 0)}, Sharpe ${fx(C.net.sharpe, 2)}`, "Only through the design: the rules and the limits were set in 2026"],
-      ["3. Live paper", "The calls written to the hash-chained ledger before the next bar, marked as prices arrive", (L.first_effective || L.first_call) ? `from ${isoNice((L.first_effective || L.first_call).slice(0, 10))}` : "starts Nov 4, 2026", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked to ${isoNice(L.last_mark || T.asof)}: ${tS(L.total, 1)}${L.stats ? `, ${tS(L.stats.cagr)} annualized` : " (too short to annualize)"}` : "No day of marks yet", "No: every call is timestamped before its first day"]], 1);
-    $("#tr-three-p").textContent = `A portfolio manager judges an analyst by calls made in advance, sized sensibly, and honest when wrong. These are three different records and they never share a chart. The backtest shows the rule with hindsight; the walk-forward record is the honest estimate; the live record is the only one that cannot have been fitted, and it ${L.first_effective ? `started ${isoNice(L.first_effective)}` : "starts with the first logged call"}.`;
+    const bt = T.backtest, Q = W.bench;
+    const liveTxt = L.marked_days ? `${tS(L.total, 1)} over ${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"}` : "no days marked yet";
+    const liveFrom = (L.first_effective || L.first_call) ? isoNice((L.first_effective || L.first_call).slice(0, 10)) : "Nov 4, 2026";
+    if (BUILD_CORE) {            // v0.49: the brief: four numbers against their two benchmarks, and the three records in plain words
+      rsKpi(tiles, [
+        [tP(C.net.maxdd, 0), "Worst loss under the rule", `held in full ${tP(Hd.net.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`],
+        [tS(C.net.cagr, 1), "Return a year under the rule", `held in full ${tS(Hd.net.cagr, 1)}; Nasdaq-100 ${tS(Q.cagr, 1)}`],
+        [fx(C.net.sharpe, 2), "Sharpe ratio under the rule", `held in full ${fx(Hd.net.sharpe, 2)}; Nasdaq-100 ${fx(Q.sharpe, 2)}`],
+        [String(L.calls || 0), "Live calls on record", `${liveTxt} since ${liveFrom}`]]);
+      fillTable($("#tr-three"), ["Record", "What it is", "Result", "Can it be flattered?"], [
+        ["1. Backtest", "Today's size applied to the whole history, on today's nine stocks", `${tS(bt.stats.cagr, 1)} a year, worst loss ${tP(bt.stats.maxdd, 0)}`, "Yes. The stocks and the size were both chosen knowing the history"],
+        ["2. Simulation", "The size recomputed every month from what was known then, trading costs charged. Also called a walk-forward test", `${tS(C.net.cagr, 1)} a year, worst loss ${tP(C.net.maxdd, 0)}, Sharpe ratio ${fx(C.net.sharpe, 2)}`, "Partly. The rules were designed in 2026, with the history in view"],
+        ["3. Live", "Calls logged before they take effect, then marked every trading day", `${liveTxt} (too short to judge)`, "No. Each call is timestamped before its first day"]], 4);
+      $("#tr-three-p").textContent = `Judge a rule by calls made in advance. The backtest knows the future. The simulation uses only what was known at each date. The live record cannot be changed after the fact, and it started ${liveFrom}.`;
+    } else {
+      rsKpi(tiles, [
+        [String(L.calls || 0), "Calls in the ledger", V && V.ok ? `hash chain verified; the first governs from ${isoNice(governsFrom(T.ledger.entries[0]))}` : "ledger does not verify"],
+        [fx(C.net.sharpe, 2), "Walk-forward Sharpe, the call", `${isoNice(C.net.from)} to ${isoNice(C.net.to)}, net of costs; holding: ${fx(Hd.net.sharpe, 2)}`],
+        [tP(C.net.maxdd, 0), "Worst drawdown, the call", `holding the book: ${tP(Hd.net.maxdd, 0)}; the Nasdaq-100: ${tP(W.bench.maxdd, 0)}`],
+        [fx(CS.net.sharpe, 2), "Sharpe, the names with the call's short", `worst drawdown ${tP(CS.net.maxdd, 0)}; 2022 ${tS(CS.net.y2022, 0)} (holding ${tS(Hd.net.y2022, 0)})`]]);
+      // the three records
+      fillTable($("#tr-three"), ["Record", "What it is", "Span", "Reading", "Can it have been fitted?"], [
+        ["1. Backtest", `The full-history size (${xx(bt.size)}, ${bt.binding.replace(/_/g, " ")} binding) applied to the same history, on today's nine names`, `${isoNice(bt.stats.from)} to ${isoNice(bt.stats.to)}`, `CAGR ${tS(bt.stats.cagr)}, volatility ${tP(bt.stats.vol)}, worst drawdown ${tP(bt.stats.maxdd, 0)}`, "Yes: the names and the size were both chosen knowing the history"],
+        ["2. Walk-forward", "Size and hedge recomputed at every month-end from data to that close, held the next month, costs charged, universe chosen point in time", `${isoNice(C.net.from)} to ${isoNice(C.net.to)}`, `CAGR ${tS(C.net.cagr)}, volatility ${tP(C.net.vol)}, worst drawdown ${tP(C.net.maxdd, 0)}, Sharpe ${fx(C.net.sharpe, 2)}`, "Only through the design: the rules and the limits were set in 2026"],
+        ["3. Live paper", "The calls written to the hash-chained ledger before the next bar, marked as prices arrive", (L.first_effective || L.first_call) ? `from ${isoNice((L.first_effective || L.first_call).slice(0, 10))}` : "starts Nov 4, 2026", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked to ${isoNice(L.last_mark || T.asof)}: ${tS(L.total, 1)}${L.stats ? `, ${tS(L.stats.cagr)} annualized` : " (too short to annualize)"}` : "No day of marks yet", "No: every call is timestamped before its first day"]], 1);
+      $("#tr-three-p").textContent = `A portfolio manager judges an analyst by calls made in advance, sized sensibly, and honest when wrong. These are three different records and they never share a chart. The backtest shows the rule with hindsight; the walk-forward record is the honest estimate; the live record is the only one that cannot have been fitted, and it ${L.first_effective ? `started ${isoNice(L.first_effective)}` : "starts with the first logged call"}.`;
+    }
     // the walk-forward record
     const ev = (k) => { const c = W.curve[k]; return c && c.length ? "$" + fx(c[c.length - 1][1], 2) : "n/a"; };
-    trackCurve($("#tr-curve"), W, ["call", "call_short", "hold", "qqq"], `Walk-forward growth of $1, net of costs, point-in-time universe: the call ends at ${ev("call")}, the names with the short at ${ev("call_short")}, the book at 1.00x at ${ev("hold")}, the Nasdaq-100 at ${ev("qqq")}`);
-    policyTable($("#tr-pol"), W, "net");
+    trackCurve($("#tr-curve"), W, ["call", "call_short", "hold", "qqq"], BUILD_CORE ? `Growth of $1 in the simulation, after costs: the rule ends at ${ev("call")}, the rule with the index short at ${ev("call_short")}, the book held in full at ${ev("hold")}, the Nasdaq-100 at ${ev("qqq")}` : `Walk-forward growth of $1, net of costs, point-in-time universe: the call ends at ${ev("call")}, the names with the short at ${ev("call_short")}, the book at 1.00x at ${ev("hold")}, the Nasdaq-100 at ${ev("qqq")}`);
     const LR = T.live_rule, CSm = W.policies.call_simple;
+    if (BUILD_CORE) {            // v0.49: four rows, five columns, and what the comparison says
+      const row = (k, n) => [polName(k), tS(n.cagr, 1), tP(n.vol, 0), fx(n.sharpe, 2), tP(n.maxdd, 0), tS(n.y2022, 0)];
+      fillTable($("#tr-pol"), ["", "Return a year", "Volatility", "Sharpe ratio", "Worst loss", "2022"],
+        ["call", "call_short", "hold"].filter((k) => W.policies[k]).map((k) => row(k, W.policies[k].net)).concat([row("qqq", Q)]), 1);
+      $("#tr-pol-p").textContent = `Each month the rule sets the size from what was known at that month's close and holds it for the next month. Trading costs are charged. "The rule" holds the share the limits allow; "with the index short" holds all of it and shorts the Nasdaq-100. On average it held ${pct0(C.meta.avg_gross)} of full size. Against holding the book in full, the return fell from ${tS(Hd.net.cagr, 1)} a year to ${tS(C.net.cagr, 1)} and the worst loss fell from ${tP(Hd.net.maxdd, 0)} to ${tP(C.net.maxdd, 0)}. That trade is the product: smaller losses, at a cost.`;
+    } else {
+    policyTable($("#tr-pol"), W, "net");
     $("#tr-pol-p").textContent = `${LR ? `Since v0.40 the call is sized by the live rule itself (book.build: factor-model volatility, three tail models, the drawdown simulation), run at each of ${LR.months} month-ends on that year's point-in-time names${LR.fallbacks ? `; ${LR.fallbacks} early month${LR.fallbacks === 1 ? "" : "s"} with too little history used the simple limits` : ""}. The simpler stand-in it replaced is kept as a row: the live rule earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(CSm ? CSm.net.sharpe : NaN, 2)} for the stand-in, so the record now reads lower and is the honest one. Read with the short, the same rule earned ${fx(CS.net.sharpe, 2)}${(() => { const V = universeVerdict(T); return V && V.edgeIsNames ? `: sizing down protects, and on these names the short kept the return. That last part is the names beating the index (${V.alpha(V.pit)} by regression), not the hedge; the universe checks below${keptTag("universe")} test it off the list` : ": sizing down protects, the short keeps the return"; })()}. ` : ""}Each policy is decided at a month-end close from data to that close, frozen, and held through the next month. ${W.policies.call.meta ? `The call averaged ${xx(W.policies.call.meta.avg_gross)}; the hedged variant shorted ${tP(W.policies.call_short.meta.avg_short, 0)} of NAV on average${LR && fin(LR.high_end_below_full_size) ? `, with the names at ${xx(W.policies.call_short.meta.avg_gross)} on average: it is the high end of the menu as logged, every name at full size in ${LR.months - LR.fallbacks - LR.high_end_below_full_size} of ${LR.months - LR.fallbacks} months, and in the other ${LR.high_end_below_full_size} the largest row inside the ${xx(LR.total_gross_limit)} limit on long plus short, because full size would have taken a short above 100% of NAV` : ""}.` : ""} The book is held at equal weights, restored every day, and the size is held at its share of NAV every day; the trades that takes are counted in the turnover column and charged (v0.42.5: before, only each January's change of names and each change of size were). Costs: stocks ${SNAP38.cost.stock_bp} bp per dollar traded, futures ${SNAP38.cost.fut_bp} bp a trade plus ${SNAP38.cost.roll_bp_q} bp a quarter to roll, borrowing above 1.00x at cash plus ${fx(SNAP38.cost.borrow_spread * 1e4, 0)} bp. The "before costs" column shows what they take.`;
+    }
     // v0.42.5: the restatement, published beside the record it changed
     const RS = T.restated, rp = $("#tr-restate-p"), rw = $("#tr-restate-w");
     if (rp && rw) { rp.hidden = !RS; rw.hidden = !RS; }
@@ -160,8 +185,10 @@
     // survivorship
     const sv = T.survivorship, mem = T.members, yrs = Object.keys(mem).sort();
     const gapPts = sv.gap_cagr * 100, Hh = T.hindsight.policies.hold.net, Hp = W.policies.hold.net;
+    const UVb = BUILD_CORE ? universeVerdict(T) : null;
+    if (BUILD_CORE) $("#tr-surv-p").textContent = `The nine stocks are in the book because they did well, and a record built on winners flatters itself. To limit that, the simulation picks its nine each January from sixteen AI candidates, by trading volume, using only earlier data. That helps but does not cure it: the list of sixteen was written in 2026, so a company that failed never appears.${UVb && UVb.cutsDD ? ` The same rule run on baskets someone else chose (the Nasdaq-100, semiconductors, robotics and AI) cut the worst loss every time${UVb.callBeatsHold === 0 ? " and gave up return per unit of risk every time" : ""}.` : ""} Read this record as evidence about the rule, not about the stocks.`; else
     $("#tr-surv-p").textContent = `Today's nine names were not the obvious nine in 2018. The walk-forward record holds, each January, the nine names with the largest trailing-year dollar volume among sixteen AI buildout candidates, using only data before that January. Holding today's nine with hindsight grew ${tS(sv.hindsight_hold_cagr)} a year; the point-in-time nine grew ${tS(sv.pit_hold_cagr)}. ${Math.abs(gapPts) < 1 ? `The return gap is ${fx(Math.abs(gapPts), 1)} points a year, close to nothing: the rule kept picking the same leaders (Nvidia, Microsoft, Amazon, Meta, Alphabet and Tesla are in every year), and the semiconductor names it held instead of today's later arrivals (Intel, Micron, AMD) roughly offset each other. Hindsight here flatters the risk more than the return: the point-in-time book fell ${tP(Hp.maxdd, 0)} at worst against ${tP(Hh.maxdd, 0)}, and ${tS(Hp.y2022, 0)} in 2022 against ${tS(Hh.y2022, 0)}.` : `A gap of ${fx(gapPts, 1)} points a year that a backtest on today's names would have claimed as skill.`} The candidate list itself was chosen in 2026, so a company that failed, was delisted or was forgotten cannot appear: that residual bias remains, it points the same way, and the comparison above measures only the bias among the sixteen. The honest label for this record is a walk-forward rule on a retrospectively selected universe.`;
-    fillTable($("#tr-mem"), ["Year", "The nine names held, chosen the January before"], yrs.map((y) => [y, mem[y].join(", ")]), 2);
+    fillTable($("#tr-mem"), ["Year", BUILD_CORE ? "The nine stocks the simulation held, chosen that January" : "The nine names held, chosen the January before"], yrs.map((y) => [y, mem[y].join(", ")]), 2);
     const H2 = T.hindsight;
     fillTable($("#tr-hind"), ["Policy, on today's nine (hindsight)", "CAGR, net", "Sharpe", "Max drawdown", "2022"], T_ORDER.filter((k) => H2.policies[k]).map((k) => { const n = H2.policies[k].net; return [({ call: "The call: the simple limits (the live rule is run on the point-in-time book only)", call_short: "Full size, the simple limits' Nasdaq-100 short" })[k] || SNAP38.policy_name[k], tS(n.cagr), fx(n.sharpe, 2), tP(n.maxdd, 0), tS(n.y2022, 0)]; }), 1);
     // sizing as the product
@@ -243,6 +270,12 @@
     const BSTATE = { amplifying: "stocks and bonds are moving together", neutral: "stocks and bonds show no clear relationship", hedging: "stocks and bonds are moving opposite" };
     const bondTxt = bondOff ? `The bond hedge is off${bstate ? `: the stock-bond state is ${bstate}${BSTATE[bstate] ? ` (${BSTATE[bstate]})` : ""}` : ": on the book's own days a long bond has not hedged it"}.`
       : `The bond hedge is on${hc && fin(hc.bond_ratio) ? ` at ${fx(hc.bond_ratio, 2)}x` : ""}${bstate ? `: the stock-bond state is ${bstate}` : " under its rule"}.`;
+    const bindPlain = head && head.call && head.call.binding ? BRIEF_LIMIT[head.call.binding] : BC ? BRIEF_LIMIT[BC.binding] : null;
+    if (BUILD_CORE) {            // v0.49: the brief's wording, and what the book is in one paragraph
+      const dek = document.querySelector("#view-home .hm-dek");
+      if (dek && BC) dek.textContent = `A model portfolio of nine AI stocks: Microsoft, Amazon, Alphabet, Nvidia, Meta, Tesla, Broadcom, Oracle and SpaceX. Each day a rule decides how much of it to hold and how to hedge it, so that a bad year stays inside a ${pctPlain(BC.B.limits.max_drawdown, 0)} loss limit. Every call is recorded before it takes effect. Not personal positions, not advice.`;
+      $("#hm-why").textContent = BC ? `${(bindPlain || "the tightest risk limit").replace(/^the /, "The ")} sets the size, not a market forecast. ${bondOff ? `Bonds are out: ${bstate === "hedging" ? "they have not hedged this book reliably" : bstate === "neutral" ? "they are not reliably moving opposite to stocks" : "they have been moving with stocks, not against them"}.` : "Bonds are in as a hedge: they are moving opposite to stocks."}` : "";
+    } else
     $("#hm-why").textContent = BC ? `${(bind || "the binding limit").replace(/^the /, "The ")} sets the size, measured on the nine names' own risk; the forecast has not earned the right to move it. ${bondTxt}` : "";
     const wh = $("#hm-when");
     if (wh && B) {
@@ -255,7 +288,7 @@
       let nx = $("#hm-next");
       if (!nx) { nx = h("p", "hm-when hm-next"); nx.id = "hm-next"; wh.after(nx); }
       const c2 = pending && now && shown.call ? shown.call : null;
-      nx.textContent = c2 ? `Next: decision ${shown.id}, on prices through ${day(shown.data_asof)}: ${c2.menu_low && c2.menu_high ? `${xx(c2.menu_low.gross)} of the book, or ${xx(c2.menu_high.gross)} with ${pct0(c2.menu_high.short)} short` : xx(c2.size)}. Takes effect ${day(shown.governs_from)}.` : "";
+      nx.textContent = c2 && BUILD_CORE ? `Next, from ${day(shown.governs_from)}: ${c2.menu_low && c2.menu_high ? `${pct0(c2.menu_low.gross)} of full size, or all of it with a ${pct0(c2.menu_high.short)} short` : pct0(c2.size) + " of full size"}.` : c2 ? `Next: decision ${shown.id}, on prices through ${day(shown.data_asof)}: ${c2.menu_low && c2.menu_high ? `${xx(c2.menu_low.gross)} of the book, or ${xx(c2.menu_high.gross)} with ${pct0(c2.menu_high.short)} short` : xx(c2.size)}. Takes effect ${day(shown.governs_from)}.` : "";
       nx.hidden = !c2;
       const behind = now && shown && now.seq > shown.seq ? `Superseded: decision ${now.id} has been in force since ${day(now.governs_from)}. The published site shows it.`
         : age > 3 ? `This copy's call is ${age} business days old. The published site carries the current one.` : "";
@@ -271,15 +304,30 @@
     if (!T) { box.replaceChildren(h("p", "empty", "The track record is not in this build.")); return; }
     const W = T.pit, C = W.policies.call, Hd = W.policies.hold.net, Q = W.bench, L = T.live, E = (T.ledger && T.ledger.entries) || [];
     // v0.42.5: three cadences, three dates. One "data through" could not describe a daily call, a per-release record and a monthly model.
+    if (BUILD_CORE) $("#hm-asof").textContent = `Prices through ${B ? isoNice(B.asof) : "n/a"}`; else
     $("#hm-asof").textContent = `Call on prices through ${B ? isoNice(B.asof) : "n/a"} · walk-forward record through ${isoNice(T.asof)}${typeof DX19 !== "undefined" && DX19 && DX19.end ? ` · monthly model through ${monthNice(String(DX19.end).slice(0, 7) + "-01")}` : ""}`;
     const fig = (v, k, note) => { const d = h("div"); d.append(h("dt", null, k), h("dd", null, v), h("p", null, note)); return d; };
-    box.replaceChildren(
-      fig(fx(C.net.sharpe, 2), "Sharpe ratio", `holding the book ${fx(Hd.sharpe, 2)}; Nasdaq-100 ${fx(Q.sharpe, 2)}; the names with the call's short ${fx(W.policies.call_short.net.sharpe, 2)}`),
-      fig(tP(C.net.maxdd, 0), "Worst drawdown", `holding the book ${tP(Hd.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`),
-      fig(tS(C.net.y2022, 0), "In 2022", `holding the book ${tS(Hd.y2022, 0)}; Nasdaq-100 ${tS(Q.y2022, 0)}`),
-      fig(tS(C.net.cagr, 1), "A year, compounded", `at ${xx(C.meta.avg_gross)} average exposure`),
-      fig(String(L.calls || E.length || 0), "Live calls logged", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked: ${tS(L.total, 1)} since ${isoNice(L.first_effective)}` : E.length ? `hash-chained; the first governs from ${isoNice(governsFrom(E[0]))}` : "hash-chained; the record starts now"));
-    $("#hm-figs-note").textContent = `Walk-forward, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: each month sized from data to that close and held the next month, costs charged, the nine names chosen point in time each January. The results of a model, not of an account. The backtest, with hindsight, is reported separately on the Track record.${T.restated ? ` Restated in v0.42.5 to charge the daily trades that hold the weights and the size, and to test the short as the ledger logs it: on prices through ${isoNice(T.restated.asof)} the call's Sharpe was ${fx(T.restated.policies.call.sharpe[0], 3)} and is ${fx(T.restated.policies.call.sharpe[1], 3)}; the names with the short was ${fx(T.restated.policies.call_short.sharpe[0], 3)} and is ${fx(T.restated.policies.call_short.sharpe[1], 3)}. The names come from a candidate list chosen today, so this is a walk-forward rule on a retrospectively selected universe.` : ""}`;
+    if (BUILD_CORE) {            // v0.49: the brief leads with what the rule is for (smaller losses), then what it costs
+      const ht = $("#hm-figs-t");
+      if (ht) ht.textContent = `How the rule would have done, ${isoNice(C.net.from).replace(/^(\w+) \d+, /, "$1 ")} to ${isoNice(C.net.to).replace(/^(\w+) \d+, /, "$1 ")}, after costs`;
+      box.replaceChildren(
+        fig(tP(C.net.maxdd, 0), "Worst loss, peak to trough", `the nine stocks held in full ${tP(Hd.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`),
+        fig(tS(C.net.y2022, 0), "In 2022", `held in full ${tS(Hd.y2022, 0)}; Nasdaq-100 ${tS(Q.y2022, 0)}`),
+        fig(tS(C.net.cagr, 1), "Return a year", `held in full ${tS(Hd.cagr, 1)}; Nasdaq-100 ${tS(Q.cagr, 1)}. The rule held ${pct0(C.meta.avg_gross)} of full size on average`),
+        fig(fx(C.net.sharpe, 2), "Return per unit of risk (Sharpe ratio)", `held in full ${fx(Hd.sharpe, 2)}; Nasdaq-100 ${fx(Q.sharpe, 2)}`),
+        fig(String(L.calls || E.length || 0), "Live calls on record", L.marked_days ? `${tS(L.total, 1)} over ${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"}, since ${isoNice(L.first_effective)}` : "the live record starts now"));
+      $("#hm-figs-note").textContent = "A simulation, not an account. Each month is sized using only what was known at the time, and trading costs are charged. The nine stocks were chosen knowing they had done well, so read the gap between the rule and holding in full, not the level of either.";
+      const ct2 = $("#hm-curve-t");
+      if (ct2) ct2.textContent = "Growth of $1 under the rule, held in full, and in the Nasdaq-100";
+    } else {
+      box.replaceChildren(
+        fig(fx(C.net.sharpe, 2), "Sharpe ratio", `holding the book ${fx(Hd.sharpe, 2)}; Nasdaq-100 ${fx(Q.sharpe, 2)}; the names with the call's short ${fx(W.policies.call_short.net.sharpe, 2)}`),
+        fig(tP(C.net.maxdd, 0), "Worst drawdown", `holding the book ${tP(Hd.maxdd, 0)}; Nasdaq-100 ${tP(Q.maxdd, 0)}`),
+        fig(tS(C.net.y2022, 0), "In 2022", `holding the book ${tS(Hd.y2022, 0)}; Nasdaq-100 ${tS(Q.y2022, 0)}`),
+        fig(tS(C.net.cagr, 1), "A year, compounded", `at ${xx(C.meta.avg_gross)} average exposure`),
+        fig(String(L.calls || E.length || 0), "Live calls logged", L.marked_days ? `${L.marked_days} trading day${L.marked_days === 1 ? "" : "s"} marked: ${tS(L.total, 1)} since ${isoNice(L.first_effective)}` : E.length ? `hash-chained; the first governs from ${isoNice(governsFrom(E[0]))}` : "hash-chained; the record starts now"));
+      $("#hm-figs-note").textContent = `Walk-forward, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: each month sized from data to that close and held the next month, costs charged, the nine names chosen point in time each January. The results of a model, not of an account. The backtest, with hindsight, is reported separately on the Track record.${T.restated ? ` Restated in v0.42.5 to charge the daily trades that hold the weights and the size, and to test the short as the ledger logs it: on prices through ${isoNice(T.restated.asof)} the call's Sharpe was ${fx(T.restated.policies.call.sharpe[0], 3)} and is ${fx(T.restated.policies.call.sharpe[1], 3)}; the names with the short was ${fx(T.restated.policies.call_short.sharpe[0], 3)} and is ${fx(T.restated.policies.call_short.sharpe[1], 3)}. The names come from a candidate list chosen today, so this is a walk-forward rule on a retrospectively selected universe.` : ""}`;
+    }
     const cv = $("#hm-curve");
     const endv = (k) => { const c = W.curve[k]; return c && c.length ? "$" + fx(c[c.length - 1][1], 2) : "n/a"; };
     if (cv && !cv.childElementCount) trackCurve(cv, W, ["call", "hold", "qqq"], `Walk-forward growth of $1, net of costs, ${isoNice(C.net.from)} to ${isoNice(C.net.to)}: the call ends at ${endv("call")}, the book held at 1.00x at ${endv("hold")}, the Nasdaq-100 at ${endv("qqq")}`, 230);
@@ -292,6 +340,13 @@
         `Walked forward with the live rule, the call cut the worst drawdown from ${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)} but earned a Sharpe of ${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)} for holding. The names with the call's Nasdaq-100 short earned ${fx(W.policies.call_short.net.sharpe, 2)} with a ${tP(W.policies.call_short.net.maxdd, 0)} worst drawdown`
         + (UV && UV.edgeIsNames ? `. Run on index baskets someone else chose before 2018, the same rule cut the worst fall every time${UV.callBeatsHold === 0 ? " and gave up Sharpe ratio every time" : ""}: that part is the rule. The ${fx(W.policies.call_short.net.sharpe, 2)} is the nine names beating the index by ${UV.alpha(UV.pit).replace(/^\+/, "")}, which a list written in 2026 knew${UV.others.length ? `; ${UV.others.map((r) => `${UV.short(r)} ${r.vs_index.alpha_ann >= 0 ? "beat" : "lagged"} it by ${fx(Math.abs(r.vs_index.alpha_ann) * 100, 1)}%`).join(" and ")}` : ""}${keptOn("universe") ? ` (the universe checks, as of ${isoNice(T.kept.asof)})` : ""}.` : `: the hedge, not the cash, is the better way to take the limits.`), "#track", "Track record"],
       [puts.length ? `${tP(Math.min(...puts), 0)} to ${tP(Math.max(...puts), 0)}` : "n/a", "Puts held up in every regime", `A modeled one-month, 90% put on the Nasdaq-100, bought at each month-end close and priced from that close's VIX, removed that share of its variance in every inflation and policy regime since 2000, and, of the overlays that add to the book (bonds, 2-year notes, gold, puts), was the only one that paid in 2022; the call's own hedge, a Nasdaq-100 short, did more. It costs a premium; the bond's failure costs more. A model scenario (Black-Scholes at VIX x 1.25, no skew or bid-ask), not a traded result.`, "#hedgetest", "Hedge test"]];
+    if (BUILD_CORE) {            // v0.49: three findings in plain words; the tests behind each are in the library
+      items.length = 0;
+      items.push([sgn2(r21.corr), "Bonds have stopped protecting stocks", `Since 2021 stocks and Treasuries have moved together (the figure is their correlation). A 30% bond position ${fin(r21.var_cut_30) && r21.var_cut_30 < 0 ? "added risk instead of removing it" : "barely reduced risk"}. In the long record, bonds protected stocks when inflation was under 3% and failed above it.`, "#hedgetest", "The hedge test, in the library"]);
+      items.push([`${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}`, "Holding less cuts the losses, and costs return", `The rule cut the worst loss from ${tP(Hd.maxdd, 0)} to ${tP(C.net.maxdd, 0)}. It also earned less per unit of risk than holding in full (${fx(C.net.sharpe, 2)} against ${fx(Hd.sharpe, 2)}). The protection has a price.`, "#track", "Track record"]);
+      const CS = W.policies.call_short && W.policies.call_short.net;
+      if (CS) items.push([fx(CS.sharpe, 2), "The index short works only if the stock picks do", `Holding all nine stocks and shorting the Nasdaq-100 scored best (${fx(CS.sharpe, 2)}, with a worst loss of ${tP(CS.maxdd, 0)})${UV && UV.edgeIsNames ? `. All of that edge is these nine beating the index by ${UV.alpha(UV.pit).replace(/^\+/, "").replace(/ \(t .*\)$/, "")}, and they were chosen in 2026 knowing they had` : ". That result depends on these nine stocks beating the index, and they were chosen knowing they had"}. Do not count on it repeating.`, "#track", "Track record"]);
+    }
     const ol = $("#hm-find"); ol.replaceChildren();
     items.forEach(([big, t, p, href, lab]) => { const li = h("li"), a = h("a", null, lab); a.href = href; li.append(h("span", "hm-big", big), h("h3", null, t), h("p", null, p), a); ol.append(li); });
   }

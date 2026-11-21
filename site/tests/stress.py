@@ -61,7 +61,7 @@ def serve(folder: Path) -> tuple[http.server.ThreadingHTTPServer, str]:
     return httpd, f"http://127.0.0.1:{httpd.server_address[1]}/"
 
 
-CORE_VIEWS = ["home", "desk", "book", "decision", "hedgetest", "track", "execution", "inventory", "memos", "fundamentals", "explained", "parameters", "engines", "engine", "appendix"]
+CORE_VIEWS = ["home", "desk", "book", "track", "explained"]          # v0.49: the brief
 
 
 def site_with(data: dict[str, object] | None, raw: dict[str, str] | None = None, core: bool = False) -> Path:
@@ -598,8 +598,8 @@ window.claude = { use: async (name) => {
 
 
 async def core_and_library(page, label: str) -> None:
-    """The core page carries fifteen desks and no library desk; the Library link and a link to a library desk both
-    land on library.html, which carries all sixty-six under the same menu."""
+    """The core page carries the brief's five desks and no library desk; the Library link and a link to a library
+    desk both land on library.html, which carries all sixty-six under its own four groups."""
     n = await page.evaluate("document.querySelectorAll('section.view').length")
     if n != len(CORE_VIEWS):
         fail(f"{label}: the front page carries {n} desks, not {len(CORE_VIEWS)}")
