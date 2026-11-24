@@ -34,15 +34,15 @@
   "date": "2026-09",
   "exposure": 1.0,
   "capped": false,
-  "es_1x": 0.065753,
+  "es_1x": 0.065735,
   "feasible_max": 1.5,
-  "var5": 0.046775,
-  "es5": 0.066284,
-  "ce_gain_vs_hold_annual": 0.01454,
+  "var5": 0.046757,
+  "es5": 0.066266,
+  "ce_gain_vs_hold_annual": 0.014649,
   "distribution": {
-   "p_below_1": 0.253,
+   "p_below_1": 0.243,
    "p_above_1": 0.7375,
-   "p_at_1": 0.0095,
+   "p_at_1": 0.0195,
    "q10": 0.0,
    "median": 1.5,
    "q90": 1.5,
@@ -3302,9 +3302,9 @@
   "forecasts": {
    "now": {
     "mean": 0.064245,
-    "ridge": 0.012167,
-    "combo": 0.043299,
-    "nn": -0.047545
+    "ridge": 0.013043,
+    "combo": 0.043446,
+    "nn": -0.046784
    },
    "weights": {
     "mean": 0.0,
@@ -3312,15 +3312,15 @@
     "combo": 0.887456,
     "nn": 0.112544
    },
-   "stacked": 0.033075,
-   "nn_sd": 0.202561,
-   "nn_epistemic_sd": 0.108814,
+   "stacked": 0.033291,
+   "nn_sd": 0.203077,
+   "nn_epistemic_sd": 0.109772,
    "nn_members": [
-    -0.120868,
-    0.061727,
-    -0.125991,
-    0.004683,
-    -0.071324
+    -0.120326,
+    0.062081,
+    -0.126135,
+    0.006467,
+    -0.070779
    ],
    "names": {
     "mean": "Historical mean",
@@ -3362,7 +3362,7 @@
    }
   ],
   "flip": {
-   "stacked_now": 0.033075,
+   "stacked_now": 0.033291,
    "raise_if_above": null,
    "cut_if_below": 0.01,
    "curve": {
@@ -3466,7 +3466,7 @@
      1.5,
      1.5,
      1.5,
-     1.2,
+     1.25,
      1.0,
      0.95,
      0.5,
@@ -3484,7 +3484,7 @@
    }
   },
   "evpi": {
-   "ce_month": 0.005177,
+   "ce_month": 0.00517,
    "by_state": [
     {
      "state": 0,
@@ -3578,7 +3578,7 @@
     ]
    }
   },
-  "tilt": -0.002597,
+  "tilt": -0.00258,
   "gh": {
    "z": [
     -10.077423,
@@ -3745,8 +3745,8 @@
   "inputs": {
    "features": {
     "log_cape": 3.710152,
-    "ecy": 0.006523,
-    "y10": 0.0504,
+    "ecy": 0.007723,
+    "y10": 0.0492,
     "infl12": 0.033401,
     "mom12_1": 0.154716,
     "trend_gap": 0.084434,
@@ -3765,9 +3765,9 @@
      "note": "a dated reading from the knowledge base, not refreshed by the daily run"
     },
     "y10": {
-     "value": 5.04,
+     "value": 4.92,
      "source": "FRED DGS10 (macro.json)",
-     "date": "2026-11-19",
+     "date": "2026-11-23",
      "assumed": false
     }
    },
@@ -8286,14 +8286,14 @@
   "as_of": "2026-09"
  },
  "findings": [
-  "Decision for the model book: 1.00x stocks. The engine's own choice is 1.50x. Walked forward since 1940, its departures from 1x improved a risk-averse investor's utility with t 0.3 (the best of 28 useless strategies would show 1.80; timing alpha +1.2% a year, t 1.1), so its evidence gate moves 0% of the way from holding. Hedge: all stocks (calm regime, trend on). Across 2,000 draws over regimes, models and forecasts, 25% of the engine's choices are below 1x and 74% above.",
+  "Decision for the model book: 1.00x stocks. The engine's own choice is 1.50x. Walked forward since 1940, its departures from 1x improved a risk-averse investor's utility with t 0.3 (the best of 28 useless strategies would show 1.80; timing alpha +1.2% a year, t 1.1), so its evidence gate moves 0% of the way from holding. Hedge: all stocks (calm regime, trend on). Across 2,000 draws over regimes, models and forecasts, 24% of the engine's choices are below 1x and 74% above.",
   "Regimes: 3 states by BIC; the stressed state's probability for next month is 25%; the chance a new regime began in the last six months is 3%.",
   "Walked forward from 1940 with costs, the engine's Sharpe is 0.63 against 0.64 for holding and 0.74 for the trend rule (gain over holding -0.01, 90% range -0.13 to +0.11); worst drawdown -53% against -52%. The evidence gate has not opened in any month on record, so the gated engine is holding (Sharpe 0.63, holding's own): the engine contributes the baseline, and the size is set by the risk limits. Deflated for the 28 strategies tried, the chance the best one's timing alpha is real is 64%.",
   "The 10-month trend rule is the strongest simple baseline: Sharpe 0.74 against 0.64 for holding and a worst drawdown of -33% against -52%, but it gives up real growth (6.5% against 7.4% a year), so a risk-averse investor is no better off in expected utility (t -0.4); its Sharpe edge is not significant (90% range -0.06 to +0.27) while its drawdown cut is (+5% to +37%). On the full record the rule would pick a factor of 0.50 (it keeps holding's expected utility, t +0.00, and cuts the worst drawdown to -36%), but the same rule walked forward, re-chosen every twelve months on the record to that point after a ten-year burn-in, costs expected utility (t -2.29; Sharpe 0.60, worst drawdown -44%; the choice changed 18 times). The engine holds itself to the walk-forward standard, so no overlay is adopted; the four scalings tried count among the 28 strategies the gate deflates for, and the trend rule stays a cross-check.",
   "Forecasts out of sample: the neural-network ensemble's skill against the historical mean is -36.9% (Diebold-Mariano t -2.6), ridge -32.6%, the restricted combination +2.7%, the stack -0.9%; the ensemble's 80% bands covered 91% of outcomes.",
   "What moves the engine's own choice most: hidden Markov regimes (without it, 1.00x). The optimum would fall if the stacked 12-month real return forecast dropped below 1%; it would fall if the stressed regime's probability passed 32%.",
-  "On the regime model's own numbers, knowing the regime for certain would be worth 621 basis points a year in certainty-equivalent terms, yet the gate is shut: the model's confidence in its regimes has not shown up in results, which is the gap between a model's value and its record."
+  "On the regime model's own numbers, knowing the regime for certain would be worth 620 basis points a year in certainty-equivalent terms, yet the gate is shut: the model's confidence in its regimes has not shown up in results, which is the gap between a model's value and its record."
  ],
- "content_sha256": "5339d4370241eaea",
- "computed_utc": "2026-11-21T18:14:10Z"
+ "content_sha256": "2de89dc84d9d57f6",
+ "computed_utc": "2026-11-24T21:30:22Z"
 }

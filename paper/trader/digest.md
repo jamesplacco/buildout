@@ -34,3 +34,17 @@ Nothing has filled yet. Mandate b2d64f2e31dfd9af.
 
 Nothing has filled yet. Mandate b2d64f2e31dfd9af.
 
+## 2026-11-24T21:31:26Z  ticket tkt-e9b79521bf4f5347  (autonomous, paper)
+
+- RESTING sell 15 NVDA: fills at the close of 2026-11-25
+- RESTING sell 3 GOOGL: fills at the close of 2026-11-25
+- RESTING sell 2 TSLA: fills at the close of 2026-11-25
+- RESTING sell 3 AMZN: fills at the close of 2026-11-25
+- RESTING sell 1 META: fills at the close of 2026-11-25
+- RESTING sell 1 MSFT: fills at the close of 2026-11-25
+- RESTING sell 4 ORCL: fills at the close of 2026-11-25
+- RESTING sell 3 SPCX: fills at the close of 2026-11-25
+- RESTING sell 1 AVGO: fills at the close of 2026-11-25
+
+Nothing has filled yet. Mandate b2d64f2e31dfd9af.
+
