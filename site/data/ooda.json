@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "as_of": "2026-11-24",
+ "as_of": "2026-11-25",
  "observe": {
   "readings": {
    "oil": 1.387919,
@@ -67,7 +67,7 @@
    "brain": "brain.json",
    "fundamentals": "TTM through each company's latest report, collected Oct 21, 2026",
    "prices": "Oct 26, 2026 close (StockTitan rankings, data through Oct 26)",
-   "report": "2026-11-23"
+   "report": "2026-11-24"
   }
  },
  "orient": {
@@ -584,17 +584,17 @@
  },
  "decide": {
   "posterior": {
-   "base": 0.363836,
-   "soft": 0.068017,
-   "melt": 0.121407,
-   "termprem": 0.180045,
-   "digest": 0.059176,
-   "stagfl": 0.163343,
-   "crash": 0.044175
+   "base": 0.454112,
+   "soft": 0.094461,
+   "melt": 0.111913,
+   "termprem": 0.120117,
+   "digest": 0.104452,
+   "stagfl": 0.069928,
+   "crash": 0.045019
   },
   "signals": {
    "infl": true,
-   "corr": true,
+   "corr": false,
    "oil": null,
    "vix": true,
    "hy": false,
@@ -606,138 +606,119 @@
     "port": [
      0.0,
      0.0,
-     0.02,
+     0.0,
      0.1
     ],
-    "ce": 0.014846
+    "ce": 0.011109
    },
    "robust_rho_0.05": {
     "port": [
      0.0,
      0.0,
      0.0,
-     0.1
+     0.0
     ],
-    "ce": 0.010783
+    "ce": 0.0105
    }
   },
   "hedges": {
-   "equity": 0.402621,
+   "equity": 0.407142,
    "on": [],
    "current": {
-    "ce": -0.007016,
-    "worst": -0.1278,
+    "ce": 0.004136,
+    "worst": -0.129353,
     "cost_bp": 0.0,
     "rets": [
-     0.042106,
-     0.050762,
-     0.102096,
-     -0.054926,
-     -0.097604,
-     -0.087337,
-     -0.1278
+     0.042461,
+     0.051214,
+     0.103125,
+     -0.055661,
+     -0.098818,
+     -0.088436,
+     -0.129353
     ]
    },
    "advisor": {
     "cheapest_meeting_limit": [
      {
       "on": [
-       "ai_pair",
-       "beta_short",
        "collar",
        "degross",
-       "put_spread",
-       "trend",
-       "vix_calls"
+       "trend"
       ],
-      "ce": 0.01181,
-      "worst": -0.005089,
-      "cost_bp": -165.329728,
+      "ce": 0.008762,
+      "worst": -0.064069,
+      "cost_bp": -32.161137,
       "meets": true,
-      "all_in_bp": -130.329728
+      "all_in_bp": -17.161137
      },
      {
       "on": [
-       "ai_pair",
-       "beta_short",
        "collar",
        "degross",
        "gold",
-       "put_spread",
-       "trend",
-       "vix_calls"
+       "trend"
       ],
-      "ce": 0.012214,
-      "worst": -0.005109,
-      "cost_bp": -169.45,
+      "ce": 0.009025,
+      "worst": -0.062889,
+      "cost_bp": -34.603869,
       "meets": true,
-      "all_in_bp": -129.45
+      "all_in_bp": -14.603869
      },
      {
       "on": [
-       "ai_pair",
-       "beta_short",
        "collar",
-       "degross",
-       "put_spread",
        "trend"
       ],
-      "ce": 0.011036,
-      "worst": -0.004298,
-      "cost_bp": -156.367933,
+      "ce": 0.007233,
+      "worst": -0.085933,
+      "cost_bp": -24.452641,
       "meets": true,
-      "all_in_bp": -126.367933
+      "all_in_bp": -14.452641
      }
     ],
     "best_growth": [
      {
       "on": [
        "ai_pair",
-       "beta_short",
        "collar",
        "degross",
        "gold",
-       "put_spread",
-       "trend",
-       "vix_calls"
-      ],
-      "ce": 0.012214,
-      "worst": -0.005109,
-      "cost_bp": -169.45,
-      "meets": true,
-      "all_in_bp": -129.45
-     },
-     {
-      "on": [
-       "ai_pair",
-       "beta_short",
-       "collar",
-       "degross",
-       "put_spread",
-       "trend",
-       "vix_calls"
-      ],
-      "ce": 0.01181,
-      "worst": -0.005089,
-      "cost_bp": -165.329728,
-      "meets": true,
-      "all_in_bp": -130.329728
-     },
-     {
-      "on": [
-       "ai_pair",
-       "beta_short",
-       "collar",
-       "degross",
-       "gold",
-       "put_spread",
        "trend"
       ],
-      "ce": 0.011443,
-      "worst": -0.003518,
-      "cost_bp": -160.488205,
+      "ce": 0.010064,
+      "worst": -0.015308,
+      "cost_bp": -35.307914,
       "meets": true,
-      "all_in_bp": -125.488205
+      "all_in_bp": -10.307914
+     },
+     {
+      "on": [
+       "ai_pair",
+       "collar",
+       "degross",
+       "trend"
+      ],
+      "ce": 0.009813,
+      "worst": -0.016088,
+      "cost_bp": -32.865182,
+      "meets": true,
+      "all_in_bp": -12.865182
+     },
+     {
+      "on": [
+       "ai_pair",
+       "beta_short",
+       "collar",
+       "degross",
+       "gold",
+       "trend"
+      ],
+      "ce": 0.009587,
+      "worst": -0.005944,
+      "cost_bp": -29.745894,
+      "meets": true,
+      "all_in_bp": 0.254106
      }
     ],
     "best_worst_case": [
@@ -750,11 +731,11 @@
        "gold",
        "vix_calls"
       ],
-      "ce": 0.008338,
-      "worst": 0.001151,
-      "cost_bp": -127.616492,
+      "ce": 0.007663,
+      "worst": 0.000485,
+      "cost_bp": -10.299682,
       "meets": true,
-      "all_in_bp": -97.616492
+      "all_in_bp": 19.700318
      },
      {
       "on": [
@@ -764,11 +745,11 @@
        "degross",
        "vix_calls"
       ],
-      "ce": 0.007925,
-      "worst": 8.997e-05,
-      "cost_bp": -123.49622,
+      "ce": 0.007417,
+      "worst": -0.000695,
+      "cost_bp": -7.85695,
       "meets": true,
-      "all_in_bp": -98.49622
+      "all_in_bp": 17.14305
      },
      {
       "on": [
@@ -779,11 +760,11 @@
        "trend",
        "vix_calls"
       ],
-      "ce": 0.008741,
-      "worst": -0.000146,
-      "cost_bp": -131.714424,
+      "ce": 0.00799,
+      "worst": -0.000741,
+      "cost_bp": -13.604867,
       "meets": true,
-      "all_in_bp": -101.714424
+      "all_in_bp": 16.395133
      }
     ]
    },
@@ -1002,41 +983,9 @@
    },
    {
     "type": "hedge",
-    "hedge": "put_spread",
-    "action": "switch on",
-    "size": 0.01,
-    "door": "two-way",
-    "why": "the cheapest set of switched-on hedges that keeps the worst scenario inside the loss limit"
-   },
-   {
-    "type": "hedge",
     "hedge": "collar",
     "action": "switch on",
     "size": 0.5,
-    "door": "two-way",
-    "why": "the cheapest set of switched-on hedges that keeps the worst scenario inside the loss limit"
-   },
-   {
-    "type": "hedge",
-    "hedge": "vix_calls",
-    "action": "switch on",
-    "size": 0.005,
-    "door": "two-way",
-    "why": "the cheapest set of switched-on hedges that keeps the worst scenario inside the loss limit"
-   },
-   {
-    "type": "hedge",
-    "hedge": "beta_short",
-    "action": "switch on",
-    "size": 0.25,
-    "door": "two-way",
-    "why": "the cheapest set of switched-on hedges that keeps the worst scenario inside the loss limit"
-   },
-   {
-    "type": "hedge",
-    "hedge": "ai_pair",
-    "action": "switch on",
-    "size": 0.15,
     "door": "two-way",
     "why": "the cheapest set of switched-on hedges that keeps the worst scenario inside the loss limit"
    },
@@ -1074,7 +1023,7 @@
     "information_nats": 0.049307
    }
   ],
-  "review_by": "2026-12-08",
+  "review_by": "2026-12-09",
   "note": "Proposals for a person to review; the engine places no orders."
  },
  "valuation": {
@@ -3664,7 +3613,7 @@
    ],
    "door": "two-way",
    "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters.",
-   "price": 4.609546
+   "price": 4.515521
   },
   {
    "id": "beta_short",

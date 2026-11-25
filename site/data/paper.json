@@ -2,9 +2,9 @@
  "schema": 2,
  "opened": "2026-11-11",
  "start_cash": 100000.0,
- "equity": 97495.5,
+ "equity": 96329.02,
  "cash": 47640.5,
- "marks_asof": "2026-11-23",
+ "marks_asof": "2026-11-24",
  "positions": [
   {
    "symbol": "AMZN",
@@ -79,6 +79,10 @@
   [
    "2026-11-23",
    97495.5
+  ],
+  [
+   "2026-11-24",
+   96329.02
   ]
  ],
  "corrections": [
@@ -224,6 +228,10 @@
   [
    "2026-11-23",
    97495.5
+  ],
+  [
+   "2026-11-24",
+   96329.02
   ]
  ],
  "reconcile": {
@@ -356,29 +364,17 @@
   "ok": true,
   "entries": 4
  },
- "passes": 19,
+ "passes": 20,
  "last": {
-  "approval": "autonomous",
   "broker": "paper",
-  "decision_id": "16-36c041c6",
-  "decision_ts": "2026-11-24T21:31:23Z",
-  "event": "resting",
-  "failures": 0,
-  "fills_in_session": "2026-11-25",
-  "mandate_hash": "b2d64f2e31dfd9af",
-  "mode": "autonomous",
-  "ordered": "2026-11-24T21:31:26Z",
-  "orders": 9,
-  "ticket": "tkt-e9b79521bf4f5347",
-  "ts_utc": "2026-11-24T21:31:28Z"
+  "event": "pass",
+  "outcome": "orders resting until the close",
+  "reasons": [
+   "9 order(s) fill at the close of 2026-11-25"
+  ],
+  "ts_utc": "2026-11-25T20:46:53Z"
  },
  "recent": [
-  {
-   "broker": "paper",
-   "event": "pass",
-   "outcome": "nothing to trade: holdings are within the drift band",
-   "ts_utc": "2026-11-13T18:43:43Z"
-  },
   {
    "broker": "paper",
    "event": "pass",
@@ -502,6 +498,15 @@
    "orders": 9,
    "ticket": "tkt-e9b79521bf4f5347",
    "ts_utc": "2026-11-24T21:31:28Z"
+  },
+  {
+   "broker": "paper",
+   "event": "pass",
+   "outcome": "orders resting until the close",
+   "reasons": [
+    "9 order(s) fill at the close of 2026-11-25"
+   ],
+   "ts_utc": "2026-11-25T20:46:53Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",

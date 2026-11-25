@@ -44,7 +44,7 @@
    ],
    "door": "two-way",
    "note": "Pays from a 5% fall, up to its 10-point maximum at a 15% fall; no more beyond.",
-   "price": 0.03329
+   "price": 0.033256
   },
   {
    "id": "collar",
@@ -66,7 +66,7 @@
    ],
    "door": "two-way",
    "note": "Close to free; gives up gains above 10% in a melt-up.",
-   "price": 0.0022
+   "price": 0.002209
   },
   {
    "id": "gold",
@@ -108,7 +108,7 @@
    ],
    "door": "two-way",
    "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters.",
-   "price": 4.609546
+   "price": 4.515521
   },
   {
    "id": "beta_short",
@@ -211,11 +211,11 @@
      "degross",
      "trend"
     ],
-    "ce": 0.018701,
-    "worst": -0.121384,
-    "cost_bp": 27.287256,
+    "ce": 0.018696,
+    "worst": -0.121388,
+    "cost_bp": 27.333956,
     "meets": true,
-    "all_in_bp": 47.287256
+    "all_in_bp": 47.333956
    },
    {
     "on": [
@@ -225,11 +225,11 @@
      "gold",
      "trend"
     ],
-    "ce": 0.018897,
-    "worst": -0.120221,
-    "cost_bp": 25.617256,
+    "ce": 0.018892,
+    "worst": -0.120225,
+    "cost_bp": 25.663956,
     "meets": true,
-    "all_in_bp": 50.617256
+    "all_in_bp": 50.663956
    },
    {
     "on": [
@@ -238,11 +238,11 @@
      "degross",
      "trend"
     ],
-    "ce": 0.017432,
-    "worst": -0.137284,
-    "cost_bp": 36.472256,
+    "ce": 0.017427,
+    "worst": -0.137288,
+    "cost_bp": 36.518956,
     "meets": true,
-    "all_in_bp": 56.472256
+    "all_in_bp": 56.518956
    },
    {
     "on": [
@@ -252,11 +252,11 @@
      "gold",
      "trend"
     ],
-    "ce": 0.01763,
-    "worst": -0.136121,
-    "cost_bp": 34.802256,
+    "ce": 0.017626,
+    "worst": -0.136125,
+    "cost_bp": 34.848956,
     "meets": true,
-    "all_in_bp": 59.802256
+    "all_in_bp": 59.848956
    },
    {
     "on": [
@@ -264,11 +264,11 @@
      "collar",
      "degross"
     ],
-    "ce": 0.01593,
-    "worst": -0.144915,
-    "cost_bp": 44.949472,
+    "ce": 0.015925,
+    "worst": -0.14492,
+    "cost_bp": 44.996172,
     "meets": true,
-    "all_in_bp": 59.949472
+    "all_in_bp": 59.996172
    }
   ],
   "best_growth": [
@@ -279,11 +279,11 @@
      "gold",
      "trend"
     ],
-    "ce": 0.02044,
-    "worst": -0.170621,
-    "cost_bp": -17.522744,
+    "ce": 0.020435,
+    "worst": -0.170625,
+    "cost_bp": -17.476044,
     "meets": false,
-    "all_in_bp": 2.477256
+    "all_in_bp": 2.523956
    },
    {
     "on": [
@@ -291,11 +291,11 @@
      "degross",
      "trend"
     ],
-    "ce": 0.020234,
-    "worst": -0.171784,
-    "cost_bp": -15.852744,
+    "ce": 0.02023,
+    "worst": -0.171788,
+    "cost_bp": -15.806044,
     "meets": false,
-    "all_in_bp": -0.852744
+    "all_in_bp": -0.806044
    },
    {
     "on": [
@@ -305,11 +305,11 @@
      "trend",
      "vix_calls"
     ],
-    "ce": 0.019473,
-    "worst": -0.162149,
-    "cost_bp": -1.834146,
+    "ce": 0.019487,
+    "worst": -0.162161,
+    "cost_bp": -1.948258,
     "meets": false,
-    "all_in_bp": 23.165854
+    "all_in_bp": 23.051742
    },
    {
     "on": [
@@ -318,11 +318,11 @@
      "trend",
      "vix_calls"
     ],
-    "ce": 0.01927,
-    "worst": -0.163312,
-    "cost_bp": -0.164146,
+    "ce": 0.019284,
+    "worst": -0.163324,
+    "cost_bp": -0.278258,
     "meets": false,
-    "all_in_bp": 19.835854
+    "all_in_bp": 19.721742
    },
    {
     "on": [
@@ -330,11 +330,11 @@
      "gold",
      "trend"
     ],
-    "ce": 0.019025,
-    "worst": -0.224406,
-    "cost_bp": -44.332744,
+    "ce": 0.01902,
+    "worst": -0.22441,
+    "cost_bp": -44.286044,
     "meets": false,
-    "all_in_bp": -29.332744
+    "all_in_bp": -29.286044
    }
   ],
   "best_worst_case": [
@@ -349,11 +349,11 @@
      "trend",
      "vix_calls"
     ],
-    "ce": 0.009457,
-    "worst": -0.069073,
-    "cost_bp": 140.762503,
+    "ce": 0.009474,
+    "worst": -0.069157,
+    "cost_bp": 140.594301,
     "meets": true,
-    "all_in_bp": 180.762503
+    "all_in_bp": 180.594301
    },
    {
     "on": [
@@ -365,11 +365,11 @@
      "trend",
      "vix_calls"
     ],
-    "ce": 0.009273,
-    "worst": -0.069836,
-    "cost_bp": 142.432503,
+    "ce": 0.00929,
+    "worst": -0.06992,
+    "cost_bp": 142.264301,
     "meets": true,
-    "all_in_bp": 177.432503
+    "all_in_bp": 177.264301
    },
    {
     "on": [
@@ -381,11 +381,11 @@
      "put_spread",
      "trend"
     ],
-    "ce": 0.010843,
-    "worst": -0.074694,
-    "cost_bp": 125.073905,
+    "ce": 0.010844,
+    "worst": -0.074677,
+    "cost_bp": 125.066515,
     "meets": true,
-    "all_in_bp": 160.073905
+    "all_in_bp": 160.066515
    },
    {
     "on": [
@@ -397,11 +397,11 @@
      "trend",
      "vix_calls"
     ],
-    "ce": 0.00671,
-    "worst": -0.075122,
-    "cost_bp": 165.76303,
+    "ce": 0.006733,
+    "worst": -0.075107,
+    "cost_bp": 165.548128,
     "meets": true,
-    "all_in_bp": 200.76303
+    "all_in_bp": 200.548128
    },
    {
     "on": [
@@ -412,11 +412,11 @@
      "put_spread",
      "trend"
     ],
-    "ce": 0.010657,
-    "worst": -0.075857,
-    "cost_bp": 126.743905,
+    "ce": 0.010658,
+    "worst": -0.07584,
+    "cost_bp": 126.736515,
     "meets": true,
-    "all_in_bp": 156.743905
+    "all_in_bp": 156.736515
    }
   ]
  },
@@ -435,14 +435,14 @@
  },
  "inputs": {
   "vix": {
-   "value": 26.62,
-   "date": "2026-11-23",
+   "value": 26.36,
+   "date": "2026-11-24",
    "source": "macro.json: the VIX (FRED VIXCLS)",
    "assumed": false
   },
   "index_vol": {
-   "value": 36.48,
-   "date": "2026-11-19",
+   "value": 36.42,
+   "date": "2026-11-24",
    "source": "macro.json: the Nasdaq-100's implied volatility (VXN)",
    "assumed": false
   },
