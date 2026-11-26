@@ -2,45 +2,45 @@
  "schema": 2,
  "opened": "2026-11-11",
  "start_cash": 100000.0,
- "equity": 96329.02,
- "cash": 47640.5,
- "marks_asof": "2026-11-24",
+ "equity": 95630.78,
+ "cash": 54381.66,
+ "marks_asof": "2026-11-25",
  "positions": [
   {
    "symbol": "AMZN",
-   "quantity": 26.0
+   "quantity": 23.0
   },
   {
    "symbol": "AVGO",
-   "quantity": 12.0
+   "quantity": 11.0
   },
   {
    "symbol": "GOOGL",
-   "quantity": 24.0
+   "quantity": 21.0
   },
   {
    "symbol": "META",
-   "quantity": 10.0
+   "quantity": 9.0
   },
   {
    "symbol": "MSFT",
-   "quantity": 13.0
+   "quantity": 12.0
   },
   {
    "symbol": "NVDA",
-   "quantity": 51.0
+   "quantity": 36.0
   },
   {
    "symbol": "ORCL",
-   "quantity": 27.0
+   "quantity": 23.0
   },
   {
    "symbol": "SPCX",
-   "quantity": 29.0
+   "quantity": 26.0
   },
   {
    "symbol": "TSLA",
-   "quantity": 13.0
+   "quantity": 11.0
   }
  ],
  "equity_history": [
@@ -83,6 +83,10 @@
   [
    "2026-11-24",
    96329.02
+  ],
+  [
+   "2026-11-25",
+   95630.78
   ]
  ],
  "corrections": [
@@ -232,12 +236,16 @@
   [
    "2026-11-24",
    96329.02
+  ],
+  [
+   "2026-11-25",
+   95630.78
   ]
  ],
  "reconcile": {
   "ok": true,
-  "cash": 47640.5,
-  "cash_from_log": 47640.5,
+  "cash": 54381.66,
+  "cash_from_log": 54381.66,
   "positions_match": true,
   "corrections": 1
  },
@@ -247,70 +255,49 @@
    100000.0
   ]
  ],
- "tickets_filled": 3,
+ "tickets_filled": 4,
  "resting": [
-  {
-   "symbol": "NVDA",
-   "side": "sell",
-   "quantity": 15.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
-  },
-  {
-   "symbol": "GOOGL",
-   "side": "sell",
-   "quantity": 3.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
-  },
-  {
-   "symbol": "TSLA",
-   "side": "sell",
-   "quantity": 2.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
-  },
-  {
-   "symbol": "AMZN",
-   "side": "sell",
-   "quantity": 3.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
-  },
   {
    "symbol": "META",
    "side": "sell",
    "quantity": 1.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
+   "ordered": "2026-11-26T20:30:27+00:00",
+   "fills_in_session": "2026-11-27"
   },
   {
-   "symbol": "MSFT",
-   "side": "sell",
+   "symbol": "NVDA",
+   "side": "buy",
+   "quantity": 4.0,
+   "ordered": "2026-11-26T20:30:27+00:00",
+   "fills_in_session": "2026-11-27"
+  },
+  {
+   "symbol": "GOOGL",
+   "side": "buy",
    "quantity": 1.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
+   "ordered": "2026-11-26T20:30:27+00:00",
+   "fills_in_session": "2026-11-27"
+  },
+  {
+   "symbol": "AMZN",
+   "side": "buy",
+   "quantity": 1.0,
+   "ordered": "2026-11-26T20:30:27+00:00",
+   "fills_in_session": "2026-11-27"
   },
   {
    "symbol": "ORCL",
-   "side": "sell",
-   "quantity": 4.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
+   "side": "buy",
+   "quantity": 2.0,
+   "ordered": "2026-11-26T20:30:27+00:00",
+   "fills_in_session": "2026-11-27"
   },
   {
    "symbol": "SPCX",
-   "side": "sell",
-   "quantity": 3.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
-  },
-  {
-   "symbol": "AVGO",
-   "side": "sell",
+   "side": "buy",
    "quantity": 1.0,
-   "ordered": "2026-11-24T21:31:26+00:00",
-   "fills_in_session": "2026-11-25"
+   "ordered": "2026-11-26T20:30:27+00:00",
+   "fills_in_session": "2026-11-27"
   }
  ],
  "timeline": [
@@ -357,36 +344,44 @@
    "outside_limit": 1,
    "convention": "close of the order's session",
    "causal": true
+  },
+  {
+   "ticket": "tkt-e9b79521bf4f5347",
+   "fills": 9,
+   "status": "filled",
+   "decision_id": "16-36c041c6",
+   "decision_ts": "2026-11-24T21:31:23Z",
+   "ordered": "2026-11-24T21:31:26+00:00",
+   "fill_session": "2026-11-25",
+   "filled_at": "2026-11-25T21:00:00+00:00",
+   "recorded": "2026-11-26T20:30:27Z",
+   "outside_limit": 8,
+   "convention": "close of the order's session",
+   "causal": true
   }
  ],
  "non_causal_fills": 9,
  "fills_chain": {
   "ok": true,
-  "entries": 4
+  "entries": 5
  },
- "passes": 20,
+ "passes": 22,
  "last": {
+  "approval": "autonomous",
   "broker": "paper",
-  "event": "pass",
-  "outcome": "orders resting until the close",
-  "reasons": [
-   "9 order(s) fill at the close of 2026-11-25"
-  ],
-  "ts_utc": "2026-11-25T20:46:53Z"
+  "decision_id": "18-d93bc2ec",
+  "decision_ts": "2026-11-26T20:30:24Z",
+  "event": "resting",
+  "failures": 0,
+  "fills_in_session": "2026-11-27",
+  "mandate_hash": "b2d64f2e31dfd9af",
+  "mode": "autonomous",
+  "ordered": "2026-11-26T20:30:27Z",
+  "orders": 6,
+  "ticket": "tkt-4fe6b45eb855632b",
+  "ts_utc": "2026-11-26T20:30:28Z"
  },
  "recent": [
-  {
-   "broker": "paper",
-   "event": "pass",
-   "outcome": "nothing to trade: holdings are within the drift band",
-   "ts_utc": "2026-11-14T17:22:40Z"
-  },
-  {
-   "broker": "paper",
-   "event": "pass",
-   "outcome": "nothing to trade: holdings are within the drift band",
-   "ts_utc": "2026-11-17T19:34:29Z"
-  },
   {
    "broker": "paper",
    "event": "pass",
@@ -507,6 +502,41 @@
     "9 order(s) fill at the close of 2026-11-25"
    ],
    "ts_utc": "2026-11-25T20:46:53Z"
+  },
+  {
+   "approval": "autonomous",
+   "broker": "paper",
+   "decision_id": "16-36c041c6",
+   "decision_ts": "2026-11-24T21:31:23Z",
+   "equity_after": 95630.78,
+   "event": "executed",
+   "failures": 0,
+   "fill_session": "2026-11-25",
+   "filled_at": "2026-11-25T21:00:00+00:00",
+   "fills": 9,
+   "mandate_hash": "b2d64f2e31dfd9af",
+   "marks_asof": "2026-11-25",
+   "mode": "autonomous",
+   "ordered": "2026-11-24T21:31:26+00:00",
+   "outside_limit": 8,
+   "status": "filled",
+   "ticket": "tkt-e9b79521bf4f5347",
+   "ts_utc": "2026-11-26T20:30:28Z"
+  },
+  {
+   "approval": "autonomous",
+   "broker": "paper",
+   "decision_id": "18-d93bc2ec",
+   "decision_ts": "2026-11-26T20:30:24Z",
+   "event": "resting",
+   "failures": 0,
+   "fills_in_session": "2026-11-27",
+   "mandate_hash": "b2d64f2e31dfd9af",
+   "mode": "autonomous",
+   "ordered": "2026-11-26T20:30:27Z",
+   "orders": 6,
+   "ticket": "tkt-4fe6b45eb855632b",
+   "ts_utc": "2026-11-26T20:30:28Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",

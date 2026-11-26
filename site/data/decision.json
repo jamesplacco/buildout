@@ -34,11 +34,11 @@
   "date": "2026-09",
   "exposure": 1.0,
   "capped": false,
-  "es_1x": 0.065735,
+  "es_1x": 0.065734,
   "feasible_max": 1.5,
-  "var5": 0.046757,
-  "es5": 0.066266,
-  "ce_gain_vs_hold_annual": 0.014649,
+  "var5": 0.046756,
+  "es5": 0.066265,
+  "ce_gain_vs_hold_annual": 0.014658,
   "distribution": {
    "p_below_1": 0.243,
    "p_above_1": 0.7375,
@@ -3302,9 +3302,9 @@
   "forecasts": {
    "now": {
     "mean": 0.064245,
-    "ridge": 0.013043,
-    "combo": 0.043446,
-    "nn": -0.046784
+    "ridge": 0.013116,
+    "combo": 0.043458,
+    "nn": -0.046716
    },
    "weights": {
     "mean": 0.0,
@@ -3312,15 +3312,15 @@
     "combo": 0.887456,
     "nn": 0.112544
    },
-   "stacked": 0.033291,
-   "nn_sd": 0.203077,
-   "nn_epistemic_sd": 0.109772,
+   "stacked": 0.033309,
+   "nn_sd": 0.20312,
+   "nn_epistemic_sd": 0.109852,
    "nn_members": [
-    -0.120326,
-    0.062081,
-    -0.126135,
-    0.006467,
-    -0.070779
+    -0.120255,
+    0.062112,
+    -0.126147,
+    0.006612,
+    -0.070732
    ],
    "names": {
     "mean": "Historical mean",
@@ -3362,7 +3362,7 @@
    }
   ],
   "flip": {
-   "stacked_now": 0.033291,
+   "stacked_now": 0.033309,
    "raise_if_above": null,
    "cut_if_below": 0.01,
    "curve": {
@@ -3484,7 +3484,7 @@
    }
   },
   "evpi": {
-   "ce_month": 0.00517,
+   "ce_month": 0.005169,
    "by_state": [
     {
      "state": 0,
@@ -3578,7 +3578,7 @@
     ]
    }
   },
-  "tilt": -0.00258,
+  "tilt": -0.002578,
   "gh": {
    "z": [
     -10.077423,
@@ -3745,8 +3745,8 @@
   "inputs": {
    "features": {
     "log_cape": 3.710152,
-    "ecy": 0.007723,
-    "y10": 0.0492,
+    "ecy": 0.007823,
+    "y10": 0.0491,
     "infl12": 0.033401,
     "mom12_1": 0.154716,
     "trend_gap": 0.084434,
@@ -3765,9 +3765,9 @@
      "note": "a dated reading from the knowledge base, not refreshed by the daily run"
     },
     "y10": {
-     "value": 4.92,
+     "value": 4.91,
      "source": "FRED DGS10 (macro.json)",
-     "date": "2026-11-23",
+     "date": "2026-11-24",
      "assumed": false
     }
    },
@@ -8294,6 +8294,6 @@
   "What moves the engine's own choice most: hidden Markov regimes (without it, 1.00x). The optimum would fall if the stacked 12-month real return forecast dropped below 1%; it would fall if the stressed regime's probability passed 32%.",
   "On the regime model's own numbers, knowing the regime for certain would be worth 620 basis points a year in certainty-equivalent terms, yet the gate is shut: the model's confidence in its regimes has not shown up in results, which is the gap between a model's value and its record."
  ],
- "content_sha256": "2de89dc84d9d57f6",
- "computed_utc": "2026-11-25T20:43:43Z"
+ "content_sha256": "633cc8f34d272c6c",
+ "computed_utc": "2026-11-26T20:27:17Z"
 }

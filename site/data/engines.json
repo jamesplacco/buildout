@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "version": "0.49.0",
- "run_at": "2026-11-25T20:44:16+00:00",
+ "run_at": "2026-11-26T20:27:50+00:00",
  "engines": [
   {
    "name": "macro",
@@ -15,7 +15,7 @@
    ],
    "status": "external",
    "outputs": {
-    "macro.json": "eb7c35fb19d57096"
+    "macro.json": "8b76bdb42026dae0"
    }
   },
   {
@@ -62,7 +62,7 @@
    ],
    "status": "external",
    "outputs": {
-    "report.json": "6f4b0a121886c892"
+    "report.json": "520bd9fb39b38156"
    }
   },
   {
@@ -77,7 +77,7 @@
    ],
    "status": "external",
    "outputs": {
-    "capex.json": "e07663bc77f04a0f"
+    "capex.json": "7f943508d0fc5652"
    }
   },
   {
@@ -92,7 +92,7 @@
    ],
    "status": "external",
    "outputs": {
-    "atlas.json": "1a06566fe979d546"
+    "atlas.json": "30946655390b3be2"
    }
   },
   {
@@ -107,7 +107,7 @@
    ],
    "status": "external",
    "outputs": {
-    "labs.json": "19194fc0b55b5293"
+    "labs.json": "ad3d268dec6be6e1"
    }
   },
   {
@@ -122,7 +122,7 @@
    ],
    "status": "external",
    "outputs": {
-    "ml.json": "51e39d54a83e0c33"
+    "ml.json": "04aeca1d38dce1b2"
    }
   },
   {
@@ -139,7 +139,7 @@
    ],
    "status": "external",
    "outputs": {
-    "reality.json": "39d2f6646aaf060d"
+    "reality.json": "889f89876ca2a987"
    }
   },
   {
@@ -154,7 +154,7 @@
    ],
    "status": "external",
    "outputs": {
-    "connections.json": "3210dc4bd760f5c6"
+    "connections.json": "431ffe96ec1fef8a"
    }
   },
   {
@@ -170,8 +170,8 @@
    ],
    "status": "external",
    "outputs": {
-    "technicals.json": "61732e509aceada9",
-    "statements.json": "c29fa8e1cb0baa1b"
+    "technicals.json": "0d9e2831204bdba5",
+    "statements.json": "d1173bdae93a51a8"
    }
   },
   {
@@ -231,7 +231,7 @@
    ],
    "status": "external",
    "outputs": {
-    "decision.json": "790b10d932b1118b"
+    "decision.json": "bf8fc74fc9248cc8"
    }
   },
   {
@@ -246,7 +246,7 @@
    ],
    "status": "external",
    "outputs": {
-    "bonds.json": "52683476c719dde6"
+    "bonds.json": "ec2881a8ff56a7cb"
    }
   },
   {
@@ -261,7 +261,7 @@
    ],
    "status": "external",
    "outputs": {
-    "feeds.json": "1ccb7632e47f2eb9"
+    "feeds.json": "52f7ef8bbea4419a"
    }
   },
   {
@@ -282,7 +282,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "reason.json": "7bff62f108aa7008"
+    "reason.json": "a6237de9ab3855fe"
    }
   },
   {
@@ -300,12 +300,12 @@
    ],
    "status": "ok",
    "outputs": {
-    "valuation.json": "fc9ec72cc46e793f"
+    "valuation.json": "53955106344bad8d"
    },
-   "seconds": 0.729,
+   "seconds": 0.743,
    "inputs": {
-    "capex.json": "e07663bc77f04a0f",
-    "macro.json": "eb7c35fb19d57096"
+    "capex.json": "7f943508d0fc5652",
+    "macro.json": "8b76bdb42026dae0"
    },
    "attempts": 1
   },
@@ -325,7 +325,7 @@
    "outputs": {
     "causal.json": "fcce438ce0d67816"
    },
-   "seconds": 0.049,
+   "seconds": 0.05,
    "inputs": {
     "brain.json": "e8144ce521a6d89f"
    },
@@ -345,11 +345,11 @@
    ],
    "status": "ok",
    "outputs": {
-    "hedges.json": "fd4a58e8a191266e"
+    "hedges.json": "f7b611bcbb2d3b5b"
    },
-   "seconds": 0.599,
+   "seconds": 0.604,
    "inputs": {
-    "macro.json": "eb7c35fb19d57096"
+    "macro.json": "8b76bdb42026dae0"
    },
    "attempts": 1
   },
@@ -371,15 +371,15 @@
    ],
    "status": "ok",
    "outputs": {
-    "ooda.json": "3fbe0c39f2651250"
+    "ooda.json": "6c87ce6f29fa94da"
    },
-   "seconds": 0.947,
+   "seconds": 0.954,
    "inputs": {
-    "macro.json": "eb7c35fb19d57096",
+    "macro.json": "8b76bdb42026dae0",
     "research.json": "d2c6580ba083f72a",
     "brain.json": "e8144ce521a6d89f",
-    "capex.json": "e07663bc77f04a0f",
-    "report.json": "6f4b0a121886c892"
+    "capex.json": "7f943508d0fc5652",
+    "report.json": "520bd9fb39b38156"
    },
    "attempts": 1
   },
@@ -454,7 +454,7 @@
    ],
    "status": "skipped",
    "outputs": {
-    "status.json": "e4d6e48782d0d838"
+    "status.json": "919fecbcd9af6665"
    }
   }
  ],
@@ -463,8 +463,8 @@
  "runner": {
   "jobs": 4,
   "isolated": true,
-  "wall_seconds": 1.637,
-  "serial_seconds": 2.324,
+  "wall_seconds": 1.659,
+  "serial_seconds": 2.351,
   "speedup": 1.42,
   "levels": [
    [

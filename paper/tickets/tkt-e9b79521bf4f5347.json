@@ -532,5 +532,5 @@
  },
  "placed_by_buildout": false,
  "instructions": "Show the person every order and check. Place nothing unless execute is true, every check passes, the ticket has not expired, and the person has approved this ticket id. Place each order through Robinhood's Trading MCP in seq order as a limit order at limit_price, then call record_fills with what Robinhood reports.",
- "status": "working"
+ "status": "filled"
 }

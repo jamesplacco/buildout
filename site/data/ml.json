@@ -22,14 +22,14 @@
     "source": "research (multpl, secondary)"
    },
    "y10": {
-    "value": 4.92,
+    "value": 4.91,
     "source": "research (Treasury)"
    }
   },
   "features": {
    "log_cape": 3.710152,
-   "ecy": 0.007723,
-   "y10": 0.0492,
+   "ecy": 0.007823,
+   "y10": 0.0491,
    "infl12": 0.033401,
    "mom12_1": 0.154716,
    "trend_gap": 0.084434,
@@ -179,14 +179,14 @@
   },
   "now": {
    "cape_ols": -0.01885,
-   "ridge": 0.013043,
+   "ridge": 0.013116,
    "forest": 0.014806,
    "boost": 0.003211,
-   "analogs": 0.059446,
-   "combo": 0.043446,
-   "ensemble_v24": 0.02679,
+   "analogs": 0.058529,
+   "combo": 0.043458,
+   "ensemble_v24": 0.026624,
    "ensemble": 0.064245,
-   "dmspe": 0.025838,
+   "dmspe": 0.025718,
    "benchmark": 0.064245
   },
   "n_oos": 1006,
@@ -2295,13 +2295,13 @@
    }
   },
   "now": {
-   "logit": 0.245376,
-   "forest": 0.271229,
+   "logit": 0.245167,
+   "forest": 0.264137,
    "boost": 0.337709,
    "analogs": 0.25,
-   "ensemble_v24": 0.276078,
+   "ensemble_v24": 0.274253,
    "ensemble": 0.212281,
-   "dmspe": 0.27488,
+   "dmspe": 0.272756,
    "benchmark": 0.212281
   },
   "n_oos": 1006,
@@ -4544,64 +4544,64 @@
  "analogs": [
   {
    "date": "1998-08",
-   "distance": 0.566663,
+   "distance": 0.568781,
    "next12": 0.224141,
    "crash": false,
    "cape": 38.598123
   },
   {
    "date": "2000-09",
-   "distance": 0.884705,
+   "distance": 0.88748,
    "next12": -0.297852,
    "crash": true,
    "cape": 43.617044
   },
   {
    "date": "1996-12",
-   "distance": 1.06922,
+   "distance": 1.071246,
    "next12": 0.295658,
    "crash": false,
    "cape": 27.980316
   },
   {
    "date": "2018-10",
-   "distance": 1.07597,
+   "distance": 1.072481,
    "next12": 0.071251,
    "crash": false,
    "cape": 33.260864
   },
   {
    "date": "2007-06",
-   "distance": 1.19308,
+   "distance": 1.192542,
    "next12": -0.139963,
    "crash": true,
    "cape": 27.957899
   },
   {
    "date": "1966-02",
-   "distance": 1.478956,
+   "distance": 1.478428,
    "next12": -0.051595,
    "crash": true,
    "cape": 24.201503
   },
   {
    "date": "2017-03",
-   "distance": 1.486047,
+   "distance": 1.482321,
    "next12": 0.136968,
    "crash": false,
    "cape": 28.62982
   },
   {
    "date": "1929-06",
-   "distance": 1.492437,
+   "distance": 1.490979,
    "next12": -0.128898,
    "crash": true,
    "cape": 28.02297
   }
  ],
  "shift": {
-  "novelty": 1.153124,
-  "novelty_pct": 0.269006,
+  "novelty": 1.155823,
+  "novelty_pct": 0.275439,
   "k": 24,
   "features": {
    "log_cape": {
@@ -4611,15 +4611,15 @@
     "outside": false
    },
    "ecy": {
-    "value": 0.007723,
+    "value": 0.007823,
     "pct": 0.170175,
-    "z": -0.87038,
+    "z": -0.86809,
     "outside": false
    },
    "y10": {
-    "value": 0.0492,
-    "pct": 0.74386,
-    "z": 0.190114,
+    "value": 0.0491,
+    "pct": 0.743275,
+    "z": 0.185897,
     "outside": false
    },
    "infl12": {
@@ -4660,6 +4660,6 @@
   "Since v0.25 the ensemble truncates each member's forecast at zero and shrinks the average toward the historical mean with a weight learned only from forecasts whose outcome was known (today 0.00, average 0.46); the equal-weight v0.24 ensemble scored -6.0%. The crash ensemble is shrunk toward the base rate the same way (Brier skill -2.8% against -11.6%). Each was chosen from the variants tried (11 for returns, 7 for crashes), so the margins are smaller than their t statistics suggest.",
   "Today the ensemble expects +6.6% real over the next year against a historical +6.6%, with an 80% conformal interval of plus or minus 20% in log terms (past intervals covered 82%).",
   "A fall of 15% or more within a year: the ensemble puts it at 21% against a base rate of 21%; its Brier skill out of sample is -2.8% and AUC 0.52.",
-  "Is today familiar? Its 24 nearest historical months are further away than they are for 27% of months in the record."
+  "Is today familiar? Its 24 nearest historical months are further away than they are for 28% of months in the record."
  ]
 }
