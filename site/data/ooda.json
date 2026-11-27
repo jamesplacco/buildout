@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "as_of": "2026-11-26",
+ "as_of": "2026-11-27",
  "observe": {
   "readings": {
    "oil": 1.387919,
@@ -730,26 +730,11 @@
        "put_spread",
        "vix_calls"
       ],
-      "ce": 0.005114,
+      "ce": 0.005081,
       "worst": -0.001596,
-      "cost_bp": 13.676461,
+      "cost_bp": 14.027201,
       "meets": true,
-      "all_in_bp": 38.676461
-     },
-     {
-      "on": [
-       "ai_pair",
-       "beta_short",
-       "degross",
-       "gold",
-       "put_spread",
-       "vix_calls"
-      ],
-      "ce": 0.005357,
-      "worst": -0.001616,
-      "cost_bp": 11.23373,
-      "meets": true,
-      "all_in_bp": 41.23373
+      "all_in_bp": 39.027201
      },
      {
       "on": [
@@ -760,11 +745,26 @@
        "gold",
        "vix_calls"
       ],
-      "ce": 0.007582,
-      "worst": -0.001628,
-      "cost_bp": -10.683217,
+      "ce": 0.007548,
+      "worst": -0.001615,
+      "cost_bp": -10.332477,
       "meets": true,
-      "all_in_bp": 19.316783
+      "all_in_bp": 19.667523
+     },
+     {
+      "on": [
+       "ai_pair",
+       "beta_short",
+       "degross",
+       "gold",
+       "put_spread",
+       "vix_calls"
+      ],
+      "ce": 0.005323,
+      "worst": -0.001616,
+      "cost_bp": 11.584469,
+      "meets": true,
+      "all_in_bp": 41.584469
      }
     ]
    },
@@ -1023,7 +1023,7 @@
     "information_nats": 0.049307
    }
   ],
-  "review_by": "2026-12-10",
+  "review_by": "2026-12-11",
   "note": "Proposals for a person to review; the engine places no orders."
  },
  "valuation": {
@@ -3613,7 +3613,7 @@
    ],
    "door": "two-way",
    "note": "Pays as the VIX rises past 25, capped at 15 points; decays in calm quarters.",
-   "price": 4.515521
+   "price": 4.674628
   },
   {
    "id": "beta_short",

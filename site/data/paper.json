@@ -365,29 +365,17 @@
   "ok": true,
   "entries": 5
  },
- "passes": 22,
+ "passes": 23,
  "last": {
-  "approval": "autonomous",
   "broker": "paper",
-  "decision_id": "18-d93bc2ec",
-  "decision_ts": "2026-11-26T20:30:24Z",
-  "event": "resting",
-  "failures": 0,
-  "fills_in_session": "2026-11-27",
-  "mandate_hash": "b2d64f2e31dfd9af",
-  "mode": "autonomous",
-  "ordered": "2026-11-26T20:30:27Z",
-  "orders": 6,
-  "ticket": "tkt-4fe6b45eb855632b",
-  "ts_utc": "2026-11-26T20:30:28Z"
+  "event": "pass",
+  "outcome": "orders resting until the close",
+  "reasons": [
+   "6 order(s) fill at the close of 2026-11-27"
+  ],
+  "ts_utc": "2026-11-27T20:15:44Z"
  },
  "recent": [
-  {
-   "broker": "paper",
-   "event": "pass",
-   "outcome": "nothing to trade: holdings are within the drift band",
-   "ts_utc": "2026-11-17T20:06:26Z"
-  },
   {
    "broker": "paper",
    "event": "pass",
@@ -537,6 +525,15 @@
    "orders": 6,
    "ticket": "tkt-4fe6b45eb855632b",
    "ts_utc": "2026-11-26T20:30:28Z"
+  },
+  {
+   "broker": "paper",
+   "event": "pass",
+   "outcome": "orders resting until the close",
+   "reasons": [
+    "6 order(s) fill at the close of 2026-11-27"
+   ],
+   "ts_utc": "2026-11-27T20:15:44Z"
   }
  ],
  "mode": "paper, autonomous, unhedged, no VIX sleeve (PSQ and VIXY are not in the price mirror)",

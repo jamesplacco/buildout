@@ -17,8 +17,8 @@
   "y30": 0.0485,
   "rf": 0.042,
   "borrow_spread": 0.01,
-  "vix": 26.36,
-  "index_vol": 36.42,
+  "vix": 26.8,
+  "index_vol": 38.53,
   "skew_pts": 3.0,
   "horizon": 0.25,
   "max_loss": 0.15,
@@ -382,13 +382,13 @@
   ]
  },
  "value_of_info": {
-  "evpi_bp": 393.017252,
+  "evpi_bp": 389.049463,
   "signals": [
    {
     "id": "hy",
     "name": "High-yield spread at or above 4.5%",
     "p_on": 0.326074,
-    "evsi_bp": 38.22782,
+    "evsi_bp": 39.487563,
     "observed": false,
     "flip_changes_choice": true,
     "choice_if_on": [
@@ -445,10 +445,10 @@
     ]
    },
    {
-    "id": "curve",
-    "name": "2s10s curve inverted",
-    "p_on": 0.306291,
-    "evsi_bp": 3.346975,
+    "id": "oil",
+    "name": "Brent at or above 1.3x its 5-year average",
+    "p_on": 0.20721,
+    "evsi_bp": 1.735197,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
@@ -465,10 +465,10 @@
     ]
    },
    {
-    "id": "oil",
-    "name": "Brent at or above 1.3x its 5-year average",
-    "p_on": 0.20721,
-    "evsi_bp": 3.21147,
+    "id": "curve",
+    "name": "2s10s curve inverted",
+    "p_on": 0.306291,
+    "evsi_bp": 1.206725,
     "observed": null,
     "flip_changes_choice": null,
     "choice_if_on": [
